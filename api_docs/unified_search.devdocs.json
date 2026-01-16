@@ -48,6 +48,8 @@
           ", {}>>"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -68,6 +70,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_search/public/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -89,6 +93,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_search/public/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -104,6 +110,8 @@
               "CoreStart"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -119,6 +127,8 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -134,6 +144,8 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -150,7 +162,7 @@
         "label": "createSearchBar",
         "description": [],
         "signature": [
-          "({\n  core,\n  storage,\n  data,\n  usageCollection,\n  isScreenshotMode = false,\n  unifiedSearch,\n  cps,\n}: ",
+          "({\n  core,\n  storage,\n  data,\n  usageCollection,\n  isScreenshotMode = false,\n  kql,\n  cps,\n}: ",
           "StatefulSearchBarDeps",
           ") => <QT extends ",
           {
@@ -187,6 +199,8 @@
           "<QT>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/search_bar/create_search_bar.tsx",
+        "lineNumber": 163,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -195,12 +209,14 @@
             "id": "def-public.createSearchBar.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  core,\n  storage,\n  data,\n  usageCollection,\n  isScreenshotMode = false,\n  unifiedSearch,\n  cps,\n}",
+            "label": "{\n  core,\n  storage,\n  data,\n  usageCollection,\n  isScreenshotMode = false,\n  kql,\n  cps,\n}",
             "description": [],
             "signature": [
               "StatefulSearchBarDeps"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/search_bar/create_search_bar.tsx",
+            "lineNumber": 163,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -238,6 +254,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/index.tsx",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -253,6 +271,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -282,6 +302,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/index.tsx",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -297,6 +319,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -326,6 +350,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/index.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -341,6 +367,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -370,6 +398,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/filter_badge/index.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -385,6 +415,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -408,6 +440,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/filter_bar/index.tsx",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -426,6 +460,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/index.tsx",
+            "lineNumber": 46,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -455,6 +491,8 @@
           ", \"intl\"> & { forwardedRef?: React.Ref<any> | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/filter_bar/index.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -477,53 +515,8 @@
               ", \"intl\"> & { forwardedRef?: React.Ref<any> | undefined; }"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedSearch",
-        "id": "def-public.QueryStringInput",
-        "type": "Function",
-        "tags": [],
-        "label": "QueryStringInput",
-        "description": [],
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "unifiedSearch",
-            "scope": "public",
-            "docId": "kibUnifiedSearchPluginApi",
-            "section": "def-public.QueryStringInputProps",
-            "text": "QueryStringInputProps"
-          },
-          ") => React.JSX.Element"
-        ],
-        "path": "src/platform/plugins/shared/unified_search/public/query_string_input/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInput.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "unifiedSearch",
-                "scope": "public",
-                "docId": "kibUnifiedSearchPluginApi",
-                "section": "def-public.QueryStringInputProps",
-                "text": "QueryStringInputProps"
-              }
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/index.tsx",
+            "lineNumber": 33,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -575,6 +568,8 @@
           "<QT>, \"kibana\" | \"intl\">) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/search_bar/index.tsx",
+        "lineNumber": 48,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -722,9 +717,21 @@
                 "text": "DataViewPickerProps"
               },
               " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"auto\" | \"full\" | \"iconOnly\" | undefined; suggestionsSize?: ",
-              "SuggestionsListSize",
+              {
+                "pluginId": "kql",
+                "scope": "public",
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.SuggestionsListSize",
+                "text": "SuggestionsListSize"
+              },
               " | undefined; suggestionsAbstraction?: ",
-              "SuggestionsAbstraction",
+              {
+                "pluginId": "kql",
+                "scope": "public",
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.SuggestionsAbstraction",
+                "text": "SuggestionsAbstraction"
+              },
               " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; renderQueryInputAppend?: (() => React.ReactNode) | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; esqlVariablesConfig?: { esqlVariables: ",
               {
                 "pluginId": "@kbn/esql-types",
@@ -768,6 +775,8 @@
               "[]) => void) | undefined; bubbleSubmitEvent?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/search_bar/index.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -784,6 +793,8 @@
         "label": "ApplyGlobalFilterActionContext",
         "description": [],
         "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action/apply_filter_action.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -805,6 +816,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action/apply_filter_action.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -819,6 +832,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action/apply_filter_action.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -833,6 +848,8 @@
               "unknown"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action/apply_filter_action.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -847,6 +864,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/actions/apply_filter_action/apply_filter_action.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -861,6 +880,8 @@
         "label": "DataViewPickerProps",
         "description": [],
         "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -878,6 +899,8 @@
               " & { label: string; title?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -894,6 +917,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -910,6 +935,8 @@
               "(newId: string) => void"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -924,6 +951,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+                "lineNumber": 34,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -952,6 +981,8 @@
               ") => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -972,6 +1003,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+                "lineNumber": 39,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -992,6 +1025,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1015,6 +1050,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1038,6 +1075,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1055,6 +1094,8 @@
               "<{}> | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1071,6 +1112,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1097,6 +1140,8 @@
               ") => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1117,6 +1162,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+                "lineNumber": 66,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1143,6 +1190,8 @@
               ") => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1163,6 +1212,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+                "lineNumber": 68,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1183,6 +1234,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1199,6 +1252,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1225,6 +1280,8 @@
               ") => React.ReactNode) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1245,6 +1302,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+                "lineNumber": 80,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1265,6 +1324,8 @@
           "\nProperties for the filter items component, which will render a single filter pill for every filter that is sent in\nas part of the `Filter[]` property."
         ],
         "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1288,6 +1349,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1304,6 +1367,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1328,6 +1393,8 @@
               "[]) => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1349,6 +1416,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+                "lineNumber": 35,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1376,6 +1445,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1392,6 +1463,8 @@
               "IntlShape"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1408,6 +1481,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1431,6 +1506,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1448,6 +1525,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1461,10 +1540,18 @@
               "Array of suggestion abstraction that controls the render of the field"
             ],
             "signature": [
-              "SuggestionsAbstraction",
+              {
+                "pluginId": "kql",
+                "scope": "public",
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.SuggestionsAbstraction",
+                "text": "SuggestionsAbstraction"
+              },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1491,22 +1578,24 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
-            "id": "def-public.IUnifiedSearchPluginServices.unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.kql",
             "type": "Object",
             "tags": [],
-            "label": "unifiedSearch",
+            "label": "kql",
             "description": [],
             "signature": [
               "{ autocomplete: { getQuerySuggestions: ",
               {
-                "pluginId": "unifiedSearch",
+                "pluginId": "kql",
                 "scope": "public",
-                "docId": "kibUnifiedSearchAutocompletePluginApi",
+                "docId": "kibKqlPluginApi",
                 "section": "def-public.QuerySuggestionGetFn",
                 "text": "QuerySuggestionGetFn"
               },
@@ -1515,6 +1604,8 @@
               "; }; }"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1526,6 +1617,8 @@
             "label": "appName",
             "description": [],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1540,6 +1633,8 @@
               "ChromeStart"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1554,6 +1649,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1568,6 +1665,8 @@
               "NotificationsStart"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1582,6 +1681,8 @@
               "ApplicationStart"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1596,6 +1697,8 @@
               "HttpSetup"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1616,6 +1719,8 @@
               ">; }"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1630,6 +1735,8 @@
               "I18nStart"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1644,6 +1751,8 @@
               "ThemeServiceSetup"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1658,6 +1767,8 @@
               "UserProfileService"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1679,6 +1790,8 @@
               "<any, void>"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1693,6 +1806,8 @@
               "DocLinksStart"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1713,6 +1828,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1733,6 +1850,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1753,6 +1872,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1774,6 +1895,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1794,6 +1917,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1814,552 +1939,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedSearch",
-        "id": "def-public.QueryStringInputProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "QueryStringInputProps",
-        "description": [],
-        "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.indexPatterns",
-            "type": "Array",
-            "tags": [],
-            "label": "indexPatterns",
-            "description": [],
-            "signature": [
-              "(string | ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | ",
-              "DataViewByIdOrTitle",
-              ")[]"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "{ query: string | { [key: string]: any; }; language: string; }"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.disableAutoFocus",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disableAutoFocus",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.screenTitle",
-            "type": "string",
-            "tags": [],
-            "label": "screenTitle",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.prepend",
-            "type": "Any",
-            "tags": [],
-            "label": "prepend",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.persistedLog",
-            "type": "Object",
-            "tags": [],
-            "label": "persistedLog",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.PersistedLog",
-                "text": "PersistedLog"
-              },
-              "<any> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.bubbleSubmitEvent",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "bubbleSubmitEvent",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.placeholder",
-            "type": "string",
-            "tags": [],
-            "label": "placeholder",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.disableLanguageSwitcher",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disableLanguageSwitcher",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.languageSwitcherPopoverAnchorPosition",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "languageSwitcherPopoverAnchorPosition",
-            "description": [],
-            "signature": [
-              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.onBlur",
-            "type": "Function",
-            "tags": [],
-            "label": "onBlur",
-            "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.onChange",
-            "type": "Function",
-            "tags": [],
-            "label": "onChange",
-            "description": [],
-            "signature": [
-              "((query: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              ") => void) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedSearch",
-                "id": "def-public.QueryStringInputProps.onChange.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "query",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Query",
-                    "text": "Query"
-                  }
-                ],
-                "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.onChangeQueryInputFocus",
-            "type": "Function",
-            "tags": [],
-            "label": "onChangeQueryInputFocus",
-            "description": [],
-            "signature": [
-              "((isFocused: boolean) => void) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedSearch",
-                "id": "def-public.QueryStringInputProps.onChangeQueryInputFocus.$1",
-                "type": "boolean",
-                "tags": [],
-                "label": "isFocused",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.onSubmit",
-            "type": "Function",
-            "tags": [],
-            "label": "onSubmit",
-            "description": [],
-            "signature": [
-              "((query: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              ") => void) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedSearch",
-                "id": "def-public.QueryStringInputProps.onSubmit.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "query",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Query",
-                    "text": "Query"
-                  }
-                ],
-                "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.submitOnBlur",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "submitOnBlur",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.dataTestSubj",
-            "type": "string",
-            "tags": [],
-            "label": "dataTestSubj",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.size",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "size",
-            "description": [],
-            "signature": [
-              "SuggestionsListSize",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.suggestionsAbstraction",
-            "type": "Object",
-            "tags": [],
-            "label": "suggestionsAbstraction",
-            "description": [],
-            "signature": [
-              "SuggestionsAbstraction",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.className",
-            "type": "string",
-            "tags": [],
-            "label": "className",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.isInvalid",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isInvalid",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.isClearable",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isClearable",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.iconType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "iconType",
-            "description": [],
-            "signature": [
-              "IconType",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.isDisabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isDisabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.appName",
-            "type": "string",
-            "tags": [],
-            "label": "appName",
-            "description": [],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.deps",
-            "type": "Object",
-            "tags": [],
-            "label": "deps",
-            "description": [],
-            "signature": [
-              "QueryStringInputDependencies"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.nonKqlMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "nonKqlMode",
-            "description": [],
-            "signature": [
-              "\"text\" | \"lucene\" | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.autoSubmit",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "autoSubmit",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.storageKey",
-            "type": "string",
-            "tags": [],
-            "label": "storageKey",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.timeRangeForSuggestionsOverride",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "timeRangeForSuggestionsOverride",
-            "description": [
-              "\nOverride whether autocomplete suggestions are restricted by time range."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.filtersForSuggestions",
-            "type": "Array",
-            "tags": [],
-            "label": "filtersForSuggestions",
-            "description": [
-              "\nAdd additional filters used for suggestions"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/query_string_input/query_string_input.tsx",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2374,6 +1955,8 @@
         "label": "UnifiedSearchDraft",
         "description": [],
         "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2403,6 +1986,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2417,6 +2002,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2431,6 +2018,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2451,6 +2040,8 @@
           "\"ACTION_GLOBAL_APPLY_FILTER\""
         ],
         "path": "src/platform/plugins/shared/unified_search/public/actions/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2471,6 +2062,8 @@
           "<any>, \"options\" | \"onChange\" | \"selectedOptions\" | \"onSearchChange\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/index_pattern_select/index_pattern_select.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2488,6 +2081,8 @@
           "SearchBarInjectedDeps"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/search_bar/search_bar.tsx",
+        "lineNumber": 171,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2513,6 +2108,8 @@
           "[]) => void) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/search_bar/create_search_bar.tsx",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2528,6 +2125,8 @@
           "\"UPDATE_FILTER_REFERENCES_ACTION\""
         ],
         "path": "src/platform/plugins/shared/unified_search/public/actions/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2543,6 +2142,8 @@
           "\"UPDATE_FILTER_REFERENCES_TRIGGER\""
         ],
         "path": "src/platform/plugins/shared/unified_search/public/triggers/update_filter_references_trigger.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2559,35 +2160,11 @@
         "\nUnified search plugin public Start contract"
       ],
       "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+      "lineNumber": 70,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
-        {
-          "parentPluginId": "unifiedSearch",
-          "id": "def-public.UnifiedSearchPublicPluginStart.autocomplete",
-          "type": "Object",
-          "tags": [],
-          "label": "autocomplete",
-          "description": [
-            "\nautocomplete service\n{@link AutocompleteStart}"
-          ],
-          "signature": [
-            "{ getQuerySuggestions: ",
-            {
-              "pluginId": "unifiedSearch",
-              "scope": "public",
-              "docId": "kibUnifiedSearchAutocompletePluginApi",
-              "section": "def-public.QuerySuggestionGetFn",
-              "text": "QuerySuggestionGetFn"
-            },
-            "; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ",
-            "ValueSuggestionsGetFn",
-            "; }"
-          ],
-          "path": "src/platform/plugins/shared/unified_search/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
         {
           "parentPluginId": "unifiedSearch",
           "id": "def-public.UnifiedSearchPublicPluginStart.ui",
@@ -2601,6 +2178,8 @@
             "UnifiedSearchPublicPluginStartUi"
           ],
           "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+          "lineNumber": 74,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -2616,417 +2195,22 @@
       "label": "UnifiedSearchPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+      "lineNumber": 43,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "unifiedSearch",
-          "id": "def-public.UnifiedSearchPluginSetup.autocomplete",
-          "type": "Object",
-          "tags": [],
-          "label": "autocomplete",
-          "description": [],
-          "signature": [
-            "{ getQuerySuggestions: ",
-            {
-              "pluginId": "unifiedSearch",
-              "scope": "public",
-              "docId": "kibUnifiedSearchAutocompletePluginApi",
-              "section": "def-public.QuerySuggestionGetFn",
-              "text": "QuerySuggestionGetFn"
-            },
-            "; getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; }"
-          ],
-          "path": "src/platform/plugins/shared/unified_search/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        }
-      ],
+      "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
     }
   },
   "server": {
-    "classes": [
-      {
-        "parentPluginId": "unifiedSearch",
-        "id": "def-server.UnifiedSearchServerPlugin",
-        "type": "Class",
-        "tags": [],
-        "label": "UnifiedSearchServerPlugin",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "unifiedSearch",
-            "scope": "server",
-            "docId": "kibUnifiedSearchPluginApi",
-            "section": "def-server.UnifiedSearchServerPlugin",
-            "text": "UnifiedSearchServerPlugin"
-          },
-          " implements ",
-          "Plugin",
-          "<",
-          {
-            "pluginId": "unifiedSearch",
-            "scope": "server",
-            "docId": "kibUnifiedSearchPluginApi",
-            "section": "def-server.UnifiedSearchServerPluginSetup",
-            "text": "UnifiedSearchServerPluginSetup"
-          },
-          ", ",
-          {
-            "pluginId": "unifiedSearch",
-            "scope": "server",
-            "docId": "kibUnifiedSearchPluginApi",
-            "section": "def-server.UnifiedSearchServerPluginStart",
-            "text": "UnifiedSearchServerPluginStart"
-          },
-          ", ",
-          "UnifiedSearchServerPluginSetupDependencies",
-          ", ",
-          "UnifiedSearchServerPluginStartDependencies",
-          ">"
-        ],
-        "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-server.UnifiedSearchServerPlugin.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedSearch",
-                "id": "def-server.UnifiedSearchServerPlugin.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "initializerContext",
-                "description": [],
-                "signature": [
-                  "PluginInitializerContext",
-                  "<Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>"
-                ],
-                "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-server.UnifiedSearchServerPlugin.setup",
-            "type": "Function",
-            "tags": [],
-            "label": "setup",
-            "description": [],
-            "signature": [
-              "(core: ",
-              "CoreSetup",
-              "<",
-              "UnifiedSearchServerPluginStartDependencies",
-              ", ",
-              {
-                "pluginId": "unifiedSearch",
-                "scope": "server",
-                "docId": "kibUnifiedSearchPluginApi",
-                "section": "def-server.UnifiedSearchServerPluginStart",
-                "text": "UnifiedSearchServerPluginStart"
-              },
-              ">, {}: ",
-              "UnifiedSearchServerPluginSetupDependencies",
-              ") => { autocomplete: { getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; getInitializerContextConfig: () => { legacy: { globalConfig$: ",
-              "Observable",
-              "<Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ByteSizeValue",
-                "text": "ByteSizeValue"
-              },
-              ") => boolean; isLessThan: (other: ",
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ByteSizeValue",
-                "text": "ByteSizeValue"
-              },
-              ") => boolean; isEqualTo: (other: ",
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ByteSizeValue",
-                "text": "ByteSizeValue"
-              },
-              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
-              "ByteSizeValueUnit",
-              " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ByteSizeValue",
-                "text": "ByteSizeValue"
-              },
-              ") => boolean; isLessThan: (other: ",
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ByteSizeValue",
-                "text": "ByteSizeValue"
-              },
-              ") => boolean; isEqualTo: (other: ",
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ByteSizeValue",
-                "text": "ByteSizeValue"
-              },
-              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
-              "ByteSizeValueUnit",
-              " | undefined) => string; }>; }>; }>; }; create: <T = Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>() => ",
-              "Observable",
-              "<T>; get: <T = Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>() => T; }; }; }"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedSearch",
-                "id": "def-server.UnifiedSearchServerPlugin.setup.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "core",
-                "description": [],
-                "signature": [
-                  "CoreSetup",
-                  "<",
-                  "UnifiedSearchServerPluginStartDependencies",
-                  ", ",
-                  {
-                    "pluginId": "unifiedSearch",
-                    "scope": "server",
-                    "docId": "kibUnifiedSearchPluginApi",
-                    "section": "def-server.UnifiedSearchServerPluginStart",
-                    "text": "UnifiedSearchServerPluginStart"
-                  },
-                  ">"
-                ],
-                "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "unifiedSearch",
-                "id": "def-server.UnifiedSearchServerPlugin.setup.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "{}",
-                "description": [],
-                "signature": [
-                  "UnifiedSearchServerPluginSetupDependencies"
-                ],
-                "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-server.UnifiedSearchServerPlugin.start",
-            "type": "Function",
-            "tags": [],
-            "label": "start",
-            "description": [],
-            "signature": [
-              "(core: ",
-              "CoreStart",
-              ", {}: ",
-              "UnifiedSearchServerPluginStartDependencies",
-              ") => {}"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedSearch",
-                "id": "def-server.UnifiedSearchServerPlugin.start.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "core",
-                "description": [],
-                "signature": [
-                  "CoreStart"
-                ],
-                "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "unifiedSearch",
-                "id": "def-server.UnifiedSearchServerPlugin.start.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "{}",
-                "description": [],
-                "signature": [
-                  "UnifiedSearchServerPluginStartDependencies"
-                ],
-                "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-server.UnifiedSearchServerPlugin.stop",
-            "type": "Function",
-            "tags": [],
-            "label": "stop",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [],
-    "setup": {
-      "parentPluginId": "unifiedSearch",
-      "id": "def-server.UnifiedSearchServerPluginSetup",
-      "type": "Interface",
-      "tags": [],
-      "label": "UnifiedSearchServerPluginSetup",
-      "description": [],
-      "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-      "deprecated": false,
-      "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "unifiedSearch",
-          "id": "def-server.UnifiedSearchServerPluginSetup.autocomplete",
-          "type": "Object",
-          "tags": [],
-          "label": "autocomplete",
-          "description": [],
-          "signature": [
-            "{ getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; getInitializerContextConfig: () => { legacy: { globalConfig$: ",
-            "Observable",
-            "<Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
-            {
-              "pluginId": "@kbn/config-schema",
-              "scope": "common",
-              "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-common.ByteSizeValue",
-              "text": "ByteSizeValue"
-            },
-            ") => boolean; isLessThan: (other: ",
-            {
-              "pluginId": "@kbn/config-schema",
-              "scope": "common",
-              "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-common.ByteSizeValue",
-              "text": "ByteSizeValue"
-            },
-            ") => boolean; isEqualTo: (other: ",
-            {
-              "pluginId": "@kbn/config-schema",
-              "scope": "common",
-              "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-common.ByteSizeValue",
-              "text": "ByteSizeValue"
-            },
-            ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
-            "ByteSizeValueUnit",
-            " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
-            {
-              "pluginId": "@kbn/config-schema",
-              "scope": "common",
-              "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-common.ByteSizeValue",
-              "text": "ByteSizeValue"
-            },
-            ") => boolean; isLessThan: (other: ",
-            {
-              "pluginId": "@kbn/config-schema",
-              "scope": "common",
-              "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-common.ByteSizeValue",
-              "text": "ByteSizeValue"
-            },
-            ") => boolean; isEqualTo: (other: ",
-            {
-              "pluginId": "@kbn/config-schema",
-              "scope": "common",
-              "docId": "kibKbnConfigSchemaPluginApi",
-              "section": "def-common.ByteSizeValue",
-              "text": "ByteSizeValue"
-            },
-            ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
-            "ByteSizeValueUnit",
-            " | undefined) => string; }>; }>; }>; }; create: <T = Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>() => ",
-            "Observable",
-            "<T>; get: <T = Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>() => T; }; }"
-          ],
-          "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        }
-      ],
-      "lifecycle": "setup",
-      "initialIsOpen": true
-    },
-    "start": {
-      "parentPluginId": "unifiedSearch",
-      "id": "def-server.UnifiedSearchServerPluginStart",
-      "type": "Interface",
-      "tags": [],
-      "label": "UnifiedSearchServerPluginStart",
-      "description": [],
-      "path": "src/platform/plugins/shared/unified_search/server/plugin.ts",
-      "deprecated": false,
-      "trackAdoption": false,
-      "children": [],
-      "lifecycle": "start",
-      "initialIsOpen": true
-    }
+    "objects": []
   },
   "common": {
     "classes": [],
