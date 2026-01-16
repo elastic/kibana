@@ -269,56 +269,56 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Fixes `createAuditEvents` always returning failure as outcome [#247152]({{kib-pull}}247152).
 * Fixes "now" and mixed format date handling in the **Share** menu [#245539]({{kib-pull}}245539).
 * Fixes favicon CSS specifity [#243351]({{kib-pull}}243351).
-* Reduces re-renders on resize and items change [#239888]({{kib-pull}}239888).
+* Reduces re-renders on resize and items changes [#239888]({{kib-pull}}239888).
 * Fixes an issue with the files management flyout crashing [#237588]({{kib-pull}}237588).
 * Fixes infinite loading of roles on the **Edit space** page [#242954]({{kib-pull}}242954).
 * Reflects the value selected for the `AI Assistants Visibility` GenAI setting when opening AI Assistant from the header [#239555]({{kib-pull}}239555).
-* Fixes ECS-incompatible value in the logs [#245706]({{kib-pull}}245706).
+* Fixes ECS-incompatible logs values [#245706]({{kib-pull}}245706).
 * Fixes an issue where clients authorized to a partial list of saved object types would circumvent the Saved Objects Repository's allowed types and could list hidden saved object types [#244967]({{kib-pull}}244967).
 
 **Kibana security**:
-* Fixes an issue where fields were not case-sensitive in Kibana's user interface for creating and updating roles, though fields are case-sensitive in Elasticsearch [#246069]({{kib-pull}}246069).
+* Fixes an issue where fields were not case-sensitive in {{kib}}'s user interface for creating and updating roles, though fields are case-sensitive in {{es}} [#246069]({{kib-pull}}246069).
 * Fixes an issue preventing IDP-initiated login with multiple OIDC providers [#243869]({{kib-pull}}243869).
-* Introduces a separate error for an empty login attempt with `saml/oidc` providers [#237611]({{kib-pull}}237611).
+* Introduces a separate error for empty login attempts with SAML and OIDC providers [#237611]({{kib-pull}}237611).
 
 **Machine Learning**:
-* Disables field statistics when using the {{esql}} TS command in Data Visualizer [#247641]({{kib-pull}}247641).
-* Data Visualizer: fixes display of map view for small screen sizes [#247615]({{kib-pull}}247615).
+* Disables field statistics when using the {{esql}} `TS` command in Data Visualizer [#247641]({{kib-pull}}247641).
+* Fixes display of Data Visualizer's map view for small screen sizes [#247615]({{kib-pull}}247615).
 * Fixes anomaly chart empty query issue [#246841]({{kib-pull}}246841).
-* Anomaly detection: Fixes creating new jobs from Discover sessions with no data view [#246410]({{kib-pull}}246410).
-* Anomaly Detection result views: ensures chart tooltips are always shown correctly [#246077]({{kib-pull}}246077).
-* Anomaly Explorer: Do not clear cell selection after hiding the alerts table popover [#244183]({{kib-pull}}244183).
-* Log Rate Analysis: Optimizes & Re-enables text field analysis in contextual insights [#244109]({{kib-pull}}244109).
-* Inference/AI Connector and Inference endpoint creation: ensures deleted text in form is not sent as empty string [#244059]({{kib-pull}}244059).
-* Data frame analytics: Fixes wizard for data view with runtime fields [#242557]({{kib-pull}}242557).
+* Fixes creating new Anomaly detection jobs from Discover sessions with no data view [#246410]({{kib-pull}}246410).
+* Ensures Anomaly detection result chart tooltips are always shown correctly [#246077]({{kib-pull}}246077).
+* Prevents clearing cell selections after hiding the alerts table popover in anomaly explorer [#244183]({{kib-pull}}244183).
+* Optimizes and enables text field analysis in contextual insights for log rate analysis: [#244109]({{kib-pull}}244109).
+* Ensures deleted text in the Inference connector, AI connector, and Inference endpoint creation forms is not sent as an empty string [#244059]({{kib-pull}}244059).
+* Fixes wizard for data view with runtime fields for data frame analytics [#242557]({{kib-pull}}242557).
 * Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs [#242263]({{kib-pull}}242263).
-* Anthropic endpoint creation: ensures max tokens parameter is passed as expected [#241212]({{kib-pull}}241212).
-* Fixes index names causing incompatible cluster error when product docs are installed with for multiple Inference IDs [#240506]({{kib-pull}}240506).
-* Inference endpoints UI: Ensures list loads when provider is custom [#240189]({{kib-pull}}240189).
+* Ensures max tokens parameter is passed as expected during Anthropic endpoint creation [#241212]({{kib-pull}}241212).
+* Fixes index names causing incompatible cluster errors when product docs are installed for multiple Inference IDs [#240506]({{kib-pull}}240506).
+* Ensures inference endpoints UI list loads when provider is custom [#240189]({{kib-pull}}240189).
 * Fixes layout of fields in Overview and Notifications pages [#239113]({{kib-pull}}239113).
-* Adds unique accessible labels for Show top field values buttons [#237972]({{kib-pull}}237972).
+* Adds unique accessible labels for **Show top field values** buttons [#237972]({{kib-pull}}237972).
 * Fixes tool calling unavailable tools [#237174]({{kib-pull}}237174).
-* Improving trained models list performance [#237072]({{kib-pull}}237072).
-* Single Metric Viewer: fixes partition field settings errors in the dashboard panel [#237046]({{kib-pull}}237046).
-* Alerting: Escape URL-like string from being displayed as links [#226849]({{kib-pull}}226849).
+* Improves trained models list performance [#237072]({{kib-pull}}237072).
+* Fixes partition field settings errors in the single metric viewer dashboard panel [#237046]({{kib-pull}}237046).
+* Prevents URL-like strings from being displayed as links in Alerts [#226849]({{kib-pull}}226849).
 * Improves anonymization error messages when NER model is not available [#247696]({{kib-pull}}247696).
 * Adds table caption for empty top categories in logs category table [#246041]({{kib-pull}}246041).
 
 
 **Search**:
-* Fixes an issue when running Elasticsearch with a Basic license, where you could encounter errors when updating index mappings, even when adding non-ML field types. This issue has been resolved so that mapping updates now work as expected, while advanced semantic text features continue to require the appropriate license [#248462]({{kib-pull}}248462).
+* Fixes an issue when running Elasticsearch with a Basic license, where you could encounter errors when updating index mappings, even when adding non-ML field types. Mapping updates now work as expected, while advanced semantic text features continue to require the appropriate license [#248462]({{kib-pull}}248462).
 * Disables 'API keys' button on the Elasticsearch home page when logged in with insufficient permissions [#248072]({{kib-pull}}248072).
 * Fixes the token count display showing "NaN" in Search Playground by preserving message annotations across the AI SDK v5 stream [#246589]({{kib-pull}}246589).
 * Fixes an issue with the API creation flyout size [#244072]({{kib-pull}}244072).
 * Fixes a case of keyboard focus getting trapped in pages using document preview [#243791]({{kib-pull}}243791).
-* `elser-2-elastic` (ELSER in EIS) is now automatically selected as the default inference endpoint when adding semantic text fields. The `SelectInferenceId` component has been refactored for clarity and stability, resolving a console warning and improving popover and flyout state handling [#242436]({{kib-pull}}242436).
+* Makes `elser-2-elastic` (ELSER in EIS) the default inference endpoint for adding semantic text fields. Refactors the `SelectInferenceId` component for clarity and stability, resolving a console warning and improving popover and flyout state handling [#242436]({{kib-pull}}242436).
 * Fixes Agents & Playground icons in the solution side navigation to render correctly when using dark mode [#240475]({{kib-pull}}240475).
 * Fixes visual issues in the data preview metadata popup when ID is too long. Adds a tooltip and copy button to improve user experience [#239768]({{kib-pull}}239768).
-* Fixes an issue in RAG Playground where invalid fields displayed red styling but no error message. Error text is now shown to help users identify and correct form issues [#238284]({{kib-pull}}238284).
+* Fixes an issue in RAG Playground where invalid fields displayed red styling but no error messages. Error text now appears to help you identify and correct form issues [#238284]({{kib-pull}}238284).
 * Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset [#237877]({{kib-pull}}237877).
 * The Index management mappings editor now syncs model deployment status correctly. This fixes a case where users couldn't save `semantic_text` fields during deployment without forcing [#237812]({{kib-pull}}237812).
 * Fixes an issue where the retriever query copied from the "Search your data" JavaScript tutorial fails with a `parsing_exception` when passed through the query parameter in the Node.js Elasticsearch client. Retriever queries must be passed through the body parameter to ensure they are serialized correctly [#237654]({{kib-pull}}237654).
-* Adds refusal field to AI assistant conversations [#243423]({{kib-pull}}243423).
+* Adds refusal field to AI Assistant conversations [#243423]({{kib-pull}}243423).
 * Turns off custom suggestions on the embedded console [#241516]({{kib-pull}}241516).
 * Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
 
