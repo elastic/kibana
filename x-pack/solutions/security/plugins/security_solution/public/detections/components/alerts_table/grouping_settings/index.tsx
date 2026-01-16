@@ -10,3 +10,4 @@ export * from './default_group_stats_aggregations';
 export * from './default_group_stats_renderers';
 export * from './default_group_title_renderers';
 export * from './query_builder';
+export * from './filter_builder';
