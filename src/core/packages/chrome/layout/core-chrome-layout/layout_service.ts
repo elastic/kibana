@@ -10,11 +10,13 @@
 import type React from 'react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 
 export interface LayoutServiceStartDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
+  http: InternalHttpStart;
   overlays: OverlayStart;
 }
 

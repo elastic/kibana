@@ -69,7 +69,8 @@ export class GridLayout implements LayoutService {
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, chrome, overlays } = this.deps;
+    const { application, chrome, http, overlays } = this.deps;
+    const assetsHrefBase = http.basePath.assetsHrefBase;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
@@ -150,7 +151,7 @@ export class GridLayout implements LayoutService {
 
       return (
         <>
-          <GridLayoutGlobalStyles />
+          <GridLayoutGlobalStyles chromeStyle={chromeStyle} assetsHrefBase={assetsHrefBase} />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}

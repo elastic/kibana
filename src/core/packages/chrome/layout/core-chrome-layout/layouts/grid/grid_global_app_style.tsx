@@ -15,6 +15,7 @@ import {
   APP_MAIN_SCROLL_CONTAINER_ID,
   layoutVar,
 } from '@kbn/core-chrome-layout-constants';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
 
 const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
@@ -83,6 +84,43 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
   `;
 };
 
+/**
+ * Project mode background styles with gradient and wave pattern.
+ * Only applied when chromeStyle is 'project' to differentiate from classic mode.
+ */
+const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme, assetsHrefBase: string) => {
+  const { colorMode } = euiThemeContext;
+  const isDarkMode = colorMode === 'DARK';
+
+  // Wave pattern images - use assetsHrefBase to construct proper URL
+  const wavePatternDark = `url("${assetsHrefBase}/ui/backgrounds/chrome-bg-dark.webp")`;
+  const wavePatternLight = `url("${assetsHrefBase}/ui/backgrounds/chrome-bg-light.webp")`;
+
+  // Dark mode layered background: radial light source in center, blue tint, wave pattern, dark gradient base
+  const darkModeBackground = [
+    'radial-gradient(1200px 800px at 50% 50%, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.04))',
+    'linear-gradient(rgba(36, 61, 111, 0.1), rgba(36, 61, 111, 0))',
+    wavePatternDark,
+    'linear-gradient(#07101F 0%, #050D1A 50%, #030A16 100%)',
+  ].join(', ');
+
+  // Light mode layered background: subtle blue glow at top center, wave pattern at bottom, light gradient base
+  const lightModeBackground = [
+    'radial-gradient(1200px 800px at 50% 0%, rgba(36, 61, 111, 0.04), rgba(36, 61, 111, 0))',
+    wavePatternLight,
+    'linear-gradient(#F6F9FC, #F4F7FA)',
+  ].join(', ');
+
+  return css`
+    html {
+      background: ${isDarkMode ? darkModeBackground : lightModeBackground};
+      background-size: ${isDarkMode ? 'auto, auto, 100% 600px, auto' : 'auto, 100% 600px, auto'};
+      background-position: ${isDarkMode ? 'top, top, bottom, top' : 'top, bottom, top'};
+      background-repeat: no-repeat;
+    }
+  `;
+};
+
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
 const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
@@ -140,11 +178,28 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 `;
 
-export const GridLayoutGlobalStyles = () => {
+interface GridLayoutGlobalStylesProps {
+  chromeStyle?: ChromeStyle;
+  assetsHrefBase?: string;
+}
+
+export const GridLayoutGlobalStyles = ({
+  chromeStyle,
+  assetsHrefBase = '',
+}: GridLayoutGlobalStylesProps) => {
   const euiTheme = useEuiTheme();
+  const isProjectStyle = chromeStyle === 'project';
+
   return (
     <>
-      <Global styles={[globalLayoutStyles(euiTheme), globalTempHackStyles(euiTheme.euiTheme)]} />
+      <Global
+        styles={[
+          globalLayoutStyles(euiTheme),
+          globalTempHackStyles(euiTheme.euiTheme),
+          // Only apply the decorative background for project mode
+          isProjectStyle && projectModeBackgroundStyles(euiTheme, assetsHrefBase),
+        ]}
+      />
       <CommonGlobalAppStyles />
     </>
   );
