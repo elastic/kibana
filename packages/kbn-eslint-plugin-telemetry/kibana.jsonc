@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/eslint-plugin-telemetry",
-  "owner": "@elastic/kibana-telemetry",
+  "owner": "@elastic/kibana-core",
   "group": "platform",
   "visibility": "private",
   "devOnly": true
