@@ -89,7 +89,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         setSelectedExecution(response.workflowExecutionId);
         closeModal();
       } catch (error) {
-        const errorMessage = error.body?.message || error.message || 'Failed to run step';
+        const errorMessage =
+          error.body?.message || error.message || 'An unexpected error occurred while running the step';
         notifications.toasts.addError(new Error(errorMessage), {
           title: i18n.translate('workflows.detail.submitStepRun.error', {
             defaultMessage: 'Failed to run step',
