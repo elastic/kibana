@@ -214,7 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(aValidationError)
               .expect(
                 anErrorMessageWith(
-                  /String must contain at least 1 character|No empty strings allowed/
+                  /String must contain at least 1 character|No empty strings allowed|Field value cannot be empty/
                 )
               );
           });
