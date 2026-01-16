@@ -36,9 +36,15 @@ interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
 export type DashboardResult = ToolResultMixin<
   ToolResultType.dashboard,
   {
-    id: string;
-    title?: string;
-    content: Record<string, unknown>;
+    content: {
+      url: string;
+      title: string;
+      description: string;
+      markdownContent: string;
+      panelCount: number;
+      /** Array of tool_result_ids referencing visualizations */
+      visualizationIds: string[];
+    };
   }
 >;
 

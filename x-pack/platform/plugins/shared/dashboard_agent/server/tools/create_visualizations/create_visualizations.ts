@@ -33,12 +33,6 @@ const regionMapSchema = parse(regionMapStateSchemaESQL.getSchema()) as object;
 const heatmapSchema = parse(heatmapStateSchemaESQL.getSchema()) as object;
 
 const visualizationInputSchema = z.object({
-  id: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) A unique identifier for this visualization. If not provided, a UUID will be generated.'
-    ),
   query: z.string().describe('A natural language query describing the desired visualization.'),
   index: z
     .string()
@@ -122,7 +116,7 @@ Returns an array of visualization results, each with a unique tool_result_id tha
 
       // Process visualizations sequentially
       for (const vizInput of visualizations) {
-        const { query: nlQuery, index, chartType, esql, id: userProvidedId } = vizInput;
+        const { query: nlQuery, index, chartType, esql } = vizInput;
 
         try {
           // Step 1: Determine chart type if not provided
@@ -164,8 +158,7 @@ Returns an array of visualization results, each with a unique tool_result_id tha
             );
           }
 
-          // Generate unique ID - use user-provided ID or generate one
-          const toolResultId = userProvidedId || getToolResultId();
+          const toolResultId = getToolResultId();
 
           results.push({
             type: ToolResultType.visualization,
