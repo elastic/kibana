@@ -239,10 +239,13 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(403);
         expect(res.body).to.have.property('message');
         expect(res.body.message).to.contain(
-          `Unable to bulk_update ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:`
+          `Unable to bulk_update ${ACCESS_CONTROL_TYPE}. Access control restrictions for objects:`
         );
         expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`);
         expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
+        expect(res.body.message).to.contain(
+          `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
+        );
       });
 
       it('returns status if all objects are write-restricted but some are owned by the current user', async () => {

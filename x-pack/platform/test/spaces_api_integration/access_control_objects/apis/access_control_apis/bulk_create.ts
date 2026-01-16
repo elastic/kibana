@@ -269,10 +269,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(res.body).to.have.property('error', 'Forbidden');
         expect(res.body).to.have.property('message');
         expect(res.body.message).to.contain(
-          `Unable to bulk_create ${ACCESS_CONTROL_TYPE}, access control restrictions for`
+          `Unable to bulk_create ${ACCESS_CONTROL_TYPE}. Access control restrictions for objects:`
         );
         expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`); // order is not guaranteed
         expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
+        expect(res.body.message).to.contain(
+          `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
+        );
 
         const getResponse = await supertestWithoutAuth
           .get(`/access_control_objects/${objectId1}`)

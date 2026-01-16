@@ -157,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(403);
       expect(updateResponse.body).to.have.property('message');
       expect(updateResponse.body.message).to.contain(
-        `Access denied: Unable to manage access control for ${ACCESS_CONTROL_TYPE}`
+        `Access denied: Unable to manage access control for objects ${ACCESS_CONTROL_TYPE}:${objectId}`
       );
     });
 

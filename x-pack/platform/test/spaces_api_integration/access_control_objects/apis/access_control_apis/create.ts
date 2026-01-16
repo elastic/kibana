@@ -301,10 +301,11 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(403);
 
         expect(overwriteResponse.body).to.have.property('error', 'Forbidden');
-        expect(overwriteResponse.body).to.have.property(
-          'message',
-          `Unable to create ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:${objectId}`
+        expect(overwriteResponse.body).to.have.property('message');
+        expect(overwriteResponse.body.message).to.contain(
+          `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
         );
+        expect(overwriteResponse.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId}`);
       });
     });
   });
