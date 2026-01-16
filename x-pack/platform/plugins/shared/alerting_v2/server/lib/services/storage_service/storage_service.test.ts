@@ -82,6 +82,32 @@ describe('StorageService', () => {
       });
     });
 
+    it('should include _id when getId is provided', async () => {
+      const mockBulkResponse = {
+        items: [{ index: { _id: 'doc-1', status: 201 } }, { index: { _id: 'doc-2', status: 201 } }],
+        errors: false,
+      };
+
+      // @ts-expect-error - not all fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      await storageService.bulkIndexDocs({
+        index,
+        docs: mockDocs,
+        getId: (_doc, i) => `doc-${i + 1}`,
+      });
+
+      expect(mockEsClient.bulk).toHaveBeenCalledWith({
+        operations: [
+          { index: { _index: index, _id: 'doc-1' } },
+          mockDocs[0],
+          { index: { _index: index, _id: 'doc-2' } },
+          mockDocs[1],
+        ],
+        refresh: 'wait_for',
+      });
+    });
+
     it('should log error when bulk response contains errors', async () => {
       const mockBulkResponse = {
         items: [

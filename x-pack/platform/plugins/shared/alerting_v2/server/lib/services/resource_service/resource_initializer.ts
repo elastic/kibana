@@ -14,7 +14,8 @@ import { isResponseError } from '@kbn/es-errors';
 import { inject, injectable } from 'inversify';
 import type { ResourceDefinition } from '../../../resources/types';
 import { EsServiceInternalToken } from '../es_service/tokens';
-import { LoggerService } from '../logger_service/logger_service';
+import type { LoggerServiceContract } from '../logger_service/logger_service';
+import { LoggerServiceToken } from '../logger_service/logger_service';
 
 export interface IResourceInitializer {
   initialize(): Promise<void>;
@@ -30,7 +31,7 @@ const TOTAL_FIELDS_LIMIT = 2500;
 @injectable()
 export class ResourceInitializer implements IResourceInitializer {
   constructor(
-    @inject(LoggerService) private readonly logger: LoggerService,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
     private readonly resourceDefinition: ResourceDefinition
   ) {}

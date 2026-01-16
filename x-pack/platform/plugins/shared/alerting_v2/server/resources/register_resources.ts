@@ -8,16 +8,16 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getAlertEventsResourceDefinition } from './alert_events';
 import { ResourceInitializer } from '../lib/services/resource_service/resource_initializer';
-import type { ResourceManager } from '../lib/services/resource_service/resource_manager';
+import type { ResourceManagerContract } from '../lib/services/resource_service/resource_manager';
 import type { ResourceDefinition } from './types';
 import { getAlertTransitionsResourceDefinition } from './alert_transitions';
 import { getAlertActionsResourceDefinition } from './alert_actions';
-import type { LoggerService } from '../lib/services/logger_service/logger_service';
+import type { LoggerServiceContract } from '../lib/services/logger_service/logger_service';
 
 export interface RegisterResourcesOptions {
-  resourceManager: ResourceManager;
+  resourceManager: ResourceManagerContract;
   esClient: ElasticsearchClient;
-  logger: LoggerService;
+  logger: LoggerServiceContract;
 }
 
 export function initializeResources({
