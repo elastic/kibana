@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/core'
   - '@kbn/react-query'
-  - '@kbn/fleet-plugin'
 tags:
   - shared-browser
   - package
