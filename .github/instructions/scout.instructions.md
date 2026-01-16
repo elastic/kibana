@@ -1,5 +1,5 @@
 ---
-applyTo: '**/test/scout/**/*.spec.ts'
+applyTo: '*.spec.ts'
 ---
 
 # Instructions
