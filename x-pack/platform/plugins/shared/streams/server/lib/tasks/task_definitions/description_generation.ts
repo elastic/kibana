@@ -7,7 +7,7 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import { getStreamTypeFromDefinition, TaskStatus } from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import { generateStreamDescription } from '@kbn/streams-ai';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
@@ -78,22 +78,10 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                   output_tokens_used: tokensUsed?.completion ?? 0,
                 });
 
-                await taskClient.update<DescriptionGenerationTaskParams, GenerateDescriptionResult>(
-                  {
-                    ..._task,
-                    status: TaskStatus.Completed,
-                    task: {
-                      params: {
-                        connectorId,
-                        start,
-                        end,
-                      },
-                      payload: {
-                        description,
-                      },
-                    },
-                  }
-                );
+                await taskClient.complete<
+                  DescriptionGenerationTaskParams,
+                  GenerateDescriptionResult
+                >(_task, { connectorId, start, end }, { description });
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
@@ -113,18 +101,15 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
                 );
 
-                await taskClient.update<DescriptionGenerationTaskParams>({
-                  ..._task,
-                  status: TaskStatus.Failed,
-                  task: {
-                    params: {
-                      connectorId,
-                      start,
-                      end,
-                    },
-                    error: errorMessage,
+                await taskClient.fail<DescriptionGenerationTaskParams>(
+                  _task,
+                  {
+                    connectorId,
+                    start,
+                    end,
                   },
-                });
+                  errorMessage
+                );
               }
             },
             runContext,

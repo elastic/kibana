@@ -6,10 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { TaskStatus } from '@kbn/streams-schema';
-import { conflict } from '@hapi/boom';
-import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
-import { isStale } from '../../../../lib/tasks/is_stale';
+import type { TaskResult } from '../../../../lib/tasks/types';
 import {
   DESCRIPTION_GENERATION_TASK_TYPE,
   getDescriptionGenerationTaskId,
@@ -20,26 +17,11 @@ import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { createServerRoute } from '../../../create_server_route';
-import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
+import { handleTaskAction } from '../../../utils/task_helpers';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
-export type DescriptionGenerationTaskResult =
-  | {
-      status:
-        | TaskStatus.NotStarted
-        | TaskStatus.InProgress
-        | TaskStatus.Stale
-        | TaskStatus.BeingCanceled
-        | TaskStatus.Canceled;
-    }
-  | {
-      status: TaskStatus.Failed;
-      error: string;
-    }
-  | ({
-      status: TaskStatus.Completed | TaskStatus.Acknowledged;
-    } & GenerateDescriptionResult);
+export type DescriptionGenerationTaskResult = TaskResult<GenerateDescriptionResult>;
 
 export const descriptionGenerationStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/_description_generation/_status',
@@ -75,29 +57,9 @@ export const descriptionGenerationStatusRoute = createServerRoute({
 
     await streamsClient.ensureStream(name);
 
-    const task = await taskClient.get<DescriptionGenerationTaskParams, GenerateDescriptionResult>(
+    return taskClient.getStatus<DescriptionGenerationTaskParams, GenerateDescriptionResult>(
       getDescriptionGenerationTaskId(name)
     );
-
-    if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
-      return {
-        status: TaskStatus.Stale,
-      };
-    } else if (task.status === TaskStatus.Failed) {
-      return {
-        status: TaskStatus.Failed,
-        error: task.task.error,
-      };
-    } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
-      return {
-        status: task.status,
-        ...task.task.payload,
-      };
-    }
-
-    return {
-      status: task.status,
-    };
   },
 });
 
@@ -156,68 +118,37 @@ export const descriptionGenerationTaskRoute = createServerRoute({
 
     await streamsClient.ensureStream(name);
 
-    const { action } = body;
+    const taskId = getDescriptionGenerationTaskId(name);
+    const actionParams =
+      body.action === 'schedule'
+        ? ({
+            action: body.action,
+            scheduleConfig: {
+              taskType: DESCRIPTION_GENERATION_TASK_TYPE,
+              taskId,
+              streamName: name,
+              params: await (async (): Promise<DescriptionGenerationTaskParams> => {
+                const connectorId = await resolveConnectorId({
+                  connectorId: body.connectorId,
+                  uiSettingsClient,
+                  logger,
+                });
+                return {
+                  connectorId,
+                  start: body.from.getTime(),
+                  end: body.to.getTime(),
+                };
+              })(),
+              request,
+            },
+          } as const)
+        : ({ action: body.action } as const);
 
-    if (action === 'schedule') {
-      const { from: start, to: end, connectorId: connectorIdParam } = body;
-
-      const connectorId = await resolveConnectorId({
-        connectorId: connectorIdParam,
-        uiSettingsClient,
-        logger,
-      });
-
-      try {
-        await taskClient.schedule<DescriptionGenerationTaskParams>({
-          task: {
-            type: DESCRIPTION_GENERATION_TASK_TYPE,
-            id: getDescriptionGenerationTaskId(name),
-            space: '*',
-            stream: name,
-          },
-          params: {
-            connectorId,
-            start: start.getTime(),
-            end: end.getTime(),
-          },
-          request,
-        });
-
-        return {
-          status: TaskStatus.InProgress,
-        };
-      } catch (error) {
-        if (error instanceof CancellationInProgressError) {
-          throw conflict(error.message);
-        }
-
-        throw error;
-      }
-    } else if (action === 'cancel') {
-      await taskClient.cancel(getDescriptionGenerationTaskId(name));
-
-      return {
-        status: TaskStatus.BeingCanceled,
-      };
-    }
-
-    try {
-      const task = await taskClient.acknowledge<
-        DescriptionGenerationTaskParams,
-        GenerateDescriptionResult
-      >(getDescriptionGenerationTaskId(name));
-
-      return {
-        status: TaskStatus.Acknowledged,
-        ...task.task.payload,
-      };
-    } catch (error) {
-      if (error instanceof AcknowledgingIncompleteError) {
-        throw conflict(error.message);
-      }
-
-      throw error;
-    }
+    return handleTaskAction<DescriptionGenerationTaskParams, GenerateDescriptionResult>({
+      taskClient,
+      taskId,
+      ...actionParams,
+    });
   },
 });
 
