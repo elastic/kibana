@@ -19,6 +19,7 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { type Subscription } from 'rxjs';
 import { cloudConnectedFeature } from './features';
 import { registerRoutes } from './routes';
@@ -44,6 +45,7 @@ interface CloudConnectedSetupDeps {
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export class CloudConnectedPlugin
