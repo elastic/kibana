@@ -5,6 +5,9 @@ Creates Synthetics monitors for scalability testing.
 > [!WARNING]
 > **Local Development:** This script requires a Fleet Server. For local dev, run `synthetics_private_location` first. See [Using with synthetics_private_location](#using-with-synthetics_private_location-local-development).
 
+> [!NOTE]
+> **Docker Required:** When used with Ensemble workflows, Docker Desktop must be running. The Elastic Agent runs locally in a Docker container to execute monitors against the cloud cluster.
+
 ## Usage
 
 ```bash
@@ -155,4 +158,15 @@ node x-pack/scripts/synthetics_forge.js create
 
 ## Using with Ensemble
 
-This script is used by Ensemble workflows for automated scalability testing. See the [Ensemble README](../../../test/ensemble/README.md) for setup and usage.
+This script is used by Ensemble workflows for automated scalability testing. The workflow:
+
+1. Creates an ESS cluster in the cloud
+2. Runs `synthetics_forge` to create monitors
+3. Deploys an Elastic Agent in a **local Docker container**
+4. The agent connects to the cloud Fleet Server and executes monitors
+
+**Requirements:**
+- Docker Desktop must be running
+- The `elastic-agent-complete` image is used (includes Chromium for browser monitors)
+
+See the [Ensemble README](../../../test/ensemble/README.md) for setup and usage.
