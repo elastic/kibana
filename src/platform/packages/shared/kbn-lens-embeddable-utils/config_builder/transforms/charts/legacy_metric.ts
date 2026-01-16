@@ -167,6 +167,7 @@ export function fromAPItoLensState(
     visualizationType: 'lnsLegacyMetric',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: 1,
     state: {
       datasourceStates: layers,
       internalReferences,

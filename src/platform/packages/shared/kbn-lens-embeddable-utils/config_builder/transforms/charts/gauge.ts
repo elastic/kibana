@@ -248,6 +248,7 @@ export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFi
     visualizationType: 'lnsGauge',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: 1,
     state: {
       datasourceStates: layers,
       internalReferences,

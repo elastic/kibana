@@ -26,6 +26,7 @@ import type { LensApiAllOperations, LensApiBucketOperations } from '../../schema
 export const LENS_EMPTY_AS_NULL_DEFAULT_VALUE = false;
 
 const LENS_DEFAULT_LABEL = '';
+
 export function getLensStateMetricSharedProps(
   options: {
     time_scale?: TimeScaleUnit;
@@ -40,13 +41,13 @@ export function getLensStateMetricSharedProps(
   return {
     dataType,
     isBucketed: false,
-    ...(filter ? { filter } : {}),
+    ...(filter && { filter }),
     ...(options.time_scale ? { timeScale: options.time_scale } : {}),
     ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
     ...(options.time_shift ? { timeShift: options.time_shift } : {}),
     label: options.label ?? LENS_DEFAULT_LABEL,
-    // @TODO improve this based on default label logic
-    customLabel: options.label != null,
+    // TODO: improve default label logic, this is an api thing not a lens SO thing
+    // customLabel: options.label != null,
   };
 }
 
@@ -59,7 +60,7 @@ export function getLensAPIMetricSharedProps(options: {
   label?: string;
 }) {
   return {
-    ...(options.customLabel ? { label: options.label } : {}),
+    ...(options.customLabel || options.label ? { label: options.label } : {}),
     ...(options.timeScale ? { time_scale: options.timeScale } : {}),
     ...(options.reducedTimeRange ? { reduced_time_range: options.reducedTimeRange } : {}),
     ...(options.timeShift ? { time_shift: options.timeShift } : {}),
