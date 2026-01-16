@@ -35,7 +35,6 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/dissect-heuristics'
   - '@kbn/es-query'
-  - '@kbn/sse-utils-client'
 tags:
   - functional-tests
   - package
