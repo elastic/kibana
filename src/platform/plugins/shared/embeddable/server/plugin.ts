@@ -31,9 +31,15 @@ import type {
   TransformEnhancementsOut,
 } from '../common';
 import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
+import { Drilldown } from './drilldowns/types';
+import { DrilldownRegistry } from './drilldowns/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
+  /*
+   * Use registerDrilldown to register transforms and schema for a drilldown type.
+   */
+  registerDrilldown: (type: string, drilldown: Drilldown) => void;
   /*
    * Use registerTransforms to register transforms and schema for an embeddable type.
    * Transforms decouple REST API state from stored state,
@@ -60,12 +66,14 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
+  private drilldownRegistry = new DrilldownRegistry();
   private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
 
   public setup(core: CoreSetup) {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
+      registerDrilldown: this.drilldownRegistry.registerDrilldown,
       registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
         if (this.transformsRegistry[type]) {
           throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
