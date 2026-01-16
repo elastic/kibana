@@ -36,6 +36,8 @@
           " extends Error"
         ],
         "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
             "label": "statusCode",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -61,6 +65,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -75,6 +81,8 @@
                   "Response"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+                "lineNumber": 10,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -90,6 +98,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+                "lineNumber": 10,
+                "columnNumber": 53,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -108,6 +118,8 @@
         "label": "KibanaClient",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +134,8 @@
               "default"
             ],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -136,6 +150,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -150,6 +166,8 @@
                   "KibanaClientOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+                "lineNumber": 44,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -168,6 +186,8 @@
               "{ (options: FetchInputOptions, init: Omit<RequestInit, \"body\"> & { body: unknown; } & { asRawResponse: true; }): Promise<Response>; <T>(options: FetchInputOptions, init?: FetchInitOptions | undefined): Promise<T>; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -182,6 +202,8 @@
                   "FetchInputOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+                "lineNumber": 76,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -197,6 +219,8 @@
                   "(Omit<RequestInit, \"body\"> & { body: unknown; } & { asRawResponse?: boolean | undefined; }) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+                "lineNumber": 77,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -236,6 +260,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -247,6 +273,8 @@
             "label": "{\n  log,\n  signal,\n  baseUrl,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
+            "lineNumber": 16,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -267,6 +295,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
+                "lineNumber": 17,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -281,6 +311,8 @@
                   "AbortSignal"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
+                "lineNumber": 18,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -295,6 +327,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
+                "lineNumber": 19,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -323,6 +357,8 @@
           "; auth?: { basic: { username: string; password: string; }; } | undefined; }) => Promise<string>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -334,6 +370,8 @@
             "label": "{\n  baseUrl,\n  log,\n  auth,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
+            "lineNumber": 117,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -348,6 +386,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
+                "lineNumber": 118,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -368,6 +408,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
+                "lineNumber": 119,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -382,6 +424,8 @@
                   "{ basic: { username: string; password: string; }; } | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
+                "lineNumber": 120,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -411,6 +455,8 @@
           "HttpHandler"
         ],
         "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/to_http_handler.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -431,6 +477,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/to_http_handler.ts",
+            "lineNumber": 22,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -473,6 +521,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -484,6 +534,8 @@
             "label": "{ flags, log }",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+            "lineNumber": 13,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -498,6 +550,8 @@
                   "{ verbose: boolean; quiet: boolean; silent: boolean; debug: boolean; help: boolean; _: string[]; unexpected: string[]; } & UnspecifiedFlags"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+                "lineNumber": 13,
+                "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -518,6 +572,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+                "lineNumber": 13,
+                "columnNumber": 68,
                 "deprecated": false,
                 "trackAdoption": false
               }
