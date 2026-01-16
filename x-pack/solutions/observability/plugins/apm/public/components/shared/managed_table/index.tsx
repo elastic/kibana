@@ -66,12 +66,14 @@ export interface TableSearchBar<T> {
 }
 
 export interface TableActionSubItem<T> {
+  id: string;
   name: string;
   onClick: (item: T) => void;
   icon?: string;
 }
 
 export interface TableAction<T> {
+  id: string;
   name: string;
   onClick?: (item: T) => void;
   icon?: string;
@@ -79,6 +81,7 @@ export interface TableAction<T> {
 }
 
 export interface TableActionGroup<T> {
+  id: string;
   groupLabel: string;
   actions: Array<TableAction<T>>;
 }
@@ -108,12 +111,12 @@ function ActionsCell<T extends object>({
   }, []);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
-    const result: EuiContextMenuPanelDescriptor[] = [];
+    const mainPanelItems: EuiContextMenuPanelDescriptor['items'] = [];
+    const subPanels: EuiContextMenuPanelDescriptor[] = [];
     let subPanelId = 1;
 
-    const mainPanelItems: EuiContextMenuPanelDescriptor['items'] = [];
-
-    actions.forEach((group, groupIndex) => {
+    for (const [groupIndex, group] of actions.entries()) {
+      // Add group header
       mainPanelItems.push({
         name: group.groupLabel,
         isSeparator: false,
@@ -124,34 +127,34 @@ function ActionsCell<T extends object>({
           borderBottom: euiTheme.border.thin,
           marginTop: groupIndex > 0 ? euiTheme.size.m : 0,
         },
-        'data-test-subj': `apmManagedTableActionsMenuGroup-${group.groupLabel.replace(/\s+/g, '')}`,
+        'data-test-subj': `apmManagedTableActionsMenuGroup-${group.id}`,
       });
 
-      group.actions.forEach((action) => {
-        if (action.items && action.items.length > 0) {
-          const currentSubPanelId = subPanelId++;
+      // Add action items
+      for (const action of group.actions) {
+        const hasSubItems = action.items && action.items.length > 0;
+
+        if (hasSubItems) {
+          const panelId = subPanelId++;
 
           mainPanelItems.push({
             name: action.name,
             icon: action.icon,
-            panel: currentSubPanelId,
-            'data-test-subj': `apmManagedTableActionsMenuItem-${action.name.replace(/\s+/g, '')}`,
+            panel: panelId,
+            'data-test-subj': `apmManagedTableActionsMenuItem-${action.id}`,
           });
 
-          result.push({
-            id: currentSubPanelId,
+          subPanels.push({
+            id: panelId,
             title: action.name,
-            items: action.items.map((subItem) => ({
+            items: action.items!.map((subItem) => ({
               name: subItem.name,
               icon: subItem.icon,
               onClick: () => {
                 subItem.onClick(item);
                 closePopover();
               },
-              'data-test-subj': `apmManagedTableActionsMenuItem-${subItem.name.replace(
-                /\s+/g,
-                ''
-              )}`,
+              'data-test-subj': `apmManagedTableActionsMenuItem-${subItem.id}`,
             })),
           });
         } else {
@@ -164,18 +167,13 @@ function ActionsCell<T extends object>({
                   closePopover();
                 }
               : undefined,
-            'data-test-subj': `apmManagedTableActionsMenuItem-${action.name.replace(/\s+/g, '')}`,
+            'data-test-subj': `apmManagedTableActionsMenuItem-${action.id}`,
           });
         }
-      });
-    });
+      }
+    }
 
-    result.unshift({
-      id: 0,
-      items: mainPanelItems,
-    });
-
-    return result;
+    return [{ id: 0, items: mainPanelItems }, ...subPanels];
   }, [actions, item, closePopover, euiTheme]);
 
   return (
@@ -201,6 +199,7 @@ function ActionsCell<T extends object>({
     </EuiPopover>
   );
 }
+
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 function defaultSortFn<T>(items: T[], sortField: keyof T, sortDirection: SortDirection) {

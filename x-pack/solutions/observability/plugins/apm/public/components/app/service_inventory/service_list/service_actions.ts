@@ -42,16 +42,19 @@ export function useServiceActions({
 
     if (canSaveApmAlerts) {
       actionsList.push({
+        id: 'alerts',
         groupLabel: i18n.translate('xpack.apm.servicesTable.actions.alertsGroupLabel', {
           defaultMessage: 'Alerts',
         }),
         actions: [
           {
+            id: 'createThresholdRule',
             name: i18n.translate('xpack.apm.servicesTable.actions.createThresholdRule', {
               defaultMessage: 'Create threshold rule',
             }),
             items: [
               {
+                id: 'createLatencyRule',
                 name: i18n.translate('xpack.apm.servicesTable.actions.createLatencyRule', {
                   defaultMessage: 'Latency',
                 }),
@@ -60,6 +63,7 @@ export function useServiceActions({
                 },
               },
               {
+                id: 'createFailedTransactionRateRule',
                 name: i18n.translate(
                   'xpack.apm.servicesTable.actions.createFailedTransactionRateRule',
                   {
@@ -73,6 +77,7 @@ export function useServiceActions({
             ],
           },
           {
+            id: 'createAnomalyRule',
             name: i18n.translate('xpack.apm.servicesTable.actions.createAnomalyRule', {
               defaultMessage: 'Create anomaly rule',
             }),
@@ -81,6 +86,7 @@ export function useServiceActions({
             },
           },
           {
+            id: 'createErrorCountRule',
             name: i18n.translate('xpack.apm.servicesTable.actions.createErrorCountRule', {
               defaultMessage: 'Create error count rule',
             }),
@@ -89,6 +95,7 @@ export function useServiceActions({
             },
           },
           {
+            id: 'manageRules',
             name: i18n.translate('xpack.apm.servicesTable.actions.manageRules', {
               defaultMessage: 'Manage rules',
             }),
@@ -115,11 +122,13 @@ export function useServiceActions({
 
     if (canWriteSlos) {
       actionsList.push({
+        id: 'slos',
         groupLabel: i18n.translate('xpack.apm.servicesTable.actions.slosGroupLabel', {
           defaultMessage: 'SLOs',
         }),
         actions: [
           {
+            id: 'createLatencySlo',
             name: i18n.translate('xpack.apm.servicesTable.actions.createLatencySlo', {
               defaultMessage: 'Create APM latency SLO',
             }),
@@ -128,6 +137,7 @@ export function useServiceActions({
             },
           },
           {
+            id: 'createAvailabilitySlo',
             name: i18n.translate('xpack.apm.servicesTable.actions.createAvailabilitySlo', {
               defaultMessage: 'Create APM availability SLO',
             }),
@@ -136,6 +146,7 @@ export function useServiceActions({
             },
           },
           {
+            id: 'manageSlos',
             name: i18n.translate('xpack.apm.servicesTable.actions.manageSlos', {
               defaultMessage: 'Manage SLOs',
             }),
