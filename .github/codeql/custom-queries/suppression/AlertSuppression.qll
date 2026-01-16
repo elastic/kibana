@@ -1,3 +1,12 @@
+/**
+ * @notice
+ *
+ * Copyright (c) GitHub, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the https://github.com/github/codeql repository.
+ */
+
 overlay[local?]
 module;
 
