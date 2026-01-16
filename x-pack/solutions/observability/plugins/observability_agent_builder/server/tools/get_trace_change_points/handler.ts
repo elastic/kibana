@@ -5,18 +5,13 @@
  * 2.0.
  */
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import {
-  ApmDocumentType,
-  LatencyAggregationType,
-  getLatencyAggregationType,
-} from '@kbn/apm-data-access-plugin/common';
+import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { intervalToSeconds } from '@kbn/apm-data-access-plugin/common/utils/get_preferred_bucket_size_and_data_source';
 import {
   getOutcomeAggregation,
   getDurationFieldForTransactions,
-  getLatencyAggregation,
 } from '@kbn/apm-data-access-plugin/server/utils';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -40,7 +35,7 @@ interface ChangePointResult {
   bucket?: Bucket;
 }
 
-export interface BucketChangePoints extends Bucket {
+interface BucketChangePoints extends Bucket {
   changes_latency: ChangePointResult;
   changes_throughput: ChangePointResult;
   changes_failure_rate: ChangePointResult;
@@ -61,6 +56,8 @@ export interface BucketChangePoints extends Bucket {
   };
 }
 
+type LatencyAggregationType = 'avg' | 'p99' | 'p95';
+
 type DocumentType =
   | ApmDocumentType.ServiceTransactionMetric
   | ApmDocumentType.TransactionMetric
@@ -76,6 +73,21 @@ function getChangePointsAggs(bucketsPath: string) {
   return changePointAggs;
 }
 
+function getLatencyAggregation(latencyAggregationType: LatencyAggregationType, field: string) {
+  return {
+    latency: {
+      ...(latencyAggregationType === 'avg'
+        ? { avg: { field } }
+        : {
+            percentiles: {
+              field,
+              percents: [latencyAggregationType === 'p95' ? 95 : 99],
+            },
+          }),
+    },
+  };
+}
+
 export async function getToolHandler({
   core,
   plugins,
@@ -85,7 +97,7 @@ export async function getToolHandler({
   end,
   kqlFilter,
   groupBy,
-  latencyType,
+  latencyType = 'avg',
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -98,7 +110,7 @@ export async function getToolHandler({
   end: string;
   kqlFilter?: string;
   groupBy: string;
-  latencyType: 'avg' | 'p95' | 'p99' | undefined;
+  latencyType: LatencyAggregationType | undefined;
 }): Promise<BucketChangePoints[]> {
   const { apmEventClient, apmDataAccessServices } = await buildApmResources({
     core,
@@ -119,14 +131,10 @@ export async function getToolHandler({
 
   const { rollupInterval, hasDurationSummaryField } = source;
   const documentType = source.documentType as DocumentType;
-  const latencyAggregationType = getLatencyAggregationType(latencyType);
   // cant calculate percentile aggregation on transaction.duration.summary field
   const useDurationSummaryField =
-    hasDurationSummaryField &&
-    latencyAggregationType !== LatencyAggregationType.p95 &&
-    latencyAggregationType !== LatencyAggregationType.p99;
+    hasDurationSummaryField && latencyType !== 'p95' && latencyType !== 'p99';
   const durationField = getDurationFieldForTransactions(documentType, useDurationSummaryField);
-  const outcomeAggs = getOutcomeAggregation(documentType);
   const bucketSizeInSeconds = intervalToSeconds(rollupInterval);
 
   const calculateFailedTransactionRate =
@@ -161,8 +169,8 @@ export async function getToolHandler({
               fixed_interval: `${bucketSizeInSeconds}s`,
             },
             aggs: {
-              ...outcomeAggs,
-              ...getLatencyAggregation(latencyAggregationType, durationField),
+              ...getOutcomeAggregation(documentType),
+              ...getLatencyAggregation(latencyType, durationField),
               failure_rate:
                 documentType === ApmDocumentType.ServiceTransactionMetric
                   ? {

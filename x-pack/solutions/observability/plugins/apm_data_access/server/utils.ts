@@ -18,7 +18,6 @@ export {
   calculateThroughputWithRange,
   getOutcomeAggregation,
   calculateFailedTransactionRate,
-  getLatencyAggregation,
   type OutcomeAggregation,
 } from './lib/helpers';
 
