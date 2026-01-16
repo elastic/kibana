@@ -56,6 +56,7 @@ describe('JobSelector', () => {
   ];
 
   const defaultProps = {
+    dateFormatTz: 'UTC',
     singleSelection: false,
     timeseriesOnly: false,
     selectedJobIds: ['job-1', 'job-2'],
