@@ -155,8 +155,17 @@ export const getAlertsAppMenuItem = ({
           : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
               defaultMessage: 'Data view does not have a time field.',
             }),
-        run: async (params?: AppMenuRunActionParams) => {
-          const onFinishAction = params?.context?.onFinishAction as (() => void) | undefined;
+        run: (params?: AppMenuRunActionParams) => {
+          const onFinishAction = () => {
+            const contextCallback = params?.context?.onFinishAction as (() => void) | undefined;
+            contextCallback?.();
+            // Focus the main alerts button after flyout closes
+            const alertsButton = document.querySelector(
+              '[data-test-subj="discoverAlertsButton"]'
+            ) as HTMLElement;
+            alertsButton?.focus();
+          };
+
           return (
             <CreateAlertFlyout
               onFinishAction={onFinishAction}

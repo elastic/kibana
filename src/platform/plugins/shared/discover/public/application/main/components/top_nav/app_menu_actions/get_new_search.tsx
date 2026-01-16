@@ -13,10 +13,10 @@ import { i18n } from '@kbn/i18n';
 
 export const getNewSearchAppMenuItem = ({
   onNewSearch,
-  newSearchUrl,
+  onNavigate,
 }: {
   onNewSearch: () => void;
-  newSearchUrl?: string;
+  onNavigate: () => void;
 }): AppMenuItemType => {
   return {
     id: AppMenuActionId.new,
@@ -26,9 +26,10 @@ export const getNewSearchAppMenuItem = ({
     }),
     iconType: 'plusInCircle',
     testId: 'discoverNewButton',
-    href: newSearchUrl,
     run: () => {
       onNewSearch();
+      // New App Menu doesn't support running onClick when href is provided, so we need to handle navigation here
+      onNavigate();
     },
   };
 };

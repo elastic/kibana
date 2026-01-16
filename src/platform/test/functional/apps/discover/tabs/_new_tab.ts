@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setAbsoluteRange(fromTime, toTime);
       await discover.waitUntilTabIsLoaded();
 
-      const tabCount = 7;
+      const tabCount = 4;
 
       for (let i = 0; i < tabCount; i++) {
         await testSubjects.click('unifiedTabs_tabsBar_newTabBtn');
