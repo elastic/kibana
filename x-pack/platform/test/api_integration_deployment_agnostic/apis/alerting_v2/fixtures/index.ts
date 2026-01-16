@@ -6,4 +6,4 @@
  */
 
 export { createAlertEvent } from './alert_event';
-export { createAlertTransition, type AlertTransition } from './alert_transition';
+export { createAlertTransition } from './alert_transition';

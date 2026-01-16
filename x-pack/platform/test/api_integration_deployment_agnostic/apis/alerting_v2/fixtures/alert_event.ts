@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertEvent } from '../../../../../plugins/shared/alerting_v2/server/resources/alert_events';
+import type { AlertEvent } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
 
 export const createAlertEvent = (overrides?: Partial<AlertEvent>): AlertEvent => ({
   '@timestamp': new Date().toISOString(),
@@ -15,7 +15,7 @@ export const createAlertEvent = (overrides?: Partial<AlertEvent>): AlertEvent =>
   parent_rule_id: undefined,
   rule: {
     id: 'test-rule-id',
-    tags: [],
+    tags: ['test-alert-tag-1', 'test-alert-tag-2'],
   },
   grouping: {
     key: 'instance.id',

@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-export interface AlertTransition {
-  '@timestamp': string;
-  alert_series_id: string;
-  episode_id: string;
-  start_state: string;
-  end_state: string;
-  rule_id: string;
-}
+import type { AlertTransition } from '@kbn/alerting-v2-plugin/server/resources/alert_transitions';
 
 export const createAlertTransition = (overrides?: Partial<AlertTransition>): AlertTransition => ({
   '@timestamp': new Date().toISOString(),

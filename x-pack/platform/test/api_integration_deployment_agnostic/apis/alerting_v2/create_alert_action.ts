@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AlertEvent } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
+import type { AlertTransition } from '@kbn/alerting-v2-plugin/server/resources/alert_transitions';
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
@@ -22,8 +24,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Create Alert Action API', function () {
     let roleAuthc: RoleCredentials;
-    let alertEvent: ReturnType<typeof createAlertEvent>;
-    let alertTransitions: ReturnType<typeof createAlertTransition>[];
+    let alertEvent: AlertEvent;
+    let alertTransitions: AlertTransition[];
 
     function getLatestTransition() {
       return alertTransitions[alertTransitions.length - 1];
