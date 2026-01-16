@@ -14,13 +14,19 @@ import { WORKFLOW_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 import { withLicenseCheck } from '../lib/with_license_check';
 
+const MAX_AGG_FIELDS = 25;
+
 export function registerGetWorkflowAggsRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.get(
     {
       path: '/api/workflows/aggs',
       options: WORKFLOW_ROUTE_OPTIONS,
       security: WORKFLOW_READ_SECURITY,
-      validate: { query: schema.object({ fields: schema.arrayOf(schema.string()) }) },
+      validate: {
+        query: schema.object({
+          fields: schema.arrayOf(schema.string(), { maxSize: MAX_AGG_FIELDS }),
+        }),
+      },
     },
     withLicenseCheck(async (context, request, response) => {
       try {

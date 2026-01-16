@@ -9,9 +9,11 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { setVarStepDefinition } from './setvar_step';
+import { externalStepDefinition } from './external_step';
 
 export const registerStepDefinitions = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup
 ) => {
   workflowsExtensions.registerStepDefinition(setVarStepDefinition);
+  workflowsExtensions.registerStepDefinition(externalStepDefinition);
 };
