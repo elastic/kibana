@@ -11,6 +11,7 @@ import { EntityIdentifierFields, EntityType } from '../../../../common/entity_an
 import {
   getRiskInputTab,
   getInsightsInputTab,
+  getEndpointAssetsTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import type {
   LeftPanelTabsType,
@@ -53,6 +54,7 @@ export const useTabs = ({
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
+  hasEndpointAssetData,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   return useMemo(() => {
     const isRiskScoreTabAvailable = isRiskScoreExist && name;
@@ -66,7 +68,12 @@ export const useTabs = ({
         ? [getInsightsInputTab({ name, fieldName: EntityIdentifierFields.hostName, scopeId })]
         : [];
 
-    return [...riskScoreTab, ...insightsTab];
+    // Endpoint Assets tab (CAASM data)
+    const endpointAssetsTab = hasEndpointAssetData
+      ? [getEndpointAssetsTab({ hostName: name, scopeId })]
+      : [];
+
+    return [...riskScoreTab, ...insightsTab, ...endpointAssetsTab];
   }, [
     isRiskScoreExist,
     name,
@@ -74,5 +81,6 @@ export const useTabs = ({
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    hasEndpointAssetData,
   ]);
 };

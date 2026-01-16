@@ -15,6 +15,8 @@ import type { EntityIdentifierFields } from '../../../common/entity_analytics/ty
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
+import { EndpointAssetsPreview } from './endpoint_assets/endpoint_assets_preview';
+import { useEndpointAssetData } from '../../flyout/entity_details/endpoint_assets/hooks/use_endpoint_asset_data';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';

@@ -19,12 +19,7 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
   EuiButton,
-  EuiPanel,
-  EuiTitle,
-  EuiDescriptionList,
   EuiText,
-  EuiIcon,
-  EuiBadge,
   EuiTabs,
   EuiTab,
   EuiButtonEmpty,
@@ -240,13 +235,6 @@ interface HostDetailsData {
   };
 }
 
-const getFirst = <T,>(value: T | T[] | undefined): T | undefined => {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-  return value;
-};
-
 const normalizePlatform = (platform?: string): 'windows' | 'macos' | 'linux' | null => {
   if (!platform) return null;
   const normalized = platform.toLowerCase();
@@ -384,7 +372,7 @@ export const HostDetailsPage: React.FC = React.memo(() => {
 
     switch (selectedTab) {
       case 'overview':
-        return <OverviewTab hostId={hostId} />;
+        return <OverviewTab hostId={hostId} hostData={hostData} />;
       case 'drift':
         return <DriftTab hostId={hostId} />;
       case 'posture':
@@ -399,185 +387,6 @@ export const HostDetailsPage: React.FC = React.memo(() => {
   const platform = useMemo(() => {
     if (!hostData?.host?.os?.platform) return null;
     return normalizePlatform(hostData.host.os.platform);
-  }, [hostData]);
-
-  const identityItems = useMemo(() => {
-    if (!hostData) return [];
-    return [
-      {
-        title: 'Hostname',
-        description: getFirst(hostData.host?.hostname) || getFirst(hostData.host?.name) || '-',
-      },
-      {
-        title: 'Host ID',
-        description: getFirst(hostData.host?.id) || '-',
-      },
-      {
-        title: 'IP Address',
-        description: getFirst(hostData.host?.ip) || '-',
-      },
-      {
-        title: 'MAC Address',
-        description: getFirst(hostData.host?.mac) || '-',
-      },
-      {
-        title: 'OS',
-        description: getFirst(hostData.host?.os?.name) || '-',
-      },
-      {
-        title: 'OS Version',
-        description: hostData.host?.os?.version || '-',
-      },
-      {
-        title: 'OS Build',
-        description: hostData.host?.os?.build || '-',
-      },
-      {
-        title: 'Platform',
-        description: hostData.host?.os?.platform || '-',
-      },
-      {
-        title: 'Architecture',
-        description: hostData.host?.architecture || '-',
-      },
-    ];
-  }, [hostData]);
-
-  const hardwareItems = useMemo(() => {
-    if (!hostData) return [];
-    const hw = hostData.endpoint?.hardware;
-
-    // Format memory - flattened field name
-    let memoryDisplay = '-';
-    const memoryGb = hw?.memory_gb;
-    if (memoryGb) {
-      const val = parseFloat(String(memoryGb));
-      if (!isNaN(val)) memoryDisplay = `${val.toFixed(1)} GB`;
-    }
-
-    // Format CPU cores - flattened field names
-    const physicalCores = hw?.cpu_physical_cores;
-    const logicalCores = hw?.cpu_cores;
-    let coresDisplay = '-';
-    if (physicalCores || logicalCores) {
-      const phys = physicalCores ? String(physicalCores) : '?';
-      const log = logicalCores ? String(logicalCores) : '?';
-      coresDisplay = `${phys} physical / ${log} logical`;
-    }
-
-    return [
-      {
-        title: 'Vendor',
-        description: hw?.vendor || '-',
-      },
-      {
-        title: 'Model',
-        description: hw?.model || '-',
-      },
-      {
-        title: 'Serial',
-        description: hw?.serial || '-',
-      },
-      {
-        title: 'UUID',
-        description: hw?.uuid || '-',
-      },
-      {
-        title: 'CPU',
-        description: hw?.cpu || '-', // flattened: cpu is brand string
-      },
-      {
-        title: 'CPU Cores',
-        description: coresDisplay,
-      },
-      {
-        title: 'Memory',
-        description: memoryDisplay,
-      },
-      {
-        title: 'Memory Type',
-        description: hw?.memory_type && hw?.memory_speed
-          ? `${hw.memory_type} @ ${hw.memory_speed}`
-          : hw?.memory_type || '-',
-      },
-    ];
-  }, [hostData]);
-
-  const agentItems = useMemo(() => {
-    if (!hostData) return [];
-    return [
-      {
-        title: 'Agent ID',
-        description: hostData.agent?.id || '-',
-      },
-      {
-        title: 'Agent Name',
-        description: hostData.agent?.name || '-',
-      },
-      {
-        title: 'Agent Version',
-        description: hostData.agent?.version || '-',
-      },
-      {
-        title: 'Last Seen',
-        description: hostData['@timestamp']
-          ? new Date(hostData['@timestamp']).toLocaleString()
-          : '-',
-      },
-    ];
-  }, [hostData]);
-
-  const diskItems = useMemo(() => {
-    if (!hostData) return [];
-    const hw = hostData.endpoint?.hardware;
-    // Flattened field names
-    const diskCount = hw?.disk_count ? String(hw.disk_count) : '-';
-    const totalCapacity = hw?.disk_total_gb
-      ? `${parseFloat(String(hw.disk_total_gb)).toFixed(1)} GB`
-      : '-';
-    const usbCount = hw?.usb_count ? String(hw.usb_count) : '-';
-    const usbRemovable = hw?.usb_removable_count ? String(hw.usb_removable_count) : '-';
-
-    return [
-      { title: 'Disk Count', description: diskCount },
-      { title: 'Total Capacity', description: totalCapacity },
-      { title: 'USB Devices', description: usbCount },
-      { title: 'Removable USB', description: usbRemovable },
-    ];
-  }, [hostData]);
-
-  const networkItems = useMemo(() => {
-    if (!hostData) return [];
-    const net = hostData.endpoint?.network;
-    const interfaceCount = net?.interface_count ? String(net.interface_count) : '-';
-    const listeningPorts = net?.listening_ports_count ? String(net.listening_ports_count) : '-';
-    const macAddresses = Array.isArray(net?.mac_addresses) ? net.mac_addresses.join(', ') : '-';
-    const ipAddresses = Array.isArray(net?.ip_addresses) ? net.ip_addresses.join(', ') : '-';
-
-    return [
-      { title: 'Interfaces', description: interfaceCount },
-      { title: 'Listening Ports', description: listeningPorts },
-      { title: 'MAC Addresses', description: macAddresses },
-      { title: 'IP Addresses', description: ipAddresses },
-    ];
-  }, [hostData]);
-
-  const softwareItems = useMemo(() => {
-    if (!hostData) return [];
-    const sw = hostData.endpoint?.software;
-    const installedCount = sw?.installed_count ? String(sw.installed_count) : '-';
-    const servicesCount = sw?.services_count ? String(sw.services_count) : '-';
-    const browsers = Array.isArray(sw?.browsers) ? sw.browsers.filter(Boolean).join(', ') : '-';
-    const securityTools = Array.isArray(sw?.security_tools) ? sw.security_tools.filter(Boolean).join(', ') : '-';
-    const remoteAccess = Array.isArray(sw?.remote_access) ? sw.remote_access.filter(Boolean).join(', ') : '-';
-
-    return [
-      { title: 'Installed Apps', description: installedCount },
-      { title: 'Services', description: servicesCount },
-      { title: 'Browsers', description: browsers || '-' },
-      { title: 'Security Tools', description: securityTools || '-' },
-      { title: 'Remote Access (Shadow IT)', description: remoteAccess || 'None detected' },
-    ];
   }, [hostData]);
 
   if (!hostId) {
@@ -724,105 +533,6 @@ export const HostDetailsPage: React.FC = React.memo(() => {
             )}
           </EuiFlexGroup>
         </HeaderPage>
-
-        <EuiSpacer size="l" />
-
-        <EuiFlexGroup gutterSize="l" wrap>
-          <EuiFlexItem grow={1} style={{ minWidth: '300px' }}>
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <h3>Identity</h3>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiDescriptionList
-                type="column"
-                listItems={identityItems}
-                compressed
-                columnWidths={[1, 2]}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={1} style={{ minWidth: '300px' }}>
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <h3>Hardware</h3>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiDescriptionList
-                type="column"
-                listItems={hardwareItems}
-                compressed
-                columnWidths={[1, 2]}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={1} style={{ minWidth: '300px' }}>
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <h3>Agent & Activity</h3>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiDescriptionList
-                type="column"
-                listItems={agentItems}
-                compressed
-                columnWidths={[1, 2]}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="l" />
-
-        {/* Second row: Disk, Network, Software */}
-        <EuiFlexGroup gutterSize="l" wrap>
-          <EuiFlexItem grow={1} style={{ minWidth: '300px' }}>
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <h3>Storage</h3>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiDescriptionList
-                type="column"
-                listItems={diskItems}
-                compressed
-                columnWidths={[1, 2]}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={1} style={{ minWidth: '300px' }}>
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <h3>Network</h3>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiDescriptionList
-                type="column"
-                listItems={networkItems}
-                compressed
-                columnWidths={[1, 2]}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={1} style={{ minWidth: '300px' }}>
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <h3>Software Summary</h3>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiDescriptionList
-                type="column"
-                listItems={softwareItems}
-                compressed
-                columnWidths={[1, 2]}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
 
         <EuiSpacer size="l" />
 

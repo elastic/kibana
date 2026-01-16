@@ -10,6 +10,7 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import type { HostPanelExpandableFlyoutProps } from '../host_right';
 import type { ServicePanelExpandableFlyoutProps } from '../service_right';
 import type { UserPanelExpandableFlyoutProps } from '../user_right';
+import type { EndpointAssetsPanelExpandableFlyoutProps } from '../endpoint_assets/types';
 
 export const ONE_WEEK_IN_HOURS = 24 * 7;
 
@@ -20,6 +21,10 @@ export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 export const ServicePanelKey: ServicePanelExpandableFlyoutProps['key'] = 'service-panel';
 export const GenericEntityPanelKey: GenericEntityPanelExpandableFlyoutProps['key'] =
   'generic-entity-panel';
+export const EndpointAssetsPanelKey: EndpointAssetsPanelExpandableFlyoutProps['key'] =
+  'endpoint-assets-panel';
+export const EndpointAssetsPreviewPanelKey: EndpointAssetsPanelExpandableFlyoutProps['key'] =
+  'endpoint-assets-preview-panel';
 
 export const EntityPanelKeyByType: Record<EntityType, string | undefined> = {
   [EntityType.host]: HostPanelKey,

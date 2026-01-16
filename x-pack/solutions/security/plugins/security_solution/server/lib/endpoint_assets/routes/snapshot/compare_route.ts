@@ -19,21 +19,15 @@ import type {
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 /**
- * Priority fields for comparison - security-critical fields that are always compared
+ * Fields to exclude from comparison (internal/metadata fields)
  */
-const PRIORITY_FIELDS = [
-  'endpoint.posture.score',
-  'endpoint.posture.level',
-  'endpoint.posture.firewall_enabled',
-  'endpoint.posture.disk_encryption',
-  'endpoint.posture.secure_boot',
-  'endpoint.privileges.admin_count',
-  'endpoint.privileges.elevated_risk',
-  'endpoint.unknown_knowns.total_dormant_risks',
-  'endpoint.unknown_knowns.risk_level',
-  'endpoint.software.installed_count',
-  'endpoint.software.services_count',
-  'endpoint.network.listening_ports_count',
+const EXCLUDED_FIELDS = [
+  '@timestamp',
+  'entity.lastSeenTimestamp',
+  'entity.firstSeenTimestamp',
+  'event.ingested',
+  'asset.last_seen',
+  'asset.first_seen',
 ];
 
 /**
@@ -51,6 +45,41 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   }
 
   return current;
+}
+
+/**
+ * Flatten an object into dot-notation paths with their values
+ * Only includes leaf values (primitives and arrays)
+ */
+function flattenObject(
+  obj: Record<string, unknown>,
+  prefix = '',
+  result: Map<string, unknown> = new Map()
+): Map<string, unknown> {
+  for (const [key, value] of Object.entries(obj)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+
+    // Skip excluded fields
+    if (EXCLUDED_FIELDS.some((excluded) => path === excluded || path.startsWith(`${excluded}.`))) {
+      continue;
+    }
+
+    if (value === null || value === undefined) {
+      // Skip null/undefined values
+      continue;
+    } else if (Array.isArray(value)) {
+      // Arrays are treated as leaf values
+      result.set(path, value);
+    } else if (typeof value === 'object') {
+      // Recurse into nested objects
+      flattenObject(value as Record<string, unknown>, path, result);
+    } else {
+      // Primitive values
+      result.set(path, value);
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -85,7 +114,7 @@ function compareValues(
 }
 
 /**
- * Compare two entity documents and extract field-level diffs
+ * Compare two entity documents and extract field-level diffs for ALL fields
  */
 function compareDocuments(
   docA: Record<string, unknown> | undefined,
@@ -94,10 +123,26 @@ function compareDocuments(
 ): FieldDiff[] {
   const diffs: FieldDiff[] = [];
 
-  // Compare priority fields
-  for (const fieldPath of PRIORITY_FIELDS) {
-    const valueA = docA ? getNestedValue(docA, fieldPath) : undefined;
-    const valueB = docB ? getNestedValue(docB, fieldPath) : undefined;
+  // Flatten both documents to get all field paths
+  const flatA = docA ? flattenObject(docA) : new Map<string, unknown>();
+  const flatB = docB ? flattenObject(docB) : new Map<string, unknown>();
+
+  // Collect all unique field paths from both documents
+  const allPaths = new Set([...flatA.keys(), ...flatB.keys()]);
+
+  // Sort paths for consistent ordering (group by category)
+  const sortedPaths = Array.from(allPaths).sort((a, b) => {
+    // Sort by top-level category first, then alphabetically
+    const catA = a.split('.')[0];
+    const catB = b.split('.')[0];
+    if (catA !== catB) return catA.localeCompare(catB);
+    return a.localeCompare(b);
+  });
+
+  // Compare each field
+  for (const fieldPath of sortedPaths) {
+    const valueA = flatA.get(fieldPath);
+    const valueB = flatB.get(fieldPath);
 
     const comparison = compareValues(valueA, valueB);
 
@@ -108,13 +153,13 @@ function compareDocuments(
         value_b: valueB,
         change_type: comparison.changeType,
       });
-    } else if (!showOnlyChanges && (valueA !== undefined || valueB !== undefined)) {
-      // Include unchanged fields in full view mode if they have values
+    } else if (!showOnlyChanges) {
+      // Include unchanged fields in full view mode
       diffs.push({
         field_path: fieldPath,
         value_a: valueA,
         value_b: valueB,
-        change_type: 'modified', // Use 'modified' as placeholder for unchanged
+        change_type: 'unchanged',
       });
     }
   }
@@ -182,7 +227,8 @@ export const registerSnapshotCompareRoute = (
           const indexB = `.entities.v1.history.${dateB}.security_host_${namespace}`;
 
           // Build query filter for specific host if provided
-          const hostFilter = hostId ? [{ term: { 'host.id': hostId } }] : [];
+          // hostId param is actually entity.id which equals host.name (the identity field)
+          const hostFilter = hostId ? [{ term: { 'host.name': hostId } }] : [];
 
           // Query both snapshots in parallel
           const [resultA, resultB] = await Promise.all([

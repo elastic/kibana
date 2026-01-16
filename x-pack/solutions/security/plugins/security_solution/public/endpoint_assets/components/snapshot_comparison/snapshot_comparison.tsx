@@ -24,7 +24,11 @@ import { DateSelector } from './date_selector';
 import { ViewModeToggle, type ViewMode } from './view_mode_toggle';
 import { ComparisonTable } from './comparison_table';
 
-export const SnapshotComparison: React.FC = React.memo(() => {
+interface SnapshotComparisonProps {
+  hostId?: string;
+}
+
+export const SnapshotComparison: React.FC<SnapshotComparisonProps> = React.memo(({ hostId }) => {
   const [dateA, setDateA] = useState<string | null>(null);
   const [dateB, setDateB] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('changes_only');
@@ -33,6 +37,7 @@ export const SnapshotComparison: React.FC = React.memo(() => {
   const { data, loading: compareLoading, error: compareError } = useSnapshotCompare({
     dateA,
     dateB,
+    hostId,
     showOnlyChanges: viewMode === 'changes_only',
   });
 
@@ -219,6 +224,7 @@ export const SnapshotComparison: React.FC = React.memo(() => {
               dateA={dateA}
               dateB={dateB}
               loading={compareLoading}
+              singleHostMode={!!hostId}
             />
           ) : (
             <EuiText color="subdued" textAlign="center">

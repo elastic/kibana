@@ -672,7 +672,7 @@ export interface FieldDiff {
   /** Value from Date B snapshot */
   value_b: unknown;
   /** Type of change detected */
-  change_type: 'added' | 'removed' | 'modified';
+  change_type: 'added' | 'removed' | 'modified' | 'unchanged';
 }
 
 /**

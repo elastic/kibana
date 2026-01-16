@@ -26,6 +26,8 @@ interface ComparisonTableProps {
   dateA: string;
   dateB: string;
   loading?: boolean;
+  /** When true and there's only one host, show field diffs directly without the table */
+  singleHostMode?: boolean;
 }
 
 const getStatusBadge = (comparison: AssetComparison) => {
@@ -42,7 +44,7 @@ const getStatusBadge = (comparison: AssetComparison) => {
 };
 
 export const ComparisonTable: React.FC<ComparisonTableProps> = React.memo(
-  ({ comparisons, viewMode, dateA, dateB, loading = false }) => {
+  ({ comparisons, viewMode, dateA, dateB, loading = false, singleHostMode = false }) => {
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
@@ -169,6 +171,35 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = React.memo(
                 ? 'No changes detected between the selected dates'
                 : 'No assets found in either snapshot'}
             </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    // In single host mode with one comparison, show field diffs directly without the table
+    if (singleHostMode && comparisons.length === 1) {
+      const comparison = comparisons[0];
+      return (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>{comparison.host_name}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{getStatusBadge(comparison)}</EuiFlexItem>
+              {comparison.exists_in_a && comparison.exists_in_b && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color={comparison.change_count > 0 ? 'warning' : 'subdued'}>
+                    {comparison.change_count} changes
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FieldDiffDisplay diffs={comparison.diffs} dateA={dateA} dateB={dateB} />
           </EuiFlexItem>
         </EuiFlexGroup>
       );

@@ -21,6 +21,7 @@ interface UseNavigateToHostDetailsParams {
   hasMisconfigurationFindings: boolean;
   hasVulnerabilitiesFindings: boolean;
   hasNonClosedAlerts: boolean;
+  hasEndpointAssetData?: boolean;
   isPreviewMode: boolean;
   contextID: string;
 }
@@ -32,6 +33,7 @@ export const useNavigateToHostDetails = ({
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
+  hasEndpointAssetData,
   isPreviewMode,
   contextID,
 }: UseNavigateToHostDetailsParams): ((path: EntityDetailsPath) => void) => {
@@ -54,6 +56,7 @@ export const useNavigateToHostDetails = ({
           hasMisconfigurationFindings,
           hasVulnerabilitiesFindings,
           hasNonClosedAlerts,
+          hasEndpointAssetData,
         },
       };
 
@@ -82,6 +85,7 @@ export const useNavigateToHostDetails = ({
       hasMisconfigurationFindings,
       hasVulnerabilitiesFindings,
       hasNonClosedAlerts,
+      hasEndpointAssetData,
       contextID,
     ]
   );

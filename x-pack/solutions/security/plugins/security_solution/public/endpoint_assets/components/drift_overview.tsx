@@ -371,7 +371,7 @@ export const DriftOverview: React.FC<DriftOverviewProps> = React.memo(({ hostId 
           {i18n.SNAPSHOT_COMPARISON_DESCRIPTION}
         </EuiText>
         <EuiSpacer size="m" />
-        <SnapshotComparison />
+        <SnapshotComparison hostId={hostId} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

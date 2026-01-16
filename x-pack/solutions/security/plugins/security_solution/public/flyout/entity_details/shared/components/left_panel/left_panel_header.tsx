@@ -24,6 +24,7 @@ export enum EntityDetailsLeftPanelTab {
   ENTRA = 'entra_document',
   CSP_INSIGHTS = 'csp_insights',
   FIELDS_TABLE = 'fields_table',
+  ENDPOINT_ASSETS = 'endpoint_assets',
 }
 
 export enum CspInsightLeftPanelSubTab {

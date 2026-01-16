@@ -35,7 +35,7 @@ const formatValue = (value: unknown): string => {
   return String(value);
 };
 
-const getChangeTypeBadge = (changeType: 'added' | 'removed' | 'modified') => {
+const getChangeTypeBadge = (changeType: 'added' | 'removed' | 'modified' | 'unchanged') => {
   switch (changeType) {
     case 'added':
       return <EuiBadge color="success">Added</EuiBadge>;
@@ -43,20 +43,25 @@ const getChangeTypeBadge = (changeType: 'added' | 'removed' | 'modified') => {
       return <EuiBadge color="danger">Removed</EuiBadge>;
     case 'modified':
       return <EuiBadge color="warning">Modified</EuiBadge>;
+    case 'unchanged':
+      return <EuiBadge color="default">Unchanged</EuiBadge>;
     default:
       return null;
   }
 };
 
 const getValueColor = (
-  changeType: 'added' | 'removed' | 'modified',
+  changeType: 'added' | 'removed' | 'modified' | 'unchanged',
   isValueA: boolean
-): 'danger' | 'success' | 'default' => {
+): 'danger' | 'success' | 'default' | 'subdued' => {
   if (changeType === 'added') {
     return isValueA ? 'default' : 'success';
   }
   if (changeType === 'removed') {
     return isValueA ? 'danger' : 'default';
+  }
+  if (changeType === 'unchanged') {
+    return 'subdued';
   }
   return 'default';
 };
@@ -105,7 +110,7 @@ export const FieldDiffDisplay: React.FC<FieldDiffDisplayProps> = React.memo(
           field: 'change_type',
           name: 'Change',
           width: '15%',
-          render: (changeType: 'added' | 'removed' | 'modified') =>
+          render: (changeType: 'added' | 'removed' | 'modified' | 'unchanged') =>
             getChangeTypeBadge(changeType),
         },
       ],
