@@ -176,17 +176,21 @@ test.describe('Rule Details Page - Admin', { tag: ['@ess', '@svlOblt'] }, () => 
       // Verify dashboard selector is visible
       await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
 
-      // Open dashboards dropdown and search for the test dashboard
-      await pageObjects.ruleDetailsPage.openDashboardsDropdown();
-      await pageObjects.ruleDetailsPage.dashboardSelectorInput.fill(testDashboardTitle);
-
       await expect(async () => {
-        const optionsText = await pageObjects.ruleDetailsPage.comboboxOptionsList.allTextContents();
-        expect(optionsText.join(' ')).toContain(testDashboardTitle);
+        await pageObjects.ruleDetailsPage.openDashboardsDropdown();
+        await pageObjects.ruleDetailsPage.dashboardSelectorInput.fill(testDashboardTitle);
+
+        await expect(async () => {
+          const optionsText =
+            await pageObjects.ruleDetailsPage.comboboxOptionsList.allTextContents();
+          expect(optionsText.join(' ')).toContain(testDashboardTitle);
+        }).toPass({ timeout: BIGGER_TIMEOUT, intervals: [500] });
+
+        // Close the dashboards dropdown
+        await pageObjects.ruleDetailsPage.closeDashboardsDropdown();
       }).toPass({ timeout: BIGGER_TIMEOUT, intervals: [500] });
 
-      // Close the dashboards dropdown
-      await pageObjects.ruleDetailsPage.closeDashboardsDropdown();
+      // Open dashboards dropdown and search for the test dashboard
     } finally {
       // Clean up: delete the test dashboard
       await kbnClient.savedObjects.delete({
