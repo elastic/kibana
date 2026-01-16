@@ -241,7 +241,7 @@ describe('LensVisService attributes', () => {
                       "breakdown_column": Object {
                         "dataType": "string",
                         "isBucketed": true,
-                        "label": "Top 3 values of extension",
+                        "label": "Top 9 values of extension",
                         "operationType": "terms",
                         "params": Object {
                           "missingBucket": true,
@@ -254,7 +254,7 @@ describe('LensVisService attributes', () => {
                           "parentFormat": Object {
                             "id": "terms",
                           },
-                          "size": 3,
+                          "size": 9,
                         },
                         "scale": "ordinal",
                         "sourceField": "extension",

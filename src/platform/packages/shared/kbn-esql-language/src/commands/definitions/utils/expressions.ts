@@ -92,6 +92,10 @@ export function getExpressionType(
     return getExpressionType(root.values[0], columns);
   }
 
+  if (root.type === 'map') {
+    return 'function_named_parameters';
+  }
+
   if (isFunctionExpression(root)) {
     const fnDefinition = getFunctionDefinition(root.name);
     if (!fnDefinition) {

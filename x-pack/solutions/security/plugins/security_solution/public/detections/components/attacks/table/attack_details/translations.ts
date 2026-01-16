@@ -8,15 +8,29 @@
 import { i18n } from '@kbn/i18n';
 
 export const ATTACK_SUMMARY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.attackDetails.tabs.attackSummaryTabLabel',
+  'xpack.securitySolution.detectionEngine.attacks.attackDetails.tabs.attackSummaryTab.title',
   {
     defaultMessage: 'Attack summary',
   }
 );
 
 export const ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.attackDetails.tabs.alertsTabLabel',
+  'xpack.securitySolution.detectionEngine.attacks.attackDetails.tabs.alertsTab.title',
   {
     defaultMessage: 'Alerts',
+  }
+);
+
+export const ATTACK_CHAIN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.attackDetails.tabs.attackSummaryTab.attackChainLabel',
+  {
+    defaultMessage: 'Attack Chain',
+  }
+);
+
+export const DETAILS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.attackDetails.tabs.attackSummaryTab.detailsLabel',
+  {
+    defaultMessage: 'Details',
   }
 );

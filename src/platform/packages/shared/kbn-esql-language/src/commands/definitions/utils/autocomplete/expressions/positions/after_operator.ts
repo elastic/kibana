@@ -14,7 +14,6 @@ import type { FunctionDefinition, SupportedDataType } from '../../../../types';
 import { FunctionDefinitionTypes, isArrayType } from '../../../../types';
 import { SignatureAnalyzer } from '../signature_analyzer';
 import { getExpressionType, getMatchingSignatures } from '../../../expressions';
-import { getRightmostNonVariadicOperator } from '../utils';
 import { getFunctionDefinition } from '../../../functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from '../../../shared';
 import { logicalOperators } from '../../../../all_operators';
@@ -35,14 +34,16 @@ export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISug
     return [];
   }
 
-  const specialSuggestions = await dispatchOperators(ctx);
+  const rightmostOperator = getRightmostOperatorInFunctionTree(expressionRoot as ESQLFunction);
+  // If we don't pass rightmostOperator, for "field IN (x) AND field NOT IN (y"
+  // dispatchOperators sees AND (no handler) instead of NOT IN, failing to suggest comma.
+  const ctxWithRightmostOperator = { ...ctx, expressionRoot: rightmostOperator };
+
+  const specialSuggestions = await dispatchOperators(ctxWithRightmostOperator);
 
   if (specialSuggestions) {
     return specialSuggestions;
   }
-
-  const fn = expressionRoot as ESQLFunction;
-  const rightmostOperator = getRightmostNonVariadicOperator(fn) as ESQLFunction;
   const getExprType = (expression: ESQLAstItem) => getExpressionType(expression, context?.columns);
 
   const { complete, reason } = isOperatorComplete(rightmostOperator, getExprType);
@@ -243,9 +244,7 @@ async function handleIncompleteOperator(
           })
           .addFunctions({
             types: typeToUse,
-            ignoredFunctions: [],
             addSpaceAfterFunction: options.addSpaceAfterOperator ?? false,
-            openSuggestions: options.openSuggestions ?? false,
           })
       );
   }
@@ -273,4 +272,26 @@ async function handleIncompleteOperator(
       rangeToReplace: overlap,
     };
   });
+}
+
+/**
+ * Finds the deepest binary operator in the right branch of an expression tree.
+ *
+ * Uses structural right-first traversal instead of position-based detection
+ * to avoid ANTLR error recovery issues where incomplete expressions get
+ * positions that corrupt location.min values.
+ */
+function getRightmostOperatorInFunctionTree(fn: ESQLFunction): ESQLFunction {
+  const rightArg = fn.args[1];
+
+  if (
+    fn.subtype === 'binary-expression' &&
+    rightArg &&
+    !Array.isArray(rightArg) &&
+    rightArg.type === 'function'
+  ) {
+    return getRightmostOperatorInFunctionTree(rightArg as ESQLFunction);
+  }
+
+  return fn;
 }
