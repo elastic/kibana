@@ -172,7 +172,7 @@ export function DatatableAppearanceSettings({
       >
         <EuiSwitch
           compressed
-          data-test-subj="lens-table-show-row-numbers-switch"
+          data-test-subj="lens-table-row-numbers-switch"
           label=""
           showLabel={false}
           checked={!!state.showRowNumbers}

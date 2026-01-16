@@ -51,6 +51,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.closeFlyoutWithBackButton();
     });
 
+    it('should allow toggling row numbers from the style settings flyout', async () => {
+      await lens.openStyleSettingsFlyout();
+
+      // Disable row number
+      await lens.toggleShowRowNumbers();
+      expect(await lens.findRowNumberColumn()).to.be(false);
+
+      // Enable row number
+      await lens.toggleShowRowNumbers();
+      expect(await lens.findRowNumberColumn()).to.be(true);
+
+      await lens.closeFlyoutWithBackButton();
+    });
+
     it('should apply expanded density correctly', async () => {
       await lens.openStyleSettingsFlyout();
       await lens.setDataTableDensity('expanded');

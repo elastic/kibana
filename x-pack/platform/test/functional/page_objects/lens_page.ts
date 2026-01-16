@@ -2234,6 +2234,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await option.click();
     },
 
+    async toggleShowRowNumbers() {
+      const rowNumberSwitch = await testSubjects.find('lens-table-row-numbers-switch');
+      await rowNumberSwitch.click();
+    },
+
+    async findRowNumberColumn() {
+      return await testSubjects.exists('lnsDataTable-rowNumber');
+    },
+
     async checkDataTableDensity(size: 'l' | 'm' | 's') {
       return find.existsByCssSelector(
         `[data-test-subj="lnsDataTable"][class*="cellPadding-${size}-fontSize-${size}"]`
