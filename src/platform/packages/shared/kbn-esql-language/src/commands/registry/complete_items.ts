@@ -79,6 +79,7 @@ export const allStarConstant: ISuggestionItem = {
 export function buildMapKeySuggestion(
   paramName: string,
   valueType: MapValueType = 'string',
+  description?: string,
   options?: MapKeySuggestionOptions
 ): ISuggestionItem {
   const text = `"${paramName}": ${MAP_VALUE_SNIPPETS[valueType]}`;
@@ -89,7 +90,7 @@ export function buildMapKeySuggestion(
     text,
     asSnippet: isSnippet,
     kind: 'Constant',
-    detail: paramName,
+    detail: description || paramName,
     ...(options?.filterText && { filterText: options.filterText }),
     ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
   });

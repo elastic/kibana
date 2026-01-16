@@ -24,6 +24,7 @@ export const OBJECT_KEYS_REGEX = /"([^"]+)"\s*:/g;
 export interface MapParameterValues {
   type: MapValueType;
   suggestions?: ISuggestionItem[];
+  description: string;
 }
 
 export type MapParameters = Record<string, MapParameterValues>;
@@ -68,15 +69,16 @@ export function getCommandMapExpressionSuggestions(
       (paramName) => !usedParams.has(paramName)
     );
 
-    return availableParamNames.map((paramName) =>
-      buildMapKeySuggestion(paramName, availableParameters[paramName].type, {
+    return availableParamNames.map((paramName) => {
+      const { type, description } = availableParameters[paramName];
+      return buildMapKeySuggestion(paramName, type, description, {
         filterText: `"${paramName}`,
         rangeToReplace: {
           start: innerText.length - finalWord.length,
           end: innerText.length,
         },
-      })
-    );
+      });
+    });
   }
 
   // Suggest a parameter value if on the right side of a parameter entry, capture the parameter name
@@ -86,7 +88,7 @@ export function getCommandMapExpressionSuggestions(
     const paramConfig = paramName ? availableParameters[paramName] : undefined;
 
     if (paramConfig) {
-      const { type, suggestions = [] } = paramConfig;
+      const { type, suggestions = [], description } = paramConfig;
       const rangeToReplace = {
         start: innerText.length - finalWord.length,
         end: finalWord.startsWith('"') ? innerText.length + 2 : innerText.length,
@@ -96,6 +98,7 @@ export function getCommandMapExpressionSuggestions(
         type === 'string'
           ? {
               ...suggestion,
+              detail: description,
               text: `"${suggestion.text}"`,
               filterText: `"${suggestion.text}"`,
               rangeToReplace,
@@ -143,18 +146,15 @@ export function isInsideMapExpression(text: string): boolean {
  * Parses a comma-separated values string and infers the type.
  * Returns suggestions for each value.
  */
-export function parseMapValues(values: string[]): {
-  type: MapValueType;
-  suggestions: ISuggestionItem[];
-} {
+export function parseMapValues(values: string[], description: string): MapParameterValues {
   if (values.length === 0) {
-    return { type: 'string', suggestions: [] };
+    return { type: 'string', suggestions: [], description };
   }
 
   const type = inferMapValueType(values);
   const suggestions = values.map((value) => buildMapValueCompleteItem(value));
 
-  return { type, suggestions };
+  return { type, suggestions, description };
 }
 
 /**

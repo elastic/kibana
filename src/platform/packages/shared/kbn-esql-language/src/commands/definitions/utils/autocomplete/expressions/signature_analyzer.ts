@@ -473,13 +473,14 @@ export class SignatureAnalyzer {
     for (const match of mapParamsStr.matchAll(MAP_PARAMS_REGEX)) {
       const paramName = match[1];
       const rawValues = match[2] ?? '';
+      const description = match[3] ?? '';
 
       const values = rawValues
         .split(',')
         .map((val) => val.trim().replace(STRIP_SINGLE_QUOTES_REGEX, ''))
         .filter(Boolean);
 
-      result[paramName] = parseMapValues(values);
+      result[paramName] = parseMapValues(values, description);
     }
 
     return result;
