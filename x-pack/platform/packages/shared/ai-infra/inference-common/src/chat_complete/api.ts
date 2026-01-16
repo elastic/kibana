@@ -209,6 +209,10 @@ export interface ChatCompleteResponse<
    * Token counts
    */
   tokens?: ChatCompletionTokenCount;
+  /**
+   * Model effectively used, as specified by the response
+   */
+  model?: string;
 }
 
 /**

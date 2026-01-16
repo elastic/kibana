@@ -13,7 +13,6 @@ import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_ite
 
 const Container = styled.div`
   border-bottom: ${(props) => props.theme.eui.euiBorderThin};
-  background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
 
   @media (max-width: 767px) {
     .euiFlexItem {

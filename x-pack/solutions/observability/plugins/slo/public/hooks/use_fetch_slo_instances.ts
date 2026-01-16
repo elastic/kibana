@@ -10,40 +10,44 @@ import type { FindSLOInstancesResponse } from '@kbn/slo-schema';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 
-export interface UseFetchSloInstancesResponse {
-  data: FindSLOInstancesResponse | undefined;
-  isLoading: boolean;
-  isError: boolean;
-  isSuccess: boolean;
-  refetch: () => void;
-}
-
-interface SLOInstancesParams {
+interface Params {
   sloId: string;
   search?: string;
-  size?: number;
   searchAfter?: string;
+  size?: number;
+  enabled?: boolean;
+  remoteName?: string;
+}
+
+interface Response {
+  data: FindSLOInstancesResponse | undefined;
+  isLoading: boolean;
+  isInitialLoading: boolean;
+  isError: boolean;
 }
 
 export function useFetchSloInstances({
   sloId,
   search,
-  size = 100,
   searchAfter,
-}: SLOInstancesParams): UseFetchSloInstancesResponse {
+  size = 100,
+  enabled = true,
+  remoteName,
+}: Params): Response {
   const { sloClient } = usePluginContext();
 
-  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: sloKeys.instances(sloId, search, size, searchAfter),
+  const { isLoading, isInitialLoading, isError, data } = useQuery({
+    queryKey: sloKeys.instances({ sloId, search, searchAfter, size, remoteName }),
     queryFn: async ({ signal }) => {
       try {
-        return await sloClient.fetch('GET /internal/observability/slos/{id}/_instances', {
+        return sloClient.fetch(`GET /internal/observability/slos/{id}/_instances`, {
           params: {
             path: { id: sloId },
             query: {
-              ...(search && { search }),
-              ...(size && { size: String(size) }),
-              ...(searchAfter && { searchAfter }),
+              search,
+              size,
+              searchAfter,
+              remoteName,
             },
           },
           signal,
@@ -52,10 +56,9 @@ export function useFetchSloInstances({
         // ignore error
       }
     },
-    enabled: Boolean(sloId),
+    enabled: Boolean(!!sloId && enabled),
     retry: false,
     refetchOnWindowFocus: false,
   });
-
-  return { isLoading, isError, isSuccess, data, refetch };
+  return { isLoading, isInitialLoading, isError, data };
 }

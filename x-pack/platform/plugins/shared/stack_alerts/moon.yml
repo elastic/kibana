@@ -64,6 +64,7 @@ dependsOn:
   - '@kbn/alerting-rule-utils'
   - '@kbn/response-ops-rule-params'
   - '@kbn/object-utils'
+  - '@kbn/kql'
   - '@kbn/esql-language'
 tags:
   - plugin

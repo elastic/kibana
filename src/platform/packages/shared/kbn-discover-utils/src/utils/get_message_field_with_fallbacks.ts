@@ -12,6 +12,7 @@ import { getLogFieldWithFallback } from './get_log_field_with_fallback';
 import type { LogDocumentOverview } from '../types';
 
 const rankingOrder = [
+  fieldConstants.OTEL_MESSAGE_FIELD,
   fieldConstants.MESSAGE_FIELD,
   fieldConstants.ERROR_MESSAGE_FIELD,
   fieldConstants.EVENT_ORIGINAL_FIELD,
