@@ -61,5 +61,15 @@ export function isWarningOrAbove(logEntry: Record<string, unknown>): boolean {
     }
   }
 
+  // 5. Check if any field value contains 'error' or 'exception'
+  for (const value of Object.values(logEntry)) {
+    if (typeof value === 'string') {
+      const lowerValue = value.toLowerCase();
+      if (lowerValue.includes('error') || lowerValue.includes('exception')) {
+        return true;
+      }
+    }
+  }
+
   return false;
 }

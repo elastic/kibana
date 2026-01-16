@@ -116,18 +116,6 @@ export async function getLogAiInsights({
       name: 'CorrelatedLogSequence',
       handler: async () => {
         try {
-          const logSourceFields = [
-            '@timestamp',
-            'message',
-            'log.level',
-            'service.name',
-            'service.environment',
-            'error.*',
-            'event.*',
-            'exception.*',
-            'host.name',
-            'container.id',
-          ];
 
           const { sequences } = await getCorrelatedLogs({
             core,
@@ -136,7 +124,6 @@ export async function getLogAiInsights({
             start: windowStart,
             end: windowEnd,
             logId: id,
-            logSourceFields,
             maxLogsPerSequence: 50,
           });
 
