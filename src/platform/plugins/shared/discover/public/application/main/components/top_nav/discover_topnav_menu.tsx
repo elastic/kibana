@@ -17,7 +17,11 @@ import React, {
 import { BehaviorSubject } from 'rxjs';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { DiscoverAppMenuConfig } from '@kbn/discover-utils';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { AppMenu } from '@kbn/core-chrome-app-menu';
 import type { useDiscoverTopNav } from './use_discover_topnav';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useDiscoverCustomization } from '../../../../customizations';
 
 /**
  * We handle the top nav menu this way because we need to render it higher in the tree than
@@ -54,10 +58,19 @@ export const DiscoverTopNavMenu = ({
   topNavMenu,
 }: Pick<ReturnType<typeof useDiscoverTopNav>, 'topNavMenu'>) => {
   const { topNavMenu$ } = useContext(discoverTopNavMenuContext);
+  const { chrome } = useDiscoverServices();
+  const topNavCustomization = useDiscoverCustomization('top_nav');
 
   useLayoutEffect(() => {
     topNavMenu$.next(topNavMenu);
   }, [topNavMenu, topNavMenu$]);
 
-  return null;
+  /**
+   * Render app menu for SingleTabView when customizations exist
+   */
+  if (!topNavCustomization) {
+    return null;
+  }
+
+  return <AppMenu config={topNavMenu as AppMenuConfig} setAppMenu={chrome.setAppMenu} />;
 };

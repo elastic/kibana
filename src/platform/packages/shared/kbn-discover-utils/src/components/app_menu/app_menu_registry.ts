@@ -26,21 +26,16 @@ import type {
  */
 export class AppMenuRegistry {
   static CUSTOM_ITEMS_LIMIT = 2;
-  private items: Map<string, DiscoverAppMenuItemType> = new Map();
-  private customItems: Map<string, DiscoverAppMenuItemType> = new Map();
+  private items: Map<string, DiscoverAppMenuItemType & { isCustom?: boolean }> = new Map();
   private primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
   private secondaryActionItem?: DiscoverAppMenuSecondaryActionItem;
-
-  private getCustomItems(): DiscoverAppMenuItemType[] {
-    return Array.from(this.customItems.values()).slice(0, AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
-  }
 
   /**
    * Register a custom menu item.
    * @param item The menu item to register
    */
   public registerCustomItem(item: DiscoverAppMenuItemType) {
-    this.customItems.set(item.id, item);
+    this.items.set(item.id, { ...item, isCustom: true });
   }
 
   /**
@@ -49,13 +44,13 @@ export class AppMenuRegistry {
    * @param popoverItem The popover item to register
    */
   public registerCustomPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
-    const parent = this.customItems.get(parentId);
-    this.customItems.set(parentId, {
+    const parent = this.items.get(parentId);
+    this.items.set(parentId, {
       ...parent,
       items: [...(parent?.items || []), popoverItem].sort(
         (a, b) => (a.order || 0) - (b.order || 0)
       ),
-    } as DiscoverAppMenuItemType);
+    } as DiscoverAppMenuItemType & { isCustom?: boolean });
   }
 
   /**
@@ -63,7 +58,7 @@ export class AppMenuRegistry {
    * @param item The menu item to register
    */
   public registerItem(item: DiscoverAppMenuItemType) {
-    this.items.set(item.id, item);
+    this.items.set(item.id, { ...item, isCustom: false });
   }
 
   /**
@@ -110,10 +105,17 @@ export class AppMenuRegistry {
    * Items with registered popover items will have their items property populated.
    */
   public getAppMenuConfig(): AppMenuConfig {
+    const allItems = Array.from(this.items.values());
+    const regularItems = allItems.filter((item) => !item.isCustom);
+    const customItems = allItems
+      .filter((item) => item.isCustom)
+      .slice(0, AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
+
+    // Remove isCustom flag before returning
+    const cleanItems = [...regularItems, ...customItems].map(({ isCustom, ...item }) => item);
+
     return {
-      items: Array.from(this.items.values())
-        .concat(this.getCustomItems())
-        .sort((a, b) => (a.order || 0) - (b.order || 0)) as AppMenuItemType[],
+      items: cleanItems.sort((a, b) => (a.order || 0) - (b.order || 0)) as AppMenuItemType[],
       primaryActionItem: this.primaryActionItem as AppMenuPrimaryActionItem | undefined,
       secondaryActionItem: this.secondaryActionItem as AppMenuSecondaryActionItem | undefined,
     };
