@@ -456,7 +456,7 @@ describe('EsqlQueryParser._injectNamedParams', () => {
   });
 });
 
-describe('EsqlQueryParser._transformColumnarToRows', () => {
+describe('EsqlQueryParser._transformEsqlRowsToVegaRows', () => {
   test('should transform columnar data to row objects', () => {
     const { parser } = createParser();
 
@@ -472,7 +472,7 @@ describe('EsqlQueryParser._transformColumnarToRows', () => {
       ],
     };
 
-    const result = parser._transformColumnarToRows(response);
+    const result = parser._transformEsqlRowsToVegaRows(response);
 
     expect(result).toEqual([
       { country: 'US', count: 100 },
@@ -489,7 +489,7 @@ describe('EsqlQueryParser._transformColumnarToRows', () => {
       values: [],
     };
 
-    const result = parser._transformColumnarToRows(response);
+    const result = parser._transformEsqlRowsToVegaRows(response);
 
     expect(result).toEqual([]);
   });
@@ -509,7 +509,7 @@ describe('EsqlQueryParser._transformColumnarToRows', () => {
       ],
     };
 
-    const result = parser._transformColumnarToRows(response);
+    const result = parser._transformEsqlRowsToVegaRows(response);
 
     expect(result).toEqual([
       { country: 'US', count: 100 },
@@ -526,7 +526,7 @@ describe('EsqlQueryParser._transformColumnarToRows', () => {
       values: [[42]],
     };
 
-    const result = parser._transformColumnarToRows(response);
+    const result = parser._transformEsqlRowsToVegaRows(response);
 
     expect(result).toEqual([{ total: 42 }]);
   });
@@ -545,7 +545,7 @@ describe('EsqlQueryParser._transformColumnarToRows', () => {
       values: [['val1', 1, 1.5, true, 'val2']],
     };
 
-    const result = parser._transformColumnarToRows(response);
+    const result = parser._transformEsqlRowsToVegaRows(response);
 
     expect(result).toEqual([{ a: 'val1', b: 1, c: 1.5, d: true, e: 'val2' }]);
   });
@@ -558,7 +558,7 @@ describe('EsqlQueryParser._transformColumnarToRows', () => {
       values: [['US', 100]],
     };
 
-    const result = parser._transformColumnarToRows(response);
+    const result = parser._transformEsqlRowsToVegaRows(response);
 
     expect(result).toEqual([]);
     expect(parser.$$$warnCount).toBe(1);
@@ -578,7 +578,7 @@ describe('EsqlQueryParser._transformColumnarToRows', () => {
       ],
     };
 
-    const result = parser._transformColumnarToRows(response);
+    const result = parser._transformEsqlRowsToVegaRows(response);
 
     expect(result).toEqual([
       { tags: ['tag1', 'tag2'], count: 100 },
@@ -600,7 +600,7 @@ describe('EsqlQueryParser._transformColumnarToRows', () => {
       ],
     };
 
-    const result = parser._transformColumnarToRows(response);
+    const result = parser._transformEsqlRowsToVegaRows(response);
 
     expect(result).toEqual([
       { location: { lat: 40.7128, lon: -74.006 }, count: 100 },
