@@ -37,7 +37,8 @@
     "@kbn/es-errors",
     "@kbn/zod",
     "@kbn/esql-composer",
-    "@kbn/core-di-internal"
+    "@kbn/core-di-internal",
+    "@kbn/safer-lodash-set"
   ],
   "exclude": ["target/**/*"]
 }
