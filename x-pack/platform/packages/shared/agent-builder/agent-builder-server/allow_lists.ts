@@ -12,7 +12,7 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new tool.
  */
-export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
+export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // platform core tools are registered from the agent builder plugin so will trigger a review anyway
   ...Object.values(platformCoreTools),
 
@@ -38,22 +38,26 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
-];
+] as const;
+
+export type AgentBuilderBuiltinTool = typeof AGENT_BUILDER_BUILTIN_TOOLS[number];
 
 /**
  * This is a manually maintained list of all built-in agents registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent.
  */
-export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
+export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.observability}.agent`,
   'platform.dashboard.dashboard_agent',
   `${internalNamespaces.security}.agent`,
-];
+] as const;
+
+export type AgentBuilderBuiltinAgent = typeof AGENT_BUILDER_BUILTIN_AGENTS[number];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
-  return AGENT_BUILDER_BUILTIN_TOOLS.includes(toolName);
+  return (AGENT_BUILDER_BUILTIN_TOOLS as readonly string[]).includes(toolName);
 };
 
 export const isAllowedBuiltinAgent = (agentName: string) => {
-  return AGENT_BUILDER_BUILTIN_AGENTS.includes(agentName);
+  return (AGENT_BUILDER_BUILTIN_AGENTS as readonly string[]).includes(agentName);
 };
