@@ -167,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
         await hostIsolationExceptionData.cleanup();
       }
     });
-    
+
     it.skip('should return 400 for import of endpoint exceptions', async () => {
       await endpointPolicyManagerSupertest
         .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
