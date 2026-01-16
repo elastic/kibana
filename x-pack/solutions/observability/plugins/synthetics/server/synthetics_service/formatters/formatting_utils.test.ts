@@ -445,4 +445,45 @@ describe('monitorUsesGlobalParams', () => {
 
     expect(monitorUsesGlobalParams(monitor)).toBe(true);
   });
+
+  describe('browser monitors', () => {
+    const baseBrowserMonitor: Partial<SyntheticsMonitor> = {
+      [ConfigKey.NAME]: 'Browser Monitor',
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
+      [ConfigKey.ENABLED]: true,
+      [ConfigKey.SCHEDULE]: { unit: ScheduleUnit.MINUTES, number: '10' },
+      [ConfigKey.LOCATIONS]: [],
+      [ConfigKey.NAMESPACE]: 'default',
+    };
+
+    it('always returns true for browser monitors (params accessed via JavaScript)', () => {
+      const monitor = {
+        ...baseBrowserMonitor,
+        [ConfigKey.SOURCE_INLINE]:
+          'step("test", async () => { await page.goto("https://example.com"); });',
+      } as SyntheticsMonitor;
+
+      // Browser monitors always return true because they access params via params.paramName
+      // in JavaScript, which we cannot reliably detect
+      expect(monitorUsesGlobalParams(monitor)).toBe(true);
+    });
+
+    it('returns true for browser monitor even without explicit param usage', () => {
+      const monitor = {
+        ...baseBrowserMonitor,
+      } as SyntheticsMonitor;
+
+      expect(monitorUsesGlobalParams(monitor)).toBe(true);
+    });
+
+    it('returns true for browser monitor with script using params', () => {
+      const monitor = {
+        ...baseBrowserMonitor,
+        [ConfigKey.SOURCE_INLINE]:
+          'step("test", async () => { await page.goto(params.baseUrl); });',
+      } as SyntheticsMonitor;
+
+      expect(monitorUsesGlobalParams(monitor)).toBe(true);
+    });
+  });
 });

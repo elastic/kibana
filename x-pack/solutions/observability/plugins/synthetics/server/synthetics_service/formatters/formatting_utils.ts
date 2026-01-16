@@ -8,7 +8,12 @@
 import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
-import type { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
+import {
+  type ConfigKey,
+  type MonitorFields,
+  type SyntheticsMonitor,
+  MonitorTypeEnum,
+} from '../../../common/runtime_types';
 import type { ParsedVars } from './lightweight_param_formatter';
 import { replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
@@ -102,15 +107,23 @@ export const valueContainsParams = (value: unknown): boolean => {
 
 /**
  * Checks if a monitor configuration uses any global parameters.
- * This function examines all relevant fields in the monitor config that support
- * parameter substitution (excluding fields in PARAMS_KEYS_TO_SKIP).
  *
- * Global parameters use the ${paramName} syntax (e.g., ${apiKey}, ${baseUrl}).
+ * For lightweight monitors (HTTP, TCP, ICMP): checks for ${paramName} syntax in fields.
+ * For browser monitors: always returns true since they access params via JavaScript
+ * (params.paramName) which we cannot reliably detect by scanning the script content.
  *
  * @param monitor - The monitor configuration to check
  * @returns true if the monitor uses at least one global parameter reference
  */
 export const monitorUsesGlobalParams = (monitor: SyntheticsMonitor): boolean => {
+  // Browser monitors access params via JavaScript (params.paramName), not ${paramName} syntax.
+  // We cannot reliably parse JavaScript to detect param usage, so we always include
+  // browser monitors in global params sync to ensure they receive updated param values.
+  if (monitor.type === MonitorTypeEnum.BROWSER) {
+    return true;
+  }
+
+  // For lightweight monitors (HTTP, TCP, ICMP), check for ${paramName} syntax in fields
   const keysToCheck = Object.keys(monitor) as Array<keyof SyntheticsMonitor>;
 
   for (const key of keysToCheck) {
