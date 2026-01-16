@@ -21,7 +21,7 @@ import {
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
-import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
+import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { NON_SIEM_CONSUMERS } from '../alerts_search_bar/constants';
 import type { Section } from '../../constants';
@@ -36,7 +36,7 @@ const RulesPage = () => {
   const {
     chrome: { docTitle },
     setBreadcrumbs,
-    application: { navigateToApp, currentAppId$ },
+    application: { navigateToApp, getUrlForApp, isAppRegistered, currentAppId$ },
     http,
     notifications: { toasts },
   } = useKibana().services;
@@ -151,10 +151,18 @@ const RulesPage = () => {
 
   useEffect(() => {
     if (setBreadcrumbs) {
-      setBreadcrumbs([getAlertingSectionBreadcrumb(currentSection || 'rules')]);
+      if (currentSection === 'logs') {
+        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(
+          isAppRegistered,
+          getUrlForApp
+        );
+        setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('logs')]);
+      } else {
+        setBreadcrumbs([getAlertingSectionBreadcrumb('rules')]);
+      }
     }
-    docTitle.change(getCurrentDocTitle(currentSection || 'rules'));
-  }, [docTitle, setBreadcrumbs, currentSection]);
+    docTitle.change(getCurrentDocTitle('rules'));
+  }, [docTitle, setBreadcrumbs, currentSection, getUrlForApp, isAppRegistered]);
 
   return (
     <RulesPageTemplate
