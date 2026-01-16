@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 
 import {
   EuiFieldSearch,
-  useEuiTheme,
   EuiIcon,
   EuiScreenReaderOnly,
   EuiFormPrepend,
@@ -54,8 +53,6 @@ export const SearchBox: FunctionComponent<Props> = ({
   setUrlandReplaceHistory,
   onlyAgentlessFilter = false,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const styles = useMemoCss(searchBoxStyles);
 
   const onQueryChange = (e: any) => {
