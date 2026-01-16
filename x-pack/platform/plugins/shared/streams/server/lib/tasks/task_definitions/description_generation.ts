@@ -8,29 +8,32 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
-import type { IdentifySystemsResult } from '@kbn/streams-ai';
+import { generateStreamDescription } from '@kbn/streams-ai';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
-import { identifySystemsWithDescription } from '../../streams/system/identify_systems';
 
-export interface SystemIdentificationTaskParams {
+export const DESCRIPTION_GENERATION_TASK_TYPE = 'streams_description_generation';
+
+export function getDescriptionGenerationTaskId(streamName: string) {
+  return `${DESCRIPTION_GENERATION_TASK_TYPE}_${streamName}`;
+}
+
+export interface DescriptionGenerationTaskParams {
   connectorId: string;
   start: number;
   end: number;
 }
 
-export const SYSTEMS_IDENTIFICATION_TASK_TYPE = 'streams_systems_identification';
-
-export function getSystemsIdentificationTaskId(streamName: string) {
-  return `${SYSTEMS_IDENTIFICATION_TASK_TYPE}_${streamName}`;
+export interface GenerateDescriptionResult {
+  description: string;
 }
 
-export function createStreamsSystemIdentificationTask(taskContext: TaskContext) {
+export function createStreamsDescriptionGenerationTask(taskContext: TaskContext) {
   return {
-    [SYSTEMS_IDENTIFICATION_TASK_TYPE]: {
+    [DESCRIPTION_GENERATION_TASK_TYPE]: {
       createTaskRunner: (runContext) => {
         return {
           run: cancellableTask(
@@ -40,63 +43,45 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
               }
 
               const { connectorId, start, end, _task } = runContext.taskInstance
-                .params as TaskParams<SystemIdentificationTaskParams>;
+                .params as TaskParams<DescriptionGenerationTaskParams>;
               const { stream: name } = _task;
 
-              const {
-                taskClient,
-                scopedClusterClient,
-                systemClient,
-                streamsClient,
-                inferenceClient,
+              const { taskClient, scopedClusterClient, streamsClient, inferenceClient, soClient } =
+                await taskContext.getScopedClients({
+                  request: runContext.fakeRequest,
+                });
+
+              const promptsConfigService = new PromptsConfigService({
                 soClient,
-              } = await taskContext.getScopedClients({
-                request: runContext.fakeRequest,
+                logger: taskContext.logger,
               });
 
               try {
-                const [{ systems: currentSystems }, stream] = await Promise.all([
-                  systemClient.getSystems(name),
-                  streamsClient.getStream(name),
-                ]);
+                const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
+                const stream = await streamsClient.getStream(name);
 
-                const boundInferenceClient = inferenceClient.bindTo({ connectorId });
-                const esClient = scopedClusterClient.asCurrentUser;
-
-                const promptsConfigService = new PromptsConfigService({
-                  soClient,
-                  logger: taskContext.logger,
-                });
-
-                const { descriptionPromptOverride, systemsPromptOverride } =
-                  await promptsConfigService.getPrompt();
-
-                const { systems, tokensUsed } = await identifySystemsWithDescription({
+                const { description, tokensUsed } = await generateStreamDescription({
+                  stream,
+                  esClient: scopedClusterClient.asCurrentUser,
+                  inferenceClient: inferenceClient.bindTo({ connectorId }),
                   start,
                   end,
-                  esClient,
-                  inferenceClient: boundInferenceClient,
-                  logger: taskContext.logger.get('system_identification'),
-                  stream,
-                  systems: currentSystems,
                   signal: runContext.abortController.signal,
-                  descriptionPrompt: descriptionPromptOverride,
-                  systemsPrompt: systemsPromptOverride,
-                  dropUnmapped: true,
+                  logger: taskContext.logger.get('stream_description'),
+                  systemPrompt: descriptionPromptOverride,
                 });
 
-                taskContext.telemetry.trackSystemsIdentified({
-                  count: systems.length,
+                taskContext.telemetry.trackDescriptionGenerated({
                   stream_name: stream.name,
                   stream_type: getStreamTypeFromDefinition(stream),
-                  input_tokens_used: tokensUsed.prompt,
-                  output_tokens_used: tokensUsed.completion,
+                  input_tokens_used: tokensUsed?.prompt ?? 0,
+                  output_tokens_used: tokensUsed?.completion ?? 0,
                 });
 
                 await taskClient.complete<
-                  SystemIdentificationTaskParams,
-                  Pick<IdentifySystemsResult, 'systems'>
-                >(_task, { connectorId, start, end }, { systems });
+                  DescriptionGenerationTaskParams,
+                  GenerateDescriptionResult
+                >(_task, { connectorId, start, end }, { description });
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
@@ -116,9 +101,13 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
                 );
 
-                await taskClient.fail<SystemIdentificationTaskParams>(
+                await taskClient.fail<DescriptionGenerationTaskParams>(
                   _task,
-                  { connectorId, start, end },
+                  {
+                    connectorId,
+                    start,
+                    end,
+                  },
                   errorMessage
                 );
               }
