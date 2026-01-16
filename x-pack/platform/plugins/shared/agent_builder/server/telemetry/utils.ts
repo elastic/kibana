@@ -13,7 +13,7 @@ import {
 import { createHash } from 'crypto';
 
 const BUILTIN_AGENT_IDS = new Set([agentBuilderDefaultAgentId, ...AGENT_BUILDER_BUILTIN_AGENTS]);
-const BUILTIN_TOOL_IDS = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
+const BUILTIN_TOOL_IDS = new Set<string>(AGENT_BUILDER_BUILTIN_TOOLS);
 
 const CUSTOM = 'custom';
 const CUSTOM_HASH_PREFIX = `${CUSTOM}-`;

@@ -70,6 +70,14 @@ describe('FilePathsFromStructure type', () => {
       type _Test5 = Expect<IsValidPath<'test/level2'>>;
       type _Test6 = Expect<IsValidPath<'test/level3/noFiles/deep'>>;
 
+      const _t1: _Test1 = true;
+      const _t2: _Test2 = true;
+      const _t3: _Test3 = true;
+      const _t4: _Test4 = true;
+      const _t5: _Test5 = true;
+      const _t6: _Test6 = true;
+      void _t1, _t2, _t3, _t4, _t5, _t6; // Type-level tests - variables exist only for type checking
+
       expect(validPath1).toBe('test/level1');
       expect(validPath2).toBe('test/level1/subdir1');
       expect(validPath3).toBe('test/level1/subdir2');
