@@ -108,7 +108,6 @@ export class InventoryPage {
 
   public async goToTime(time: string) {
     await this.datePickerInput.fill(time);
-    await this.datePickerInput.press('Enter');
     await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
   }
 
