@@ -32,6 +32,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -91,6 +92,15 @@ const statusColors: Record<string, string> = {
   NO_DATA: 'default',
 };
 
+// Status priority for sorting (higher = more important)
+const STATUS_PRIORITY: Record<string, number> = {
+  VIOLATED: 4,
+  DEGRADING: 3,
+  NO_DATA: 2,
+  STALE: 1,
+  HEALTHY: 0,
+};
+
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
@@ -114,25 +124,33 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const [perPage, setPerPage] = useState(10);
   const percentFormat = uiSettings?.get('format:percent:defaultPattern') ?? '0.00%';
 
+  const { environment } = query;
+
   const filtersQuery = useMemo(() => {
+    const filters = [
+      { match_phrase: { 'service.name': serviceName } },
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            { match_phrase: { 'slo.indicator.type': 'sli.apm.transactionDuration' } },
+            { match_phrase: { 'slo.indicator.type': 'sli.apm.transactionErrorRate' } },
+          ],
+        },
+      },
+    ];
+
+    if (environment && environment !== 'ENVIRONMENT_ALL') {
+      filters.push({ match_phrase: { 'service.environment': environment } });
+    }
+
     return JSON.stringify({
       must: [],
-      filter: [
-        { match_phrase: { 'service.name': serviceName } },
-        {
-          bool: {
-            minimum_should_match: 1,
-            should: [
-              { match_phrase: { 'slo.indicator.type': 'sli.apm.transactionDuration' } },
-              { match_phrase: { 'slo.indicator.type': 'sli.apm.transactionErrorRate' } },
-            ],
-          },
-        },
-      ],
+      filter: filters,
       should: [],
       must_not: [],
     });
-  }, [serviceName]);
+  }, [serviceName, environment]);
 
   // Fetch SLOs and alerts in parallel
   useEffect(() => {
@@ -294,7 +312,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const filteredSlos = useMemo(() => {
     if (!sloData.length) return [];
 
-    return sloData.filter((sloItem) => {
+    const filtered = sloData.filter((sloItem) => {
       if (
         selectedStatuses.length > 0 &&
         !selectedStatuses.includes(sloItem.summary?.status as SloStatusFilter)
@@ -307,7 +325,21 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       }
       return true;
     });
-  }, [sloData, selectedStatuses, searchQuery]);
+
+    return filtered.sort((a, b) => {
+      const alertsA = activeAlerts.get(`${a.id}|${a.instanceId ?? ALL_VALUE}`) ?? 0;
+      const alertsB = activeAlerts.get(`${b.id}|${b.instanceId ?? ALL_VALUE}`) ?? 0;
+
+      if (alertsA !== alertsB) {
+        return alertsB - alertsA;
+      }
+
+      const statusPriorityA = STATUS_PRIORITY[a.summary?.status ?? 'HEALTHY'] ?? 0;
+      const statusPriorityB = STATUS_PRIORITY[b.summary?.status ?? 'HEALTHY'] ?? 0;
+
+      return statusPriorityB - statusPriorityA;
+    });
+  }, [sloData, selectedStatuses, searchQuery, activeAlerts]);
 
   const sloAppUrl = useMemo(() => {
     const searchParams = rison.encode({
@@ -632,15 +664,28 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         {/* Results count */}
         {totalSlos > 0 && (
           <>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.apm.sloOverviewFlyout.resultsCount', {
-                defaultMessage: 'Showing {start}-{end} of {total} SLOs',
-                values: {
-                  start: page * perPage + 1,
-                  end: Math.min((page + 1) * perPage, totalSlos),
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.apm.sloOverviewFlyout.resultsCount"
+                defaultMessage="Showing {currentCount} of {total} {slos}"
+                values={{
+                  currentCount: (
+                    <strong>{`${page * perPage + 1}-${Math.min(
+                      (page + 1) * perPage,
+                      totalSlos
+                    )}`}</strong>
+                  ),
                   total: totalSlos,
-                },
-              })}
+                  slos: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.apm.sloOverviewFlyout.slos.label"
+                        defaultMessage="SLOs"
+                      />
+                    </strong>
+                  ),
+                }}
+              />
             </EuiText>
             <EuiSpacer size="s" />
           </>
