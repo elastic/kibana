@@ -72,6 +72,13 @@ const buildShareOptions = async ({
     refreshInterval,
   };
 
+  if (currentTab) {
+    params.tab = {
+      id: currentTab.id,
+      label: currentTab.label,
+    };
+  }
+
   const relativeUrl = locator.getRedirectUrl(params);
 
   // This logic is duplicated from `relativeToAbsolute` (for bundle size reasons). Ultimately, this should be
