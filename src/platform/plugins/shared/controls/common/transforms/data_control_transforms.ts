@@ -7,36 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
-
 import type { Reference } from '@kbn/content-management-utils';
-import type { DataControlState } from '@kbn/controls-schemas';
+import type { DataControlState, StoredDataControlState } from '@kbn/controls-schemas';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { StoredDataControlState } from './types';
 
-export function extractReferences(
+export function transformDataControlIn(
   state: DataControlState,
   referenceName: string
 ): { state: StoredDataControlState; references?: Reference[] } {
+  const { title, description, use_global_filters, ignore_validations, data_view_id, field_name } =
+    state;
   return {
     state: {
-      ...omit(state, 'dataViewId'),
+      title,
+      description,
+      useGlobalFilters: use_global_filters,
+      ignoreValidations: ignore_validations,
+      fieldName: field_name,
       dataViewRefName: referenceName,
     },
     references: [
       {
         name: referenceName,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        id: state.dataViewId,
+        id: data_view_id,
       },
     ],
   };
 }
 
-export function injectReferences(
+export function transformDataControlOut(
   id: string | undefined,
   state: StoredDataControlState,
-  refNames: string[],
+  refNames: Readonly<string[]>,
   panelReferences: Reference[] = [],
   containerReferences: Reference[] = []
 ): DataControlState {
@@ -53,7 +56,14 @@ export function injectReferences(
   } else {
     dataViewRef = references.find(({ name }) => name === dataViewRefName);
   }
-  return { ...omit(state, 'dataViewRefName'), dataViewId: dataViewRef?.id ?? '' };
+  return {
+    title: state.title,
+    description: state.description,
+    use_global_filters: state.useGlobalFilters,
+    ignore_validations: state.ignoreValidations,
+    field_name: state.fieldName,
+    data_view_id: dataViewRef?.id ?? '',
+  };
 }
 
 function getLegacyReferenceName(controlId: string, refName: string) {

@@ -32,6 +32,7 @@ export type {
 } from './src/types';
 
 export type {
+  StoredDataControlState,
   StoredESQLControlExplicitInput,
   StoredOptionsListExplicitInput,
   StoredPinnedControls,

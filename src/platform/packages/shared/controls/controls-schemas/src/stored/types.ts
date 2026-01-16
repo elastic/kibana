@@ -8,6 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { storedDataControlSchema } from './stored_control_schema';
 import type {
   storedOptionsListDSLControlSchema,
   storedOptionsListESQLControlSchema,
@@ -15,6 +16,8 @@ import type {
 import type { storedPinnedControlSchema } from './stored_pinned_controls_schema';
 import type { storedRangeSliderControlSchema } from './stored_range_slider_schema';
 import type { storedTimeSliderControlSchema } from './stored_time_slider_schema';
+
+export type StoredDataControlState = TypeOf<typeof storedDataControlSchema>;
 
 export type StoredPinnedControlState = TypeOf<typeof storedPinnedControlSchema>;
 export interface StoredPinnedControls {
