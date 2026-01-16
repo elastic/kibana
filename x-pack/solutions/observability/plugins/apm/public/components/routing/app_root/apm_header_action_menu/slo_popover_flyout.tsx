@@ -17,7 +17,7 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
 
-const sloLabel = i18n.translate('xpack.apm.home.sloMenu.slos', {
+const sloLabel = i18n.translate('xpack.apm.home.sloMenu.slosHeaderLink', {
   defaultMessage: 'SLOs',
 });
 
