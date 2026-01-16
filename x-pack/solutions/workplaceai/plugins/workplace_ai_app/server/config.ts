@@ -11,16 +11,9 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  tracing: schema.object(
+  ears: schema.object(
     {
-      langsmith: schema.maybe(
-        schema.object({
-          enabled: schema.boolean({ defaultValue: false }),
-          apiKey: schema.string(),
-          apiUrl: schema.string({ defaultValue: 'https://api.smith.langchain.com' }),
-          project: schema.string(),
-        })
-      ),
+      url: schema.maybe(schema.string()),
     },
     { defaultValue: {} }
   ),
@@ -30,7 +23,11 @@ export type WorkplaceAIAppConfig = TypeOf<typeof configSchema>;
 
 export type WorkplaceAITracingConfig = WorkplaceAIAppConfig['tracing'];
 
+export type WorkplaceAIEarsConfig = WorkplaceAIAppConfig['ears'];
+
 export const config: PluginConfigDescriptor<WorkplaceAIAppConfig> = {
-  exposeToBrowser: {},
+  exposeToBrowser: {
+    ears: true,
+  },
   schema: configSchema,
 };

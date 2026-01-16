@@ -13,4 +13,15 @@ export {
   AGENT_BUILDER_CONVERSATIONS_NEW_PATH,
   AGENT_BUILDER_AGENTS,
   STACK_CONNECTORS_MANAGEMENT_ID,
+  EARS_API_PATH,
+  EARS_START_OAUTH_ROUTE,
+  EARS_FETCH_SECRETS_ROUTE,
 } from './routes';
+
+export type {
+  EarsOAuthProvider,
+  StartOAuthRequest,
+  StartOAuthResponse,
+  FetchSecretsResponse,
+  GoogleUserInfo,
+} from './http_api/ears';
