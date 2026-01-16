@@ -14,4 +14,3 @@ import { alertAnalysisSkill } from './alert_analysis_skill';
 export const registerSkills = async (agentBuilder: AgentBuilderPluginSetup): Promise<void> => {
   agentBuilder.skill.registerSkill(alertAnalysisSkill);
 };
-

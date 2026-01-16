@@ -40,7 +40,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.alerts`,
 ] as const;
 
-export type AgentBuilderBuiltinTool = typeof AGENT_BUILDER_BUILTIN_TOOLS[number];
+export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
 
 /**
  * This is a manually maintained list of all built-in agents registered in Agent Builder.
@@ -52,7 +52,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.security}.agent`,
 ] as const;
 
-export type AgentBuilderBuiltinAgent = typeof AGENT_BUILDER_BUILTIN_AGENTS[number];
+export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
   return (AGENT_BUILDER_BUILTIN_TOOLS as readonly string[]).includes(toolName);

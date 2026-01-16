@@ -51,4 +51,3 @@ class SkillTypeRegistryImpl implements SkillTypeRegistry {
     return [...this.skills.values()];
   }
 }
-

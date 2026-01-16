@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 
 /**
  * DISCLAIMER: This skill is a sample skill.
- * 
+ *
  * Threat analysis skill for security operations.
  * This skill helps analyze security threats, investigate alerts, and assess risk.
  */
@@ -81,24 +81,23 @@ export const alertAnalysisSkill = defineSkillType({
   ],
   getInlineTools: () => [
     {
-        id: "security.alert-analysis.get-related-alerts",
-        type: ToolType.builtin,
-        description: "Get related alerts to the alert",
-        schema: z.object({
-            alertId: z.string(),
-        }),
-        handler: async (_args, context) => {
-            // TODO: Implement the handler
-            return {
-                results: [
-                    {
-                        type: ToolResultType.other,
-                        data: { message: "Related alerts fetched successfully" },
-                    },
-                ],
-            };
-        },
-    }
-  ]
+      id: 'security.alert-analysis.get-related-alerts',
+      type: ToolType.builtin,
+      description: 'Get related alerts to the alert',
+      schema: z.object({
+        alertId: z.string(),
+      }),
+      handler: async (_args, context) => {
+        // TODO: Implement the handler
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: { message: 'Related alerts fetched successfully' },
+            },
+          ],
+        };
+      },
+    },
+  ],
 });
-

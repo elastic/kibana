@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  createSkillTypeRegistry,
-  type SkillTypeRegistry,
-} from './skill_type_registry';
+import { createSkillTypeRegistry, type SkillTypeRegistry } from './skill_type_registry';
 import type { SkillServiceSetup, SkillServiceStart } from './types';
 
 export interface SkillService {
@@ -44,4 +41,3 @@ export class SkillServiceImpl implements SkillService {
     };
   }
 }
-

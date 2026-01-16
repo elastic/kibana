@@ -6,4 +6,3 @@
  */
 
 export type { SkillTypeDefinition } from './type_definition';
-
