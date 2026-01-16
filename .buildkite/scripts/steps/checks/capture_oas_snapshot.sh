@@ -8,6 +8,7 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
 echo --- Capture OAS snapshot
+# Capture OpenAPI specs for relevant endpoints
 cmd="node scripts/capture_oas_snapshot \
   --include-path /api/status \
   --include-path /api/alerting/rule/ \
@@ -35,8 +36,8 @@ run_check() {
 
 retry 5 15 run_check
 # Bundle hand written specs
-.buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
-.buildkite/scripts/steps/openapi_bundling/final_merge.sh
+.buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh # Security Solution OAS bundling
+.buildkite/scripts/steps/openapi_bundling/final_merge.sh #  Final OAS merge
 
 node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
 

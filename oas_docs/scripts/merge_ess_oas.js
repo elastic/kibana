@@ -10,6 +10,7 @@
 require('@kbn/setup-node-env');
 const { merge } = require('@kbn/openapi-bundler');
 const { REPO_ROOT } = require('@kbn/repo-info');
+const { componentizeObjectSchemas } = require('./componentize');
 
 (async () => {
   await merge({
@@ -48,4 +49,5 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       prototypeDocument: `${REPO_ROOT}/oas_docs/kibana.info.yaml`,
     },
   });
+  await componentizeObjectSchemas(`${REPO_ROOT}/oas_docs/output/kibana.yaml`);
 })();

@@ -26,7 +26,9 @@ space-aware-api-docs: ## Add special space aware description entries
 
 .PHONY: merge-api-docs
 merge-api-docs: ## Merge Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler
+  ## append componentizing schema references as the last step in the merge
 	@node scripts/merge_serverless_oas.js
+  ## append componentizing schema references as the last step in the merge
 	@node scripts/merge_ess_oas.js
 
 .PHONY: merge-api-docs-stateful
