@@ -1290,7 +1290,9 @@ describe('Discover state', () => {
       expect(state.savedSearchState.getState().hideChart).toBe(false);
       state.savedSearchState.update({ nextState: { hideChart: true } });
       expect(state.savedSearchState.getState().hideChart).toBe(true);
-      await state.actions.onOpenSavedSearch(savedSearchMock.id!);
+      await state.internalState.dispatch(
+        internalStateActions.openDiscoverSession({ discoverSessionId: savedSearchMock.id! })
+      );
       expect(state.savedSearchState.getState().hideChart).toBe(false);
       state.actions.stopSyncing();
     });
@@ -1315,7 +1317,9 @@ describe('Discover state', () => {
         })
       );
       expect(state.getCurrentTab().appState.filters).toHaveLength(1);
-      await state.actions.onOpenSavedSearch(savedSearchMock.id!);
+      await state.internalState.dispatch(
+        internalStateActions.openDiscoverSession({ discoverSessionId: savedSearchMock.id! })
+      );
       expect(state.getCurrentTab().appState.filters).toBeUndefined();
     });
 

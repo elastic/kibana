@@ -154,11 +154,6 @@ export interface DiscoverStateContainer {
      * Stop syncing the state containers started by initializeAndSync
      */
     stopSyncing: () => void;
-    /**
-     * Triggered when a saved search is opened in the savedObject finder
-     * @param savedSearchId
-     */
-    onOpenSavedSearch: (savedSearchId: string) => Promise<void>;
   };
 }
 
@@ -195,20 +190,6 @@ export function getDiscoverStateContainer({
     injectCurrentTab,
     getCurrentTab,
   });
-
-  const onOpenSavedSearch = async (newSavedSearchId: string) => {
-    addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
-    const { persistedDiscoverSession } = internalState.getState();
-    if (persistedDiscoverSession?.id === newSavedSearchId) {
-      addLog('[discoverState] undo changes since saved search did not change');
-      await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
-    } else {
-      addLog('[discoverState] onOpenSavedSearch open view URL');
-      services.locator.navigate({
-        savedSearchId: newSavedSearchId,
-      });
-    }
-  };
 
   const getAppState = (state: DiscoverInternalState): DiscoverAppState => {
     return selectTab(state, tabId).appState;
@@ -515,7 +496,6 @@ export function getDiscoverStateContainer({
     actions: {
       initializeAndSync,
       stopSyncing,
-      onOpenSavedSearch,
     },
   };
 }
