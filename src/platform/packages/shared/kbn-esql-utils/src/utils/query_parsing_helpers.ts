@@ -129,7 +129,7 @@ export function hasTransformationalCommand(esql?: string) {
       // Branch must have at least one command and all commands must be transformational
       return (
         branchCommands.length > 0 &&
-        branchCommands.every((cmd) => transformationalCommands.includes(cmd.name))
+        branchCommands.every((cmd) => TRANSFORMATIONAL_COMMANDS.includes(cmd.name))
       );
     });
   });
