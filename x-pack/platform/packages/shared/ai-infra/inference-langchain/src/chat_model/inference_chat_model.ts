@@ -73,6 +73,7 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   tool_choice?: ToolChoice;
   temperature?: number;
   model?: string;
+  timeout?: number;
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
