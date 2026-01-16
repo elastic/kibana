@@ -37,7 +37,6 @@ import type {
   ESQLAstItem,
   ESQLAstQueryExpression,
   ESQLMap,
-  ESQLMapEntry,
   ESQLProperNode,
 } from '../types';
 
