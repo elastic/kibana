@@ -15,7 +15,7 @@ import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
 import { RulesClient } from './rules_client';
-import type { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { createMockRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 
 import type { CreateRuleParams, UpdateRuleData } from './types';
 
@@ -38,13 +38,7 @@ describe('RulesClient', () => {
   const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
   const security = securityMock.createStart();
-  const rulesSavedObjectService = {
-    create: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-  } as unknown as jest.Mocked<RulesSavedObjectService>;
+  const rulesSavedObjectService = createMockRulesSavedObjectService();
 
   const baseCreateData: CreateRuleParams['data'] = {
     name: 'rule-1',
