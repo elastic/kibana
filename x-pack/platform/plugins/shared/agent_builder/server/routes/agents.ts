@@ -37,7 +37,12 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   )
 );
 
-export function registerAgentRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+export function registerAgentRoutes({
+  router,
+  getInternalServices,
+  logger,
+  analyticsService,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   // List agents
@@ -201,6 +206,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         const { agents } = getInternalServices();
         const service = await agents.getRegistry({ request });
         const profile = await service.create(request.body);
+        analyticsService?.reportAgentCreated({
+          agentId: request.body.id,
+          toolSelection: request.body.configuration.tools,
+        });
         return response.ok<CreateAgentResponse>({ body: profile });
       })
     );
@@ -294,6 +303,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         const { agents } = getInternalServices();
         const service = await agents.getRegistry({ request });
         const profile = await service.update(request.params.id, request.body);
+        analyticsService?.reportAgentUpdated({
+          agentId: profile.id,
+          toolSelection: profile.configuration.tools,
+        });
         return response.ok<UpdateAgentResponse>({ body: profile });
       })
     );

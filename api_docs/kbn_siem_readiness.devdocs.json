@@ -26,6 +26,8 @@
           "<unknown, unknown>; }"
         ],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/use_readiness_tasks.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -42,6 +44,8 @@
         "label": "CategoriesResponse",
         "description": [],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,6 +67,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -84,6 +90,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -98,6 +106,8 @@
         "label": "CategoryGroup",
         "description": [],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,6 +119,8 @@
             "label": "category",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -130,6 +142,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -144,6 +158,8 @@
         "label": "IndexInfo",
         "description": [],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -155,6 +171,8 @@
             "label": "indexName",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -166,6 +184,8 @@
             "label": "docs",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -186,6 +206,8 @@
           "\"/api/siem_readiness/get_categories\""
         ],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
