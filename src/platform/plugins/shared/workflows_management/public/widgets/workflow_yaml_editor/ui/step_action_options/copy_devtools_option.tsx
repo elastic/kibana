@@ -12,46 +12,41 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { buildKibanaRequestFromAction } from '@kbn/workflows';
-import { isKibana, type KibanaGraphNode } from '@kbn/workflows/graph/types';
+import { buildKibanaRequestFromAction, buildRequestFromConnector } from '@kbn/workflows';
+import {
+  type ElasticsearchGraphNode,
+  isElasticsearch,
+  isKibana,
+  type KibanaGraphNode,
+} from '@kbn/workflows/graph/types';
 import {
   selectEditorFocusedStepInfo,
   selectEditorWorkflowGraph,
 } from '../../../../entities/workflows/store';
 import { useKibana } from '../../../../hooks/use_kibana';
 
-export interface CopyKibanaDevToolsOptionProps {
+export interface CopyDevToolsOptionProps {
   onClick: () => void;
 }
 
-export const CopyKibanaDevToolsOption: React.FC<CopyKibanaDevToolsOptionProps> = ({ onClick }) => {
+interface RequestInfo {
+  method: string;
+  path: string;
+  body?: Record<string, unknown>;
+  query?: Record<string, unknown>;
+  params?: Record<string, string>;
+  headers?: Record<string, string>;
+}
+
+/**
+ * Combined copy-as-devtools option that works for both Elasticsearch and Kibana steps
+ */
+export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick }) => {
   const workflowGraph = useSelector(selectEditorWorkflowGraph);
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const {
     services: { notifications },
   } = useKibana();
-
-  function generateConsoleFormat(requestInfo: {
-    method: string;
-    path: string;
-    body?: Record<string, unknown>;
-    query?: Record<string, unknown>;
-    headers?: Record<string, string>;
-  }): string {
-    const lines = [
-      `${requestInfo.method} kbn:/${requestInfo.path}${
-        requestInfo.query
-          ? `?${new URLSearchParams(requestInfo.query as Record<string, string>).toString()}`
-          : ''
-      }`,
-    ];
-
-    if (requestInfo.body && Object.keys(requestInfo.body).length > 0) {
-      lines.push(JSON.stringify(requestInfo.body, null, 2));
-    }
-
-    return lines.join('\n');
-  }
 
   const copy = useCallback(async () => {
     if (!focusedStepInfo || !workflowGraph) {
@@ -60,15 +55,32 @@ export const CopyKibanaDevToolsOption: React.FC<CopyKibanaDevToolsOptionProps> =
 
     try {
       const stepGraph = workflowGraph.getStepGraph(focusedStepInfo.stepId);
-      const kibanaNode = stepGraph
-        .getAllNodes()
-        .find((node): node is KibanaGraphNode => isKibana(node));
-      if (!kibanaNode) {
+      const allNodes = stepGraph.getAllNodes();
+
+      let consoleFormat: string | null = null;
+
+      // Check for Elasticsearch step
+      const esNode = allNodes.find((node): node is ElasticsearchGraphNode => isElasticsearch(node));
+      if (esNode) {
+        const stepType = esNode.stepType;
+        const requestInfo = buildRequestFromConnector(stepType, esNode.configuration.with || {});
+        consoleFormat = generateConsoleFormat(requestInfo);
+      }
+
+      // Check for Kibana step
+      const kibanaNode = allNodes.find((node): node is KibanaGraphNode => isKibana(node));
+      if (kibanaNode) {
+        const stepType = kibanaNode.configuration.type;
+        const requestInfo = buildKibanaRequestFromAction(
+          stepType,
+          kibanaNode.configuration.with || {}
+        );
+        consoleFormat = generateConsoleFormat({ ...requestInfo, path: `kbn:/${requestInfo.path}` });
+      }
+
+      if (!consoleFormat) {
         return;
       }
-      const stepType = kibanaNode.configuration.type;
-      const requestInfo = buildKibanaRequestFromAction(stepType, kibanaNode.configuration.with);
-      const consoleFormat = generateConsoleFormat(requestInfo);
 
       await navigator.clipboard.writeText(consoleFormat);
 
@@ -105,8 +117,8 @@ export const CopyKibanaDevToolsOption: React.FC<CopyKibanaDevToolsOptionProps> =
 
   return (
     <EuiContextMenuItem
-      data-test-subj={`actionButton-copy-as-console`}
-      key="elasticsearch-copy-as-console"
+      data-test-subj="actionButton-copy-as-console"
+      key="copy-as-console"
       onClick={copy}
       icon="copy"
     >
@@ -117,3 +129,19 @@ export const CopyKibanaDevToolsOption: React.FC<CopyKibanaDevToolsOptionProps> =
     </EuiContextMenuItem>
   );
 };
+
+function generateConsoleFormat(requestInfo: RequestInfo): string {
+  // Handle query params - could be either 'query' or 'params' depending on the builder
+  const queryParams = requestInfo.query || requestInfo.params;
+  const queryString = queryParams
+    ? `?${new URLSearchParams(queryParams as Record<string, string>).toString()}`
+    : '';
+
+  const lines = [`${requestInfo.method} ${requestInfo.path}${queryString}`];
+
+  if (requestInfo.body && Object.keys(requestInfo.body).length > 0) {
+    lines.push(JSON.stringify(requestInfo.body, null, 2));
+  }
+
+  return lines.join('\n');
+}
