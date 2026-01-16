@@ -11,9 +11,8 @@ import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { Parser } from '@kbn/esql-language';
 import type { AggregateQuery } from '@kbn/es-query';
-import { findCommandStringPosition } from './utils';
+import { findCommandPositions } from './utils';
 
 /**
  * Hook to register a custom command in the ESQL editor for creating a resources badge.
@@ -54,30 +53,29 @@ export const useResourcesBadge = (
   `;
 
   const addResourcesDecorator = useCallback(() => {
-    const { root } = Parser.parse(query.esql);
     const commands = ['from', 'ts'];
     const collections: monaco.editor.IModelDeltaDecoration[] = [];
 
     commands.forEach((commandName) => {
-      const command = root.commands.find((cmd) => cmd.name === commandName);
-      if (command) {
-        const commandPosition = findCommandStringPosition(query.esql, commandName);
-        if (commandPosition && commandPosition.startLineNumber !== -1) {
-          collections.push({
-            range: new monaco.Range(
-              commandPosition.startLineNumber,
-              commandPosition.min + 1,
-              commandPosition.endLineNumber,
-              commandPosition.max
-            ),
-            options: {
-              isWholeLine: false,
-              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-              inlineClassName: resourcesFromBadgeClassName,
-            },
-          });
-        }
-      }
+      // Find all string positions for this command
+      const commandPositions = findCommandPositions(query.esql, commandName);
+
+      // Create decorations for all occurrences
+      commandPositions.forEach((commandPosition) => {
+        collections.push({
+          range: new monaco.Range(
+            commandPosition.lineNumber,
+            commandPosition.startColumn,
+            commandPosition.lineNumber,
+            commandPosition.startColumn + commandName.length
+          ),
+          options: {
+            isWholeLine: false,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            inlineClassName: resourcesFromBadgeClassName,
+          },
+        });
+      });
     });
 
     if (collections.length > 0) {
@@ -101,22 +99,25 @@ export const useResourcesBadge = (
       if (!currentWord) return;
       const openIndexIndicesBrowserAtCommand = (commands: string[]) => {
         commands.forEach((command) => {
-          const commandPosition = findCommandStringPosition(query.esql, command.toLowerCase());
-          if (
-            currentWord.word === command &&
-            commandPosition.startLineNumber !== -1 &&
-            commandPosition.startLineNumber === mousePosition.lineNumber &&
-            currentWord.startColumn >= commandPosition.min &&
-            currentWord.endColumn <= commandPosition.max
-          ) {
-            const positionAfterCommand = new monaco.Position(
-              commandPosition.startLineNumber,
-              commandPosition.max + 1
-            );
-            editorRef.current?.setPosition(positionAfterCommand);
-            editorRef.current?.revealPosition(positionAfterCommand);
-            openIndicesBrowser();
-            return; // No need to continue checking for other commands
+          if (currentWord.word === command) {
+            const commandPositions = findCommandPositions(query.esql, command);
+            // Check all occurrences to see if the click is on any of them
+            for (const commandPosition of commandPositions) {
+              if (
+                commandPosition.lineNumber === mousePosition.lineNumber &&
+                currentWord.startColumn >= commandPosition.startColumn &&
+                currentWord.endColumn <= commandPosition.startColumn + command.length
+              ) {
+                const positionAfterCommand = new monaco.Position(
+                  commandPosition.lineNumber,
+                  commandPosition.startColumn + command.length + 1
+                );
+                editorRef.current?.setPosition(positionAfterCommand);
+                editorRef.current?.revealPosition(positionAfterCommand);
+                openIndicesBrowser();
+                return; // Found matching command, no need to continue
+              }
+            }
           }
         });
       };
@@ -136,28 +137,31 @@ export const useResourcesBadge = (
       // Trigger autocomplete suggestions if current word is a command
       const handleCommandKeyDown = (commands: string[]) => {
         commands.forEach((command) => {
-          const commandPosition = findCommandStringPosition(query.esql, command.toLowerCase());
-          if (
-            currentWord.word === command &&
-            commandPosition.startLineNumber !== -1 &&
-            commandPosition.startLineNumber === currentPosition.lineNumber &&
-            currentWord.startColumn >= commandPosition.min &&
-            currentWord.endColumn <= commandPosition.max
-          ) {
-            e.preventDefault();
-            // Move cursor to position after command
-            const positionAfterCommand = new monaco.Position(
-              commandPosition.startLineNumber,
-              commandPosition.max + 1
-            );
-            editorRef.current?.setPosition(positionAfterCommand);
-            editorRef.current?.revealPosition(positionAfterCommand);
+          if (currentWord.word === command) {
+            const commandPositions = findCommandPositions(query.esql, command);
+            // Check all occurrences to see if the cursor is on any of them
+            for (const commandPosition of commandPositions) {
+              if (
+                commandPosition.lineNumber === currentPosition.lineNumber &&
+                currentWord.startColumn >= commandPosition.startColumn &&
+                currentWord.endColumn <= commandPosition.startColumn + command.length
+              ) {
+                e.preventDefault();
+                // Move cursor to position after command
+                const positionAfterCommand = new monaco.Position(
+                  commandPosition.lineNumber,
+                  commandPosition.startColumn + command.length + 1
+                );
+                editorRef.current?.setPosition(positionAfterCommand);
+                editorRef.current?.revealPosition(positionAfterCommand);
 
-            // Trigger autocomplete suggestions
-            setTimeout(() => {
-              editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-            }, 0);
-            return; // No need to continue checking for other commands
+                // Trigger autocomplete suggestions
+                setTimeout(() => {
+                  editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+                }, 0);
+                return; // Found matching command, no need to continue
+              }
+            }
           }
         });
       };

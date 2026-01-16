@@ -16,4 +16,4 @@ export type { BrowserPopoverWrapperProps } from './browser_popover_wrapper';
 export { IndicesBrowserPopover } from './indices_browser_popover';
 export { FieldsBrowserPopover } from './fields_browser_popover';
 export { useResourcesBadge } from './resources_badge';
-export { findCommandStringPosition } from './utils';
+export { findCommandPositions } from './utils';
