@@ -17,6 +17,13 @@ const removeUndefinedProperty = (obj: Record<string, any>, key: string): void =>
   }
 };
 
+/**
+ * Cleans filters for serialization by removing the `value` property from filter metadata.
+ * This is necessary because the `value` property is not serializable and should not be persisted.
+ *
+ * @param filters - The array of {@link Filter} objects to clean.
+ * @returns The cleaned array of {@link DashboardFilter} objects, or `undefined` if no filters are provided.
+ */
 export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] | undefined {
   if (!filters) return;
   return filters.map((filter) => {

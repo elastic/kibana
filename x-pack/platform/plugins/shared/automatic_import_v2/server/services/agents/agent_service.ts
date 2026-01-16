@@ -5,24 +5,32 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { createAutomaticImportAgent } from '../../agents';
 import {
   createIngestPipelineGeneratorAgent,
   createLogsAnalyzerAgent,
-  textToEcsSubAgent,
+  createTextToEcsAgent,
 } from '../../agents/sub_agents';
-import { fetchSamplesTool, ingestPipelineValidatorTool } from '../../agents/tools';
+import {
+  fetchSamplesTool,
+  fetchUniqueKeysTool,
+  ingestPipelineValidatorTool,
+} from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
 
 export class AgentService {
+  private logger: Logger;
+
   constructor(
-    private readonly esClient: ElasticsearchClient,
     private readonly samplesIndexService: AutomaticImportSamplesIndexService,
-    private readonly model: InferenceChatModel
-  ) {}
+    logger: LoggerFactory
+  ) {
+    this.logger = logger.get('agentService');
+  }
 
   /**
    * Invokes the deep research agent with samples fetched from the index.
@@ -34,19 +42,31 @@ export class AgentService {
    *
    * @param integration_id - The integration ID
    * @param data_stream_id - The data stream ID
+   * @param esClient - The Elasticsearch client
+   * @param model - The model to use for the agent
    */
-  public async invoke_deep_agent(integrationId: string, dataStreamId: string) {
+  public async invokeAutomaticImportAgent(
+    integrationId: string,
+    dataStreamId: string,
+    esClient: ElasticsearchClient,
+    model: InferenceChatModel
+  ) {
+    this.logger.debug(
+      `invokeAutomaticImportAgent: Invoking automatic import agent for integration ${integrationId} and data stream ${dataStreamId}`
+    );
+
     // Fetch samples from the index (decoupled from agent building)
     const samples = await this.samplesIndexService.getSamplesForDataStream(
       integrationId,
       dataStreamId,
-      this.esClient
+      esClient
     );
 
     // Create tools at the service level
     // Tools capture samples and esClient in their closures
     const fetchSamplesToolInstance = fetchSamplesTool(samples);
-    const validatorTool = ingestPipelineValidatorTool(this.esClient, samples);
+    const validatorTool = ingestPipelineValidatorTool(esClient, samples);
+    const uniqueKeysTool = fetchUniqueKeysTool();
 
     // Create the sub agents with tools
     const logsAnalyzerSubAgent = createLogsAnalyzerAgent({
@@ -68,20 +88,44 @@ export class AgentService {
       sampleCount: samples.length,
     });
 
+    const textToEcsSubAgent = createTextToEcsAgent({
+      prompt:
+        'You may call tools as needed to inspect recent pipeline outputs and gather sample field values before proposing ECS mappings.',
+      tools: [uniqueKeysTool],
+    });
+
     // Create and invoke the agent
     const automaticImportAgent = createAutomaticImportAgent({
-      model: this.model,
+      model,
       subagents: [logsAnalyzerSubAgent, pipelineGeneratorSubAgent, textToEcsSubAgent],
     });
 
-    const result = await automaticImportAgent.invoke({
-      messages: [
-        {
-          role: 'user',
-          content: `You are tasked with generating an Elasticsearch ingest pipeline for the integration \`${integrationId}\` and data stream \`${dataStreamId}\`.`,
-        },
+    const traceOptions = {
+      tracers: [
+        ...getLangSmithTracer({
+          // TODO: Get apiKey from config
+          apiKey: 'apiKey',
+          projectName: 'projectName',
+          logger: this.logger,
+        }),
       ],
-    });
+    };
+
+    const result = await automaticImportAgent.invoke(
+      {
+        messages: [
+          {
+            role: 'user',
+            content: `You are tasked with generating an Elasticsearch ingest pipeline for the integration \`${integrationId}\` and data stream \`${dataStreamId}\`.`,
+          },
+        ],
+      },
+      {
+        callbacks: [...(traceOptions.tracers ?? [])],
+        runName: 'automatic_import_agent',
+        tags: ['automatic_import_agent'],
+      }
+    );
 
     return result;
   }

@@ -45,6 +45,8 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/deeplinks-agent-builder'
 tags:
   - plugin
   - prod
