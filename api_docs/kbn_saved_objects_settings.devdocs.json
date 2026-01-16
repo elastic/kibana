@@ -33,6 +33,8 @@
           "\"savedObjects:listingLimit\""
         ],
         "path": "src/platform/packages/private/kbn-saved-objects-settings/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"savedObjects:perPage\""
         ],
         "path": "src/platform/packages/private/kbn-saved-objects-settings/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

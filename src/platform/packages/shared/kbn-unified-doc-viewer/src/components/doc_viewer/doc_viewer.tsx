@@ -40,19 +40,17 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
   ({ docViews, initialTabId, onUpdateSelectedTabId, ...renderProps }, ref) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
-      .map(({ id, title, component }: DocView) => ({
-        id: getFullTabId(id), // `id` value is used to persist the selected tab in localStorage
-        name: title,
+      .map((docView: DocView) => ({
+        id: getFullTabId(docView.id), // `id` value is used to persist the selected tab in localStorage
+        name: docView.title,
         content: (
           <DocViewerTab
-            key={id}
-            id={id}
-            title={title}
-            component={component}
+            key={`${renderProps.hit.id}_${docView.id}`}
+            docView={docView}
             renderProps={renderProps}
           />
         ),
-        ['data-test-subj']: `docViewerTab-${id}`,
+        ['data-test-subj']: `docViewerTab-${docView.id}`,
       }));
 
     const [storedInitialTabId, setInitialTabId] = useLocalStorage<string>(INITIAL_TAB);

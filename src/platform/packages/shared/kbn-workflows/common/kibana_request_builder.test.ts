@@ -13,7 +13,7 @@ describe('buildKibanaRequestFromAction', () => {
   describe('Space ID handling', () => {
     describe('without space ID', () => {
       it('should build request without space prefix when spaceId is not provided', () => {
-        const result = buildKibanaRequestFromAction('kibana.createCaseDefaultSpace', {
+        const result = buildKibanaRequestFromAction('kibana.createCase', {
           title: 'Test Case',
           description: 'Test Description',
           owner: 'cases',
@@ -25,7 +25,7 @@ describe('buildKibanaRequestFromAction', () => {
 
       it('should build request without space prefix when spaceId is undefined', () => {
         const result = buildKibanaRequestFromAction(
-          'kibana.createCaseDefaultSpace',
+          'kibana.createCase',
           {
             title: 'Test Case',
             description: 'Test Description',
@@ -42,7 +42,7 @@ describe('buildKibanaRequestFromAction', () => {
     describe('with default space', () => {
       it('should not add space prefix for default space', () => {
         const result = buildKibanaRequestFromAction(
-          'kibana.createCaseDefaultSpace',
+          'kibana.createCase',
           {
             title: 'Test Case',
             description: 'Test Description',
@@ -59,7 +59,7 @@ describe('buildKibanaRequestFromAction', () => {
     describe('with custom space', () => {
       it('should add space prefix for non-default space', () => {
         const result = buildKibanaRequestFromAction(
-          'kibana.createCaseDefaultSpace',
+          'kibana.createCase',
           {
             title: 'Test Case',
             description: 'Test Description',
@@ -73,7 +73,7 @@ describe('buildKibanaRequestFromAction', () => {
 
       it('should handle space IDs with special characters', () => {
         const result = buildKibanaRequestFromAction(
-          'kibana.createCaseDefaultSpace',
+          'kibana.createCase',
           {
             title: 'Test Case',
             description: 'Test Description',
@@ -87,7 +87,7 @@ describe('buildKibanaRequestFromAction', () => {
 
       it('should handle space prefix with path parameters', () => {
         const result = buildKibanaRequestFromAction(
-          'kibana.getCaseDefaultSpace',
+          'kibana.getCase',
           {
             caseId: 'test-case-123',
           },
@@ -182,7 +182,7 @@ describe('buildKibanaRequestFromAction', () => {
   describe('Request structure', () => {
     it('should return proper request structure with all fields', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.createCaseDefaultSpace',
+        'kibana.createCase',
         {
           title: 'Test Case',
           description: 'Description',
@@ -206,7 +206,7 @@ describe('buildKibanaRequestFromAction', () => {
 
     it('should handle query parameters', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
+        'kibana.getCase',
         {
           caseId: 'test-case-id',
           includeComments: true,
@@ -221,7 +221,7 @@ describe('buildKibanaRequestFromAction', () => {
 
     it('should handle requests with no body', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
+        'kibana.getCase',
         { caseId: 'test-case' },
         'monitoring'
       );
@@ -235,7 +235,7 @@ describe('buildKibanaRequestFromAction', () => {
   describe('Edge cases', () => {
     it('should handle empty string as space ID', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.createCaseDefaultSpace',
+        'kibana.createCase',
         {
           title: 'Test',
           description: 'Test',
@@ -251,7 +251,7 @@ describe('buildKibanaRequestFromAction', () => {
 
     it('should handle path parameters with space prefix', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
+        'kibana.getCase',
         {
           caseId: 'case-123',
         },
@@ -266,12 +266,28 @@ describe('buildKibanaRequestFromAction', () => {
         buildKibanaRequestFromAction('unknown.action.type', {}, 'some-space');
       }).toThrow('No connector definition found');
     });
+
+    it('should support backward-compatible type aliases', () => {
+      // Old type name should still work and resolve to the new connector
+      const result = buildKibanaRequestFromAction(
+        'kibana.createCaseDefaultSpace',
+        {
+          title: 'Test Case',
+          description: 'Test Description',
+          owner: 'cases',
+        },
+        'test-space'
+      );
+
+      expect(result.path).toBe('/s/test-space/api/cases');
+      expect(result.method).toBe('POST');
+    });
   });
 
   describe('Method handling', () => {
     it('should use POST method for create operations', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.createCaseDefaultSpace',
+        'kibana.createCase',
         {
           title: 'Test',
           description: 'Test',
@@ -285,7 +301,7 @@ describe('buildKibanaRequestFromAction', () => {
 
     it('should use GET method for retrieval operations', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.getCaseDefaultSpace',
+        'kibana.getCase',
         { caseId: 'test-id' },
         'test-space'
       );
@@ -310,7 +326,7 @@ describe('buildKibanaRequestFromAction', () => {
   describe('Real-world scenarios', () => {
     it('should handle case creation in security space', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.createCaseDefaultSpace',
+        'kibana.createCase',
         {
           title: 'Security Incident',
           description: 'Suspicious activity detected',
@@ -352,7 +368,7 @@ describe('buildKibanaRequestFromAction', () => {
 
     it('should handle case comment operations in analytics space', () => {
       const result = buildKibanaRequestFromAction(
-        'kibana.addCaseCommentDefaultSpace',
+        'kibana.addCaseComment',
         {
           caseId: 'analytics-case-1',
           comment: 'Adding analysis results to the case',
