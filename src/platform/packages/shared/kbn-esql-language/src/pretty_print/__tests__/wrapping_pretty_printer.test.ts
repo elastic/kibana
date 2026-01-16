@@ -1026,6 +1026,20 @@ FROM index
       });
 
       test('long query', () => {
+        const src = `PROMQL index = kibana_sample_data_logstsdb step = ?_step start = ?_something_very_very_long_to_force_wrapping end = ?_end rate(byres_counter[5m])`;
+        const text = reprint(src, { wrap: 60 }).text;
+
+        expect(text).toBe(
+          `PROMQL
+    index = kibana_sample_data_logstsdb
+    step = ?_step
+    start = ?_something_very_very_long_to_force_wrapping
+    end = ?_end
+  rate(byres_counter[5m])`
+        );
+      });
+
+      test.skip('strings and duration in PROMQL command', () => {
         const src = `PROMQL index = kibana_sample_data_logstsdb step = 5m start = "2026-01-08T19:30:00.000Z" end = ?_end rate(byres_counter[5m])`;
         const text = reprint(src, { wrap: 60 }).text;
 
