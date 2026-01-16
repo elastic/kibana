@@ -43,11 +43,8 @@ export class RuleExecutorTaskRunner {
 
     const params = taskInstance.params as RuleExecutorTaskParams;
 
-    const ruleAttributes = await this.rulesSavedObjectService
-      .getRuleAttributes({
-        id: params.ruleId,
-        spaceId: params.spaceId,
-      })
+    const ruleDoc = await this.rulesSavedObjectService
+      .get(params.ruleId, params.spaceId)
       .catch((error) => {
         if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
           return null;
@@ -55,23 +52,23 @@ export class RuleExecutorTaskRunner {
         throw error;
       });
 
-    if (!ruleAttributes) {
+    if (!ruleDoc) {
       // Rule was deleted.
       return { state: taskInstance.state };
     }
 
     this.logger.debug({
-      message: () => `Rule saved object attributes: ${JSON.stringify(ruleAttributes, null, 2)}`,
+      message: () => `Rule saved object attributes: ${JSON.stringify(ruleDoc.attributes, null, 2)}`,
     });
 
-    if (!ruleAttributes.enabled) {
+    if (!ruleDoc.attributes.enabled) {
       return { state: taskInstance.state };
     }
 
     const { filter, params: queryParams } = getQueryPayload({
-      query: ruleAttributes.query,
-      timeField: ruleAttributes.timeField,
-      lookbackWindow: ruleAttributes.lookbackWindow,
+      query: ruleDoc.attributes.query,
+      timeField: ruleDoc.attributes.timeField,
+      lookbackWindow: ruleDoc.attributes.lookbackWindow,
     });
 
     this.logger.debug({
@@ -79,7 +76,7 @@ export class RuleExecutorTaskRunner {
         `executing ES|QL query for rule ${params.ruleId} in space ${
           params.spaceId
         } - ${JSON.stringify({
-          query: ruleAttributes.query,
+          query: ruleDoc.attributes.query,
           filter,
           params: queryParams,
         })}`,
@@ -88,7 +85,7 @@ export class RuleExecutorTaskRunner {
     let esqlResponse: Awaited<ReturnType<QueryService['executeQuery']>>;
     try {
       esqlResponse = await this.queryService.executeQuery({
-        query: ruleAttributes.query,
+        query: ruleDoc.attributes.query,
         filter,
         params: queryParams,
         abortSignal: abortController.signal,
@@ -116,7 +113,7 @@ export class RuleExecutorTaskRunner {
       input: {
         ruleId: params.ruleId,
         spaceId: params.spaceId,
-        ruleAttributes,
+        ruleAttributes: ruleDoc.attributes,
         esqlResponse,
         scheduledTimestamp,
       },

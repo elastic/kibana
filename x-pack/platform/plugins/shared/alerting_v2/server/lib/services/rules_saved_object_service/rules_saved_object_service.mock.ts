@@ -15,9 +15,6 @@ export function createMockRulesSavedObjectService() {
     update: jest.fn() as jest.MockedFunction<RulesSavedObjectServiceContract['update']>,
     delete: jest.fn() as jest.MockedFunction<RulesSavedObjectServiceContract['delete']>,
     find: jest.fn() as jest.MockedFunction<RulesSavedObjectServiceContract['find']>,
-    getRuleAttributes: jest.fn() as jest.MockedFunction<
-      RulesSavedObjectServiceContract['getRuleAttributes']
-    >,
   } satisfies RulesSavedObjectServiceMock;
 
   return rulesSavedObjectService;

@@ -19,14 +19,16 @@ import { spaceIdToNamespace } from '../../space_id_to_namespace';
 
 export interface RulesSavedObjectServiceContract {
   create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<string>;
-  get(id: string): Promise<{ attributes: RuleSavedObjectAttributes; version?: string }>;
+  get(
+    id: string,
+    spaceId?: string
+  ): Promise<{ attributes: RuleSavedObjectAttributes; version?: string }>;
   update(params: { id: string; attrs: RuleSavedObjectAttributes; version?: string }): Promise<void>;
   delete(params: { id: string }): Promise<void>;
   find(params: { page: number; perPage: number }): Promise<{
     saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes }>;
     total: number;
   }>;
-  getRuleAttributes(params: { id: string; spaceId?: string }): Promise<RuleSavedObjectAttributes>;
 }
 
 @injectable()
@@ -43,7 +45,6 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
     });
   }
-
   public async create({
     attrs,
     id,
@@ -58,11 +59,16 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     });
     return ruleId;
   }
-
   public async get(
-    id: string
+    id: string,
+    spaceId?: string
   ): Promise<{ attributes: RuleSavedObjectAttributes; version?: string }> {
-    const doc = await this.client.get<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id);
+    const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    const doc = await this.client.get<RuleSavedObjectAttributes>(
+      RULE_SAVED_OBJECT_TYPE,
+      id,
+      namespace ? { namespace } : undefined
+    );
     return { attributes: doc.attributes, version: doc.version };
   }
 
@@ -92,19 +98,5 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       sortField: 'updatedAt',
       sortOrder: 'desc',
     });
-  }
-
-  public async getRuleAttributes({
-    id,
-    spaceId,
-  }: {
-    id: string;
-    spaceId?: string;
-  }): Promise<RuleSavedObjectAttributes> {
-    const namespace = spaceIdToNamespace(this.spaces, spaceId);
-    const doc = await this.client.get<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id, {
-      namespace,
-    });
-    return doc.attributes;
   }
 }

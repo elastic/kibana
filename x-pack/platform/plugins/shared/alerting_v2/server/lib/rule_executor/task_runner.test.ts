@@ -58,7 +58,9 @@ describe('RuleExecutorTaskRunner', () => {
     const queryService = createMockQueryService();
     const storageService = createMockStorageService();
 
-    rulesSavedObjectService.getRuleAttributes.mockResolvedValue(ruleAttributes);
+    rulesSavedObjectService.get.mockResolvedValue({
+      attributes: ruleAttributes,
+    });
     queryService.executeQuery.mockResolvedValue(esqlResponse);
 
     const runner = new RuleExecutorTaskRunner(
@@ -92,7 +94,7 @@ describe('RuleExecutorTaskRunner', () => {
 
     expect(res).toEqual({ state: taskInstance.state });
     expect(resourcesService.waitUntilReady).toHaveBeenCalled();
-    expect(rulesSavedObjectService.getRuleAttributes).toHaveBeenCalled();
+    expect(rulesSavedObjectService.get).toHaveBeenCalledWith('rule-1', 'default');
     expect(queryService.executeQuery).not.toHaveBeenCalled();
     expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
   });
@@ -101,7 +103,7 @@ describe('RuleExecutorTaskRunner', () => {
     const { runner, resourcesService, rulesSavedObjectService, queryService, storageService } =
       createRunner();
 
-    (rulesSavedObjectService.getRuleAttributes as jest.Mock).mockRejectedValueOnce(
+    rulesSavedObjectService.get.mockRejectedValueOnce(
       SavedObjectsErrorHelpers.createGenericNotFoundError('alerting_rule', 'rule-1')
     );
 
@@ -112,16 +114,16 @@ describe('RuleExecutorTaskRunner', () => {
 
     expect(res).toEqual({ state: taskInstance.state });
     expect(resourcesService.waitUntilReady).toHaveBeenCalled();
-    expect(rulesSavedObjectService.getRuleAttributes).toHaveBeenCalled();
+    expect(rulesSavedObjectService.get).toHaveBeenCalledWith('rule-1', 'default');
     expect(queryService.executeQuery).not.toHaveBeenCalled();
     expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
   });
 
-  it('throws when getRuleAttributes fails', async () => {
+  it('throws when get fails', async () => {
     const { runner, rulesSavedObjectService } = createRunner();
     const error = new Error('boom');
 
-    rulesSavedObjectService.getRuleAttributes.mockRejectedValueOnce(error);
+    rulesSavedObjectService.get.mockRejectedValueOnce(error);
 
     await expect(
       runner.run({
@@ -172,7 +174,7 @@ describe('RuleExecutorTaskRunner', () => {
 
     expect(res).toEqual({ state: {} });
     expect(resourcesService.waitUntilReady).toHaveBeenCalled();
-    expect(rulesSavedObjectService.getRuleAttributes).toHaveBeenCalled();
+    expect(rulesSavedObjectService.get).toHaveBeenCalledWith('rule-1', 'default');
     expect(queryService.executeQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         query: baseRuleAttributes.query,
