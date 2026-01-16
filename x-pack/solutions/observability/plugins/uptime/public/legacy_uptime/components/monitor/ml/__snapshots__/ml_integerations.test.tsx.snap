@@ -21,7 +21,7 @@ exports[`ML Integrations renders without errors 1`] = `
         style="border-color:#0B64DD currentcolor currentcolor currentcolor"
       />
       <span
-        class="eui-textTruncate"
+        class="eui-textTruncate css-1ryezsz-s"
       />
     </span>
   </button>
