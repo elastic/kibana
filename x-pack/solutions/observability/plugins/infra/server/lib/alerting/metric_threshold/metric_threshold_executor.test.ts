@@ -2669,7 +2669,6 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 reported no data in the last 1m for a',
           tags: [],
           groupByKeys: { something: alertIdA },
-          grouping: { something: alertIdA },
         });
 
         // Reset mock
@@ -2780,7 +2779,6 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 is 2 in the last 1 min for a. Alert when above 1.',
           tags: [],
           groupByKeys: { something: alertIdA },
-          grouping: { something: alertIdA },
         });
       });
     });
@@ -2852,7 +2850,6 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 reported no data in the last 1m for a',
           tags: [],
           groupByKeys: { something: alertIdA },
-          grouping: { something: alertIdA },
         });
         testAlertReported(2, {
           id: alertIdB,
@@ -2864,7 +2861,6 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 reported no data in the last 1m for b',
           tags: [],
           groupByKeys: { something: alertIdB },
-          grouping: { something: alertIdB },
         });
       });
 
@@ -2911,7 +2907,6 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 is 2 in the last 1 min for a. Alert when above 1.',
           tags: [],
           groupByKeys: { something: alertIdA },
-          grouping: { something: alertIdA },
         });
         testAlertReported(2, {
           id: alertIdB,
@@ -2923,7 +2918,6 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 reported no data in the last 1m for b',
           tags: [],
           groupByKeys: { something: alertIdB },
-          grouping: { something: alertIdB },
         });
       });
     });
@@ -3016,7 +3010,6 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 reported no data in the last 1m for a',
           tags: [],
           groupByKeys: { something: alertIdA },
-          grouping: { something: alertIdA },
         });
 
         testAlertReported(2, {
@@ -3029,7 +3022,6 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 is 2 in the last 1 min for c. Alert when above 1.',
           tags: [],
           groupByKeys: { something: alertIdC },
-          grouping: { something: alertIdC },
         });
 
         // Reset mock
@@ -3083,7 +3075,6 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 reported no data in the last 1m for a',
           tags: [],
           groupByKeys: { something: alertIdA },
-          grouping: { something: alertIdA },
         });
         testAlertReported(2, {
           id: alertIdB,
@@ -3095,7 +3086,6 @@ describe('The metric threshold rule type', () => {
           reason: 'test.metric.1 reported no data in the last 1m for b',
           tags: [],
           groupByKeys: { something: alertIdB },
-          grouping: { something: alertIdB },
         });
 
         // Reset mock
