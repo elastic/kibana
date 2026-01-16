@@ -78,8 +78,13 @@ Returns an array of visualization results, each with a unique tool_result_id tha
       }> = [];
 
       // Process visualizations sequentially
-      for (const vizInput of visualizations) {
+      for (let i = 0; i < visualizations.length; i++) {
+        const vizInput = visualizations[i];
         const { query: nlQuery, index, chartType, esql } = vizInput;
+
+        events.reportProgress(
+          `Creating visualization ${i + 1} of ${visualizations.length}: "${nlQuery}"`
+        );
 
         try {
           // Step 1: Determine chart type if not provided

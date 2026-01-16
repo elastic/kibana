@@ -22,7 +22,7 @@ import type {
   ToolResultStore,
 } from '@kbn/agent-builder-server';
 import { isToolResultId } from '@kbn/agent-builder-server';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common';
 import {
   DEFAULT_PANEL_HEIGHT,
   SMALL_PANEL_WIDTH,
