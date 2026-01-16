@@ -49,6 +49,10 @@ import {
   fromAPItoLensState as fromPartitionAPItoLensState,
   fromLensStateToAPI as fromPartitionLensStateToAPI,
 } from './transforms/charts/partition';
+import {
+  fromAPItoLensState as fromDatatableAPItoLensState,
+  fromLensStateToAPI as fromDatatableLensStateToAPI,
+} from './transforms/charts/datatable';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
@@ -62,6 +66,7 @@ const compatibilityMap: Record<string, string> = {
   lnsTagcloud: 'tagcloud',
   lnsChoropleth: 'region_map',
   lnsPie: 'pie',
+  lnsDatatable: 'datatable',
 };
 
 /**
@@ -123,6 +128,10 @@ const apiConvertersByChart = {
     fromLensStateToAPI: fromRegionMapLensStateToAPI,
   },
   ...addPartitionChartConverters(),
+  datatable: {
+    fromAPItoLensState: fromDatatableAPItoLensState,
+    fromLensStateToAPI: fromDatatableLensStateToAPI,
+  },
 } as const;
 
 export class LensConfigBuilder {
