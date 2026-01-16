@@ -15,7 +15,7 @@ import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from './constants';
 import { bulkAlertActionDataSchema, type BulkAlertActionData } from './schemas/alert_action_schema';
 
 @injectable()
-export class BulkAlertActionRoute {
+export class BulkCreateAlertActionRoute {
   static method = 'post' as const;
   static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/action/_bulk`;
   static security: RouteSecurity = {

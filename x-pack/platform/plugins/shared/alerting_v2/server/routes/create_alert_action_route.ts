@@ -20,7 +20,7 @@ import {
 } from './schemas/alert_action_schema';
 
 @injectable()
-export class AlertActionRoute {
+export class CreateAlertActionRoute {
   static method = 'post' as const;
   static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/{alert_series_id}/action`;
   static security: RouteSecurity = {
