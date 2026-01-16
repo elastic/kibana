@@ -622,7 +622,8 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2d-standard-4
+      machineType: n2-standard-4
+      diskSizeGb: 105
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
     timeout_in_minutes: 75
@@ -639,7 +640,8 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2d-standard-4
+      machineType: n2-standard-4
+      diskSizeGb: 105
       preemptible: true
       spotZones: us-central1-f,us-central1-a,us-central1-b,us-central1-c
     timeout_in_minutes: 75

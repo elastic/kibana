@@ -14,6 +14,8 @@
           "({ application, codeSnippet, consolePlugin, languageType, languages, assetBasePath, selectedLanguage, setSelectedLanguage, sharePlugin, consoleRequest, consoleTitle, showTopBar, }: CodeBoxProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/code_box.tsx",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "CodeBoxProps"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/code_box.tsx",
+            "lineNumber": 51,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -55,6 +59,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,6 +81,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 33,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -102,6 +110,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+        "lineNumber": 63,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +132,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 63,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -149,6 +161,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -169,6 +183,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "lineNumber": 35,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -196,6 +212,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -216,6 +234,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 35,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -243,6 +263,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -263,6 +285,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 60,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -298,6 +322,8 @@
           " | undefined) => string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -319,6 +345,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -341,6 +369,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -384,6 +414,8 @@
           ") => string"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -406,6 +438,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -428,6 +462,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -449,6 +485,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -468,6 +506,8 @@
           "({ assetBasePath, label, href, \"aria-label\": ariaLabel }: { assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/github_link.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -482,6 +522,8 @@
               "{ assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/github_link.tsx",
+            "lineNumber": 19,
+            "columnNumber": 7,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -509,6 +551,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+        "lineNumber": 57,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -529,6 +573,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 57,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -547,6 +593,8 @@
         "label": "EisCloudConnectPromoCalloutProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -558,6 +606,8 @@
             "label": "promoId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -569,6 +619,8 @@
             "label": "isSelfManaged",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -583,6 +635,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -599,6 +653,8 @@
               "\"row\" | \"column\""
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -613,6 +669,8 @@
               "\"top\" | \"bottom\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -636,6 +694,8 @@
           "\nProps for the EisCloudConnectPromoTour component.\n"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -650,6 +710,8 @@
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -664,6 +726,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -677,6 +741,8 @@
             "label": "promoId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -688,6 +754,8 @@
             "label": "isSelfManaged",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -702,6 +770,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -716,6 +786,8 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -730,6 +802,8 @@
         "label": "EisPromotionalCalloutProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -741,6 +815,8 @@
             "label": "ctaLink",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -752,6 +828,8 @@
             "label": "promoId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -763,6 +841,8 @@
             "label": "isCloudEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -777,6 +857,8 @@
               "\"row\" | \"column\""
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -791,6 +873,8 @@
         "label": "EisPromotionalTourProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -805,6 +889,8 @@
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -819,6 +905,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -830,6 +918,8 @@
             "label": "promoId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -841,6 +931,8 @@
             "label": "isCloudEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -855,6 +947,8 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -879,6 +973,8 @@
           "\nProps for the EisUpdateCallout component.\n"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -890,6 +986,8 @@
             "label": "ctaLink",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -901,6 +999,8 @@
             "label": "promoId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -912,6 +1012,8 @@
             "label": "shouldShowEisUpdateCallout",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -926,6 +1028,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -942,6 +1046,8 @@
               "\"row\" | \"column\""
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -956,6 +1062,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -970,6 +1078,8 @@
               "\"top\" | \"bottom\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -993,6 +1103,8 @@
           "\nProps for the InferenceCostsTransparencyTour component.\n"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1007,6 +1119,8 @@
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1021,6 +1135,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1032,6 +1148,8 @@
             "label": "promoId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1043,6 +1161,8 @@
             "label": "isCloudEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1057,6 +1177,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1071,6 +1193,8 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1085,6 +1209,8 @@
         "label": "LanguageDefinition",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1096,6 +1222,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1116,6 +1244,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1127,6 +1257,8 @@
             "label": "iconType",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1141,6 +1273,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1155,6 +1289,8 @@
               "CodeSnippet | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1169,6 +1305,8 @@
               "CodeSnippet | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1183,6 +1321,8 @@
               "CodeSnippet | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1197,6 +1337,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1211,6 +1353,8 @@
               "CodeSnippet | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1225,6 +1369,8 @@
               "CodeSnippet | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1239,6 +1385,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1253,6 +1401,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1267,6 +1417,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1281,6 +1433,8 @@
               "{ link: string; label: string; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1295,6 +1449,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1309,6 +1465,8 @@
         "label": "LanguageDefinitionSnippetArguments",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1320,6 +1478,8 @@
             "label": "url",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1331,6 +1491,8 @@
             "label": "apiKey",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1345,6 +1507,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1359,6 +1523,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1373,6 +1539,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1387,6 +1555,8 @@
               "Record<string, boolean> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1401,6 +1571,8 @@
         "label": "SearchApiPanelsServicesContext",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1415,6 +1587,8 @@
               "ApplicationStart"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1429,6 +1603,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1445,6 +1621,8 @@
         "label": "Languages",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
