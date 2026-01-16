@@ -55,7 +55,8 @@ const getLogsSchema = z.object({
     .optional()
     .describe(
       'The field containing the log message. Use "message" for ECS logs or "body.text" for OpenTelemetry logs. Defaults to "message".'
-    ),
+    )
+    .default('message'),
 });
 
 export function createGetLogCategoriesTool({
@@ -101,14 +102,7 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, { esClient }) => {
-      const {
-        index,
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        kqlFilter,
-        fields = [],
-        messageField = 'message',
-      } = toolParams;
+      const { index, start, end, kqlFilter, fields = [], messageField } = toolParams;
 
       try {
         const { highSeverityCategories, lowSeverityCategories } = await getToolHandler({
