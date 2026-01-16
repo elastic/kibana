@@ -1886,8 +1886,9 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.ci/.storybook @elastic/kibana-operations
 /src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/obs-ui-devex-team
 
-# QA - Appex QA
+# QA - AppEx QA
 .buildkite/scout_ci_config.yml @elastic/appex-qa
+.github/instructions/scout.instructions.md @elastic/appex-qa
 /x-pack/platform/test/index.d.ts @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
