@@ -195,5 +195,91 @@ describe('QueryService', () => {
       expect(result).toHaveLength(0);
       expect(result).toEqual([]);
     });
+
+    it('should un-flatten column names with dots into nested objects', () => {
+      const mockResponse: ESQLSearchResponse = {
+        columns: [
+          { name: 'rule.id', type: 'keyword' },
+          { name: 'rule.name', type: 'keyword' },
+          { name: 'alert_series_id', type: 'keyword' },
+        ],
+        values: [
+          ['rule-1', 'Test Rule', 'series-1'],
+          ['rule-2', 'Another Rule', 'series-2'],
+        ],
+      };
+
+      const result = esqlService.queryResponseToRecords(mockResponse);
+
+      expect(result).toHaveLength(2);
+      expect(result).toEqual([
+        {
+          rule: {
+            id: 'rule-1',
+            name: 'Test Rule',
+          },
+          alert_series_id: 'series-1',
+        },
+        {
+          rule: {
+            id: 'rule-2',
+            name: 'Another Rule',
+          },
+          alert_series_id: 'series-2',
+        },
+      ]);
+    });
+
+    it('should handle multiple levels of nesting', () => {
+      const mockResponse: ESQLSearchResponse = {
+        columns: [
+          { name: 'a.b.c', type: 'keyword' },
+          { name: 'a.b.d', type: 'keyword' },
+          { name: 'x.y', type: 'keyword' },
+        ],
+        values: [['value1', 'value2', 'value3']],
+      };
+
+      const result = esqlService.queryResponseToRecords(mockResponse);
+
+      expect(result).toHaveLength(1);
+      expect(result).toEqual([
+        {
+          a: {
+            b: {
+              c: 'value1',
+              d: 'value2',
+            },
+          },
+          x: {
+            y: 'value3',
+          },
+        },
+      ]);
+    });
+
+    it('should handle mixed flattened and non-flattened column names', () => {
+      const mockResponse: ESQLSearchResponse = {
+        columns: [
+          { name: 'simple_field', type: 'keyword' },
+          { name: 'nested.field', type: 'keyword' },
+          { name: '@timestamp', type: 'date' },
+        ],
+        values: [['simple-value', 'nested-value', '2026-01-02T10:29:31.019Z']],
+      };
+
+      const result = esqlService.queryResponseToRecords(mockResponse);
+
+      expect(result).toHaveLength(1);
+      expect(result).toEqual([
+        {
+          simple_field: 'simple-value',
+          nested: {
+            field: 'nested-value',
+          },
+          '@timestamp': '2026-01-02T10:29:31.019Z',
+        },
+      ]);
+    });
   });
 });

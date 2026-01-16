@@ -9,17 +9,19 @@ import Boom from '@hapi/boom';
 import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { from, keep, limit, sort, SortOrder, where } from '@kbn/esql-composer';
+import { from, limit, sort, SortOrder, where } from '@kbn/esql-composer';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable, optional } from 'inversify';
-import { omit, zipObject } from 'lodash';
 import pLimit from 'p-limit';
 import {
   ALERT_ACTIONS_DATA_STREAM,
   type AlertAction as AlertActionDocument,
 } from '../../resources/alert_actions';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
-import { ALERT_TRANSITIONS_DATA_STREAM } from '../../resources/alert_transitions';
+import { ALERT_EVENTS_DATA_STREAM, type AlertEvent } from '../../resources/alert_events';
+import {
+  ALERT_TRANSITIONS_DATA_STREAM,
+  type AlertTransition,
+} from '../../resources/alert_transitions';
 import type {
   BulkCreateAlertActionItemData,
   CreateAlertActionData,
@@ -27,12 +29,6 @@ import type {
 import { QueryService } from '../services/query_service/query_service';
 import type { StorageService } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
-import {
-  alertEventSchema,
-  alertTransitionSchema,
-  type AlertEvent,
-  type AlertTransition,
-} from './types';
 
 @injectable()
 export class AlertActionsClient {
@@ -128,17 +124,23 @@ export class AlertActionsClient {
     alertTransition: AlertTransition;
     username: string | null;
   }): AlertActionDocument {
-    const { action, alertEvent, alertSeriesId, alertTransition, username } = params;
+    const {
+      action: { episode_id, action_type, ...actionData },
+      alertEvent,
+      alertSeriesId,
+      alertTransition,
+      username,
+    } = params;
 
     return {
       '@timestamp': new Date().toISOString(),
       alert_series_id: alertSeriesId,
       last_series_event_timestamp: alertEvent['@timestamp'],
       actor: username,
-      action_type: action.action_type,
+      action_type,
       episode_id: alertTransition.episode_id,
-      rule_id: alertEvent['rule.id'],
-      ...omit(action, 'action_type', 'episode_id'),
+      rule_id: alertEvent.rule.id,
+      ...actionData,
     };
   }
 
@@ -146,21 +148,17 @@ export class AlertActionsClient {
     const query = from(ALERT_EVENTS_DATA_STREAM).pipe(
       where(`alert_series_id == ?alertSeriesId`, { alertSeriesId }),
       sort({ '@timestamp': SortOrder.Desc }),
-      keep(['@timestamp', 'rule.id']),
       limit(1)
     );
-    const result = await this.queryService.executeQuery({ query: query.toString() });
+    const result = this.queryService.queryResponseToRecords<AlertEvent>(
+      await this.queryService.executeQuery({ query: query.toString() })
+    );
 
-    if (result.values.length === 0) {
+    if (result.length === 0) {
       throw Boom.notFound(`Alert event with series id [${alertSeriesId}] not found`);
     }
 
-    return alertEventSchema.parse(
-      zipObject(
-        result.columns.map((col) => col.name),
-        result.values[0]
-      )
-    );
+    return result[0];
   }
 
   private async findLastAlertTransitionBySeriesIdOrThrow(
@@ -175,22 +173,18 @@ export class AlertActionsClient {
     const query = from(ALERT_TRANSITIONS_DATA_STREAM).pipe(
       where(whereCriteria, { alertSeriesId, episodeId }),
       sort({ '@timestamp': SortOrder.Desc }),
-      keep(['episode_id']),
       limit(1)
     );
-    const result = await this.queryService.executeQuery({ query: query.toString() });
+    const result = this.queryService.queryResponseToRecords<AlertTransition>(
+      await this.queryService.executeQuery({ query: query.toString() })
+    );
 
-    if (result.values.length === 0) {
+    if (result.length === 0) {
       throw Boom.notFound(
         `Alert transition with series id [${alertSeriesId}] and optional episode id [${episodeId}] not found`
       );
     }
 
-    return alertTransitionSchema.parse(
-      zipObject(
-        result.columns.map((col) => col.name),
-        result.values[0]
-      )
-    );
+    return result[0];
   }
 }
