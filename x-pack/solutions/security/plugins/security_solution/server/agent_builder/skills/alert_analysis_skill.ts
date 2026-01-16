@@ -15,7 +15,7 @@ import { z } from '@kbn/zod';
  * Threat analysis skill for security operations.
  * This skill helps analyze security threats, investigate alerts, and assess risk.
  */
-export const threatAnalysisSkill = defineSkillType({
+export const alertAnalysisSkill = defineSkillType({
   id: 'security.alert-analysis',
   name: 'alert-analysis',
   path: 'skills/security/alerts',
