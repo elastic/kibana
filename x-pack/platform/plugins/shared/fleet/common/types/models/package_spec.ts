@@ -7,6 +7,25 @@
 
 import type { RegistryElasticsearch, RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
 
+// Based on https://github.com/elastic/package-spec/blob/main/spec/integration/manifest.spec.yml
+export interface RegistryVarGroupOption {
+  name: string;
+  title: string;
+  description?: string;
+  vars: string[];
+  hide_in_deployment_modes?: Array<'default' | 'agentless'>;
+  // Additional properties allowed for feature-specific extensions (e.g., provider, iac_template_url)
+  [key: string]: unknown;
+}
+
+export interface RegistryVarGroup {
+  name: string;
+  title: string;
+  selector_title: string;
+  description?: string;
+  options: RegistryVarGroupOption[];
+}
+
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
   format_version?: string;
@@ -27,6 +46,7 @@ export interface PackageSpecManifest {
   policy_templates_behavior?: 'all' | 'combined_policy' | 'individual_policies';
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
+  var_groups?: RegistryVarGroup[];
   owner: { github?: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,

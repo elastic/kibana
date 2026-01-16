@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../../../../../../common/constants';
 import type { PackagePolicy } from '../../../../../../../../../common/types';
+import type { RegistryVarGroup } from '../../../../../../types';
 import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
 import { useGetOutputs, useLicense } from '../../../../../../hooks';
+
+import { computeDefaultVarGroupSelections } from './var_group_selector';
+import type { VarGroupSelection } from './var_group_selector';
 
 export function useDataStreamId() {
   const history = useHistory();
@@ -43,4 +47,53 @@ export function useOutputs(
     canUseOutputPerIntegration,
     allowedOutputs,
   };
+}
+
+interface UseVarGroupSelectionsParams<T extends { var_group_selections?: VarGroupSelection }> {
+  varGroups: RegistryVarGroup[] | undefined;
+  savedSelections: VarGroupSelection | undefined;
+  isAgentlessEnabled: boolean;
+  onSelectionsChange: (update: Pick<T, 'var_group_selections'>) => void;
+}
+
+/**
+ * Hook for managing var group selections state.
+ * Handles deriving current selections, initializing defaults, and selection changes.
+ */
+export function useVarGroupSelections<T extends { var_group_selections?: VarGroupSelection }>({
+  varGroups,
+  savedSelections,
+  isAgentlessEnabled,
+  onSelectionsChange,
+}: UseVarGroupSelectionsParams<T>) {
+  // Derive current selections from saved or compute defaults
+  const selections = useMemo((): VarGroupSelection => {
+    if (savedSelections) return savedSelections;
+    return computeDefaultVarGroupSelections(varGroups, isAgentlessEnabled);
+  }, [savedSelections, varGroups, isAgentlessEnabled]);
+
+  // Initialize with defaults on mount if not already set
+  useEffect(() => {
+    if (varGroups && varGroups.length > 0 && !savedSelections) {
+      const defaults = computeDefaultVarGroupSelections(varGroups, isAgentlessEnabled);
+      if (Object.keys(defaults).length > 0) {
+        onSelectionsChange({ var_group_selections: defaults } as Pick<T, 'var_group_selections'>);
+      }
+    }
+  }, [varGroups, isAgentlessEnabled, savedSelections, onSelectionsChange]);
+
+  // Handle selection change
+  const handleSelectionChange = useCallback(
+    (groupName: string, optionName: string) => {
+      onSelectionsChange({
+        var_group_selections: {
+          ...savedSelections,
+          [groupName]: optionName,
+        },
+      } as Pick<T, 'var_group_selections'>);
+    },
+    [savedSelections, onSelectionsChange]
+  );
+
+  return { selections, handleSelectionChange };
 }

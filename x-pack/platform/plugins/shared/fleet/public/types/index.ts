@@ -107,6 +107,8 @@ export type {
   RegistryStream,
   RegistryStreamWithDataStream,
   RegistryPolicyTemplate,
+  RegistryVarGroup,
+  RegistryVarGroupOption,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,
