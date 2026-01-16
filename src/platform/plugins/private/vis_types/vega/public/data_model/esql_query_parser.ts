@@ -166,7 +166,7 @@ export class EsqlQueryParser {
 
       if (requestObject) {
         const esqlResponse = data.rawResponse as unknown as ESQLSearchResponse;
-        const rowData = this._transformColumnarToRows(esqlResponse);
+        const rowData = this._transformEsqlRowsToVegaRows(esqlResponse);
 
         requestObject.dataObject.url = requestObject.url;
         requestObject.dataObject.values = rowData;
@@ -209,7 +209,7 @@ export class EsqlQueryParser {
   /**
    * Transform ES|QL columnar response to Vega row-based format
    */
-  private _transformColumnarToRows(response: ESQLSearchResponse): Record<string, unknown>[] {
+  private _transformEsqlRowsToVegaRows(response: ESQLSearchResponse): Record<string, unknown>[] {
     try {
       // Check response validity before destructuring
       if (!response || !response.columns) {
