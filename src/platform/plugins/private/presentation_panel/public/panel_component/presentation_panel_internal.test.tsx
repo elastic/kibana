@@ -360,5 +360,159 @@ describe('Presentation panel', () => {
       await renderPresentationPanel({ api });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
+
+    it('passes titleHighlight prop through to PresentationPanelHeader', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        title$: new BehaviorSubject<string | undefined>('CPU Usage'),
+      };
+      const { container } = render(
+        <EuiThemeProvider>
+          <PresentationPanel
+            Component={getMockPresentationPanelCompatibleComponent(api)}
+            titleHighlight="cpu"
+          />
+        </EuiThemeProvider>
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitle')).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        const mark = container.querySelector('mark');
+        expect(mark).toBeInTheDocument();
+      });
+    });
+
+    it('title highlighting works when titleHighlight is provided via props', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        title$: new BehaviorSubject<string | undefined>('CPU Usage'),
+      };
+      const { container } = render(
+        <EuiThemeProvider>
+          <PresentationPanel
+            Component={getMockPresentationPanelCompatibleComponent(api)}
+            titleHighlight="cpu"
+          />
+        </EuiThemeProvider>
+      );
+      await waitFor(() => {
+        const titleElement = screen.getByTestId('embeddablePanelTitle');
+        expect(titleElement).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        const mark = container.querySelector('mark');
+        expect(mark).toBeInTheDocument();
+      });
+    });
+
+    it('title highlighting works with both custom title and default title', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        title$: new BehaviorSubject<string | undefined>('Custom Title'),
+        defaultTitle$: new BehaviorSubject<string | undefined>('Default Title'),
+      };
+      const { container } = render(
+        <EuiThemeProvider>
+          <PresentationPanel
+            Component={getMockPresentationPanelCompatibleComponent(api)}
+            titleHighlight="custom"
+          />
+        </EuiThemeProvider>
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitle')).toHaveTextContent('Custom Title');
+      });
+      await waitFor(() => {
+        const mark = container.querySelector('mark');
+        expect(mark).toBeInTheDocument();
+        expect(mark?.textContent?.toLowerCase()).toBe('custom');
+      });
+    });
+
+    it('title highlighting works in both view and edit modes', async () => {
+      const apiView: DefaultPresentationPanelApi & PublishesViewMode = {
+        uuid: 'test',
+        title$: new BehaviorSubject<string | undefined>('CPU Usage'),
+        viewMode$: new BehaviorSubject<ViewMode>('view'),
+      };
+      const { container: containerView } = render(
+        <EuiThemeProvider>
+          <PresentationPanel
+            Component={getMockPresentationPanelCompatibleComponent(apiView)}
+            titleHighlight="cpu"
+          />
+        </EuiThemeProvider>
+      );
+      await waitFor(() => {
+        const titleElement = screen.getByTestId('embeddablePanelTitle');
+        expect(titleElement).toBeInTheDocument();
+        expect(titleElement.nodeName).toBe('SPAN');
+      });
+      await waitFor(() => {
+        const mark = containerView.querySelector('mark');
+        expect(mark).toBeInTheDocument();
+      });
+
+      const apiEdit: DefaultPresentationPanelApi & PublishesViewMode = {
+        uuid: 'test-edit',
+        title$: new BehaviorSubject<string | undefined>('CPU Usage'),
+        viewMode$: new BehaviorSubject<ViewMode>('edit'),
+        isCustomizable: true,
+      };
+      const { container: containerEdit } = render(
+        <EuiThemeProvider>
+          <PresentationPanel
+            Component={getMockPresentationPanelCompatibleComponent(apiEdit)}
+            titleHighlight="cpu"
+          />
+        </EuiThemeProvider>
+      );
+      await waitFor(() => {
+        const titleElement = screen.getAllByTestId('embeddablePanelTitle')[1];
+        expect(titleElement).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        const mark = containerEdit.querySelector('mark');
+        expect(mark).toBeInTheDocument();
+      });
+    });
+
+    it('title highlighting works when title is hidden (should not render)', async () => {
+      const api: DefaultPresentationPanelApi & PublishesViewMode = {
+        uuid: 'test',
+        title$: new BehaviorSubject<string | undefined>('CPU Usage'),
+        hideTitle$: new BehaviorSubject<boolean | undefined>(true),
+        viewMode$: new BehaviorSubject<ViewMode>('view'),
+      };
+      await renderPresentationPanel({ api, props: { titleHighlight: 'cpu' } });
+      expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('titleHighlight integration', () => {
+    it('end-to-end: titleHighlight prop flows from PresentationPanelInternal → PresentationPanelHeader → PresentationPanelTitle → renders highlighted text', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        title$: new BehaviorSubject<string | undefined>('CPU Usage'),
+      };
+      const { container } = render(
+        <EuiThemeProvider>
+          <PresentationPanel
+            Component={getMockPresentationPanelCompatibleComponent(api)}
+            titleHighlight="cpu"
+          />
+        </EuiThemeProvider>
+      );
+      await waitFor(() => {
+        const titleElement = screen.getByTestId('embeddablePanelTitle');
+        expect(titleElement).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        const mark = container.querySelector('mark');
+        expect(mark).toBeInTheDocument();
+        expect(mark?.textContent?.toLowerCase()).toBe('cpu');
+      });
+    });
   });
 });
