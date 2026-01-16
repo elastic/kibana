@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'crossClusterReplication',
   ]);
   const a11y = getService('a11y');
-  const testSubjects = getService('testSubjects');
   const find = getService('find');
   const es = getService('es');
   const retry = getService('retry');
