@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { PrivMonUtils, PlainIndexSyncUtils } from './utils';
 
@@ -103,10 +104,36 @@ export default ({ getService }: FtrProviderContext) => {
         privMonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
       });
 
-      it('should not update timestamps when re-syncing the same user', async () => {
+      it(`should not update timestamps when re-syncing the same user`, async () => {
         const user1 = { name: 'user1' };
         await indexSyncUtils.addUsersToIndex([user1.name]);
         await indexSyncUtils.createEntitySourceForIndex();
+
+        await waitFor(
+          async () => {
+            const res = await api.listEntitySources({ query: {} });
+            const sources = res.body.sources;
+            const indexSource = sources.find(
+              (source: any) => source.type === 'index' && source.indexPattern === indexName
+            );
+
+            log.info(
+              `Index entity sources: ${JSON.stringify(
+                sources
+                  .filter((source: any) => source.type === 'index')
+                  .map((source: any) => ({
+                    name: source.name,
+                    indexPattern: source.indexPattern,
+                    enabled: source.enabled,
+                  }))
+              )}`
+            );
+
+            return Boolean(indexSource?.enabled);
+          },
+          'wait for index entity source to be available',
+          log
+        );
 
         const usersAfterFirstSync = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
         const user1AfterFirstSync = privMonUtils.findUser(usersAfterFirstSync, user1.name);
