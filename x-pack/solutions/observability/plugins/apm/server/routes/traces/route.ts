@@ -542,14 +542,14 @@ const unifiedTraceSpanRoute = createApmServerRoute({
 const tracesDataSourcesSummaryRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces_data_sources_summary',
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ hasEcs: boolean; hasUnprocessedOtel: boolean }> => {
+  handler: async (resources): Promise<{ ecs: boolean; unprocessedOtel: boolean }> => {
     const apmEventClient = await getApmEventClient(resources);
-    const [hasEcs, hasUnprocessedOtel] = await Promise.all([
+    const [ecs, unprocessedOtel] = await Promise.all([
       hasTracesEcsData(apmEventClient),
       hasTracesUnprocessedOtelData(apmEventClient),
     ]);
 
-    return { hasEcs, hasUnprocessedOtel };
+    return { ecs, unprocessedOtel };
   },
 });
 
