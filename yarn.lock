@@ -2665,9 +2665,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./eui_111.1.0_append_prepend_with_form_control_button_04.tgz":
+"@elastic/eui@file:./eui_111.1.0_append_prepend_with_form_control_button_05.tgz":
   version "111.1.0"
-  resolved "file:./eui_111.1.0_append_prepend_with_form_control_button_04.tgz#bbdd2195dd0a0e7cc0532ca256d19d78879aff86"
+  resolved "file:./eui_111.1.0_append_prepend_with_form_control_button_05.tgz#c0997bcf32165ed94ffb6ac9c0e147f200edf6e7"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
