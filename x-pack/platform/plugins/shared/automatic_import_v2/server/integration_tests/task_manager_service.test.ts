@@ -8,7 +8,6 @@
 import type {
   CoreSetup,
   ElasticsearchClient,
-  FakeRawRequest,
   KibanaRequest,
   SavedObjectsClient,
 } from '@kbn/core/server';
@@ -30,6 +29,7 @@ import type {
 import type { IntegrationParams, DataStreamParams } from '../routes/types';
 import { mockAuthenticatedUser } from '../__mocks__/saved_objects';
 import type { AutomaticImportV2PluginStartDependencies } from '..';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 const taskManagerSetupSpy = jest.spyOn(TaskManagerPlugin.prototype, 'setup');
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
@@ -45,7 +45,7 @@ describe('TaskManagerService Integration Tests', () => {
   let taskManagerService: TaskManagerService;
   let taskManagerSetup: TaskManagerSetupContract;
   let taskManagerStart: TaskManagerStartContract;
-  let fakeRawRequest: FakeRawRequest;
+  let kibanaRequest: KibanaRequest;
 
   beforeAll(async () => {
     try {
@@ -79,12 +79,12 @@ describe('TaskManagerService Integration Tests', () => {
       expect(taskManagerStartSpy).toHaveBeenCalled();
       taskManagerStart = taskManagerStartSpy.mock.results[0].value;
 
-      fakeRawRequest = {
+      const encodedApiKey = Buffer.from('test-api-key-id:test-api-key').toString('base64');
+      kibanaRequest = httpServerMock.createFakeKibanaRequest({
         headers: {
-          authorization: `ApiKey skdjtq4u543yt3rhewrh`,
+          authorization: `ApiKey ${encodedApiKey}`,
         },
-        path: '/',
-      };
+      });
 
       const savedObjectsClient =
         coreStart.savedObjects.createInternalRepository() as unknown as SavedObjectsClient;
@@ -175,7 +175,7 @@ describe('TaskManagerService Integration Tests', () => {
 
       const scheduledTask = await taskManagerService.scheduleDataStreamCreationTask(
         taskParams,
-        fakeRawRequest as unknown as KibanaRequest
+        kibanaRequest
       );
 
       expect(scheduledTask).toBeDefined();
@@ -266,7 +266,7 @@ describe('TaskManagerService Integration Tests', () => {
 
           const scheduledTask = await taskManagerService.scheduleDataStreamCreationTask(
             taskParams,
-            fakeRawRequest as unknown as KibanaRequest
+            kibanaRequest
           );
 
           // Create data stream with task reference
@@ -316,7 +316,7 @@ describe('TaskManagerService Integration Tests', () => {
 
         const duplicateTaskResponse = await taskManagerService.scheduleDataStreamCreationTask(
           duplicateTaskParams,
-          fakeRawRequest as unknown as KibanaRequest
+          kibanaRequest
         );
 
         // Should return the same task ID as the existing one
