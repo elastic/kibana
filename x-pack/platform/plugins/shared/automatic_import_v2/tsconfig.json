@@ -45,5 +45,6 @@
     "@kbn/management-settings-ids",
     "@kbn/langchain",
     "@kbn/core-lifecycle-browser-mocks",
+    "@kbn/core-http-server-mocks",
   ]
 }
