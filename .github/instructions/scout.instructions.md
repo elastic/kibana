@@ -1,30 +1,128 @@
 ---
-applyTo: '*.spec.ts'
+name: Scout best practices
+description: Copilot guidance for Scout tests and fixtures under test/scout and test/scout_*.
+applyTo: '{**/test/scout/**/*.ts,**/test/scout_*/**/*.ts}'
 ---
 
-# Instructions
+Your job is to review PRs adding or updating Scout tests to make sure they follow best practices. Be thorough — your goal is to catch **every** issue, not just the obvious ones.
 
-You are reviewing files inside Scout test folders. Your goal is to ensure these files are in line with the Scout best practices outlined in "Best practices for Scout tests" below.
+# Review Style
 
-# Comment format
+## Thoroughness
 
-You MUST use this exact format for EVERY comment. Do not deviate:
+- **Review every file and every test.** Do not skip files or stop early.
+- **Comment on every issue you find.** More comments are better than fewer. If you see 10 issues, leave 10 comments.
+- **Use the Quick reference tables as a checklist.** Scan each file against every item in the checklist.
+- **Check for anti-patterns explicitly.**
+- **When in doubt, comment.** A cautious flag is better than a missed issue.
+
+## Comment quality
+
+- Keep each comment short, specific, and actionable.
+- Include the reason when it affects stability or behavior.
+- Pair each issue with a concrete fix or code suggestion.
+- Reference the best-practice section title in every comment.
+- One issue per comment—split unrelated fixes into separate comments.
+- Briefly acknowledge good patterns without distracting from fixes.
+
+### Copilot comment format
+
+Use this callout-style format for Scout-related review comments:
 
 > 📘 **Scout Best Practice:** `<section title>`
 
-**Issue:** <one sentence describing what is wrong>
+**Issue:** <what is off / risky>
 
-**Why:** <why this matters — impact on stability, speed, or maintainability>
+**Fix:** <what to change, preferably with a concrete suggestion or snippet>
 
-**Fix:** <concrete fix or code suggestion>
+If there is no exact best-practice match, use `General` and ground the comment in the closest principle (stability, readability, speed, or correctness).
 
-# Review thoroughness
+---
 
-- **Review every file and every test.** Do not skip files or stop early.
-- **Comment on every issue.** If you find 10 issues, leave 10 separate comments.
-- **When in doubt, comment.** A cautious flag is better than a missed issue.
+### Sample Scout review comments
+
+> 📘 **Scout Best Practice:** Use test.step for multi-step flows
+
+**Issue:** The flow is split across two `test()` blocks, so it replays `beforeEach` and resets browser state.
+
+**Fix:** Merge the steps into a single `test()` and wrap each phase with `test.step(...)` for clearer reporting.
+
+---
+
+> 📘 **Scout Best Practice:** Put cleanup code in hooks, not in the test body
+
+**Issue:** Cleanup runs after assertions inside the test body, so it will be skipped on failure.
+
+**Fix:** Move the delete call into `afterEach` (or `afterAll` if shared) to guarantee cleanup.
+
+---
+
+> 📘 **Scout Best Practice:** Locate UI elements reliably
+
+**Issue:** The locator uses `getByText`, which is fragile with translations and can match multiple nodes.
+
+**Fix:** Add a `data-test-subj` in the UI and use `page.testSubj` in the test.
+
+---
+
+> 📘 **Scout Best Practice:** Prefer Kibana APIs over UI for setup and teardown
+
+**Issue:** The test navigates through the UI to set time range in `beforeEach`, which is slow and brittle.
+
+**Fix:** Use `uiSettings.setDefaultTime(...)` in setup and reserve UI actions for what the test is validating.
+
+---
+
+> 📘 **Scout Best Practice:** Use Scout's default timeouts
+
+**Issue:** The test overrides timeouts to 120s, which hides slow behavior and conflicts with Scout defaults.
+
+**Fix:** Remove the custom timeout and investigate the slow operation. If needed, keep a shorter, justified override with a comment.
 
 # Best practices for Scout tests
+
+This guide covers best practices for writing Scout UI and API tests that are reliable, maintainable, and fast. Since Scout is built on Playwright, we also recommend reading the official [Playwright Best Practices](https://playwright.dev/docs/best-practices).
+
+> **New to Scout?** Start with [What is Scout?](introduction.md)
+
+## Quick reference
+
+**UI and API tests**
+
+| Question                                 | Section                                                                                                                |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| How should I **organize** my test files? | [Organize test suites by role and user flow](#organize-test-suites-by-role-and-user-flow)                              |
+| Where should **shared setup** go?        | [Move repeated one-time setup to a global setup hook](#move-repeated-one-time-setup-operations-to-a-global-setup-hook) |
+| Where should **cleanup code** go?        | [Put cleanup code in hooks, not in the test body](#put-cleanup-code-in-hooks-not-in-the-test-body)                     |
+| What **permissions** should my test use? | [Test with minimal permissions](#test-with-minimal-permissions-avoid-admin-when-possible)                              |
+| How do I know if my test is **flaky**?   | [Use the Flaky Test Runner to catch flaky tests early](#use-the-flaky-test-runner-to-catch-flaky-tests-early)          |
+
+**UI tests**
+
+| Question                                                             | Section                                                                                                       |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| What should I test in **UI tests** vs **API tests**?                 | [Focus UI tests on behavior, not data correctness](#focus-ui-tests-on-behavior-not-data-correctness)          |
+| Should my tests run in **parallel** or **sequentially**?             | [Run tests in parallel whenever possible](#run-tests-in-parallel-whenever-possible)                           |
+| Should I split into multiple `test()` blocks or use **`test.step`**? | [Use `test.step` for multi-step flows](#use-teststep-for-multi-step-flows)                                    |
+| How should I set up **test data**?                                   | [Prefer Kibana APIs over UI for setup and teardown](#prefer-kibana-apis-over-ui-for-setup-and-teardown)       |
+| How do I skip **onboarding screens**?                                | [Skip onboarding flows with `addInitScript`](#skip-onboarding-flows-with-addinitscript)                       |
+| Do I need to add explicit **waits** everywhere?                      | [Leverage Playwright auto-waiting](#leverage-playwright-auto-waiting)                                         |
+| How do I **wait for the UI** to be ready?                            | [Wait for UI updates when the next action requires it](#wait-for-ui-updates-when-the-next-action-requires-it) |
+| How do I test **tables** and **complex components**?                 | [Wait for complex components to fully render](#wait-for-complex-components-to-fully-render)                   |
+| What **locators** should I use?                                      | [Locate UI elements reliably](#locate-ui-elements-reliably)                                                   |
+| Should I change Scout's default **timeouts**?                        | [Use Scout's default timeouts](#use-scouts-default-timeouts)                                                  |
+| How do I write good **page objects**?                                | [Page object tips](#page-object-tips)                                                                         |
+| My test keeps failing — should I add **retries**?                    | [Don't use manual retry loops — fix the source code](#dont-use-manual-retry-loops--fix-the-source-code)       |
+| Should I **contribute** my page object to Scout?                     | [Contribute to Scout when possible](#contribute-to-scout-when-possible)                                       |
+
+**API tests**
+
+| Question                        | Section                                                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Which **fixture** should I use? | [Validate endpoints with `apiClient`](#validate-endpoints-with-apiclient-for-readable-and-scoped-tests)                       |
+| What should I **assert**?       | [Don't just verify the status code, validate the response body](#dont-just-verify-the-status-code-validate-the-response-body) |
+
+---
 
 ## UI and API tests
 
@@ -1053,3 +1151,16 @@ apiTest('should return autocomplete definitions', async ({ apiClient }) => {
 ```
 
 This catches issues like missing fields, wrong types, or empty collections that a status code check would miss.
+
+---
+
+## Contribute to Scout when possible
+
+We welcome contributions to one of the [Scout packages](introduction.md#modular-and-extensible-by-design). This includes page objects, EUI wrappers, API helpers, and more.
+
+| If your code...                               | Then...                                                                                                                                                                                                             |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Could be useful to **reuse in other plugins** | **Platform-wide** functionality should be contributed to `@kbn/scout`.<br/><br/>**Solution-specific** functionality should go to a solution-specific Scout package (e.g. `@kbn/scout-security`, `@kbn/scout-oblt`). |
+| Is **specific to your plugin**                | Keep it in your plugin's test directory                                                                                                                                                                             |
+
+Reach out to the AppEx QA team in the [#kibana-scout](https://elastic.slack.com/archives/C082TSQ672B) channel for guidance.
