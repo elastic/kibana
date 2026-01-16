@@ -36,6 +36,12 @@ import {
   getDriftEventsPipelineId,
   getDriftEventsTransformId,
   getDriftEventsTransformConfig,
+  getSoftwareInventoryTransformId,
+  getSoftwareInventoryTransformConfig,
+  getSoftwareInventoryIndexPattern,
+  getSoftwareInventoryIndexMapping,
+  getSoftwareInventoryPipeline,
+  getSoftwareInventoryPipelineId,
 } from './transforms';
 import {
   createTransform,
@@ -404,6 +410,123 @@ export class EndpointAssetsService {
       transform_id: driftTransformId,
     });
     this.logger.info(`Drift events transform ${driftTransformId} started successfully`);
+  }
+
+  // ===========================================================================
+  // Software Inventory Transform Management
+  // ===========================================================================
+
+  async initializeSoftwareInventoryInfrastructure(): Promise<void> {
+    this.logger.info('Initializing software inventory infrastructure');
+
+    const softwareIndexPattern = getSoftwareInventoryIndexPattern(this.namespace);
+    const softwarePipelineId = getSoftwareInventoryPipelineId(this.namespace);
+    const softwareTransformId = getSoftwareInventoryTransformId(this.namespace);
+
+    // 1. Create software inventory index
+    this.logger.info(`Creating software inventory index: ${softwareIndexPattern}`);
+    const indexMapping = getSoftwareInventoryIndexMapping();
+
+    try {
+      await this.esClient.indices.create({
+        index: softwareIndexPattern,
+        mappings: indexMapping,
+      });
+      this.logger.info(`Software inventory index ${softwareIndexPattern} created successfully`);
+    } catch (error) {
+      if (
+        (error as { meta?: { body?: { error?: { type?: string } } } }).meta?.body?.error?.type ===
+        'resource_already_exists_exception'
+      ) {
+        this.logger.info(`Software inventory index ${softwareIndexPattern} already exists`);
+      } else {
+        throw error;
+      }
+    }
+
+    // 2. Create software inventory ingest pipeline
+    this.logger.info(`Creating software inventory ingest pipeline: ${softwarePipelineId}`);
+    const pipelineConfig = getSoftwareInventoryPipeline(this.namespace);
+
+    await this.esClient.ingest.putPipeline({
+      id: softwarePipelineId,
+      description: pipelineConfig.description,
+      processors: pipelineConfig.processors,
+    });
+
+    this.logger.info(`Software inventory ingest pipeline ${softwarePipelineId} created successfully`);
+
+    // 3. Create software inventory transform
+    this.logger.info(`Creating software inventory transform: ${softwareTransformId}`);
+    const transformConfig = getSoftwareInventoryTransformConfig(this.namespace);
+
+    await createTransform({
+      esClient: this.esClient,
+      transform: transformConfig,
+      logger: this.logger,
+    });
+
+    this.logger.info(`Software inventory transform ${softwareTransformId} created successfully`);
+  }
+
+  async startSoftwareInventoryTransform(): Promise<void> {
+    const softwareTransformId = getSoftwareInventoryTransformId(this.namespace);
+
+    this.logger.info(`Starting software inventory transform: ${softwareTransformId}`);
+    await this.esClient.transform.startTransform({
+      transform_id: softwareTransformId,
+    });
+    this.logger.info(`Software inventory transform ${softwareTransformId} started successfully`);
+  }
+
+  async stopSoftwareInventoryTransform(): Promise<void> {
+    const softwareTransformId = getSoftwareInventoryTransformId(this.namespace);
+
+    this.logger.info(`Stopping software inventory transform: ${softwareTransformId}`);
+    await stopTransform({
+      esClient: this.esClient,
+      logger: this.logger,
+      transformId: softwareTransformId,
+    });
+    this.logger.info(`Software inventory transform ${softwareTransformId} stopped successfully`);
+  }
+
+  async getSoftwareInventoryTransformStatus(): Promise<TransformStatusResponse> {
+    const softwareTransformId = getSoftwareInventoryTransformId(this.namespace);
+
+    try {
+      const stats = await this.esClient.transform.getTransformStats({
+        transform_id: softwareTransformId,
+      });
+
+      const transformStats = stats.transforms[0];
+      if (!transformStats) {
+        return {
+          transform_id: softwareTransformId,
+          status: 'not_found',
+        };
+      }
+
+      return {
+        transform_id: softwareTransformId,
+        status: transformStats.state as 'started' | 'stopped' | 'failed' | 'indexing',
+        documents_processed: transformStats.stats?.documents_processed ?? 0,
+        last_checkpoint: transformStats.checkpointing?.last?.time_upper_bound_millis
+          ? new Date(transformStats.checkpointing.last.time_upper_bound_millis).toISOString()
+          : undefined,
+      };
+    } catch (error) {
+      if (
+        (error as { meta?: { body?: { error?: { type?: string } } } }).meta?.body?.error?.type ===
+        'resource_not_found_exception'
+      ) {
+        return {
+          transform_id: softwareTransformId,
+          status: 'not_found',
+        };
+      }
+      throw error;
+    }
   }
 
   async startTransform(): Promise<void> {

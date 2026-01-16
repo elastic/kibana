@@ -32,6 +32,9 @@ export const OSQUERY_MANAGER_INDEX_PATTERN = 'logs-osquery_manager.*';
 /** Entity Store host index (for future integration) */
 export const ENTITY_STORE_HOST_INDEX_PATTERN = '.entities.v1.latest.security_host_*';
 
+/** Software inventory index (from dedicated transform) */
+export const SOFTWARE_INVENTORY_INDEX_PATTERN = 'software-inventory-osquery-*';
+
 // =============================================================================
 // TRANSFORM CONFIGURATION
 // =============================================================================
@@ -243,6 +246,18 @@ export const ENDPOINT_ASSETS_ROUTES = {
   SNAPSHOT_LIST: `${ENDPOINT_ASSETS_API_BASE}/snapshot/list`,
   /** Compare two Entity Store host snapshots by date */
   SNAPSHOT_COMPARE: `${ENDPOINT_ASSETS_API_BASE}/snapshot/compare`,
+  /** Get software inventory for a specific host */
+  SOFTWARE_INVENTORY: `${ENDPOINT_ASSETS_API_BASE}/software/{host_id}`,
+  /** Get aggregated software overview across all hosts */
+  SOFTWARE_OVERVIEW: `${ENDPOINT_ASSETS_API_BASE}/software/overview`,
+  /** Initialize software inventory transform */
+  SOFTWARE_TRANSFORM_INIT: `${ENDPOINT_ASSETS_API_BASE}/software/transform/init`,
+  /** Start software inventory transform */
+  SOFTWARE_TRANSFORM_START: `${ENDPOINT_ASSETS_API_BASE}/software/transform/start`,
+  /** Stop software inventory transform */
+  SOFTWARE_TRANSFORM_STOP: `${ENDPOINT_ASSETS_API_BASE}/software/transform/stop`,
+  /** Get software inventory transform status */
+  SOFTWARE_TRANSFORM_STATUS: `${ENDPOINT_ASSETS_API_BASE}/software/transform/status`,
 } as const;
 
 // =============================================================================

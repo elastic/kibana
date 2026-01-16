@@ -30,3 +30,14 @@ export {
   getDriftEventsTransformConfig,
   DRIFT_EVENTS_TRANSFORM_PREFIX,
 } from './drift_events_transform';
+
+export {
+  getSoftwareInventoryTransformId,
+  getSoftwareInventoryTransformConfig,
+  getSoftwareInventoryIndexPattern,
+  getSoftwareInventoryIndexMapping,
+  getSoftwareInventoryPipeline,
+  getSoftwareInventoryPipelineId,
+  SOFTWARE_INVENTORY_TRANSFORM_PREFIX,
+  SOFTWARE_INVENTORY_INDEX_PREFIX,
+} from './software_inventory_transform';

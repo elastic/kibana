@@ -43,6 +43,7 @@ export const TEST_IDS = {
   TAB_POSTURE: 'endpoint-assets-tab-posture',
   TAB_DRIFT: 'endpoint-assets-tab-drift',
   TAB_PRIVILEGES: 'endpoint-assets-tab-privileges',
+  TAB_SOFTWARE: 'endpoint-assets-tab-software',
   OVERVIEW_SECTION: 'endpoint-assets-overview-section',
   POSTURE_SCORE: 'endpoint-assets-posture-score',
   DRIFT_SUMMARY: 'endpoint-assets-drift-summary',

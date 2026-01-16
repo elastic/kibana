@@ -738,3 +738,183 @@ export interface ListSnapshotsResponse {
   /** Available snapshots sorted by date descending */
   snapshots: SnapshotInfo[];
 }
+
+// =============================================================================
+// Software Inventory Types
+// =============================================================================
+
+/**
+ * Software type classification
+ */
+export type SoftwareType = 'application' | 'package' | 'service';
+
+/**
+ * Individual software item from the software inventory
+ */
+export interface SoftwareItem {
+  /** Software name */
+  name: string;
+  /** Software version */
+  version: string;
+  /** Installation path (optional) */
+  path?: string;
+  /** Software type: application, package, or service */
+  type: SoftwareType;
+  /** First time this software was seen on this host */
+  firstSeen?: string;
+  /** Last time this software was seen */
+  lastSeen: string;
+  /** Publisher/Vendor name */
+  publisher?: string;
+  /** Install date */
+  installDate?: string;
+  /** Architecture (x64, arm64, etc.) */
+  arch?: string;
+  /** Package/App size in bytes */
+  size?: number;
+  /** Bundle identifier (macOS) */
+  bundleId?: string;
+  /** Service status (running, stopped, etc.) */
+  status?: string;
+  /** Process ID (for running services) */
+  pid?: number;
+  /** Service start type (automatic, manual, disabled) */
+  startType?: string;
+  /** Service user account */
+  userAccount?: string;
+}
+
+/**
+ * Response from software inventory API
+ */
+export interface SoftwareInventoryResponse {
+  /** List of software items for the host */
+  items: SoftwareItem[];
+  /** Total count of software items */
+  total: number;
+  /** Host identifier */
+  hostId: string;
+  /** Host name */
+  hostName: string;
+}
+
+/**
+ * Request query parameters for software inventory
+ */
+export interface SoftwareInventoryRequestQuery {
+  /** Host identifier (required) */
+  hostId: string;
+  /** Search term to filter software by name */
+  search?: string;
+  /** Filter by software type */
+  type?: SoftwareType | 'all';
+  /** Page number for pagination (0-based) */
+  page?: number;
+  /** Number of items per page */
+  perPage?: number;
+  /** Field to sort by */
+  sortField?: string;
+  /** Sort direction */
+  sortDirection?: 'asc' | 'desc';
+}
+
+/**
+ * Aggregated software item for overview (across all hosts)
+ */
+export interface AggregatedSoftwareItem {
+  /** Software name */
+  name: string;
+  /** Software type: application, package, or service */
+  type: SoftwareType;
+  /** Number of hosts with this software installed */
+  hostCount: number;
+  /** Known versions of this software across the fleet */
+  versions: string[];
+}
+
+/**
+ * Response from software overview API (aggregated across all hosts)
+ */
+export interface SoftwareOverviewResponse {
+  /** List of aggregated software items */
+  items: AggregatedSoftwareItem[];
+  /** Total count of unique software */
+  total: number;
+  /** Count of applications */
+  applications: number;
+  /** Count of services */
+  services: number;
+  /** Count of packages */
+  packages: number;
+}
+
+// =============================================================================
+// Software Inventory Transform Types (Current State Facts)
+// =============================================================================
+
+/**
+ * Software fact document stored in the software inventory transform index.
+ * Represents the current state of a single software item on a single host.
+ */
+export interface SoftwareFact {
+  '@timestamp': string;
+
+  /** Host identification */
+  host: {
+    id: string;
+    name: string;
+    os?: {
+      platform?: string;
+      name?: string;
+      version?: string;
+    };
+  };
+
+  /** Agent identification */
+  agent?: {
+    id?: string;
+    name?: string;
+  };
+
+  /** Software details */
+  software: {
+    /** Software name (normalized from various osquery fields) */
+    name: string;
+    /** Software version */
+    version?: string;
+    /** Software type: application, package, or service */
+    type: SoftwareType;
+    /** Installation path */
+    path?: string;
+    /** Publisher/vendor name */
+    publisher?: string;
+    /** Description */
+    description?: string;
+    /** Service status (for services) */
+    status?: string;
+    /** Service start type (for services) */
+    start_type?: string;
+    /** Service user account (for services) */
+    user_account?: string;
+    /** Process ID (for running services) */
+    pid?: number;
+    /** Architecture (for packages) */
+    arch?: string;
+    /** Size in bytes (for packages) */
+    size?: number;
+    /** Bundle identifier (for macOS apps) */
+    bundle_id?: string;
+  };
+
+  /** First time this software was seen on this host */
+  first_seen: string;
+
+  /** Last time this software was seen on this host */
+  last_seen: string;
+
+  /** Source tracking */
+  source?: {
+    action_id?: string;
+    query_name?: string;
+  };
+}

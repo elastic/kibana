@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { OverviewTab } from '../../../../entity_analytics/pages/host_details/tabs/overview_tab';
 import { PostureTab } from '../../../../entity_analytics/pages/host_details/tabs/posture_tab';
 import { PrivilegesTab } from '../../../../entity_analytics/pages/host_details/tabs/privileges_tab';
+import { SoftwareTab } from '../../../../entity_analytics/pages/host_details/tabs/software_tab';
 import { DriftOverview } from '../../../../endpoint_assets/components/drift_overview';
 import type { HostDetailsData } from '../../../entity_details/endpoint_assets/types';
 
@@ -44,7 +45,12 @@ const TAB_PRIVILEGES = i18n.translate(
   { defaultMessage: 'Privileges' }
 );
 
-type EndpointAssetsSubTab = 'overview' | 'drift' | 'posture' | 'privileges';
+const TAB_SOFTWARE = i18n.translate(
+  'xpack.securitySolution.flyout.entities.endpointAssets.tabs.software',
+  { defaultMessage: 'Software' }
+);
+
+type EndpointAssetsSubTab = 'overview' | 'drift' | 'posture' | 'privileges' | 'software';
 
 interface SubTab {
   id: EndpointAssetsSubTab;
@@ -56,6 +62,7 @@ const SUB_TABS: SubTab[] = [
   { id: 'drift', label: TAB_DRIFT },
   { id: 'posture', label: TAB_POSTURE },
   { id: 'privileges', label: TAB_PRIVILEGES },
+  { id: 'software', label: TAB_SOFTWARE },
 ];
 
 export interface EndpointAssetsSectionProps {
@@ -96,6 +103,14 @@ export const EndpointAssetsSection: React.FC<EndpointAssetsSectionProps> = React
         case 'privileges':
           return (
             <PrivilegesTab hostId={hostId} privilegesData={endpointAssetData.endpoint?.privileges} />
+          );
+        case 'software':
+          return (
+            <SoftwareTab
+              hostId={hostId}
+              installedCount={endpointAssetData.endpoint?.software?.installed_count}
+              servicesCount={endpointAssetData.endpoint?.software?.services_count}
+            />
           );
         default:
           return <OverviewTab hostId={hostId} hostData={endpointAssetData} />;

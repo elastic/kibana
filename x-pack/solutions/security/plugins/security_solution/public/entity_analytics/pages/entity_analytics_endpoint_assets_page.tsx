@@ -56,6 +56,7 @@ import { usePrivileges } from '../hooks/use_privileges';
 import type { FindingType } from '../../../common/endpoint_assets';
 import { SecurityFindingsDetailFlyout } from '../components/security_findings_detail_flyout';
 import { DriftOverview } from '../../endpoint_assets/components/drift_overview';
+import { SoftwareOverview } from '../../endpoint_assets/components/software_overview';
 import { UnknownKnownsOverview } from '../../endpoint_assets/components/unknown_knowns_overview.tsx';
 import { ENTITY_ANALYTICS_ENDPOINT_ASSETS_HOST_DETAILS_PATH } from '../../../common/constants';
 
@@ -91,6 +92,11 @@ const TAB_PRIVILEGES = i18n.translate(
 const TAB_DRIFT = i18n.translate('xpack.securitySolution.entityAnalytics.endpointAssets.tabDrift', {
   defaultMessage: 'Drift',
 });
+
+const TAB_SOFTWARE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.endpointAssets.tabSoftware',
+  { defaultMessage: 'Software' }
+);
 
 export const TAB_UNKNOWN_KNOWNS = i18n.translate(
   'xpack.securitySolution.endpointAssets.tabUnknownKnowns',
@@ -144,7 +150,7 @@ interface EndpointAssetRecord {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AssetDetailDocument = Record<string, any>;
 
-type TabId = 'inventory' | 'posture' | 'privileges' | 'drift' | 'unknown_knowns';
+type TabId = 'inventory' | 'posture' | 'privileges' | 'drift' | 'software' | 'unknown_knowns';
 
 // Helper functions
 const normalizePlatform = (platform: string): 'windows' | 'macos' | 'linux' | null => {
@@ -2446,6 +2452,11 @@ const EndpointAssetsPageComponent: React.FC = () => {
       id: 'drift',
       name: TAB_DRIFT,
       content: <DriftOverview />,
+    },
+    {
+      id: 'software',
+      name: TAB_SOFTWARE,
+      content: <SoftwareOverview />,
     },
     {
       id: 'unknown_knowns',

@@ -28,6 +28,7 @@ import { FlyoutBody } from '../../shared/components/flyout_body';
 import { PostureTab } from '../../../entity_analytics/pages/host_details/tabs/posture_tab';
 import { PrivilegesTab } from '../../../entity_analytics/pages/host_details/tabs/privileges_tab';
 import { DriftOverview } from '../../../endpoint_assets/components/drift_overview';
+import { SoftwareTab } from '../../../entity_analytics/pages/host_details/tabs/software_tab';
 import type { HostDetailsData, EndpointAssetsTabId } from './types';
 import { getPostureLevelColor } from './hooks/use_endpoint_asset_data';
 import { TEST_IDS } from './constants';
@@ -50,6 +51,11 @@ const TAB_DRIFT = i18n.translate(
 const TAB_PRIVILEGES = i18n.translate(
   'xpack.securitySolution.flyout.endpointAssets.tabs.privileges',
   { defaultMessage: 'Privileges' }
+);
+
+const TAB_SOFTWARE = i18n.translate(
+  'xpack.securitySolution.flyout.endpointAssets.tabs.software',
+  { defaultMessage: 'Software' }
 );
 
 const NO_DATA_TITLE = i18n.translate(
@@ -139,6 +145,7 @@ const TABS: Tab[] = [
   { id: 'posture', label: TAB_POSTURE, testId: TEST_IDS.TAB_POSTURE },
   { id: 'drift', label: TAB_DRIFT, testId: TEST_IDS.TAB_DRIFT },
   { id: 'privileges', label: TAB_PRIVILEGES, testId: TEST_IDS.TAB_PRIVILEGES },
+  { id: 'software', label: TAB_SOFTWARE, testId: TEST_IDS.TAB_SOFTWARE },
 ];
 
 // Helper to safely convert to number (ES may return string or array)
@@ -398,6 +405,14 @@ export const EndpointAssetsContent: React.FC<EndpointAssetsContentProps> = React
           return <DriftOverview hostId={hostId} />;
         case 'privileges':
           return <PrivilegesTab hostId={hostId} privilegesData={hostData.endpoint?.privileges} />;
+        case 'software':
+          return (
+            <SoftwareTab
+              hostId={hostId}
+              installedCount={toNumber(hostData.endpoint?.software?.installed_count)}
+              servicesCount={toNumber(hostData.endpoint?.software?.services_count)}
+            />
+          );
         default:
           return <OverviewSection hostData={hostData} />;
       }

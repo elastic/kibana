@@ -28,6 +28,7 @@ import { FlyoutBody } from '../../../shared/components/flyout_body';
 import { PostureTab } from '../../../../entity_analytics/pages/host_details/tabs/posture_tab';
 import { PrivilegesTab } from '../../../../entity_analytics/pages/host_details/tabs/privileges_tab';
 import { DriftOverview } from '../../../../endpoint_assets/components/drift_overview';
+import { SoftwareTab } from '../../../../entity_analytics/pages/host_details/tabs/software_tab';
 import type { HostDetailsData } from '../types';
 import { useEndpointAssetData, getPostureLevelColor } from '../hooks/use_endpoint_asset_data';
 
@@ -49,6 +50,11 @@ const TAB_DRIFT = i18n.translate(
 const TAB_PRIVILEGES = i18n.translate(
   'xpack.securitySolution.flyout.endpointAssets.leftPanel.tabs.privileges',
   { defaultMessage: 'Privileges' }
+);
+
+const TAB_SOFTWARE = i18n.translate(
+  'xpack.securitySolution.flyout.endpointAssets.leftPanel.tabs.software',
+  { defaultMessage: 'Software' }
 );
 
 const NO_DATA_TITLE = i18n.translate(
@@ -119,7 +125,7 @@ const UNKNOWN_STATUS = i18n.translate(
   { defaultMessage: 'Unknown' }
 );
 
-type EndpointAssetsSubTab = 'overview' | 'posture' | 'drift' | 'privileges';
+type EndpointAssetsSubTab = 'overview' | 'posture' | 'drift' | 'privileges' | 'software';
 
 interface SubTab {
   id: EndpointAssetsSubTab;
@@ -131,6 +137,7 @@ const SUB_TABS: SubTab[] = [
   { id: 'posture', label: TAB_POSTURE },
   { id: 'drift', label: TAB_DRIFT },
   { id: 'privileges', label: TAB_PRIVILEGES },
+  { id: 'software', label: TAB_SOFTWARE },
 ];
 
 // Helper to safely convert to number
@@ -381,6 +388,14 @@ export const EndpointAssetsTab: React.FC<EndpointAssetsTabProps> = React.memo(
           return <DriftOverview hostId={hostId} />;
         case 'privileges':
           return <PrivilegesTab hostId={hostId} privilegesData={hostData.endpoint?.privileges} />;
+        case 'software':
+          return (
+            <SoftwareTab
+              hostId={hostId}
+              installedCount={toNumber(hostData.endpoint?.software?.installed_count)}
+              servicesCount={toNumber(hostData.endpoint?.software?.services_count)}
+            />
+          );
         default:
           return <OverviewSection hostData={hostData} />;
       }

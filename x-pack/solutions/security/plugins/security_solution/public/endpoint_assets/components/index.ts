@@ -13,3 +13,7 @@ export { PrivilegesOverview } from './privileges_overview';
 export { UnknownKnownsOverview } from './unknown_knowns_overview';
 export { DriftEventsTable } from './drift_events_table';
 export { SnapshotComparison } from './snapshot_comparison';
+export { SoftwareOverview } from './software_overview';
+export { SoftwareTable } from './software_table';
+export { SoftwareSummaryCards } from './software_summary_cards';
+export { SoftwareExportButton } from './software_export_button';

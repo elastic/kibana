@@ -39,6 +39,7 @@ import { OverviewTab } from './host_details/tabs/overview_tab';
 import { DriftTab } from './host_details/tabs/drift_tab';
 import { PostureTab } from './host_details/tabs/posture_tab';
 import { PrivilegesTab } from './host_details/tabs/privileges_tab';
+import { SoftwareTab } from './host_details/tabs/software_tab';
 import { useInvestigateInTimeline } from '../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { OsqueryFlyout } from '../../detections/components/osquery/osquery_flyout';
@@ -106,6 +107,13 @@ const TAB_PRIVILEGES = i18n.translate(
   'xpack.securitySolution.entityAnalytics.hostDetails.tabPrivileges',
   {
     defaultMessage: 'Privileges',
+  }
+);
+
+const TAB_SOFTWARE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostDetails.tabSoftware',
+  {
+    defaultMessage: 'Software',
   }
 );
 
@@ -297,7 +305,7 @@ const useHostDetails = (hostId: string | null) => {
   });
 };
 
-type TabId = 'overview' | 'drift' | 'posture' | 'privileges';
+type TabId = 'overview' | 'drift' | 'posture' | 'privileges' | 'software';
 
 export const HostDetailsPage: React.FC = React.memo(() => {
   const { hostId } = useParams<HostDetailsPageParams>();
@@ -363,6 +371,10 @@ export const HostDetailsPage: React.FC = React.memo(() => {
         id: 'privileges' as TabId,
         label: TAB_PRIVILEGES,
       },
+      {
+        id: 'software' as TabId,
+        label: TAB_SOFTWARE,
+      },
     ],
     []
   );
@@ -379,6 +391,26 @@ export const HostDetailsPage: React.FC = React.memo(() => {
         return <PostureTab hostId={hostId} postureData={hostData.endpoint?.posture} />;
       case 'privileges':
         return <PrivilegesTab hostId={hostId} privilegesData={hostData.endpoint?.privileges} />;
+      case 'software':
+        return (
+          <SoftwareTab
+            hostId={hostId}
+            installedCount={
+              typeof hostData.endpoint?.software?.installed_count === 'number'
+                ? hostData.endpoint.software.installed_count
+                : typeof hostData.endpoint?.software?.installed_count === 'string'
+                ? parseInt(hostData.endpoint.software.installed_count, 10)
+                : undefined
+            }
+            servicesCount={
+              typeof hostData.endpoint?.software?.services_count === 'number'
+                ? hostData.endpoint.software.services_count
+                : typeof hostData.endpoint?.software?.services_count === 'string'
+                ? parseInt(hostData.endpoint.software.services_count, 10)
+                : undefined
+            }
+          />
+        );
       default:
         return null;
     }

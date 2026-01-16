@@ -133,4 +133,4 @@ export interface EndpointAssetsPanelExpandableFlyoutProps extends FlyoutPanelPro
 /**
  * Tab identifiers for the flyout content
  */
-export type EndpointAssetsTabId = 'overview' | 'posture' | 'drift' | 'privileges';
+export type EndpointAssetsTabId = 'overview' | 'posture' | 'drift' | 'privileges' | 'software';

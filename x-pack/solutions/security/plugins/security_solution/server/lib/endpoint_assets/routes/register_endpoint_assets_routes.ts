@@ -23,6 +23,7 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 import { createEndpointAssetsService } from '../endpoint_assets_service';
 import { registerDriftRoutes } from './drift';
 import { registerSnapshotRoutes } from './snapshot';
+import { registerSoftwareRoutes } from './software';
 
 /**
  * Register routes for Endpoint Assets transform management.
@@ -615,4 +616,5 @@ export const registerEndpointAssetsRoutes = (
 
   registerDriftRoutes(router, logger);
   registerSnapshotRoutes(router, logger);
+  registerSoftwareRoutes(router, logger);
 };
