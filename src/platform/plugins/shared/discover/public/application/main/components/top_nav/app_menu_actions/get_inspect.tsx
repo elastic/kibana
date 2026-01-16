@@ -23,8 +23,8 @@ export const getInspectAppMenuItem = ({
       defaultMessage: 'Inspect',
     }),
     testId: 'openInspectorButton',
-    run: (params) => {
-      onOpenInspector(params.context.onFinishAction);
+    run: ({ context: { onFinishAction } }) => {
+      onOpenInspector(onFinishAction);
     },
   };
 };

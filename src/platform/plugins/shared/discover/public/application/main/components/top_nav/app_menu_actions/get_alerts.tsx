@@ -155,10 +155,10 @@ export const getAlertsAppMenuItem = ({
           : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
               defaultMessage: 'Data view does not have a time field.',
             }),
-        run: (params) => {
+        run: ({ context: { onFinishAction } }) => {
           return (
             <CreateAlertFlyout
-              onFinishAction={params?.context.onFinishAction}
+              onFinishAction={onFinishAction}
               discoverParams={discoverParams}
               services={services}
               stateContainer={stateContainer}

@@ -56,10 +56,9 @@ const registerDatasetQualityLink = (
       order: 5,
       iconType: 'database',
       testId: 'discoverAppMenuDatasetQualityLink',
-      run: (params) => {
+      run: ({ context: { onFinishAction } }) => {
         const refresh = timefilter.getRefreshInterval();
         const { from, to } = timefilter.getTime();
-        const onFinishAction = params?.context.onFinishAction;
 
         dataQualityLocator.navigate({
           filters: {
@@ -97,8 +96,7 @@ const registerCustomThresholdRuleAction = (
       defaultMessage: 'Create custom threshold rule',
     }),
 
-    run: (params) => {
-      const onFinishAction = params?.context.onFinishAction;
+    run: ({ context: { onFinishAction } }) => {
       const index = dataView?.toMinimalSpec();
       const { filters, query } = data.query.getState();
 
@@ -160,8 +158,7 @@ const registerCreateSLOAction = (
       }),
       iconType: 'visGauge',
       testId: 'discoverAppMenuCreateSlo',
-      run: (params) => {
-        const onFinishAction = params?.context.onFinishAction;
+      run: ({ context: { onFinishAction } }) => {
         const index = dataView?.getIndexPattern();
         const timestampField = dataView?.timeFieldName;
         const { filters, query: kqlQuery } = data.query.getState();

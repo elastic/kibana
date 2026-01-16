@@ -68,9 +68,8 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                 order: 1,
                 label: 'Custom action 11 (from Root profile)',
                 testId: 'example-custom-root-action11',
-                run: (runParams) => {
+                run: ({ context: { onFinishAction } }) => {
                   alert('Example Root Custom action 11 clicked');
-                  const onFinishAction = runParams?.context.onFinishAction;
                   onFinishAction(); // This allows to return focus back to the app menu DOM node
                 },
               },
@@ -79,15 +78,17 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                 order: 2,
                 label: 'Custom action 12 (from Root profile)',
                 testId: 'example-custom-root-action12',
-                run: () => {
+                run: ({ context: { onFinishAction } }) => {
                   // This is an example of a custom action that opens a flyout or any other custom modal.
                   // To do so, simply return a React element and call onFinishAction when you're done.
-                  // <EuiFlyout
-                  //   onClose={onFinishAction}
-                  //   data-test-subj="example-custom-root-action12-flyout"
-                  // >
-                  //   <div>Example custom action clicked</div>
-                  // </EuiFlyout>;
+                  return (
+                    <EuiFlyout
+                      onClose={onFinishAction}
+                      data-test-subj="example-custom-root-action12-flyout"
+                    >
+                      <div>Example custom action clicked</div>
+                    </EuiFlyout>
+                  );
                 },
               },
             ],
