@@ -18,6 +18,8 @@
         "label": "LogsRepository",
         "description": [],
         "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -46,6 +50,8 @@
                   "DataStreamsStart"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+                "lineNumber": 38,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -72,6 +78,8 @@
               "[]) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -93,6 +101,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+                "lineNumber": 40,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -119,6 +129,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -133,6 +145,8 @@
                   "number"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+                "lineNumber": 48,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -167,6 +181,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -187,6 +203,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+                "lineNumber": 55,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -208,6 +226,8 @@
         "label": "IWorkflowEventLoggerService",
         "description": [],
         "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -225,6 +245,8 @@
               "IWorkflowEventLogger"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -239,6 +261,8 @@
                   "WorkflowEventLoggerContext"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 47,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -258,6 +282,8 @@
               "IWorkflowEventLogger"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -272,6 +298,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 48,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -287,6 +315,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 48,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -306,6 +336,8 @@
               "IWorkflowEventLogger"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -320,6 +352,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 50,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -335,6 +369,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -350,6 +386,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 52,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -369,6 +407,8 @@
               "IWorkflowEventLogger"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -383,6 +423,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 55,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -398,6 +440,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 56,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -413,6 +457,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 57,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -428,6 +474,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 58,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -443,6 +491,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 59,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -458,6 +508,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 60,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -486,6 +538,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -500,6 +554,8 @@
                   "ExecutionLogsParams"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 63,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -528,6 +584,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -542,6 +600,8 @@
                   "StepLogsParams"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 64,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -570,6 +630,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -584,6 +646,8 @@
                   "LogsByLevelParams"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 65,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -618,6 +682,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -638,6 +704,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 66,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -664,6 +732,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -678,6 +748,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/workflow_event_logger/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -696,6 +768,8 @@
         "label": "LogSearchResult",
         "description": [],
         "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -707,6 +781,8 @@
             "label": "total",
             "description": [],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -728,6 +804,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -742,6 +820,8 @@
         "label": "SearchLogsParams",
         "description": [],
         "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -756,6 +836,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -771,6 +853,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -785,6 +869,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -799,6 +885,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -813,6 +901,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -827,6 +917,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -841,6 +933,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -855,6 +949,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -869,6 +965,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/logs_repository.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -893,6 +991,8 @@
           " extends Partial<{ '@timestamp'?: Partial<string | number> | Partial<string | number>[] | undefined; spaceId?: string | string[] | undefined; level?: string | string[] | undefined; workflow?: Partial<{ id?: string | string[] | undefined; execution_id?: string | string[] | undefined; step_id?: string | string[] | undefined; step_execution_id?: string | string[] | undefined; }> | Partial<{ id?: string | string[] | undefined; execution_id?: string | string[] | undefined; step_id?: string | string[] | undefined; step_execution_id?: string | string[] | undefined; }>[] | undefined; }>"
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -904,6 +1004,8 @@
             "label": "'@timestamp'",
             "description": [],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -915,6 +1017,8 @@
             "label": "message",
             "description": [],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -929,6 +1033,8 @@
               "\"info\" | \"error\" | \"trace\" | \"debug\" | \"warn\" | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -943,6 +1049,8 @@
               "{ id?: string | undefined; name?: string | undefined; execution_id?: string | undefined; step_id?: string | undefined; step_execution_id?: string | undefined; step_name?: string | undefined; step_type?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -957,6 +1065,8 @@
               "{ action?: string | undefined; category?: string[] | undefined; type?: string[] | undefined; provider?: string | undefined; outcome?: \"unknown\" | \"success\" | \"failure\" | undefined; duration?: number | undefined; start?: string | undefined; end?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -971,6 +1081,8 @@
               "{ workflow_transaction_id?: string | undefined; task_transaction_id?: string | undefined; name?: string | undefined; type?: string | null | undefined; is_triggered_by_alerting?: boolean | undefined; alerting_rule_id?: string | undefined; transaction_id?: string | undefined; outcome?: \"success\" | \"failure\" | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -985,6 +1097,8 @@
               "{ trace_id?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -999,6 +1113,8 @@
               "{ message?: string | undefined; type?: string | undefined; stack_trace?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1013,6 +1129,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1027,6 +1145,8 @@
               "Record<string, string | number | undefined> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1045,6 +1165,8 @@
       "label": "WorkflowsExecutionEnginePluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+      "lineNumber": 37,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1059,6 +1181,8 @@
       "label": "WorkflowsExecutionEnginePluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+      "lineNumber": 38,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1085,6 +1209,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1106,6 +1232,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 61,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1120,6 +1248,8 @@
                 "{ [x: string]: any; }"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 62,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1135,6 +1265,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 63,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1163,6 +1295,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "lineNumber": 40,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1184,6 +1318,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 67,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1195,6 +1331,8 @@
               "label": "stepId",
               "description": [],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 68,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1209,6 +1347,8 @@
                 "{ [x: string]: any; }"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 69,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1224,6 +1364,8 @@
                 "<unknown, unknown, unknown, any> | undefined"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 70,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1240,6 +1382,8 @@
             "(workflowExecutionId: string, spaceId: string) => Promise<void>"
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "lineNumber": 41,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1252,6 +1396,8 @@
               "label": "workflowExecutionId",
               "description": [],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 74,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1263,6 +1409,8 @@
               "label": "spaceId",
               "description": [],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 75,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1285,6 +1433,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "lineNumber": 42,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1311,6 +1461,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "lineNumber": 43,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1332,6 +1484,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 79,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1346,6 +1500,8 @@
                 "{ [x: string]: any; }"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 80,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1361,6 +1517,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "lineNumber": 81,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1385,6 +1543,8 @@
           "(options: CreateIndexesOptions) => Promise<void>"
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/common/create_indexes.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1399,6 +1559,8 @@
               "CreateIndexesOptions"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/common/create_indexes.ts",
+            "lineNumber": 24,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1422,6 +1584,8 @@
           "\".workflows-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/common/mappings.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1437,6 +1601,8 @@
           "\".workflows-step-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/common/mappings.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
