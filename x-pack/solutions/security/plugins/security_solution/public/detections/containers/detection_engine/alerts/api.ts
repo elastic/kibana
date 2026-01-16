@@ -85,13 +85,15 @@ export const fetchQueryUnifiedAlerts = async <Hit, Aggregations>({
 /**
  * Fetch Unified Alerts (detection and attack alerts) by providing an ES|QL query
  *
- * @param query ES|QL query string (all filters should be included in the query)
+ * @param query ES|QL query string
+ * @param filter Optional Elasticsearch query DSL filter to apply to the ES|QL query
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
 export const fetchQueryUnifiedAlertsEsql = async ({
   query,
+  filter,
   signal,
 }: QueryEsqlAlerts): Promise<import('@kbn/es-types').ESQLSearchResponse> => {
   return KibanaServices.get().http.fetch<import('@kbn/es-types').ESQLSearchResponse>(
@@ -99,7 +101,7 @@ export const fetchQueryUnifiedAlertsEsql = async ({
     {
       version: '1',
       method: 'POST',
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ query, ...(filter ? { filter } : {}) }),
       signal,
     }
   );

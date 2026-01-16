@@ -217,11 +217,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const uniqueValue = useMemo(() => `SuperUniqueValue-${uuidv4()}`, []);
 
   const queryGroups = useMemo(() => {
-    if (esqlQuery) {
-      // For ES|QL, we return a special marker object
-      // All filters are already included in the ES|QL query string
-      return { _esqlQuery: esqlQuery };
-    }
     return getAlertsGroupingQuery({
       groupStatsAggregations,
       additionalFilters,
@@ -236,7 +231,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     });
   }, [
     additionalFilters,
-    esqlQuery,
     from,
     groupStatsAggregations,
     pageIndex,
@@ -263,8 +257,15 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     return pageScope === PageScope.attacks ? fetchQueryUnifiedAlerts : fetchQueryAlerts;
   }, [pageScope]);
 
-  // For ES|QL queries, use the dedicated hook
-  // All filters are already included in the ES|QL query string
+  // Extract filters from queryGroups for ES|QL queries
+  const esqlFilters = useMemo(() => {
+    if (!esqlQuery || !queryGroups?.query?.bool) {
+      return undefined;
+    }
+    return queryGroups.query.bool;
+  }, [esqlQuery, queryGroups]);
+
+  // For ES|QL queries, use the dedicated hook with filters
   const {
     data: esqlData,
     loading: esqlLoading,
@@ -274,15 +275,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     setQuery: setEsqlQuery,
   } = useQueryAlertsEsql<AlertsGroupingAggregation>({
     query: esqlQuery,
+    filter: esqlFilters,
     skip: !esqlQuery || isNoneGroup([selectedGroup]),
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING_ESQL,
   });
-  // console.log(`[GroupedSubLevel] esqlQuery: ${JSON.stringify(esqlQuery, null, 2)}`);
-  // console.log(`[GroupedSubLevel] esqlData: ${JSON.stringify(esqlData, null, 2)}`);
-  // console.log(`[GroupedSubLevel] esqlLoading: ${esqlLoading}`);
-  // console.log(`[GroupedSubLevel] esqlRequest: ${JSON.stringify(esqlRequest, null, 2)}`);
-  // console.log(`[GroupedSubLevel] esqlResponseText: ${esqlResponseText}`);
-  // console.log(`[GroupedSubLevel] esqlRefetch: ${JSON.stringify(esqlRefetch, null, 2)}`);
 
   const {
     data: alertsGroupsData,
@@ -293,7 +289,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     setQuery: setAlertsQuery,
   } = useQueryAlerts<{}, GroupingAggregation<AlertsGroupingAggregation>>({
     fetchMethod,
-    query: esqlQuery ? {} : queryGroups, // Don't pass query for ES|QL
+    query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
     skip: isNoneGroup([selectedGroup]) || !!esqlQuery, // Skip KQL path when ES|QL is used

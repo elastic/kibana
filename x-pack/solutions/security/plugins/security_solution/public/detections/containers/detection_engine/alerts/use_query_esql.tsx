@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash';
 import type { Dispatch, SetStateAction } from 'react';
 import { useMemo, useEffect, useState } from 'react';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { BoolQuery } from '@kbn/es-query';
 import type { GroupingAggregation } from '@kbn/grouping';
 import { fetchQueryUnifiedAlertsEsql } from './api';
 import type { QueryEsqlAlerts } from './types';
@@ -32,6 +33,7 @@ export type AlertsQueryName = (typeof ALERTS_QUERY_NAMES)[keyof typeof ALERTS_QU
 
 export interface AlertsEsqlQueryParams {
   query?: string;
+  filter?: BoolQuery;
   skip?: boolean;
   /**
    * The query name is used for performance monitoring with APM
@@ -67,17 +69,25 @@ const useTrackedFetchEsqlMethod = (queryName: string) => {
 /**
  * Hook for fetching Alerts using ES|QL queries from the Detection Engine API
  *
- * @param query ES|QL query string (all filters should be included in the query)
+ * @param query ES|QL query string
+ * @param filter Optional Elasticsearch query DSL filter to apply to the ES|QL query
  * @param skip Whether to skip the query
  * @param queryName The query name for performance monitoring
  *
  */
 export const useQueryAlertsEsql = <T = AlertsGroupingAggregation,>({
   query: initialQuery,
+  filter,
   skip,
   queryName,
 }: AlertsEsqlQueryParams): ReturnQueryAlertsEsql<T> => {
   const [query, setQuery] = useState<string | undefined>(initialQuery);
+
+  // Sync query when initialQuery prop changes
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
   const [alerts, setAlerts] = useState<
     Pick<ReturnQueryAlertsEsql<T>, 'data' | 'setQuery' | 'response' | 'request' | 'refetch'>
   >({
@@ -105,6 +115,7 @@ export const useQueryAlertsEsql = <T = AlertsGroupingAggregation,>({
 
         const esqlResponse = await fetchAlerts({
           query,
+          filter,
           signal: abortCtrl.signal,
         });
 
@@ -115,7 +126,7 @@ export const useQueryAlertsEsql = <T = AlertsGroupingAggregation,>({
           setAlerts({
             data: transformed,
             response: JSON.stringify(esqlResponse, null, 2),
-            request: JSON.stringify({ query }, null, 2),
+            request: JSON.stringify({ query, ...(filter ? { filter } : {}) }, null, 2),
             setQuery,
             refetch: fetchData,
           });
@@ -149,7 +160,7 @@ export const useQueryAlertsEsql = <T = AlertsGroupingAggregation,>({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query, skip, fetchAlerts]);
+  }, [query, filter, skip, fetchAlerts]);
 
   return { loading, ...alerts };
 };

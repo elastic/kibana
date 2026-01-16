@@ -202,14 +202,8 @@ export const TableSection = React.memo(
     }, [dataView]);
 
     // Build ES|QL query to group alerts by attack_ids
-    const esqlQuery = useBuildEsqlQuery({
-      from,
-      to,
-      defaultFilters,
-      globalFilters,
-      globalQuery: query,
-      dataView,
-    });
+    // Filters and time range are applied separately via the filter parameter
+    const esqlQuery = useBuildEsqlQuery({ dataView });
     // console.log(`[TableSection] esqlQuery: ${JSON.stringify(esqlQuery, null, 2)}`);
 
     const { openFlyout } = useExpandableFlyoutApi();

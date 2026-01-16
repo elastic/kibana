@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_ESQL_URL } from '../../../../../common/constants';
@@ -18,6 +19,7 @@ import { buildSiemResponse } from '../utils';
 
 const SearchUnifiedAlertsEsqlRequestBody = z.object({
   query: z.string(),
+  filter: z.any().optional(), // Elasticsearch query DSL filter
 });
 
 type SearchUnifiedAlertsEsqlRequestBody = z.infer<typeof SearchUnifiedAlertsEsqlRequestBody>;
@@ -49,7 +51,7 @@ export const searchUnifiedAlertsEsqlRoute = (
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const siemResponse = buildSiemResponse(response);
 
-        const { query } = request.body;
+        const { query, filter } = request.body;
 
         if (!query) {
           return siemResponse.error({
@@ -59,11 +61,20 @@ export const searchUnifiedAlertsEsqlRoute = (
         }
 
         try {
-          // All filters are included in the ES|QL query itself
-          const result = (await esClient.esql.query({
+          const queryParams: estypes.EsqlQueryRequest = {
             query,
             drop_null_columns: true,
-          })) as unknown as ESQLSearchResponse;
+          };
+
+          // Add filter if provided
+          // The filter should be a QueryDslQueryContainer, which means wrapping BoolQuery in { bool: ... }
+          if (filter) {
+            queryParams.filter = {
+              bool: filter,
+            } as estypes.QueryDslQueryContainer;
+          }
+
+          const result = (await esClient.esql.query(queryParams)) as unknown as ESQLSearchResponse;
 
           return response.ok({ body: result });
         } catch (err) {
