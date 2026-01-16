@@ -61,8 +61,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       const expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed = async (
-        menuButtonTestSubject: string
+        menuButtonTestSubject: string,
+        isInOverflowMenu: boolean = false
       ) => {
+        if (isInOverflowMenu) {
+          await focusAndPressButton('app-menu-overflow-button');
+        }
         await focusAndPressButton(menuButtonTestSubject);
         await retry.try(async () => {
           expect(await hasFocus(menuButtonTestSubject)).to.be(false);
@@ -71,7 +75,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await new Promise((resolve) => setTimeout(resolve, 500));
         await browser.pressKeys(browser.keys.ESCAPE);
         await retry.try(async () => {
-          expect(await hasFocus(menuButtonTestSubject)).to.be(true);
+          expect(
+            await hasFocus(isInOverflowMenu ? 'app-menu-overflow-button' : menuButtonTestSubject)
+          ).to.be(true);
         });
       };
 
@@ -106,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('shareTopNavButton'));
 
       it('should return focus to the inspect button when dismissing the inspector flyout', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('openInspectorButton'));
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('openInspectorButton', true));
 
       it('should return focus to the save button when dismissing the save modal', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverSaveButton'));

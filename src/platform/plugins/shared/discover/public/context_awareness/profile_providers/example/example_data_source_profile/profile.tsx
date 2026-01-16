@@ -128,7 +128,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             iconType: 'logoElasticsearch',
             run: (runParams) => {
               alert('Example Custom action clicked');
-              const onFinishAction = runParams?.context?.onFinishAction as () => void;
+              const onFinishAction = runParams?.context.onFinishAction;
               onFinishAction(); // This allows to return focus back to the app menu DOM node
             },
 
@@ -165,7 +165,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             run: (runParams) => {
               // This is an example of a custom action that opens a flyout or any other custom modal.
               // To do so, simply return a React element and call onFinishAction when you're done.
-              const onFinishAction = runParams?.context?.onFinishAction as () => void;
+              const onFinishAction = runParams?.context.onFinishAction;
               return (
                 <EuiFlyout onClose={onFinishAction}>
                   <div>Example custom action clicked</div>
@@ -181,7 +181,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             order: 1,
             label: 'Custom action (from Data Source profile)',
             run: (runParams) => {
-              const onFinishAction = runParams?.context?.onFinishAction as () => void;
+              const onFinishAction = runParams?.context.onFinishAction;
               alert('Example Data source action under root submenu clicked');
               onFinishAction();
             },

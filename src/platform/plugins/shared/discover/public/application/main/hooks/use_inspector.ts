@@ -42,38 +42,48 @@ export function useInspector({
     dataDocuments$: stateContainer.dataState.data$.documents$,
   });
 
-  const onOpenInspector = useCallback(() => {
-    // prevent overlapping
-    dispatch(setExpandedDoc({ expandedDoc: undefined }));
+  const onOpenInspector = useCallback(
+    (onClose?: () => void) => {
+      // prevent overlapping
+      dispatch(setExpandedDoc({ expandedDoc: undefined }));
 
-    const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
+      const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 
-    const requestAdapters = inspectorAdapters.lensRequests
-      ? [inspectorAdapters.requests, inspectorAdapters.lensRequests]
-      : [inspectorAdapters.requests];
+      const requestAdapters = inspectorAdapters.lensRequests
+        ? [inspectorAdapters.requests, inspectorAdapters.lensRequests]
+        : [inspectorAdapters.requests];
 
-    const session = inspector.open(
-      {
-        requests: new AggregateRequestAdapter(requestAdapters),
-        contexts: getContextsAdapter({
-          onOpenDocDetails: (record) => {
-            session?.close();
-            dispatch(setExpandedDoc({ expandedDoc: record }));
-          },
-        }),
-      },
-      { title: persistedDiscoverSession?.title }
-    );
+      const session = inspector.open(
+        {
+          requests: new AggregateRequestAdapter(requestAdapters),
+          contexts: getContextsAdapter({
+            onOpenDocDetails: (record) => {
+              session?.close();
+              dispatch(setExpandedDoc({ expandedDoc: record }));
+            },
+          }),
+        },
+        { title: persistedDiscoverSession?.title }
+      );
 
-    setInspectorSession(session);
-  }, [
-    dispatch,
-    setExpandedDoc,
-    stateContainer.dataState.inspectorAdapters,
-    inspector,
-    getContextsAdapter,
-    persistedDiscoverSession?.title,
-  ]);
+      setInspectorSession(session);
+
+      // Call onClose when inspector closes
+      if (onClose) {
+        session?.onClose.then(() => {
+          onClose();
+        });
+      }
+    },
+    [
+      dispatch,
+      setExpandedDoc,
+      stateContainer.dataState.inspectorAdapters,
+      inspector,
+      getContextsAdapter,
+      persistedDiscoverSession?.title,
+    ]
+  );
 
   useEffect(() => {
     return () => {

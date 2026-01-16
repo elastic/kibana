@@ -8,16 +8,16 @@
  */
 
 import React from 'react';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import type { AppMenuItemType, AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
 import { OpenSearchPanel } from '../open_search_panel';
 
 export const getOpenSearchAppMenuItem = ({
   onOpenSavedSearch,
 }: {
   onOpenSavedSearch: (savedSearchId: string) => void;
-}): AppMenuItemType => {
+}): DiscoverAppMenuItemType => {
   return {
     id: AppMenuActionId.open,
     order: 2,
@@ -26,8 +26,8 @@ export const getOpenSearchAppMenuItem = ({
     }),
     iconType: 'folderOpen',
     testId: 'discoverOpenButton',
-    run: (params?: AppMenuRunActionParams) => {
-      const onFinishAction = params?.context?.onFinishAction as () => void;
+    run: (params) => {
+      const onFinishAction = params?.context.onFinishAction;
       return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
     },
   };

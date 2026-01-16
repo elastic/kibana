@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
@@ -17,7 +17,7 @@ export const getNewSearchAppMenuItem = ({
 }: {
   onNewSearch: () => void;
   onNavigate: () => void;
-}): AppMenuItemType => {
+}): DiscoverAppMenuItemType => {
   return {
     id: AppMenuActionId.new,
     order: 1,

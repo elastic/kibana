@@ -59,7 +59,7 @@ const registerDatasetQualityLink = (
       run: (params) => {
         const refresh = timefilter.getRefreshInterval();
         const { from, to } = timefilter.getTime();
-        const onFinishAction = params?.context?.onFinishAction as () => void;
+        const onFinishAction = params?.context.onFinishAction;
 
         dataQualityLocator.navigate({
           filters: {
@@ -98,7 +98,7 @@ const registerCustomThresholdRuleAction = (
     }),
 
     run: (params) => {
-      const onFinishAction = params?.context?.onFinishAction as () => void;
+      const onFinishAction = params?.context.onFinishAction;
       const index = dataView?.toMinimalSpec();
       const { filters, query } = data.query.getState();
 
@@ -161,7 +161,7 @@ const registerCreateSLOAction = (
       iconType: 'visGauge',
       testId: 'discoverAppMenuCreateSlo',
       run: (params) => {
-        const onFinishAction = params?.context?.onFinishAction as () => void;
+        const onFinishAction = params?.context.onFinishAction;
         const index = dataView?.getIndexPattern();
         const timestampField = dataView?.timeFieldName;
         const { filters, query: kqlQuery } = data.query.getState();

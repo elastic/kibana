@@ -16,7 +16,7 @@ import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
-import type { AppMenuItemType, AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
+import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -119,12 +119,12 @@ export const getAlertsAppMenuItem = ({
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
-}): AppMenuItemType => {
+}): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
-  const items = [];
+  const items: DiscoverAppMenuPopoverItem[] = [];
 
   if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
     items.push({
@@ -155,20 +155,10 @@ export const getAlertsAppMenuItem = ({
           : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
               defaultMessage: 'Data view does not have a time field.',
             }),
-        run: (params?: AppMenuRunActionParams) => {
-          const onFinishAction = () => {
-            const contextCallback = params?.context?.onFinishAction as (() => void) | undefined;
-            contextCallback?.();
-            // Focus the main alerts button after flyout closes
-            const alertsButton = document.querySelector(
-              '[data-test-subj="discoverAlertsButton"]'
-            ) as HTMLElement;
-            alertsButton?.focus();
-          };
-
+        run: (params) => {
           return (
             <CreateAlertFlyout
-              onFinishAction={onFinishAction}
+              onFinishAction={params?.context.onFinishAction}
               discoverParams={discoverParams}
               services={services}
               stateContainer={stateContainer}

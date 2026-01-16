@@ -70,7 +70,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                 testId: 'example-custom-root-action11',
                 run: (runParams) => {
                   alert('Example Root Custom action 11 clicked');
-                  const onFinishAction = runParams?.context?.onFinishAction as () => void;
+                  const onFinishAction = runParams?.context.onFinishAction;
                   onFinishAction(); // This allows to return focus back to the app menu DOM node
                 },
               },

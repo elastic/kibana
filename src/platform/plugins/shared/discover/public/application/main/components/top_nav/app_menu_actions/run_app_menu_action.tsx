@@ -20,49 +20,91 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
 import type {
-  AppMenuItemType,
-  AppMenuPopoverItem,
-  AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
-  AppMenuRunActionParams,
-} from '@kbn/core-chrome-app-menu-components';
+  DiscoverAppMenuItemType,
+  DiscoverAppMenuPopoverItem,
+  DiscoverAppMenuPrimaryActionItem,
+  DiscoverAppMenuRunActionParams,
+  DiscoverAppMenuSecondaryActionItem,
+} from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../../../build_services';
 
 const container = document.createElement('div');
 let isOpen = false;
 
-function cleanup(anchorElement?: HTMLElement) {
+function cleanup(anchorElement?: HTMLElement, parentTestId?: string) {
   if (!isOpen) {
     return;
   }
+
+  // Check if anchor is in DOM before we remove the container
+  const shouldFocusAnchor = anchorElement && document.body.contains(anchorElement);
+
   ReactDOM.unmountComponentAtNode(container);
   document.body.removeChild(container);
   isOpen = false;
-  anchorElement?.focus();
+
+  // Restore focus using the captured state
+  const overflowButton = document.querySelector(
+    '[data-test-subj="app-menu-overflow-button"]'
+  ) as HTMLElement;
+
+  if (parentTestId) {
+    const parentButton = document.querySelector(
+      `[data-test-subj="${parentTestId}"]`
+    ) as HTMLElement;
+    (parentButton || overflowButton)?.focus();
+  } else if (shouldFocusAnchor) {
+    anchorElement!.focus();
+  } else {
+    overflowButton?.focus();
+  }
 }
 
 export async function runAppMenuAction({
   appMenuItem,
   anchorElement,
   services,
+  parentTestId,
 }: {
   appMenuItem:
-    | AppMenuItemType
-    | AppMenuPrimaryActionItem
-    | AppMenuSecondaryActionItem
-    | AppMenuPopoverItem;
+    | DiscoverAppMenuItemType
+    | DiscoverAppMenuPrimaryActionItem
+    | DiscoverAppMenuSecondaryActionItem
+    | DiscoverAppMenuPopoverItem;
   anchorElement: HTMLElement;
   services: DiscoverServices;
+  parentTestId?: string;
 }) {
-  cleanup(anchorElement);
+  cleanup(anchorElement, parentTestId);
 
-  const onFinishAction = () => cleanup(anchorElement);
+  const onFinishAction = () => {
+    cleanup(anchorElement, parentTestId);
+    // If cleanup didn't run (no React element), still restore focus
+    if (!isOpen) {
+      const overflowButton = document.querySelector(
+        '[data-test-subj="app-menu-overflow-button"]'
+      ) as HTMLElement;
 
-  const params: AppMenuRunActionParams = {
+      if (parentTestId) {
+        const parentButton = document.querySelector(
+          `[data-test-subj="${parentTestId}"]`
+        ) as HTMLElement;
+        (parentButton || overflowButton)?.focus();
+      } else if (anchorElement && document.body.contains(anchorElement)) {
+        anchorElement.focus();
+      } else {
+        overflowButton?.focus();
+      }
+    }
+  };
+
+  const params: DiscoverAppMenuRunActionParams = {
     triggerElement: anchorElement,
     context: {
       onFinishAction,
+      parentTestId,
     },
   };
 
@@ -83,25 +125,35 @@ export async function runAppMenuAction({
   ReactDOM.render(element, container);
 }
 
-export const enhanceAppMenuItemWithRunAction = <
-  T extends AppMenuItemType | AppMenuPrimaryActionItem | AppMenuSecondaryActionItem
->({
+export const enhanceAppMenuItemWithRunAction = ({
   appMenuItem,
   services,
+  parentTestId,
 }: {
-  appMenuItem: T;
+  appMenuItem:
+    | DiscoverAppMenuItemType
+    | DiscoverAppMenuPrimaryActionItem
+    | DiscoverAppMenuSecondaryActionItem;
   services: DiscoverServices;
-}): T => {
-  const itemWithItems = appMenuItem as AppMenuItemType;
+  parentTestId?: string;
+}):
+  | DiscoverAppMenuItemType
+  | DiscoverAppMenuPrimaryActionItem
+  | DiscoverAppMenuSecondaryActionItem => {
+  const itemWithItems = appMenuItem as DiscoverAppMenuPopoverItem;
 
   return {
     ...appMenuItem,
-    // Recursively enhance nested items if present
-    items: itemWithItems.items?.map((nestedItem: AppMenuPopoverItem) =>
-      enhanceAppMenuItemWithRunAction({
-        appMenuItem: nestedItem as AppMenuItemType,
-        services,
-      })
+    items: itemWithItems.items?.map(
+      (nestedItem) =>
+        enhanceAppMenuItemWithRunAction({
+          appMenuItem: nestedItem as
+            | DiscoverAppMenuItemType
+            | DiscoverAppMenuPrimaryActionItem
+            | DiscoverAppMenuSecondaryActionItem,
+          services,
+          parentTestId: appMenuItem.testId || 'app-menu-overflow-button',
+        }) as DiscoverAppMenuPopoverItem
     ),
     run: appMenuItem.run
       ? (params?: AppMenuRunActionParams) => {
@@ -110,9 +162,10 @@ export const enhanceAppMenuItemWithRunAction = <
               appMenuItem,
               anchorElement: params.triggerElement,
               services,
+              parentTestId,
             });
           }
         }
       : undefined,
-  } as T;
+  };
 };

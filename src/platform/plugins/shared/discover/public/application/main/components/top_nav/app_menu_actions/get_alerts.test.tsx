@@ -9,19 +9,19 @@
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { getAlertsAppMenuItem } from './get_alerts';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 
 const getAlertsMenuItem = (
   dataView = dataViewMock,
   isEsqlMode = false,
   authorizedRuleTypeIds = [ES_QUERY_ID]
-): AppMenuItemType => {
+): DiscoverAppMenuItemType => {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.actions.setDataView(dataView);
 

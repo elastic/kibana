@@ -10,24 +10,28 @@
 import type {
   AppMenuConfig,
   AppMenuItemType,
-  AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
   AppMenuSecondaryActionItem,
 } from '@kbn/core-chrome-app-menu-components';
+import type {
+  DiscoverAppMenuItemType,
+  DiscoverAppMenuPopoverItem,
+  DiscoverAppMenuPrimaryActionItem,
+  DiscoverAppMenuSecondaryActionItem,
+} from '../../types';
 
 /**
- * Registry for managing AppMenuConfig items.
- * Works directly with AppMenuConfig types and allows registration of items,
- * primary/secondary actions, and popover items for specific parent items.
+ * Registry for managing AppMenuConfig items with Discover-specific types.
+ * All run actions automatically receive DiscoverAppMenuRunActionParams with guaranteed onFinishAction.
  */
 export class AppMenuRegistry {
   static CUSTOM_ITEMS_LIMIT = 2;
-  private items: Map<string, AppMenuItemType> = new Map();
-  private customItems: Map<string, AppMenuItemType> = new Map();
-  private primaryActionItem?: AppMenuPrimaryActionItem;
-  private secondaryActionItem?: AppMenuSecondaryActionItem;
+  private items: Map<string, DiscoverAppMenuItemType> = new Map();
+  private customItems: Map<string, DiscoverAppMenuItemType> = new Map();
+  private primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
+  private secondaryActionItem?: DiscoverAppMenuSecondaryActionItem;
 
-  private getCustomItems(): AppMenuItemType[] {
+  private getCustomItems(): DiscoverAppMenuItemType[] {
     return Array.from(this.customItems.values()).slice(0, AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
   }
 
@@ -35,36 +39,38 @@ export class AppMenuRegistry {
    * Register a custom menu item.
    * @param item The menu item to register
    */
-  public registerCustomItem(item: AppMenuItemType) {
-    this.customItems.set(item.id, item as AppMenuItemType);
+  public registerCustomItem(item: DiscoverAppMenuItemType) {
+    this.customItems.set(item.id, item);
   }
 
   /**
-   * Register a custom menu item.
-   * @param item The menu item to register
+   * Register a custom popover item under a parent menu item.
+   * @param parentId The ID of the parent menu item
+   * @param popoverItem The popover item to register
    */
-  public registerCustomPopoverItem(parentId: string, popoverItem: AppMenuPopoverItem) {
+  public registerCustomPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
+    const parent = this.customItems.get(parentId);
     this.customItems.set(parentId, {
-      ...this.customItems.get(parentId),
-      items: [...(this.customItems.get(parentId)?.items || []), popoverItem].sort(
-        (a: AppMenuPopoverItem, b: AppMenuPopoverItem) => (a.order || 0) - (b.order || 0)
+      ...parent,
+      items: [...(parent?.items || []), popoverItem].sort(
+        (a, b) => (a.order || 0) - (b.order || 0)
       ),
-    } as AppMenuItemType);
+    } as DiscoverAppMenuItemType);
   }
 
   /**
    * Register a menu item.
    * @param item The menu item to register
    */
-  public registerItem(item: AppMenuItemType) {
-    this.items.set(item.id, item as AppMenuItemType);
+  public registerItem(item: DiscoverAppMenuItemType) {
+    this.items.set(item.id, item);
   }
 
   /**
    * Register multiple menu items at once.
    * @param items Array of menu items to register
    */
-  public registerItems(items: AppMenuItemType[]) {
+  public registerItems(items: DiscoverAppMenuItemType[]) {
     items.forEach((item) => this.registerItem(item));
   }
 
@@ -72,7 +78,7 @@ export class AppMenuRegistry {
    * Set the primary action item for the app menu.
    * @param item The primary action item
    */
-  public setPrimaryActionItem(item: AppMenuPrimaryActionItem) {
+  public setPrimaryActionItem(item: DiscoverAppMenuPrimaryActionItem) {
     this.primaryActionItem = item;
   }
 
@@ -80,7 +86,7 @@ export class AppMenuRegistry {
    * Set the secondary action item for the app menu.
    * @param item The secondary action item
    */
-  public setSecondaryActionItem(item: AppMenuSecondaryActionItem) {
+  public setSecondaryActionItem(item: DiscoverAppMenuSecondaryActionItem) {
     this.secondaryActionItem = item;
   }
 
@@ -89,13 +95,14 @@ export class AppMenuRegistry {
    * @param parentId The ID of the parent menu item
    * @param popoverItem The popover item to register
    */
-  public registerPopoverItem(parentId: string, popoverItem: AppMenuPopoverItem) {
+  public registerPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
+    const parent = this.items.get(parentId);
     this.items.set(parentId, {
-      ...this.items.get(parentId),
-      items: [...(this.items.get(parentId)?.items || []), popoverItem].sort(
-        (a: AppMenuPopoverItem, b: AppMenuPopoverItem) => (a.order || 0) - (b.order || 0)
+      ...parent,
+      items: [...(parent?.items || []), popoverItem].sort(
+        (a, b) => (a.order || 0) - (b.order || 0)
       ),
-    } as AppMenuItemType);
+    } as DiscoverAppMenuItemType);
   }
 
   /**
@@ -106,9 +113,9 @@ export class AppMenuRegistry {
     return {
       items: Array.from(this.items.values())
         .concat(this.getCustomItems())
-        .sort((a: AppMenuItemType, b: AppMenuItemType) => (a.order || 0) - (b.order || 0)),
-      primaryActionItem: this.primaryActionItem,
-      secondaryActionItem: this.secondaryActionItem,
+        .sort((a, b) => (a.order || 0) - (b.order || 0)) as AppMenuItemType[],
+      primaryActionItem: this.primaryActionItem as AppMenuPrimaryActionItem | undefined,
+      secondaryActionItem: this.secondaryActionItem as AppMenuSecondaryActionItem | undefined,
     };
   }
 }

@@ -11,7 +11,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import { EuiResizeObserver, type EuiResizeObserverProps } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import useObservable from 'react-use/lib/useObservable';
-import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { css } from '@emotion/react';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import { discoverTopNavMenuContext } from '../top_nav/discover_topnav_menu';
@@ -112,7 +112,10 @@ export const TabsView = (props: SingleTabViewProps) => {
             onEBTEvent={onEvent}
             onClearRecentlyClosed={onClearRecentlyClosed}
             appendRight={
-              <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
+              <AppMenuComponent
+                config={topNavMenuItems as AppMenuConfig}
+                isCollapsed={shouldCollapseAppMenu}
+              />
             }
           />
         </div>

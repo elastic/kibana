@@ -12,6 +12,12 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
+import type {
+  DiscoverAppMenuItemType,
+  DiscoverAppMenuConfig,
+  DiscoverAppMenuPrimaryActionItem,
+  DiscoverAppMenuSecondaryActionItem,
+} from '@kbn/discover-utils';
 import { AppMenuRegistry, dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
@@ -19,7 +25,6 @@ import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useI18n } from '@kbn/i18n-react';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
@@ -76,7 +81,7 @@ export const useTopNavLinks = ({
   shouldShowESQLToDataViewTransitionModal: boolean;
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
-}): AppMenuConfig => {
+}): DiscoverAppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
@@ -115,8 +120,8 @@ export const useTopNavLinks = ({
 
   const defaultMenu = topNavCustomization?.defaultMenu;
 
-  const appMenuItems: AppMenuItemType[] = useMemo(() => {
-    const items: AppMenuItemType[] = [];
+  const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
+    const items: DiscoverAppMenuItemType[] = [];
     if (!defaultMenu?.inspectItem?.disabled) {
       const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
       items.push(inspectAppMenuItem);
@@ -368,7 +373,7 @@ export const useTopNavLinks = ({
     transitionFromDataViewToESQL,
   ]);
 
-  return useMemo((): AppMenuConfig => {
+  return useMemo((): DiscoverAppMenuConfig => {
     const config = appMenuRegistry.getAppMenuConfig();
 
     return {
@@ -376,10 +381,16 @@ export const useTopNavLinks = ({
         enhanceAppMenuItemWithRunAction({ appMenuItem: item, services })
       ),
       primaryActionItem: config.primaryActionItem
-        ? enhanceAppMenuItemWithRunAction({ appMenuItem: config.primaryActionItem, services })
+        ? (enhanceAppMenuItemWithRunAction({
+            appMenuItem: config.primaryActionItem,
+            services,
+          }) as DiscoverAppMenuPrimaryActionItem)
         : undefined,
       secondaryActionItem: config.secondaryActionItem
-        ? enhanceAppMenuItemWithRunAction({ appMenuItem: config.secondaryActionItem, services })
+        ? (enhanceAppMenuItemWithRunAction({
+            appMenuItem: config.secondaryActionItem,
+            services,
+          }) as DiscoverAppMenuSecondaryActionItem)
         : undefined,
     };
   }, [appMenuRegistry, services]);

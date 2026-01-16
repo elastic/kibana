@@ -8,15 +8,16 @@
  */
 
 import React from 'react';
-import type { AppMenuItemType, AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { runAppMenuAction, enhanceAppMenuItemWithRunAction } from './run_app_menu_action';
+import type { DiscoverAppMenuItemType, DiscoverAppMenuRunActionParams } from '@kbn/discover-utils';
 
 describe('run app menu actions', () => {
   describe('runAppMenuAction', () => {
     it('should call the run function with correct params', async () => {
       const mockRun = jest.fn();
-      const appMenuItem: AppMenuItemType = {
+      const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
         label: 'Action 1',
@@ -69,14 +70,14 @@ describe('run app menu actions', () => {
     });
 
     it('should call onFinishAction to cleanup', async () => {
-      let capturedParams: AppMenuRunActionParams | undefined;
+      let capturedParams: DiscoverAppMenuRunActionParams | undefined;
 
       const mockRun = jest.fn((params) => {
         capturedParams = params;
         return <div data-test-subj="test-content">Custom Content</div>;
       });
 
-      const appMenuItem: AppMenuItemType = {
+      const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
         label: 'Action 1',
@@ -86,6 +87,7 @@ describe('run app menu actions', () => {
       };
 
       const anchorElement = document.createElement('div');
+      document.body.appendChild(anchorElement);
       const focusSpy = jest.spyOn(anchorElement, 'focus');
 
       await runAppMenuAction({
@@ -96,18 +98,18 @@ describe('run app menu actions', () => {
 
       expect(mockRun).toHaveBeenCalled();
       expect(capturedParams).toBeDefined();
-      expect(capturedParams?.context?.onFinishAction).toBeDefined();
+      expect(capturedParams?.context.onFinishAction).toBeDefined();
 
       // Container should be added
       const containers = document.body.querySelectorAll('div');
       expect(containers.length).toBeGreaterThan(0);
 
       // Call onFinishAction to cleanup
-      const onFinishAction = capturedParams?.context?.onFinishAction as (() => void) | undefined;
-      onFinishAction?.();
+      const onFinishAction = capturedParams?.context?.onFinishAction;
+      onFinishAction!();
 
-      // Container should be removed
-      expect(document.body.querySelectorAll('div').length).toBe(0);
+      // Container should be removed (anchorElement still in DOM)
+      expect(document.body.querySelectorAll('div').length).toBe(1);
       expect(focusSpy).toHaveBeenCalled();
     });
   });
@@ -115,7 +117,7 @@ describe('run app menu actions', () => {
   describe('enhanceAppMenuItemWithRunAction', () => {
     it('should wrap the run function', () => {
       const mockRun = jest.fn();
-      const appMenuItem: AppMenuItemType = {
+      const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
         label: 'Action 1',
@@ -135,7 +137,7 @@ describe('run app menu actions', () => {
 
     it('should call runAppMenuAction when wrapper is invoked', async () => {
       const mockRun = jest.fn();
-      const appMenuItem: AppMenuItemType = {
+      const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
         label: 'Action 1',
@@ -150,7 +152,7 @@ describe('run app menu actions', () => {
       });
 
       const triggerElement = document.createElement('div');
-      enhanced.run?.({ triggerElement });
+      enhanced.run?.({ triggerElement, context: { onFinishAction: jest.fn() } });
 
       // Wait for async execution
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -160,7 +162,7 @@ describe('run app menu actions', () => {
 
     it('should recursively enhance nested items', () => {
       const mockNestedRun = jest.fn();
-      const appMenuItem: AppMenuItemType = {
+      const appMenuItem: DiscoverAppMenuItemType = {
         id: 'parent',
         order: 1,
         label: 'Parent',
@@ -179,7 +181,7 @@ describe('run app menu actions', () => {
       const enhanced = enhanceAppMenuItemWithRunAction({
         appMenuItem,
         services: discoverServiceMock,
-      });
+      }) as DiscoverAppMenuItemType;
 
       expect(enhanced.items).toBeDefined();
       expect(enhanced.items?.[0]).toBeDefined();
@@ -188,7 +190,7 @@ describe('run app menu actions', () => {
     });
 
     it('should preserve all properties', () => {
-      const appMenuItem: AppMenuItemType = {
+      const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 5,
         label: 'Action 1',
@@ -200,7 +202,7 @@ describe('run app menu actions', () => {
       const enhanced = enhanceAppMenuItemWithRunAction({
         appMenuItem,
         services: discoverServiceMock,
-      });
+      }) as DiscoverAppMenuItemType;
 
       expect(enhanced.id).toBe('action-1');
       expect(enhanced.order).toBe(5);
@@ -210,7 +212,7 @@ describe('run app menu actions', () => {
     });
 
     it('should return undefined run when item has no run', () => {
-      const appMenuItem: AppMenuItemType = {
+      const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
         label: 'Action 1',

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
 export const getInspectAppMenuItem = ({
   onOpenInspector,
 }: {
-  onOpenInspector: () => void;
-}): AppMenuItemType => {
+  onOpenInspector: (onClose?: () => void) => void;
+}): DiscoverAppMenuItemType => {
   return {
     id: 'inspect',
     iconType: 'inspect',
@@ -23,8 +23,8 @@ export const getInspectAppMenuItem = ({
       defaultMessage: 'Inspect',
     }),
     testId: 'openInspectorButton',
-    run: () => {
-      onOpenInspector();
+    run: (params) => {
+      onOpenInspector(params.context.onFinishAction);
     },
   };
 };
