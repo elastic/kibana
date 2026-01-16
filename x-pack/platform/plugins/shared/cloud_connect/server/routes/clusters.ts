@@ -8,14 +8,17 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { i18n } from '@kbn/i18n';
 import axios from 'axios';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import { createStorageService } from '../lib/create_storage_service';
 import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
+import { updateDefaultLLMActions } from '../lib/update_default_llm_actions';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export interface ClustersRouteOptions {
@@ -297,6 +300,16 @@ export const registerClustersRoute = ({
             });
           }
 
+          // Update default LLM actions if needed
+          try {
+            if (eisRequest?.enabled) {
+              await updateDefaultLLMActions(getStartServices, request, logger);
+            }
+          } catch (llmActionsError) {
+            logger.warn('Failed to update default LLM actions', { error: llmActionsError });
+          }
+
+          // Update elastic inference ccm settings
           try {
             if (eisRequest?.enabled) {
               await enableInferenceCCM(esClient, eisKey!, logger);

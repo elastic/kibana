@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiBadge,
   EuiBetaBadge,
+  EuiCallOut,
   EuiText,
   EuiLink,
   EuiButtonEmpty,
@@ -111,7 +112,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   validLicenseTypes,
   currentLicenseType,
 }) => {
-  const { hasConfigurePermission, telemetryService } = useCloudConnectedAppContext();
+  const { hasConfigurePermission, hasActionsSavePrivilege, telemetryService } =
+    useCloudConnectedAppContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLicensePopoverOpen, setIsLicensePopoverOpen] = useState(false);
 
@@ -485,6 +487,29 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 
         <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>
       </EuiFlexGroup>
+
+      {serviceKey === 'eis' && !hasActionsSavePrivilege && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate('xpack.cloudConnect.connectedServices.service.missingPrivileges', {
+              defaultMessage: 'Missing privileges',
+            })}
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.cloudConnect.connectedServices.service.missingPrivilegesDescription"
+                defaultMessage="Full LLM functionality requires the save {privilege} Kibana privilege. Without it, some features will be unavailable."
+                values={{
+                  privilege: <strong>Actions and Connectors</strong>,
+                }}
+              />
+            </p>
+          </EuiCallOut>
+        </>
+      )}
     </EuiPanel>
   );
 };

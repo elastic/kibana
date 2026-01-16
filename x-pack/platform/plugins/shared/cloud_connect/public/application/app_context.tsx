@@ -25,6 +25,7 @@ export interface CloudConnectedAppContextValue {
   apiService: CloudConnectApiService;
   clusterConfig?: CloudConnectApiConfig;
   hasConfigurePermission?: boolean;
+  hasActionsSavePrivilege?: boolean;
 }
 
 const CloudConnectedAppContext = createContext<CloudConnectedAppContextValue | null>(null);

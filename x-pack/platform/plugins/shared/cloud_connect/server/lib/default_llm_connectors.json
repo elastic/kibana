@@ -1,0 +1,41 @@
+[
+  {
+    "id": "Anthropic-Claude-Sonnet-3-7",
+    "name": "Anthropic Claude Sonnet 3.7",
+    "actionTypeId": ".inference",
+    "config": {
+      "provider": "elastic",
+      "taskType": "chat_completion",
+      "inferenceId": ".rainbow-sprinkles-elastic",
+      "providerConfig": {
+        "model_id": "rainbow-sprinkles"
+      }
+    }
+  },
+  {
+    "id": "Anthropic-Claude-Sonnet-4-5",
+    "name": "Anthropic Claude Sonnet 4.5",
+    "actionTypeId": ".inference",
+    "config": {
+      "provider": "elastic",
+      "taskType": "chat_completion",
+      "inferenceId": ".gp-llm-v2-chat_completion",
+      "providerConfig": {
+        "model_id": "gp-llm-v2"
+      }
+    }
+  },
+  {
+    "id": "OpenAI-GPT-OSS-120B",
+    "name": "OpenAI GPT-OSS 120B",
+    "actionTypeId": ".inference",
+    "config": {
+      "provider": "elastic",
+      "taskType": "chat_completion",
+      "inferenceId": ".openai-gpt-oss-120b-chat_completion",
+      "providerConfig": {
+        "model_id": "openai-gpt-oss-120b"
+      }
+    }
+  }
+]
