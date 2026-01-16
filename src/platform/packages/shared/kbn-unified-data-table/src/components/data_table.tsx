@@ -478,6 +478,12 @@ interface InternalUnifiedDataTableProps {
    */
 
   onFullScreenChange?: (isFullScreen: boolean) => void;
+
+  /**
+   * Set to true when the table is used in an embedded context (e.g., dashboards).
+   * When true, filter actions on computed columns will be hidden.
+   */
+  isEmbedded?: boolean;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -563,6 +569,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       customBulkActions,
       shouldKeepAdHocDataViewImmutable,
       onFullScreenChange,
+      isEmbedded,
     },
     ref
   ) => {
@@ -991,6 +998,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           sortedColumns,
           disableCellActions,
           dataGridRef,
+          isEmbedded,
         }),
       [
         cellActionsHandling,
@@ -1016,6 +1024,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         visibleColumns,
         sortedColumns,
         disableCellActions,
+        isEmbedded,
       ]
     );
 
