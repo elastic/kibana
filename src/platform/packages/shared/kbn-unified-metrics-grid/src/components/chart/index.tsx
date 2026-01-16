@@ -81,13 +81,6 @@ export const Chart = ({
         height: ${ChartSizes[size]}px;
         outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
         border-radius: ${euiTheme.border.radius.medium};
-
-        &:hover {
-          .metricsExperienceChartTitle {
-            z-index: ${Number(euiTheme.levels.menu) + 1};
-            transition: none;
-          }
-        }
       `}
       ref={chartRef}
     >
