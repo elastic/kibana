@@ -40,11 +40,11 @@ export const createTracesDataSourceProfileProvider = ({
     hasUnprocessedOtel: boolean;
   }> => {
     try {
-      const { hasECS, hasUnprocessedOtel } = await http.get<{
-        hasECS: boolean;
+      const { hasEcs, hasUnprocessedOtel } = await http.get<{
+        hasEcs: boolean;
         hasUnprocessedOtel: boolean;
       }>('/internal/apm/traces_data_sources_summary');
-      return { hasEcs: hasECS, hasUnprocessedOtel };
+      return { hasEcs, hasUnprocessedOtel };
     } catch {
       return { hasEcs: false, hasUnprocessedOtel: false };
     }
