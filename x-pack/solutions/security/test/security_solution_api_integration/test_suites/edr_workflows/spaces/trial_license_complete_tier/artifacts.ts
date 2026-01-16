@@ -48,9 +48,8 @@ export default function ({ getService }: FtrProviderContext) {
     .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
     ?.includes('endpointExceptionsMovedUnderManagement');
 
-  // @skipInServerless: due to the fact that the serverless builtin roles are not yet updated with new privilege
   //                    and tests below are currently creating a new role/user
-  describe('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
+  describe('@ess @serverless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';
@@ -94,20 +93,14 @@ export default function ({ getService }: FtrProviderContext) {
         );
       }
 
-      const [artifactManagerUser, globalArtifactManagerUser] = await Promise.all([
-        rolesUsersProvider.loader.create(artifactManagerRole),
-        rolesUsersProvider.loader.create(globalArtifactManagerRole),
-      ]);
-
-      supertestArtifactManager = await utils.createSuperTest(
-        artifactManagerUser.username,
-        artifactManagerUser.password
-      );
-      supertestGlobalArtifactManager = await utils.createSuperTest(
-        globalArtifactManagerUser.username,
-        globalArtifactManagerUser.password
-      );
-
+      supertestArtifactManager = await utils.createSuperTestWithCustomRole({
+        name: 'artifactManager',
+        privileges: artifactManagerRole,
+      });
+      supertestGlobalArtifactManager = await utils.createSuperTestWithCustomRole({
+        name: 'globalArtifactManager',
+        privileges: globalArtifactManagerRole,
+      });
       await Promise.all([
         ensureSpaceIdExists(kbnServer, spaceOneId, { log }),
         ensureSpaceIdExists(kbnServer, spaceTwoId, { log }),
@@ -128,17 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error
       spaceTwoPolicy = undefined;
 
-      if (artifactManagerRole) {
-        await rolesUsersProvider.loader.delete(artifactManagerRole.name);
-        // @ts-expect-error
-        artifactManagerRole = undefined;
-      }
-
-      if (globalArtifactManagerRole) {
-        await rolesUsersProvider.loader.delete(globalArtifactManagerRole.name);
-        // @ts-expect-error
-        globalArtifactManagerRole = undefined;
-      }
+      await utils.cleanUpCustomRoles();
     });
 
     afterEach(async () => {

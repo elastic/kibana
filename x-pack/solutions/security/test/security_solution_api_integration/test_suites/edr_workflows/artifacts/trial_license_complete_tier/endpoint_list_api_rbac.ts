@@ -18,11 +18,12 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
+import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
+import type { CustomRole } from '../../../../config/services/types';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
-  const rolesUsersProvider = getService('rolesUsersProvider');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
@@ -244,29 +245,30 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('@skipInServerless and user has endpoint exception access but no global artifact access', () => {
+    describe('and user has endpoint exception access but no global artifact access', () => {
       let noGlobalArtifactSupertest: TestAgent;
 
       before(async () => {
-        const loadedRole = await rolesUsersProvider.loader.create({
+        const role: CustomRole = {
           name: 'no_global_artifact_role_endpoint_list',
-          kibana: [
-            {
-              base: [],
-              feature: {
-                [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_all'],
+          privileges: {
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_all'],
+                },
+                spaces: ['*'],
               },
-              spaces: ['*'],
-            },
-          ],
-          elasticsearch: { cluster: [], indices: [], run_as: [] },
-        });
-
-        noGlobalArtifactSupertest = await utils.createSuperTest(loadedRole.username);
+            ],
+            elasticsearch: { cluster: [], indices: [] },
+          },
+        };
+        noGlobalArtifactSupertest = await utils.createSuperTestWithCustomRole(role);
       });
 
       after(async () => {
-        await rolesUsersProvider.loader.delete('no_global_artifact_role_endpoint_list');
+        await utils.cleanUpCustomRoles();
       });
 
       for (const endpointListApiCall of endpointListCalls) {
@@ -319,11 +321,18 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('@skipInServerless and user has authorization to read endpoint exceptions', function () {
+    describe('and user has authorization to read endpoint exceptions', function () {
       let hunterSupertest: TestAgent;
 
       before(async () => {
-        hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+        hunterSupertest = await utils.createSuperTestWithCustomRole({
+          name: 'custom_hunter_role',
+          privileges: getHunter(),
+        });
+      });
+
+      after(async () => {
+        await utils.cleanUpCustomRoles();
       });
 
       for (const endpointListApiCall of [...endpointListCalls, ...needsWritePrivilege]) {
