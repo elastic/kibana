@@ -19,6 +19,33 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
       const indexSyncUtils = PlainIndexSyncUtils(getService, indexName);
+      const waitForIndexSourceEnabled = async () => {
+        await waitFor(
+          async () => {
+            const res = await api.listEntitySources({ query: {} });
+            const sources = res.body.sources;
+            const indexSource = sources.find(
+              (source: any) => source.type === 'index' && source.indexPattern === indexName
+            );
+
+            log.info(
+              `Index entity sources: ${JSON.stringify(
+                sources
+                  .filter((source: any) => source.type === 'index')
+                  .map((source: any) => ({
+                    name: source.name,
+                    indexPattern: source.indexPattern,
+                    enabled: source.enabled,
+                  }))
+              )}`
+            );
+
+            return Boolean(indexSource?.enabled);
+          },
+          'wait for index entity source to be available',
+          log
+        );
+      };
 
       beforeEach(async () => {
         await privMonUtils.createIndex(indexName);
@@ -47,6 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await indexSyncUtils.addUsersToIndex([...uniqueUsernames, ...repeatedUsers]);
         await indexSyncUtils.createEntitySourceForIndex();
+        await waitForIndexSourceEnabled();
 
         const users = await privMonUtils.scheduleEngineAndWaitForUserCountWithoutDuplicates(
           uniqueUsernames.length
@@ -63,6 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
         // add user to incoming index, for monitoring source
         await indexSyncUtils.addUsersToIndex(['user1', 'user2']);
         await indexSyncUtils.createEntitySourceForIndex();
+        await waitForIndexSourceEnabled();
         // users from internal index
         const usersBefore = await privMonUtils.scheduleEngineAndWaitForUserCount(2);
 
@@ -93,6 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await indexSyncUtils.addUsersToIndex([user1.name]);
         await indexSyncUtils.createEntitySourceForIndex();
+        await waitForIndexSourceEnabled();
 
         const usersAfterSync = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
         const user1After = privMonUtils.findUser(usersAfterSync, user1.name);
@@ -108,32 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
         const user1 = { name: 'user1' };
         await indexSyncUtils.addUsersToIndex([user1.name]);
         await indexSyncUtils.createEntitySourceForIndex();
-
-        await waitFor(
-          async () => {
-            const res = await api.listEntitySources({ query: {} });
-            const sources = res.body.sources;
-            const indexSource = sources.find(
-              (source: any) => source.type === 'index' && source.indexPattern === indexName
-            );
-
-            log.info(
-              `Index entity sources: ${JSON.stringify(
-                sources
-                  .filter((source: any) => source.type === 'index')
-                  .map((source: any) => ({
-                    name: source.name,
-                    indexPattern: source.indexPattern,
-                    enabled: source.enabled,
-                  }))
-              )}`
-            );
-
-            return Boolean(indexSource?.enabled);
-          },
-          'wait for index entity source to be available',
-          log
-        );
+        await waitForIndexSourceEnabled();
 
         const usersAfterFirstSync = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
         const user1AfterFirstSync = privMonUtils.findUser(usersAfterFirstSync, user1.name);
