@@ -9,6 +9,7 @@ import { ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
 import {
   dashboardElement,
   visualizationElement,
+  SupportedChartType,
 } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { dashboardTools } from '../common';
@@ -26,9 +27,13 @@ export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
       research: {
         instructions: `## Dashboard Tools
 
-- ${dashboardTools.createVisualizations}: Creates multiple visualization configurations in a single batch operation
+- ${
+          dashboardTools.createVisualizations
+        }: Creates multiple visualization configurations in a single batch operation
 - ${dashboardTools.createDashboard}: Creates an in-memory dashboard with visualization panels
-- ${dashboardTools.manageDashboard}: Updates an existing in-memory dashboard (add/remove panels, update metadata)
+- ${
+          dashboardTools.manageDashboard
+        }: Updates an existing in-memory dashboard (add/remove panels, update metadata)
 
 ## Creating a Dashboard
 
@@ -39,12 +44,16 @@ When the user asks to create a dashboard:
    - Use ${platformCoreTools.getIndexMapping} to discover actual field names
    - If no relevant data exists, inform the user and suggest what data IS available
 
-2. **Create visualizations in batch** - Call ${dashboardTools.createVisualizations} with an array of visualization descriptions:
+2. **Create visualizations in batch** - Call ${
+          dashboardTools.createVisualizations
+        } with an array of visualization descriptions:
    - Each visualization should have a \`query\` that references actual index names and field names you discovered
    - Example query: "Show system.cpu.total.pct over time from metrics-*" (using real fields)
    - Pass \`index\` when you know the target index pattern to improve performance
    - Pass \`esql\` if you have a pre-generated query to improve performance
-   - Pass \`chartType\` (Metric, Gauge, Tagcloud, XY, RegionMap, or Heatmap) to skip chart type detection
+   - Pass \`chartType\` (${Object.values(SupportedChartType).join(
+     ', '
+   )}) to skip chart type detection
    - The tool returns an array of results, each with a \`tool_result_id\` for use in dashboard creation
    - Example input:
      \`\`\`
@@ -59,7 +68,9 @@ When the user asks to create a dashboard:
 3. **Create the dashboard** - Call ${dashboardTools.createDashboard} with:
    - \`title\`: Dashboard title
    - \`description\`: Dashboard description
-   - \`panels\`: Array of \`tool_result_id\` values from the ${dashboardTools.createVisualizations} call (preferred), or full visualization configs
+   - \`panels\`: Array of \`tool_result_id\` values from the ${
+     dashboardTools.createVisualizations
+   } call (preferred), or full visualization configs
    - \`markdownContent\`: A markdown summary displayed at the top of the dashboard
      - Should describe what the dashboard shows and provide helpful context
      - Use markdown formatting (headers, lists, bold text)
@@ -70,7 +81,9 @@ The dashboard is created as an **in-memory dashboard** (not saved automatically)
 
 **CRITICAL RULES:**
 - NEVER call ${dashboardTools.createVisualizations} without first discovering what data exists
-- NEVER invent index names or field names - only use indices/fields you found via ${platformCoreTools.listIndices} and ${platformCoreTools.getIndexMapping}
+- NEVER invent index names or field names - only use indices/fields you found via ${
+          platformCoreTools.listIndices
+        } and ${platformCoreTools.getIndexMapping}
 - When creating a dashboard: ALWAYS call ${dashboardTools.createDashboard} to complete the request
 
 
@@ -78,9 +91,13 @@ The dashboard is created as an **in-memory dashboard** (not saved automatically)
 
 When the user wants to modify an existing in-memory dashboard:
 
-1. **Get the previous dashboard's tool_result_id** - This was returned by ${dashboardTools.createDashboard} or a previous ${dashboardTools.manageDashboard} call
+1. **Get the previous dashboard's tool_result_id** - This was returned by ${
+          dashboardTools.createDashboard
+        } or a previous ${dashboardTools.manageDashboard} call
 
-2. **Create any new visualizations** - If adding new panels, call ${dashboardTools.createVisualizations} first
+2. **Create any new visualizations** - If adding new panels, call ${
+          dashboardTools.createVisualizations
+        } first
 
 3. **Call ${dashboardTools.manageDashboard}** with:
    - \`toolResultId\`: The \`tool_result_id\` from the previous dashboard operation
@@ -94,11 +111,15 @@ The tool returns a new \`tool_result_id\` that can be used for subsequent modifi
 
 **Example workflow:**
 1. User: "Create a dashboard with CPU metrics"
-   -> ${platformCoreTools.listIndices} -> ${platformCoreTools.getIndexMapping} -> ${dashboardTools.createVisualizations} -> ${dashboardTools.createDashboard}
+   -> ${platformCoreTools.listIndices} -> ${platformCoreTools.getIndexMapping} -> ${
+          dashboardTools.createVisualizations
+        } -> ${dashboardTools.createDashboard}
    -> Returns dashboard with \`tool_result_id: "abc123"\`
 
 2. User: "Add memory metrics to that dashboard"
-   -> ${dashboardTools.createVisualizations} (for memory viz) -> Returns \`tool_result_id: "viz456"\`
+   -> ${
+     dashboardTools.createVisualizations
+   } (for memory viz) -> Returns \`tool_result_id: "viz456"\`
    -> ${dashboardTools.manageDashboard}({ toolResultId: "abc123", panelsToAdd: ["viz456"] })
    -> Returns updated dashboard with new \`tool_result_id: "def789"\`
 `,
