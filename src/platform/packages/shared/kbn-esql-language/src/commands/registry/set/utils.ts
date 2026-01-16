@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
 import type { ESQLAstItem } from '../../../types';
 import { isMap, SuggestionCategory } from '../../../..';
-import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
+import { SignatureAnalyzer } from '../../definitions/utils/autocomplete/expressions/signature_analyzer';
+import { settings } from '../../definitions/generated/settings';
 
 const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   return [
@@ -71,19 +72,17 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
   ];
 };
 
+type ApproximateSetting = (typeof settings)[0] & { mapParams: string };
 const getApproximateCompletionItems = (
   innerText: string,
   settingRightSide: ESQLAstItem | null
 ): ISuggestionItem[] => {
   if (isMap(settingRightSide)) {
-    const availableParameters: MapParameters = {
-      num_rows: {
-        type: 'number',
-      },
-      confidence_level: {
-        type: 'number',
-      },
-    };
+    // casting the object because typescript is not able to infer the 'mapParams' property
+    const approximateSetting = settings.find((s) => s.name === 'approximate') as ApproximateSetting;
+    const availableParameters = SignatureAnalyzer.parseMapParams(
+      approximateSetting?.mapParams || ''
+    );
     return getCommandMapExpressionSuggestions(innerText, availableParameters);
   }
   return [
