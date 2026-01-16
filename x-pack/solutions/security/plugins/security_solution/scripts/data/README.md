@@ -71,7 +71,7 @@ To avoid alerts appearing in large grouped blocks per rule (a common artifact of
 From Kibana repo root:
 
 ```bash
-node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.js \
+node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_cli.js \
   -n 100 -h 5 -u 5 \
   --start-date 1d --end-date now
 ```
@@ -79,14 +79,14 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.j
 To also generate synthetic Attack Discoveries (and optionally cases):
 
 ```bash
-node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.js \
+node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_cli.js \
   -n 100 -h 5 -u 5 \
   --start-date 1d --end-date now \
   --attacks
 ```
 
 ```bash
-node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.js \
+node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_cli.js \
   -n 100 -h 5 -u 5 \
   --start-date 1d --end-date now \
   --cases

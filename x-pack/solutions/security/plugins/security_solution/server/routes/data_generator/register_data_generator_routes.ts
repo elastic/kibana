@@ -10,15 +10,13 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import { SAVED_OBJECT_TYPES } from '@kbn/cases-plugin/common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { StartServicesAccessor } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { StartPlugins } from '../../plugin';
 
 const isPrivilegedDataGeneratorUser = (
-  user:
-    | { roles?: string[]; authentication_type?: string; authentication_realm?: { name?: string }; api_key?: { id?: string } }
-    | null
-    | undefined
+  user: AuthenticatedUser | null | undefined
 ): boolean => {
   if (!user) return false;
   if (user.roles?.includes('superuser')) return true;

@@ -11,15 +11,11 @@ import type { ElasticAssistantPluginRouter } from '../../types';
 import { API_VERSIONS, CreateAttackDiscoveryAlertsParams } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 const RESPONSE_SCHEMA = z.object({ data: z.array(z.unknown()) });
 
-const isPrivilegedDataGeneratorUser = (
-  user:
-    | { roles?: string[]; authentication_type?: string; authentication_realm?: { name?: string }; api_key?: { id?: string } }
-    | null
-    | undefined
-): boolean => {
+const isPrivilegedDataGeneratorUser = (user: AuthenticatedUser | null | undefined): boolean => {
   if (!user) return false;
   if (user.roles?.includes('superuser')) return true;
   // Kibana may authenticate API-key requests as `_es_api_key` with no Kibana roles in serverless.
@@ -110,7 +106,7 @@ export const createAttackDiscoveryAlertsRoute = (router: ElasticAssistantPluginR
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,
-            body: { message: error.message, full_error: JSON.stringify(e) },
+            body: { message: error.message },
             bypassErrorFormat: true,
           });
         }
