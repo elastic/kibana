@@ -65,8 +65,7 @@ export const AlertsDropdown: React.FC<{}> = () => {
         defaultMessage: 'Manage rules',
       }),
       icon: 'tableOfContents',
-      onClick: () =>
-        navigateToApp('management', { path: '/insightsAndAlerting/triggersActions/rules' }),
+      onClick: () => navigateToApp('rules'),
     },
   ];
 
