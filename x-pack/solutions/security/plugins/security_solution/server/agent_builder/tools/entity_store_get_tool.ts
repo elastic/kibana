@@ -16,6 +16,7 @@ import { getEntitiesIndexName } from '../../lib/entity_analytics/entity_store/ut
 import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
+import { RISK_SCORE_INSTRUCTION } from './tool_instructions';
 
 const entityStoreGetSchema = z.object({
   entityType: z
@@ -100,6 +101,8 @@ Returns all available information including:
 - Attributes (privileged, managed, MFA enabled)
 - Behaviors (brute force victim, new country login, USB device usage)
 - Relationships (what the entity communicates with, depends on, etc.)
+
+${RISK_SCORE_INSTRUCTION}
 
 Use this tool for questions like "What do we know about user jsmith?" or "Show me the profile for host server-01".`,
     schema: entityStoreGetSchema,

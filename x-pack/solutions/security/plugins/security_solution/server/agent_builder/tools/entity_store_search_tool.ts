@@ -16,6 +16,7 @@ import { getEntitiesIndexName } from '../../lib/entity_analytics/entity_store/ut
 import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
+import { RISK_SCORE_INSTRUCTION, RISK_LEVELS_INSTRUCTION } from './tool_instructions';
 
 const RISK_LEVELS = ['Critical', 'High', 'Moderate', 'Low', 'Unknown'] as const;
 const ASSET_CRITICALITY_LEVELS = [
@@ -241,12 +242,12 @@ export const entityStoreSearchTool = (
     description: `Search the Entity Store for entities (hosts, users, services) matching specific criteria. Use this tool to find entities based on risk levels, asset criticality, attributes (privileged, managed), and behaviors. For example: "What are the riskiest hosts that are high impact?" or "Show me privileged users with high risk scores."
 
 Key fields:
-- entity.risk.calculated_level: Critical, High, Moderate, Low, Unknown
+- entity.risk.calculated_level: ${RISK_LEVELS_INSTRUCTION}
 - asset.criticality: extreme_impact, high_impact, medium_impact, low_impact
 - entity.attributes: Privileged, Managed, Mfa_enabled, Asset
 - entity.behaviors: Brute_force_victim, New_country_login, Used_usb_device
 
-Always use 'calculated_score_norm' (0-100) when comparing risk scores between entities.`,
+${RISK_SCORE_INSTRUCTION}`,
     schema: entityStoreSearchSchema,
     availability: {
       cacheMode: 'space',

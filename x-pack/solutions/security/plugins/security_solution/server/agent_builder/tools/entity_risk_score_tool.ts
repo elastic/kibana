@@ -20,6 +20,7 @@ import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/co
 import { getRiskIndex } from '../../../common/search_strategy/security_solution/risk_score/common';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
+import { RISK_SCORE_FULL_INSTRUCTIONS } from './tool_instructions';
 
 const entityRiskScoreSchema = z.object({
   identifierType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
@@ -131,7 +132,7 @@ export const entityRiskScoreTool = (
   return {
     id: SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). Use identifier "*" to get all entities of the specified type sorted by risk score. IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities. The 'modifiers' array contains risk adjustments such as asset criticality and privileged user monitoring (watchlist/privmon type).`,
+    description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). Use identifier "*" to get all entities of the specified type sorted by risk score. ${RISK_SCORE_FULL_INSTRUCTIONS}`,
     schema: entityRiskScoreSchema,
     availability: {
       cacheMode: 'space',

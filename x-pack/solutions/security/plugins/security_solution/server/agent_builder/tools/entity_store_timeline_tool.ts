@@ -16,6 +16,7 @@ import { getEntitiesIndexName } from '../../lib/entity_analytics/entity_store/ut
 import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
+import { RISK_SCORE_INSTRUCTION } from './tool_instructions';
 
 const entityStoreTimelineSchema = z.object({
   entityType: z
@@ -118,7 +119,10 @@ This tool answers questions like:
 Returns:
 - Lifecycle data: first_seen, last_activity, duration of activity
 - Behavioral timeline: history of behaviors (brute force attempts, new country logins, USB device usage)
-- Relationships: entities this entity interacts with (communicates_with, depends_on, accesses_frequently, etc.)`,
+- Relationships: entities this entity interacts with (communicates_with, depends_on, accesses_frequently, etc.)
+- Current risk status with normalized score
+
+${RISK_SCORE_INSTRUCTION}`,
     schema: entityStoreTimelineSchema,
     availability: {
       cacheMode: 'space',

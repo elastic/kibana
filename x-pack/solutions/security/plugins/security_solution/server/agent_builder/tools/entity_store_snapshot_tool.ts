@@ -20,6 +20,7 @@ import {
 import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
+import { RISK_SCORE_INSTRUCTION } from './tool_instructions';
 
 const entityStoreSnapshotSchema = z.object({
   entityType: z
@@ -339,6 +340,8 @@ Features:
 - Retrieve entity profile from a specific historical date
 - Optionally compare historical profile with current profile to see changes
 - Shows risk score changes, attribute changes, behavior changes over time
+
+${RISK_SCORE_INSTRUCTION}
 
 Note: Historical snapshots are only available if the Entity Store snapshot task has been running. Snapshots older than the retention period may not be available.`,
     schema: entityStoreSnapshotSchema,
