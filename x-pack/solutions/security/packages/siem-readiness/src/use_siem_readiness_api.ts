@@ -7,12 +7,9 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { CoreStart } from '@kbn/core/public';
-import type {
-  CategoriesResponse,
-  RelatedIntegrationRuleResponse,
-  SiemReadinessPackageInfo,
-} from './types';
+import type { CategoriesResponse, SiemReadinessPackageInfo } from './types';
 import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from './constants';
 
 // Fix: Use 'as const' to make these readonly tuples for proper React Query typing
@@ -37,15 +34,12 @@ export const useSiemReadinessApi = () => {
   const getDetectionRules = useQuery({
     queryKey: GET_DETECTION_RULES_QUERY_KEY,
     queryFn: () => {
-      return http.get<{ data: RelatedIntegrationRuleResponse[] }>(
-        '/api/detection_engine/rules/_find',
-        {
-          query: {
-            filter: 'alert.attributes.enabled:true',
-            per_page: 10000,
-          },
-        }
-      );
+      return http.get<{ data: RuleResponse[] }>('/api/detection_engine/rules/_find', {
+        query: {
+          filter: 'alert.attributes.enabled:true',
+          per_page: 10000,
+        },
+      });
     },
   });
 

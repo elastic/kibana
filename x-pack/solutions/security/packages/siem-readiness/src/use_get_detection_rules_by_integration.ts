@@ -6,19 +6,19 @@
  */
 
 import { useMemo } from 'react';
-import type { RelatedIntegrationRuleResponse } from './types';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { useSiemReadinessApi } from './use_siem_readiness_api';
 
 export interface RuleIntegrationCoverage {
-  coveredRules: RelatedIntegrationRuleResponse[];
-  uncoveredRules: RelatedIntegrationRuleResponse[];
+  coveredRules: RuleResponse[];
+  uncoveredRules: RuleResponse[];
   missingIntegrations: string[];
   installedIntegrations: string[];
   relatedIntegrations: Array<{ package: string; version?: string; integration?: string }>;
 }
 
 export const getRuleIntegrationCoverage = (
-  rules: RelatedIntegrationRuleResponse[],
+  rules: RuleResponse[],
   installedIntegrationPackages: string[]
 ): RuleIntegrationCoverage => {
   const installedSet = new Set(installedIntegrationPackages);
@@ -28,8 +28,8 @@ export const getRuleIntegrationCoverage = (
     { package: string; version?: string; integration?: string }
   >();
 
-  const coveredRules: RelatedIntegrationRuleResponse[] = [];
-  const uncoveredRules: RelatedIntegrationRuleResponse[] = [];
+  const coveredRules: RuleResponse[] = [];
+  const uncoveredRules: RuleResponse[] = [];
 
   rules.forEach((rule) => {
     const requiredIntegrations =
