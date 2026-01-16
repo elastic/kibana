@@ -63,10 +63,9 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Removes the **Supporting visualization** section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under **Appearance** [#245979]({{kib-pull}}245979).
 * Reorganizes and renames color settings in the Primary Metric dimension editor. For numeric metrics, the "Color by value" and "Color mapping"/"Color" settings are now located under the "Background chart" field. The settings have been renamed as follows: "Color by value" is now "Color mode," and "Color mapping" is now "Dynamic color mapping" [#243608]({{kib-pull}}243608).
 * In **dashboard visualization in-line editing** and **Lens workspace**, the 'Appearance', 'Titles and text', 'Axis', and 'Legend' settings have been moved from a popover into a dedicated flyout panel [#240804]({{kib-pull}}240804).
-* Moves the Lens visualization toolbar from the workspace section to the configuration panel. [#239879]({{kib-pull}}239879).
-* Moves the Lens visualization toolbar in the edit flyout from the visualization parameters section to the flyout header. [#239176]({{kib-pull}}239176).
+* Moves the Lens visualization toolbar from the workspace section to the configuration panel. [#239879]({{kib-pull}}239879)
 * Moves the **Save as** and **Reset** options under the top nav **Save** button when the dashboard is in edit mode. [#237211]({{kib-pull}}237211).
-* The Lens configuration flyout has been redesigned to display layers as tabs instead of vertically stacked panels. Layer actions (clone, remove, save) are now accessible through a menu in each tab, improving the editing experience when working with multiple data layers, annotations, and reference lines [#235372]({{kib-pull}}235372).
+* The Lens configuration panel has been redesigned to display layers as tabs instead of vertically stacked panels. Layer actions (clone, remove, save) are now accessible through a menu in each tab, improving the editing experience when working with multiple data layers, annotations, and reference lines [#235372]({{kib-pull}}235372).
 
 **Data ingestion and Fleet**:
 * Adds integration knowledge opt out UI setting and enable feature flag [#245080]({{kib-pull}}245080).
