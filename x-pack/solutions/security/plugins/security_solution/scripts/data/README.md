@@ -58,12 +58,13 @@ To avoid alerts appearing in large grouped blocks per rule (a common artifact of
 
 - **Kibana + Elasticsearch running**
 - **Dependencies installed** in the repo (e.g. `yarn kbn bootstrap`)
-- **Security Solution initialized** (so `.alerts-security.alerts-<spaceId>` exists)
-  - If you get an error about missing `.alerts-security.alerts-*`, open the Security app once and initialize detections.
-- **Privileges**: the user you run with must be able to:
-  - call the Detection Engine APIs
-  - read preview indices `.preview.alerts-security.alerts-*`
-  - write to `.alerts-security.alerts-*`
+- **Security Solution detections initialized** (recommended)
+  - The script will **best-effort** initialize detections by calling `POST /api/detection_engine/index`.
+  - If `.alerts-security.alerts-<spaceId>` does not exist yet, the script will **still index raw events/endpoint alerts**, but will **skip generating/copying Security alerts** and log a warning.
+- **Privileges** (only required for alerts / attacks / cases)
+  - **Raw indexing only** (always attempted): write privileges for the concrete indices created by this script (see “What the script does” below)
+  - **Security alerts**: call Detection Engine APIs + read `.preview.alerts-security.alerts-*` + write to `.alerts-security.alerts-*`
+  - **Attack Discoveries / Cases**: access to the Elastic Assistant data generator routes + Cases APIs
 
 ## Usage
 
@@ -101,12 +102,17 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.j
 - `--clean`: Delete previously generated data created by this script before generating new data (default: `false`)
   - Removes:
     - the episode indices created by this script for the selected `--episodes` (across the requested date range)
-    - detection alerts in `.alerts-security.alerts-<spaceId>` attributed to the ruleset rules (generator-owned)
-    - ad-hoc Attack Discoveries created by this script (Synthetic (no-LLM), for the current `--username`)
-    - Cases created by this script (tagged `data-generator`)
+      - `${indexPrefix}.events.*.<YYYY.MM.DD>`, `${indexPrefix}.alerts.*.<YYYY.MM.DD>`, `insights-alerts-*-<YYYY.MM.DD>`
+    - generated Security alerts in `.alerts-security.alerts-<spaceId>`
+      - prefers deleting alerts tagged `data-generator`
+      - falls back to deleting alerts matching the resolved ruleset rule UUIDs / `rule_id`s (for older generator runs)
+      - note: Security alert deletion is not time-filtered (to avoid leaving generator-owned docs behind due to timestamp jitter)
+    - ad-hoc Attack Discoveries created by this script (Synthetic (no-LLM), for the current `--username`) from `.adhoc.alerts-security.attack.discovery.alerts-<spaceId>`
+    - Cases created by this script (tagged `data-generator`, plus a narrow legacy fallback)
   - Notes:
     - **Does not delete** preview indices. Some dev setups won’t automatically recreate preview indices once deleted.
-    - If preview indices are missing, the generator will **recreate them** by cloning mappings from `.internal.alerts-security.alerts-<spaceId>-000001`.
+    - Before previewing, the generator clears existing preview documents (to avoid 409 conflicts) without deleting the preview index.
+    - If preview indices are missing, the generator will **recreate them** by cloning mappings from the real Security alerts backing index (requires detections to be initialized).
 - `--start-date`: Date math start (default: `1d`)
   - Accepts `now-1d` style date math, and a shorthand like `1d` (treated as `now-1d`)
 - `--end-date`: Date math end (default: `now`)
@@ -123,6 +129,7 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.j
 - `--ruleset`: Path to a YAML ruleset file (default: `x-pack/solutions/security/plugins/security_solution/scripts/data/rulesets/default_ruleset.yml`)
 - `--indexPrefix`: Prefix for the endpoint event/alert indices created by this script (default: `logs-endpoint`)
   - If your cluster has templates/data streams that conflict with creating concrete indices under `logs-endpoint.*`, set this to something else (e.g. `security-solution-data-gen`).
+  - **Serverless / API key note**: avoid prefixes that match `logs-*-*` (for example `logs-endpoint-generator`), because Elasticsearch can reject creating concrete indices that match data-stream-only templates. Prefer something like `logs-endpoint_generator`, or keep the default `logs-endpoint`.
 
 Ruleset entries are resolved
 
@@ -139,6 +146,7 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
 
 - `--max-preview-invocations`: Caps rule preview invocations per rule (lower is faster). Default: `12`
 - `--skip-alerts`: Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
+- `--skip-alerts` also skips Attack Discoveries / Cases (because they depend on Security alerts)
 - `--skip-ruleset-preview`: Skip previews of the ruleset rules (baseline attribution only; faster)
 - `--attacks`: Generate synthetic Attack Discoveries (**opt-in**)
 - `--cases`: Create Kibana cases from **~50%** of generated Attack Discoveries (**implies `--attacks`**)
@@ -155,28 +163,44 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
 - `--elasticsearchUrl` (default: `http://127.0.0.1:9200`)
 - `--username` (default: `elastic`)
 - `--password` (default: `changeme`)
+- `--apiKey`: Elasticsearch API key (base64, with or without `ApiKey ` prefix). When provided, the script uses API key auth for both Kibana + Elasticsearch.
+  - You can also set `ES_API_KEY` (or `ELASTIC_API_KEY`) instead of passing `--apiKey`.
 - `--spaceId` (optional; defaults to `default`)
 
 ## What the script does (high level)
 
-1. **Installs prebuilt rules** if missing
+1. **Connects to Kibana + Elasticsearch** and logs basic connectivity details.
+2. **Best-effort installs prebuilt rules** if missing (non-blocking)
    - On a fresh Kibana (0 prebuilt rules installed), it installs **only the rules matched by `--ruleset`** (not all rules).
-   - If prebuilt rules are already installed, it **does not uninstall** existing rules.
-2. Loads vendored episode fixtures from `episodes/attacks/`
-3. **Scales** episodes (time-shift + clone + rewrite IDs)
-4. Indexes:
-   - raw endpoint events into `logs-endpoint.events.*`
-   - endpoint alerts into `logs-endpoint.alerts-*`
-   - a copy of endpoint alerts into `insights-alerts-*` (for the Insights rule)
-5. **Enables the ruleset rules**
-6. Runs **rule preview** for:
-   - a baseline Insights-style query (to ensure detections are generated from the endpoint alert fixtures)
-   - any rules resolved from `--ruleset`
-7. Copies preview alerts into `.alerts-security.alerts-<spaceId>` and rewrites `kibana.alert.rule.*` so alerts are attributed to **real installed+enabled rules**
-   - While copying, alert timestamps are **jittered within the requested time range** so alerts are interleaved across rules in time-sorted views
-8. Optionally (with `--attacks`, or `--cases`) creates **synthetic Attack Discoveries (no LLM)** and indexes them into:
-   - `.internal.adhoc.alerts-security.attack.discovery.alerts-<spaceId>-000001`
-   - Attack Discoveries are generated only for a small set of “risky” entities (top host/user pairs by alert volume), not for every host/user
+   - If prebuilt rules are already installed, it does not uninstall or expand the install set.
+3. Loads vendored episode fixtures from `episodes/attacks/` and `episodes/noise/` (supports `.ndjson` and `.ndjson.gz`)
+4. **Scales** episodes (time-shift + clone + rewrite IDs)
+5. Indexes into concrete indices (UTC-day suffix `YYYY.MM.DD`):
+   - endpoint events:
+     - `epN` episodes: `${indexPrefix}.events.insights.epN.<YYYY.MM.DD>`
+     - other episode ids: `${indexPrefix}.events.<episode>.<YYYY.MM.DD>`
+   - endpoint alerts:
+     - `epN` episodes: `${indexPrefix}.alerts.insights.epN.<YYYY.MM.DD>`
+     - other episode ids: `${indexPrefix}.alerts.<episode>.<YYYY.MM.DD>`
+   - a copy of endpoint alerts into `insights-alerts-<episode>-<YYYY.MM.DD>` (for the Insights-style baseline)
+6. **Best-effort initializes detections** (so `.alerts-security.alerts-<spaceId>` exists)
+7. Ensures the ruleset rules are **enabled**
+8. Ensures the preview alerts index exists and **clears existing preview documents** (without deleting the index)
+9. If `--skip-alerts` is set, stops after raw indexing.
+10. If `.alerts-security.alerts-<spaceId>` doesn’t exist yet, stops after raw indexing (with a warning).
+11. Runs Rule Preview and copies preview alerts into `.alerts-security.alerts-<spaceId>`:
+
+- Baseline: runs a single Insights-style preview once, then **copies/attributes** the resulting preview alerts across **all** ruleset rules
+- Optional: previews each ruleset rule directly (skippable with `--skip-ruleset-preview`)
+- While copying, alert IDs are namespaced per target rule and `kibana.alert.rule.*` is rewritten so alerts are attributed to **real installed+enabled rules**
+- Alert timestamps are deterministically jittered within the requested time range so alerts interleave across rules in time-sorted views
+
+12. Optionally (with `--attacks`, or `--cases`) creates **synthetic Attack Discoveries (no LLM)** from generated Security alerts
+
+- Discoveries are written under `.adhoc.alerts-security.attack.discovery.alerts-<spaceId>`
+- Discoveries focus on a small set of “risky” host/user pairs (top alert volume), not every entity
+
+13. Optionally (with `--cases`) creates cases from ~50% of generated Attack Discoveries (tagged `data-generator`)
 
 ## Troubleshooting
 
@@ -184,6 +208,10 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
   - Your `node_modules` are incomplete/out of date. Run `yarn kbn bootstrap`.
 - **Prebuilt rule install fails**:
   - This usually means Kibana can’t reach EPR or Fleet isn’t ready. Install prebuilt rules manually in the Security app and re-run.
-- **No alerts created from preview**:
+- **Security alerts destination missing (`.alerts-security.alerts-<spaceId>`)**:
+  - Open the Security app once and initialize detections, or run detections initialization via the API, then re-run. Raw data indexing should still succeed even if alerts are skipped.
+- **Elasticsearch rejects index creation with data stream template errors**:
+  - Use a different `--indexPrefix` that does not match data-stream-only templates (avoid `logs-*-*` patterns like `logs-endpoint-generator`).
+- **No alerts created / no matches**:
   - Ensure your rule’s index patterns match the indices being populated and that the time range overlaps.
-  - The vendored Insights rule expects `insights-alerts-*` (the generator writes that for you).
+  - The baseline Insights-style preview depends on the `insights-alerts-*` indices (the generator writes these for you).
