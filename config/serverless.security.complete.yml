@@ -54,7 +54,7 @@ xpack.actions.preconfigured:
       providerConfig:
         model_id: "openai-gpt-4.1"
   OpenAI-GPT-4-1-Mini:
-    name: OpenAI GPT-4.1
+    name: OpenAI GPT-4.1 Mini
     actionTypeId: .inference
     exposeConfig: true
     config:
