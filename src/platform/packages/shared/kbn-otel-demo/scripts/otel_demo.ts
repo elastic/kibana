@@ -26,7 +26,9 @@ run(
     const availableDemos = listAvailableDemos();
     if (!availableDemos.includes(demoType)) {
       throw new Error(
-        `Unknown demo type: ${demoType}. Available: ${availableDemos.join(', ')}\nUse --list-demos to see details.`
+        `Unknown demo type: ${demoType}. Available: ${availableDemos.join(
+          ', '
+        )}\nUse --list-demos to see details.`
       );
     }
 
@@ -52,14 +54,18 @@ run(
       log.info(`Failure scenarios for ${demoConfig.displayName}:`);
       log.info('');
       log.info('DRAMATIC (service-breaking):');
-      demoScenarios.filter((s) => s.category === 'dramatic').forEach((s) => {
-        log.info(`  ${s.id.padEnd(35)} - ${s.name}`);
-      });
+      demoScenarios
+        .filter((s) => s.category === 'dramatic')
+        .forEach((s) => {
+          log.info(`  ${s.id.padEnd(35)} - ${s.name}`);
+        });
       log.info('');
       log.info('SUBTLE (degraded performance/observability):');
-      demoScenarios.filter((s) => s.category === 'subtle').forEach((s) => {
-        log.info(`  ${s.id.padEnd(35)} - ${s.name}`);
-      });
+      demoScenarios
+        .filter((s) => s.category === 'subtle')
+        .forEach((s) => {
+          log.info(`  ${s.id.padEnd(35)} - ${s.name}`);
+        });
       return Promise.resolve();
     }
 
