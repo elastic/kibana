@@ -10,6 +10,8 @@
         "label": "DataRequest",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -38,6 +42,8 @@
                   "DataRequestDescriptor"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+                "lineNumber": 18,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -56,6 +62,8 @@
               "() => object | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -72,6 +80,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -89,6 +99,8 @@
               "DataRequestMeta"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -105,6 +117,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -121,6 +135,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -137,6 +153,8 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -153,6 +171,8 @@
               "() => symbol | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -169,6 +189,8 @@
               "() => Error | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -185,6 +207,8 @@
               "() => React.ReactNode"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/util/data_request.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -213,6 +237,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -227,6 +253,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -245,6 +273,8 @@
         "label": "BoundsRequestMeta",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -256,6 +286,8 @@
             "label": "applyGlobalQuery",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -267,6 +299,8 @@
             "label": "applyGlobalTime",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -288,6 +322,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -309,6 +345,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -339,6 +377,8 @@
               "[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -360,6 +400,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -374,6 +416,8 @@
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -389,6 +433,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -400,6 +446,8 @@
             "label": "isFeatureEditorOpenForLayer",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -421,6 +469,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -437,6 +487,8 @@
               " | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -451,6 +503,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -465,6 +519,8 @@
         "label": "CreateLayerDescriptorParams",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -476,6 +532,8 @@
             "label": "indexPatternId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -487,6 +545,8 @@
             "label": "geoFieldName",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -507,6 +567,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -528,6 +590,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -542,6 +606,8 @@
         "label": "EMSTermJoinConfig",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -553,6 +619,8 @@
             "label": "layerId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -564,6 +632,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -575,6 +645,8 @@
             "label": "displayName",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -589,6 +661,8 @@
         "label": "GeoJsonWithMeta",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -603,6 +677,8 @@
               "GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -618,6 +694,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -632,6 +710,8 @@
         "label": "GetFeatureActionsArgs",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -654,6 +734,8 @@
               "[], actionId: string) => Promise<void>) | null"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -665,6 +747,8 @@
             "label": "featureId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -679,6 +763,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -701,6 +787,8 @@
               "<object>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -725,6 +813,8 @@
               "<object, object>[]>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -741,6 +831,8 @@
               "() => GeoJSON.Geometry | null"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -776,6 +868,8 @@
               ", \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -790,6 +884,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -806,6 +902,8 @@
         "label": "IField",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -820,6 +918,8 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -836,6 +936,8 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -852,6 +954,8 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -868,6 +972,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -884,6 +990,8 @@
               "() => Promise<string>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -900,6 +1008,8 @@
               "() => Promise<string>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -924,6 +1034,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -938,6 +1050,8 @@
                   "string | string[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+                "lineNumber": 26,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -963,6 +1077,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -986,6 +1102,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1002,6 +1120,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1020,6 +1140,8 @@
               "; }> | null>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1038,6 +1160,8 @@
               "; }> | null>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1052,6 +1176,8 @@
                   "number[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1072,6 +1198,8 @@
               "; }> | null>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1086,6 +1214,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1104,6 +1234,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1120,6 +1252,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1144,6 +1278,8 @@
               ") => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1164,6 +1300,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+                "lineNumber": 55,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1184,6 +1322,8 @@
               ") => { min: number; max: number; } | null"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1198,6 +1338,8 @@
                   "TileMetaFeature"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+                "lineNumber": 57,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1216,6 +1358,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/fields/field.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1249,6 +1393,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1273,6 +1419,8 @@
               ") => Promise<boolean>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1293,6 +1441,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
+                "lineNumber": 17,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1308,6 +1458,8 @@
                   "DataRequestMeta"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
+                "lineNumber": 17,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1330,6 +1482,8 @@
               ") => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1344,6 +1498,8 @@
                   "RasterTileSource"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
+                "lineNumber": 18,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1359,6 +1515,8 @@
                   "RasterTileSourceData"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
+                "lineNumber": 18,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1377,6 +1535,8 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1401,6 +1561,8 @@
               " | undefined) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1422,6 +1584,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/raster_source/index.ts",
+                "lineNumber": 20,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1451,6 +1615,8 @@
           "ISource"
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/tms_source/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1467,6 +1633,8 @@
               ") => Promise<string>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/tms_source/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1481,6 +1649,8 @@
                   "SourceRequestMeta"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/tms_source/index.ts",
+                "lineNumber": 11,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1499,6 +1669,8 @@
         "label": "ITooltipProperty",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1513,6 +1685,8 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1529,6 +1703,8 @@
               "() => React.ReactNode"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1545,6 +1721,8 @@
               "() => React.ReactNode"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1561,6 +1739,8 @@
               "() => string | string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1577,6 +1757,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1601,6 +1783,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1628,6 +1812,8 @@
           "ISource"
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1642,6 +1828,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1668,6 +1856,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1682,6 +1872,8 @@
                   "GeoJSON.GeoJsonProperties"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 101,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1697,6 +1889,8 @@
                   "KibanaExecutionContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 102,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1725,6 +1919,8 @@
               " | null>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1745,6 +1941,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 105,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1760,6 +1958,8 @@
                   "(callback: () => void) => void"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 106,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1802,6 +2002,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1816,6 +2018,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 109,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1837,6 +2041,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 110,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1852,6 +2058,8 @@
                   "(callback: () => void) => void"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 111,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1867,6 +2075,8 @@
                   "() => boolean"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 112,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1888,6 +2098,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 113,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1914,6 +2126,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1938,6 +2152,8 @@
               " | null"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1952,6 +2168,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 117,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1978,6 +2196,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1994,6 +2214,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2018,6 +2240,8 @@
               ") => object | null"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2038,6 +2262,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 124,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2056,6 +2282,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2080,6 +2308,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2096,6 +2326,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2127,6 +2359,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2148,6 +2382,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 129,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2166,6 +2402,8 @@
               "() => Promise<string | null>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2182,6 +2420,8 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2198,6 +2438,8 @@
               "(geometry: GeoJSON.Geometry | GeoJSON.Position[]) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2212,6 +2454,8 @@
                   "GeoJSON.Geometry | GeoJSON.Position[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 132,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2230,6 +2474,8 @@
               "(featureId: string) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2244,6 +2490,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 133,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2278,6 +2526,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2298,6 +2548,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 138,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2316,6 +2568,8 @@
               "() => string[]"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 152,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2334,6 +2588,8 @@
               "(() => Promise<boolean>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2354,6 +2610,8 @@
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2368,6 +2626,8 @@
                   "IVectorStyle"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "lineNumber": 161,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2386,6 +2646,8 @@
         "label": "RenderTooltipContentParams",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2408,6 +2670,8 @@
               "[], actionId: string) => Promise<void>) | null"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2422,6 +2686,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2445,6 +2711,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2467,6 +2735,8 @@
               "<object>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2491,6 +2761,8 @@
               "<object, object>[]>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2507,6 +2779,8 @@
               "(layerId: string) => Promise<string | null>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2521,6 +2795,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+                "lineNumber": 41,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2536,6 +2812,8 @@
             "label": "isLocked",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2558,6 +2836,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2569,6 +2849,8 @@
                 "label": "{\n    layerId,\n    properties,\n  }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+                "lineNumber": 52,
+                "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2580,6 +2862,8 @@
                     "label": "layerId",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+                    "lineNumber": 53,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2594,6 +2878,8 @@
                       "{ [name: string]: any; } | null"
                     ],
                     "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+                    "lineNumber": 54,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2613,6 +2899,8 @@
               "({ layerId, featureId, }: { layerId: string; featureId?: string | number | undefined; }) => GeoJSON.Geometry | null"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2624,6 +2912,8 @@
                 "label": "{\n    layerId,\n    featureId,\n  }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+                "lineNumber": 59,
+                "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2635,6 +2925,8 @@
                     "label": "layerId",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+                    "lineNumber": 60,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2649,6 +2941,8 @@
                       "string | number | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+                    "lineNumber": 61,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2670,6 +2964,8 @@
               ") => Promise<void>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2684,6 +2980,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+                "lineNumber": 63,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2699,6 +2997,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+                "lineNumber": 63,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2714,6 +3014,8 @@
                   "RawValue"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/public/classes/tooltips/tooltip_property.ts",
+                "lineNumber": 63,
+                "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2732,6 +3034,8 @@
         "label": "SampleValuesConfig",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2746,6 +3050,8 @@
               "(string | number)[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2760,6 +3066,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2774,6 +3082,8 @@
         "label": "SourceStatus",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2788,6 +3098,8 @@
               "string | null"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2799,6 +3111,8 @@
             "label": "areResultsTrimmed",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2813,6 +3127,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2827,6 +3143,8 @@
         "label": "TableSourceDescriptor",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2838,6 +3156,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2859,6 +3179,8 @@
               ".TABLE_SOURCE"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2873,6 +3195,8 @@
               "{ [key: string]: string | number; }[]"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2887,6 +3211,8 @@
               "{ name: string; label?: string | undefined; type: \"string\" | \"number\"; }[]"
             ],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2898,6 +3224,8 @@
             "label": "term",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/join_sources/table_source/table_source.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2918,6 +3246,8 @@
           "{ readonly label: string; readonly url: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/layer_schemas/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2933,6 +3263,8 @@
           "\"__kbn__feature_id__\""
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2948,6 +3280,8 @@
           "{ label: string; value: string; link?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/source.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2981,6 +3315,8 @@
           "[] | undefined; disabledReason?: string | undefined; getIsDisabled?: (() => boolean | Promise<boolean>) | undefined; isBeta?: boolean | undefined; checkVisibility?: (() => Promise<boolean>) | undefined; showFeatureEditTools?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2996,6 +3332,8 @@
           "\"map\""
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3192,6 +3530,8 @@
           "<void>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/react_embeddable/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3207,6 +3547,8 @@
           "\"MAPS_APP_LOCATOR\""
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/locators/map_locator/locator_definition.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3230,6 +3572,8 @@
           "[]) => void; mapColors: string[]; mostCommonDataViewId?: string | undefined; currentStepId: string | null; isOnFinalStep: boolean; enableNextBtn: () => void; disableNextBtn: () => void; startStepLoading: () => void; stopStepLoading: () => void; advanceToNextStep: () => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3581,6 +3925,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/public/classes/sources/source.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3595,6 +3941,8 @@
       "label": "MapsSetupApi",
       "description": [],
       "path": "x-pack/platform/plugins/shared/maps/public/api/setup_api.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3617,6 +3965,8 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/maps/public/api/setup_api.ts",
+          "lineNumber": 12,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3637,6 +3987,8 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/maps/public/api/setup_api.ts",
+              "lineNumber": 12,
+              "columnNumber": 23,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3657,6 +4009,8 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/maps/public/api/setup_api.ts",
+          "lineNumber": 13,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3671,6 +4025,8 @@
                 "SourceRegistryEntry"
               ],
               "path": "x-pack/platform/plugins/shared/maps/public/api/setup_api.ts",
+              "lineNumber": 13,
+              "columnNumber": 18,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3690,6 +4046,8 @@
       "label": "MapsStartApi",
       "description": [],
       "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3736,6 +4094,8 @@
             ">; }"
           ],
           "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
+          "lineNumber": 15,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3752,6 +4112,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
+          "lineNumber": 25,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -3767,6 +4129,8 @@
                 "P"
               ],
               "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 1109,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -3781,6 +4145,8 @@
                 "any"
               ],
               "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 1109,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -3799,6 +4165,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
+          "lineNumber": 26,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -3814,6 +4182,8 @@
                 "P"
               ],
               "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 1109,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -3828,6 +4198,8 @@
                 "any"
               ],
               "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 1109,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -3860,6 +4232,8 @@
             " | null>"
           ],
           "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
+          "lineNumber": 27,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3880,6 +4254,8 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/maps/public/api/start_api.ts",
+              "lineNumber": 27,
+              "columnNumber": 28,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3902,6 +4278,8 @@
         "label": "MapsStorage",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3916,6 +4294,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3927,6 +4307,8 @@
                 "label": "{\n    logger,\n    throwOnResultValidationError,\n  }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 75,
+                "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3947,6 +4329,8 @@
                       }
                     ],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                    "lineNumber": 76,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3958,6 +4342,8 @@
                     "label": "throwOnResultValidationError",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                    "lineNumber": 77,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4947,6 +5333,8 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4967,6 +5355,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 86,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4982,6 +5372,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 86,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5000,6 +5392,8 @@
               "() => Promise<never>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -6948,6 +7342,8 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6968,6 +7364,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 131,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7945,6 +8343,8 @@
                   ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 132,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7960,6 +8360,8 @@
                   "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 133,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -9910,6 +10312,8 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "lineNumber": 197,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -9930,6 +10334,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 198,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -9945,6 +10351,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 199,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -10922,6 +11330,8 @@
                   ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 200,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -10937,6 +11347,8 @@
                   "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 201,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -10971,6 +11383,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "lineNumber": 270,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -10991,6 +11405,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 271,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -11006,6 +11422,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 272,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -11018,6 +11436,8 @@
                 "label": "options",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 274,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -11029,6 +11449,8 @@
                     "label": "force",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                    "lineNumber": 274,
+                    "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -12034,6 +12456,8 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>>[]; pagination: { total: number; cursor?: string | undefined; }; }>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "lineNumber": 281,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12054,6 +12478,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 282,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12075,6 +12501,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 283,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12090,6 +12518,8 @@
                   "Readonly<{ onlyTitle?: boolean | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 284,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -12105,6 +12535,8 @@
             "label": "mSearch",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+            "lineNumber": 335,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12116,6 +12548,8 @@
                 "label": "savedObjectType",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 336,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -13118,6 +13552,8 @@
                   ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                "lineNumber": 337,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -13138,6 +13574,8 @@
                       }
                     ],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                    "lineNumber": 337,
+                    "columnNumber": 20,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -13162,6 +13600,8 @@
                       ">"
                     ],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
+                    "lineNumber": 337,
+                    "columnNumber": 41,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -13185,6 +13625,8 @@
         "label": "Category",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 121,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -13196,6 +13638,8 @@
             "label": "key",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -13207,6 +13651,8 @@
             "label": "count",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -13221,6 +13667,8 @@
         "label": "DynamicStyleProperties",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -13242,6 +13690,8 @@
               ".DYNAMIC"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -13308,6 +13758,8 @@
               "; }> | undefined; } & {}>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -13322,6 +13774,8 @@
         "label": "RangeFieldMeta",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -13333,6 +13787,8 @@
             "label": "min",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -13344,6 +13800,8 @@
             "label": "max",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -13355,6 +13813,8 @@
             "label": "delta",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -13369,6 +13829,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -13383,6 +13845,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -13397,6 +13861,8 @@
         "label": "StyleMetaDescriptor",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 136,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -13412,6 +13878,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -13426,6 +13894,8 @@
               "FieldMeta"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -13516,6 +13986,8 @@
           ".PERCENTILE; }>)[] | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly id: string; readonly indexPatternId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13601,6 +14073,8 @@
           ".PERCENTILE; }>)[] | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly id: string; readonly type: string; readonly indexPatternId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13616,6 +14090,8 @@
           "{ readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly id: string; readonly indexPatternId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13631,6 +14107,8 @@
           "{ readonly name?: string | undefined; readonly allowHidden?: boolean | undefined; readonly timeFieldName?: string | undefined; readonly id: string; readonly title: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/map_attributes_schema/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13716,6 +14194,8 @@
           ".PERCENTILE; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13731,6 +14211,8 @@
           "{ readonly label: string; readonly url: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/layer_schemas/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13746,6 +14228,8 @@
           "{ readonly color: string; readonly stop: string | null; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13779,6 +14263,8 @@
           " | undefined; readonly colorCategory?: string | undefined; readonly customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; readonly useCustomColorPalette?: boolean | undefined; readonly otherCategoryColor?: string | undefined; readonly fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13820,6 +14306,8 @@
           " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13835,6 +14323,8 @@
           "{ readonly color: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13858,6 +14348,8 @@
           ".STATIC; readonly options: Readonly<{} & { color: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13907,6 +14399,8 @@
           " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13932,6 +14426,8 @@
           ".COUNT; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13947,6 +14443,8 @@
           "{ readonly radius: number; readonly label: string; readonly svg: string; readonly symbolId: string; readonly cutoff: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/map_attributes_schema/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14014,6 +14512,8 @@
           "; }> | undefined; } & {}>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14037,6 +14537,8 @@
           ".EMS_FILE; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14060,6 +14562,8 @@
           ".EMS_TMS; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14083,6 +14587,8 @@
           ".EMS_VECTOR_TILE; readonly color: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14176,6 +14682,8 @@
           ".ES_DISTANCE_SOURCE; readonly indexPatternId: string; readonly distance: number; readonly geoField: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14273,6 +14781,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14366,6 +14876,8 @@
           ".ES_GEO_LINE; readonly indexPatternId: string; readonly geoField: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14459,6 +14971,8 @@
           ".ES_PEW_PEW; readonly indexPatternId: string; readonly destGeoField: string; readonly sourceGeoField: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14482,6 +14996,8 @@
           ".ESQL; readonly esql: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14521,6 +15037,8 @@
           ".ES_SEARCH; readonly indexPatternId: string; readonly geoField: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14614,6 +15132,8 @@
           ".ES_TERM_SOURCE; readonly term: string; readonly indexPatternId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14679,6 +15199,8 @@
           ".UNIQUE_COUNT; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14694,6 +15216,8 @@
           "{ readonly percentiles?: number[] | undefined; readonly sigma?: number | undefined; readonly isEnabled: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 107,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14717,6 +15241,8 @@
           ".HEATMAP; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14742,6 +15268,8 @@
           " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; readonly useCustomIconMap?: boolean | undefined; readonly fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; readonly iconPaletteId: string | null; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14759,6 +15287,8 @@
           " | undefined; readonly value: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14776,6 +15306,8 @@
           " | undefined; readonly stop: string | null; readonly icon: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14819,6 +15351,8 @@
           " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; useCustomIconMap?: boolean | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; iconPaletteId: string | null; }>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -14990,6 +15524,8 @@
           ".ES_TERM_SOURCE; term: string; indexPatternId: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -15013,6 +15549,8 @@
           ".KIBANA_TILEMAP; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -15036,6 +15574,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -15059,6 +15599,8 @@
           "; }> | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -15082,6 +15624,8 @@
           "; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -15097,6 +15641,8 @@
           "{ readonly value: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -15136,6 +15682,8 @@
           "; }> | undefined; } & {}>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -15151,6 +15699,8 @@
           "{ readonly options: Readonly<{} & { minZoom: number; maxZoom: number; useLayerZoomRange: boolean; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16130,6 +16680,8 @@
           ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; readonly adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; readonly timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; readonly zoom?: number | undefined; readonly isLayerTOCOpen?: boolean | undefined; readonly openTOCDetails?: string[] | undefined; readonly title: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/map_attributes_schema/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16145,6 +16697,8 @@
           "{ readonly lat: number; readonly lon: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/map_attributes_schema/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16168,6 +16722,8 @@
           "; readonly fixedLocation: Readonly<{} & { lat: number; lon: number; zoom: number; }>; readonly browserLocation: Readonly<{} & { zoom: number; }>; readonly keydownScrollZoom: boolean; readonly projection: \"globeInterpolate\" | \"mercator\"; readonly showScaleControl: boolean; readonly showSpatialFilters: boolean; readonly showTimesliderToggleButton: boolean; readonly spatialFiltersAlpa: number; readonly spatialFiltersFillColor: string; readonly spatialFiltersLineColor: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/map_attributes_schema/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16185,6 +16741,8 @@
           "; readonly name: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16200,6 +16758,8 @@
           "{ readonly color: string; readonly stop: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16223,6 +16783,8 @@
           "; }> | undefined; readonly fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16238,6 +16800,8 @@
           "{ readonly orientation: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16277,6 +16841,8 @@
           "; }> | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16302,6 +16868,8 @@
           ".PERCENTILE; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16317,6 +16885,8 @@
           "{ percentile: string; value: number; }[]"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 117,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16340,6 +16910,8 @@
           "; }> | undefined; readonly invert?: boolean | undefined; readonly minSize: number; readonly maxSize: number; readonly fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16355,6 +16927,8 @@
           "{ readonly size: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16394,6 +16968,8 @@
           "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16729,6 +17305,8 @@
           ".EMS_XYZ; urlTemplate: string; }> | Readonly<{} & { type: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16746,6 +17324,8 @@
           " | undefined; } & { value: string; }> | Readonly<{} & { orientation: number; }> | Readonly<{} & { value: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16785,6 +17365,8 @@
           ".EMS_TMS; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/layer_schemas/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16898,6 +17480,8 @@
           "; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/layer_schemas/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16921,6 +17505,8 @@
           ".LAYER_GROUP; readonly label: string; readonly visible: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/layer_schemas/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16945,6 +17531,8 @@
           " & { title: string; description?: string | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/saved_objects/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -16992,6 +17580,8 @@
           ".EMS_XYZ; urlTemplate: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/layer_schemas/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -17791,6 +18381,8 @@
           ".ESQL; esql: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/layer_schemas/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18138,6 +18730,8 @@
           ".EMS_VECTOR_TILE; color: string; }> | Readonly<{} & { type: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18161,6 +18755,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18216,6 +18812,8 @@
           " | undefined; } & {}>"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 97,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18239,6 +18837,8 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18264,6 +18864,8 @@
           ".MVT_SINGLE_LAYER; readonly layerName: string; readonly minSourceZoom: number; readonly urlTemplate: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18603,6 +19205,8 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 140,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18926,6 +19530,8 @@
           "; }>; }> | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 105,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18949,6 +19555,8 @@
           ".WMS; readonly layers: string; readonly serviceUrl: string; readonly styles: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18972,6 +19580,8 @@
           ".EMS_XYZ; readonly urlTemplate: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18992,6 +19602,8 @@
         "label": "AGG_TYPE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 157,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19004,6 +19616,8 @@
         "label": "COLOR_MAP_TYPE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 202,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19016,6 +19630,8 @@
         "label": "ES_GEO_FIELD_TYPE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19028,6 +19644,8 @@
         "label": "FIELD_ORIGIN",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19040,6 +19658,8 @@
         "label": "INITIAL_LOCATION",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 272,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19052,6 +19672,8 @@
         "label": "LABEL_BORDER_SIZES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 215,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19064,6 +19686,8 @@
         "label": "LABEL_POSITIONS",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 222,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19076,6 +19700,8 @@
         "label": "LAYER_STYLE_TYPE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 195,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19088,6 +19714,8 @@
         "label": "LAYER_TYPE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19100,6 +19728,8 @@
         "label": "LAYER_WIZARD_CATEGORY",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 279,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19112,6 +19742,8 @@
         "label": "SCALING_TYPES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 258,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19124,6 +19756,8 @@
         "label": "SOURCE_TYPES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19136,6 +19770,8 @@
         "label": "STYLE_TYPE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 190,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19148,6 +19784,8 @@
         "label": "SYMBOLIZE_AS_TYPES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 210,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19160,6 +19798,8 @@
         "label": "VECTOR_SHAPE_TYPE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 285,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19172,6 +19812,8 @@
         "label": "VECTOR_STYLES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 241,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19189,6 +19831,8 @@
           "\"maps\""
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19268,6 +19912,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/data_request_descriptor_types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19283,6 +19929,8 @@
           "5"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 101,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19306,6 +19954,8 @@
           ".EMS_FILE; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19399,6 +20049,8 @@
           ".ES_TERM_SOURCE; readonly term: string; readonly indexPatternId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19416,6 +20068,8 @@
           ") => string | number"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 306,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -19431,6 +20085,8 @@
               "string | number | boolean | string[] | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+            "lineNumber": 306,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -19499,6 +20155,8 @@
           ".EMS_XYZ; urlTemplate: string; }>; }> & RuntimeLayerState & { style?: { type: string; } | undefined; })"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/layer_descriptor_types.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19514,6 +20172,8 @@
           "\"map\""
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -19564,6 +20224,8 @@
           " | undefined; fixedLocation?: Readonly<{} & { lat: number; lon: number; zoom: number; }> | undefined; browserLocation?: Readonly<{} & { zoom: number; }> | undefined; keydownScrollZoom?: boolean | undefined; projection?: \"globeInterpolate\" | \"mercator\" | undefined; showScaleControl?: boolean | undefined; showSpatialFilters?: boolean | undefined; showTimesliderToggleButton?: boolean | undefined; spatialFiltersAlpa?: number | undefined; spatialFiltersFillColor?: string | undefined; spatialFiltersLineColor?: string | undefined; } & {}>>> | undefined; hiddenLayers?: string[] | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; } & { savedObjectId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/embeddable/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -20576,6 +21238,8 @@
           ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/embeddable/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -20605,6 +21269,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/embeddable/types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -20620,6 +21286,8 @@
           "24"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 99,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -20635,6 +21303,8 @@
           "0"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "lineNumber": 98,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -20658,6 +21328,8 @@
           "[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/map_descriptor.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -20673,6 +21345,8 @@
           "{ label: string; id: string; form?: React.ReactNode; onClick?: (() => void) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/map_descriptor.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -21474,6 +22148,8 @@
           "[] | undefined; } & RuntimeLayerState"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/layer_descriptor_types.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -21504,6 +22180,8 @@
           " | undefined; isForceRefresh: boolean; } & { fieldNames: string[]; timesliceMaskField?: string | undefined; sourceMeta: object | null; isFeatureEditorOpenForLayer: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/data_request_descriptor_types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -21843,6 +22521,8 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "lineNumber": 140,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
