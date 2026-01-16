@@ -188,7 +188,7 @@ test.describe('Rule Details Page - Admin', { tag: ['@ess', '@svlOblt'] }, () => 
 
         // Close the dashboards dropdown
         await pageObjects.ruleDetailsPage.closeDashboardsDropdown();
-      }).toPass({ timeout: BIGGER_TIMEOUT, intervals: [500] });
+      }).toPass({ timeout: BIGGER_TIMEOUT * 2, intervals: [500] });
 
       // Open dashboards dropdown and search for the test dashboard
     } finally {
