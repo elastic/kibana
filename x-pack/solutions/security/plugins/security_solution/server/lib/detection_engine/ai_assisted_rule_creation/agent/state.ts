@@ -7,12 +7,13 @@
 
 import { Annotation } from '@langchain/langgraph';
 import type { EsqlRule } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
 
-export interface KnowledgeBaseDocument {
-  id: string;
-  text: string;
-  name: string;
-}
+export const defaultSchedule: RuleSchedule = {
+  interval: '5m',
+  from: 'now-6m',
+  to: 'now',
+};
 
 const defaultRuleValues: Partial<EsqlRule> = {
   references: [],
@@ -28,11 +29,9 @@ const defaultRuleValues: Partial<EsqlRule> = {
   max_signals: 100,
   risk_score: 21,
   severity: 'low',
-  interval: '5m',
-  from: 'now-6m',
-  to: 'now',
   tags: [],
   threat: [],
+  ...defaultSchedule,
 };
 
 export const RuleCreationAnnotation = Annotation.Root({
