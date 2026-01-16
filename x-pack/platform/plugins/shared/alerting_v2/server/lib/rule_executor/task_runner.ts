@@ -110,13 +110,11 @@ export class RuleExecutorTaskRunner {
       new Date().toISOString();
 
     const alertDocs = buildAlertEventsFromEsqlResponse({
-      input: {
-        ruleId: params.ruleId,
-        spaceId: params.spaceId,
-        ruleAttributes: ruleDoc.attributes,
-        esqlResponse,
-        scheduledTimestamp,
-      },
+      ruleId: params.ruleId,
+      spaceId: params.spaceId,
+      ruleAttributes: ruleDoc.attributes,
+      esqlResponse,
+      scheduledTimestamp,
     });
 
     await this.storageService.bulkIndexDocs({

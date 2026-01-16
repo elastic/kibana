@@ -49,20 +49,22 @@ function buildGrouping({
 }
 
 export interface BuildAlertEventsOpts {
-  input: {
-    ruleId: string;
-    spaceId: string;
-    ruleAttributes: RuleSavedObjectAttributes;
-    esqlResponse: ESQLSearchResponse;
-    /**
-     * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
-     */
-    scheduledTimestamp: string;
-  };
+  ruleId: string;
+  spaceId: string;
+  ruleAttributes: RuleSavedObjectAttributes;
+  esqlResponse: ESQLSearchResponse;
+  /**
+   * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
+   */
+  scheduledTimestamp: string;
 }
 
 export function buildAlertEventsFromEsqlResponse({
-  input: { ruleId, spaceId, ruleAttributes, esqlResponse, scheduledTimestamp },
+  ruleId,
+  spaceId,
+  ruleAttributes,
+  esqlResponse,
+  scheduledTimestamp,
 }: BuildAlertEventsOpts): Array<{ id: string; doc: Record<string, unknown> }> {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];

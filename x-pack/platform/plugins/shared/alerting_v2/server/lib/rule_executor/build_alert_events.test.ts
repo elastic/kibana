@@ -44,13 +44,11 @@ describe('buildAlertEventsFromEsqlResponse', () => {
     } as unknown as ESQLSearchResponse;
 
     const docs = buildAlertEventsFromEsqlResponse({
-      input: {
-        ruleId: 'rule-123',
-        spaceId: 'default',
-        ruleAttributes,
-        esqlResponse,
-        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
-      },
+      ruleId: 'rule-123',
+      spaceId: 'default',
+      ruleAttributes,
+      esqlResponse,
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
     });
 
     expect(docs).toHaveLength(2);
