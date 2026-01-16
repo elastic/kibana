@@ -68,10 +68,6 @@ export interface ObservabilityCreateSLOFeature {
     onClose: () => void;
     initialValues: Record<string, unknown>;
   }) => React.ReactNode;
-  createSLOFlyoutContent?: (props: {
-    onClose: () => void;
-    initialValues: Record<string, unknown>;
-  }) => React.ReactNode;
 }
 
 export interface ObservabilityLogsFetchDocumentByIdFeature {

@@ -220,19 +220,9 @@ export class SLOPlugin
       { spinnerSize: 'm' }
     );
 
-    const getCreateSLOFormFlyoutContent = lazyWithContextProviders(
-      lazy(() =>
-        import('./pages/slo_edit/shared_flyout/create_slo_form_flyout').then((m) => ({
-          default: m.CreateSLOFormFlyoutContent,
-        }))
-      ),
-      { spinnerSize: 'm' }
-    );
-
     plugins.discoverShared.features.registry.register({
       id: 'observability-create-slo',
       createSLOFlyout: getCreateSLOFormFlyout,
-      createSLOFlyoutContent: getCreateSLOFormFlyoutContent,
     });
 
     return {

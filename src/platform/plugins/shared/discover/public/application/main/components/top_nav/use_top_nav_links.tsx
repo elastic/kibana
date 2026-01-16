@@ -180,7 +180,6 @@ export const useTopNavLinks = ({
 
     if (!defaultMenu?.openItem?.disabled) {
       const openSearchMenuItem = getOpenSearchAppMenuItem({
-        services,
         onOpenSavedSearch: state.actions.onOpenSavedSearch,
       });
       items.push(openSearchMenuItem);

@@ -25,9 +25,9 @@ import type {
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
   AppMenuSecondaryActionItem,
+  AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { DiscoverAppMenuRunAction } from './types';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -58,10 +58,15 @@ export async function runAppMenuAction({
   cleanup(anchorElement);
 
   const onFinishAction = () => cleanup(anchorElement);
-  const result = await (appMenuItem.run as DiscoverAppMenuRunAction | undefined)?.(
-    anchorElement,
-    onFinishAction
-  );
+
+  const params: AppMenuRunActionParams = {
+    triggerElement: anchorElement,
+    context: {
+      onFinishAction,
+    },
+  };
+
+  const result = await appMenuItem.run?.(params);
 
   if (!result || !React.isValidElement(result)) {
     return;
@@ -99,12 +104,14 @@ export const enhanceAppMenuItemWithRunAction = <
       })
     ),
     run: appMenuItem.run
-      ? (anchorElement: HTMLElement) => {
-          runAppMenuAction({
-            appMenuItem,
-            anchorElement,
-            services,
-          });
+      ? (params?: AppMenuRunActionParams) => {
+          if (params) {
+            runAppMenuAction({
+              appMenuItem,
+              anchorElement: params.triggerElement,
+              services,
+            });
+          }
         }
       : undefined,
   } as T;

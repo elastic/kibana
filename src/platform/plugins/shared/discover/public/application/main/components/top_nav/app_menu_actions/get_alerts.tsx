@@ -16,9 +16,9 @@ import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
-import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuItemType, AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
-import type { AppMenuDiscoverParams, DiscoverAppMenuRunAction } from './types';
+import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
@@ -155,7 +155,8 @@ export const getAlertsAppMenuItem = ({
           : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
               defaultMessage: 'Data view does not have a time field.',
             }),
-        run: (async (_triggerElement, onFinishAction) => {
+        run: async (params?: AppMenuRunActionParams) => {
+          const onFinishAction = params?.context?.onFinishAction as (() => void) | undefined;
           return (
             <CreateAlertFlyout
               onFinishAction={onFinishAction}
@@ -164,7 +165,7 @@ export const getAlertsAppMenuItem = ({
               stateContainer={stateContainer}
             />
           );
-        }) as DiscoverAppMenuRunAction,
+        },
       });
     }
   }
@@ -178,8 +179,7 @@ export const getAlertsAppMenuItem = ({
     order: 4,
     iconType: 'alert',
     popoverWidth: 250,
-    // Cast needed because Discover extends AppMenuRunAction with onFinishAction callback
-    items: items as AppMenuPopoverItem[],
+    items,
   };
 };
 
