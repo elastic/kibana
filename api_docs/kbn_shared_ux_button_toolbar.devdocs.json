@@ -24,6 +24,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
+            "lineNumber": 27,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,6 +77,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -93,6 +99,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 62,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -122,6 +130,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,6 +152,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+            "lineNumber": 45,
+            "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -171,6 +183,8 @@
           "<T>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
+        "lineNumber": 184,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -192,6 +206,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
+            "lineNumber": 184,
+            "columnNumber": 60,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -221,6 +237,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/popover/popover.tsx",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -241,6 +259,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/popover/popover.tsx",
+            "lineNumber": 38,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -261,6 +281,8 @@
           "\nAn interface representing a single icon button in the `IconButtonGroup`."
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,6 +296,8 @@
               "The accessible button label."
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -290,6 +314,8 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -306,6 +332,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -324,6 +352,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -340,6 +370,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -356,6 +388,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,6 +406,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -388,6 +424,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -405,6 +443,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -421,6 +461,8 @@
           "\nProps for `IconButtonGroup`."
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -434,6 +476,8 @@
               "Required accessible legend for the whole group"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -457,6 +501,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -473,6 +519,8 @@
               "\"m\" | \"s\" | \"compressed\" | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -489,6 +537,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -506,6 +556,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -522,6 +574,8 @@
           "\nProps for a generic toolbar component"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -536,6 +590,8 @@
               "NamedSlots"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -558,6 +614,8 @@
           "; groupPosition?: ButtonPositions | undefined; hasArrow?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -575,6 +633,8 @@
           "T extends \"iconButton\" ? ToolbarIconButton : ToolbarStandardButton"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -592,6 +652,8 @@
           "AllowedButtonProps & Omit<AllowedPopoverProps, \"children\"> & { children: (arg: { closePopover: () => void; }) => React.ReactNode; label: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/popover/popover.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -625,6 +687,8 @@
           ") => React.JSX.Element)"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
