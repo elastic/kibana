@@ -8,7 +8,7 @@
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import type { FtrProviderContextWithSpaces } from '../../ftr_provider_context_with_spaces';
-import type { SecuritySolutionUtilsInterface, Role, User } from './types';
+import type { SecuritySolutionUtilsInterface, CustomRole, User } from './types';
 
 export function SecuritySolutionESSUtils({
   getService,
@@ -36,11 +36,11 @@ export function SecuritySolutionESSUtils({
     await security.user.create(username, { roles, password: password ?? 'changeme' });
   };
 
-  const createRole = async (name: string, role: Role) => {
+  const createRole = async (name: string, role: CustomRole) => {
     return await security.role.create(name, role.privileges);
   };
 
-  const createSuperTestWithCustomRole = async (roleDefinition: Role) => {
+  const createSuperTestWithCustomRole = async (roleDefinition: CustomRole) => {
     await createRole(roleDefinition.name, roleDefinition);
     await createUser({
       username: roleDefinition.name,

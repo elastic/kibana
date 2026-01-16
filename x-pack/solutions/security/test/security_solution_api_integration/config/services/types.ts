@@ -13,7 +13,7 @@ export interface SecuritySolutionUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
   createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
   cleanUpCustomRoles: () => Promise<void>;
-  createSuperTestWithCustomRole: (role: Role) => Promise<TestAgent<any>>;
+  createSuperTestWithCustomRole: (role: CustomRole) => Promise<TestAgent<any>>;
   createSearch: (role?: string) => Promise<SearchService>;
 }
 
@@ -26,7 +26,7 @@ interface ElasticsearchIndices {
   privileges: string[];
 }
 
-export interface Role {
+export interface CustomRole {
   name: string;
   privileges: {
     elasticsearch: ElasticSearchPrivilege;

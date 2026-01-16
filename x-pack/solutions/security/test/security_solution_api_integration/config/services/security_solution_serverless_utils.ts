@@ -12,7 +12,7 @@ import type { RoleCredentials } from '@kbn/test-suites-xpack-platform/serverless
 import type { SearchService, SendOptions } from '@kbn/ftr-common-functional-services';
 import type { SendOptions as SecureSearchSendOptions } from './search_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { SecuritySolutionUtilsInterface, Role } from './types';
+import type { SecuritySolutionUtilsInterface, CustomRole } from './types';
 
 export function SecuritySolutionServerlessUtils({
   getService,
@@ -63,7 +63,7 @@ export function SecuritySolutionServerlessUtils({
     return agentWithCommonHeaders.set(credentials.apiKeyHeader);
   };
 
-  const createSuperTestWithCustomRole = async (roleDefinition: Role) => {
+  const createSuperTestWithCustomRole = async (roleDefinition: CustomRole) => {
     await svlUserManager.setCustomRole(roleDefinition.privileges);
     const roleAuthc = await svlUserManager.createM2mApiKeyWithCustomRoleScope();
     rolesCredentials.set(roleDefinition.name, roleAuthc);
