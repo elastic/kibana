@@ -18,12 +18,14 @@ import {
   layerSettingsSchema,
   sharedPanelInfoSchema,
 } from '../shared';
+import type { PartitionMetric } from './partition_shared';
 import {
+  groupIsNotCollapsed,
   legendNestedSchema,
   legendSizeSchema,
   legendTruncateAfterLinesSchema,
   legendVisibleSchema,
-  validateMultipleMetricsCriteria,
+  validateColouringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
 import {
@@ -103,6 +105,26 @@ const partitionStateBreakdownByOptionsSchema = schema.object(
   }
 );
 
+function validateForMultipleMetrics({
+  metrics,
+  group_by,
+}: {
+  metrics: Array<PartitionMetric>;
+  group_by?: Array<{ collapse_by?: string }>;
+}) {
+  const groupByDimensionNumber = (group_by && group_by.filter(groupIsNotCollapsed).length) || 0;
+  if (metrics.length === 1) {
+    if (groupByDimensionNumber > 2) {
+      return 'The number of non-collapsed group_by dimensions must not exceed 2';
+    }
+  } else {
+    if (groupByDimensionNumber > 1) {
+      return 'When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 1';
+    }
+  }
+  return validateColouringAssignments({ metrics, group_by });
+}
+
 export const treemapStateSchemaNoESQL = schema.object(
   {
     type: schema.literal('treemap'),
@@ -143,7 +165,7 @@ export const treemapStateSchemaNoESQL = schema.object(
       description:
         'Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
-    validate: validateMultipleMetricsCriteria,
+    validate: validateForMultipleMetrics,
   }
 );
 
@@ -201,7 +223,7 @@ const treemapStateSchemaESQL = schema.object(
       description:
         'Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
-    validate: validateMultipleMetricsCriteria,
+    validate: validateForMultipleMetrics,
   }
 );
 

@@ -22,12 +22,14 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import type { PartitionMetric } from './partition_shared';
 import {
+  groupIsNotCollapsed,
   legendNestedSchema,
   legendSizeSchema,
   legendTruncateAfterLinesSchema,
   legendVisibleSchema,
-  validateMultipleMetricsCriteria,
+  validateColouringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
 
@@ -101,6 +103,26 @@ const pieTypeSchema = schema.oneOf([schema.literal('pie'), schema.literal('donut
   meta: { description: 'Chart type: pie or donut' },
 });
 
+function validateForMultipleMetrics({
+  metrics,
+  group_by,
+}: {
+  metrics: Array<PartitionMetric>;
+  group_by?: Array<{ collapse_by?: string }>;
+}) {
+  const groupByDimensionNumber = (group_by && group_by.filter(groupIsNotCollapsed).length) || 0;
+  if (metrics.length === 1) {
+    if (groupByDimensionNumber > 3) {
+      return 'The number of non-collapsed group_by dimensions must not exceed 3';
+    }
+  } else {
+    if (groupByDimensionNumber > 2) {
+      return 'When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 2';
+    }
+  }
+  return validateColouringAssignments({ metrics, group_by });
+}
+
 /**
  * Pie/donut chart configuration for standard (non-ES|QL) queries
  */
@@ -135,7 +157,7 @@ export const pieStateSchemaNoESQL = schema.object(
   },
   {
     meta: { description: 'Pie/donut chart configuration for standard queries' },
-    validate: validateMultipleMetricsCriteria,
+    validate: validateForMultipleMetrics,
   }
 );
 
@@ -179,7 +201,7 @@ const pieStateSchemaESQL = schema.object(
   },
   {
     meta: { description: 'Pie/donut chart configuration for ES|QL queries' },
-    validate: validateMultipleMetricsCriteria,
+    validate: validateForMultipleMetrics,
   }
 );
 

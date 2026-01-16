@@ -75,7 +75,13 @@ export interface PartitionGroupBy {
   color?: ColorMappingType;
 }
 
-function validateColouringAssignments({
+export function groupIsNotCollapsed(def: {
+  collapse_by?: string;
+}): def is { collapse_by: undefined } {
+  return def.collapse_by == null;
+}
+
+export function validateColouringAssignments({
   metrics,
   group_by,
 }: {
@@ -83,19 +89,22 @@ function validateColouringAssignments({
   group_by?: Array<PartitionGroupBy>;
 }) {
   if (group_by) {
-    const hasStaticColouring = metrics.some((metric) => 'color' in metric && metric.color != null);
-    if (group_by.length && hasStaticColouring) {
-      return 'Colouring cannot be assigned to metric dimensions when grouping dimensions are defined.';
-    }
+    // @TODO: re-evaluate this: unfortunately each partition chart type has some specific number of allowed group by
+    // dimensions, and that can be further extended with collapse_by. So this validation should probably be done
+    // at the runtime level, not here in shared utils.
+    // const hasStaticColouring = metrics.some((metric) => 'color' in metric && metric.color != null);
+    // if (group_by.length && hasStaticColouring) {
+    //   return 'Colouring cannot be assigned to metric dimensions when grouping dimensions are defined.';
+    // }
     const breakdownsWithColouring = group_by.filter((def) => def.color != null);
     if (breakdownsWithColouring.length > 1) {
       return 'Colouring can only be assigned to a single grouping dimension.';
     }
     if (breakdownsWithColouring[0]?.collapse_by) {
-      return 'Colouring cannot be assigned to a non-collapsed grouping dimension.';
+      return 'Colouring cannot be assigned to a collapsed grouping dimension.';
     }
-    const nonCollapsedGroupBy = group_by.filter((def) => def.collapse_by == null);
-    if (nonCollapsedGroupBy[0] !== breakdownsWithColouring[0]) {
+    const nonCollapsedGroupBy = group_by.filter(groupIsNotCollapsed);
+    if (breakdownsWithColouring.length && nonCollapsedGroupBy[0] !== breakdownsWithColouring[0]) {
       return 'Colouring can only be assigned to the first non-collapsed grouping dimension.';
     }
   }
@@ -108,13 +117,15 @@ export function validateGroupings({
   metrics: Array<PartitionMetric>;
   group_by?: Array<{ collapse_by?: string }>;
 }) {
+  const groupByDimensionNumber = (group_by && group_by.filter(groupIsNotCollapsed).length) || 0;
   if (metrics.length > 1) {
-    if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 0) {
+    if (groupByDimensionNumber > 0) {
       return 'When multiple metrics are defined, only collapsed group_by dimensions are allowed.';
     }
-  }
-  if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 1) {
-    return 'Only a single non-collapsed dimension is allowed for group_by';
+  } else {
+    if (groupByDimensionNumber > 1) {
+      return 'Only a single non-collapsed dimension is allowed for group_by';
+    }
   }
 }
 
@@ -122,6 +133,14 @@ export function validateMultipleMetricsCriteria(arg: {
   metrics: Array<PartitionMetric>;
   group_by?: Array<{ collapse_by?: string }>;
 }) {
-  validateGroupings(arg);
-  validateColouringAssignments(arg);
+  const errors = [];
+  const checks = [validateGroupings, validateColouringAssignments];
+  while (errors.length === 0 && checks.length > 0) {
+    const check = checks.shift()!;
+    const error = check(arg);
+    if (error) {
+      errors.push(error);
+    }
+  }
+  return errors[0];
 }

@@ -68,11 +68,11 @@ describe('Dataset Schema', () => {
     it('throws on missing required fields', () => {
       const input = {
         type: 'index' as const,
-        index: 'my-index-*',
+        time_field: '@timestamp',
       };
 
       expect(() => datasetTypeSchema.validate(input)).toThrow(
-        /\[1.time_field\]: expected value of type/
+        /\[1.index\]: expected value of type/
       );
     });
   });

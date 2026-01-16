@@ -456,11 +456,6 @@ export const esqlCharts = [
           metric: 0,
           direction: 'desc',
         },
-        color: {
-          mode: 'categorical',
-          palette: 'default',
-          mapping: [],
-        },
       },
     ],
     dataset: {
@@ -701,11 +696,6 @@ export const esqlCharts = [
           metric: 0,
           direction: 'desc',
         },
-        color: {
-          mode: 'categorical',
-          palette: 'default',
-          mapping: [],
-        },
         collapse_by: 'sum',
       },
       {
@@ -719,6 +709,11 @@ export const esqlCharts = [
           type: 'column',
           metric: 0,
           direction: 'desc',
+        },
+        color: {
+          mode: 'categorical',
+          palette: 'default',
+          mapping: [],
         },
       },
     ],
@@ -1253,44 +1248,6 @@ export const esqlCharts = [
           metric: 0,
           direction: 'desc',
         },
-        color: {
-          mode: 'categorical',
-          palette: 'default',
-          mapping: [
-            {
-              values: ['success'],
-              color: {
-                type: 'from_palette',
-                palette: 'default',
-                index: 6,
-              },
-            },
-            {
-              values: ['info'],
-              color: {
-                type: 'from_palette',
-                palette: 'default',
-                index: 9,
-              },
-            },
-            {
-              values: ['security'],
-              color: {
-                type: 'from_palette',
-                palette: 'default',
-                index: 4,
-              },
-            },
-            {
-              values: ['__other__'],
-              color: {
-                type: 'from_palette',
-                palette: 'default',
-                index: 5,
-              },
-            },
-          ],
-        },
       },
     ],
     dataset: {
@@ -1505,11 +1462,6 @@ export const esqlCharts = [
           metric: 0,
           direction: 'desc',
         },
-        color: {
-          mode: 'categorical',
-          palette: 'default',
-          mapping: [],
-        },
         collapse_by: 'sum',
       },
       {
@@ -1523,6 +1475,11 @@ export const esqlCharts = [
           type: 'column',
           metric: 0,
           direction: 'desc',
+        },
+        color: {
+          mode: 'categorical',
+          palette: 'default',
+          mapping: [],
         },
       },
     ],

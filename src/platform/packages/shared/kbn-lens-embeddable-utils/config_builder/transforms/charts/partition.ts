@@ -508,7 +508,8 @@ function getMetrics(vizLayer: LensPartitionVisualizationState['layers'][0]): str
 function convertLensStateToAPIGrouping(
   vizLayer: LensPartitionLayerState,
   layer: DataSourceStateLayer,
-  groupByAccessors: string[]
+  groupByAccessors: string[],
+  groupIndexForColorMapping: number
 ) {
   const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping);
   if (isTextBasedLayer(layer)) {
@@ -516,7 +517,7 @@ function convertLensStateToAPIGrouping(
       (id, index) =>
         stripUndefined({
           ...getValueApiColumn(id, layer),
-          color: index === 0 ? colorMapping : undefined,
+          color: index === groupIndexForColorMapping ? colorMapping : undefined,
         }) as NonNullable<
           Extract<PartitionStateESQL, 'group_breakdown_by'>['group_breakdown_by']
         >[0]
@@ -527,7 +528,7 @@ function convertLensStateToAPIGrouping(
       (id, index) =>
         stripUndefined({
           ...operationFromColumn(id, layer),
-          color: index === 0 ? colorMapping : undefined,
+          color: index === groupIndexForColorMapping ? colorMapping : undefined,
           collapse_by: vizLayer.collapseFns?.[id] || undefined, // handle gracefully empty strings
         }) as NonNullable<
           Extract<PartitionStateNoESQL, 'group_breakdown_by'>['group_breakdown_by']
@@ -543,7 +544,15 @@ function fromLensStateToAPIGroups(
   const vizLayer = visualization.layers[0];
 
   const groupByAccessors = getGroups(vizLayer);
-  const groups = convertLensStateToAPIGrouping(vizLayer, layer, groupByAccessors);
+  const groupIndexForColorMapping = groupByAccessors.findIndex(
+    (id) => vizLayer.collapseFns?.[id] == null
+  );
+  const groups = convertLensStateToAPIGrouping(
+    vizLayer,
+    layer,
+    groupByAccessors,
+    groupIndexForColorMapping
+  );
   return groups?.length ? groups : undefined;
 }
 
@@ -559,7 +568,7 @@ function fromLensStateToAPISecondaryGroups(
   const groupByAccessors = vizLayer.secondaryGroups;
 
   return groupByAccessors?.length
-    ? { group_breakdown_by: convertLensStateToAPIGrouping(vizLayer, layer, groupByAccessors) }
+    ? { group_breakdown_by: convertLensStateToAPIGrouping(vizLayer, layer, groupByAccessors, -1) }
     : {};
 }
 

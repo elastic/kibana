@@ -191,7 +191,7 @@ describe('Treemap Schema', () => {
       };
 
       const validated = treemapStateSchema.validate(input);
-      expect(validated.group_by?.[0].color).toHaveProperty('type', 'dynamic');
+      expect(validated.group_by?.[0].color).toHaveProperty('mode', 'categorical');
     });
 
     it('validates configuration with collapsed dimensions', () => {
@@ -385,7 +385,7 @@ describe('Treemap Schema', () => {
           };
 
           expect(() => treemapStateSchema.validate(input)).toThrow(
-            /number of non-collapsed group by dimensions must not exceed 2/i
+            / The number of non-collapsed group_by dimensions must not exceed 2/i
           );
         });
       });
@@ -505,7 +505,7 @@ describe('Treemap Schema', () => {
           };
 
           expect(() => treemapStateSchema.validate(input)).toThrow(
-            /number of group by dimensions must not exceed 1/i
+            /the number of non-collapsed group_by dimensions must not exceed 1/i
           );
         });
 
@@ -548,7 +548,7 @@ describe('Treemap Schema', () => {
           };
 
           expect(() => treemapStateSchema.validate(input)).toThrow(
-            /number of group by dimensions must not exceed 1/i
+            /the number of non-collapsed group_by dimensions must not exceed 1/i
           );
         });
       });

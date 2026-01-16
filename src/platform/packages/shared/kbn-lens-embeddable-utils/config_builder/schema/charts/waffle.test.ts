@@ -185,7 +185,7 @@ describe('Waffle Schema', () => {
       };
 
       const validated = waffleStateSchema.validate(input);
-      expect(validated.group_by?.[0].color).toHaveProperty('type', 'dynamic');
+      expect(validated.group_by?.[0].color).toHaveProperty('mode', 'categorical');
     });
 
     it('validates configuration with collapsed dimensions', () => {
@@ -320,7 +320,7 @@ describe('Waffle Schema', () => {
         };
 
         expect(() => waffleStateSchema.validate(input)).toThrow(
-          /Only a single non-collapsed breakdown dimension is allowed/i
+          /Only a single non-collapsed dimension is allowed for group_by/i
         );
       });
 
@@ -441,7 +441,7 @@ describe('Waffle Schema', () => {
         };
 
         expect(() => waffleStateSchema.validate(input)).toThrow(
-          /only collapsed breakdown dimensions are allowed/i
+          /only collapsed group_by dimensions are allowed/i
         );
       });
     });

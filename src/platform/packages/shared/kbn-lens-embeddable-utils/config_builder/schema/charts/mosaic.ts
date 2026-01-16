@@ -119,7 +119,9 @@ export const mosaicStateSchemaNoESQL = schema.object(
      */
     group_breakdown_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
+        mergeAllBucketsWithChartDimensionSchema(
+          schema.object({ collapse_by: schema.maybe(collapseBySchema) })
+        ),
         {
           minSize: 1,
           maxSize: 100,
@@ -133,7 +135,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
       description:
         'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
-    validate({
+    validate: ({
       metrics,
       group_by,
       group_breakdown_by,
@@ -141,7 +143,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
       metrics: Array<PartitionMetric>;
       group_by?: Array<{ collapse_by?: string }>;
       group_breakdown_by?: Array<{ collapse_by?: string }>;
-    }) {
+    }) => {
       if (group_by && group_by.filter((def) => def.collapse_by == null).length > 1) {
         return 'Only a single non-collapsed dimension is allowed for group_by';
       }
@@ -226,7 +228,7 @@ const mosaicStateSchemaESQL = schema.object(
       description:
         'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
-    validate({
+    validate: ({
       metrics,
       group_by,
       group_breakdown_by,
@@ -234,7 +236,7 @@ const mosaicStateSchemaESQL = schema.object(
       metrics: Array<PartitionMetric>;
       group_by?: Array<{ collapse_by?: string }>;
       group_breakdown_by?: Array<{ collapse_by?: string }>;
-    }) {
+    }) => {
       if (group_by && group_by?.filter((def) => def.collapse_by != null).length > 1) {
         return 'Only a single non-collapsed dimension is allowed for group_by';
       }
