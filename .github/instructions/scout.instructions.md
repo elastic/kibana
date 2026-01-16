@@ -2,11 +2,13 @@
 applyTo: '**/test/scout/**/*.spec.ts'
 ---
 
-You are reviewing Scout tests. Your goal is to catch **every** best-practice violation.
+# Instructions
 
-# REQUIRED comment format
+You are reviewing files inside Scout test folders. Your goal is to ensure these files are in line with the Scout best practices outlined in "Best practices for Scout tests" below.
 
-**You MUST use this exact format for EVERY comment. Do not deviate.**
+# Comment format
+
+You MUST use this exact format for EVERY comment. Do not deviate:
 
 > 📘 **Scout Best Practice:** `<section title>`
 
@@ -16,45 +18,13 @@ You are reviewing Scout tests. Your goal is to catch **every** best-practice vio
 
 **Fix:** <concrete fix or code suggestion>
 
-Example of a correct comment:
-
-> 📘 **Scout Best Practice:** Locate UI elements reliably
-
-**Issue:** Using `.nth()` to select rows is fragile.
-
-**Why:** Row order can change, causing the test to select the wrong element or fail unexpectedly.
-
-**Fix:** Add `data-test-subj="indexTableRow-${indexName}"` to each row and locate by name.
-
----
-
 # Review thoroughness
 
 - **Review every file and every test.** Do not skip files or stop early.
 - **Comment on every issue.** If you find 10 issues, leave 10 separate comments.
 - **When in doubt, comment.** A cautious flag is better than a missed issue.
 
----
-
-# Comment quality
-
-- Keep each comment short and actionable.
-- One issue per comment.
-- Always include the **Why** to explain impact.
-- Always include a concrete fix or code suggestion.
-- Reference the best-practice section title in the blockquote.
-
----
-
-# More example comments
-
-> 📘 **Scout Best Practice:** Use test.step for multi-step flows
-
-**Issue:** The flow is split across two `test()` blocks.
-
-**Why:** Each `test()` replays `beforeEach` and resets browser state, making the flow slower and harder to debug.
-
-**Fix:** Merge into one `test()` and wrap each phase with `test.step(...)`.
+# Best practices for Scout tests
 
 ## UI and API tests
 
@@ -1083,14 +1053,3 @@ apiTest('should return autocomplete definitions', async ({ apiClient }) => {
 ```
 
 This catches issues like missing fields, wrong types, or empty collections that a status code check would miss.
-
----
-
-## Contribute to Scout when possible
-
-We welcome contributions to one of the [Scout packages](introduction.md#modular-and-extensible-by-design). This includes page objects, EUI wrappers, API helpers, and more.
-
-| If your code...                               | Then...                                                                                                                                                                                                             |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Could be useful to **reuse in other plugins** | **Platform-wide** functionality should be contributed to `@kbn/scout`.<br/><br/>**Solution-specific** functionality should go to a solution-specific Scout package (e.g. `@kbn/scout-security`, `@kbn/scout-oblt`). |
-| Is **specific to your plugin**                | Keep it in your plugin's test directory                                                                                                                                                                             |
