@@ -18,6 +18,7 @@
     "@kbn/lens-common-2",
     "@kbn/share-plugin",
     "@kbn/dashboard-markdown",
+    "@kbn/agent-builder-platform-plugin",
   ],
   "exclude": ["target/**/*"]
 }
