@@ -1,0 +1,12 @@
+diff a/src/platform/plugins/shared/dashboard/tsconfig.json b/src/platform/plugins/shared/dashboard/tsconfig.json	(rejected hunks)
+@@ -96,7 +96,9 @@
+     "@kbn/react-query",
+     "@kbn/core-http-server",
+     "@kbn/core-chrome-layout-utils",
+-    "@kbn/cps"
++    "@kbn/cps",
++    "@kbn/scout",
++    "@kbn/test",
+   ],
+   "exclude": ["target/**/*"]
+ }

@@ -17,14 +17,33 @@ export class DiscoverApp {
 
   async goto() {
     await this.page.gotoApp('discover');
+    await this.waitForDataViewSwitch();
+  }
+
+  private async getVisibleDataViewSwitch() {
+    const discoverSwitch = this.page.testSubj.locator('discover-dataView-switch-link');
+    const fallbackSwitch = this.page.testSubj.locator('dataView-switch-link');
+
+    try {
+      await discoverSwitch.waitFor({ state: 'visible', timeout: 30_000 });
+      return discoverSwitch;
+    } catch {
+      await fallbackSwitch.waitFor({ state: 'visible', timeout: 30_000 });
+      return fallbackSwitch;
+    }
+  }
+
+  private async waitForDataViewSwitch() {
+    await this.getVisibleDataViewSwitch();
   }
 
   async selectDataView(name: string) {
-    const currentValue = await this.page.testSubj.innerText('*dataView-switch-link');
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
       return;
     }
-    await this.page.testSubj.click('*dataView-switch-link');
+    await dataViewSwitch.click();
     await this.page.testSubj.waitForSelector('indexPattern-switcher');
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = this.page.testSubj
@@ -40,7 +59,9 @@ export class DiscoverApp {
   }
 
   getSelectedDataView(): Locator {
-    return this.page.testSubj.locator('discover-dataView-switch-link');
+    return this.page.locator(
+      '[data-test-subj~="discover-dataView-switch-link"], [data-test-subj~="dataView-switch-link"]'
+    );
   }
 
   async clickNewSearch() {

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",

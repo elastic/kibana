@@ -81,6 +81,11 @@ export class DatePicker {
     await this.page.testSubj.click('querySubmitButton');
   }
 
+  async setCommonlyUsedTime(option: string) {
+    await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
+    await this.page.testSubj.click(`superDatePickerCommonlyUsed_${option}`);
+  }
+
   async getTimeConfig(): Promise<{ start: string; end: string }> {
     await this.showStartEndTimes();
     const start = await this.page.testSubj.innerText('superDatePickerstartDatePopoverButton');

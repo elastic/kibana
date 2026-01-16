@@ -1,0 +1,10 @@
+diff a/src/platform/plugins/shared/dashboard/moon.yml b/src/platform/plugins/shared/dashboard/moon.yml	(rejected hunks)
+@@ -110,6 +110,8 @@ dependsOn:
+   - '@kbn/core-http-server'
+   - '@kbn/core-chrome-layout-utils'
+   - '@kbn/cps'
++  - '@kbn/scout'
++  - '@kbn/test'
+ tags:
+   - plugin
+   - prod
