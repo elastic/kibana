@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/metrics-experience-plugin",
-  "owner": "@elastic/obs-presentation-team",
+  "owner": "@elastic/obs-exploration-team",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
