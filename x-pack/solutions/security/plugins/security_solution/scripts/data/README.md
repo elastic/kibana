@@ -59,7 +59,7 @@ To avoid alerts appearing in large grouped blocks per rule (a common artifact of
 - **Kibana + Elasticsearch running**
 - **Dependencies installed** in the repo (e.g. `yarn kbn bootstrap`)
 - **Security Solution detections initialized** (recommended)
-  - The script will **best-effort** initialize detections by calling `POST /api/detection_engine/index`.
+  - The script will initialize detections by calling `POST /api/detection_engine/index`.
   - If `.alerts-security.alerts-<spaceId>` does not exist yet, the script will **still index raw events/endpoint alerts**, but will **skip generating/copying Security alerts** and log a warning.
 - **Privileges** (only required for alerts / attacks / cases)
   - **Raw indexing only** (always attempted): write privileges for the concrete indices created by this script (see “What the script does” below)
@@ -170,7 +170,7 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
 ## What the script does (high level)
 
 1. **Connects to Kibana + Elasticsearch** and logs basic connectivity details.
-2. **Best-effort installs prebuilt rules** if missing (non-blocking)
+2. **Installs prebuilt rules** if missing (non-blocking)
    - On a fresh Kibana (0 prebuilt rules installed), it installs **only the rules matched by `--ruleset`** (not all rules).
    - If prebuilt rules are already installed, it does not uninstall or expand the install set.
 3. Loads vendored episode fixtures from `episodes/attacks/` and `episodes/noise/` (supports `.ndjson` and `.ndjson.gz`)
@@ -183,7 +183,7 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
      - `epN` episodes: `${indexPrefix}.alerts.insights.epN.<YYYY.MM.DD>`
      - other episode ids: `${indexPrefix}.alerts.<episode>.<YYYY.MM.DD>`
    - a copy of endpoint alerts into `insights-alerts-<episode>-<YYYY.MM.DD>` (for the Insights-style baseline)
-6. **Best-effort initializes detections** (so `.alerts-security.alerts-<spaceId>` exists)
+6. **Initializes detections** (so `.alerts-security.alerts-<spaceId>` exists)
 7. Ensures the ruleset rules are **enabled**
 8. Ensures the preview alerts index exists and **clears existing preview documents** (without deleting the index)
 9. If `--skip-alerts` is set, stops after raw indexing.
