@@ -36,6 +36,8 @@
           ") => React.JSX.Element; }"
         ],
         "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/pipeline_structure_tree.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -51,6 +53,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -67,6 +71,8 @@
         "label": "PipelineTreeNode",
         "description": [],
         "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,6 +84,8 @@
             "label": "pipelineName",
             "description": [],
             "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -89,6 +97,8 @@
             "label": "isManaged",
             "description": [],
             "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -100,6 +110,8 @@
             "label": "isDeprecated",
             "description": [],
             "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,6 +133,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -141,6 +155,8 @@
           "5"
         ],
         "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
