@@ -131,7 +131,7 @@ export const selectAlertAssignee = (assignee: string) => {
       cy.get(ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM).contains(assignee).click();
       return;
     }
-    cy.get('input').type(assignee);
+    cy.get('input').type(assignee, { force: true });
     cy.get(ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM).contains(assignee).click();
     cy.get(ALERT_USERS_PROFILES_CLEAR_SEARCH_BUTTON).click();
   });
