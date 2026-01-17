@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiButtonEmpty, EuiButton } from '@elastic/eui';
+import {
+  EuiPageTemplate,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../common/translations';
 import { PLUGIN_TITLE } from '../../common/constants';
 import { docLinks } from '../../common/doc_links';
-import { useTrainedModelPageUrl } from '../hooks/use_trained_model_page_url';
 
 interface InferenceEndpointsHeaderProps {
   onFlyoutOpen: () => void;
@@ -18,13 +23,26 @@ interface InferenceEndpointsHeaderProps {
 export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> = ({
   onFlyoutOpen,
 }) => {
-  const trainedModelPageUrl = useTrainedModelPageUrl();
-
   return (
     <EuiPageTemplate.Header
       data-test-subj="allInferenceEndpointsPage"
       pageTitle={PLUGIN_TITLE}
-      description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
+      description={
+        <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
+          <EuiFlexItem grow={false}>{i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              href={docLinks.elasticInferenceService}
+              target="_blank"
+              data-test-subj="get-started-link"
+              color="text"
+              size="s"
+            >
+              {i18n.GET_STARTED_LINK}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
       bottomBorder={true}
       rightSideItems={[
         <EuiButton
@@ -47,30 +65,6 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
           href={docLinks.createInferenceEndpoint}
         >
           {i18n.API_DOCUMENTATION_LINK}
-        </EuiButtonEmpty>,
-        <EuiButtonEmpty
-          aria-label={i18n.VIEW_YOUR_MODELS_LINK}
-          href={trainedModelPageUrl}
-          iconType="popout"
-          iconSide="right"
-          iconSize="s"
-          flush="both"
-          target="_blank"
-          data-test-subj="view-your-models"
-        >
-          {i18n.VIEW_YOUR_MODELS_LINK}
-        </EuiButtonEmpty>,
-        <EuiButtonEmpty
-          aria-label={i18n.EIS_DOCUMENTATION_LINK}
-          href={docLinks.elasticInferenceService}
-          iconType="popout"
-          iconSide="right"
-          iconSize="s"
-          flush="both"
-          target="_blank"
-          data-test-subj="eis-documentation"
-        >
-          {i18n.EIS_DOCUMENTATION_LINK}
         </EuiButtonEmpty>,
       ]}
     />

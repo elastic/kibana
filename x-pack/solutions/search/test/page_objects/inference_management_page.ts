@@ -16,9 +16,8 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
     InferenceTabularPage: {
       async expectHeaderToBeExist() {
         await testSubjects.existOrFail('allInferenceEndpointsPage');
-        await testSubjects.existOrFail('eis-documentation');
+        await testSubjects.existOrFail('get-started-link');
         await testSubjects.existOrFail('api-documentation');
-        await testSubjects.existOrFail('view-your-models');
         await testSubjects.existOrFail('add-inference-endpoint-header-button');
       },
 
