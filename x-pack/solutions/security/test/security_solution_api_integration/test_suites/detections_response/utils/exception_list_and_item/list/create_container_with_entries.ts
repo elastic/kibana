@@ -32,7 +32,6 @@ export const createContainerWithEntries = async (
     return [];
   }
   // Create the rule exception list container
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
     description: 'some description',
     list_id: 'some-list-id',
