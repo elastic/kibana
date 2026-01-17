@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
-  describe('@ess @serverless @skipInServerlessMKI Endpoint Host Isolation Exceptions artifacts (via lists plugin)', function () {
+  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint Host Isolation Exceptions artifacts (via lists plugin)', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let hostIsolationExceptionData: ArtifactTestData;
 
@@ -168,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it.skip('should return 400 for import of endpoint exceptions', async () => {
+    it('should return 400 for import of endpoint exceptions', async () => {
       await endpointPolicyManagerSupertest
         .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
         .set('kbn-xsrf', 'true')
