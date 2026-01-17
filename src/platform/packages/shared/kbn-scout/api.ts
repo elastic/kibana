@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { expectApi } from './api/expect';
+export { expect } from './src/playwright/matchers/api';
+export type { ApiMatchers } from './src/playwright/matchers/api';

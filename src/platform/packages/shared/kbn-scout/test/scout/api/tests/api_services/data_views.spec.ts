@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, expect } from '../../../../../src/playwright';
+import { apiTest } from '../../../../../src/playwright';
+import { expect } from '../../../../../api';
 
 apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
   let dataViewId: string;

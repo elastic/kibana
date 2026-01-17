@@ -7,27 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApiClientResponse } from '../../fixtures/scope/worker/api_client';
+import type { AxiosResponse } from 'axios';
+import { createMatcherError } from './utils';
 
 /**
  * Asserts that the response has the expected HTTP status code.
  *
  * @example
- * expectApi(response).toHaveStatusCode(200);
- * expectApi(response).not.toHaveStatusCode(404);
+ * expect(response).toHaveStatusCode(200);
+ * expect(response).not.toHaveStatusCode(404);
  */
-export function toHaveStatusCode(response: ApiClientResponse, expectedStatusCode: number) {
-  const assertionName = 'toHaveStatusCode';
-  const pass = response.statusCode === expectedStatusCode;
+export function toHaveStatusCode(
+  response: AxiosResponse,
+  expectedStatusCode: number,
+  isNegated = false
+): void {
+  const pass = response.status === expectedStatusCode;
 
-  return {
-    pass,
-    name: assertionName,
-    expected: expectedStatusCode,
-    actual: response.statusCode,
-    message: () =>
-      pass
-        ? `Expected response not to have status code ${expectedStatusCode}, but it did`
-        : `Expected response to have status code ${expectedStatusCode}, but received ${response.statusCode}`,
-  };
+  if ((pass && isNegated) || (!pass && !isNegated)) {
+    throw createMatcherError(expectedStatusCode, 'toHaveStatusCode', response.status, isNegated);
+  }
 }

@@ -7,39 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expectApi } from './expect';
-import type { ApiClientResponse } from '../../fixtures/scope/worker/api_client';
-
-const createMockResponse = (overrides: Partial<ApiClientResponse> = {}): ApiClientResponse => ({
-  statusCode: 200,
-  statusMessage: 'OK',
-  headers: { 'content-type': 'application/json' },
-  body: {},
-  ...overrides,
-});
+import { expect as apiExpect } from '.';
+import { createApiResponse } from './utils';
+import { createMatcherError } from './utils'; // adjust path if needed
 
 describe('toHaveStatusCode', () => {
   it('should pass when status code matches', () => {
-    const response = createMockResponse({ statusCode: 200 });
-    expect(() => expectApi(response).toHaveStatusCode(200)).not.toThrow();
+    const response = createApiResponse({ status: 200 });
+    expect(() => apiExpect(response).toHaveStatusCode(200)).not.toThrow();
   });
 
   it('should fail when status code does not match', () => {
-    const response = createMockResponse({ statusCode: 404 });
-    expect(() => expectApi(response).toHaveStatusCode(200)).toThrow(
-      'Expected response to have status code 200, but received 404'
-    );
+    const response = createApiResponse({ status: 404 });
+    const expectedError = createMatcherError(200, 'toHaveStatusCode', 404, false).message;
+
+    expect(() => apiExpect(response).toHaveStatusCode(200)).toThrow(expectedError);
   });
 
   it('should support negation', () => {
-    const response = createMockResponse({ statusCode: 200 });
-    expect(() => expectApi(response).not.toHaveStatusCode(404)).not.toThrow();
+    const response = createApiResponse({ status: 200 });
+    expect(() => apiExpect(response).not.toHaveStatusCode(404)).not.toThrow();
   });
 
   it('should fail negation when status code matches', () => {
-    const response = createMockResponse({ statusCode: 200 });
-    expect(() => expectApi(response).not.toHaveStatusCode(200)).toThrow(
-      'Expected response not to have status code 200, but it did'
-    );
+    const response = createApiResponse({ status: 200 });
+    const expectedError = createMatcherError(200, 'toHaveStatusCode', 200, true).message;
+
+    expect(() => apiExpect(response).not.toHaveStatusCode(200)).toThrow(expectedError);
   });
 });

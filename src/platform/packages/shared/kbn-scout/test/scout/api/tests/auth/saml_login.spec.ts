@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, expect, tags } from '../../../../../src/playwright';
+import { apiTest, tags } from '../../../../../src/playwright';
+import { expect } from '../../../../../api';
 
 apiTest.describe(`SAML Auth fixture`, { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   apiTest(`should create a session for 'admin' role`, async ({ samlAuth }) => {

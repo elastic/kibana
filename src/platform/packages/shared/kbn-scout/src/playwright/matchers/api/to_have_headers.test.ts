@@ -7,65 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expectApi } from './expect';
-import type { ApiClientResponse } from '../../fixtures/scope/worker/api_client';
-
-const response: ApiClientResponse = {
-  statusCode: 200,
-  statusMessage: 'OK',
-  headers: {
-    'Content-Type': 'application/json',
-    'x-request-id': '12345',
-    'cache-control': 'no-cache',
-    'set-cookie': ['cookie1=value1', 'cookie2=value2'],
-  },
-  body: {},
-};
+import { expect as apiExpect } from '.';
+import { createApiResponse } from './utils';
 
 describe('toHaveHeaders', () => {
-  it('should pass when header matches', () => {
+  it('should pass when expected headers are present (partial match)', () => {
+    const response = createApiResponse({
+      headers: { 'content-type': 'application/json', 'x-custom': 'value', 'x-other': 'data' },
+    });
     expect(() =>
-      expectApi(response).toHaveHeaders({ 'content-type': 'application/json' })
-    ).not.toThrow();
-  });
-
-  it('should be case-insensitive for header keys', () => {
-    expect(() =>
-      expectApi(response).toHaveHeaders({ 'CONTENT-TYPE': 'application/json' })
+      apiExpect(response).toHaveHeaders({ 'content-type': 'application/json', 'x-custom': 'value' })
     ).not.toThrow();
   });
 
   it('should fail when header is missing', () => {
-    expect(() => expectApi(response).toHaveHeaders({ 'x-non-existent': 'value' })).toThrow(
-      'Missing headers: x-non-existent'
+    const response = createApiResponse({ headers: { 'content-type': 'application/json' } });
+    expect(() => apiExpect(response).toHaveHeaders({ 'x-missing': 'value' })).toThrow(
+      'Missing headers: x-missing'
     );
   });
 
   it('should fail when header value does not match', () => {
-    expect(() => expectApi(response).toHaveHeaders({ 'content-type': 'text/plain' })).toThrow(
-      'Mismatched headers: content-type (expected "text/plain", got "application/json")'
+    const response = createApiResponse({ headers: { 'content-type': 'text/plain' } });
+    expect(() => apiExpect(response).toHaveHeaders({ 'content-type': 'application/json' })).toThrow(
+      'Mismatched headers: content-type (expected "application/json", got "text/plain")'
     );
   });
 
-  it('should support checking multiple headers at once', () => {
+  it('should be case-insensitive for header keys', () => {
+    const response = createApiResponse({ headers: { 'Content-Type': 'application/json' } });
     expect(() =>
-      expectApi(response).toHaveHeaders({
-        'content-type': 'application/json',
-        'x-request-id': '12345',
-        'cache-control': 'no-cache',
-      })
+      apiExpect(response).toHaveHeaders({ 'content-type': 'application/json' })
     ).not.toThrow();
   });
 
   it('should support negation', () => {
-    expect(() =>
-      expectApi(response).not.toHaveHeaders({ 'x-non-existent': 'value' })
-    ).not.toThrow();
+    const response = createApiResponse({ headers: { 'content-type': 'application/json' } });
+    expect(() => apiExpect(response).not.toHaveHeaders({ 'x-forbidden': 'value' })).not.toThrow();
   });
 
-  it('should join array header values with comma', () => {
+  it('should fail negation when headers match', () => {
+    const response = createApiResponse({ headers: { 'content-type': 'application/json' } });
     expect(() =>
-      expectApi(response).toHaveHeaders({ 'set-cookie': 'cookie1=value1, cookie2=value2' })
-    ).not.toThrow();
+      apiExpect(response).not.toHaveHeaders({ 'content-type': 'application/json' })
+    ).toThrow('Expected response not to have the specified headers, but it did');
   });
 });

@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApiClientResponse } from '../../fixtures/scope/worker/api_client';
+import type { AxiosResponse } from 'axios';
 
 /**
  * Asserts that the response contains the expected headers.
  * This is a partial match - the response can contain additional headers.
  *
  * @example
- * expectApi(response).toHaveHeaders({ 'content-type': 'application/json', 'x-custom': 'value' });
- * expectApi(response).not.toHaveHeaders({ 'x-forbidden': 'value' });
+ * expect(response).toHaveHeaders({ 'content-type': 'application/json' });
+ * expect(response).not.toHaveHeaders({ 'x-forbidden': 'value' });
  */
 export function toHaveHeaders(
-  response: ApiClientResponse,
-  expectedHeaders: Record<string, string>
-) {
-  const assertionName = 'toHaveHeaders';
+  response: AxiosResponse,
+  expectedHeaders: Record<string, string>,
+  isNegated: boolean = false
+): void {
   const normalizeHeaderKey = (key: string) => key.toLowerCase();
 
   const responseHeaders: Record<string, string> = {};
@@ -46,16 +46,12 @@ export function toHaveHeaders(
 
   const pass = missingHeaders.length === 0 && mismatchedHeaders.length === 0;
 
-  return {
-    pass,
-    name: assertionName,
-    expected: expectedHeaders,
-    actual: responseHeaders,
-    message: () => {
-      if (pass) {
-        return 'Expected response not to have the specified headers, but it did';
-      }
-
+  if (isNegated) {
+    if (pass) {
+      throw new Error('Expected response not to have the specified headers, but it did');
+    }
+  } else {
+    if (!pass) {
       const messages: string[] = [];
       if (missingHeaders.length > 0) {
         messages.push(`Missing headers: ${missingHeaders.join(', ')}`);
@@ -66,7 +62,7 @@ export function toHaveHeaders(
           .join(', ');
         messages.push(`Mismatched headers: ${mismatchDetails}`);
       }
-      return `Expected response to have headers:\n${messages.join('\n')}`;
-    },
-  };
+      throw new Error(`Expected response to have headers:\n${messages.join('\n')}`);
+    }
+  }
 }
