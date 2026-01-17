@@ -6,12 +6,11 @@
  */
 
 import { useMemo } from 'react';
-import type { PanelPath } from '@kbn/expandable-flyout';
 import type { RightPanelPaths } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
-import * as tabs from '../tabs';
 import type { RightPanelTabType } from '../tabs';
+import * as tabs from '../tabs';
 
 export const allThreeTabs = [tabs.overviewTab, tabs.tableTab, tabs.jsonTab];
 export const twoTabs = [tabs.tableTab, tabs.jsonTab];
@@ -24,7 +23,7 @@ export interface UseTabsParams {
   /**
    * The path passed in when using the expandable flyout API to open a panel.
    */
-  path: PanelPath | undefined;
+  path: string | undefined;
 }
 
 export interface UseTabsResult {
@@ -35,7 +34,7 @@ export interface UseTabsResult {
   /**
    * The tab id to selected in the right panel.
    */
-  selectedTabId: RightPanelPaths;
+  defaultSelectedTabId: RightPanelPaths;
 }
 
 /**
@@ -51,10 +50,10 @@ export const useTabs = ({ flyoutIsExpandable, path }: UseTabsParams): UseTabsRes
     [flyoutIsExpandable]
   );
 
-  const selectedTabId = useMemo(() => {
+  const defaultSelectedTabId = useMemo(() => {
     // we use the value passed from the url and use it if it exists in the list of tabs to display
     if (path) {
-      const selectedTab = tabsDisplayed.map((tab) => tab.id).find((tabId) => tabId === path.tab);
+      const selectedTab = tabsDisplayed.map((tab) => tab.id).find((tabId) => tabId === path);
       if (selectedTab) {
         return selectedTab;
       }
@@ -76,6 +75,6 @@ export const useTabs = ({ flyoutIsExpandable, path }: UseTabsParams): UseTabsRes
 
   return {
     tabsDisplayed,
-    selectedTabId,
+    defaultSelectedTabId,
   };
 };

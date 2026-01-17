@@ -66,12 +66,12 @@ const VulnerabilitiesCount = ({
 export const VulnerabilitiesPreview = ({
   value,
   field,
-  isPreviewMode,
+  isChild,
   openDetailsPanel,
 }: {
   value: string;
   field: CloudPostureEntityIdentifier;
-  isPreviewMode: boolean;
+  isChild: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   useEffect(() => {
@@ -136,7 +136,7 @@ export const VulnerabilitiesPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasVulnerabilitiesFindings ? 'arrowStart' : '',
+        iconType: !isChild && hasVulnerabilitiesFindings ? 'arrowStart' : '',
         title: (
           <EuiTitle
             css={css`

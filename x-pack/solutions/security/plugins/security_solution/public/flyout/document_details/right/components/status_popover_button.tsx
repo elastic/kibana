@@ -7,7 +7,7 @@
 
 import { EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import { getFieldFormat } from '../utils/get_field_format';
 import type { EnrichedFieldInfoWithValues } from '../utils/enriched_field_info';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
@@ -46,7 +46,7 @@ interface StatusPopoverButtonProps {
  */
 export const StatusPopoverButton = memo(
   ({ eventId, contextId, enrichedFieldInfo, scopeId }: StatusPopoverButtonProps) => {
-    const { closeFlyout } = useExpandableFlyoutApi();
+    const { closeFlyout } = useFlyoutApi();
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);

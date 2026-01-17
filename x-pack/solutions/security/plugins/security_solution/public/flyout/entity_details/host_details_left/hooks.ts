@@ -6,22 +6,22 @@
  */
 
 import { useMemo } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import {
-  getRiskInputTab,
   getInsightsInputTab,
+  getRiskInputTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import type {
-  LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
+  LeftPanelTabsType,
 } from '../shared/components/left_panel/left_panel_header';
 
 import type { HostDetailsPanelProps } from '.';
 import { HostDetailsPanelKey } from '.';
 
 export const useSelectedTab = (params: HostDetailsPanelProps, tabs: LeftPanelTabsType) => {
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openChildPanel } = useFlyoutApi();
   const path = params.path;
 
   const selectedTabId = useMemo(() => {
@@ -32,13 +32,12 @@ export const useSelectedTab = (params: HostDetailsPanelProps, tabs: LeftPanelTab
   }, [path, tabs]);
 
   const setSelectedTabId = (tabId: EntityDetailsLeftPanelTab) => {
-    openLeftPanel({
+    openChildPanel({
       id: HostDetailsPanelKey,
       params: {
         ...params,
-        path: {
-          tab: tabId,
-        },
+        path: tabId,
+        isChild: true,
       },
     });
   };

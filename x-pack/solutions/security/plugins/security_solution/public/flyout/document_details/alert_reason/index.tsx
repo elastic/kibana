@@ -6,14 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DocumentDetailsAlertReasonPanelKey } from '../shared/constants/panel_keys';
 import { AlertReason } from './alert_reason';
 
 export interface AlertReasonPanelProps extends FlyoutPanelProps {
   key: typeof DocumentDetailsAlertReasonPanelKey;
-  path?: PanelPath;
+  path?: string;
   params?: {
     id: string;
     indexName: string;

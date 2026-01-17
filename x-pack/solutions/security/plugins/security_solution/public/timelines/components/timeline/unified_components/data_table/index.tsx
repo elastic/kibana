@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -13,17 +13,16 @@ import type {
   UnifiedDataTableProps,
   UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
-import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
+import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
   EuiDataGridProps,
 } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
-import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
+import { useFlyoutApi } from '@kbn/flyout';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
@@ -36,13 +35,13 @@ import type {
   RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import type { State, inputsModel } from '../../../../../common/store';
+import type { inputsModel, State } from '../../../../../common/store';
 import { SecurityCellActionsTrigger } from '../../../../../app/actions/constants';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import {
-  StyledTimelineUnifiedDataTable,
   StyledEuiProgress,
+  StyledTimelineUnifiedDataTable,
   UnifiedTimelineGlobalStyles,
 } from '../styles';
 import { timelineActions } from '../../../../store';
@@ -50,7 +49,6 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 
 export const SAMPLE_SIZE_SETTING = 500;
@@ -132,7 +130,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         storage,
         dataViewFieldEditor,
         notifications: { toasts: toastsService },
-        telemetry,
         theme,
         data: dataPluginContract,
       },
@@ -140,12 +137,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
 
-    const onCloseExpandableFlyout = useCallback((id: string) => {
-      setExpandedDoc((prev) => (!prev ? prev : undefined));
-    }, []);
-
-    const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
-    useOnExpandableFlyoutClose({ callback: onCloseExpandableFlyout });
+    const { openFlyout, closeFlyout } = useFlyoutApi();
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
@@ -176,7 +168,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
         openFlyout({
-          right: {
+          main: {
             id: DocumentDetailsRightPanelKey,
             params: {
               id: eventData._id,
@@ -185,12 +177,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             },
           },
         });
-        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-          location: timelineId,
-          panel: 'right',
-        });
       },
-      [openFlyout, timelineId, telemetry]
+      [timelineId, openFlyout]
     );
 
     const onSetExpandedDoc = useCallback(
@@ -203,6 +191,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           }
         } else {
           closeFlyout();
+
           setExpandedDoc(undefined);
         }
       },

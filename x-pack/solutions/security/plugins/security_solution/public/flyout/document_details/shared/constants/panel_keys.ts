@@ -11,5 +11,22 @@ export const DocumentDetailsPreviewPanelKey = 'document-details-preview' as cons
 
 export const DocumentDetailsIsolateHostPanelKey = 'document-details-isolate-host' as const;
 export const DocumentDetailsAlertReasonPanelKey = 'document-details-alert-reason' as const;
+
+export const DocumentDetailsInsightsPanelKey = 'document-details-main-insights' as const;
+
+export const DocumentDetailsNotesPanelKey = 'document-details-main-notes' as const;
+
+export const DocumentDetailsResponsePanelKey = 'document-details-main-response' as const;
+
+export const DocumentDetailsInvestigationGuidePanelKey =
+  'document-details-main-investigation_guide' as const;
+
+export const DocumentDetailsMainAnalyzerPanelKey =
+  'document-details-main-analyzer-details' as const;
 export const DocumentDetailsAnalyzerPanelKey = 'document-details-analyzer-details' as const;
+
+export const DocumentDetailsMainSessionViewPanelKey =
+  'document-details-main-sessions-view-details' as const;
 export const DocumentDetailsSessionViewPanelKey = 'document-details-sessions-view-details' as const;
+
+export const DocumentDetailsGraphPanelKey = 'document-details-graph-details' as const;

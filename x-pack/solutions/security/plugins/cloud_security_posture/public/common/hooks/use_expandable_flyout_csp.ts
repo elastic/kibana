@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useContext, useCallback, useState } from 'react';
+import { useContext, useState } from 'react';
 import type { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
@@ -16,24 +16,10 @@ export const useExpandableFlyoutCsp = (
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
-  const setFlyoutCloseCallback = useCallback(
-    (onChange: (value: DataTableRecord | undefined) => void) => {
-      // Check if the context and required methods exist
-      if (securitySolutionContext && securitySolutionContext.useOnExpandableFlyoutClose) {
-        securitySolutionContext.useOnExpandableFlyoutClose({
-          callback: () => onChange(undefined),
-        });
-      }
-    },
-    [securitySolutionContext]
-  );
-
   if (!securitySolutionContext || !securitySolutionContext.useExpandableFlyoutApi)
     return { onExpandDocClick: null };
 
   const { openFlyout, closeFlyout } = securitySolutionContext.useExpandableFlyoutApi();
-
-  setFlyoutCloseCallback(setExpandedDoc);
 
   const onExpandDocClick = (record?: DataTableRecord | undefined) => {
     let finding;

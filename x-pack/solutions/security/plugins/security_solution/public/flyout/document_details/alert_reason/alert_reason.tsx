@@ -41,14 +41,14 @@ export const AlertReason: React.FC = () => {
 
   if (!renderer) {
     return (
-      <EuiPanel hasShadow={false} hasBorder={false}>
+      <EuiPanel color="transparent" hasShadow={false} hasBorder={false}>
         <FlyoutError />
       </EuiPanel>
     );
   }
 
   return (
-    <EuiPanel hasShadow={false} data-test-subj={ALERT_REASON_BODY_TEST_ID}>
+    <EuiPanel color="transparent" hasShadow={false} data-test-subj={ALERT_REASON_BODY_TEST_ID}>
       <EuiTitle>
         <h6>
           <FormattedMessage

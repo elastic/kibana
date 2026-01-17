@@ -267,7 +267,7 @@ export const AlertsDetailsTable = memo(
             id: eventId,
             indexName,
             scopeId: tableId,
-            isPreviewMode: true,
+            isChild: true,
             banner: ALERT_PREVIEW_BANNER,
           },
         });

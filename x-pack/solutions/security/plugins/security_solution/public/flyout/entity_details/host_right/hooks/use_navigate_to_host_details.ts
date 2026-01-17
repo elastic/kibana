@@ -6,12 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EntityType } from '../../../../../common/search_strategy';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useFlyoutApi } from '@kbn/flyout';
 import { HostDetailsPanelKey } from '../../host_details_left';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
-import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { HostPanelKey } from '../../shared/constants';
 
 interface UseNavigateToHostDetailsParams {
@@ -21,7 +18,7 @@ interface UseNavigateToHostDetailsParams {
   hasMisconfigurationFindings: boolean;
   hasVulnerabilitiesFindings: boolean;
   hasNonClosedAlerts: boolean;
-  isPreviewMode: boolean;
+  isChild?: boolean;
   contextID: string;
 }
 
@@ -32,15 +29,10 @@ export const useNavigateToHostDetails = ({
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
   hasNonClosedAlerts,
-  isPreviewMode,
+  isChild,
   contextID,
 }: UseNavigateToHostDetailsParams): ((path: EntityDetailsPath) => void) => {
-  const { telemetry } = useKibana().services;
-  const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-
-  telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
-    entity: EntityType.host,
-  });
+  const { openFlyout, openChildPanel } = useFlyoutApi();
 
   return useCallback(
     (path?: EntityDetailsPath) => {
@@ -54,6 +46,7 @@ export const useNavigateToHostDetails = ({
           hasMisconfigurationFindings,
           hasVulnerabilitiesFindings,
           hasNonClosedAlerts,
+          isChild: true,
         },
       };
 
@@ -63,19 +56,20 @@ export const useNavigateToHostDetails = ({
           contextID,
           scopeId,
           hostName,
+          isChild: false,
         },
       };
 
-      if (isPreviewMode) {
-        openFlyout({ right, left });
+      if (isChild) {
+        openFlyout({
+          main: right,
+          child: left,
+        });
       } else {
-        openLeftPanel(left);
+        openChildPanel(left);
       }
     },
     [
-      isPreviewMode,
-      openFlyout,
-      openLeftPanel,
       hostName,
       scopeId,
       isRiskScoreExist,
@@ -83,6 +77,9 @@ export const useNavigateToHostDetails = ({
       hasVulnerabilitiesFindings,
       hasNonClosedAlerts,
       contextID,
+      isChild,
+      openFlyout,
+      openChildPanel,
     ]
   );
 };

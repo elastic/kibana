@@ -269,12 +269,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 scopeId={scopeId}
                 render={(ip) =>
                   ip != null ? (
-                    <FlyoutLink
-                      field={'host.ip'}
-                      value={ip}
-                      scopeId={scopeId}
-                      isFlyoutOpen={isFlyoutOpen}
-                    />
+                    <FlyoutLink field={'host.ip'} value={ip} scopeId={scopeId} isChild={true} />
                   ) : (
                     getEmptyTagValue()
                   )
@@ -284,16 +279,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
           },
         ],
       ],
-      [
-        data,
-        indexPatterns,
-        getDefaultRenderer,
-        contextID,
-        scopeId,
-        userName,
-        firstColumn,
-        isFlyoutOpen,
-      ]
+      [data, indexPatterns, getDefaultRenderer, contextID, scopeId, userName, firstColumn]
     );
     return (
       <>

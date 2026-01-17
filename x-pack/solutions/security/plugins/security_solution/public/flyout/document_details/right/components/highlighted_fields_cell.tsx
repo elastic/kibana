@@ -10,6 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { getAgentTypeForAgentIdField } from '../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
@@ -72,6 +73,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   ancestorsIndexName,
   displayValuesLimit = 2,
 }) => {
+  const { isChild } = useDocumentDetailsContext();
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
   }, [originalField]);
@@ -129,6 +131,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
             scopeId={scopeId}
             data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
             ancestorsIndexName={ancestorsIndexName}
+            isChild={isChild}
           />
         ) : field === AGENT_STATUS_FIELD_NAME ? (
           <AgentStatus
@@ -141,7 +144,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
         )}
       </div>
     ),
-    [agentType, ancestorsIndexName, field, scopeId, showPreview]
+    [agentType, ancestorsIndexName, field, isChild, scopeId, showPreview]
   );
 
   if (values === null) return null;

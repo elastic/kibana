@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { TableId } from '@kbn/securitysolution-data-table';
+import type { FlyoutPanelProps } from '@kbn/flyout';
 import { noop } from 'lodash/fp';
 import { buildEntityNameFilter } from '../../../../common/search_strategy';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -18,12 +17,10 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { ServicePanelContent } from './content';
 import { ServicePanelHeader } from './header';
 import { useObservedService } from './hooks/use_observed_service';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useNavigateToServiceDetails } from './hooks/use_navigate_to_service_details';
 
 export interface ServicePanelProps extends Record<string, unknown> {
@@ -87,16 +84,9 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
   const openDetailsPanel = useNavigateToServiceDetails({
     serviceName,
     scopeId,
+    contextID,
     isRiskScoreExist,
   });
-
-  const openPanelFirstTab = useCallback(
-    () =>
-      openDetailsPanel({
-        tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
-      }),
-    [openDetailsPanel]
-  );
 
   if (observedService.isLoading) {
     return <FlyoutLoading />;
@@ -104,11 +94,6 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
 
   return (
     <>
-      <FlyoutNavigation
-        flyoutIsExpandable={isRiskScoreExist}
-        expandDetails={openPanelFirstTab}
-        isRulePreview={scopeId === TableId.rulePreview}
-      />
       <ServicePanelHeader serviceName={serviceName} observedService={observedService} />
       <ServicePanelContent
         serviceName={serviceName}
@@ -119,6 +104,7 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
         contextID={contextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
+        isChild={false}
       />
     </>
   );

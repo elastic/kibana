@@ -7,14 +7,13 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
 import { i18n } from '@kbn/i18n';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { NetworkPreviewBanner } from './components/preview_banner';
 import { PreviewPanelFooter } from './footer';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
-import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 
 export interface NetworkExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'network-details' | 'network-preview';
@@ -48,27 +47,21 @@ export interface NetworkPanelProps extends Record<string, unknown> {
   /**
    * If in preview mode, show preview banner and hide navigation
    */
-  isPreviewMode?: boolean;
+  isChild?: boolean;
 }
 
 /**
  * Panel to be displayed in the network details expandable flyout right section
  */
-export const NetworkPanel: FC<NetworkPanelProps> = memo(
-  ({ ip, flowTarget, scopeId, isPreviewMode }) => {
-    return (
-      <>
-        <FlyoutNavigation
-          flyoutIsExpandable={false}
-          isPreviewMode={isPreviewMode}
-          isRulePreview={scopeId === TableId.rulePreview}
-        />
-        <PanelHeader ip={ip} flowTarget={flowTarget} />
-        <PanelContent ip={ip} flowTarget={flowTarget} />
-        {isPreviewMode && <PreviewPanelFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />}
-      </>
-    );
-  }
-);
+export const NetworkPanel: FC<NetworkPanelProps> = memo(({ ip, flowTarget, scopeId, isChild }) => {
+  return (
+    <>
+      {isChild && <NetworkPreviewBanner />}
+      <PanelHeader ip={ip} flowTarget={flowTarget} />
+      <PanelContent ip={ip} flowTarget={flowTarget} />
+      {isChild && <PreviewPanelFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />}
+    </>
+  );
+});
 
 NetworkPanel.displayName = 'NetworkPanel';

@@ -107,6 +107,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
+
   const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
   const { to, from } = useGlobalTime();
   const { signalIndexName } = useSignalIndex();
@@ -126,6 +127,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
     [alertStats]
   );
 
+  // renders either a button to go to host alert details, open timeline or just plain text depending on the user's timeline privileges
   const alertCount = useMemo(() => {
     const formattedAlertCount = <FormattedCount count={totalAlertCount} />;
 

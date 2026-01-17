@@ -50,6 +50,10 @@ export interface FieldValueCellProps {
    * Values for the field, to render in the second column of the table
    */
   values: string[] | null | undefined;
+  /**
+   *
+   */
+  isChild: boolean;
 }
 
 /**
@@ -65,6 +69,7 @@ export const TableFieldValueCell = memo(
     getLinkValue,
     values,
     isRulePreview,
+    isChild,
   }: FieldValueCellProps) => {
     if (values == null) {
       return null;
@@ -94,6 +99,7 @@ export const TableFieldValueCell = memo(
                   scopeId={scopeId}
                   ruleId={ruleId}
                   data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
+                  isChild={isChild}
                 />
               ) : (
                 <FormattedFieldValue

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -84,8 +84,8 @@ export const USER_PREVIEW_BANNER = {
 /**
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
-export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
-  const { scopeId } = useDocumentDetailsContext();
+export const UserEntityOverview: React.FC<UserEntityOverviewProps> = memo(({ userName }) => {
+  const { isChild, scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -145,7 +145,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
-    isPreviewMode: true, // setting to true to always open a new user flyout
+    isChild: true, // setting to true to always open a new user flyout
     contextID: 'UserEntityOverview',
   });
 
@@ -232,6 +232,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
               value={userName}
               scopeId={scopeId}
               data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
+              isChild={isChild}
             >
               <EuiText
                 css={css`
@@ -293,4 +294,6 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       />
     </EuiFlexGroup>
   );
-};
+});
+
+UserEntityOverview.displayName = 'UserEntityOverview';

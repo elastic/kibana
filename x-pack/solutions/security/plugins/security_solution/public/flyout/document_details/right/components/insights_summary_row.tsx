@@ -6,13 +6,17 @@
  */
 
 import type { ReactElement, VFC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
-import { LeftPanelInsightsTab } from '../../left';
+import { useFlyoutApi } from '@kbn/flyout';
+import { useDocumentDetailsContext } from '../../shared/context';
+import {
+  DocumentDetailsInsightsPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../shared/constants/panel_keys';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 const LOADING = i18n.translate(
   'xpack.securitySolution.flyout.right.insights.insightSummaryLoadingAriaLabel',
@@ -43,7 +47,7 @@ export interface InsightsSummaryRowProps {
   /**
    * Optional parameter used to know which subtab to navigate to when the user clicks on the button
    */
-  expandedSubTab?: string;
+  expandedTab?: string;
   /**
    *  Prefix data-test-subj because this component will be used in multiple places
    */
@@ -61,13 +65,39 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   error = false,
   value,
   text,
-  expandedSubTab,
+  expandedTab,
   'data-test-subj': dataTestSubj,
 }) => {
-  const onClick = useNavigateToLeftPanel({
-    tab: LeftPanelInsightsTab,
-    subTab: expandedSubTab,
-  });
+  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
+  const { openFlyout } = useFlyoutApi();
+  const openEntitiesFlyout = useCallback(
+    () =>
+      openFlyout(
+        {
+          main: {
+            id: DocumentDetailsInsightsPanelKey,
+            path: expandedTab,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId,
+              isChild: false,
+            },
+          },
+          child: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId,
+              isChild: true,
+            },
+          },
+        },
+        { mainSize: 'm' }
+      ),
+    [eventId, expandedTab, indexName, openFlyout, scopeId]
+  );
 
   const textDataTestSubj = useMemo(() => `${dataTestSubj}Text`, [dataTestSubj]);
   const loadingDataTestSubj = useMemo(() => `${dataTestSubj}Loading`, [dataTestSubj]);
@@ -82,7 +112,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
           <EuiBadge color="hollow">
             <EuiButtonEmpty
               aria-label={BUTTON}
-              onClick={onClick}
+              onClick={openEntitiesFlyout}
               flush={'both'}
               size="xs"
               data-test-subj={buttonDataTestSubj}
@@ -95,7 +125,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
         )}
       </>
     );
-  }, [dataTestSubj, onClick, value]);
+  }, [dataTestSubj, openEntitiesFlyout, value]);
 
   if (loading) {
     return (

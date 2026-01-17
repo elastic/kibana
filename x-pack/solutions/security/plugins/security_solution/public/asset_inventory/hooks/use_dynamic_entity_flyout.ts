@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
-  ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS,
   ASSET_INVENTORY_EXPAND_FLYOUT_ERROR,
+  ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../common/lib/kibana';
+import { useFlyoutApi } from '@kbn/flyout';
 import {
+  GenericEntityPanelKey,
   HostPanelKey,
   ServicePanelKey,
-  GenericEntityPanelKey,
   UserPanelKey,
 } from '../../flyout/entity_details/shared/constants';
-import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
+import { useKibana } from '../../common/lib/kibana';
 
 interface InventoryFlyoutProps {
   entityDocId?: string;
@@ -31,9 +30,8 @@ interface InventoryFlyoutProps {
 }
 
 export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () => void }) => {
-  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
+  const { openFlyout, closeFlyout } = useFlyoutApi();
   const { notifications } = useKibana().services;
-  useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
   const openDynamicFlyout = ({
     entityDocId,
@@ -63,23 +61,27 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     switch (entityType) {
       case 'user':
         openFlyout({
-          right: { id: UserPanelKey, params: { userName: entityName, scopeId, contextId } },
+          main: { id: UserPanelKey, params: { userName: entityName, scopeId, contextId } },
         });
         break;
       case 'host':
         openFlyout({
-          right: { id: HostPanelKey, params: { hostName: entityName, scopeId, contextId } },
+          main: { id: HostPanelKey, params: { hostName: entityName, scopeId, contextId } },
         });
         break;
       case 'service':
         openFlyout({
-          right: { id: ServicePanelKey, params: { serviceName: entityName, scopeId, contextId } },
+          main: {
+            id: ServicePanelKey,
+            params: { serviceName: entityName, scopeId, contextId },
+          },
         });
+
         break;
 
       default:
         openFlyout({
-          right: {
+          main: {
             id: GenericEntityPanelKey,
             params: {
               entityDocId,

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   GENERIC_ENTITY_FLYOUT_OPENED,
@@ -21,16 +21,12 @@ import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_ref
 import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../common/types';
-import {
-  EntityDetailsLeftPanelTab,
-  type EntityDetailsPath,
-} from '../shared/components/left_panel/left_panel_header';
+import { type EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
 import {
   useGetGenericEntity,
   type UseGetGenericEntityParams,
 } from './hooks/use_get_generic_entity';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import { GenericEntityFlyoutHeader } from './header';
 import { GenericEntityFlyoutContent } from './content';
@@ -56,7 +52,7 @@ export const isCommonError = (error: unknown): error is CommonError => {
 
 interface BaseGenericEntityPanelProps {
   scopeId: string;
-  isPreviewMode?: boolean;
+  isChild?: boolean;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
   isEngineMetadataExist?: boolean;
@@ -70,7 +66,7 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
 }
 
 export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
-  const { isPreviewMode, scopeId, isEngineMetadataExist } = params;
+  const { isChild, scopeId, isEngineMetadataExist } = params;
 
   // When you destructuring params in the function signature TypeScript loses track
   // of the union type constraints and infers them as potentially undefined
@@ -203,13 +199,6 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
 
   return (
     <>
-      <FlyoutNavigation
-        flyoutIsExpandable={true}
-        expandDetails={() =>
-          openGenericEntityDetailsPanelByPath({ tab: EntityDetailsLeftPanelTab.FIELDS_TABLE })
-        }
-        isPreviewMode={isPreviewMode}
-      />
       <GenericEntityFlyoutHeader entity={entity} source={source} />
       <GenericEntityFlyoutContent
         source={source}
@@ -220,7 +209,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
       />
       <GenericEntityFlyoutFooter
         scopeId={scopeId}
-        isPreviewMode={isPreviewMode ?? false}
+        isChild={isChild ?? false}
         entityId={entity.id}
         entityFields={fields}
         assetCriticalityLevel={assetCriticalityLevel}

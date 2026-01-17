@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
-import { useEuiTheme } from '@elastic/eui';
+import React, { memo } from 'react';
+import type { Action, Store } from 'redux';
 import type {
   FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
   FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
@@ -16,6 +15,21 @@ import type {
 } from '@kbn/cloud-security-posture';
 import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
 import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
+import type { FlyoutProps } from '@kbn/flyout';
+import { Flyout } from '@kbn/flyout';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { Provider as ReduxProvider } from 'react-redux';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import { HashRouter } from 'react-router-dom';
+import { InvestigationGuidePanel } from './document_details/investigation_guide';
+import { ResponsePanel } from './document_details/response';
+import { NotesPanel } from './document_details/notes';
+import { InsightsPanel } from './document_details/insights';
+import { getStore } from '../common/store';
+import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
+import { SessionViewMainPanel } from './document_details/session_view';
+import { AnalyzerMainPanel } from './document_details/analyzer';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
@@ -26,18 +40,22 @@ import { GenericEntityPanel } from './entity_details/generic_right';
 import type { EaseDetailsProps } from './ease/types';
 import { EaseDetailsProvider } from './ease/context';
 import { EasePanel } from './ease';
-import { SessionViewPanelProvider } from './document_details/session_view/context';
-import type { SessionViewPanelProps } from './document_details/session_view';
-import { SessionViewPanel } from './document_details/session_view';
+import { SessionViewPanelProvider } from './document_details/session_view_panels/context';
+import type { SessionViewPanelProps } from './document_details/session_view_panels';
+import { SessionViewPanel } from './document_details/session_view_panels';
 import type { NetworkExpandableFlyoutProps } from './network_details';
 import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
-import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
   DocumentDetailsAlertReasonPanelKey,
   DocumentDetailsAnalyzerPanelKey,
+  DocumentDetailsInsightsPanelKey,
+  DocumentDetailsInvestigationGuidePanelKey,
   DocumentDetailsIsolateHostPanelKey,
-  DocumentDetailsLeftPanelKey,
+  DocumentDetailsMainAnalyzerPanelKey,
+  DocumentDetailsMainSessionViewPanelKey,
+  DocumentDetailsNotesPanelKey,
   DocumentDetailsPreviewPanelKey,
+  DocumentDetailsResponsePanelKey,
   DocumentDetailsRightPanelKey,
   DocumentDetailsSessionViewPanelKey,
 } from './document_details/shared/constants/panel_keys';
@@ -47,8 +65,6 @@ import { IsolateHostPanelProvider } from './document_details/isolate_host/contex
 import type { DocumentDetailsProps } from './document_details/shared/types';
 import { DocumentDetailsProvider } from './document_details/shared/context';
 import { RightPanel } from './document_details/right';
-import { LeftPanel } from './document_details/left';
-import { PreviewPanel } from './document_details/preview';
 import type { AlertReasonPanelProps } from './document_details/alert_reason';
 import { AlertReasonPanel } from './document_details/alert_reason';
 import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
@@ -85,6 +101,12 @@ import {
   VulnerabilityFindingsPreviewPanelKey,
 } from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
+import { UpsellingProvider } from '../common/components/upselling_provider';
+import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
+import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
+import { AssistantProvider } from '../assistant/provider';
+import { CaseProvider } from '../cases/components/provider/provider';
+import { ConsoleManager } from '../management/components/console';
 import { AttackDetailsRightPanelKey } from './attack_details/constants/panel_keys';
 import type { AttackDetailsProps } from './attack_details/types';
 import { AttackDetailsProvider } from './attack_details/context';
@@ -101,272 +123,362 @@ const GraphGroupedNodePreviewPanel = React.lazy(() =>
 );
 
 /**
- * List of all panels that will be used within the document details expandable flyout.
- * This needs to be passed to the expandable flyout registeredPanels property.
- */
-const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels'] = [
-  {
-    key: DocumentDetailsRightPanelKey,
-    component: (props) => (
-      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
-        <RightPanel path={props.path as DocumentDetailsProps['path']} />
-      </DocumentDetailsProvider>
-    ),
-  },
-  {
-    key: DocumentDetailsLeftPanelKey,
-    component: (props) => (
-      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
-        <LeftPanel path={props.path as DocumentDetailsProps['path']} />
-      </DocumentDetailsProvider>
-    ),
-  },
-  {
-    key: DocumentDetailsPreviewPanelKey,
-    component: (props) => (
-      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
-        <PreviewPanel path={props.path as DocumentDetailsProps['path']} />
-      </DocumentDetailsProvider>
-    ),
-  },
-  {
-    key: DocumentDetailsAlertReasonPanelKey,
-    component: (props) => (
-      <AlertReasonPanelProvider {...(props as AlertReasonPanelProps).params}>
-        <AlertReasonPanel />
-      </AlertReasonPanelProvider>
-    ),
-  },
-  {
-    key: GraphGroupedNodePreviewPanelKey,
-    component: (props) => {
-      // TODO Fix typing issue here
-      const params = props.params as unknown as GraphGroupedNodePreviewPanelProps;
-      return <GraphGroupedNodePreviewPanel {...params} />;
-    },
-  },
-  {
-    key: RulePanelKey,
-    component: (props) => <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} />,
-  },
-  {
-    key: RulePreviewPanelKey,
-    component: (props) => (
-      <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} isPreviewMode />
-    ),
-  },
-  {
-    key: DocumentDetailsIsolateHostPanelKey,
-    component: (props) => (
-      <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
-        <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
-      </IsolateHostPanelProvider>
-    ),
-  },
-  {
-    key: DocumentDetailsAnalyzerPanelKey,
-    component: (props) => (
-      <AnalyzerPanel {...(props as AnalyzerPanelExpandableFlyoutProps).params} />
-    ),
-  },
-  {
-    key: DocumentDetailsSessionViewPanelKey,
-    component: (props) => (
-      <SessionViewPanelProvider {...(props as SessionViewPanelProps).params}>
-        <SessionViewPanel path={props.path as SessionViewPanelProps['path']} />
-      </SessionViewPanelProvider>
-    ),
-  },
-  {
-    key: UserPanelKey,
-    component: (props) => <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />,
-  },
-  {
-    key: UserDetailsPanelKey,
-    component: (props) => (
-      <UserDetailsPanel {...(props as UserDetailsExpandableFlyoutProps).params} />
-    ),
-  },
-  {
-    key: UserPreviewPanelKey,
-    component: (props) => (
-      <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} isPreviewMode />
-    ),
-  },
-  {
-    key: HostPanelKey,
-    component: (props) => <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} />,
-  },
-  {
-    key: HostDetailsPanelKey,
-    component: (props) => (
-      <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
-    ),
-  },
-  {
-    key: HostPreviewPanelKey,
-    component: (props) => (
-      <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} isPreviewMode />
-    ),
-  },
-  {
-    key: NetworkPanelKey,
-    component: (props) => <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />,
-  },
-  {
-    key: NetworkPreviewPanelKey,
-    component: (props) => (
-      <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode />
-    ),
-  },
-
-  {
-    key: ServicePanelKey,
-    component: (props) => <ServicePanel {...(props as ServicePanelExpandableFlyoutProps).params} />,
-  },
-  {
-    key: ServiceDetailsPanelKey,
-    component: (props) => (
-      <ServiceDetailsPanel {...(props as ServiceDetailsExpandableFlyoutProps).params} />
-    ),
-  },
-  {
-    key: GenericEntityPanelKey,
-    component: (props) => (
-      <GenericEntityPanel {...(props as GenericEntityPanelExpandableFlyoutProps).params} />
-    ),
-  },
-  {
-    key: GenericEntityDetailsPanelKey,
-    component: (props) => (
-      <GenericEntityDetailsPanel {...(props as GenericEntityDetailsExpandableFlyoutProps).params} />
-    ),
-  },
-  {
-    key: MisconfigurationFindingsPanelKey,
-    component: (props) => (
-      <FindingsMisconfigurationPanel
-        {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview).params}
-      />
-    ),
-  },
-  {
-    key: EasePanelKey,
-    component: (props) => (
-      <EaseDetailsProvider {...(props as EaseDetailsProps).params}>
-        <EasePanel />
-      </EaseDetailsProvider>
-    ),
-  },
-  {
-    key: AttackDetailsRightPanelKey,
-    component: (props) => (
-      <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
-        <AttackDetailsPanel path={props.path as AttackDetailsProps['path']} />
-      </AttackDetailsProvider>
-    ),
-  },
-  {
-    key: MisconfigurationFindingsPreviewPanelKey,
-    component: (props) => (
-      <FindingsMisconfigurationPanel
-        {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsPreview).params}
-      />
-    ),
-  },
-  {
-    key: VulnerabilityFindingsPanelKey,
-    component: (props) => (
-      <FindingsVulnerabilityPanel
-        {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview).params}
-      />
-    ),
-  },
-  {
-    key: VulnerabilityFindingsPreviewPanelKey,
-    component: (props) => (
-      <FindingsVulnerabilityPanel
-        {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsPreview).params}
-      />
-    ),
-  },
-  {
-    key: IOCRightPanelKey,
-    component: (props) => (
-      <IOCDetailsProvider {...(props as IOCDetailsProps).params}>
-        <IOCPanel path={props.path as IOCDetailsProps['path']} />
-      </IOCDetailsProvider>
-    ),
-  },
-];
-
-export const SECURITY_SOLUTION_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.securitySolution}`;
-export const TIMELINE_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.timeline}`;
-
-/**
  * Flyout used for the Security Solution application
  * We keep the default EUI 1001 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1002)
  * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-SecuritySolution'
  * This flyout support push/overlay mode. The value is saved in local storage.
  */
 export const SecuritySolutionFlyout = memo(() => {
-  const { euiTheme } = useEuiTheme();
+  const services = useKibana().services;
+  const { overlays, uiActions, upselling } = services;
+  const store = getStore() as Store<never, Action<never>>;
 
-  const onClose = useCallback(
-    () =>
-      window.dispatchEvent(
-        new CustomEvent(SECURITY_SOLUTION_ON_CLOSE_EVENT, {
-          detail: Flyouts.securitySolution,
-        })
+  // @ts-ignore
+  const FlyoutProviders = ({ children }) => (
+    <KibanaContextProvider services={services}>
+      <EuiThemeProvider>
+        <NavigationProvider core={services}>
+          <UpsellingProvider upsellingService={upselling}>
+            <ReduxProvider store={store}>
+              <ReactQueryClientProvider>
+                <CellActionsProvider
+                  getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                >
+                  <DiscoverInTimelineContextProvider>
+                    <AssistantProvider>
+                      <CaseProvider>
+                        <ConsoleManager>
+                          <HashRouter>{children}</HashRouter>
+                        </ConsoleManager>
+                      </CaseProvider>
+                    </AssistantProvider>
+                  </DiscoverInTimelineContextProvider>
+                </CellActionsProvider>
+              </ReactQueryClientProvider>
+            </ReduxProvider>
+          </UpsellingProvider>
+        </NavigationProvider>
+      </EuiThemeProvider>
+    </KibanaContextProvider>
+  );
+
+  const flyoutDocumentsPanels: FlyoutProps['registeredPanels'] = [
+    {
+      key: DocumentDetailsRightPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+            <RightPanel path={props.path as DocumentDetailsProps['path']} />
+          </DocumentDetailsProvider>
+        </FlyoutProviders>
       ),
-    []
-  );
+    },
+    {
+      key: DocumentDetailsPreviewPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+            <RightPanel path={props.path as DocumentDetailsProps['path']} />
+          </DocumentDetailsProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: DocumentDetailsAlertReasonPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <AlertReasonPanelProvider {...(props as AlertReasonPanelProps).params}>
+            <AlertReasonPanel />
+          </AlertReasonPanelProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: GraphGroupedNodePreviewPanelKey,
+      component: (props) => {
+        // TODO Fix typing issue here
+        const params = props.params as unknown as GraphGroupedNodePreviewPanelProps;
+        return (
+          <FlyoutProviders>
+            <GraphGroupedNodePreviewPanel {...params} />
+          </FlyoutProviders>
+        );
+      },
+    },
+    {
+      key: RulePanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: RulePreviewPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} isChild />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: DocumentDetailsIsolateHostPanelKey,
+      component: (props) => (
+        <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
+          <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
+        </IsolateHostPanelProvider>
+      ),
+    },
+    {
+      key: DocumentDetailsMainAnalyzerPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+            <AnalyzerMainPanel />
+          </DocumentDetailsProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: DocumentDetailsAnalyzerPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <AnalyzerPanel {...(props as AnalyzerPanelExpandableFlyoutProps).params} />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: DocumentDetailsMainSessionViewPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+            <SessionViewMainPanel path={props.path as DocumentDetailsProps['path']} />
+          </DocumentDetailsProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: DocumentDetailsSessionViewPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <SessionViewPanelProvider {...(props as SessionViewPanelProps).params}>
+            <SessionViewPanel path={props.path as SessionViewPanelProps['path']} />
+          </SessionViewPanelProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: DocumentDetailsInsightsPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+            <InsightsPanel path={props.path as DocumentDetailsProps['path']} />
+          </DocumentDetailsProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: DocumentDetailsNotesPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+            <NotesPanel />
+          </DocumentDetailsProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: DocumentDetailsResponsePanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+            <ResponsePanel />
+          </DocumentDetailsProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: DocumentDetailsInvestigationGuidePanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+            <InvestigationGuidePanel />
+          </DocumentDetailsProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: UserPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: UserDetailsPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <UserDetailsPanel {...(props as UserDetailsExpandableFlyoutProps).params} />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: UserPreviewPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} isChild />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: HostPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: HostDetailsPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: HostPreviewPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} isChild />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: NetworkPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: NetworkPreviewPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isChild />
+        </FlyoutProviders>
+      ),
+    },
 
-  return (
-    <ExpandableFlyout
-      registeredPanels={expandableFlyoutDocumentsPanels}
-      paddingSize="none"
-      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 1 }}
-      onClose={onClose}
-    />
-  );
+    {
+      key: ServicePanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <ServicePanel {...(props as ServicePanelExpandableFlyoutProps).params} />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: ServiceDetailsPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <ServiceDetailsPanel {...(props as ServiceDetailsExpandableFlyoutProps).params} />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: GenericEntityPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <GenericEntityPanel {...(props as GenericEntityPanelExpandableFlyoutProps).params} />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: GenericEntityDetailsPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <GenericEntityDetailsPanel
+            {...(props as GenericEntityDetailsExpandableFlyoutProps).params}
+          />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: MisconfigurationFindingsPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <FindingsMisconfigurationPanel
+            {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview).params}
+          />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: EasePanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <EaseDetailsProvider {...(props as EaseDetailsProps).params}>
+            <EasePanel />
+          </EaseDetailsProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: AttackDetailsRightPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
+            <AttackDetailsPanel path={props.path as AttackDetailsProps['path']} />
+          </AttackDetailsProvider>
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: MisconfigurationFindingsPreviewPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <FindingsMisconfigurationPanel
+            {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsPreview).params}
+          />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: VulnerabilityFindingsPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <FindingsVulnerabilityPanel
+            {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview).params}
+          />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: VulnerabilityFindingsPreviewPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <FindingsVulnerabilityPanel
+            {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsPreview).params}
+          />
+        </FlyoutProviders>
+      ),
+    },
+    {
+      key: IOCRightPanelKey,
+      component: (props) => (
+        <FlyoutProviders>
+          <IOCDetailsProvider {...(props as IOCDetailsProps).params}>
+            <IOCPanel path={props.path as IOCDetailsProps['path']} />
+          </IOCDetailsProvider>
+        </FlyoutProviders>
+      ),
+    },
+  ];
+
+  return <Flyout overlays={overlays} registeredPanels={flyoutDocumentsPanels} />;
 });
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
-
-/**
- * Flyout used in Timeline
- * We set the z-index to 1003 to ensure it is always rendered above Timeline (which has a z-index of 1002)
- * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-Timeline'
- * This flyout does not support push mode, because timeline being rendered in a modal (EUiPortal), it's very difficult to dynamically change its width.
- */
-export const TimelineFlyout = memo(() => {
-  const { euiTheme } = useEuiTheme();
-
-  const onClose = useCallback(
-    () =>
-      window.dispatchEvent(
-        new CustomEvent(TIMELINE_ON_CLOSE_EVENT, {
-          detail: Flyouts.timeline,
-        })
-      ),
-    []
-  );
-
-  return (
-    <ExpandableFlyout
-      registeredPanels={expandableFlyoutDocumentsPanels}
-      paddingSize="none"
-      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 3 }}
-      onClose={onClose}
-      flyoutCustomProps={{
-        pushVsOverlay: {
-          disabled: true,
-          tooltip: 'Push mode is not supported in Timeline',
-        },
-      }}
-    />
-  );
-});
-
-TimelineFlyout.displayName = 'TimelineFlyout';

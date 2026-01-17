@@ -19,7 +19,7 @@ interface FlyoutFooterProps extends React.ComponentProps<typeof EuiFlyoutFooter>
 export const FlyoutFooter: FC<FlyoutFooterProps> = memo(({ children, ...flyoutFooterProps }) => {
   return (
     <EuiFlyoutFooter {...flyoutFooterProps}>
-      <EuiPanel hasShadow={false} color="transparent">
+      <EuiPanel hasShadow={false} color="transparent" paddingSize="none">
         {children}
       </EuiPanel>
     </EuiFlyoutFooter>

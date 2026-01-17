@@ -8,11 +8,10 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useFlyoutApi } from '@kbn/flyout';
 import { getField } from '../../shared/utils';
 import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import {
@@ -22,7 +21,6 @@ import {
 } from './test_ids';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 export const ALERT_REASON_BANNER = {
   title: i18n.translate(
@@ -39,28 +37,27 @@ export const ALERT_REASON_BANNER = {
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.
  */
 export const Reason: FC = () => {
-  const { telemetry } = useKibana().services;
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, getFieldsData } =
     useDocumentDetailsContext();
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const alertReason = getField(getFieldsData(ALERT_REASON));
 
-  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const { openChildPanel } = useFlyoutApi();
   const openRulePreview = useCallback(() => {
-    openPreviewPanel({
-      id: DocumentDetailsAlertReasonPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-        banner: ALERT_REASON_BANNER,
+    openChildPanel(
+      {
+        id: DocumentDetailsAlertReasonPanelKey,
+        params: {
+          id: eventId,
+          indexName,
+          scopeId,
+          banner: ALERT_REASON_BANNER,
+          isChild: true,
+        },
       },
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: scopeId,
-      panel: 'preview',
-    });
-  }, [eventId, openPreviewPanel, indexName, scopeId, telemetry]);
+      's'
+    );
+  }, [eventId, openChildPanel, indexName, scopeId]);
 
   const viewPreview = useMemo(
     () => (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { css } from '@emotion/react';
@@ -118,6 +118,7 @@ export const TableTab = memo(() => {
     isRulePreview,
     eventId,
     investigationFields,
+    isChild,
   } = useDocumentDetailsContext();
   const { ruleId, isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
@@ -259,8 +260,9 @@ export const TableTab = memo(() => {
         ruleId,
         isRulePreview,
         onTogglePinned,
+        isChild,
       }),
-    [browserFields, eventId, scopeId, getLinkValue, ruleId, isRulePreview, onTogglePinned]
+    [browserFields, eventId, scopeId, getLinkValue, ruleId, isRulePreview, onTogglePinned, isChild]
   );
 
   const search = useMemo(() => {

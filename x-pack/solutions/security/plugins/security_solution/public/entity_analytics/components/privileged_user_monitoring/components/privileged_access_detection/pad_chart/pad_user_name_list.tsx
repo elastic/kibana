@@ -6,20 +6,20 @@
  */
 
 import React from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { padChartStyling } from './pad_chart_styling';
+import { useFlyoutApi } from '@kbn/flyout';
 import { UserPanelKey } from '../../../../../../flyout/entity_details/shared/constants';
+import { padChartStyling } from './pad_chart_styling';
 
 const PRIVILEGED_ACCESS_DETECTION_TABLE_ID = 'PadAnomalies-table';
 
 export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
   const openUserFlyout = (userName: string) => {
     openFlyout({
-      right: {
+      main: {
         id: UserPanelKey,
         params: {
           contextID: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,

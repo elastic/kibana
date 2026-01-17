@@ -73,7 +73,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
 
   return (
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
-      <EuiPanel color="transparent">
+      <EuiPanel color="transparent" paddingSize="none">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             {isAgentChatExperienceEnabled ? (

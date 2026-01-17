@@ -26,7 +26,7 @@ export const SessionPreviewContainer: FC = () => {
     scopeId,
     getFieldsData,
     isRulePreview,
-    isPreviewMode,
+    isChild,
     dataFormattedForFieldBrowser,
   } = useDocumentDetailsContext();
 
@@ -40,10 +40,10 @@ export const SessionPreviewContainer: FC = () => {
     indexName,
     isFlyoutOpen: true,
     scopeId,
-    isPreviewMode,
+    isChild,
   });
 
-  const iconType = useMemo(() => (!isPreviewMode ? 'arrowStart' : undefined), [isPreviewMode]);
+  const iconType = useMemo(() => (!isChild ? 'arrowStart' : undefined), [isChild]);
 
   // if the session view is not enabled or in rule preview mode, the navigation is not enabled
   const isNavigationEnabled = useMemo(

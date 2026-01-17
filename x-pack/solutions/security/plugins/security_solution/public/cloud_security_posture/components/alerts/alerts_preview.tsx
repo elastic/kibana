@@ -62,11 +62,11 @@ const AlertsCount = ({
 
 export const AlertsPreview = ({
   alertsData,
-  isPreviewMode,
+  isChild,
   openDetailsPanel,
 }: {
   alertsData: ParsedAlertsData;
-  isPreviewMode: boolean;
+  isChild: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -123,7 +123,7 @@ export const AlertsPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasNonClosedAlerts ? 'arrowStart' : '',
+        iconType: !isChild && hasNonClosedAlerts ? 'arrowStart' : '',
         title: (
           <EuiText
             size="xs"

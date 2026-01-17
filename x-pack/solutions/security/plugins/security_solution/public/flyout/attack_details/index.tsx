@@ -7,7 +7,6 @@
 import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { AttackDetailsProps } from './types';
-import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 
 import { PanelFooter } from './footer';
 import { PanelContent } from './content';
@@ -47,7 +46,6 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}

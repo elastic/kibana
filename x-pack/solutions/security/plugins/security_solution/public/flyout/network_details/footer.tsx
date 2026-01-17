@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import { PREVIEW_FOOTER_LINK_TEST_ID, PREVIEW_FOOTER_TEST_ID } from './test_ids';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { NetworkPanelKey } from '.';
@@ -33,20 +33,23 @@ export interface PreviewPanelFooterProps {
  * Footer at the bottom of preview panel with a link to open network details flyout
  */
 export const PreviewPanelFooter: FC<PreviewPanelFooterProps> = ({ ip, flowTarget, scopeId }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
-  const openNetworkFlyout = useCallback(() => {
-    openFlyout({
-      right: {
-        id: NetworkPanelKey,
-        params: {
-          ip,
-          flowTarget,
-          scopeId,
+  const openNetworkFlyout = useCallback(
+    () =>
+      openFlyout({
+        main: {
+          id: NetworkPanelKey,
+          params: {
+            ip,
+            flowTarget,
+            scopeId,
+            isChild: false,
+          },
         },
-      },
-    });
-  }, [openFlyout, flowTarget, ip, scopeId]);
+      }),
+    [ip, flowTarget, scopeId, openFlyout]
+  );
 
   const fullDetailsLink = useMemo(
     () => (
@@ -67,7 +70,7 @@ export const PreviewPanelFooter: FC<PreviewPanelFooterProps> = ({ ip, flowTarget
 
   return (
     <EuiFlyoutFooter data-test-subj={PREVIEW_FOOTER_TEST_ID}>
-      <EuiPanel color="transparent">
+      <EuiPanel color="transparent" paddingSize="none">
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>{fullDetailsLink}</EuiFlexItem>
         </EuiFlexGroup>

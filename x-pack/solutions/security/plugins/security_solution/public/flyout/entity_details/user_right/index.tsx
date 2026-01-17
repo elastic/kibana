@@ -6,16 +6,15 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { UserPreviewBanner } from '../user_preview/preview_banner';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { UsersType } from '../../../explore/users/store/model';
@@ -24,12 +23,10 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelFooter } from './footer';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { useObservedUser } from './hooks/use_observed_user';
-import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
@@ -41,7 +38,7 @@ export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   userName: string;
-  isPreviewMode: boolean;
+  isChild?: boolean;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -56,12 +53,7 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const UserPanel = ({
-  contextID,
-  scopeId,
-  userName,
-  isPreviewMode = false,
-}: UserPanelProps) => {
+export const UserPanel = ({ contextID, scopeId, userName, isChild }: UserPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
@@ -127,23 +119,8 @@ export const UserPanel = ({
     isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
-    isPreviewMode,
+    isChild,
   });
-
-  const openPanelFirstTab = useCallback(
-    () =>
-      openDetailsPanel({
-        tab: isRiskScoreExist
-          ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      }),
-    [isRiskScoreExist, openDetailsPanel]
-  );
-
-  const hasUserDetailsData =
-    !!userRiskData?.user.risk ||
-    !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
-    !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
   if (observedUser.isLoading) {
     return <FlyoutLoading />;
@@ -167,14 +144,7 @@ export const UserPanel = ({
         };
         return (
           <>
-            <FlyoutNavigation
-              flyoutIsExpandable={
-                hasUserDetailsData || hasMisconfigurationFindings || hasNonClosedAlerts
-              }
-              expandDetails={openPanelFirstTab}
-              isPreviewMode={isPreviewMode}
-              isRulePreview={scopeId === TableId.rulePreview}
-            />
+            {isChild && <UserPreviewBanner />}
             <UserPanelHeader
               userName={userName}
               observedUser={observedUserWithAnomalies}
@@ -189,10 +159,10 @@ export const UserPanel = ({
               contextID={contextID}
               scopeId={scopeId}
               openDetailsPanel={openDetailsPanel}
-              isPreviewMode={isPreviewMode}
+              isChild={Boolean(isChild)}
             />
-            {!isPreviewMode && assetInventoryEnabled && <UserPanelFooter userName={userName} />}
-            {isPreviewMode && (
+            {!isChild && assetInventoryEnabled && <UserPanelFooter userName={userName} />}
+            {isChild && (
               <UserPreviewPanelFooter userName={userName} contextID={contextID} scopeId={scopeId} />
             )}
           </>

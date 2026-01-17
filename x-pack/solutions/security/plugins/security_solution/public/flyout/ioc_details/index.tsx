@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIOCDetailsContext } from './context';
-import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 import type { IOCDetailsProps } from './types';
 import { IOCRightPanelKey } from './constants/panel_keys';
 import { useTabs } from './hooks/use_tabs';
@@ -52,7 +51,6 @@ export const IOCPanel: FC<Partial<IOCDetailsProps>> = memo(({ path }) => {
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
       <PanelHeader
         tabs={tabsDisplayed}
         selectedTabId={selectedTabId}

@@ -11,18 +11,17 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useFlyoutApi } from '@kbn/flyout';
 import { PageScope } from '../../../../../data_view_manager/constants';
+import {
+  DocumentDetailsNotesPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
-import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-} from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
@@ -36,8 +35,6 @@ import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
-import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
-import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
 interface PinnedFilter {
@@ -76,8 +73,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
    *
    */
   const [pageIndex, setPageIndex] = useState(0);
-
-  const { telemetry } = useKibana().services;
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -202,7 +197,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
    */
   const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
@@ -211,36 +206,29 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       }
 
       const indexName = selectedPatterns.join(',');
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
+      openFlyout(
+        {
+          main: {
+            id: DocumentDetailsNotesPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+          child: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
           },
         },
-        left: {
-          id: DocumentDetailsLeftPanelKey,
-          path: {
-            tab: LeftPanelNotesTab,
-          },
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
-          },
-        },
-      });
-      telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
-        location: timelineId,
-      });
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-        location: timelineId,
-        panel: 'left',
-      });
+        { mainSize: 'm' }
+      );
     },
-    [openFlyout, selectedPatterns, telemetry, timelineId]
+    [selectedPatterns, timelineId, openFlyout]
   );
 
   const leadingControlColumns = useTimelineControlColumn({

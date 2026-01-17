@@ -18,7 +18,8 @@ import { PreviewLink } from '../../../../shared/components/preview_link';
 export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,
   scopeId: string,
-  data: T
+  data: T,
+  isChild: boolean
 ): EntityTableColumns<T> => [
   {
     name: (
@@ -54,7 +55,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
       if (field) {
         const showPreviewLink = values && isFlyoutLink({ field, scopeId });
         const renderPreviewLink = (value: string) => (
-          <PreviewLink field={field} value={value} scopeId={scopeId} />
+          <PreviewLink field={field} value={value} scopeId={scopeId} isChild={isChild} />
         );
         return (
           <DefaultFieldRenderer

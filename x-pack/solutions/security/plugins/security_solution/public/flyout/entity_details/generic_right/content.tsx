@@ -105,7 +105,7 @@ export const GenericEntityFlyoutContent = ({
       <EntityInsight
         field={insightsField}
         value={insightsValue}
-        isPreviewMode={false}
+        isChild={false}
         openDetailsPanel={openGenericEntityDetailsPanelByPath}
       />
       <ExpandableSection

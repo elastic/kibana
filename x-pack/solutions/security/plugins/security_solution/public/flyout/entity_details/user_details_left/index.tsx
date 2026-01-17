@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useTabs } from './tabs';
 import type {
@@ -25,7 +25,7 @@ interface UserParam {
 export interface UserDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
   user: UserParam;
-  path?: PanelPath;
+  path?: string;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasNonClosedAlerts?: boolean;
@@ -59,7 +59,6 @@ export const UserDetailsPanel = ({
     user,
     tabs,
     path,
-    scopeId,
     hasMisconfigurationFindings,
     hasNonClosedAlerts
   );
@@ -84,22 +83,21 @@ const useSelectedTab = (
   isRiskScoreExist: boolean,
   user: UserParam,
   tabs: LeftPanelTabsType,
-  path: PanelPath | undefined,
-  scopeId: string,
+  path: string | undefined,
   hasMisconfigurationFindings?: boolean,
   hasNonClosedAlerts?: boolean
 ) => {
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openChildPanel } = useFlyoutApi();
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabs.length > 0 ? tabs[0].id : undefined;
     if (!path) return defaultTab;
 
-    return tabs.find((tab) => tab.id === path.tab)?.id ?? defaultTab;
+    return tabs.find((tab) => tab.id === path)?.id ?? defaultTab;
   }, [path, tabs]);
 
   const setSelectedTabId = (tabId: EntityDetailsLeftPanelTab) => {
-    openLeftPanel({
+    openChildPanel({
       id: UserDetailsPanelKey,
       params: {
         user,
@@ -109,7 +107,7 @@ const useSelectedTab = (
         path: {
           tab: tabId,
         },
-        scopeId,
+        isChild: true,
       },
     });
   };

@@ -6,6 +6,7 @@
  */
 
 import { EuiHorizontalRule } from '@elastic/eui';
+
 import React from 'react';
 import type { ServiceItem } from '../../../../common/search_strategy';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -30,6 +31,7 @@ interface ServicePanelContentProps {
   scopeId: string;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  isChild: boolean;
 }
 
 export const ServicePanelContent = ({
@@ -41,6 +43,7 @@ export const ServicePanelContent = ({
   scopeId,
   openDetailsPanel,
   onAssetCriticalityChange,
+  isChild,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
 
@@ -53,7 +56,7 @@ export const ServicePanelContent = ({
             recalculatingScore={recalculatingScore}
             queryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
-            isPreviewMode={false}
+            isChild={isChild}
             entityType={EntityType.service}
           />
           <EuiHorizontalRule />
@@ -69,6 +72,7 @@ export const ServicePanelContent = ({
         scopeId={scopeId}
         observedFields={observedFields}
         queryId={OBSERVED_SERVICE_QUERY_ID}
+        isChild={isChild}
       />
       <EuiHorizontalRule margin="m" />
     </FlyoutBody>

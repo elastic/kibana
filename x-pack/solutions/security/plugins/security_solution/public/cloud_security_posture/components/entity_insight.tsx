@@ -32,12 +32,12 @@ export type CloudPostureEntityIdentifier =
 export const EntityInsight = <T,>({
   value,
   field,
-  isPreviewMode,
+  isChild,
   openDetailsPanel,
 }: {
   value: string;
   field: CloudPostureEntityIdentifier;
-  isPreviewMode: boolean;
+  isChild: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -67,7 +67,7 @@ export const EntityInsight = <T,>({
       <>
         <AlertsPreview
           alertsData={filteredAlertsData}
-          isPreviewMode={isPreviewMode}
+          isChild={isChild}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />
@@ -81,7 +81,7 @@ export const EntityInsight = <T,>({
         <MisconfigurationsPreview
           value={value}
           field={field}
-          isPreviewMode={isPreviewMode}
+          isChild={isChild}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />
@@ -93,7 +93,7 @@ export const EntityInsight = <T,>({
         <VulnerabilitiesPreview
           value={value}
           field={field}
-          isPreviewMode={isPreviewMode}
+          isChild={isChild}
           openDetailsPanel={openDetailsPanel}
         />
         <EuiSpacer size="s" />

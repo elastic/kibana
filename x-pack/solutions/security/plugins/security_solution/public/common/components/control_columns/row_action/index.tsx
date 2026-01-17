@@ -7,11 +7,9 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
-import { useKibana } from '../../../lib/kibana';
+import { useFlyoutApi } from '@kbn/flyout';
 import {
-  DocumentDetailsLeftPanelKey,
+  DocumentDetailsNotesPanelKey,
   DocumentDetailsRightPanelKey,
 } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
@@ -21,7 +19,6 @@ import type {
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
 
@@ -68,8 +65,7 @@ const RowActionComponent = ({
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
-  const { telemetry } = useKibana().services;
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout, openMainPanel } = useFlyoutApi();
 
   const columnValues = useMemo(
     () =>
@@ -93,8 +89,8 @@ const RowActionComponent = ({
   const showNotes = canReadNotes;
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    openFlyout({
-      right: {
+    openMainPanel(
+      {
         id: DocumentDetailsRightPanelKey,
         params: {
           id: eventId,
@@ -102,43 +98,33 @@ const RowActionComponent = ({
           scopeId: tableId,
         },
       },
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: tableId,
-      panel: 'right',
-    });
-  }, [eventId, indexName, tableId, openFlyout, telemetry]);
+      's'
+    );
+  }, [eventId, indexName, tableId, openMainPanel]);
 
   const toggleShowNotes = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
+    openFlyout(
+      {
+        main: {
+          id: DocumentDetailsNotesPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
+        },
+        child: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
         },
       },
-      left: {
-        id: DocumentDetailsLeftPanelKey,
-        path: {
-          tab: LeftPanelNotesTab,
-        },
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
-        },
-      },
-    });
-    telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
-      location: tableId,
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: tableId,
-      panel: 'left',
-    });
-  }, [eventId, indexName, openFlyout, tableId, telemetry]);
+      { mainSize: 'm' }
+    );
+  }, [eventId, indexName, openFlyout, tableId]);
 
   const Action = controlColumn.rowCellRender;
 

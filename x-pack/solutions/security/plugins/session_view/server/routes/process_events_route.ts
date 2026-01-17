@@ -7,25 +7,19 @@
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import _ from 'lodash';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter, Logger } from '@kbn/core/server';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import type { SearchHit } from '@kbn/es-types';
 import {
   ALERTS_PER_PROCESS_EVENTS_PAGE,
-  PROCESS_EVENTS_ROUTE,
-  PROCESS_EVENTS_PER_PAGE,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
-  TIMESTAMP_PROPERTY,
   PROCESS_EVENT_FIELDS,
-  EVENT_ACTION_EXECUTED,
-  EVENT_ACTION_END,
-  EVENT_ACTION_EXEC,
-  EVENT_ACTION_FORK,
+  PROCESS_EVENTS_PER_PAGE,
+  PROCESS_EVENTS_ROUTE,
+  TIMESTAMP_PROPERTY,
 } from '../../common/constants';
 import type { ProcessEvent } from '../../common';
 import { searchAlerts } from './alerts_route';
@@ -119,16 +113,6 @@ export const fetchEventsAndScopedAlerts = async (
       bool: {
         must: [
           { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-          {
-            bool: {
-              should: [
-                { term: { [EVENT_ACTION]: EVENT_ACTION_FORK } },
-                { term: { [EVENT_ACTION]: EVENT_ACTION_EXEC } },
-                { term: { [EVENT_ACTION]: EVENT_ACTION_EXECUTED } },
-                { term: { [EVENT_ACTION]: EVENT_ACTION_END } },
-              ],
-            },
-          },
           {
             range: {
               // optimization to prevent data before this session from being hit.

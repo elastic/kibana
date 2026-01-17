@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiIcon, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
@@ -24,13 +24,13 @@ import type {
   MultiValueCellAction,
 } from '@kbn/cloud-security-posture';
 import {
-  getVulnerabilityStats,
-  CVSScoreBadge,
-  SeverityStatusBadge,
-  getNormalizedSeverity,
   ActionableBadge,
-  MultiValueCellPopover,
+  CVSScoreBadge,
   findReferenceLink,
+  getNormalizedSeverity,
+  getVulnerabilityStats,
+  MultiValueCellPopover,
+  SeverityStatusBadge,
 } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS,
@@ -242,7 +242,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
                   packageVersion: finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION],
                   eventId: finding?.event?.id,
                   scopeId,
-                  isPreviewMode: true,
+                  isChild: true,
                   banner: {
                     title: i18n.translate(
                       'xpack.securitySolution.flyout.right.vulnerabilityFinding.PreviewTitle',
@@ -253,6 +253,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
                     backgroundColor: 'warning',
                     textColor: 'warning',
                   },
+                  isPreviewMode: true,
                 },
               };
 

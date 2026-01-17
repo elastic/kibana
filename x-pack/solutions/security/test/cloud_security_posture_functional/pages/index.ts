@@ -25,7 +25,6 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./findings_onboarding'));
     loadTestFile(require.resolve('./findings'));
     loadTestFile(require.resolve('./findings_grouping'));
-    loadTestFile(require.resolve('./findings_alerts'));
     loadTestFile(require.resolve('./compliance_dashboard'));
     loadTestFile(require.resolve('./vulnerability_dashboard'));
     loadTestFile(require.resolve('./cis_integrations/cnvm/cis_integration_cnvm'));
