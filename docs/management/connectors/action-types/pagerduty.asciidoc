@@ -58,7 +58,7 @@ Rule recovery actions also support all types.
 [[pagerduty-action-acknowledge]]
 ==== Acknowledge action
 
-When you test the acknowlege action, you must provide the de-duplication key for a PagerDuty alert:
+When you test the acknowledge action, you must provide the de-duplication key for a PagerDuty alert:
 
 [role="screenshot"]
 image::management/connectors/images/pagerduty-acknowledge-test.png[PagerDuty params test]
