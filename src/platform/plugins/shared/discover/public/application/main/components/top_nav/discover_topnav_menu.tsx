@@ -66,7 +66,7 @@ export const DiscoverTopNavMenu = ({
   }, [topNavMenu, topNavMenu$]);
 
   /**
-   * Render app menu for SingleTabView when customizations exist
+   * Render app menu for SingleTabView when customizations exist.
    */
   if (!topNavCustomization) {
     return null;

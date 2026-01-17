@@ -351,7 +351,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   `;
 
   const tabsBarComponentCss = css`
-    min-width: 0; /* without this, TabsBar would push out AppMenu */
+    min-width: 0; /* Fixes an issue causing TabsBar to push appendRight to overflow as number of tabs grows */
   `;
 
   const appendRightContainerCss = css`

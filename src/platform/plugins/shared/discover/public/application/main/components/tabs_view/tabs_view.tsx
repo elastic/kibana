@@ -84,18 +84,18 @@ export const TabsView = (props: SingleTabViewProps) => {
 
   return (
     /**
-     * AppMenuComponent handles responsiveness on its own, however, there are some edge cases
-     * e.g opening push flyout, where this might not be good enough.
-     * Wrapping the whole tabs view in a resize observer ensures that the tabs view is always aware of the available width and can adjust the app menu accordingly.
+     * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
+     * where this might not be good enough.
      */
     <EuiResizeObserver onResize={onResize}>
       {(resizeRef) => (
         <div
           ref={resizeRef}
+          /** EuiResizeObserver requires the ref container to have defined dimensions. */
           css={css`
             height: 100%;
             width: 100%;
-          `} // EuiResizeObserver requires the ref container to have dimensions
+          `}
         >
           <UnifiedTabs
             services={services}

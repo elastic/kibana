@@ -47,9 +47,7 @@ export class AppMenuRegistry {
     const parent = this.items.get(parentId);
     this.items.set(parentId, {
       ...parent,
-      items: [...(parent?.items || []), popoverItem].sort(
-        (a, b) => (a.order || 0) - (b.order || 0)
-      ),
+      items: [...(parent?.items || []), popoverItem],
     } as DiscoverAppMenuItemType & { isCustom?: boolean });
   }
 
@@ -94,9 +92,7 @@ export class AppMenuRegistry {
     const parent = this.items.get(parentId);
     this.items.set(parentId, {
       ...parent,
-      items: [...(parent?.items || []), popoverItem].sort(
-        (a, b) => (a.order || 0) - (b.order || 0)
-      ),
+      items: [...(parent?.items || []), popoverItem],
     } as DiscoverAppMenuItemType);
   }
 
@@ -111,11 +107,10 @@ export class AppMenuRegistry {
       .filter((item) => item.isCustom)
       .slice(0, AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
 
-    // Remove isCustom flag before returning
     const cleanItems = [...regularItems, ...customItems].map(({ isCustom, ...item }) => item);
 
     return {
-      items: cleanItems.sort((a, b) => (a.order || 0) - (b.order || 0)) as AppMenuItemType[],
+      items: cleanItems as AppMenuItemType[],
       primaryActionItem: this.primaryActionItem as AppMenuPrimaryActionItem | undefined,
       secondaryActionItem: this.secondaryActionItem as AppMenuSecondaryActionItem | undefined,
     };

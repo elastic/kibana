@@ -65,7 +65,6 @@ describe('run app menu actions', () => {
       });
 
       expect(mockRun).toHaveBeenCalled();
-      // No container should be added to body
       expect(document.body.querySelectorAll('div').length).toBe(0);
     });
 
@@ -100,15 +99,12 @@ describe('run app menu actions', () => {
       expect(capturedParams).toBeDefined();
       expect(capturedParams?.context.onFinishAction).toBeDefined();
 
-      // Container should be added
       const containers = document.body.querySelectorAll('div');
       expect(containers.length).toBeGreaterThan(0);
 
-      // Call onFinishAction to cleanup
       const onFinishAction = capturedParams?.context?.onFinishAction;
       onFinishAction!();
 
-      // Container should be removed (anchorElement still in DOM)
       expect(document.body.querySelectorAll('div').length).toBe(1);
       expect(focusSpy).toHaveBeenCalled();
     });
@@ -154,7 +150,6 @@ describe('run app menu actions', () => {
       const triggerElement = document.createElement('div');
       enhanced.run?.({ triggerElement, context: { onFinishAction: jest.fn() } });
 
-      // Wait for async execution
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(mockRun).toHaveBeenCalled();

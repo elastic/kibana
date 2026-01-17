@@ -175,7 +175,6 @@ describe('useTopNavLinks', () => {
       expect(exportItem).toBeDefined();
       expect(exportItem?.label).toBe('Export');
 
-      // Export should have popover items
       expect((exportItem as DiscoverAppMenuItemType)?.items).toBeDefined();
       expect((exportItem as DiscoverAppMenuItemType)?.items?.length).toBeGreaterThan(0);
 

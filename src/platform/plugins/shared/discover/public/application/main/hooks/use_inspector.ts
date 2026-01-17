@@ -68,7 +68,6 @@ export function useInspector({
 
       setInspectorSession(session);
 
-      // Call onClose when inspector closes
       if (onClose) {
         session?.onClose.then(() => {
           onClose();

@@ -28,7 +28,6 @@ export const getNewSearchAppMenuItem = ({
     testId: 'discoverNewButton',
     run: () => {
       onNewSearch();
-      // New App Menu doesn't support running onClick when href is provided, so we need to handle navigation here
       onNavigate();
     },
   };
