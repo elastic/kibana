@@ -33,6 +33,23 @@ const entityStoreGetSchema = z.object({
 export const SECURITY_ENTITY_STORE_GET_TOOL_ID = securityTool('entity_store_get');
 
 /**
+ * Calculates the duration between two dates in a human-readable format
+ */
+const calculateDuration = (startDate: string, endDate: string): string => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffMs = end.getTime() - start.getTime();
+
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+  if (days > 0) {
+    return `${days} day${days > 1 ? 's' : ''} ${hours} hour${hours > 1 ? 's' : ''}`;
+  }
+  return `${hours} hour${hours > 1 ? 's' : ''}`;
+};
+
+/**
  * Gets a single entity from the entity store by its identifier
  */
 const getEntity = async ({
@@ -91,20 +108,24 @@ export const entityStoreGetTool = (
   return {
     id: SECURITY_ENTITY_STORE_GET_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieve detailed information about a specific entity from the Entity Store. Use this tool when you need comprehensive profile data about a known entity (host, user, or service).
+    description: `Retrieve detailed information about a specific entity from the Entity Store, including profile data and activity timeline. Use this tool when you need comprehensive information about a known entity (host, user, or service).
 
 Returns all available information including:
 - Entity identity (name, ID, type)
 - Risk score and level
 - Asset criticality
-- Lifecycle data (first seen, last activity)
+- Lifecycle data with timeline (first seen, last activity, activity duration, days since first seen/last activity)
 - Attributes (privileged, managed, MFA enabled)
-- Behaviors (brute force victim, new country login, USB device usage)
+- Behaviors with active behaviors list (brute force victim, new country login, USB device usage), anomaly job IDs from ML jobs, and rule names from security rules
 - Relationships (what the entity communicates with, depends on, etc.)
 
 ${RISK_SCORE_INSTRUCTION}
 
-Use this tool for questions like "What do we know about user jsmith?" or "Show me the profile for host server-01".`,
+Use this tool for questions like:
+- "What do we know about user jsmith?"
+- "Show me the profile for host server-01"
+- "When was this user first seen?"
+- "How long has this entity been active?"`,
     schema: entityStoreGetSchema,
     availability: {
       cacheMode: 'space',
@@ -185,6 +206,10 @@ Use this tool for questions like "What do we know about user jsmith?" or "Show m
         const relationshipsData = entityData?.relationships as Record<string, unknown> | undefined;
         const assetData = entity.asset as Record<string, unknown> | undefined;
 
+        // Extract lifecycle dates for timeline calculations
+        const firstSeen = lifecycleData?.First_seen as string | undefined;
+        const lastActivity = lifecycleData?.Last_activity as string | undefined;
+
         const formattedEntity = {
           // Identity
           entity_id: entityData?.id,
@@ -198,29 +223,84 @@ Use this tool for questions like "What do we know about user jsmith?" or "Show m
             ? {
                 calculated_score_norm: riskData.calculated_score_norm,
                 calculated_level: riskData.calculated_level,
-                calculated_score: riskData.calculated_score,
               }
             : null,
 
           // Asset criticality
           asset_criticality: assetData?.criticality ?? null,
 
-          // Lifecycle information
-          lifecycle: lifecycleData
+          // Lifecycle information with timeline calculations
+          lifecycle: {
+            first_seen: firstSeen ?? null,
+            last_activity: lastActivity ?? null,
+            activity_duration:
+              firstSeen && lastActivity ? calculateDuration(firstSeen, lastActivity) : null,
+            days_since_first_seen: firstSeen
+              ? Math.floor((Date.now() - new Date(firstSeen).getTime()) / (1000 * 60 * 60 * 24))
+              : null,
+            days_since_last_activity: lastActivity
+              ? Math.floor((Date.now() - new Date(lastActivity).getTime()) / (1000 * 60 * 60 * 24))
+              : null,
+          },
+
+          // Attributes with explicit fields
+          attributes: attributesData
             ? {
-                first_seen: lifecycleData.First_seen,
-                last_activity: lifecycleData.Last_activity,
+                privileged: attributesData.Privileged ?? false,
+                managed: attributesData.Managed ?? false,
+                mfa_enabled: attributesData.Mfa_enabled ?? false,
               }
-            : null,
+            : {
+                privileged: false,
+                managed: false,
+                mfa_enabled: false,
+              },
 
-          // Attributes
-          attributes: attributesData ?? {},
+          // Behaviors with explicit fields and active behaviors list
+          behaviors: behaviorsData
+            ? {
+                brute_force_victim: behaviorsData.Brute_force_victim ?? false,
+                new_country_login: behaviorsData.New_country_login ?? false,
+                used_usb_device: behaviorsData.Used_usb_device ?? false,
+                anomaly_job_ids: (behaviorsData.Anomaly_job_ids as string[] | undefined) ?? [],
+                rule_names: (behaviorsData.Rule_names as string[] | undefined) ?? [],
+                active_behaviors: Object.entries(behaviorsData)
+                  .filter(([, value]) => value === true)
+                  .map(([key]) => key.replace(/_/g, ' ').toLowerCase()),
+              }
+            : {
+                brute_force_victim: false,
+                new_country_login: false,
+                used_usb_device: false,
+                anomaly_job_ids: [],
+                rule_names: [],
+                active_behaviors: [],
+              },
 
-          // Behaviors
-          behaviors: behaviorsData ?? {},
-
-          // Relationships
-          relationships: relationshipsData ?? {},
+          // Relationships with explicit fields for better LLM comprehension
+          relationships: relationshipsData
+            ? {
+                communicates_with: relationshipsData.Communicates_with ?? [],
+                depends_on: relationshipsData.Depends_on ?? [],
+                dependent_of: relationshipsData.Dependent_of ?? [],
+                owned_by: relationshipsData.Owned_by ?? [],
+                owns: relationshipsData.Owns ?? [],
+                accesses_frequently: relationshipsData.Accesses_frequently ?? [],
+                accessed_frequently_by: relationshipsData.Accessed_frequently_by ?? [],
+                supervises: relationshipsData.Supervises ?? [],
+                supervised_by: relationshipsData.Supervised_by ?? [],
+              }
+            : {
+                communicates_with: [],
+                depends_on: [],
+                dependent_of: [],
+                owned_by: [],
+                owns: [],
+                accesses_frequently: [],
+                accessed_frequently_by: [],
+                supervises: [],
+                supervised_by: [],
+              },
 
           // Type-specific identity fields
           ...(entity.host ? { host: entity.host } : {}),
@@ -270,6 +350,6 @@ Use this tool for questions like "What do we know about user jsmith?" or "Show m
         };
       }
     },
-    tags: ['security', 'entity-store', 'entities', 'profile'],
+    tags: ['security', 'entity-store', 'entities', 'profile', 'timeline', 'activity'],
   };
 };

@@ -73,6 +73,8 @@ describe('entityStoreSearchTool', () => {
           brute_force_victim: true,
           new_country_login: false,
           used_usb_device: true,
+          anomaly_job_ids: ['auth_high_failed_logon', 'high_auth_count'],
+          rule_names: ['Brute Force Victim'],
         },
         sortBy: 'risk_score',
         sortOrder: 'desc',
@@ -481,6 +483,49 @@ describe('entityStoreSearchTool', () => {
                 { term: { 'entity.behaviors.Brute_force_victim': true } },
                 { term: { 'entity.behaviors.New_country_login': false } },
                 { term: { 'entity.behaviors.Used_usb_device': true } },
+              ]),
+            },
+          },
+        })
+      );
+    });
+
+    it('filters by anomaly_job_ids and rule_names', async () => {
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          hits: [{ _id: 'entity-1', _index: 'test-index', _source: createMockEntity() }],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      await tool.handler(
+        {
+          entityTypes: ['user'],
+          behaviors: {
+            anomaly_job_ids: ['auth_high_failed_logon', 'high_auth_count'],
+            rule_names: ['Brute Force Victim'],
+          },
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: expect.arrayContaining([
+                {
+                  terms: {
+                    'entity.behaviors.Anomaly_job_ids': [
+                      'auth_high_failed_logon',
+                      'high_auth_count',
+                    ],
+                  },
+                },
+                { terms: { 'entity.behaviors.Rule_names': ['Brute Force Victim'] } },
               ]),
             },
           },

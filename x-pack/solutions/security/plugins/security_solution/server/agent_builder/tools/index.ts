@@ -20,10 +20,6 @@ export {
 } from './entity_store_search_tool';
 export { entityStoreGetTool, SECURITY_ENTITY_STORE_GET_TOOL_ID } from './entity_store_get_tool';
 export {
-  entityStoreTimelineTool,
-  SECURITY_ENTITY_STORE_TIMELINE_TOOL_ID,
-} from './entity_store_timeline_tool';
-export {
   entityStoreSnapshotTool,
   SECURITY_ENTITY_STORE_SNAPSHOT_TOOL_ID,
 } from './entity_store_snapshot_tool';

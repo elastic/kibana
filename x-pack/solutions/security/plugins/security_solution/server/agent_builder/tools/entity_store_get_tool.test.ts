@@ -30,7 +30,14 @@ describe('entityStoreGetTool', () => {
     });
 
     it('has correct tags', () => {
-      expect(tool.tags).toEqual(['security', 'entity-store', 'entities', 'profile']);
+      expect(tool.tags).toEqual([
+        'security',
+        'entity-store',
+        'entities',
+        'profile',
+        'timeline',
+        'activity',
+      ]);
     });
   });
 
@@ -172,7 +179,9 @@ describe('entityStoreGetTool', () => {
         sub_type: 'server',
         source: 'entity-store',
         lifecycle: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           First_seen: '2024-01-01T00:00:00Z',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           Last_activity: '2024-01-15T10:00:00Z',
         },
         attributes: {
@@ -180,10 +189,13 @@ describe('entityStoreGetTool', () => {
           Managed: true,
         },
         behaviors: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           Brute_force_victim: false,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           New_country_login: false,
         },
         relationships: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           Communicates_with: ['service-api'],
         },
       },
@@ -399,7 +411,7 @@ describe('entityStoreGetTool', () => {
       expect(errorResult.data.message).toContain('nonexistent-host');
     });
 
-    it('includes lifecycle data when present', async () => {
+    it('includes lifecycle data with timeline calculations when present', async () => {
       mockEsClient.asCurrentUser.search.mockResolvedValue({
         took: 1,
         timed_out: false,
@@ -417,13 +429,96 @@ describe('entityStoreGetTool', () => {
 
       const otherResult = result.results[0] as OtherResult;
       const entity = (otherResult.data as { entity: Record<string, unknown> }).entity;
-      expect(entity.lifecycle).toEqual({
-        first_seen: '2024-01-01T00:00:00Z',
-        last_activity: '2024-01-15T10:00:00Z',
+      const lifecycle = entity.lifecycle as Record<string, unknown>;
+
+      expect(lifecycle.first_seen).toBe('2024-01-01T00:00:00Z');
+      expect(lifecycle.last_activity).toBe('2024-01-15T10:00:00Z');
+      expect(lifecycle.activity_duration).toBe('14 days 10 hours');
+      expect(typeof lifecycle.days_since_first_seen).toBe('number');
+      expect(typeof lifecycle.days_since_last_activity).toBe('number');
+    });
+
+    it('includes attributes and behaviors with active_behaviors list when present', async () => {
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          hits: [{ _id: 'entity-1', _index: 'test-index', _source: mockHostEntity }],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      const result = (await tool.handler(
+        { entityType: 'host', identifier: 'server-01' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const otherResult = result.results[0] as OtherResult;
+      const entity = (otherResult.data as { entity: Record<string, unknown> }).entity;
+      expect(entity.attributes).toEqual({
+        privileged: false,
+        managed: true,
+        mfa_enabled: false,
+      });
+      expect(entity.behaviors).toEqual({
+        brute_force_victim: false,
+        new_country_login: false,
+        used_usb_device: false,
+        anomaly_job_ids: [],
+        rule_names: [],
+        active_behaviors: [],
       });
     });
 
-    it('includes attributes and behaviors when present', async () => {
+    it('includes active_behaviors list when behaviors are true', async () => {
+      const mockEntityWithActiveBehaviors = {
+        ...mockHostEntity,
+        entity: {
+          ...mockHostEntity.entity,
+          behaviors: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            Brute_force_victim: true,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            New_country_login: true,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            Used_usb_device: false,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            Anomaly_job_ids: ['auth_high_failed_logon', 'high_auth_count'],
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            Rule_names: ['Brute Force Victim'],
+          },
+        },
+      };
+
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          hits: [{ _id: 'entity-1', _index: 'test-index', _source: mockEntityWithActiveBehaviors }],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      const result = (await tool.handler(
+        { entityType: 'host', identifier: 'server-01' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const otherResult = result.results[0] as OtherResult;
+      const entity = (otherResult.data as { entity: Record<string, unknown> }).entity;
+      const behaviors = entity.behaviors as Record<string, unknown>;
+
+      expect(behaviors.brute_force_victim).toBe(true);
+      expect(behaviors.new_country_login).toBe(true);
+      expect(behaviors.used_usb_device).toBe(false);
+      expect(behaviors.anomaly_job_ids).toEqual(['auth_high_failed_logon', 'high_auth_count']);
+      expect(behaviors.rule_names).toEqual(['Brute Force Victim']);
+      expect(behaviors.active_behaviors).toEqual(['brute force victim', 'new country login']);
+    });
+
+    it('includes relationships with explicit snake_case keys', async () => {
       mockEsClient.asCurrentUser.search.mockResolvedValue({
         took: 1,
         timed_out: false,
@@ -441,11 +536,18 @@ describe('entityStoreGetTool', () => {
 
       const otherResult = result.results[0] as OtherResult;
       const entity = (otherResult.data as { entity: Record<string, unknown> }).entity;
-      expect(entity.attributes).toEqual({ Privileged: false, Managed: true });
-      expect(entity.behaviors).toEqual({
-        Brute_force_victim: false,
-        New_country_login: false,
-      });
+      const relationships = entity.relationships as Record<string, unknown>;
+
+      // Verify explicit snake_case keys with defaults
+      expect(relationships.communicates_with).toEqual(['service-api']);
+      expect(relationships.depends_on).toEqual([]);
+      expect(relationships.dependent_of).toEqual([]);
+      expect(relationships.owned_by).toEqual([]);
+      expect(relationships.owns).toEqual([]);
+      expect(relationships.accesses_frequently).toEqual([]);
+      expect(relationships.accessed_frequently_by).toEqual([]);
+      expect(relationships.supervises).toEqual([]);
+      expect(relationships.supervised_by).toEqual([]);
     });
 
     it('includes asset information when available', async () => {
@@ -501,15 +603,9 @@ describe('entityStoreGetTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('entity_store_get')
-      );
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('host')
-      );
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('server-01')
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('entity_store_get'));
+      expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('host'));
+      expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('server-01'));
     });
   });
 });

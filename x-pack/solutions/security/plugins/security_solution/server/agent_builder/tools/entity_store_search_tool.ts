@@ -21,7 +21,10 @@ import {
   type EntityTypeForRisk,
 } from './helpers';
 import { securityTool } from './constants';
-import { RISK_SCORE_INSTRUCTION, RISK_LEVELS_INSTRUCTION } from '../utils/entity_tools_instructions';
+import {
+  RISK_SCORE_INSTRUCTION,
+  RISK_LEVELS_INSTRUCTION,
+} from '../utils/entity_tools_instructions';
 
 const RISK_LEVELS = ['Critical', 'High', 'Moderate', 'Low', 'Unknown'] as const;
 const ASSET_CRITICALITY_LEVELS = [
@@ -71,6 +74,14 @@ const entityStoreSearchSchema = z.object({
         .boolean()
         .optional()
         .describe('Filter for entities that have used USB devices'),
+      anomaly_job_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Filter for entities with anomalies from specific ML job IDs'),
+      rule_names: z
+        .array(z.string())
+        .optional()
+        .describe('Filter for entities that triggered specific security rules'),
     })
     .optional()
     .describe('Filter by entity behaviors'),
@@ -164,6 +175,16 @@ const buildEntityQuery = (
     if (params.behaviors.used_usb_device !== undefined) {
       mustClauses.push({
         term: { 'entity.behaviors.Used_usb_device': params.behaviors.used_usb_device },
+      });
+    }
+    if (params.behaviors.anomaly_job_ids && params.behaviors.anomaly_job_ids.length > 0) {
+      mustClauses.push({
+        terms: { 'entity.behaviors.Anomaly_job_ids': params.behaviors.anomaly_job_ids },
+      });
+    }
+    if (params.behaviors.rule_names && params.behaviors.rule_names.length > 0) {
+      mustClauses.push({
+        terms: { 'entity.behaviors.Rule_names': params.behaviors.rule_names },
       });
     }
   }
@@ -320,7 +341,7 @@ Key fields:
 - entity.risk.calculated_level: ${RISK_LEVELS_INSTRUCTION}
 - asset.criticality: extreme_impact, high_impact, medium_impact, low_impact
 - entity.attributes: Privileged, Managed, Mfa_enabled, Asset
-- entity.behaviors: Brute_force_victim, New_country_login, Used_usb_device
+- entity.behaviors: Brute_force_victim, New_country_login, Used_usb_device, Anomaly_job_ids (ML job IDs), Rule_names (security rule names)
 
 ${RISK_SCORE_INSTRUCTION}`,
     schema: entityStoreSearchSchema,
@@ -378,7 +399,9 @@ ${RISK_SCORE_INSTRUCTION}`,
       } = params;
 
       logger.debug(
-        `${SECURITY_ENTITY_STORE_SEARCH_TOOL_ID} tool called with entityTypes: ${entityTypes.join(', ')}, riskLevels: ${riskLevels?.join(', ') ?? 'all'}`
+        `${SECURITY_ENTITY_STORE_SEARCH_TOOL_ID} tool called with entityTypes: ${entityTypes.join(
+          ', '
+        )}, riskLevels: ${riskLevels?.join(', ') ?? 'all'}`
       );
 
       try {
