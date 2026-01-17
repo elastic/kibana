@@ -267,5 +267,12 @@ export function transformPartialSLODataToFormState(
     }
   }
 
+  // Handle artifacts (linked dashboards) from templates
+  if ('artifacts' in values && values.artifacts) {
+    state.artifacts = {
+      dashboards: values.artifacts.dashboards || [],
+    };
+  }
+
   return state;
 }
