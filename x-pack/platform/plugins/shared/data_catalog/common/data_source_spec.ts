@@ -5,6 +5,19 @@
  * 2.0.
  */
 
+import type { SavedObjectAttributes } from '@kbn/core/server';
+
+/**
+ * Type for Stack connector secrets.
+ */
+export interface ConnectorSecrets extends SavedObjectAttributes {
+  token?: string;
+  apiKey?: string;
+  user?: string;
+  password?: string;
+  secretHeaders?: Record<string, string>;
+}
+
 /**
  * OAuth providers supported by EARS
  */
@@ -47,6 +60,7 @@ export interface CustomOAuthConfiguration {
 export interface StackConnectorConfig {
   type: string;
   config: Record<string, unknown>;
+  importedTools?: string[];
 }
 
 /**

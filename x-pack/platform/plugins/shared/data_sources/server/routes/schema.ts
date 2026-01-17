@@ -38,6 +38,6 @@ export function convertSOtoAPIResponse(
 export const createDataSourceRequestSchema = schema.object({
   type: schema.string({ minLength: 1 }),
   name: schema.maybe(schema.string({ minLength: 1 })),
-  token: schema.maybe(schema.string({ minLength: 1 })),
+  credentials: schema.maybe(schema.string({ minLength: 1 })),
   stack_connector_id: schema.maybe(schema.string({ minLength: 1 })),
 });

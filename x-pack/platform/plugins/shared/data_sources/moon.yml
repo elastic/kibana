@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-agent-builder'
+  - '@kbn/connector-schemas'
 tags:
   - plugin
   - prod
