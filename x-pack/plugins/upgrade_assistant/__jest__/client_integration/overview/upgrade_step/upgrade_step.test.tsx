@@ -63,7 +63,7 @@ describe('Overview - Upgrade Step', () => {
       );
     });
 
-    test('When not ready for upgrade, the CTA button is disabled', async () => {
+    test('When not ready for upgrade on 8.17, the CTA button is still enabled', async () => {
       httpRequestsMockHelpers.setGetUpgradeStatusResponse({
         readyForUpgrade: false,
         details: 'Resolve critical deprecations first',
@@ -76,7 +76,10 @@ describe('Overview - Upgrade Step', () => {
       expect(exists('upgradeSetupDocsLink')).toBe(true);
       expect(exists('upgradeSetupCloudLink')).toBe(true);
 
-      expect(find('upgradeSetupCloudLink').props().disabled).toBe(true);
+      expect(find('upgradeSetupCloudLink').props().disabled).toBeFalsy();
+      expect(find('upgradeSetupCloudLink').props().href).toBe(
+        `${DEPLOYMENT_URL}?show_upgrade=true`
+      );
     });
 
     test('An error callout is displayed, if status check failed', async () => {
