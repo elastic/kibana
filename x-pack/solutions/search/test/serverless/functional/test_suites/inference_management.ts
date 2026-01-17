@@ -42,6 +42,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('preconfigured endpoints can not be deleted', async () => {
         await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsCannotBeDeleted();
       });
+
+      it('displays type badge under endpoint name', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectTypeBadgeUnderEndpointName();
+      });
     });
 
     describe('copy endpoint id action', () => {
