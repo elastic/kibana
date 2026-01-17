@@ -1,13 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import datemath from '@elastic/datemath';
-import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import type { LogDocument, Timerange } from '@kbn/synthtrace-client';
 import { log, timerange } from '@kbn/synthtrace-client';
+import { createCliScenario } from '../../../../lib/utils/create_scenario';
+import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
+import { withClient } from '../../../../lib/utils/with_client';
+import type { ScenarioReturnType } from '../../../../lib/utils/with_client';
 
 const DATASET = 'app.logs';
 const SERVICE_NAME = 'test-service';
@@ -22,21 +28,23 @@ export const LOG_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW = {
 };
 
 /**
- * Creates log data with SPIKE pattern.
+ * Generates log data with SPIKE pattern.
  */
-export async function createLogChangePointsData({
-  logsSynthtraceEsClient,
+export function generateLogChangePointsData({
+  logsEsClient,
+  range,
 }: {
-  logsSynthtraceEsClient: LogsSynthtraceEsClient;
-}) {
-  const range = timerange(
-    LOG_CHANGE_POINTS_ANALYSIS_WINDOW.start,
-    LOG_CHANGE_POINTS_ANALYSIS_WINDOW.end
-  );
+  logsEsClient: LogsSynthtraceEsClient;
+  range?: Timerange;
+}): ScenarioReturnType<LogDocument> {
+  const effectiveRange =
+    range ??
+    timerange(LOG_CHANGE_POINTS_ANALYSIS_WINDOW.start, LOG_CHANGE_POINTS_ANALYSIS_WINDOW.end);
+
   const spikeStart = datemath.parse(LOG_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.start)!.valueOf();
   const spikeEnd = datemath.parse(LOG_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.end)!.valueOf();
 
-  const logStream = range
+  const logStream = effectiveRange
     .interval('1m')
     .rate(1)
     .generator((timestamp) => {
@@ -72,5 +80,12 @@ export async function createLogChangePointsData({
       return logs;
     });
 
-  await logsSynthtraceEsClient.index([logStream]);
+  return withClient(logsEsClient, logStream);
 }
+
+export default createCliScenario(({ range, clients: { logsEsClient } }) =>
+  generateLogChangePointsData({
+    range,
+    logsEsClient,
+  })
+);
