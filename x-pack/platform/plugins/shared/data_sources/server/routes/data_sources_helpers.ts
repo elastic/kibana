@@ -162,8 +162,14 @@ export async function createDataSourceAndRelatedResources(
     workflowIds.push(workflow.id);
 
     if (workflowInfo.shouldGenerateABTool) {
+      // e.g., "sources.github.search_issues" -> "search_issues"
+      const workflowBaseName = originalName.split('.').pop() || originalName;
+
+      // Tool ID structure: data_source_name.type.workflow_base_name
+      // This ensures uniqueness across clones while maintaining readability
+      // e.g., "github.github.search_issues" (original), "github-clone.github.search_issues" (clone)
       const tool = await toolRegistry.create({
-        id: `${type}.${slugify(workflow.name)}`,
+        id: `${slugify(name)}.${type}.${workflowBaseName}`,
         type: ToolType.workflow,
         description: `Workflow tool for ${type} data source`,
         tags: ['data-source', type],
