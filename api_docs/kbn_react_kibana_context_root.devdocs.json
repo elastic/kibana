@@ -40,6 +40,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
+        "lineNumber": 98,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,6 +64,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
+            "lineNumber": 98,
+            "columnNumber": 82,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,6 +95,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -113,6 +119,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
+            "lineNumber": 54,
+            "columnNumber": 98,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -145,6 +153,8 @@
           "<{}>, \"modify\" | \"colorMode\">"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -165,6 +175,8 @@
               }
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -181,6 +193,8 @@
               ", \"getUserProfile$\"> | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -195,6 +209,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -228,6 +244,8 @@
           }
         ],
         "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -244,6 +262,8 @@
               "I18nStart"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -262,6 +282,8 @@
               ", \"reportEvent\"> | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -279,6 +301,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -296,6 +320,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

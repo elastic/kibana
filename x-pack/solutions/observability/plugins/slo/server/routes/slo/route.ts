@@ -19,7 +19,6 @@ import { findSloDefinitionsRoute } from './find_definitions';
 import { findSLOGroupsRoute } from './find_groups';
 import { findSLORoute } from './find_slo';
 import { getDiagnosisRoute } from './get_diagnosis';
-import { getSLOGroupingsRoute } from './get_groupings';
 import { getPreviewData } from './get_preview_data';
 import { getSLORoute } from './get_slo';
 import { getSloBurnRates } from './get_slo_burn_rates';
@@ -54,7 +53,6 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getDiagnosisRoute,
     ...getSloBurnRates,
     ...getPreviewData,
-    ...getSLOGroupingsRoute,
     ...resetSLORoute,
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,

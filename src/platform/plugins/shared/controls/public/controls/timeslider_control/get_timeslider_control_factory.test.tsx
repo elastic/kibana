@@ -57,7 +57,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Should set timeslice to undefined when state does not provide percentage of timeRange', async () => {
     const { api } = await factory.buildEmbeddable({
-      initialState: { rawState: {} },
+      initialState: {},
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -68,10 +68,8 @@ describe('TimeSliderControlApi', () => {
   test('Should set timeslice to values within time range when state provides percentage of timeRange', async () => {
     const { api } = await factory.buildEmbeddable({
       initialState: {
-        rawState: {
-          timesliceStartAsPercentageOfTimeRange: 0.25,
-          timesliceEndAsPercentageOfTimeRange: 0.5,
-        },
+        timesliceStartAsPercentageOfTimeRange: 0.25,
+        timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
@@ -90,10 +88,8 @@ describe('TimeSliderControlApi', () => {
   test('Should update timeslice when time range changes', async () => {
     const { api } = await factory.buildEmbeddable({
       initialState: {
-        rawState: {
-          timesliceStartAsPercentageOfTimeRange: 0.25,
-          timesliceEndAsPercentageOfTimeRange: 0.5,
-        },
+        timesliceStartAsPercentageOfTimeRange: 0.25,
+        timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
@@ -120,10 +116,8 @@ describe('TimeSliderControlApi', () => {
   test('Clicking previous button should advance timeslice backward', async () => {
     const { api } = await factory.buildEmbeddable({
       initialState: {
-        rawState: {
-          timesliceStartAsPercentageOfTimeRange: 0.25,
-          timesliceEndAsPercentageOfTimeRange: 0.5,
-        },
+        timesliceStartAsPercentageOfTimeRange: 0.25,
+        timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
@@ -148,10 +142,8 @@ describe('TimeSliderControlApi', () => {
   test('Clicking previous button should wrap when time range start is reached', async () => {
     const { api } = await factory.buildEmbeddable({
       initialState: {
-        rawState: {
-          timesliceStartAsPercentageOfTimeRange: 0.25,
-          timesliceEndAsPercentageOfTimeRange: 0.5,
-        },
+        timesliceStartAsPercentageOfTimeRange: 0.25,
+        timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
@@ -177,10 +169,8 @@ describe('TimeSliderControlApi', () => {
   test('Clicking next button should advance timeslice forward', async () => {
     const { api } = await factory.buildEmbeddable({
       initialState: {
-        rawState: {
-          timesliceStartAsPercentageOfTimeRange: 0.25,
-          timesliceEndAsPercentageOfTimeRange: 0.5,
-        },
+        timesliceStartAsPercentageOfTimeRange: 0.25,
+        timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
@@ -205,10 +195,8 @@ describe('TimeSliderControlApi', () => {
   test('Clicking next button should wrap when time range end is reached', async () => {
     const { api } = await factory.buildEmbeddable({
       initialState: {
-        rawState: {
-          timesliceStartAsPercentageOfTimeRange: 0.25,
-          timesliceEndAsPercentageOfTimeRange: 0.5,
-        },
+        timesliceStartAsPercentageOfTimeRange: 0.25,
+        timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
@@ -233,15 +221,13 @@ describe('TimeSliderControlApi', () => {
   });
 
   test('Resetting state should reset timeslice', async () => {
-    const rawState = {
+    const controlState = {
       timesliceStartAsPercentageOfTimeRange: 0.25,
       timesliceEndAsPercentageOfTimeRange: 0.5,
     };
-    dashboardApi.getLastSavedStateForChild.mockReturnValueOnce({
-      rawState,
-    });
+    dashboardApi.getLastSavedStateForChild.mockReturnValueOnce(controlState);
     const { api } = await factory.buildEmbeddable({
-      initialState: { rawState },
+      initialState: controlState,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,

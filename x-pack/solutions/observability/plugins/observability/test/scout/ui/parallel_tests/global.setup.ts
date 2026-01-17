@@ -6,15 +6,12 @@
  */
 
 import { globalSetupHook } from '@kbn/scout-oblt';
-import { createDataView, generateLogsData, generateRulesData } from '../fixtures/generators';
+import { createDataView, generateRulesData } from '../fixtures/generators';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ apiServices, log, logsSynthtraceEsClient, kbnClient, esClient }) => {
-    log.info('Generating Observability data...');
-    await generateRulesData(apiServices);
-
+  async ({ apiServices, log, esClient, kbnClient }) => {
     log.info('Generating sample data into .alerts-observability.test index...');
     await esClient.index({
       index: '.alerts-observability.test',
@@ -26,17 +23,14 @@ globalSetupHook(
       refresh: true,
     });
 
-    log.info('Creating dummy data view for ad-hoc data view tests...');
+    log.info('Creating default data view for .alerts-* pattern...');
     await createDataView(kbnClient, {
-      name: 'test-data-view-name_1',
-      id: 'test-data-view-id_1',
-      title: 'logs-*',
+      name: 'Default Alerts Data View',
+      id: 'default-alerts-data-view',
+      title: '.alerts-*',
     });
 
-    await generateLogsData({
-      from: Date.now() - 15 * 60 * 1000, // 15 minutes ago
-      to: Date.now(),
-      client: logsSynthtraceEsClient,
-    });
+    log.info('Generating shared rules for rules list tests...');
+    await generateRulesData(apiServices);
   }
 );
