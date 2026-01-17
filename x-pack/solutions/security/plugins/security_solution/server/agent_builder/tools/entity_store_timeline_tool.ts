@@ -14,7 +14,7 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getEntitiesIndexName } from '../../lib/entity_analytics/entity_store/utils';
 import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
-import { getSpaceIdFromRequest } from './helpers';
+import { getSpaceIdFromRequest, getRiskDataFromEntity } from './helpers';
 import { securityTool } from './constants';
 import { RISK_SCORE_INSTRUCTION } from '../utils/entity_tools_instructions';
 
@@ -198,7 +198,8 @@ ${RISK_SCORE_INSTRUCTION}`,
         const lifecycleData = entityData?.lifecycle as Record<string, unknown> | undefined;
         const behaviorsData = entityData?.behaviors as Record<string, unknown> | undefined;
         const relationshipsData = entityData?.relationships as Record<string, unknown> | undefined;
-        const riskData = entityData?.risk as Record<string, unknown> | undefined;
+        // Risk data is stored under entity-type-specific paths (e.g., user.risk, host.risk)
+        const riskData = getRiskDataFromEntity(entity, entityType);
 
         const firstSeen = lifecycleData?.First_seen as string | undefined;
         const lastActivity = lifecycleData?.Last_activity as string | undefined;
@@ -217,14 +218,10 @@ ${RISK_SCORE_INSTRUCTION}`,
             activity_duration:
               firstSeen && lastActivity ? calculateDuration(firstSeen, lastActivity) : null,
             days_since_first_seen: firstSeen
-              ? Math.floor(
-                  (Date.now() - new Date(firstSeen).getTime()) / (1000 * 60 * 60 * 24)
-                )
+              ? Math.floor((Date.now() - new Date(firstSeen).getTime()) / (1000 * 60 * 60 * 24))
               : null,
             days_since_last_activity: lastActivity
-              ? Math.floor(
-                  (Date.now() - new Date(lastActivity).getTime()) / (1000 * 60 * 60 * 24)
-                )
+              ? Math.floor((Date.now() - new Date(lastActivity).getTime()) / (1000 * 60 * 60 * 24))
               : null,
           },
 

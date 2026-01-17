@@ -18,7 +18,7 @@ import {
   getEntitiesSnapshotIndexPattern,
 } from '../../lib/entity_analytics/entity_store/utils';
 import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
-import { getSpaceIdFromRequest } from './helpers';
+import { getSpaceIdFromRequest, getRiskDataFromEntity, type EntityTypeForRisk } from './helpers';
 import { securityTool } from './constants';
 import { RISK_SCORE_INSTRUCTION } from '../utils/entity_tools_instructions';
 
@@ -219,9 +219,10 @@ const getAvailableSnapshots = async ({
 /**
  * Formats an entity for response
  */
-const formatEntityProfile = (entity: Record<string, unknown>) => {
+const formatEntityProfile = (entity: Record<string, unknown>, entityType: EntityTypeForRisk) => {
   const entityData = entity.entity as Record<string, unknown> | undefined;
-  const riskData = entityData?.risk as Record<string, unknown> | undefined;
+  // Risk data is stored under entity-type-specific paths (e.g., user.risk, host.risk)
+  const riskData = getRiskDataFromEntity(entity, entityType);
   const lifecycleData = entityData?.lifecycle as Record<string, unknown> | undefined;
   const attributesData = entityData?.attributes as Record<string, unknown> | undefined;
   const behaviorsData = entityData?.behaviors as Record<string, unknown> | undefined;
@@ -453,7 +454,7 @@ Note: Historical snapshots are only available if the Entity Store snapshot task 
           };
         }
 
-        const historicalProfile = formatEntityProfile(historicalEntity);
+        const historicalProfile = formatEntityProfile(historicalEntity, entityType);
 
         // Build response
         const response: Record<string, unknown> = {
@@ -473,7 +474,7 @@ Note: Historical snapshots are only available if the Entity Store snapshot task 
           });
 
           if (currentEntity) {
-            const currentProfile = formatEntityProfile(currentEntity);
+            const currentProfile = formatEntityProfile(currentEntity, entityType);
             response.current_profile = currentProfile;
             response.changes = compareProfiles(historicalProfile, currentProfile);
             response.has_changed = (response.changes as unknown[]).length > 0;

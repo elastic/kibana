@@ -14,7 +14,12 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getEntitiesIndexName } from '../../lib/entity_analytics/entity_store/utils';
 import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
-import { getSpaceIdFromRequest } from './helpers';
+import {
+  getSpaceIdFromRequest,
+  getRiskFieldPrefix,
+  getRiskDataFromEntity,
+  type EntityTypeForRisk,
+} from './helpers';
 import { securityTool } from './constants';
 import { RISK_SCORE_INSTRUCTION, RISK_LEVELS_INSTRUCTION } from '../utils/entity_tools_instructions';
 
@@ -96,11 +101,17 @@ const buildEntityQuery = (
 ): Record<string, unknown> => {
   const mustClauses: Array<Record<string, unknown>> = [];
 
-  // Filter by risk levels
+  // Filter by risk levels - need to check entity-type-specific fields
+  // Risk data is stored under different paths: user.risk, host.risk, service.risk, entity.risk (for generic)
   if (params.riskLevels && params.riskLevels.length > 0) {
     mustClauses.push({
-      terms: {
-        'entity.risk.calculated_level': params.riskLevels,
+      bool: {
+        should: params.entityTypes.map((type) => ({
+          terms: {
+            [`${getRiskFieldPrefix(type)}.risk.calculated_level`]: params.riskLevels,
+          },
+        })),
+        minimum_should_match: 1,
       },
     });
   }
@@ -169,20 +180,71 @@ const buildEntityQuery = (
 };
 
 /**
- * Maps sortBy parameter to actual Elasticsearch field
+ * Maps sortBy parameter to actual Elasticsearch field(s)
+ * For risk_score sorting, we need to handle multiple entity-type-specific fields
  */
-const getSortField = (sortBy?: string): string => {
+const getSortFields = (
+  sortBy: string | undefined,
+  entityTypes: EntityTypeForRisk[]
+): Array<Record<string, unknown>> => {
   switch (sortBy) {
     case 'risk_score':
-      return 'entity.risk.calculated_score_norm';
+      // For risk score, we need to sort by all possible entity-type-specific risk fields
+      // Using a script sort to coalesce the values from different paths
+      return [
+        {
+          _script: {
+            type: 'number',
+            script: {
+              source: `
+                double score = 0;
+                for (String prefix : params.prefixes) {
+                  String field = prefix + '.risk.calculated_score_norm';
+                  if (doc.containsKey(field) && doc[field].size() > 0) {
+                    score = doc[field].value;
+                    break;
+                  }
+                }
+                return score;
+              `,
+              params: {
+                prefixes: entityTypes.map((type) => getRiskFieldPrefix(type)),
+              },
+            },
+          },
+        },
+      ];
     case 'last_activity':
-      return 'entity.lifecycle.Last_activity';
+      return [{ 'entity.lifecycle.Last_activity': { unmapped_type: 'date' } }];
     case 'first_seen':
-      return 'entity.lifecycle.First_seen';
+      return [{ 'entity.lifecycle.First_seen': { unmapped_type: 'date' } }];
     case 'name':
-      return 'entity.name';
+      return [{ 'entity.name': { unmapped_type: 'keyword' } }];
     default:
-      return 'entity.risk.calculated_score_norm';
+      // Default to risk_score sorting
+      return [
+        {
+          _script: {
+            type: 'number',
+            script: {
+              source: `
+                double score = 0;
+                for (String prefix : params.prefixes) {
+                  String field = prefix + '.risk.calculated_score_norm';
+                  if (doc.containsKey(field) && doc[field].size() > 0) {
+                    score = doc[field].value;
+                    break;
+                  }
+                }
+                return score;
+              `,
+              params: {
+                prefixes: entityTypes.map((type) => getRiskFieldPrefix(type)),
+              },
+            },
+          },
+        },
+      ];
   }
 };
 
@@ -194,7 +256,7 @@ const searchEntityStore = async ({
   spaceId,
   entityTypes,
   query,
-  sortField,
+  sortFields,
   sortOrder,
   limit,
 }: {
@@ -202,7 +264,7 @@ const searchEntityStore = async ({
   spaceId: string;
   entityTypes: Array<'host' | 'user' | 'service' | 'generic'>;
   query: Record<string, unknown>;
-  sortField: string;
+  sortFields: Array<Record<string, unknown>>;
   sortOrder: 'asc' | 'desc';
   limit: number;
 }): Promise<Array<Record<string, unknown>>> => {
@@ -211,20 +273,33 @@ const searchEntityStore = async ({
     getEntitiesIndexName(EntityTypeEnum.enum[type], spaceId)
   );
 
+  // Apply sort order to each sort field
+  const sortWithOrder = sortFields.map((sortField) => {
+    const key = Object.keys(sortField)[0];
+    const value = sortField[key];
+    if (key === '_script') {
+      return {
+        _script: {
+          ...(value as Record<string, unknown>),
+          order: sortOrder,
+        },
+      };
+    }
+    return {
+      [key]: {
+        ...(value as Record<string, unknown>),
+        order: sortOrder,
+      },
+    };
+  });
+
   const response = await esClient.search({
     index: indices,
     ignore_unavailable: true,
     allow_no_indices: true,
     size: limit,
     query,
-    sort: [
-      {
-        [sortField]: {
-          order: sortOrder,
-          unmapped_type: 'float',
-        },
-      },
-    ],
+    sort: sortWithOrder,
   });
 
   return response.hits.hits
@@ -314,14 +389,14 @@ ${RISK_SCORE_INSTRUCTION}`,
           attributes,
           behaviors,
         });
-        const sortField = getSortField(sortBy);
+        const sortFields = getSortFields(sortBy, entityTypes);
 
         const entities = await searchEntityStore({
           esClient: esClient.asCurrentUser,
           spaceId,
           entityTypes,
           query,
-          sortField,
+          sortFields,
           sortOrder,
           limit,
         });
@@ -343,7 +418,10 @@ ${RISK_SCORE_INSTRUCTION}`,
         // Format entities for response, prioritizing key fields
         const formattedEntities = entities.map((entity) => {
           const entityData = entity.entity as Record<string, unknown> | undefined;
-          const riskData = entityData?.risk as Record<string, unknown> | undefined;
+          // Determine entity type from the document to extract risk from the correct path
+          const detectedEntityType = (entityData?.type as EntityTypeForRisk) ?? 'generic';
+          // Risk data is stored under entity-type-specific paths (e.g., user.risk, host.risk)
+          const riskData = getRiskDataFromEntity(entity, detectedEntityType);
           const lifecycleData = entityData?.lifecycle as Record<string, unknown> | undefined;
           const attributesData = entityData?.attributes as Record<string, unknown> | undefined;
           const behaviorsData = entityData?.behaviors as Record<string, unknown> | undefined;

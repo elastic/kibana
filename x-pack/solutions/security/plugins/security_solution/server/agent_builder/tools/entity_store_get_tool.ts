@@ -14,7 +14,7 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getEntitiesIndexName } from '../../lib/entity_analytics/entity_store/utils';
 import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
-import { getSpaceIdFromRequest } from './helpers';
+import { getSpaceIdFromRequest, getRiskDataFromEntity } from './helpers';
 import { securityTool } from './constants';
 import { RISK_SCORE_INSTRUCTION } from '../utils/entity_tools_instructions';
 
@@ -177,7 +177,8 @@ Use this tool for questions like "What do we know about user jsmith?" or "Show m
 
         // Format the entity response with all available data
         const entityData = entity.entity as Record<string, unknown> | undefined;
-        const riskData = entityData?.risk as Record<string, unknown> | undefined;
+        // Risk data is stored under entity-type-specific paths (e.g., user.risk, host.risk)
+        const riskData = getRiskDataFromEntity(entity, entityType);
         const lifecycleData = entityData?.lifecycle as Record<string, unknown> | undefined;
         const attributesData = entityData?.attributes as Record<string, unknown> | undefined;
         const behaviorsData = entityData?.behaviors as Record<string, unknown> | undefined;
