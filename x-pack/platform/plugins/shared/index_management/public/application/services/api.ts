@@ -162,11 +162,10 @@ interface IndexMetadata {
 }
 
 export async function loadIndices() {
-  // todo change api
   // Run all requests in parallel
   const enrichedPromises = indexDataEnricher.enrichIndices(httpService.httpClient);
 
-  // we'll wait for the main request to complete first
+  // we'll wait for the main request to complete first so
   // the index list has stability - unsure if this is an actual
   // issue but its certainly possible looking at the code
   const indices = await httpService.httpClient.get<Record<string, IndexData>>(
@@ -194,11 +193,10 @@ export async function loadIndices() {
       })
 
       .catch((error) => {
-        // silently swallow enricher response errors
         // todo errors should be collected and displayed to the user
         console.error(error);
       });
-    // todo add finally block to emit update here
+    // todo add finally block to emit update here?
   });
 
   // this is currently returning unenriched data

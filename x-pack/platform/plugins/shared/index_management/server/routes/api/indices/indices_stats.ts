@@ -23,6 +23,7 @@ export function registerIndicesStats({ router, lib: { handleEsError } }: RouteDe
       const { client } = (await context.core).elasticsearch;
       try {
         const { indices } = await client.asCurrentUser.indices.stats({
+          // todo does this need to be *,.*
           index: '*', // indexNamesString,
           expand_wildcards: ['hidden', 'all'],
           forbid_closed_indices: false,

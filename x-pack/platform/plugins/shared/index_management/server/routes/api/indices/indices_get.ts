@@ -70,7 +70,6 @@ export function registerIndicesGet({ router, lib: { handleEsError }, config }: R
 
         const mappedIndices: Record<string, IndexData> = Object.keys(indices).reduce(
           (prev, indexName: string) => {
-            // todo this code is duplicated and should be shared
             const indexData = indices[indexName];
             const aliases = Object.keys(indexData.aliases!);
             prev[indexName] = {
