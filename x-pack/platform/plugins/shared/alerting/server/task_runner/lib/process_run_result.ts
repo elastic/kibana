@@ -21,13 +21,14 @@ import {
 import type { RuleRunMetrics } from '../../lib/rule_run_metrics_store';
 import type { RuleResultService } from '../../monitoring/rule_result_service';
 import type { RunRuleResult } from '../types';
+import type { AdHocRunRuleResult } from '../ad_hoc_task_runner';
 
 interface ProcessRuleRunOpts {
   logger?: Logger;
   logPrefix?: string;
   result: RuleResultService;
   runDate: Date;
-  runRuleResult: Result<RunRuleResult, Error>;
+  runRuleResult: Result<RunRuleResult, Error> | Result<AdHocRunRuleResult, Error>;
 }
 
 interface ProcessRuleRunResult {
@@ -46,7 +47,7 @@ export function processRunResults({
 }: ProcessRuleRunOpts): ProcessRuleRunResult {
   // Getting executionStatus for backwards compatibility
   const { status: executionStatus } = map<
-    RunRuleResult,
+    RunRuleResult | AdHocRunRuleResult,
     ElasticsearchError,
     IExecutionStatusAndMetrics
   >(
@@ -61,7 +62,11 @@ export function processRunResults({
   );
 
   // New consolidated statuses for lastRun
-  const { lastRun, metrics: executionMetrics } = map<RunRuleResult, ElasticsearchError, ILastRun>(
+  const { lastRun, metrics: executionMetrics } = map<
+    RunRuleResult | AdHocRunRuleResult,
+    ElasticsearchError,
+    ILastRun
+  >(
     runRuleResult,
     ({ metrics }) => lastRunFromState(metrics, result),
     (err: ElasticsearchError) => lastRunFromError(err)

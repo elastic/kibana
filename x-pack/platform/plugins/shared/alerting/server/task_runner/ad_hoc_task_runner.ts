@@ -17,13 +17,15 @@ import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import type { AdHocRunStatus } from '../../common/constants';
 import { adHocRunStatus } from '../../common/constants';
-import type { RuleRunnerErrorStackTraceLog, RunRuleResult, TaskRunnerContext } from './types';
+import type { RuleRunnerErrorStackTraceLog, TaskRunnerContext } from './types';
 import { getExecutorServices } from './get_executor_services';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
+  RawAlertInstance,
   RuleAlertData,
+  RuleTaskState,
   RuleTypeParams,
   RuleTypeRegistry,
   RuleTypeState,
@@ -48,11 +50,20 @@ import type { RuleRunMetrics } from '../lib/rule_run_metrics_store';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { getEsErrorMessage } from '../lib/errors';
 import type { Result } from '../lib/result_type';
-import { isOk, asOk, asErr } from '../lib/result_type';
+import { isOk, asOk, asErr, map } from '../lib/result_type';
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { ActionScheduler } from './action_scheduler';
 import { transformAdHocRunToAdHocRunData } from '../application/backfill/transforms/transform_ad_hoc_run_to_backfill_result';
+import { getTrackedExecutions } from './lib/get_tracked_execution';
 
+export interface AdHocRunRuleResult {
+  metrics: RuleRunMetrics;
+  state?: {
+    alertTypeState?: RuleTypeState;
+    alertInstances: Record<string, RawAlertInstance> | undefined;
+    trackedExecutions?: string[];
+  };
+}
 interface ConstructorParams {
   context: TaskRunnerContext;
   internalSavedObjectsRepository: ISavedObjectsRepository;
@@ -169,10 +180,10 @@ export class AdHocTaskRunner implements CancellableTask {
     fakeRequest,
     scheduleToRun,
     validatedParams: params,
-  }: RunParams): Promise<RuleRunMetrics> {
+  }: RunParams): Promise<AdHocRunRuleResult> {
     const ruleRunMetricsStore = new RuleRunMetricsStore();
     if (scheduleToRun == null) {
-      return ruleRunMetricsStore.getMetrics();
+      return { metrics: ruleRunMetricsStore.getMetrics() };
     }
 
     const { rule, apiKeyToUse, apiKeyId } = adHocRunData;
@@ -237,7 +248,11 @@ export class AdHocTaskRunner implements CancellableTask {
 
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
 
-    const { error, stackTrace } = await this.ruleTypeRunner.run({
+    const {
+      state: updatedRuleTypeState,
+      error,
+      stackTrace,
+    } = await this.ruleTypeRunner.run({
       context: ruleTypeRunnerContext,
       alertsClient,
       actionsClient:
@@ -315,7 +330,31 @@ export class AdHocTaskRunner implements CancellableTask {
       );
     }
 
-    return ruleRunMetricsStore.getMetrics();
+    let alertsToReturn: Record<string, RawAlertInstance> = {};
+
+    // Only serialize alerts into task state if we're auto-recovering, otherwise
+    // we don't need to keep this information around.
+    if (ruleType.autoRecoverAlerts) {
+      const alerts = alertsClient.getRawAlertInstancesForState(true);
+      alertsToReturn = alerts.rawActiveAlerts;
+    }
+
+    return {
+      metrics: ruleRunMetricsStore.getMetrics(),
+      ...(ruleType.autoRecoverAlerts
+        ? {
+            state: {
+              alertTypeState: updatedRuleTypeState || undefined,
+              alertInstances: alertsToReturn,
+              trackedExecutions: getTrackedExecutions({
+                trackedExecutions: alertsClient.getTrackedExecutions(),
+                currentExecution: this.executionId,
+                limit: 3,
+              }),
+            },
+          }
+        : {}),
+    };
   }
 
   /**
@@ -475,7 +514,7 @@ export class AdHocTaskRunner implements CancellableTask {
     });
   }
 
-  private async processAdHocRunResults(runRuleResult: Result<RunRuleResult, Error>) {
+  private async processAdHocRunResults(runRuleResult: Result<AdHocRunRuleResult, Error>) {
     const {
       params: { adHocRunParamsId, spaceId },
       startedAt,
@@ -588,11 +627,13 @@ export class AdHocTaskRunner implements CancellableTask {
   }
 
   async run(): Promise<RunResult> {
-    let runRuleResult: Result<RunRuleResult, Error>;
+    const { state: originalState } = this.taskInstance;
+
+    let runRuleResult: Result<AdHocRunRuleResult, Error>;
 
     try {
       const runParams = await this.prepareToRun();
-      runRuleResult = asOk({ metrics: await this.runRule(runParams), state: {} });
+      runRuleResult = asOk(await this.runRule(runParams));
     } catch (err) {
       runRuleResult = asErr(err);
     }
@@ -600,10 +641,26 @@ export class AdHocTaskRunner implements CancellableTask {
 
     this.shouldDeleteTask = this.shouldDeleteTask || !this.hasAnyPendingRuns();
 
-    return {
-      state: {},
+    const getUpdatedState = () => {
+      return map<AdHocRunRuleResult, Error, RuleTaskState>(
+        runRuleResult,
+        ({ state }: AdHocRunRuleResult) => {
+          return {
+            ...state,
+          };
+        },
+        (_: Error) => {
+          return originalState;
+        }
+      );
+    };
+
+    const newTaskState = {
+      state: getUpdatedState(),
       ...(this.shouldDeleteTask ? {} : { runAt: new Date() }),
     };
+
+    return newTaskState;
   }
 
   async cancel(): Promise<void> {

@@ -51,7 +51,6 @@ import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } fro
 import type { Gap } from '../lib/rule_gaps/gap';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
-
 interface ConstructorOpts {
   logger: Logger;
   taskManagerSetup: TaskManagerSetupContract;
@@ -642,18 +641,6 @@ function getRuleOrError({ ruleId, rules, ruleTypeRegistry }: GetRuleOrErrorOpts)
   // if rule exists, check that it is enabled
   if (!rule.enabled) {
     return { error: createBackfillError(`Rule ${ruleId} is disabled`, ruleId, rule.name) };
-  }
-
-  // check that the rule type is supported
-  const isLifecycleRule = ruleTypeRegistry.get(rule.alertTypeId).autoRecoverAlerts ?? true;
-  if (isLifecycleRule) {
-    return {
-      error: createBackfillError(
-        `Rule type "${rule.alertTypeId}" for rule ${ruleId} is not supported`,
-        ruleId,
-        rule.name
-      ),
-    };
   }
 
   // check that the API key is not null
