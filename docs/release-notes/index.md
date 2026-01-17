@@ -34,27 +34,25 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Features and enhancements [kibana-9.3.0-features-enhancements]
 
 **Alerting**:
-* Added the possibility to search scheduled reports by title and creator [#243841]({{kib-pull}}243841).
-* Adds email cc, bcc, subject and message fields to scheduled reports email [#242922]({{kib-pull}}242922).
-% !!TODO!! The above PR had a lengthy release note description:
-% Adds new fields to the schedule export form email notification section:  cc and bcc recipients, subject and message with Mustache templating support
-* Enable cases numerical id service [#238555]({{kib-pull}}238555).
-* Added support for deleting export schedules [#238197]({{kib-pull}}238197).
-* Alert deletion feature is now GA [#247465]({{kib-pull}}247465).
-* Adds search in attachment tab [#246265]({{kib-pull}}246265).
-* Adds support for searching rules by their actions' params via API [#246123]({{kib-pull}}246123).
-* Scheduled exports is GA [#245882]({{kib-pull}}245882).
-* Slack connector can be configured to send messages to any channel using channel names [#245423]({{kib-pull}}245423).
-* Expand search in all cases page [#245321]({{kib-pull}}245321).
-* Allow users to enable scheduled reports [#244202]({{kib-pull}}244202).
-* Disable flapping per rule - schema only changes [#243855]({{kib-pull}}243855).
-* One Attachments tab [#243708]({{kib-pull}}243708).
-* Adds time range to all cases [#243409]({{kib-pull}}243409).
-* Allow users to edit schedule config [#241928]({{kib-pull}}241928).
-* IBM Resilient form improvements [#238869]({{kib-pull}}238869).
-* Adds agent id as default observables type [#238533]({{kib-pull}}238533).
-* Adds `kibana.alert.index_pattern` to all alerts [#239450]({{kib-pull}}239450).
 
+* Supports searching for report schedules by title and creator [#243841]({{kib-pull}}243841).
+* Provides fields for specifying cc and bcc recipients, the subject line, and the message for scheduled report email notifications [#242922]({{kib-pull}}242922).
+* Enables incremental human-readable case IDs [#238555]({{kib-pull}}238555).
+* Adds option to delete report schedules [#238197]({{kib-pull}}238197).
+* Alert cleanup is now generally available [#247465]({{kib-pull}}247465).
+* Adds search to the new **Attachments** tab in cases [#246265]({{kib-pull}}246265).
+* Adds support for searching rules by their actions' params using the API [#246123]({{kib-pull}}246123).
+* Scheduled reports are now generally available [#245882]({{kib-pull}}245882).
+* The Slack connector can now be configured to send messages to any channel using channel names [#245423]({{kib-pull}}245423).
+* Improves search on the case management page [#245321]({{kib-pull}}245321).
+* Adds option to enable disabled report schedules [#244202]({{kib-pull}}244202).
+* Disable flapping per rule - schema only changes [#243855]({{kib-pull}}243855).
+* Centralizes tabs for different attachement types under the new **Attachments** tab in cases [#243708]({{kib-pull}}243708).
+* Adds a date time picker to the cases management page to help you find cases that were created during a specific time range [#243409]({{kib-pull}}243409).
+* Adds option to edit report schedules [#241928]({{kib-pull}}241928).
+* Improves UI for specifying additional fields for IBM Resilient action [#238869]({{kib-pull}}238869).
+* Makes Agent ID the default observables type [#238533]({{kib-pull}}238533).
+* Adds `kibana.alert.index_pattern` to all alerts [#239450]({{kib-pull}}239450).
 
 **Connectivity**:
 * Adds Groq to the list of available providers for the Inference/AI Connector and for Inference endpoint creation [#244962]({{kib-pull}}244962).
@@ -166,30 +164,30 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.3.0-fixes]
 
 **Alerting**:
-* Update total event in ES document when attaching an event [#247996]({{kib-pull}}247996).
-* Encode search term in cases page [#247992]({{kib-pull}}247992).
+* Fixes `cases.total_event` not showing the number of events attached to a case [#247996]({{kib-pull}}247996).
+* Encodes terms searched on cases management page [#247992]({{kib-pull}}247992).
 * Adds max character validation to the email connector params and config [#246453]({{kib-pull}}246453).
 * Fixes an issue that caused the Security alerts table to not update columns correctly when switching view mode [#245253]({{kib-pull}}245253).
-* Adds consecutiveMatches to action context [#244997]({{kib-pull}}244997).
-* Fixes stale submitting [#244543]({{kib-pull}}244543).
-* Allow spaces in file paths in Observables [#244350]({{kib-pull}}244350).
-* Catch connector errors but do not interrupt the case creation flow [#244188]({{kib-pull}}244188).
-* Improve IBM error message [#244012]({{kib-pull}}244012).
-* Verify the alert exists before muting [#242847]({{kib-pull}}242847).
-* Fixes auto extraction in event bulk actions [#242325]({{kib-pull}}242325).
-* Fixes an issue that caused the alerts tables pagination to be stuck in the Rule pages [#242275]({{kib-pull}}242275).
-* Use the real dimensions when taking a screenshot [#242127]({{kib-pull}}242127).
-* Only take tags-changes into account when connector supports them [#241944]({{kib-pull}}241944).
-* Improve all cases table loading to prevent flashing [#240155]({{kib-pull}}240155).
-* A11y - Fix missing announcements in form row [#240132]({{kib-pull}}240132).
-* Adds manual focus to action buttons' actions [#239504]({{kib-pull}}239504).
-* Remove `autoFocus` to preserve proper focus when modal closed [#239366]({{kib-pull}}239366).
-* Fixes auto extract observables in EASE [#239000]({{kib-pull}}239000).
-* Update `nodemailer` [#238816]({{kib-pull}}238816).
+* Adds `alert.consecutiveMatches` to action context [#244997]({{kib-pull}}244997).
+* Fixes case submissions becoming stale [#244543]({{kib-pull}}244543).
+* Allows spaces in file paths for case observables [#244350]({{kib-pull}}244350).
+* Catches connector errors without interrupting the case creation flow [#244188]({{kib-pull}}244188).
+* Improves error messages for IBM connector [#244012]({{kib-pull}}244012).
+* Verifies the alert exists before muting [#242847]({{kib-pull}}242847).
+* Fixes auto-extraction in event bulk actions [#242325]({{kib-pull}}242325).
+* Fixes Alerts table pagination being stuck on rule details page [#242275]({{kib-pull}}242275).
+* Use real dimensions when taking a screenshot of {kib} layout [#242127]({{kib-pull}}242127).
+* Only takes tag changes into account when connector supports them [#241944]({{kib-pull}}241944).
+* Improves cases management table loading to prevent flashing [#240155]({{kib-pull}}240155).
+* Fixes missing announcements in case forms to improve accessiblity [#240132]({{kib-pull}}240132).
+* Adds manual focus to buttons for case actions to improve accessiblity [#239504]({{kib-pull}}239504).
+* Removes `autoFocus` to preserve proper focus when modal closed [#239366]({{kib-pull}}239366).
+* Fixes observables not being added to cases when auto-extract is turned on [#239000]({{kib-pull}}239000).
+* Updates `nodemailer` to to 7.0.9 [#238816]({{kib-pull}}238816).
 * Adds Jira's `otherFields` JSON editor to case creation flow [#238435]({{kib-pull}}238435).
-* Connector api update [#236863]({{kib-pull}}236863).
-* Enable auto-extraction by default and add user actions for observable actions [#236524]({{kib-pull}}236524).
-* Separate sync alert and auto-extract updates in activity [#236519]({{kib-pull}}236519).
+* Isolates the configuration parameters for the Tines connector to the server side [#236863]({{kib-pull}}236863).
+* Enables auto-extraction by default and adds user actions for case observable actions [#236524]({{kib-pull}}236524).
+* Separates sync alert and auto-extract updates in case activity [#236519]({{kib-pull}}236519).
 * Fixes the alert history chart background color in dark mode [#246017]({{kib-pull}}246017).
 * Fixes infinite loop issue in investigation guide editor [#240472]({{kib-pull}}240472).
 
