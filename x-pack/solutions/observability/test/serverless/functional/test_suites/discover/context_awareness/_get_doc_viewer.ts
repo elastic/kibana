@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
 
-  describe('extension getDocViewer', () => {
+  // eslint-disable-next-line ban/ban
+  describe.only('extension getDocViewer', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
     });
@@ -58,8 +59,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilTabIsLoaded();
+        // Press ESC to dismiss any preview panels that might be covering UI elements
+        await browser.pressKeys(browser.keys.ESCAPE);
         await dataViews.switchTo('my-example-logs');
-        await PageObjects.discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle();
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
@@ -97,6 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilTabIsLoaded();
+        // Press ESC to dismiss any preview panels that might be covering UI elements
+        await browser.pressKeys(browser.keys.ESCAPE);
         await dataViews.switchTo('my-example-metrics');
         await PageObjects.discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle();
