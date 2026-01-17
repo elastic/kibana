@@ -2237,108 +2237,210 @@
           "type": "long"
         },
         "count_rules_installed_by_integrations": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "Total count of rules installed by integrations (Elastic Agent tag)"
+          }
         },
         "count_rules_installed_by_integrations_by_type": {
           "properties": {
             "DYNAMIC_KEY": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of rules installed by integrations for unknown rule type"
+              }
             },
             "__index-threshold": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of index threshold rules installed by integrations"
+              }
             },
             "__es-query": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of ES query rules installed by integrations"
+              }
             },
             "transform_health": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of transform health rules installed by integrations"
+              }
             },
             "apm__error_rate": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of APM error rate rules installed by integrations"
+              }
             },
             "apm__transaction_error_rate": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of APM transaction error rate rules installed by integrations"
+              }
             },
             "apm__transaction_duration": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of APM transaction duration rules installed by integrations"
+              }
             },
             "apm__transaction_duration_anomaly": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of APM transaction duration anomaly rules installed by integrations"
+              }
             },
             "metrics__alert__threshold": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of metrics threshold rules installed by integrations"
+              }
             },
             "metrics__alert__inventory__threshold": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of inventory threshold rules installed by integrations"
+              }
             },
             "logs__alert__document__count": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of log document count rules installed by integrations"
+              }
             },
             "monitoring_alert_cluster_health": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of monitoring cluster health rules installed by integrations"
+              }
             },
             "monitoring_alert_cpu_usage": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of monitoring CPU usage rules installed by integrations"
+              }
             },
             "monitoring_alert_disk_usage": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of monitoring disk usage rules installed by integrations"
+              }
             },
             "monitoring_alert_elasticsearch_version_mismatch": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of monitoring Elasticsearch version mismatch rules installed by integrations"
+              }
             },
             "monitoring_alert_kibana_version_mismatch": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of monitoring Kibana version mismatch rules installed by integrations"
+              }
             },
             "monitoring_alert_license_expiration": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of monitoring license expiration rules installed by integrations"
+              }
             },
             "monitoring_alert_logstash_version_mismatch": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of monitoring Logstash version mismatch rules installed by integrations"
+              }
             },
             "monitoring_alert_nodes_changed": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of monitoring nodes changed rules installed by integrations"
+              }
             },
             "siem__signals": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of SIEM signals rules installed by integrations"
+              }
             },
             "siem__notifications": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of SIEM notifications rules installed by integrations"
+              }
             },
             "siem__eqlRule": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of SIEM EQL rules installed by integrations"
+              }
             },
             "siem__indicatorRule": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of SIEM indicator rules installed by integrations"
+              }
             },
             "siem__mlRule": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of SIEM ML rules installed by integrations"
+              }
             },
             "siem__queryRule": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of SIEM query rules installed by integrations"
+              }
             },
             "siem__savedQueryRule": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of SIEM saved query rules installed by integrations"
+              }
             },
             "siem__thresholdRule": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of SIEM threshold rules installed by integrations"
+              }
             },
             "xpack__uptime__alerts__monitorStatus": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of Uptime monitor status rules installed by integrations"
+              }
             },
             "xpack__uptime__alerts__tls": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of Uptime TLS rules installed by integrations"
+              }
             },
             "xpack__uptime__alerts__durationAnomaly": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of Uptime duration anomaly rules installed by integrations"
+              }
             },
             "__geo-containment": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of geo-containment rules installed by integrations"
+              }
             },
             "xpack__ml__anomaly_detection_alert": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of ML anomaly detection alert rules installed by integrations"
+              }
             },
             "xpack__ml__anomaly_detection_jobs_health": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Count of ML anomaly detection jobs health rules installed by integrations"
+              }
             }
           }
         },
