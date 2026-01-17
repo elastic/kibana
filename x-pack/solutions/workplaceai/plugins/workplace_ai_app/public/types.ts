@@ -6,7 +6,6 @@
  */
 
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
-import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -20,7 +19,6 @@ export interface WorkplaceAIAppPluginSetup {}
 export interface WorkplaceAIAppPluginStart {}
 
 export interface WorkplaceAIAppPluginSetupDependencies {
-  dataSourcesRegistry: DataSourcesRegistryPluginSetup;
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
