@@ -10,9 +10,10 @@ import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
 
-/* eslint-disable @kbn/eslint/scout_max_one_describe */
+// Failing: See https://github.com/elastic/kibana/issues/248929
+// /* eslint-disable @kbn/eslint/scout_max_one_describe */
 
-apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
+apiTest.describe.skip('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
   apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
@@ -53,50 +54,54 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
   });
 });
 
-apiTest.describe('APM integration not installed but setup completed', { tag: ['@ess'] }, () => {
-  let viewerApiCreditials: RoleApiCredentials;
-  let adminApiCreditials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ profilingSetup, requestAuth }) => {
-    if (!(await profilingSetup.checkStatus()).has_setup) {
-      await profilingSetup.setupResources();
-    }
-    viewerApiCreditials = await requestAuth.getApiKey('viewer');
-    adminApiCreditials = await requestAuth.getApiKey('admin');
-  });
-
-  apiTest('Admin user', async ({ apiClient }) => {
-    const adminRes = await apiClient.get(esResourcesEndpoint, {
-      headers: {
-        ...adminApiCreditials.apiKeyHeader,
-        'content-type': 'application/json',
-        'kbn-xsrf': 'reporting',
-      },
+apiTest.describe.skip(
+  'APM integration not installed but setup completed',
+  { tag: ['@ess'] },
+  () => {
+    let viewerApiCreditials: RoleApiCredentials;
+    let adminApiCreditials: RoleApiCredentials;
+    apiTest.beforeAll(async ({ profilingSetup, requestAuth }) => {
+      if (!(await profilingSetup.checkStatus()).has_setup) {
+        await profilingSetup.setupResources();
+      }
+      viewerApiCreditials = await requestAuth.getApiKey('viewer');
+      adminApiCreditials = await requestAuth.getApiKey('admin');
     });
 
-    const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBeTruthy();
-    expect(adminStatus.has_data).toBeFalsy();
-    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
-  });
+    apiTest('Admin user', async ({ apiClient }) => {
+      const adminRes = await apiClient.get(esResourcesEndpoint, {
+        headers: {
+          ...adminApiCreditials.apiKeyHeader,
+          'content-type': 'application/json',
+          'kbn-xsrf': 'reporting',
+        },
+      });
 
-  apiTest('Viewer user', async ({ apiClient }) => {
-    const readRes = await apiClient.get(esResourcesEndpoint, {
-      headers: {
-        ...viewerApiCreditials.apiKeyHeader,
-        'content-type': 'application/json',
-        'kbn-xsrf': 'reporting',
-      },
+      const adminStatus = adminRes.body;
+      expect(adminStatus.has_setup).toBeTruthy();
+      expect(adminStatus.has_data).toBeFalsy();
+      expect(adminStatus.pre_8_9_1_data).toBeFalsy();
     });
 
-    const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBeTruthy();
-    expect(readStatus.has_data).toBeFalsy();
-    expect(readStatus.pre_8_9_1_data).toBeFalsy();
-    expect(readStatus.has_required_role).toBeFalsy();
-  });
-});
+    apiTest('Viewer user', async ({ apiClient }) => {
+      const readRes = await apiClient.get(esResourcesEndpoint, {
+        headers: {
+          ...viewerApiCreditials.apiKeyHeader,
+          'content-type': 'application/json',
+          'kbn-xsrf': 'reporting',
+        },
+      });
 
-apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () => {
+      const readStatus = readRes.body;
+      expect(readStatus.has_setup).toBeTruthy();
+      expect(readStatus.has_data).toBeFalsy();
+      expect(readStatus.pre_8_9_1_data).toBeFalsy();
+      expect(readStatus.has_required_role).toBeFalsy();
+    });
+  }
+);
+
+apiTest.describe.skip('Profiling is setup and data is loaded', { tag: ['@ess'] }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
   apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
@@ -136,7 +141,7 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () 
   });
 });
 
-apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, () => {
+apiTest.describe.skip('Collector integration is not installed', { tag: ['@ess'] }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
     await profilingSetup.cleanup();

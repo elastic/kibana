@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { ModelProvider } from '@kbn/agent-builder-server';
+import type { ModelProvider } from '@kbn/onechat-server';
 import { compact, groupBy, mapValues, uniq } from 'lodash';
 import { selectRelevantFields } from './select_relevant_fields';
 import { getFieldType } from './get_field_type';
