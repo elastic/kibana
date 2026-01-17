@@ -47,6 +47,7 @@ import { ComponentTemplateFlyout } from './application/components/component_temp
 import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
 import { indexDataEnricher, type IndexDataEnricher } from './services';
+import { indexStatsEnricher } from './index_stats_enricher';
 
 export class IndexMgmtUIPlugin
   implements
@@ -166,6 +167,11 @@ export class IndexMgmtUIPlugin
     );
 
     this.apiService = new PublicApiService(coreSetup.http);
+
+    // disabled in serverless
+    if (this.config.enableIndexStats) {
+      this.indexDataEnricher.add(indexStatsEnricher);
+    }
 
     return {
       apiService: this.apiService,

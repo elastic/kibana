@@ -8,14 +8,14 @@
 import { addBasePath } from '../../../services';
 import type { RouteDependencies } from '../../../types';
 
-export const registerGetFollowerInfoRoute = ({
+export const registerExplainRoute = ({
   router,
   license,
   lib: { handleEsError },
 }: RouteDependencies) => {
   router.get(
     {
-      path: addBasePath('/follower_info'),
+      path: addBasePath('/explain'),
       security: {
         authz: {
           enabled: false,
@@ -26,15 +26,9 @@ export const registerGetFollowerInfoRoute = ({
     },
     license.guardApiRoute(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-
       try {
-        const body = await client.asCurrentUser.ccr.followInfo({
-          index: '*',
-        });
-
-        return response.ok({
-          body,
-        });
+        const body = await client.asCurrentUser.ilm.explainLifecycle({ index: '*,.*' });
+        return response.ok({ body });
       } catch (error) {
         return handleEsError({ error, response });
       }

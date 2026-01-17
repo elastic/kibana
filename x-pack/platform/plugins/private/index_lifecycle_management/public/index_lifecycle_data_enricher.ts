@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import type { Index } from '@kbn/index-management-shared-types';
+import type { IlmExplainLifecycleResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { EnricherResponse } from '@kbn/index-management-shared-types';
 
-export const indexLifecycleDataEnricher = async (
-  indicesList: Index[],
-  client: IScopedClusterClient
-): Promise<Index[]> => {
-  if (!indicesList || !indicesList.length) {
-    return [];
-  }
+const SOURCE = 'index_lifecycle_data_enricher';
 
-  const { indices: ilmIndicesData } = await client.asCurrentUser.ilm.explainLifecycle({
-    index: '*,.*',
-  });
-  return indicesList.map((index: Index) => {
-    return {
-      ...index,
-      // simply appends ilm data if it exists
-      ilm: { ...(ilmIndicesData[index.name] || {}) },
-    };
-  });
-};
+export const indexLifecycleDataEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
+  client
+    .get<IlmExplainLifecycleResponse>('/api/index_lifecycle_management/explain')
+    .then((response) => {
+      return {
+        indices: Object.keys(response.indices).map((index) => ({
+          name: index,
+          ilm: response.indices[index],
+        })),
+        source: SOURCE,
+      };
+    })
+    .catch((error) => {
+      return {
+        error: 'Failed to load index lifecycle data',
+        source: SOURCE,
+      };
+    });

@@ -6,14 +6,39 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { Index } from '@kbn/index-management-shared-types';
-import { isArray } from 'lodash';
+import type { RollupGetRollupIndexCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { EnricherResponse } from '@kbn/index-management-shared-types';
 
-export const rollupDataEnricher = async (indicesList: Index[], client: HttpSetup) => {
-  if (!indicesList || !indicesList.length) {
-    return Promise.resolve(indicesList);
-  }
+const SOURCE = 'rollup_data_enricher';
 
+// todo
+// look at x-pack/platform/plugins/private/rollup/server/rollup_data_enricher.ts
+// account for aliases
+export const rollupDataEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
+  client
+    .get<RollupGetRollupIndexCapsResponse>('/api/rollup/indices')
+    .then((response) => {
+      return {
+        indices: Object.keys(response).reduce((acc, rollupJob) => {
+          response[rollupJob].rollup_jobs.forEach((job) => {
+            acc.push({
+              name: job.rollup_index,
+              isRollupIndex: true,
+            });
+          });
+          return acc;
+        }, [] as { name: string; isRollupIndex: true }[]),
+        source: SOURCE,
+      };
+    })
+    .catch((error) => {
+      return {
+        error: 'Failed to load rollup data',
+        source: SOURCE,
+      };
+    });
+
+/*
   try {
     const rollupJobData = await client.asCurrentUser.rollup.getRollupIndexCaps({
       index: '_all',
@@ -33,4 +58,4 @@ export const rollupDataEnricher = async (indicesList: Index[], client: HttpSetup
     // swallow exceptions and return original list
     return indicesList;
   }
-};
+*/

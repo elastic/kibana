@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
@@ -25,7 +24,6 @@ export function registerIndicesGet({ router, lib: { handleEsError }, config }: R
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const promiseArray: [Promise<IndicesGetResponse>, Promise<MeteringStatsResponse>][] = [];
 
       try {
         const indicesPromise = client.asCurrentUser.indices.get({
@@ -46,23 +44,24 @@ export function registerIndicesGet({ router, lib: { handleEsError }, config }: R
           features: ['aliases', 'settings'],
         });
 
-        // @ts-ignore
-        promiseArray[0] = [indicesPromise];
-
-        // todo when is this used?
+        // Used for serverless
+        let statsPromise: Promise<MeteringStatsResponse> | undefined;
         if (config.isSizeAndDocCountEnabled) {
-          const statsPromise = client.asSecondaryAuthUser.transport
+          // this api is internal only and therefore requires elevated privileges
+          statsPromise = client.asSecondaryAuthUser.transport
             .request<MeteringStatsResponse>({
               method: 'GET',
               path: '/_metering/stats/*',
             })
             .catch(() => ({ indices: [] }));
-          promiseArray[0].push(statsPromise);
         } else {
-          promiseArray[0].push(Promise.resolve({ indices: [] }));
+          statsPromise = Promise.resolve({ indices: [] });
         }
 
-        const [indices, { indices: indicesStats }] = await Promise.all(promiseArray[0]);
+        const [indices, { indices: indicesStats }] = await Promise.all([
+          indicesPromise,
+          statsPromise,
+        ]);
 
         const indexStatsMap = indicesStats.reduce((prev, index) => {
           prev[index.name] = { size_in_bytes: index.size_in_bytes, num_docs: index.num_docs };

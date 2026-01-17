@@ -51,6 +51,7 @@ import type { FieldFromIndicesRequest } from '../../../common';
 import type { Fields } from '../components/mappings_editor/types';
 import type { IndexData } from '../../../common/types/indices';
 import type { UserStartPrivilegesResponse } from '../../../server/lib/types';
+import { indexDataEnricher } from '../../services';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -161,61 +162,46 @@ interface IndexMetadata {
 }
 
 export async function loadIndices() {
-  // todo get config
-  const config = {
-    isIndexStatsEnabled: true,
-    isSizeAndDocCountEnabled: true,
-    // until endpoit is implemented
-    // isSizeAndDocCountEnabled: false,
-  };
+  // todo change api
+  // Run all requests in parallel
+  const enrichedPromises = indexDataEnricher.enrichIndices(httpService.httpClient);
 
-  const promises: [Promise<Record<string, IndexData>>, Promise<IndicesStatsResponse['indices']>][] =
-    [];
-
-  const getIndicesPromise = httpService.httpClient.get<Record<string, IndexData>>(
+  // we'll wait for the main request to complete first
+  // the index list has stability - unsure if this is an actual
+  // issue but its certainly possible looking at the code
+  const indices = await httpService.httpClient.get<Record<string, IndexData>>(
     `${API_BASE_PATH}/indices_get`
   );
-  // @ts-expect-error
-  promises.push([getIndicesPromise]);
-  if (config.isIndexStatsEnabled) {
-    const getIndicesStatsPromise = httpService.httpClient.get<IndicesStatsResponse['indices']>(
-      `${API_BASE_PATH}/indices_stats`
-    );
-    promises[0].push(getIndicesStatsPromise);
-  } else {
-    promises[0].push(Promise.resolve({} as IndicesStatsResponse['indices']));
-  }
 
-  // todo - this will run at speed of slowest promise
-  // would be better to run independently and combine later
-  const [indices, indicesStats] = await Promise.all(promises[0]);
+  // todo emit update here
 
+  // todo review types
   const indicesWithMetadata: Record<string, IndexMetadata> = indices;
 
-  if (Object.keys(indicesStats || {}).length > 0) {
-    Object.values(indicesWithMetadata).forEach((baseResponse) => {
-      const indexStats = indicesStats![baseResponse.name] || {};
+  // iterate over all the requests for additional info
+  enrichedPromises.forEach((enrichedPromise) => {
+    enrichedPromise
+      .then((enriched) => {
+        // todo
+        // iterate over the array of additional data and merge it into the original index data
+        if (enriched.indices) {
+          enriched.indices.forEach((enrichedIndex) => {
+            Object.assign(indicesWithMetadata[enrichedIndex.name], enrichedIndex);
+          });
+        } else {
+          console.error(enriched.error);
+        }
+      })
 
-      baseResponse.health = indexStats?.health;
-      baseResponse.status = indexStats?.status;
-      baseResponse.uuid = indexStats?.uuid;
-      baseResponse.documents = indexStats?.primaries?.docs?.count ?? 0;
-      baseResponse.documents_deleted = indexStats?.primaries?.docs?.deleted ?? 0;
-      baseResponse.size = new ByteSizeValue(
-        indexStats?.total?.store?.size_in_bytes ?? 0
-      ).toString();
-      baseResponse.primary_size = new ByteSizeValue(
-        indexStats?.primaries?.store?.size_in_bytes ?? 0
-      ).toString();
-    });
-  }
+      .catch((error) => {
+        // silently swallow enricher response errors
+        // todo errors should be collected and displayed to the user
+        console.error(error);
+      });
+    // todo add finally block to emit update here
+  });
 
-  // todo change api
-  // const enriched = await indexDataEnricher.enrichIndices(indices, httpService.httpClient);
-
-  // if neither index stats (Stateful only API)
-  // nor size and doc count are enabled (ES3 only API)
-  // return the base response
+  // this is currently returning unenriched data
   return Object.values(indicesWithMetadata);
 }
 

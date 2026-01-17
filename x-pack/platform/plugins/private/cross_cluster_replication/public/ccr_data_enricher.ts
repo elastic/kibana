@@ -7,21 +7,24 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { CcrFollowInfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { EnricherResponse } from '@kbn/index-management-shared-types';
+const SOURCE = 'ccr_data_enricher';
 
-export const ccrDataEnricher = async (client: HttpSetup) =>
-  client.get<CcrFollowInfoResponse>('/internal/ccr/follower_info');
-
-/*
-this is just setting a boolean whether its a follower index
-indicesList.map((index) => {
-      const isFollowerIndex = !!followerIndices.find(
-        (followerIndex: { follower_index: string }) => {
-          return followerIndex.follower_index === index.name;
-        }
-      );
+export const ccrDataEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
+  client
+    .get<CcrFollowInfoResponse>('/api/cross_cluster_replication/follower_info')
+    .then((response) => {
       return {
-        ...index,
-        isFollowerIndex,
+        indices: response.follower_indices.map((followerIndex) => ({
+          name: followerIndex.follower_index,
+          isFollowerIndex: true,
+        })),
+        source: SOURCE,
+      };
+    })
+    .catch((error) => {
+      return {
+        error: 'Failed to load cross cluster replication data',
+        source: SOURCE,
       };
     });
-    */
