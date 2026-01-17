@@ -56,7 +56,7 @@ import { buildIgnoreMissingFilter, castFieldsToGrokTypes, buildWhereCondition } 
 export function convertGrokProcessorToESQL(processor: GrokProcessor): ESQLAstCommand[] {
   const {
     from,
-    patterns, // eslint-disable-next-line @typescript-eslint/naming-convention
+    patterns,
     ignore_missing = false, // default mirrors ingest grok behavior
     where,
   } = processor;

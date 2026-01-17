@@ -882,7 +882,6 @@ describe('rules schema', () => {
   });
 
   test('saved_id is required when type is saved_query and will not validate without it', () => {
-    /* eslint-disable @typescript-eslint/naming-convention */
     const { saved_id, ...payload } = getCreateSavedQueryRulesSchemaMock();
 
     const result = RuleCreateProps.safeParse(payload);
@@ -1010,7 +1009,6 @@ describe('rules schema', () => {
     });
 
     test('threat_index, threat_query, and threat_mapping are required when type is "threat_match" and validation fails without them', () => {
-      /* eslint-disable @typescript-eslint/naming-convention */
       const { threat_index, threat_query, threat_mapping, ...payload } =
         getCreateThreatMatchRulesSchemaMock();
 

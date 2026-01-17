@@ -62,7 +62,6 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
         }
       );
     } else {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { action, parentId, customIdentifier, where, ignore_failure, ...rest } = step;
       return JSON.stringify(rest);
     }

@@ -159,7 +159,7 @@ describe('Handle request to schedule', () => {
         schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
@@ -248,7 +248,7 @@ describe('Handle request to schedule', () => {
         notification: { email: { to: ['a@b.com'] } },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
@@ -339,7 +339,7 @@ describe('Handle request to schedule', () => {
         },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
