@@ -57,6 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await dataViews.switchTo('my-example-logs');
         await PageObjects.discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle();
@@ -95,6 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await dataViews.switchTo('my-example-metrics');
         await PageObjects.discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle();
