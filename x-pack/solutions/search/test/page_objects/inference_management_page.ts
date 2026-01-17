@@ -53,6 +53,10 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         expect(isEnabled).to.be(false);
       },
 
+      async expectPreconfiguredEndpointsToHaveLockIcon() {
+        await testSubjects.existOrFail('preconfigured-endpoint-icon');
+      },
+
       async expectEndpointWithoutUsageTobeDelete() {
         const userDefinedEdnpoint = await testSubjects.find('inferenceUIDeleteAction-user-defined');
         await userDefinedEdnpoint.click();

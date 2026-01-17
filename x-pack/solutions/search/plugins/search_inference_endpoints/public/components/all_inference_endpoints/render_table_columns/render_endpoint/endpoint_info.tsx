@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { isEndpointPreconfigured } from '../../../../utils/preconfigured_endpoint_helper';
@@ -23,35 +23,26 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({
   endpointInfo,
   isCloudEnabled,
 }) => (
-  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-        <EuiFlexItem grow={false}>
-          <span>
-            <strong>{inferenceId}</strong>
-          </span>
-        </EuiFlexItem>
-        {isProviderTechPreview(endpointInfo) ? (
-          <EuiFlexItem grow={false}>
-            <span>
-              <EuiBetaBadge
-                label={i18n.TECH_PREVIEW_LABEL}
-                size="s"
-                color="subdued"
-                alignment="middle"
-              />
-            </span>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </EuiFlexItem>
+  <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
     {isEndpointPreconfigured(inferenceId) ? (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={i18n.PRECONFIGURED_LABEL}>
+          <EuiIcon type="lock" size="m" data-test-subj="preconfigured-endpoint-icon" />
+        </EuiToolTip>
+      </EuiFlexItem>
+    ) : null}
+    <EuiFlexItem grow={false}>
+      <span>
+        <strong>{inferenceId}</strong>
+      </span>
+    </EuiFlexItem>
+    {isProviderTechPreview(endpointInfo) ? (
       <EuiFlexItem grow={false}>
         <span>
           <EuiBetaBadge
-            label={i18n.PRECONFIGURED_LABEL}
+            label={i18n.TECH_PREVIEW_LABEL}
             size="s"
-            color="hollow"
+            color="subdued"
             alignment="middle"
           />
         </span>

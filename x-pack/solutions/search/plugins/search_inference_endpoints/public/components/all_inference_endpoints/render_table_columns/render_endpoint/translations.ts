@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const PRECONFIGURED_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.preconfigured',
   {
-    defaultMessage: 'PRECONFIGURED',
+    defaultMessage: 'Preconfigured',
   }
 );
 

@@ -49,6 +49,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
       });
 
+      it('preconfigured endpoints have lock icon', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsToHaveLockIcon();
+      });
+
       it('preconfigured endpoints can not be deleted', async () => {
         await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsCannotBeDeleted();
       });
