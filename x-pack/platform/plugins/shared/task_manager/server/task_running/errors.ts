@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { isResponseError } from '@kbn/es-errors';
+
 import { TaskErrorSource } from '../../common';
 
 export { TaskErrorSource };
@@ -69,8 +72,7 @@ export function getErrorSource(error: Error | DecoratedError): TaskErrorSource |
     return error[source];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((error as any)?.meta?.statusCode === 401) {
+  if (isResponseError(error) && error.statusCode === 401) {
     return TaskErrorSource.USER;
   }
 }
