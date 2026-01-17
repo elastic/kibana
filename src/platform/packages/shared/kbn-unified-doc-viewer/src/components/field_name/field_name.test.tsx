@@ -8,63 +8,93 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-plugin/common/stubs';
 import { FieldName } from './field_name';
+import { render, screen } from '@testing-library/react';
 
-describe('FieldName', function () {
+describe('FieldName', () => {
   test('renders a string field by providing fieldType and fieldName', () => {
-    const component = render(<FieldName fieldType="string" fieldName="test" />);
-    expect(component).toMatchSnapshot();
+    const FIELD_NAME = 'test';
+
+    render(<FieldName fieldName={FIELD_NAME} fieldType="string" />);
+
+    expect(screen.getByText(FIELD_NAME)).toBeVisible();
+    expect(screen.getByText('String')).toBeVisible();
   });
 
   test('renders a number field by providing a field record', () => {
-    const component = render(<FieldName fieldName={'test.test.test'} fieldType={'number'} />);
-    expect(component).toMatchSnapshot();
+    const FIELD_NAME = 'test.test.test';
+
+    render(<FieldName fieldName={FIELD_NAME} fieldType={'number'} />);
+
+    expect(screen.getByText(FIELD_NAME)).toBeVisible();
+    expect(screen.getByText('Number')).toBeVisible();
   });
 
   test('renders a geo field', () => {
-    const component = render(<FieldName fieldName={'test.test.test'} fieldType={'geo_point'} />);
-    expect(component).toMatchSnapshot();
+    const FIELD_NAME = 'test.test.test';
+
+    render(<FieldName fieldName={FIELD_NAME} fieldType={'geo_point'} />);
+
+    expect(screen.getByText(FIELD_NAME)).toBeVisible();
+    expect(screen.getByText('Geo point')).toBeVisible();
   });
 
   test('renders unknown field', () => {
-    const component = render(<FieldName fieldName={'test.test.test'} />);
-    expect(component).toMatchSnapshot();
+    const FIELD_NAME = 'test.test.test';
+
+    render(<FieldName fieldName={FIELD_NAME} />);
+
+    expect(screen.getByText(FIELD_NAME)).toBeVisible();
+    expect(screen.getByText('Unknown field')).toBeVisible();
   });
 
   test('renders with a search highlight', () => {
-    const component = render(
-      <FieldName fieldName={'test.test.test'} fieldType={'number'} highlight="te" />
-    );
-    expect(component).toMatchSnapshot();
+    render(<FieldName fieldName={'test.test.test'} fieldType={'number'} highlight="te" />);
+
+    expect(screen.getByText('te').closest('mark')).toBeVisible();
+    expect(screen.getByText('st.test.test')).toBeVisible();
+    expect(screen.getByText('Number')).toBeVisible();
   });
 
   test('renders when mapping is provided', () => {
-    const component = render(
+    const FIELD_MAP = 'bytes';
+    const FIELD_NAME = 'test';
+
+    render(
       <FieldName
-        fieldName="test"
+        fieldMapping={dataView.getFieldByName(FIELD_MAP)}
+        fieldName={FIELD_NAME}
         fieldType="number"
-        fieldMapping={dataView.getFieldByName('bytes')}
       />
     );
-    expect(component).toMatchSnapshot();
+
+    expect(screen.getByText('Number')).toBeVisible();
+    expect(screen.getByText(FIELD_MAP)).toBeVisible();
+    expect(screen.queryByText(FIELD_NAME)).not.toBeInTheDocument();
   });
 
   test('renders a custom description icon', () => {
-    const component = render(
+    const FIELD_DISPLAY_NAME = 'test description';
+    const FIELD_MAP = 'bytes';
+    const FIELD_NAME = 'test';
+
+    render(
       <FieldName
         fieldType="string"
-        fieldName="test"
+        fieldName={FIELD_NAME}
         fieldMapping={
           {
-            ...dataView.getFieldByName('bytes')!.spec,
-            customDescription: 'test description',
+            ...dataView.getFieldByName(FIELD_MAP)!.spec,
+            displayName: FIELD_DISPLAY_NAME,
           } as DataViewField
         }
       />
     );
-    expect(component).toMatchSnapshot();
+
+    expect(screen.getByText('String')).toBeVisible();
+    expect(screen.getByText(FIELD_DISPLAY_NAME)).toBeVisible();
+    expect(screen.queryByText(FIELD_NAME)).not.toBeInTheDocument();
   });
 });

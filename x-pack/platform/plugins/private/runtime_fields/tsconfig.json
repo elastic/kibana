@@ -1,25 +1,20 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "public/**/*",
-    "../../../../../typings/**/*",
-  ],
+  "include": ["public/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/es-ui-shared-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/test-jest-helpers",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/react-kibana-mount",
+    "@kbn/core-doc-links-browser-mocks"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

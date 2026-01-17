@@ -56,9 +56,11 @@ export const getAddAlertsTableAction = (
                 embeddable.addNewPanel(
                   {
                     panelType: EMBEDDABLE_ALERTS_TABLE_ID,
-                    serializedState: { rawState: { tableConfig } },
+                    serializedState: { tableConfig },
                   },
-                  true
+                  {
+                    displaySuccessMessage: true,
+                  }
                 );
               }}
             />

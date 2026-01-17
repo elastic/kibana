@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import type { MappingField } from '../utils/mappings';
 
 export interface MatchResult {
@@ -24,56 +25,49 @@ export const performMatchSearch = async ({
   index,
   size,
   esClient,
+  logger,
 }: {
   term: string;
   fields: MappingField[];
   index: string;
   size: number;
   esClient: ElasticsearchClient;
+  logger: Logger;
 }): Promise<PerformMatchSearchResponse> => {
   const textFields = fields.filter((field) => field.type === 'text');
   const semanticTextFields = fields.filter((field) => field.type === 'semantic_text');
+  const allSearchableFields = [...textFields, ...semanticTextFields];
 
-  const response = await esClient.search<any>({
+  // should replace `any` with `SearchRequest` type when the simplified retriever syntax is supported in @elastic/elasticsearch`
+  const searchRequest: any = {
     index,
     size,
     retriever: {
       rrf: {
         rank_window_size: size * 2,
-        retrievers: [
-          ...(textFields.length > 0
-            ? [
-                {
-                  standard: {
-                    query: {
-                      multi_match: {
-                        query: term,
-                        fields: textFields.map((field) => field.path),
-                      },
-                    },
-                  },
-                },
-              ]
-            : []),
-          ...semanticTextFields.map((field) => {
-            return {
-              standard: {
-                query: {
-                  match: {
-                    [field.path]: term,
-                  },
-                },
-              },
-            };
-          }),
-        ],
+        query: term,
+        fields: allSearchableFields.map((field) => field.path),
       },
     },
     highlight: {
       number_of_fragments: 5,
       fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
     },
-  });
+  };
+
+  logger.debug(`Elasticsearch search request: ${JSON.stringify(searchRequest, null, 2)}`);
+
+  let response;
+  try {
+    response = await esClient.search<any>(searchRequest);
+  } catch (error) {
+    logger.debug(
+      `Elasticsearch search failed for index="${index}", term="${term}": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    throw error;
+  }
 
   const results = response.hits.hits.map<MatchResult>((hit) => {
     return {

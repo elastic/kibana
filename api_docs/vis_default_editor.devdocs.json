@@ -27,6 +27,8 @@
           }
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/default_editor_controller.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,6 +43,8 @@
               "any"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/default_editor_controller.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -55,6 +59,8 @@
                   "HTMLElement"
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/default_editor_controller.tsx",
+                "lineNumber": 25,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -85,6 +91,8 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/default_editor_controller.tsx",
+                "lineNumber": 26,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -101,6 +109,8 @@
                   "<DefaultEventMap>"
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/default_editor_controller.tsx",
+                "lineNumber": 27,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -122,6 +132,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/default_editor_controller.tsx",
+                "lineNumber": 28,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -148,6 +160,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/default_editor_controller.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -168,6 +182,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/default_editor_controller.tsx",
+                "lineNumber": 31,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -186,6 +202,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/default_editor_controller.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -215,6 +233,8 @@
           "<VisParams> & { legendPositions: LegendPositions; }) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/basic_options.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -236,6 +256,8 @@
               "<VisParams> & { legendPositions: LegendPositions; }"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/basic_options.tsx",
+            "lineNumber": 28,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -255,6 +277,8 @@
           "({\n  'data-test-subj': dataTestSubj,\n  colorsRange,\n  setValue,\n  setValidity,\n  setTouched,\n}: ColorRangesProps) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/color_ranges.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -269,6 +293,8 @@
               "ColorRangesProps"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/color_ranges.tsx",
+            "lineNumber": 28,
+            "columnNumber": 22,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -288,6 +314,8 @@
           "({\n  disabled,\n  colorSchema,\n  colorSchemas,\n  invertColors,\n  uiState,\n  setValue,\n  showHelpText = true,\n}: ColorSchemaOptionsProps) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/color_schema.tsx",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -302,6 +330,8 @@
               "ColorSchemaOptionsProps"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/color_schema.tsx",
+            "lineNumber": 33,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -325,6 +355,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/utils.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -341,6 +373,8 @@
               "T[]"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/utils.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -358,6 +392,8 @@
               "TGroupBy"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/utils.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -375,6 +411,8 @@
               "TLabelName"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/utils.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -390,6 +428,8 @@
               "TKeyName | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/utils.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -411,6 +451,8 @@
           "({ legendSize, onLegendSizeChange, isVerticalLegend, showAutoOption, }: LegendSizeSettingsProps) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/legend_size_settings.tsx",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -425,6 +467,8 @@
               "LegendSizeSettingsProps"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/legend_size_settings.tsx",
+            "lineNumber": 62,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -446,6 +490,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/long_legend_options.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -460,6 +506,8 @@
               "LongLegendOptionsProps"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/long_legend_options.tsx",
+            "lineNumber": 26,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -489,6 +537,8 @@
           "<ParamName>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -510,6 +560,8 @@
               "<ParamName>"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 34,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -531,6 +583,8 @@
           "<ParamName>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/palette_picker.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -546,6 +600,8 @@
               "<ParamName>"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/palette_picker.tsx",
+            "lineNumber": 28,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -567,6 +623,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/percentage_mode.tsx",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -581,6 +639,8 @@
               "PercentageModeOptionProps"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/percentage_mode.tsx",
+            "lineNumber": 29,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -600,6 +660,8 @@
           "({\n  label,\n  max,\n  min,\n  showInput,\n  showLabels,\n  showValue = true,\n  step,\n  paramName,\n  value,\n  setValue,\n}: RangeOptionProps<ParamName>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/range.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -614,6 +676,8 @@
               "RangeOptionProps<ParamName>"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/range.tsx",
+            "lineNumber": 28,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -633,6 +697,8 @@
           "({\n  'data-test-subj': dataTestSubj = 'range',\n  addRangeValues,\n  error,\n  value = [],\n  hidePlaceholders,\n  setValue,\n  setTouched,\n  setValidity,\n  validateRange,\n}: RangesParamEditorProps) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/ranges.tsx",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -647,6 +713,8 @@
               "RangesParamEditorProps"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/ranges.tsx",
+            "lineNumber": 57,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -668,6 +736,8 @@
           "({\n  disabled,\n  error,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}: NumberInputOptionProps<ParamName>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/required_number_input.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -682,6 +752,8 @@
               "NumberInputOptionProps<ParamName>"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/required_number_input.tsx",
+            "lineNumber": 34,
+            "columnNumber": 62,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -701,6 +773,8 @@
           "({\n  disabled,\n  helpText,\n  id,\n  label,\n  labelAppend,\n  options,\n  paramName,\n  value,\n  setValue,\n  'data-test-subj': dataTestSubj,\n}: SelectOptionProps<ParamName, ValidParamValues>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/select.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -715,6 +789,8 @@
               "SelectOptionProps<ParamName, ValidParamValues>"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/select.tsx",
+            "lineNumber": 28,
+            "columnNumber": 91,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -734,6 +810,8 @@
           "({\n  'data-test-subj': dataTestSubj,\n  tooltip,\n  label,\n  disabled,\n  paramName,\n  value = false,\n  setValue,\n}: SwitchOptionProps<ParamName>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/switch.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -748,6 +826,8 @@
               "SwitchOptionProps<ParamName>"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/switch.tsx",
+            "lineNumber": 24,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -767,6 +847,8 @@
           "({\n  'data-test-subj': dataTestSubj,\n  disabled,\n  helpText,\n  label,\n  paramName,\n  value = '',\n  setValue,\n}: TextInputOptionProps<ParamName>) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/text_input.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -781,6 +863,8 @@
               "TextInputOptionProps<ParamName>"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/text_input.tsx",
+            "lineNumber": 23,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -802,6 +886,8 @@
           "(setValidity: (isValid: boolean) => void, isValid: boolean) => void"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/utils/agg_utils.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -816,6 +902,8 @@
               "(isValid: boolean) => void"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/utils/agg_utils.ts",
+            "lineNumber": 93,
+            "columnNumber": 24,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -831,6 +919,8 @@
               "boolean"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/utils/agg_utils.ts",
+            "lineNumber": 93,
+            "columnNumber": 65,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -859,6 +949,8 @@
           "<ParamName>"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -873,6 +965,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -887,6 +981,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -901,6 +997,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -915,6 +1013,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -929,6 +1029,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -943,6 +1045,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -957,6 +1061,8 @@
               "ParamName"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -971,6 +1077,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -985,6 +1093,8 @@
               "number | \"\" | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -999,6 +1109,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1013,6 +1125,8 @@
               "(paramName: ParamName, value: number | \"\") => void"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1027,6 +1141,8 @@
                   "ParamName"
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+                "lineNumber": 25,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1042,6 +1158,8 @@
                   "number | \"\""
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/components/options/number_input.tsx",
+                "lineNumber": 25,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1060,6 +1178,8 @@
         "label": "RangeValues",
         "description": [],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/ranges.tsx",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1074,6 +1194,8 @@
               "\"range\" | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/ranges.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1088,6 +1210,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/ranges.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1102,6 +1226,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/controls/ranges.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1118,6 +1244,8 @@
         "label": "DefaultEditorSize",
         "description": [],
         "path": "src/platform/plugins/private/vis_default_editor/public/editor_size.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1143,6 +1271,8 @@
           "[]) => void"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/color_ranges.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1155,6 +1285,8 @@
             "label": "paramName",
             "description": [],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/color_ranges.tsx",
+            "lineNumber": 18,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1176,6 +1308,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/color_ranges.tsx",
+            "lineNumber": 18,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1209,6 +1343,8 @@
           "[T]) => void"
         ],
         "path": "src/platform/plugins/private/vis_default_editor/public/components/options/color_schema.tsx",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1224,6 +1360,8 @@
               "T"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/color_schema.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1245,6 +1383,8 @@
               "[T]"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/components/options/color_schema.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1261,6 +1401,8 @@
         "label": "visEditorSidebarStyles",
         "description": [],
         "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1278,6 +1420,8 @@
               "SerializedStyles"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1293,6 +1437,8 @@
                   "<{}>"
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+                "lineNumber": 14,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1314,6 +1460,8 @@
               "SerializedStyles"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1329,6 +1477,8 @@
                   "<{}>"
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+                "lineNumber": 23,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1350,6 +1500,8 @@
               "SerializedStyles"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1365,6 +1517,8 @@
                   "<{}>"
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+                "lineNumber": 30,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1386,6 +1540,8 @@
               "SerializedStyles"
             ],
             "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1401,6 +1557,8 @@
                   "<{}>"
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+                "lineNumber": 34,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

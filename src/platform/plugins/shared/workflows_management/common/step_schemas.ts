@@ -50,6 +50,12 @@ class StepSchemas {
     return this.workflowsExtensions?.getAllStepDefinitions() ?? [];
   }
 
+  public getStepDefinition(
+    stepTypeId: string
+  ): PublicStepDefinition | ServerStepDefinition | undefined {
+    return this.workflowsExtensions?.getStepDefinition(stepTypeId);
+  }
+
   /**
    * Helper function to check if a step definition is a public step definition
    */

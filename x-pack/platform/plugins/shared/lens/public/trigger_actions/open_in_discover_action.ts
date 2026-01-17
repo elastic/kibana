@@ -42,7 +42,7 @@ export const createOpenInDiscoverAction = (
     },
     isCompatible: async (context: EmbeddableApiContext) => {
       const { isCompatible } = await getDiscoverHelpersAsync();
-      return await isCompatible({
+      return isCompatible({
         hasDiscoverAccess,
         locator,
         dataViews,

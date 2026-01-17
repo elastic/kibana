@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Filter, TimeRange } from '@kbn/es-query';
@@ -201,7 +200,6 @@ export function ObservabilityAlertSearchBar({
           <AlertFilterControls
             dataViewSpec={dataViewSpec}
             spaceId={spaceId}
-            chainingSystem="HIERARCHICAL"
             controlsUrlState={controlConfigs}
             setControlsUrlState={onControlConfigsChange}
             filters={aggregatedFilters}
@@ -215,7 +213,6 @@ export function ObservabilityAlertSearchBar({
               dataViews,
               storage: Storage,
             }}
-            ControlGroupRenderer={ControlGroupRenderer}
             onInit={onControlApiAvailable}
           />
         )}

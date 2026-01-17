@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type React from 'react';
+
 export type LayoutComponent =
   | 'banner'
   | 'header'
@@ -15,7 +17,10 @@ export type LayoutComponent =
   | 'sidebar'
   | 'application';
 export type ApplicationComponent = 'topBar' | 'bottomBar' | 'content';
-export type LayoutProperty = 'top' | 'bottom' | 'left' | 'right' | 'height' | 'width';
+export type LayoutProperty = keyof Pick<
+  React.CSSProperties,
+  'top' | 'bottom' | 'left' | 'right' | 'height' | 'width' | 'marginBottom' | 'marginRight'
+>;
 
 export type LayoutVarName = `${LayoutComponent}.${LayoutProperty}`;
 export type ApplicationVarName = `application.${ApplicationComponent}.${LayoutProperty}`;

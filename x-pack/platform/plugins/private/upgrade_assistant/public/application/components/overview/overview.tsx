@@ -66,10 +66,10 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
 
   const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
   const setCompletedStep = (step: OverviewStep, isCompleted: boolean) => {
-    setCompletedStepsMap({
-      ...completedStepsMap,
+    setCompletedStepsMap((prevStepsMap) => ({
+      ...prevStepsMap,
       [step]: isCompleted,
-    });
+    }));
   };
 
   const versionTooltipContent = () => {
