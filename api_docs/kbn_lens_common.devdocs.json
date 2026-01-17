@@ -21,6 +21,128 @@
     "functions": [
       {
         "parentPluginId": "@kbn/lens-common",
+        "id": "def-common.cleanupFormulaReferenceColumns",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanupFormulaReferenceColumns",
+        "description": [],
+        "signature": [
+          "(layer: Omit<",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.FormBasedLayer",
+            "text": "FormBasedLayer"
+          },
+          ", \"indexPatternId\">) => Omit<",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.FormBasedLayer",
+            "text": "FormBasedLayer"
+          },
+          ", \"indexPatternId\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common/datasources/form_based/helpers.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.cleanupFormulaReferenceColumns.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "layer",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "@kbn/lens-common",
+                "scope": "common",
+                "docId": "kibKbnLensCommonPluginApi",
+                "section": "def-common.FormBasedLayer",
+                "text": "FormBasedLayer"
+              },
+              ", \"indexPatternId\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/datasources/form_based/helpers.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-common",
+        "id": "def-common.getFormulaColumnsFromLayer",
+        "type": "Function",
+        "tags": [],
+        "label": "getFormulaColumnsFromLayer",
+        "description": [],
+        "signature": [
+          "(layer: Omit<",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.FormBasedLayer",
+            "text": "FormBasedLayer"
+          },
+          ", \"indexPatternId\">) => [string, ",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.FormulaIndexPatternColumn",
+            "text": "FormulaIndexPatternColumn"
+          },
+          "][]"
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common/datasources/form_based/helpers.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.getFormulaColumnsFromLayer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "layer",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "@kbn/lens-common",
+                "scope": "common",
+                "docId": "kibKbnLensCommonPluginApi",
+                "section": "def-common.FormBasedLayer",
+                "text": "FormBasedLayer"
+              },
+              ", \"indexPatternId\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/datasources/form_based/helpers.ts",
+            "lineNumber": 28,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-common",
         "id": "def-common.getLensLayerTypeTabDisplayName",
         "type": "Function",
         "tags": [],
@@ -100,6 +222,127 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-common",
+        "id": "def-common.getReferencedColumnIds",
+        "type": "Function",
+        "tags": [],
+        "label": "getReferencedColumnIds",
+        "description": [],
+        "signature": [
+          "(layer: Omit<",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.FormBasedLayer",
+            "text": "FormBasedLayer"
+          },
+          ", \"indexPatternId\">, columnId: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common/datasources/form_based/helpers.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.getReferencedColumnIds.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "layer",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "@kbn/lens-common",
+                "scope": "common",
+                "docId": "kibKbnLensCommonPluginApi",
+                "section": "def-common.FormBasedLayer",
+                "text": "FormBasedLayer"
+              },
+              ", \"indexPatternId\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/datasources/form_based/helpers.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.getReferencedColumnIds.$2",
+            "type": "string",
+            "tags": [],
+            "label": "columnId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/datasources/form_based/helpers.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-common",
+        "id": "def-common.hasStateFormulaColumn",
+        "type": "Function",
+        "tags": [],
+        "label": "hasStateFormulaColumn",
+        "description": [],
+        "signature": [
+          "(state: ",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-common/datasources/form_based/helpers.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.hasStateFormulaColumn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/lens-common",
+                "scope": "common",
+                "docId": "kibKbnLensCommonPluginApi",
+                "section": "def-common.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/datasources/form_based/helpers.ts",
+            "lineNumber": 20,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
