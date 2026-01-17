@@ -95,8 +95,8 @@ When to use:
       const {
         jobIds,
         limit: jobsLimit = DEFAULT_JOBS_LIMIT,
-        start: rangeStart = DEFAULT_TIME_RANGE.start,
-        end: rangeEnd = DEFAULT_TIME_RANGE.end,
+        start: rangeStart,
+        end: rangeEnd,
       } = toolParams;
       const scopedEsClient = esClient.asCurrentUser;
       const mlClient = scopedEsClient.ml;

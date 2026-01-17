@@ -83,7 +83,7 @@ export async function createAlertingRuleFromTemplate(
       data: {
         alertTypeId: ruleTypeId,
         ...rest,
-        enabled: true,
+        enabled: false,
         actions: [],
         consumer: 'alerts',
       }, // what value for consumer will make sense?

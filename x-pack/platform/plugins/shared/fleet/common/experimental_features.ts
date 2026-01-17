@@ -17,7 +17,7 @@ const _allowedExperimentalValues = {
   enableAutoInstallContentPackages: true,
   enableOtelIntegrations: true,
   enableAgentStatusAlerting: true,
-  enableAgentPrivilegeLevelChange: false,
+  enableAgentPrivilegeLevelChange: true,
   installIntegrationsKnowledge: true,
   enableFleetPolicyRevisionsCleanupTask: true,
   agentlessPoliciesAPI: true, // When enabled, agentless policies API will be enabled.
@@ -25,6 +25,7 @@ const _allowedExperimentalValues = {
   disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
   enableEsqlViewInstall: false,
   newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
+  enableAgentRollback: false, // When enabled, agent upgrade rollback will be available in the API and UI.
 };
 
 /**

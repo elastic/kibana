@@ -8,6 +8,7 @@
  */
 
 import * as settings from '@kbn/management-settings-ids';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 
 export const OBSERVABILITY_PROJECT_SETTINGS = [
   settings.DEFAULT_ROUTE_ID,
@@ -33,6 +34,8 @@ export const OBSERVABILITY_PROJECT_SETTINGS = [
 export const OBSERVABILITY_STREAMS_TIERED_PROJECT_SETTINGS = [
   settings.OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   settings.OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
+  // This setting is only registered in complete tier. It's temporary, will be removed on 9.4.0 release.
+  WORKFLOWS_UI_SETTING_ID,
 ];
 
 export const OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS = [

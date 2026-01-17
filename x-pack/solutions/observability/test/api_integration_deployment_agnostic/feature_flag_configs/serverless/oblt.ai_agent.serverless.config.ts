@@ -11,7 +11,6 @@ import { services } from '../../services';
 export default createServerlessFeatureFlagTestConfig<typeof services>({
   services,
   serverlessProject: 'oblt',
-  kbnServerArgs: ['--feature_flags.overrides.aiAssistant.aiAgents.enabled=true'],
   testFiles: [require.resolve('./oblt.ai_agent.index.ts')],
   junit: {
     reportName:
