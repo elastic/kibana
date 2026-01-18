@@ -99,8 +99,11 @@ export async function changeDataView({
       injectCurrentTab(internalStateActions.updateAppState)({ appState: nextAppState })
     );
 
-    if (internalState.getState().expandedDoc) {
-      internalState.dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
+    const currentTab = getCurrentTab();
+    if (currentTab.expandedDoc) {
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId: currentTab.id, expandedDoc: undefined })
+      );
     }
   }
 
