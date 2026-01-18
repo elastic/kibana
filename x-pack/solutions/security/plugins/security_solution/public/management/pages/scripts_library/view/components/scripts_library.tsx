@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useEffect, useMemo, useCallback, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { SortableScriptLibraryFields } from '../../../../../../common/endpoint/types';
 import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
 import { useToasts } from '../../../../../common/lib/kibana';
@@ -28,14 +29,32 @@ export const ScriptsLibrary = memo(() => {
   } = useScriptsLibraryUrlParams();
 
   const { canReadScriptsLibrary } = useUserPrivileges().endpointPrivileges;
+  const { search: searchParams } = useLocation();
 
   const [queryParams, setQueryParams] = useState<ListScriptsRequestQuery>({
-    kuery: kueryFromUrl?.length ? kueryFromUrl : '',
+    kuery: kueryFromUrl,
     sortField: sortFieldFromUrl as SortableScriptLibraryFields,
     sortDirection: sortDirectionFromUrl,
     page: paginationFromUrlParams.page,
     pageSize: paginationFromUrlParams.pageSize,
   });
+
+  // update query state from URL params on page re-load or URL changes
+  useEffect(() => {
+    setQueryParams({
+      kuery: kueryFromUrl,
+      sortField: sortFieldFromUrl as SortableScriptLibraryFields,
+      sortDirection: sortDirectionFromUrl,
+      page: paginationFromUrlParams.page,
+      pageSize: paginationFromUrlParams.pageSize,
+    });
+  }, [
+    kueryFromUrl,
+    sortDirectionFromUrl,
+    sortFieldFromUrl,
+    paginationFromUrlParams.page,
+    paginationFromUrlParams.pageSize,
+  ]);
 
   const {
     data: scriptsData,
@@ -54,18 +73,15 @@ export const ScriptsLibrary = memo(() => {
   const onChangeScriptsTable = useCallback<ScriptsLibraryTableProps['onChange']>(
     ({ page, sort }) => {
       const { index, size } = page;
-      const pagingArgs = {
+      const pagingAndSortingArgs = {
         page: index + 1,
         pageSize: size,
-      };
-
-      const sortingArgs = {
         sortField: (sort?.field as SortableScriptLibraryFields) ?? 'name',
         sortDirection: sort?.direction ?? 'asc',
       };
 
-      setQueryParams((prevState) => ({ ...prevState, ...pagingArgs, ...sortingArgs }));
-      setPagingAndSortingParams({ ...pagingArgs, ...sortingArgs });
+      setQueryParams((prevState) => ({ ...prevState, ...pagingAndSortingArgs }));
+      setPagingAndSortingParams({ ...pagingAndSortingArgs });
 
       reFetchEndpointScriptsList();
     },
@@ -93,6 +109,7 @@ export const ScriptsLibrary = memo(() => {
           onChange={onChangeScriptsTable}
           queryParams={queryParams}
           totalItemCount={totalItemCount}
+          searchParams={searchParams}
           sort={{
             field: scriptsData?.sortField as SortableScriptLibraryFields,
             direction: scriptsData?.sortDirection,

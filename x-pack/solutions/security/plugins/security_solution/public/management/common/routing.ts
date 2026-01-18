@@ -34,13 +34,10 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
-  MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
 } from './constants';
 import { isDefaultOrMissing, getArtifactListPageUrlPath } from './url_routing';
-
-import type { ScriptsLibraryUrlParams } from '../pages/scripts_library/view/components/scripts_library_url_params';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -355,38 +352,4 @@ export const getPolicyProtectionUpdatesPath = (
   })}${appendSearch(
     querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
   )}`;
-};
-
-export const getScriptsLibraryPath = ({ query }: { query: ScriptsLibraryUrlParams }) => {
-  const filteredQuery = getFilteredQueryParams<ScriptsLibraryUrlParams>(query);
-  const urlQueryParams = querystringStringify<ScriptsLibraryUrlParams, typeof filteredQuery>(
-    filteredQuery
-  );
-
-  return `${generatePath(MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH, {
-    tabName: AdministrationSubTab.scriptsLibrary,
-  })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}` : ''}`)}`;
-};
-
-export const getScriptsDetailPath = ({ query }: { query: ScriptsLibraryUrlParams }) => {
-  const filteredQuery = getFilteredQueryParams<ScriptsLibraryUrlParams>(query);
-  const urlQueryParams = querystringStringify<ScriptsLibraryUrlParams, typeof filteredQuery>(
-    filteredQuery
-  );
-
-  const returnUrl = `${generatePath(MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH, {
-    tabName: AdministrationSubTab.scriptsLibrary,
-  })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}` : ''}`)}`;
-
-  return returnUrl;
-};
-
-const getFilteredQueryParams = <T extends object>(query: T): Partial<T> => {
-  const filteredQuery: Partial<T> = {};
-  Object.entries(query).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') {
-      filteredQuery[key as keyof T] = value as T[keyof T];
-    }
-  });
-  return filteredQuery;
 };

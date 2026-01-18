@@ -38,7 +38,7 @@ import type {
 } from '../../../../../../common/endpoint/types';
 import { scriptsLibraryLabels as tableLabels } from '../../translations';
 import { ScriptNameNavLink } from './script_name_nav_link';
-import { getScriptsDetailPath } from '../../../../common/routing';
+import { getScriptsDetailPath } from '../../../../common/url_routing';
 import { ScriptTablePlatformBadges } from './platform_badges';
 
 const columnWidths = {
@@ -56,6 +56,7 @@ interface GetScriptsLibraryTableColumnsProps {
   getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
   getTestId: (suffix?: string | undefined) => string | undefined;
   queryParams: ScriptsLibraryTableProps['queryParams'];
+  searchParams: ScriptsLibraryTableProps['searchParams'];
 }
 
 const getScriptsLibraryTableColumns = ({
@@ -63,6 +64,7 @@ const getScriptsLibraryTableColumns = ({
   getAppUrl,
   getTestId,
   queryParams,
+  searchParams,
 }: GetScriptsLibraryTableColumnsProps) => {
   const columns = [
     {
@@ -74,6 +76,7 @@ const getScriptsLibraryTableColumns = ({
       render: (name: string, item: EndpointScript) => {
         const toRoutePath = getScriptsDetailPath({
           query: { ...queryParams, selectedScriptId: item.id, show: 'details' },
+          search: searchParams,
         });
         const toRouteUrl = getAppUrl({ path: toRoutePath });
         return (
@@ -200,6 +203,7 @@ export interface ScriptsLibraryTableProps {
   items: ScriptItems;
   onChange: OnChangeTable;
   queryParams: ListScriptsRequestQuery;
+  searchParams: string;
   sort: {
     field?: SortableScriptLibraryFields;
     direction?: SortDirection;
@@ -214,6 +218,7 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
     items,
     onChange,
     queryParams,
+    searchParams,
     sort,
     totalItemCount,
   }) => {
@@ -297,6 +302,7 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
         <EuiHorizontalRule margin="xs" />
         <EuiBasicTable
           columns={columns}
+          data-test-subj={dataTestSubj}
           error={error}
           items={items}
           noItemsMessage={tableLabels.table.noItemsMessage}
@@ -306,7 +312,6 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
           rowProps={setTableRowProps}
           sorting={sorting as EuiTableSortingType<EndpointScript>}
           tableCaption={tableLabels.pageTitle}
-          data-test-subj={dataTestSubj}
         />
       </>
     );
