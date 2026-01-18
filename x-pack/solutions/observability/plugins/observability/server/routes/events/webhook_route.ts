@@ -64,18 +64,64 @@ export function registerWebhookRoute(core: CoreSetup, logger: Logger) {
         const esClient = coreContext.elasticsearch.client.asInternalUser;
         const eventsService = new EventsService(esClient);
 
+        const fingerprint = body.fingerprint as string | undefined;
+        const status = (body.status as EventStatus) || 'open';
+
+        // If fingerprint provided, check for existing alert (deduplication)
+        if (fingerprint) {
+          const existingAlert = await eventsService.findAlertByFingerprint(fingerprint);
+
+          if (existingAlert) {
+            logger.info(
+              `[Events Raw] Found existing alert ${existingAlert.id} with fingerprint ${fingerprint}`
+            );
+
+            if (status === 'resolved') {
+              // Resolve the existing alert
+              const updated = await eventsService.updateAlertStatus(existingAlert.id, 'resolved');
+              logger.info(`[Events Raw] Resolved existing alert: ${existingAlert.id}`);
+              return response.ok({
+                body: { event: updated, count: 1, action: 'resolved' },
+              });
+            } else {
+              // Update the existing alert (re-triggered)
+              const updated = await eventsService.updateAlert(existingAlert.id, {
+                title: body.title as string,
+                message: body.message as string,
+                severity: body.severity as EventSeverity,
+                status: 'open',
+                timestamp: new Date().toISOString(),
+                raw_payload: body.raw_payload as Record<string, unknown> | undefined,
+              });
+              logger.info(`[Events Raw] Updated existing alert: ${existingAlert.id}`);
+              return response.ok({
+                body: { event: updated, count: 1, action: 'updated' },
+              });
+            }
+          }
+        }
+
+        // No existing alert found or no fingerprint - create new one
+        logger.info(
+          `[Events Raw] ${
+            fingerprint
+              ? `No existing alert for fingerprint ${fingerprint}`
+              : 'No fingerprint provided'
+          }, creating new`
+        );
+
         const eventInput: ExternalEventInput = {
           title: body.title as string,
           message: body.message as string,
           severity: body.severity as EventSeverity,
           source: body.source as string,
-          status: (body.status as EventStatus) || 'open',
+          status,
           timestamp: (body.timestamp as string) || new Date().toISOString(),
           tags: Array.isArray(body.tags) ? (body.tags as string[]) : [],
           links: body.links as Array<{ label: string; url: string }> | undefined,
           raw_payload: body.raw_payload as Record<string, unknown> | undefined,
           connector_id: (body.connector_id as string) || connectorId,
-          fingerprint: body.fingerprint as string | undefined,
+          fingerprint,
         };
 
         const event = await eventsService.createEvent(eventInput);
@@ -104,7 +150,8 @@ export function registerWebhookRoute(core: CoreSetup, logger: Logger) {
         },
         authc: {
           enabled: false,
-          reason: 'Webhook endpoint for external services - authenticated via webhook_token parameter',
+          reason:
+            'Webhook endpoint for external services - authenticated via webhook_token parameter',
         },
       },
       options: {
@@ -226,7 +273,9 @@ export function registerWebhookRoute(core: CoreSetup, logger: Logger) {
         }
 
         // No existing alert found - create new one
-        logger.info(`[Webhook] No existing alert found for fingerprint ${fingerprint}, creating new`);
+        logger.info(
+          `[Webhook] No existing alert found for fingerprint ${fingerprint}, creating new`
+        );
 
         const eventInput: ExternalEventInput = {
           title,
@@ -296,4 +345,3 @@ function mapDatadogAlertType(alertType: string): EventSeverity {
   }
   return 'medium';
 }
-
