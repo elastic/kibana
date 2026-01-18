@@ -294,8 +294,8 @@ function InternalAlertsPage() {
           error instanceof Error
             ? error.message
             : typeof error === 'object' && error !== null && 'body' in error
-              ? (error as { body?: { message?: string } }).body?.message || 'Unknown error'
-              : 'Unknown error';
+            ? (error as { body?: { message?: string } }).body?.message || 'Unknown error'
+            : 'Unknown error';
         toasts.addDanger({
           title: i18n.translate('xpack.observability.alerts.generateError', {
             defaultMessage: 'Failed to generate mock event',
@@ -319,6 +319,7 @@ function InternalAlertsPage() {
       locators.get<RulesLocatorParams>(rulesLocatorID)
     ),
     <EuiButton
+      data-test-subj="o11yInternalAlertsPageGenerateMockEventButton"
       key="generateMockEventsButton"
       iconType="beaker"
       onClick={() => setIsGenerateModalOpen(true)}

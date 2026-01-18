@@ -63,7 +63,10 @@ export const unifiedAlertsSearchStrategyProvider = (
     RuleRegistrySearchResponse
   > | null = null;
   let startServicesPromise: Promise<
-    [CoreStart, { data: DataPluginStart; alerting: AlertingServerStart; spaces?: SpacesPluginStart }]
+    [
+      CoreStart,
+      { data: DataPluginStart; alerting: AlertingServerStart; spaces?: SpacesPluginStart }
+    ]
   > | null = null;
 
   const getStartServices = async () => {
@@ -99,7 +102,9 @@ export const unifiedAlertsSearchStrategyProvider = (
           const originalStrategy = await getOriginalStrategy();
 
           if (!originalStrategy) {
-            logger.error(`[UnifiedAlertsStrategy] Original strategy ${ORIGINAL_STRATEGY_NAME} not found`);
+            logger.error(
+              `[UnifiedAlertsStrategy] Original strategy ${ORIGINAL_STRATEGY_NAME} not found`
+            );
             return {
               rawResponse: {
                 hits: { total: { value: 0, relation: 'eq' }, hits: [] },
@@ -116,19 +121,25 @@ export const unifiedAlertsSearchStrategyProvider = (
             originalStrategy.search(request, options, deps).subscribe({
               next: (response) => {
                 logger.info(
-                  `[UnifiedAlertsStrategy] Got response from original strategy, isRunning: ${response.isRunning}, hits: ${response.rawResponse?.hits?.hits?.length || 0}`
+                  `[UnifiedAlertsStrategy] Got response from original strategy, isRunning: ${
+                    response.isRunning
+                  }, hits: ${response.rawResponse?.hits?.hits?.length || 0}`
                 );
                 lastResponse = response;
                 if (!response.isRunning) {
                   // Search is complete, now add external alerts
-                  logger.info(`[UnifiedAlertsStrategy] Original search complete, adding external alerts...`);
+                  logger.info(
+                    `[UnifiedAlertsStrategy] Original search complete, adding external alerts...`
+                  );
                   addExternalAlerts(response, request, deps, logger)
                     .then((merged) => {
                       logger.info(`[UnifiedAlertsStrategy] External alerts added, resolving...`);
                       resolve(merged);
                     })
                     .catch((err) => {
-                      logger.error(`[UnifiedAlertsStrategy] addExternalAlerts failed: ${err.message}`);
+                      logger.error(
+                        `[UnifiedAlertsStrategy] addExternalAlerts failed: ${err.message}`
+                      );
                       resolve(response);
                     }); // On error, return Kibana alerts only
                 }
@@ -179,7 +190,9 @@ async function addExternalAlerts(
     const externalQuery = buildExternalAlertsQuery(request, logger);
 
     logger.info(
-      `[UnifiedAlertsStrategy] Querying external alerts from ${EXTERNAL_ALERTS_INDEX} with query: ${JSON.stringify(externalQuery)}`
+      `[UnifiedAlertsStrategy] Querying external alerts from ${EXTERNAL_ALERTS_INDEX} with query: ${JSON.stringify(
+        externalQuery
+      )}`
     );
 
     // Query external alerts index
@@ -189,19 +202,27 @@ async function addExternalAlerts(
     });
 
     logger.info(
-      `[UnifiedAlertsStrategy] External query returned ${externalResponse.hits?.hits?.length || 0} hits`
+      `[UnifiedAlertsStrategy] External query returned ${
+        externalResponse.hits?.hits?.length || 0
+      } hits`
     );
 
     // Merge the results
     const merged = mergeAlertResponses(kibanaAlertsResponse, externalResponse, request);
     logger.info(
-      `[UnifiedAlertsStrategy] Merged: ${kibanaAlertsResponse.rawResponse?.hits?.hits?.length || 0} Kibana + ${externalResponse.hits?.hits?.length || 0} external = ${merged.rawResponse?.hits?.hits?.length || 0} total`
+      `[UnifiedAlertsStrategy] Merged: ${
+        kibanaAlertsResponse.rawResponse?.hits?.hits?.length || 0
+      } Kibana + ${externalResponse.hits?.hits?.length || 0} external = ${
+        merged.rawResponse?.hits?.hits?.length || 0
+      } total`
     );
     return merged;
   } catch (error: any) {
     // If external alerts query fails (e.g., index doesn't exist), just return Kibana alerts
     if (error?.meta?.statusCode === 404) {
-      logger.info(`[UnifiedAlertsStrategy] External alerts index ${EXTERNAL_ALERTS_INDEX} not found (404)`);
+      logger.info(
+        `[UnifiedAlertsStrategy] External alerts index ${EXTERNAL_ALERTS_INDEX} not found (404)`
+      );
     } else {
       logger.error(`[UnifiedAlertsStrategy] External alerts query failed: ${error.message}`);
     }
@@ -249,7 +270,9 @@ function buildExternalAlertsQuery(request: RuleRegistrySearchRequest, logger: Lo
 
         // Convert kibana.alert.time_range to @timestamp for external alerts
         if (filterStr.includes('kibana.alert.time_range')) {
-          const rangeFilter = f as { range?: { 'kibana.alert.time_range'?: Record<string, unknown> } };
+          const rangeFilter = f as {
+            range?: { 'kibana.alert.time_range'?: Record<string, unknown> };
+          };
           if (rangeFilter.range?.['kibana.alert.time_range']) {
             filter.push({
               range: {

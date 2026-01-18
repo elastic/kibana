@@ -7,4 +7,3 @@
 
 export { GenerateMockEventModal } from './generate_mock_event_modal';
 export type { GenerateMockEventModalProps } from './generate_mock_event_modal';
-

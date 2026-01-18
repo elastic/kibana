@@ -88,7 +88,8 @@ export function AlertsFlyout({
   } = useKibana().services;
 
   const isExternal = alert ? isExternalAlert(alert) : false;
-  const parsedAlert = alert && !isExternal ? parseAlert(observabilityRuleTypeRegistry)(alert) : null;
+  const parsedAlert =
+    alert && !isExternal ? parseAlert(observabilityRuleTypeRegistry)(alert) : null;
 
   const overviewTab = useMemo(() => {
     if (isExternal && alert) {
@@ -165,8 +166,8 @@ export function AlertsFlyout({
   const ariaLabel = isExternal
     ? getExternalAlertTitle(alert!)
     : alert && alert[ALERT_RULE_CATEGORY]
-      ? getAlertFlyoutAriaLabel(String(alert[ALERT_RULE_CATEGORY]))
-      : ALERT_FLYOUT_DEFAULT_TITLE;
+    ? getAlertFlyoutAriaLabel(String(alert[ALERT_RULE_CATEGORY]))
+    : ALERT_FLYOUT_DEFAULT_TITLE;
 
   // Get the flyout title
   const flyoutTitle = isExternal
@@ -200,10 +201,10 @@ export function AlertsFlyout({
                   defaultMessage="Alert"
                 />
               ) : (
-              <FormattedMessage
-                id="xpack.observability.alertFlyout.title.ruleName"
-                defaultMessage="Rule"
-              />
+                <FormattedMessage
+                  id="xpack.observability.alertFlyout.title.ruleName"
+                  defaultMessage="Rule"
+                />
               )}
               :&nbsp;
             </EuiText>
@@ -259,30 +260,36 @@ export function AlertsFlyout({
             ) : (
               // Kibana alert actions
               <>
-                {parsedAlert && !parsedAlert.link || tableId === SLO_ALERTS_TABLE_ID ? null : (
-              <EuiFlexItem grow={false}>
-                <EuiButton data-test-subj="alertsFlyoutViewInAppButton" fill href={viewInAppUrl}>
-                  {i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
-                    defaultMessage: 'View in app',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
+                {(parsedAlert && !parsedAlert.link) || tableId === SLO_ALERTS_TABLE_ID ? null : (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="alertsFlyoutViewInAppButton"
+                      fill
+                      href={viewInAppUrl}
+                    >
+                      {i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
+                        defaultMessage: 'View in app',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
                 {parsedAlert && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="alertsFlyoutAlertDetailsButton"
-                fill
-                href={
-                  prepend &&
-                  prepend(paths.observability.alertDetails(parsedAlert.fields['kibana.alert.uuid']))
-                }
-              >
-                {i18n.translate('xpack.observability.alertsFlyout.alertsDetailsButtonText', {
-                  defaultMessage: 'Alert details',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="alertsFlyoutAlertDetailsButton"
+                      fill
+                      href={
+                        prepend &&
+                        prepend(
+                          paths.observability.alertDetails(parsedAlert.fields['kibana.alert.uuid'])
+                        )
+                      }
+                    >
+                      {i18n.translate('xpack.observability.alertsFlyout.alertsDetailsButtonText', {
+                        defaultMessage: 'Alert details',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
                 )}
               </>
             )}

@@ -9,4 +9,3 @@ export {
   unifiedAlertsSearchStrategyProvider,
   UNIFIED_ALERTS_SEARCH_STRATEGY_NAME,
 } from './unified_alerts_search_strategy';
-

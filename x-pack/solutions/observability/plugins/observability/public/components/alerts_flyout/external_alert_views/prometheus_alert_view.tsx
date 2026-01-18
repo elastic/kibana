@@ -63,9 +63,7 @@ export const PrometheusAlertView: React.FC<PrometheusAlertViewProps> = ({ alert 
       }),
       description: (
         <EuiBadge
-          color={
-            prometheusState === 'firing' || status === 'active' ? 'danger' : 'success'
-          }
+          color={prometheusState === 'firing' || status === 'active' ? 'danger' : 'success'}
         >
           {(prometheusState || status)?.toUpperCase() || 'UNKNOWN'}
         </EuiBadge>
@@ -316,7 +314,12 @@ export const PrometheusAlertView: React.FC<PrometheusAlertViewProps> = ({ alert 
         <EuiFlexGroup gutterSize="m">
           {generatorURL && (
             <EuiFlexItem grow={false}>
-              <EuiLink href={generatorURL} target="_blank" external>
+              <EuiLink
+                data-test-subj="o11yPrometheusAlertViewViewExpressionInPrometheusLink"
+                href={generatorURL}
+                target="_blank"
+                external
+              >
                 {i18n.translate('xpack.observability.prometheusAlertView.viewExpression', {
                   defaultMessage: 'View Expression in Prometheus',
                 })}
@@ -325,7 +328,12 @@ export const PrometheusAlertView: React.FC<PrometheusAlertViewProps> = ({ alert 
           )}
           {externalUrl && (
             <EuiFlexItem grow={false}>
-              <EuiLink href={externalUrl} target="_blank" external>
+              <EuiLink
+                data-test-subj="o11yPrometheusAlertViewViewAlertInPrometheusLink"
+                href={externalUrl}
+                target="_blank"
+                external
+              >
                 {i18n.translate('xpack.observability.prometheusAlertView.viewInPrometheus', {
                   defaultMessage: 'View Alert in Prometheus',
                 })}
@@ -356,4 +364,3 @@ export const PrometheusAlertView: React.FC<PrometheusAlertViewProps> = ({ alert 
     </EuiFlexGroup>
   );
 };
-

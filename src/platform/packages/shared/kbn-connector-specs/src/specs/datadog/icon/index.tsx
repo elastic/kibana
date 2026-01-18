@@ -34,6 +34,4 @@ const DatadogIcon: React.FC<ConnectorIconProps> = (props) => {
   );
 };
 
-// eslint-disable-next-line import/no-default-export
 export default DatadogIcon;
-

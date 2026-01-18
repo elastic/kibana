@@ -336,7 +336,12 @@ export const SentryAlertView: React.FC<SentryAlertViewProps> = ({ alert }) => {
       {/* External link */}
       {externalUrl && (
         <EuiFlexItem>
-          <EuiLink href={externalUrl} target="_blank" external>
+          <EuiLink
+            data-test-subj="o11ySentryAlertViewLink"
+            href={externalUrl}
+            target="_blank"
+            external
+          >
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon type={sentryIcon} size="s" />
@@ -372,4 +377,3 @@ export const SentryAlertView: React.FC<SentryAlertViewProps> = ({ alert }) => {
     </EuiFlexGroup>
   );
 };
-

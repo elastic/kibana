@@ -226,12 +226,8 @@ const AlertsTableContent = typedForwardRef(
     // Memoized so that consumers can pass an inline object without causing re-renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const memoizedServices = useMemo(() => services, Object.values(services));
-    const {
-      casesConfiguration,
-      showInspectButton,
-      searchStrategy,
-      ...dataGridOnlyProps
-    } = publicDataGridProps;
+    const { casesConfiguration, showInspectButton, searchStrategy, ...dataGridOnlyProps } =
+      publicDataGridProps;
     const { data, cases: casesService, http, notifications, application, licensing } = services;
     const queryClient = useQueryClient({ context: AlertsQueryContext });
     const dataGridRef = useRef<EuiDataGridRefProps>(null);

@@ -42,8 +42,7 @@ export const PROMETHEUS_MOCKS: ExternalEventInput[] = [
   },
   {
     title: 'Disk Space Low',
-    message:
-      'Disk /dev/sda1 is 92% full on instance db-server:9090. Free space: 8GB remaining.',
+    message: 'Disk /dev/sda1 is 92% full on instance db-server:9090. Free space: 8GB remaining.',
     severity: 'high',
     source: 'prometheus',
     status: 'open',
@@ -90,4 +89,3 @@ export const PROMETHEUS_MOCKS: ExternalEventInput[] = [
     },
   },
 ];
-

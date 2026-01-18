@@ -91,10 +91,10 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   });
 
   const [selectedTab, setTab] = useState<EditConnectorTabs>(tab);
-  
+
   // Get action type model early so we can use it for initializing test params
   const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
-  
+
   /**
    * Test connector
    */

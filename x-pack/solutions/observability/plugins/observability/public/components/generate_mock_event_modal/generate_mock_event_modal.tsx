@@ -318,12 +318,17 @@ export function GenerateMockEventModal({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} disabled={isSubmitting}>
+        <EuiButtonEmpty
+          data-test-subj="o11yGenerateMockEventModalCancelButton"
+          onClick={onClose}
+          disabled={isSubmitting}
+        >
           {i18n.translate('xpack.observability.generateMockEvent.cancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
         <EuiButton
+          data-test-subj="o11yGenerateMockEventModalGenerateEventButton"
           onClick={handleSubmit}
           fill
           isLoading={isSubmitting}
@@ -337,4 +342,3 @@ export function GenerateMockEventModal({
     </EuiModal>
   );
 }
-

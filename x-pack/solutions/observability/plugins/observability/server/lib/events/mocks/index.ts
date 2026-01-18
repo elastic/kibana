@@ -27,4 +27,3 @@ export function getAllMockEvents(): ExternalEventInput[] {
 }
 
 export { PROMETHEUS_MOCKS, DATADOG_MOCKS, SENTRY_MOCKS };
-

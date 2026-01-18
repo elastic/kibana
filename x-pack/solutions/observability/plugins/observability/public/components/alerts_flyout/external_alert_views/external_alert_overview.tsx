@@ -77,9 +77,7 @@ export const ExternalAlertOverview: React.FC<ExternalAlertOverviewProps> = ({ al
       title: i18n.translate('xpack.observability.externalAlertOverview.source', {
         defaultMessage: 'Source',
       }),
-      description: (
-        <EuiBadge color="hollow">{source?.toUpperCase() || 'EXTERNAL'}</EuiBadge>
-      ),
+      description: <EuiBadge color="hollow">{source?.toUpperCase() || 'EXTERNAL'}</EuiBadge>,
     },
     {
       title: i18n.translate('xpack.observability.externalAlertOverview.alertTitle', {
@@ -217,7 +215,12 @@ export const ExternalAlertOverview: React.FC<ExternalAlertOverviewProps> = ({ al
       {/* External link */}
       {externalUrl && (
         <EuiFlexItem>
-          <EuiLink href={externalUrl} target="_blank" external>
+          <EuiLink
+            data-test-subj="o11yExternalAlertOverviewViewInSourceSystemLink"
+            href={externalUrl}
+            target="_blank"
+            external
+          >
             {i18n.translate('xpack.observability.externalAlertOverview.viewInSource', {
               defaultMessage: 'View in Source System',
             })}
@@ -246,4 +249,3 @@ export const ExternalAlertOverview: React.FC<ExternalAlertOverviewProps> = ({ al
     </EuiFlexGroup>
   );
 };
-

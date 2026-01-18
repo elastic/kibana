@@ -50,7 +50,12 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
   // This is important for Cases view which may pass empty ruleTypeIds for external alerts
   const effectiveRuleTypeIds =
     props.ruleTypeIds && props.ruleTypeIds.length > 0
-      ? [...new Set([...props.ruleTypeIds, ...OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES])]
+      ? [
+          ...new Set([
+            ...props.ruleTypeIds,
+            ...OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+          ]),
+        ]
       : OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES;
 
   // eslint-disable-next-line no-console

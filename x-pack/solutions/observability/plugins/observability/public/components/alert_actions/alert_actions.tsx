@@ -87,11 +87,11 @@ export function AlertActions(
     if (isExternal) {
       setViewInAppUrl(externalUrl);
     } else {
-    const alertLink = observabilityAlert.link;
-    if (!observabilityAlert.hasBasePath && prepend) {
-      setViewInAppUrl(prepend(alertLink ?? ''));
-    } else {
-      setViewInAppUrl(alertLink);
+      const alertLink = observabilityAlert.link;
+      if (!observabilityAlert.hasBasePath && prepend) {
+        setViewInAppUrl(prepend(alertLink ?? ''));
+      } else {
+        setViewInAppUrl(alertLink);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,12 +101,12 @@ export function AlertActions(
     if (isExternal) {
       setViewInAppUrl(externalUrl);
     } else {
-    const alertLink = observabilityAlert.link as unknown as string;
-    if (!observabilityAlert.hasBasePath) {
-      setViewInAppUrl(prepend(alertLink ?? ''));
-    } else {
-      setViewInAppUrl(alertLink);
-    }
+      const alertLink = observabilityAlert.link as unknown as string;
+      if (!observabilityAlert.hasBasePath) {
+        setViewInAppUrl(prepend(alertLink ?? ''));
+      } else {
+        setViewInAppUrl(alertLink);
+      }
     }
   }, [isExternal, externalUrl, observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
@@ -204,7 +204,7 @@ export function AlertActions(
 
     try {
       const { http } = services;
-      
+
       // Execute the connector's mute/unmute action
       const response = await http.post<{
         status: string;
@@ -247,7 +247,7 @@ export function AlertActions(
           }),
         });
       }
-      
+
       refresh?.();
     } catch (error) {
       notifications?.toasts.addDanger({
@@ -260,7 +260,15 @@ export function AlertActions(
     }
 
     closeActionsPopover();
-  }, [connectorId, getMonitorId, isMutedLocally, services, notifications, closeActionsPopover, refresh]);
+  }, [
+    connectorId,
+    getMonitorId,
+    isMutedLocally,
+    services,
+    notifications,
+    closeActionsPopover,
+    refresh,
+  ]);
 
   // External alert menu items
   const externalAlertMenuItems = useMemo(() => {

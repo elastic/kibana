@@ -98,16 +98,14 @@ const fetchAlert = async (
     // ignore error for retrieving external event
   }
 
-      return null;
+  return null;
 };
 
 /**
  * Converts an external event to EcsFieldsResponse format for compatibility
  * with the existing alert detail components
  */
-function convertExternalEventToEcsFields(
-  event: Record<string, unknown>
-): EcsFieldsResponse {
+function convertExternalEventToEcsFields(event: Record<string, unknown>): EcsFieldsResponse {
   return {
     '@timestamp': event.timestamp as string,
     'kibana.alert.uuid': event.id as string,
@@ -117,9 +115,7 @@ function convertExternalEventToEcsFields(
     'kibana.alert.severity': event.severity as string,
     'kibana.alert.source': event.source as string,
     'kibana.alert.start': event.timestamp as string,
-    'kibana.alert.raw_payload': event.raw_payload
-      ? JSON.stringify(event.raw_payload)
-      : undefined,
+    'kibana.alert.raw_payload': event.raw_payload ? JSON.stringify(event.raw_payload) : undefined,
     tags: event.tags as string[] | undefined,
     // Add rule category for external alerts
     'kibana.alert.rule.category': 'External Alert',

@@ -120,8 +120,7 @@ export const SENTRY_MOCKS: ExternalEventInput[] = [
   },
   {
     title: 'Unhandled Promise Rejection',
-    message:
-      'TypeError: Cannot read property "id" of undefined in UserDashboard component.',
+    message: 'TypeError: Cannot read property "id" of undefined in UserDashboard component.',
     severity: 'medium',
     source: 'sentry',
     status: 'open',
@@ -169,4 +168,3 @@ export const SENTRY_MOCKS: ExternalEventInput[] = [
     },
   },
 ];
-

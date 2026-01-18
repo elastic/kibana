@@ -9,4 +9,3 @@ export { DatadogAlertView } from './datadog_alert_view';
 export { SentryAlertView } from './sentry_alert_view';
 export { PrometheusAlertView } from './prometheus_alert_view';
 export { ExternalAlertOverview, getExternalAlertView } from './external_alert_overview';
-

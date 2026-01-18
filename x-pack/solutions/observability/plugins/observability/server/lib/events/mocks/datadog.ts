@@ -34,8 +34,7 @@ export const DATADOG_MOCKS: ExternalEventInput[] = [
   },
   {
     title: 'Infrastructure: Host Unreachable',
-    message:
-      'Host web-server-03.us-east-1 is not reporting metrics. Last seen: 5 minutes ago.',
+    message: 'Host web-server-03.us-east-1 is not reporting metrics. Last seen: 5 minutes ago.',
     severity: 'critical',
     source: 'datadog',
     status: 'open',
@@ -103,4 +102,3 @@ export const DATADOG_MOCKS: ExternalEventInput[] = [
     },
   },
 ];
-

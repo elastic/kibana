@@ -18,10 +18,8 @@ import {
   EuiText,
   EuiCodeBlock,
   EuiImage,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
 import datadogIcon from '../../../assets/icons/datadog.svg';
 
@@ -131,7 +129,11 @@ export const DatadogAlertView: React.FC<DatadogAlertViewProps> = ({ alert }) => 
         </EuiFlexItem>
         {connectorId && connectorPageUrl && (
           <EuiFlexItem grow={false}>
-            <EuiLink href={connectorPageUrl} target="_blank">
+            <EuiLink
+              data-test-subj="o11yDatadogAlertViewLink"
+              href={connectorPageUrl}
+              target="_blank"
+            >
               <EuiBadge color="hollow" iconType="link" iconSide="left">
                 Connector: {connectorId.substring(0, 8)}...
               </EuiBadge>
@@ -150,7 +152,7 @@ export const DatadogAlertView: React.FC<DatadogAlertViewProps> = ({ alert }) => 
               <h4>Metric Graph</h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiLink href={snapshotUrl} target="_blank">
+            <EuiLink data-test-subj="o11yDatadogAlertViewLink" href={snapshotUrl} target="_blank">
               <EuiImage
                 src={snapshotUrl}
                 alt="Datadog Metric Graph"
@@ -182,13 +184,7 @@ export const DatadogAlertView: React.FC<DatadogAlertViewProps> = ({ alert }) => 
 
         <FieldRow label="Severity">
           <EuiBadge
-            color={
-              severity === 'critical'
-                ? 'danger'
-                : severity === 'high'
-                ? 'warning'
-                : 'default'
-            }
+            color={severity === 'critical' ? 'danger' : severity === 'high' ? 'warning' : 'default'}
           >
             {priority || severity?.toUpperCase() || 'UNKNOWN'}
           </EuiBadge>
@@ -253,7 +249,12 @@ export const DatadogAlertView: React.FC<DatadogAlertViewProps> = ({ alert }) => 
               <EuiIcon type={datadogIcon} size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink href={externalUrl} target="_blank" external>
+              <EuiLink
+                data-test-subj="o11yDatadogAlertViewViewInDatadogLink"
+                href={externalUrl}
+                target="_blank"
+                external
+              >
                 View in Datadog
               </EuiLink>
             </EuiFlexItem>

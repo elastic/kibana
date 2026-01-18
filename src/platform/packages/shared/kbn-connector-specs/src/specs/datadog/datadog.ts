@@ -299,7 +299,9 @@ export const DatadogConnector: ConnectorSpec = {
         if (includeNoData) triggeredStates.push('No Data');
 
         const triggeredMonitors = response.data
-          .filter((m: Record<string, unknown>) => triggeredStates.includes(m.overall_state as string))
+          .filter((m: Record<string, unknown>) =>
+            triggeredStates.includes(m.overall_state as string)
+          )
           .map((m: Record<string, unknown>) => ({
             id: m.id,
             name: m.name,
@@ -434,7 +436,10 @@ export const DatadogConnector: ConnectorSpec = {
           .string()
           .optional()
           .describe('Name of the webhook (default: kibana-alerts-webhook)'),
-        tags: z.string().optional().describe('Only instrument monitors with these tags (comma-separated)'),
+        tags: z
+          .string()
+          .optional()
+          .describe('Only instrument monitors with these tags (comma-separated)'),
         dryRun: z
           .boolean()
           .optional()
@@ -1027,4 +1032,3 @@ export const DatadogConnector: ConnectorSpec = {
     },
   },
 };
-

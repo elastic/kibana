@@ -8,8 +8,6 @@ import { EuiLink, EuiText, EuiFlexGroup, EuiBadge, EuiFlexItem, EuiIcon } from '
 import type { ReactNode } from 'react';
 import React from 'react';
 // Import custom provider icons
-import datadogIcon from '../../../assets/icons/datadog.svg';
-import sentryIcon from '../../../assets/icons/sentry.svg';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY,
@@ -30,6 +28,8 @@ import {
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import type { JsonValue } from '@kbn/utility-types';
+import sentryIcon from '../../../assets/icons/sentry.svg';
+import datadogIcon from '../../../assets/icons/datadog.svg';
 import {
   RELATED_ACTIONS_COL,
   RELATED_ALERT_REASON,
