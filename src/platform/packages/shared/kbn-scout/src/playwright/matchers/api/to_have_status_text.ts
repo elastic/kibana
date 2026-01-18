@@ -17,7 +17,7 @@ import { createMatcherError } from './utils';
  * expect(response).toHaveStatusText('OK');
  * expect(response).not.toHaveStatusText('Not Found');
  */
-export function toHaveStatusText<T extends { statusText?: string }>(
+export function toHaveStatusText<T extends { statusText: unknown }>(
   obj: T,
   expected: string,
   isNegated = false

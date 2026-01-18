@@ -17,7 +17,7 @@ import { createMatcherError } from './utils';
  * expect(response).toHaveStatusCode(200);
  * expect(response).not.toHaveStatusCode(404);
  */
-export function toHaveStatusCode<T extends { status?: number }>(
+export function toHaveStatusCode<T extends { status: unknown }>(
   obj: T,
   expected: number,
   isNegated = false

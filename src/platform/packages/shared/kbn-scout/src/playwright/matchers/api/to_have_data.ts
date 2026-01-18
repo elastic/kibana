@@ -26,7 +26,7 @@ export interface ToHaveDataOptions {
  * expect(response).toHaveData({ id: 1 }, { exactMatch: true }); // exact match
  * expect(response).toHaveData('success'); // exact match for primitives
  */
-export function toHaveData<T extends { data?: any }>(
+export function toHaveData<T extends { data: unknown }>(
   obj: T,
   expected?: unknown,
   options?: ToHaveDataOptions,

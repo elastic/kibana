@@ -19,14 +19,15 @@ import { createMatcherError } from './utils';
  * expect(response).toHaveHeaders({ 'content-type': 'application/json' });
  * expect(response).not.toHaveHeaders({ 'x-forbidden': 'value' });
  */
-export function toHaveHeaders<T extends { headers?: Record<string, string> }>(
+export function toHaveHeaders<T extends { headers: unknown }>(
   obj: T,
   expectedHeaders: Record<string, string>,
   isNegated = false
 ): void {
   const actualHeaders: Record<string, string> = {};
-  for (const [key, value] of Object.entries(obj.headers ?? {})) {
-    actualHeaders[key.toLowerCase()] = Array.isArray(value) ? value.join(', ') : value!;
+  const headers = obj.headers ?? {};
+  for (const [key, value] of Object.entries(headers)) {
+    actualHeaders[key.toLowerCase()] = Array.isArray(value) ? value.join(', ') : value;
   }
 
   const normalizedExpected: Record<string, string> = {};
