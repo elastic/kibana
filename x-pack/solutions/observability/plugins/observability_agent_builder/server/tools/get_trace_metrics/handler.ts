@@ -6,12 +6,10 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import type { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
   calculateThroughputWithRange,
-  getDurationFieldForTransactions,
 } from '@kbn/apm-data-access-plugin/server/utils';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -22,6 +20,12 @@ import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
 import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { getPreferredDocumentSource } from '../../utils/get_preferred_document_source';
+import {
+  type LatencyAggregationType,
+  type DocumentType,
+  getLatencyAggregation,
+  getLatencyValue,
+} from '../../utils/get_latency_aggregation';
 
 export interface TraceMetricsItem {
   group: string;
@@ -41,6 +45,7 @@ export async function getToolHandler({
   end,
   kqlFilter,
   groupBy,
+  latencyType = 'avg',
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -53,6 +58,7 @@ export async function getToolHandler({
   end: string;
   groupBy: string;
   kqlFilter?: string;
+  latencyType: LatencyAggregationType | undefined;
 }): Promise<{
   items: TraceMetricsItem[];
 }> {
@@ -74,13 +80,7 @@ export async function getToolHandler({
   });
 
   const { rollupInterval, hasDurationSummaryField } = source;
-  const documentType = source.documentType as
-    | ApmDocumentType.ServiceTransactionMetric
-    | ApmDocumentType.TransactionMetric
-    | ApmDocumentType.TransactionEvent;
-
-  const durationField = getDurationFieldForTransactions(documentType, hasDurationSummaryField);
-  const outcomeAggs = getOutcomeAggregation(documentType);
+  const documentType = source.documentType as DocumentType;
 
   const response = await apmEventClient.search('get_trace_metrics', {
     apm: {
@@ -103,12 +103,12 @@ export async function getToolHandler({
           size: MAX_NUMBER_OF_GROUPS,
         },
         aggs: {
-          avg_latency: {
-            avg: {
-              field: durationField,
-            },
-          },
-          ...outcomeAggs,
+          ...getOutcomeAggregation(documentType),
+          ...getLatencyAggregation({
+            latencyAggregationType: latencyType,
+            hasDurationSummaryField,
+            documentType,
+          }),
         },
       },
     },
@@ -118,7 +118,10 @@ export async function getToolHandler({
 
   const items: TraceMetricsItem[] = buckets.map((bucket) => {
     const docCount = bucket.doc_count;
-    const latencyValue = bucket.avg_latency?.value;
+    const latencyValue = getLatencyValue({
+      latencyAggregationType: latencyType,
+      aggregation: bucket.latency,
+    });
 
     const latencyMs =
       latencyValue !== null && latencyValue !== undefined ? latencyValue / 1000 : null;

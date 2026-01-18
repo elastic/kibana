@@ -36,6 +36,10 @@ const getTraceMetricsSchema = z.object({
     .describe(
       'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields where possible for meaningful aggregations. If not specified, results are grouped by service.name.'
     ),
+  latencyType: z
+    .enum(['avg', 'p95', 'p99'])
+    .describe('Aggregation type for latency change points analysis. default is avg.')
+    .optional(),
 });
 
 export function createGetTraceMetricsTool({
@@ -88,9 +92,11 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, kqlFilter, groupBy }, context) => {
+    handler: async (
+      { start, end, kqlFilter, groupBy = 'service.name', latencyType = 'avg' },
+      context
+    ) => {
       const { request } = context;
-      const groupByField = groupBy || 'service.name';
 
       try {
         const { items } = await getToolHandler({
@@ -101,7 +107,8 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
           start,
           end,
           kqlFilter,
-          groupBy: groupByField,
+          groupBy,
+          latencyType,
         });
 
         return {
