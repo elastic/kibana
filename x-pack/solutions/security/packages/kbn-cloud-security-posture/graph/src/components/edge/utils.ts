@@ -20,6 +20,7 @@ export function getShapeHandlePosition(shape?: NodeShape) {
     case 'diamond':
       return 14;
     case 'label':
+    case 'relationship':
       return 3;
     case 'group':
       return 0;

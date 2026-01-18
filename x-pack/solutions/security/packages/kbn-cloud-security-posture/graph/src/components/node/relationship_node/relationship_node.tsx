@@ -14,7 +14,7 @@ import {
   LabelShape,
   HandleStyleOverride,
   LabelShapeOnHover,
-  getLabelColors,
+  getRelationshipColors,
 } from '../styles';
 import type { RelationshipNodeViewModel, NodeProps } from '../../types';
 import { GRAPH_RELATIONSHIP_NODE_ID } from '../../test_ids';
@@ -28,7 +28,7 @@ export const TEST_SUBJ_LABEL_TEXT = 'relationship-node-text';
 const MAX_LABEL_LENGTH = 27;
 
 export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, label, interactive } = props.data as RelationshipNodeViewModel;
+  const { id, label, interactive } = props.data as RelationshipNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
@@ -36,13 +36,15 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
   const text = label ? label : id;
 
   const { backgroundColor, borderColor, textColor } = useMemo(
-    () => getLabelColors(color, euiTheme, 'relationship'),
-    [color, euiTheme]
+    () => getRelationshipColors(euiTheme),
+    [euiTheme]
   );
 
   return (
     <LabelNodeContainer data-test-subj={GRAPH_RELATIONSHIP_NODE_ID}>
-      {interactive && <LabelShapeOnHover data-test-subj={TEST_SUBJ_HOVER_OUTLINE} color={color} />}
+      {interactive && (
+        <LabelShapeOnHover data-test-subj={TEST_SUBJ_HOVER_OUTLINE} color="primary" />
+      )}
       <LabelShape
         data-test-subj={TEST_SUBJ_SHAPE}
         backgroundColor={backgroundColor}

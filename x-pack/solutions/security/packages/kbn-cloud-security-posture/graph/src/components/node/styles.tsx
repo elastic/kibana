@@ -174,24 +174,13 @@ export const NodeContainer = styled.div`
   width: ${NODE_WIDTH}px;
 `;
 
-export type LabelNodeType = 'label' | 'relationship';
-
 /**
- * Gets the background, border and text colors for the label based on document analysis
+ * Gets the background, border and text colors for label nodes based on color prop
  */
 export const getLabelColors = (
   color: LabelNodeViewModel['color'],
-  euiTheme: EuiThemeComputed,
-  nodeType: LabelNodeType = 'label'
+  euiTheme: EuiThemeComputed
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
-  if (nodeType === 'relationship') {
-    return {
-      backgroundColor: euiTheme.colors.darkShade,
-      borderColor: euiTheme.colors.lightShade,
-      textColor: euiTheme.colors.lightestShade,
-    };
-  }
-
   if (color === 'danger') {
     return {
       backgroundColor: euiTheme.colors.danger,
@@ -204,6 +193,20 @@ export const getLabelColors = (
     backgroundColor: euiTheme.colors.backgroundBasePrimary,
     borderColor: euiTheme.colors.borderStrongPrimary,
     textColor: euiTheme.colors.textPrimary,
+  };
+};
+
+/**
+ * Gets the background, border and text colors for relationship nodes
+ * Relationship nodes have fixed colors (dark background with light text)
+ */
+export const getRelationshipColors = (
+  euiTheme: EuiThemeComputed
+): { backgroundColor: string; borderColor: string; textColor: string } => {
+  return {
+    backgroundColor: euiTheme.colors.backgroundFilledText,
+    borderColor: euiTheme.colors.borderBaseProminent,
+    textColor: euiTheme.colors.textInverse,
   };
 };
 

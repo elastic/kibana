@@ -174,7 +174,6 @@ export const relationshipNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
     shape: schema.literal('relationship'),
-    color: nodeColorSchema,
     parentId: schema.maybe(schema.string()),
   }),
 ]);

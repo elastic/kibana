@@ -22,14 +22,9 @@ const meta: Meta<RelationshipNodeViewModel> = {
     id: 'relationship-1',
     label: 'Owns',
     shape: 'relationship',
-    color: 'primary',
-    interactive: true,
+    interactive: false,
   },
   argTypes: {
-    color: {
-      options: ['primary', 'danger', 'warning'],
-      control: { type: 'radio' },
-    },
     label: {
       control: { type: 'text' },
     },

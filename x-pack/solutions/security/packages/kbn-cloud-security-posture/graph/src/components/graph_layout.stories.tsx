@@ -1114,13 +1114,19 @@ const extractEdgesWithRelationships = (
       }
 
       // Create edges: source -> connector -> target
+      // Use 'subdued' color for relationship edges, otherwise use the connector's color
+      const edgeColor =
+        connectorNode.shape === 'relationship'
+          ? 'subdued'
+          : (connectorNode as { color?: NodeColor }).color ?? 'primary';
+
       edges.push({
         id: `edge-${source}-to-${connectorNode.id}`,
         source,
         sourceShape: nodes[source]?.shape,
         target: connectorNode.id,
         targetShape: connectorNode.shape,
-        color: connectorNode.color as NodeColor,
+        color: edgeColor,
       });
 
       edges.push({
@@ -1129,7 +1135,7 @@ const extractEdgesWithRelationships = (
         sourceShape: connectorNode.shape,
         target,
         targetShape: nodes[target]?.shape,
-        color: connectorNode.color as NodeColor,
+        color: edgeColor,
       });
     }
   });
@@ -1204,7 +1210,6 @@ export const EventsAndEntityRelationships: Story = {
         source: 'user-john',
         target: 'host-prod-1',
         label: 'Owns',
-        color: 'primary',
         shape: 'relationship',
       },
       {
@@ -1212,7 +1217,6 @@ export const EventsAndEntityRelationships: Story = {
         source: 'user-john',
         target: 'host-prod-2',
         label: 'Owns',
-        color: 'primary',
         shape: 'relationship',
       },
       {
@@ -1220,7 +1224,6 @@ export const EventsAndEntityRelationships: Story = {
         source: 'user-john',
         target: 'host-prod-1',
         label: 'Has Access',
-        color: 'primary',
         shape: 'relationship',
       },
     ]),

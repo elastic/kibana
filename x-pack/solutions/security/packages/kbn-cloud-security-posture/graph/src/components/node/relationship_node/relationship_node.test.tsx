@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { ReactFlow, Position } from '@xyflow/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
-import { getLabelColors } from '../styles';
+import { getRelationshipColors, getLabelColors } from '../styles';
 import { GRAPH_RELATIONSHIP_NODE_ID } from '../../test_ids';
 import {
   RelationshipNode,
@@ -27,7 +27,6 @@ describe('RelationshipNode', () => {
     data: {
       id: 'test-relationship-node',
       label: 'Owns',
-      color: 'primary',
       shape: 'relationship',
       interactive: true,
     },
@@ -184,48 +183,35 @@ describe('RelationshipNode', () => {
         borderStrongPrimary: '#0000DD',
         textInverse: '#FFFFFF',
         textPrimary: '#000000',
-        darkShade: '#333333',
-        lightShade: '#CCCCCC',
-        lightestShade: '#F5F5F5',
+        backgroundFilledText: '#333333',
+        borderBaseProminent: '#CCCCCC',
       },
     };
 
-    it('should return relationship colors when nodeType is "relationship"', () => {
-      const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed, 'relationship');
+    it('should return relationship colors with dark background and light text', () => {
+      const colors = getRelationshipColors(mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.darkShade,
-        borderColor: mockEuiTheme.colors.lightShade,
-        textColor: mockEuiTheme.colors.lightestShade,
+        backgroundColor: mockEuiTheme.colors.backgroundFilledText,
+        borderColor: mockEuiTheme.colors.borderBaseProminent,
+        textColor: mockEuiTheme.colors.textInverse,
       });
     });
 
-    it('should return relationship colors regardless of color prop', () => {
-      const colorsDanger = getLabelColors(
-        'danger',
-        mockEuiTheme as EuiThemeComputed,
-        'relationship'
-      );
-      const colorsPrimary = getLabelColors(
-        'primary',
-        mockEuiTheme as EuiThemeComputed,
-        'relationship'
-      );
-
-      // Both should return the same relationship colors
-      expect(colorsDanger).toEqual(colorsPrimary);
-      expect(colorsDanger).toEqual({
-        backgroundColor: mockEuiTheme.colors.darkShade,
-        borderColor: mockEuiTheme.colors.lightShade,
-        textColor: mockEuiTheme.colors.lightestShade,
-      });
-    });
-
-    it('should return label colors when nodeType is "label" (default)', () => {
+    it('should return label colors for primary color', () => {
       const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
         backgroundColor: mockEuiTheme.colors.backgroundBasePrimary,
         borderColor: mockEuiTheme.colors.borderStrongPrimary,
         textColor: mockEuiTheme.colors.textPrimary,
+      });
+    });
+
+    it('should return danger colors for label nodes with danger color', () => {
+      const colors = getLabelColors('danger', mockEuiTheme as EuiThemeComputed);
+      expect(colors).toEqual({
+        backgroundColor: mockEuiTheme.colors.danger,
+        borderColor: mockEuiTheme.colors.danger,
+        textColor: mockEuiTheme.colors.textInverse,
       });
     });
   });
