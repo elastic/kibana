@@ -8,35 +8,76 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import { selectUnit } from '@formatjs/intl-utils';
 import moment from 'moment';
 import React from 'react';
-import { useGetFormattedDateTime } from '..';
+import { i18n } from '@kbn/i18n';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
+import { useGetFormattedDateTime } from '../use_formatted_date';
 
-export interface FormattedRelativeEnhancedProps {
+export interface FormattedRelativeEnhancedProps extends Intl.RelativeTimeFormatOptions {
   value: Date | number | string;
+  thresholds?: Partial<Record<'second' | 'minute' | 'hour' | 'day', number>>;
+  updateIntervalInSeconds?: number;
   fullDateTooltip?: boolean;
   fullDateTooltipPosition?: 'top' | 'right' | 'bottom' | 'left';
 }
 
-// Configure moment thresholds to avoid "last year" for recent dates
-// This ensures dates like "Dec 20" viewed on "Jan 10" show "3 weeks ago" not "last year"
-// See: https://momentjs.com/docs/#/customization/relative-time-threshold/
-moment.relativeTimeThreshold('M', 12); // Only show "year" after 12 months (not based on calendar year)
+// Only show "year" unit if the date is more than this many days ago.
+// This prevents "last year" from showing for dates that are only a few weeks/months old
+// but cross the year boundary (e.g., Dec 20 viewed on Jan 10).
+const MIN_DAYS_FOR_YEAR_UNIT = 180; // 6 months
 
 /**
- * Enhanced relative time formatting using moment.js with configured thresholds.
- * This avoids misleading "last year" displays for dates that are only a few weeks old
- * but cross a year boundary.
+ * Mimic `FormattedRelative` previous behavior from formatJS v2,
+ * with a fix for year boundaries to avoid misleading "last year" displays.
+ *
+ * The only change from the original: when selectUnit returns "year" but the actual
+ * difference is less than MIN_DAYS_FOR_YEAR_UNIT, we recalculate using months instead.
  */
 export const FormattedRelativeEnhanced = ({
   value: valueInput,
+  updateIntervalInSeconds,
+  thresholds,
+  numeric = 'auto',
   fullDateTooltip = false,
   fullDateTooltipPosition,
+  ...rest
 }: FormattedRelativeEnhancedProps) => {
-  const valueDate = moment(valueInput);
-  const relativeTime = valueDate.isValid() ? valueDate.fromNow() : '';
+  const valueDate = moment(valueInput).isValid() ? moment(valueInput).toDate() : new Date();
 
-  const content = <>{relativeTime}</>;
+  let { value, unit } = selectUnit(valueDate, new Date(), thresholds);
+
+  // Fix for year boundary issue: if selectUnit chose "year" but less than MIN_DAYS_FOR_YEAR_UNIT
+  // have passed, use months instead to avoid misleading "last year" for recent dates
+  if (unit === 'year') {
+    const diffDays = Math.abs(moment().diff(moment(valueDate), 'days'));
+    if (diffDays < MIN_DAYS_FOR_YEAR_UNIT) {
+      const diffMonths = moment().diff(moment(valueDate), 'months');
+      value = -Math.abs(diffMonths);
+      unit = 'month';
+    }
+  }
+
+  if (unit === 'second') {
+    return (
+      <>
+        {i18n.translate('workflows.formattedRelativeEnhanced.justNow', {
+          defaultMessage: 'just now',
+        })}
+      </>
+    );
+  }
+
+  const content = (
+    <FormattedRelativeTime
+      value={value}
+      unit={unit}
+      numeric={numeric}
+      updateIntervalInSeconds={updateIntervalInSeconds}
+      {...rest}
+    />
+  );
 
   if (!fullDateTooltip) {
     return content;
@@ -45,7 +86,7 @@ export const FormattedRelativeEnhanced = ({
   return (
     <FormattedRelativeEnhancedWithTooltip
       content={content}
-      valueDate={valueDate.toDate()}
+      valueDate={valueDate}
       fullDateTooltipPosition={fullDateTooltipPosition}
     />
   );
