@@ -21,3 +21,51 @@ export interface CategoriesResponse {
   rawCategoriesMap: CategoryGroup[];
   mainCategoriesMap: CategoryGroup[];
 }
+
+export interface IncompatibleFieldMappingItem {
+  fieldName: string;
+  expectedValue: string;
+  actualValue: string;
+  description: string;
+}
+
+export interface IncompatibleFieldValueItem {
+  fieldName: string;
+  expectedValues: string[];
+  actualValues: Array<{ name: string; count: number }>;
+  description: string;
+}
+
+export interface SameFamilyFieldItem {
+  fieldName: string;
+  expectedValue: string;
+  actualValue: string;
+  description: string;
+}
+
+export interface ResultDocument {
+  batchId: string;
+  indexName: string;
+  isCheckAll: boolean;
+  checkedAt: number;
+  docsCount: number;
+  totalFieldCount: number;
+  ecsFieldCount: number;
+  customFieldCount: number;
+  incompatibleFieldCount: number;
+  incompatibleFieldMappingItems: IncompatibleFieldMappingItem[];
+  incompatibleFieldValueItems: IncompatibleFieldValueItem[];
+  sameFamilyFieldCount: number;
+  sameFamilyFields: string[];
+  sameFamilyFieldItems: SameFamilyFieldItem[];
+  unallowedMappingFields: string[];
+  unallowedValueFields: string[];
+  sizeInBytes: number;
+  markdownComments: string[];
+  ecsVersion: string;
+  error: string | null;
+  indexPattern?: string;
+  checkedBy?: string;
+  indexId?: string;
+  ilmPhase?: string;
+}

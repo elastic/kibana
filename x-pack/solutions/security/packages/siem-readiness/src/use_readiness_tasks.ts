@@ -8,11 +8,15 @@
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { CategoriesResponse } from './types';
-import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from './constants';
+import type { CategoriesResponse, ResultDocument } from './types';
+import {
+  GET_SIEM_READINESS_CATEGORIES_API_PATH,
+  GET_INDEX_RESULTS_LATEST_API_PATH,
+} from './constants';
 
 const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'];
 const GET_INSTALLED_INTEGRATIONS_QUERY_KEY = ['installed-integrations'];
+const GET_INDEX_RESULTS_LATEST_QUERY_KEY = ['index-results-latest'];
 
 export const useSiemReadinessApi = () => {
   const { http } = useKibana<CoreStart>().services;
@@ -31,8 +35,18 @@ export const useSiemReadinessApi = () => {
     },
   });
 
+  const getIndexResultsLatest = useQuery({
+    queryKey: GET_INDEX_RESULTS_LATEST_QUERY_KEY,
+    queryFn: () => {
+      return http.get<ResultDocument[]>(`${GET_INDEX_RESULTS_LATEST_API_PATH}/*`, {
+        version: '1',
+      });
+    },
+  });
+
   return {
     getReadinessCategories,
     getInstalledIntegrations,
+    getIndexResultsLatest,
   };
 };
