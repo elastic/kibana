@@ -40,6 +40,8 @@
           "<T>) => void; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/table_persist/src/use_table_persist.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,6 +59,8 @@
               "<T>; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/table_persist/src/use_table_persist.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,6 +84,8 @@
           "<T>) => void; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/table_persist/src/use_table_persist.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -95,6 +101,8 @@
               "<T> & { initialSort?: undefined; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/table_persist/src/use_table_persist.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -120,6 +128,8 @@
           "<T>) => void; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/table_persist/src/use_table_persist.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,6 +145,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/shared-ux/table_persist/src/use_table_persist.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -160,6 +172,8 @@
           "<T>) => void; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/table_persist/src/use_table_persist.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,6 +189,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/shared-ux/table_persist/src/use_table_persist.ts",
+            "lineNumber": 60,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -220,6 +236,8 @@
           "<T, Omit<Props, \"euiTablePersist\">>>"
         ],
         "path": "src/platform/packages/shared/shared-ux/table_persist/src/table_persist_hoc.tsx",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -242,6 +260,8 @@
               "<T>, any>"
             ],
             "path": "src/platform/packages/shared/shared-ux/table_persist/src/table_persist_hoc.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -267,6 +287,8 @@
               "<T, Props>; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/table_persist/src/table_persist_hoc.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -295,6 +317,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/shared-ux/table_persist/src/table_persist_hoc.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -313,6 +337,8 @@
               "<T>; }; pageSize: number; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/table_persist/src/table_persist_hoc.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -333,6 +359,8 @@
           "number[]"
         ],
         "path": "src/platform/packages/shared/shared-ux/table_persist/src/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -350,6 +378,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/shared-ux/table_persist/src/table_persist_hoc.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -365,6 +395,8 @@
               "{ [P in Exclude<keyof P, \"euiTablePersist\">]: P[P]; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/table_persist/src/table_persist_hoc.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -384,6 +416,8 @@
           "<T>> | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/table_persist/src/table_persist_hoc.tsx",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
