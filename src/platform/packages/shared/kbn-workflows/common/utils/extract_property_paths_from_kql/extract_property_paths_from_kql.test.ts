@@ -130,7 +130,7 @@ describe('extractPropertyPathsFromKql', () => {
     });
   });
 
-  describe('template expressions (Handlebars syntax)', () => {
+  describe('template expressions', () => {
     it('should extract both field names and template variables from KQL with template values', () => {
       const result = extractPropertyPathsFromKql('foreach.item: {{ consts.favorite_person }}');
       expect(result).toEqual(expect.arrayContaining(['foreach.item', 'consts.favorite_person']));
