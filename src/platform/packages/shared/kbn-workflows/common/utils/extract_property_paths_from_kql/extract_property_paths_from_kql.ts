@@ -11,7 +11,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import type { KqlFunctionNode, KqlLiteralNode } from '@kbn/es-query/src/kuery/node_types';
 import { extractTemplateVariables } from '../extract_template_variables/extract_template_variables';
 
-// Placeholder value used to replace Handlebars expressions in KQL
+// Placeholder value used to replace template expressions in KQL
 // This allows the KQL parser to process the query without failing on template syntax
 const TEMPLATE_PLACEHOLDER = '"__TEMPLATE_PLACEHOLDER__"';
 
