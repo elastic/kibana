@@ -41,7 +41,7 @@ function replaceTemplateExpressions(kql: string): string {
  * colons in field:value expressions, ignoring quoted strings and handling
  * logical operators (AND, OR, NOT) and parentheses.
  *
- * It also handles Handlebars template expressions ({{ ... }}) by:
+ * It also handles template expressions ({{ ... }}) by:
  * 1. Replacing them with placeholders before KQL parsing
  * 2. Extracting template variables separately
  * 3. Combining both sets of results
