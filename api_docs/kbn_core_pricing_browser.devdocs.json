@@ -14,6 +14,8 @@
           "\nAPIs to access pricing tier information during the start phase.\n"
         ],
         "path": "src/core/packages/pricing/common/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
             ],
             "path": "src/core/packages/pricing/common/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [
@@ -49,6 +53,8 @@
                   "TFeatureId"
                 ],
                 "path": "src/core/packages/pricing/common/src/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -69,6 +75,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/pricing/common/src/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [

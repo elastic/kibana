@@ -58,7 +58,9 @@ function getImpactProperties(impact: FormattedChangePoint['impact']): {
   };
 }
 
-export function formatChangePoint(item: SignificantEventItem): FormattedChangePoint | undefined {
+export function formatChangePoint(
+  item: Omit<SignificantEventItem, 'stream_name'>
+): FormattedChangePoint | undefined {
   const type = Object.keys(item.change_points.type)[0] as keyof typeof item.change_points.type;
 
   const isChange = type && type !== 'stationary' && type !== 'non_stationary';
