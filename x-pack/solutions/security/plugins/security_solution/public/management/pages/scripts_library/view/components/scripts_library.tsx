@@ -13,7 +13,7 @@ import { useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { scriptsLibraryLabels as pageLabels } from '../../translations';
 import { AdministrationListPage } from '../../../../components/administration_list_page';
-import { useGetEndpointScriptsList } from '../hooks/use_get_scripts_library';
+import { useGetEndpointScriptsList } from '../hooks/use_get_scripts_list';
 import { ScriptsLibraryTable, type ScriptsLibraryTableProps } from './scripts_library_table';
 import { useUrlPagination } from '../../../../hooks/use_url_pagination';
 import { useScriptsLibraryUrlParams } from './scripts_library_url_params';
