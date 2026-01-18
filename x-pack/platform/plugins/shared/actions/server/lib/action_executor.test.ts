@@ -1549,6 +1549,36 @@ describe('Action Executor', () => {
         expect(connectorType.executor).not.toHaveBeenCalled();
       }
     });
+
+    test(`${label} classifies error as user-error when execution fails with "socket disconnected"`, async () => {
+      const err = createTaskRunError(
+        new Error('Client network socket disconnected before secure TLS connection was established')
+      );
+      err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(err);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      let executorResult;
+      if (executeUnsecure) {
+        executorResult = await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        executorResult = await actionExecutor.execute(executeParams);
+      }
+
+      expect(executorResult?.errorSource).toBe(TaskErrorSource.USER);
+      expect(loggerMock.warn).toBeCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: Client network socket disconnected before secure TLS connection was established; retry: true'
+      );
+      expect(loggerMock.error).toBeCalledWith(err, {
+        error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
+        tags: ['test', '1', 'action-run-failed', 'user-error'],
+      });
+    });
   }
 });
 
