@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/slo-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-management-team'
+  defaultOwner: '@elastic/actionable-obs-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/slo-plugin'
   description: Moon project for @kbn/slo-plugin
   channel: ''
-  owner: '@elastic/obs-ux-management-team'
+  owner: '@elastic/actionable-obs-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/slo
 dependsOn:
@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/slo-schema'
+  - '@kbn/slo-shared-plugin'
   - '@kbn/alerting-plugin'
   - '@kbn/rison'
   - '@kbn/embeddable-plugin'
@@ -56,7 +57,6 @@ dependsOn:
   - '@kbn/unified-search-plugin'
   - '@kbn/std'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/controls-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/data-view-editor-plugin'
@@ -118,9 +118,11 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/content-management-plugin'
   - '@kbn/dashboards-selector'
-  - '@kbn/deeplinks-management'
+  - '@kbn/control-group-renderer'
   - '@kbn/react-query'
+  - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-observability'
+  - '@kbn/observability-get-padded-alert-time-range-util'
 tags:
   - plugin
   - prod

@@ -5,74 +5,218 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiFormRow,
   EuiFieldText,
-  EuiIcon,
   EuiFormLabel,
+  EuiFormRow,
+  EuiIcon,
+  EuiLink,
   EuiScreenReaderOnly,
   EuiTextTruncate,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
+import type { ReactNode } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
-  value: string;
   onChange?: (value: string) => void;
+  setLocalStreamName?: React.Dispatch<React.SetStateAction<string>>;
   readOnly?: boolean;
   autoFocus?: boolean;
   error?: string;
   isInvalid?: boolean;
+  helpText?: string;
+  errorMessage?: ReactNode | string | undefined;
+  isStreamNameValid?: boolean;
+  partitionName: string;
+  prefix: string;
 }
 
-const MAX_NAME_LENGTH = 200;
+const MIN_NAME_LENGTH = 1;
 const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 
+export const getHelpText = (
+  isStreamNameEmpty: boolean,
+  isStreamNameTooLong: boolean,
+  readOnly: boolean
+): string | undefined => {
+  if (isStreamNameEmpty && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
+      defaultMessage: `Stream name is required.`,
+    });
+  } else if (isStreamNameTooLong && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
+      defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
+      values: {
+        maxLength: MAX_STREAM_NAME_LENGTH,
+      },
+    });
+  } else {
+    return undefined;
+  }
+};
+
+export const getErrorMessage = (
+  containsUpperCaseChars: boolean,
+  isDuplicatedName: boolean,
+  rootChildExists: boolean,
+  isDotPresent: boolean,
+  prefix: string,
+  rootChild: string,
+  router: StatefulStreamsAppRouter
+): ReactNode | string | undefined => {
+  if (containsUpperCaseChars) {
+    return i18n.translate('xpack.streams.streamDetailRouting.uppercaseCharsError', {
+      defaultMessage: 'Stream name cannot contain uppercase characters.',
+    });
+  }
+  if (isDuplicatedName) {
+    return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
+      defaultMessage: 'A stream with this name already exists',
+    });
+  }
+  if (isDotPresent && !rootChildExists) {
+    return i18n.translate('xpack.streams.streamDetailRouting.rootChildDoesNotExistError', {
+      defaultMessage: `The child stream {rootChild} does not exist. Please create it first.`,
+      values: {
+        rootChild: prefix + rootChild,
+      },
+    });
+  }
+  if (isDotPresent && rootChildExists) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.streamDetailRouting.nameContainsDotErrorMessage"
+        defaultMessage={`Stream name cannot contain the "." character. Open the stream {childStreamLink} and create the child there.`}
+        values={{
+          childStreamLink: (
+            <EuiLink
+              data-test-subj="streamsAppChildStreamLink"
+              external
+              target="_blank"
+              href={router.link('/{key}', { path: { key: prefix + rootChild } })}
+            >
+              {prefix + rootChild}
+            </EuiLink>
+          ),
+        }}
+      />
+    );
+  }
+
+  return undefined;
+};
+
+interface ChildStreamInputHookResponse {
+  localStreamName: string;
+  setLocalStreamName: React.Dispatch<React.SetStateAction<string>>;
+  isStreamNameValid: boolean;
+  prefix: string;
+  partitionName: string;
+  helpText: string | undefined;
+  errorMessage: ReactNode | string | undefined;
+}
+
+/**
+ * Custom hook that handles computations necessary for child stream input component instances.
+ * Used by parent components to lift up the states needed for the local input field so validation concerns can be shared across components.
+ * @param streamName - The stream name to use for the local input field.
+ * @param readOnly - Whether the input field is read only.
+ * @returns An object containing local states, input validation flags, and help/error messages.
+ * @example
+ * const { localStreamName, setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput('logs.linux');
+ * return (
+ *   <StreamNameFormRow
+ *     localStreamName={localStreamName}
+ *     setLocalStreamName={setLocalStreamName}
+ *     isStreamNameValid={isStreamNameValid}
+ *     prefix={prefix}
+ *     partitionName={partitionName}
+ *     helpText={helpText}
+ *     errorMessage={errorMessage}
+ *   />
+ * );
+ */
+export const useChildStreamInput = (
+  streamName: string,
+  readOnly: boolean = false
+): ChildStreamInputHookResponse => {
+  const [localStreamName, setLocalStreamName] = useState(streamName);
+
+  const router = useStreamsAppRouter();
+  const parentStreamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
+  const routing = useStreamsRoutingSelector((snapshot) => snapshot.context.routing);
+
+  const prefix = parentStreamName + '.';
+  const partitionName = localStreamName.replace(prefix, '');
+  const rootChild = partitionName.split('.')[0];
+  const isDuplicatedName = useMemo(
+    () => routing.some((r) => r.destination === localStreamName && !r.isNew),
+    [routing, localStreamName]
+  );
+  const rootChildExists = useMemo(
+    () => routing.some((r) => r.destination === prefix + rootChild && !r.isNew),
+    [routing, prefix, rootChild]
+  );
+
+  const isStreamNameEmpty = localStreamName.length <= prefix.length;
+  const isStreamNameTooLong = localStreamName.length > MAX_STREAM_NAME_LENGTH;
+  const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
+  const containsUpperCaseChars = localStreamName !== localStreamName.toLowerCase();
+
+  const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
+
+  const isDotPresent = !readOnly && partitionName.includes('.');
+
+  const errorMessage = getErrorMessage(
+    containsUpperCaseChars,
+    isDuplicatedName,
+    rootChildExists,
+    isDotPresent,
+    prefix,
+    rootChild,
+    router
+  );
+
+  return {
+    localStreamName,
+    setLocalStreamName,
+    isStreamNameValid:
+      isLengthValid && !isDotPresent && !isDuplicatedName && !containsUpperCaseChars,
+    prefix,
+    partitionName,
+    helpText,
+    errorMessage,
+  };
+};
+
 export function StreamNameFormRow({
-  value,
-  onChange = () => {},
+  onChange = (value: string) => {},
+  setLocalStreamName = () => {},
   readOnly = false,
   autoFocus = false,
   error,
   isInvalid = false,
+  helpText,
+  errorMessage,
+  isStreamNameValid = true,
+  partitionName,
+  prefix,
 }: StreamNameFormRowProps) {
   const descriptionId = useGeneratedHtmlId();
 
-  const parentStreamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition)
-    .stream.name;
-
-  const prefix = parentStreamName + '.';
-  const partitionName = value.replace(prefix, '');
-
-  const isLengthValid = value.length > prefix.length && value.length <= MAX_NAME_LENGTH;
-
-  const helpText =
-    value.length >= MAX_NAME_LENGTH && !readOnly
-      ? i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
-          defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
-          values: {
-            maxLength: MAX_NAME_LENGTH,
-          },
-        })
-      : value.length <= prefix.length && !readOnly
-      ? i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
-          defaultMessage: `Stream name is required.`,
-        })
-      : undefined;
-
-  const isDotPresent = !readOnly && partitionName.includes('.');
-  const dotErrorMessage = isDotPresent
-    ? i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessage', {
-        defaultMessage: `Stream name cannot contain the "." character.`,
-      })
-    : undefined;
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPartitionName = e.target.value;
-
+    setLocalStreamName(`${prefix}${newPartitionName}`);
     onChange(`${prefix}${newPartitionName}`);
   };
 
@@ -88,11 +232,11 @@ export function StreamNameFormRow({
       }
       helpText={helpText}
       describedByIds={[descriptionId]}
-      isInvalid={isInvalid || isDotPresent || !isLengthValid}
-      error={error || dotErrorMessage}
+      isInvalid={isInvalid || !isStreamNameValid}
+      error={error || errorMessage}
     >
       <EuiFieldText
-        isInvalid={isInvalid || isDotPresent || !isLengthValid}
+        isInvalid={isInvalid || !isStreamNameValid}
         data-test-subj="streamsAppRoutingStreamEntryNameField"
         value={partitionName}
         fullWidth
@@ -100,7 +244,7 @@ export function StreamNameFormRow({
         readOnly={readOnly}
         autoFocus={autoFocus}
         onChange={handleChange}
-        maxLength={MAX_NAME_LENGTH - prefix.length}
+        minLength={MIN_NAME_LENGTH}
         prepend={[
           <EuiIcon type="streamsWired" />,
           <EuiFormLabel

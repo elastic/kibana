@@ -299,6 +299,55 @@ describe('mock-idp-utils', () => {
         expect(payload.sub).toBe(serverlessOptions.username);
       });
 
+      it('should configure specified expiration dates for JWT access and refresh tokens', async () => {
+        // 1. Generate SAML response with short-lived access token.
+        const samlResponse = await createSAMLResponse({
+          ...serverlessOptions,
+          serverless: {
+            ...serverlessOptions.serverless,
+            accessTokenLifetimeSec: 5,
+            refreshTokenLifetimeSec: 10,
+          },
+        });
+
+        // 2. Extract raw encoded access and refresh tokens.
+        const [, accessTokenMatch] = Buffer.from(samlResponse, 'base64')
+          .toString('utf-8')
+          .match(
+            new RegExp(
+              `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+              's'
+            )
+          )!;
+        const [, refreshTokenMatch] = Buffer.from(samlResponse, 'base64')
+          .toString('utf-8')
+          .match(
+            new RegExp(
+              `${MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+              's'
+            )
+          )!;
+
+        // 3. Unwrap the tokens and extract payloads (format: header.payload.signature).
+        const [, encodedAccessTokenPayload] = decodeWithChecksum(
+          removePrefixEssuDev(accessTokenMatch)
+        ).split('.');
+        const [, encodedRefreshTokenPayload] = decodeWithChecksum(
+          removePrefixEssuDev(refreshTokenMatch)
+        ).split('.');
+
+        // 4. Verify that exp = iat + 5 seconds.
+        const accessTokenPayload = JSON.parse(
+          Buffer.from(encodedAccessTokenPayload, 'base64url').toString()
+        );
+        expect(accessTokenPayload.exp).toBe(accessTokenPayload.iat + 5);
+
+        const refreshTokenPayload = JSON.parse(
+          Buffer.from(encodedRefreshTokenPayload, 'base64url').toString()
+        );
+        expect(refreshTokenPayload.exp).toBe(refreshTokenPayload.iat + 10);
+      });
+
       it('should not include UIAM tokens when uiamEnabled is false', async () => {
         const nonUiamOptions = {
           ...baseOptions,

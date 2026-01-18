@@ -130,6 +130,22 @@ describe('DefaultAlertActions', () => {
           expect(screen.queryByText('EditTagsAction')).toBeInTheDocument();
         }
       );
+
+      it('should hide the Mute alert action when isMutedAlertsEnabled is false', async () => {
+        const mutedAlertsDisabledProps = createPartialObjectMock<AlertActionsProps>({
+          alert: {
+            [ALERT_RULE_TYPE_ID]: 'apm.anomaly' as any,
+          },
+          refresh: jest.fn(),
+          isMutedAlertsEnabled: false,
+        });
+
+        render(<TestComponent {...mutedAlertsDisabledProps} />);
+
+        expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
+        expect(screen.queryByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
+        expect(screen.queryByText('EditTagsAction')).toBeInTheDocument();
+      });
     });
 
     describe('for security rule types', () => {

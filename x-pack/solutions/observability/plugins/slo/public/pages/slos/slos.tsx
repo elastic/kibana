@@ -8,9 +8,9 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { useHistory } from 'react-router-dom';
+import { paths, SLOS_WELCOME_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect } from 'react';
-import { paths, SLOS_WELCOME_PATH } from '../../../common/locators/paths';
+import { useHistory } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
@@ -76,10 +76,11 @@ export function SlosPage() {
         pageTitle: i18n.translate('xpack.slo.slosPage.', { defaultMessage: 'SLOs' }),
         rightSideItems: [<CreateSloBtn />],
       }}
-      topSearchBar={<SloListSearchBar />}
     >
       <HeaderMenu />
       <SloOutdatedCallout />
+      <SloListSearchBar />
+      <EuiSpacer size="m" />
       <SLOsOverview />
       <EuiSpacer size="m" />
       <SloList />

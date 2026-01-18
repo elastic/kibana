@@ -16,4 +16,6 @@ export const editRuleRoute = '/rules/edit/:id' as const;
 export const getRuleDetailsRoute = (ruleId: string) => ruleDetailsRoute.replace(':ruleId', ruleId);
 export const getCreateRuleRoute = (ruleTypeId: string) =>
   createRuleRoute.replace(':ruleTypeId', ruleTypeId);
+export const getCreateRuleFromTemplateRoute = (templateId: string) =>
+  createRuleFromTemplateRoute.replace(':templateId', templateId);
 export const getEditRuleRoute = (ruleId: string) => editRuleRoute.replace(':id', ruleId);

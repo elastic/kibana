@@ -11,6 +11,7 @@ import {
   type CreateListIndexResponse,
   CreateListIndexResponse as ResponseSchema,
 } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
@@ -39,7 +40,7 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
       path: LIST_INDEX,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })

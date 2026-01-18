@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { Dimension, MetricField } from '../../../types';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createESQLQuery } from './create_esql_query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -61,7 +61,6 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
 `.trim()
     );
@@ -78,7 +77,6 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IS NOT NULL AND \`container.id\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`, \`container.id\`
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.name\`, " › ", \`container.id\`)
   | DROP \`host.name\`, \`container.id\`
@@ -97,7 +95,6 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.ip\` IS NOT NULL AND \`host.name\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.ip\`::STRING, " › ", \`host.name\`)
   | DROP \`host.ip\`, \`host.name\`
@@ -116,7 +113,6 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`cpu.cores\` IS NOT NULL AND \`host.name\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`cpu.cores\`, \`host.name\`
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`cpu.cores\`::STRING, " › ", \`host.name\`)
   | DROP \`cpu.cores\`, \`host.name\`
@@ -136,29 +132,9 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.ip\` IS NOT NULL AND \`host.name\` IS NOT NULL AND \`cpu.cores\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`, \`cpu.cores\`
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.ip\`::STRING, " › ", \`host.name\`, " › ", \`cpu.cores\`::STRING)
   | DROP \`host.ip\`, \`host.name\`, \`cpu.cores\`
-`.trim()
-    );
-  });
-
-  it('should handle filters', () => {
-    const query = createESQLQuery({
-      metric: mockMetric,
-      filters: {
-        'host.name': ['host-1', 'host-2'],
-        region: ['us-east'],
-      },
-    });
-
-    expect(query).toBe(
-      `
-TS metrics-*
-  | WHERE \`host.name\`::STRING IN ("host-1", "host-2")
-  | WHERE region::STRING IN ("us-east")
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
   });
@@ -202,37 +178,6 @@ TS metrics-*
     );
   });
 
-  it('should handle undefined dimensions with filters', () => {
-    const query = createESQLQuery({
-      metric: mockMetric,
-      dimensions: undefined,
-      filters: { 'host.name': ['host-1'] },
-    });
-
-    expect(query).toBe(
-      `
-TS metrics-*
-  | WHERE \`host.name\`::STRING IN ("host-1")
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
-`.trim()
-    );
-  });
-  it('should handle undefined metrics dimensions with dimensions and filters', () => {
-    const query = createESQLQuery({
-      metric: { ...mockMetric, dimensions: undefined as unknown as Dimension[] },
-      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
-      filters: { 'host.name': ['host-1'] },
-    });
-
-    expect(query).toBe(
-      `
-TS metrics-*
-  | WHERE \`host.name\`::STRING IN ("host-1")
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
-`.trim()
-    );
-  });
-
   describe('special character escaping', () => {
     const mockMetricWithSpecialChars: MetricField = {
       name: 'cpu.usage',
@@ -253,7 +198,6 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | WHERE \`service-name\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service-name\`
 `.trim()
       );
@@ -270,7 +214,6 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | WHERE \`service-name\` IS NOT NULL AND \`container-id\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service-name\`, \`container-id\`
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`service-name\`, " › ", \`container-id\`)
   | DROP \`service-name\`, \`container-id\`
@@ -289,28 +232,9 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | WHERE \`host-ip\` IS NOT NULL AND \`service-name\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host-ip\`, \`service-name\`
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host-ip\`::STRING, " › ", \`service-name\`)
   | DROP \`host-ip\`, \`service-name\`
-`.trim()
-      );
-    });
-
-    it('should escape filter field names with hyphens', () => {
-      const query = createESQLQuery({
-        metric: mockMetricWithSpecialChars,
-        filters: {
-          'service-name': ['web-server'],
-          'container-id': ['cont-123'],
-        },
-      });
-      expect(query).toBe(
-        `
-TS metrics-*
-  | WHERE \`service-name\`::STRING IN ("web-server")
-  | WHERE \`container-id\`::STRING IN ("cont-123")
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
       );
     });
@@ -330,7 +254,6 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | WHERE \`field\`\`with\`\`ticks\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`field\`\`with\`\`ticks\`
 `.trim()
       );

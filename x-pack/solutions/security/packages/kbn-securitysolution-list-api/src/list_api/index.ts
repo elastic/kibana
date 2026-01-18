@@ -67,12 +67,9 @@ const findLists = async ({
   http,
   cursor,
   page,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   per_page,
   signal,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   sort_field,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   sort_order,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListSchema> => {
   return http.fetch(`${LIST_URL}/_find`, {
@@ -118,7 +115,7 @@ const findListsBySize = async ({
   http,
   cursor,
   page,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   per_page,
   signal,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListsBySizeSchema> => {
@@ -158,7 +155,7 @@ export { findListsBySizeWithValidation as findListsBySize };
 const importList = async ({
   file,
   http,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   list_id,
   type,
   signal,
@@ -240,7 +237,7 @@ export { deleteListWithValidation as deleteList };
 
 const exportList = async ({
   http,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   list_id,
   signal,
 }: ApiParams & ExportListItemQuerySchemaEncoded): Promise<Blob> =>

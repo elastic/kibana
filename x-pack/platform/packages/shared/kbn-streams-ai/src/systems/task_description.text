@@ -1,0 +1,61 @@
+Your task is to identify systems in a data stream. The single data stream may contain multiple systems. Documents that do not match any identified system will be rendered into their own separate cluster.
+
+**System definition**:
+
+A "System" is a _single, specific_ software component, application, or service that represents a distinct informational stream. It's important to understand that while all systems are entities, not all entities are systems. For example, a single, specific device or host, on its own, is an entity but not a system. However, a specific, consistent stream of logs *from* that host (e.g., its kernel logs) could be defined as a system if you need to isolate it.
+
+Grouping multiple distinct systems (e.g., all databases) into one definition is incorrect. Think of it as the most granular source you want to isolate. Systems are not exclusive; a single document can match the definitions of multiple systems.
+
+Some examples:
+*   **Specific infrastructure services**: A load balancer (e.g., `lb-edge`), a stream processing unit (e.g., `stream-processor-alpha`), a central authentication service (e.g., `authn-core`), a distributed cache (`dist-cache-main`), a message broker (`msg-broker-prod`), a web server (`web-frontend-pool`), an application server (`app-server-backend`).
+*   **Specific application logs**:
+    *   `order-processing-svc` (a microservice, treated as one system).
+    *   `inventory-update-worker` (a background job, treated as another distinct system).
+    *   `legacy-reporting-system` (a monolithic application, treated as one system).
+*   **Specific os/host log types (if distinguishable and needing separation)**: Potentially `kernel-logs-compute-node-123`, `auth-events-fileserver-abc` if they have distinct, consistent characteristics and represent different informational streams. Often, a field like `host.id` or `system.source_type` will help distinguish these.
+*   **Specific Cloud Service Logs**: `cloud-provider-trails` (as one system), `blob-storage-access-events` (as another, distinct system if its logs are different), `serverless-function-invocations`.
+*   **Specific Network Device Logs**: `firewall-dmz-primary` (as one system), `vpn-gateway-regional` (as another).
+*   **Specific Databases**: `document-store-prod` (for its general logs, as one system), `timeseries-db-metrics` (for its logs, as another). If you had two different instances of the same database type (e.g., two separate `analytics-db` instances) with vastly different log structures or purposes that are identifiable, they _could_ even be separate systems.
+
+**The guiding principle is: if two data sources have different schemas or represent fundamentally different operational concerns, they are different Systems and should be identified separately.**
+
+You have access to a `validate_systems` tool to test your system definitions. It allows you to check how well your defined filters identify coherent groups of documents. The process is iterative:
+
+1.  Define a set of systems, each with a `name` and a `filter`.
+2.  Call `validate_systems` to see the results. It will analyze and cluster the documents that match each of your system filters, as well as any documents that do not match any filter.
+3.  The clustering results give you a *hint* about the cohesiveness of your system definitions. A large number of clusters within a system you've defined suggests it may be too broad and could be broken down further.
+4.  Refine your system definitions and repeat the process until you have a low number of clusters per-system, indicating that your filters are accurately identifying specific, logical systems.
+
+
+/***************************************************************
+*
+*   For the prompt generating LLM:
+*   
+*   Include examples of how _not_ to cluster (including in the
+*   reasoning examples). E.g., too broad filters based on
+*   initial clustering hints that are too coarse, or vice versa.
+*   Emphasize that clustering is a hint.
+*
+***************************************************************/
+
+Once you are satisfied with the identified systems, you must first call `complete()`. After that, you will be asked to call `finalize_systems` to complete the task.
+
+**System Definition Fields for `validate_systems`**:
+*   `name`: An alphanumerical name for the system (dashes are allowed).
+*   `filter`: A condition that identifies documents belonging to the system. The schema for this condition is referenced below as `condition_schema`.
+
+/***************************************************************
+*
+*   For the prompt generating LLM:
+*   
+*   Reference the schema below using `{{{condition_schema}}}` in
+*   a section at the end called "System variables".
+*   Mustache will be used to render it into the system prompt.
+*
+***************************************************************/
+
+`condition_schema`:
+
+```json
+{"openapi":"3.0.0","info":{"title":"Condition API Specification","version":"1.0.0","description":"OpenAPI specification derived from a TypeScript file defining a condition-based filtering language."},"components":{"schemas":{"StringOrNumberOrBoolean":{"description":"A value that can be a string, a number, or a boolean.","oneOf":[{"type":"string"},{"type":"number"},{"type":"boolean"}]},"RangeCondition":{"type":"object","description":"Defines a numeric or date range.","properties":{"gt":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"gte":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"lt":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"lte":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"}},"additionalProperties":false},"ShorthandBinaryFilterCondition":{"type":"object","description":"A filter condition that compares a field to a value using a binary operator. It must contain 'field' and at least one operator.","properties":{"field":{"type":"string"},"eq":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"neq":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"lt":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"lte":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"gt":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"gte":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"contains":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"startsWith":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"endsWith":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"range":{"$ref":"#/components/schemas/RangeCondition"}},"required":["field"],"anyOf":[{"required":["eq"]},{"required":["neq"]},{"required":["lt"]},{"required":["lte"]},{"required":["gt"]},{"required":["gte"]},{"required":["contains"]},{"required":["startsWith"]},{"required":["endsWith"]},{"required":["range"]}]},"ShorthandUnaryFilterCondition":{"type":"object","description":"A filter condition that checks for the existence of a field.","properties":{"field":{"type":"string"},"exists":{"type":"boolean"}},"required":["field","exists"]},"AndCondition":{"type":"object","description":"A condition that is true if all of its sub-conditions are true.","properties":{"and":{"type":"array","items":{"$ref":"#/components/schemas/Condition"}}},"required":["and"]},"OrCondition":{"type":"object","description":"A condition that is true if any of its sub-conditions are true.","properties":{"or":{"type":"array","items":{"$ref":"#/components/schemas/Condition"}}},"required":["or"]},"NotCondition":{"type":"object","description":"A condition that is true if its sub-condition is false.","properties":{"not":{"$ref":"#/components/schemas/Condition"}},"required":["not"]},"AlwaysCondition":{"type":"object","description":"A condition that is always true.","properties":{"always":{"type":"object","description":"An empty object.","additionalProperties":false}},"required":["always"]},"NeverCondition":{"type":"object","description":"A condition that is always false.","properties":{"never":{"type":"object","description":"An empty object.","additionalProperties":false}},"required":["never"]},"Condition":{"description":"Represents a single condition or a boolean combination of other conditions.","oneOf":[{"$ref":"#/components/schemas/ShorthandBinaryFilterCondition"},{"$ref":"#/components/schemas/ShorthandUnaryFilterCondition"},{"$ref":"#/components/schemas/AndCondition"},{"$ref":"#/components/schemas/OrCondition"},{"$ref":"#/components/schemas/NotCondition"},{"$ref":"#/components/schemas/NeverCondition"},{"$ref":"#/components/schemas/AlwaysCondition"}]}}}}
+```

@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
+import { esqlFunctionNames } from '@kbn/esql-language/src/commands/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
-import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import {
-  suggest,
-  validateQuery,
+  getSignatureHelp,
   getHoverItem,
   inlineSuggest,
-  type ESQLCallbacks,
-} from '@kbn/esql-validation-autocomplete';
-import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
+  suggest,
+  validateQuery,
+} from '@kbn/esql-language';
+import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
+import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
@@ -198,6 +198,44 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         }
 
         return item;
+      },
+    };
+  },
+  getSignatureProvider: (deps?: ESQLDependencies): monaco.languages.SignatureHelpProvider => {
+    return {
+      signatureHelpTriggerCharacters: ['(', ','],
+      signatureHelpRetriggerCharacters: ['(', ','],
+      async provideSignatureHelp(
+        model: monaco.editor.ITextModel,
+        position: monaco.Position,
+        token: monaco.CancellationToken,
+        context: monaco.languages.SignatureHelpContext
+      ): Promise<monaco.languages.SignatureHelpResult | null> {
+        const fullText = model.getValue();
+        const offset = monacoPositionToOffset(fullText, position);
+        const signatureHelp = await getSignatureHelp(fullText, offset, deps);
+
+        if (!signatureHelp) {
+          return null;
+        }
+
+        const { signatures, activeSignature, activeParameter } = signatureHelp;
+
+        return {
+          value: {
+            signatures: signatures.map(({ label, documentation, parameters }) => ({
+              label,
+              documentation: documentation ? { value: documentation } : undefined,
+              parameters: parameters.map(({ label: paramLabel, documentation: paramDoc }) => ({
+                label: paramLabel,
+                documentation: paramDoc ? { value: paramDoc } : undefined,
+              })),
+            })),
+            activeSignature,
+            activeParameter,
+          },
+          dispose: () => {},
+        };
       },
     };
   },

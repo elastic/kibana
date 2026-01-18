@@ -7,6 +7,8 @@
 
 import { processDistanceResponse } from './process_distance_response';
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 test('should convert elasticsearch response into table', () => {
   const response = {
     aggregations: {

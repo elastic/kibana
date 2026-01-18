@@ -30,6 +30,14 @@ const getFullscreenStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
       left: 0;
       top: 0;
       background: ${euiTheme.colors.body};
+
+      &
+        .monaco-editor
+        .margin:not(:has(.line-numbers))
+        + .monaco-scrollable-element
+        .monaco-mouse-cursor-text {
+        padding: 0 ${euiTheme.size.base};
+      }
     `,
   };
 };

@@ -27,9 +27,6 @@ export const TimelineESQLGlobalStyles = createGlobalStyle`
     .esqlInlineDocumentationFlyout {
       z-index: 1003 !important;
     }
-    .euiOverlayMask {
-      z-index: 1002 !important;
-    }
   }
 
   // TODO this should be removed when we change the ES|QL tab to be our own component instead of Discover (hopefully 8.15)

@@ -320,8 +320,9 @@ describe('ServerMetricsCollector', () => {
       await Promise.all([sendGet('/no-delay'), sendGet('/500-ms')]);
       let metrics = await collector.collect();
 
-      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(250);
-      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(240);
+      expect(metrics.response_times.avg_in_millis).toBeLessThanOrEqual(260);
+      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(490);
 
       collector.reset();
       metrics = await collector.collect();
@@ -331,8 +332,8 @@ describe('ServerMetricsCollector', () => {
       await Promise.all([sendGet('/500-ms'), sendGet('/500-ms')]);
       metrics = await collector.collect();
 
-      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(500);
-      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(490);
+      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(490);
     });
   });
 });

@@ -6,21 +6,21 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FeatureWithFilter, Streams } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import { conditionToESQL } from '@kbn/streamlang';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { FeatureEventsSparkline } from './feature_events_sparkline';
+import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 
 export const FeatureEventsData = ({
   feature,
   definition,
 }: {
-  feature: FeatureWithFilter;
+  feature: System;
   definition: Streams.all.Definition;
 }) => {
   const {
@@ -46,13 +46,15 @@ export const FeatureEventsData = ({
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.streams.identifiedFeatureEvents.label', {
-              defaultMessage: 'Identified feature events',
-            })}
-          </EuiText>
+          <EuiTitle size="xxs">
+            <h3>
+              {i18n.translate('xpack.streams.identifiedFeatureEvents.label', {
+                defaultMessage: 'Detected feature events',
+              })}
+            </h3>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {discoverLink ? (
@@ -75,7 +77,7 @@ export const FeatureEventsData = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <FeatureEventsSparkline
+      <FeatureEventsSparklineLast24hrs
         feature={feature}
         definition={definition}
         hideAxis={false}

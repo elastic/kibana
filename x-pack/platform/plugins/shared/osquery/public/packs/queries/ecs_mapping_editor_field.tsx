@@ -47,8 +47,8 @@ import {
   convertECSMappingToArray,
   convertECSMappingToObject,
 } from '../../../common/utils/converters';
-import ECSSchema from '../../common/schemas/ecs/v9.1.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.18.1.json';
+import ECSSchema from '../../common/schemas/ecs/v9.2.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.19.0.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -702,9 +702,9 @@ interface OsqueryColumn {
   name: string;
   description: string;
   type: string;
-  hidden: boolean;
-  required: boolean;
-  index: boolean;
+  hidden?: boolean;
+  required?: boolean;
+  index?: boolean;
 }
 
 // eslint-disable-next-line react/display-name

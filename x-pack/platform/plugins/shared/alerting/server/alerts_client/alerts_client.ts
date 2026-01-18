@@ -831,6 +831,11 @@ export class AlertsClient<
         maintenanceWindows: maintenanceWindows ?? [],
         withScopedQuery: false,
       });
+
+      // Create a map of maintenance window IDs to names
+      const maintenanceWindowNamesMap = new Map(
+        (maintenanceWindows ?? []).map((mw) => [mw.id, mw.title])
+      );
       if (maintenanceWindowsWithScopedQuery.length === 0) {
         return {};
       }
@@ -866,8 +871,15 @@ export class AlertsClient<
             scopedQueryMaintenanceWindowId,
           ];
 
-          // Update in memory alert with new maintenance window IDs
-          newAlert.setMaintenanceWindowIds([...new Set(newMaintenanceWindowIds)]);
+          // Get corresponding names for the maintenance window IDs
+          const uniqueMaintenanceWindowIds = [...new Set(newMaintenanceWindowIds)];
+          const maintenanceWindowNames = uniqueMaintenanceWindowIds.map(
+            (id) => maintenanceWindowNamesMap.get(id) || id
+          );
+
+          // Update in memory alert with new maintenance window IDs and names
+          newAlert.setMaintenanceWindowIds(uniqueMaintenanceWindowIds);
+          newAlert.setMaintenanceWindowNames(maintenanceWindowNames);
 
           alertsAffectedByScopedQuery.push(alertId);
           appliedMaintenanceWindowIds.push(...newMaintenanceWindowIds);

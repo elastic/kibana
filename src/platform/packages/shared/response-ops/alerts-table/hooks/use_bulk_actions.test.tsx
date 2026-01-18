@@ -14,7 +14,12 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
+import {
+  useBulkActions,
+  useBulkAddToCaseActions,
+  useBulkUntrackActions,
+  useBulkMuteActions,
+} from './use_bulk_actions';
 import { createCasesServiceMock } from '../mocks/cases.mock';
 import { BulkActionsVerbs, type PublicAlertsDataGridProps } from '../types';
 import type { AdditionalContext, RenderContext } from '../types';
@@ -462,6 +467,34 @@ describe('bulk action hooks', () => {
     });
   });
 
+  describe('useBulkMuteActions', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should return mute/unmute actions', () => {
+      const { result } = renderHook(
+        () =>
+          useBulkMuteActions({
+            setIsBulkActionsLoading,
+            refresh,
+            clearSelection,
+            http,
+            notifications,
+          }),
+        {
+          wrapper,
+        }
+      );
+
+      expect(result.current.length).toBe(2);
+      expect(result.current[0].key).toBe('bulk-mute');
+      expect(result.current[1].key).toBe('bulk-unmute');
+      expect(result.current[0]['data-test-subj']).toBe('bulk-mute');
+      expect(result.current[1]['data-test-subj']).toBe('bulk-unmute');
+    });
+  });
+
   describe('useBulkActions', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -523,6 +556,22 @@ describe('bulk action hooks', () => {
                 "disabledLabel": "Edit tags",
                 "key": "edit-tags",
                 "label": "Edit tags",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "bulk-mute",
+                "disableOnQuery": true,
+                "disabledLabel": "Mute selected",
+                "key": "bulk-mute",
+                "label": "Mute selected",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "bulk-unmute",
+                "disableOnQuery": true,
+                "disabledLabel": "Unmute selected",
+                "key": "bulk-unmute",
+                "label": "Unmute selected",
                 "onClick": [Function],
               },
             ],

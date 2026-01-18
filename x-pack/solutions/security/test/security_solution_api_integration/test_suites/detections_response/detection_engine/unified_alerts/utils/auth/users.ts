@@ -6,12 +6,12 @@
  */
 
 import {
-  securitySolutionOnlyAll,
-  securitySolutionAllNoIndices,
-  securitySolutionAllNoDetectionIndices,
-  securitySolutionAllNoAttackIndices,
+  rulesRead,
+  rulesReadNoIndices,
+  rulesReadNoDetectionIndices,
+  rulesReadNoAttackIndices,
   attackDiscoveryOnlyAll,
-  securitySolutionAndAttackDiscoveryAll,
+  rulesReadAndAttackDiscoveryAll,
   noKibanaPrivileges as noKibanaPrivilegesRole,
 } from './roles';
 import type { User } from './types';
@@ -28,28 +28,28 @@ export const noKibanaPrivileges: User = {
   roles: [noKibanaPrivilegesRole.name],
 };
 
-export const secOnly: User = {
-  username: 'sec_only_all_spaces',
-  password: 'sec_only_all_spaces',
-  roles: [securitySolutionOnlyAll.name],
+export const rulesReadUser: User = {
+  username: 'rules_read_all_spaces',
+  password: 'rules_read_all_spaces',
+  roles: [rulesRead.name],
 };
 
-export const secOnlyNoIndices: User = {
-  username: 'sec_only_all_spaces_no_indices',
-  password: 'sec_only_all_spaces_no_indices',
-  roles: [securitySolutionAllNoIndices.name],
+export const rulesReadNoIndicesUser: User = {
+  username: 'rules_read_all_spaces_no_indices',
+  password: 'rules_read_all_spaces_no_indices',
+  roles: [rulesReadNoIndices.name],
 };
 
-export const secOnlyNoDetectionIndices: User = {
-  username: 'sec_only_all_spaces_no_detection_indices',
-  password: 'sec_only_all_spaces_no_detection_indices',
-  roles: [securitySolutionAllNoDetectionIndices.name],
+export const rulesReadNoDetectionIndicesUser: User = {
+  username: 'rules_read_all_spaces_no_detection_indices',
+  password: 'rules_read_all_spaces_no_detection_indices',
+  roles: [rulesReadNoDetectionIndices.name],
 };
 
-export const secOnlyNoAttackIndices: User = {
-  username: 'sec_only_all_spaces_no_attack_indices',
-  password: 'sec_only_all_spaces_no_attack_indices',
-  roles: [securitySolutionAllNoAttackIndices.name],
+export const rulesReadNoAttackIndicesUser: User = {
+  username: 'rules_read_all_spaces_no_attack_indices',
+  password: 'rules_read_all_spaces_no_attack_indices',
+  roles: [rulesReadNoAttackIndices.name],
 };
 
 export const attackDiscoveryOnly: User = {
@@ -58,19 +58,19 @@ export const attackDiscoveryOnly: User = {
   roles: [attackDiscoveryOnlyAll.name],
 };
 
-export const secAndAttackDiscoveryOnly: User = {
-  username: 'sec_and_attack_discovery_all_spaces',
-  password: 'sec_and_attack_discovery_all_spaces',
-  roles: [securitySolutionAndAttackDiscoveryAll.name],
+export const rulesReadAndAttackDiscoveryAllUser: User = {
+  username: 'rules_read_and_attack_discovery_all_spaces',
+  password: 'rules_read_and_attack_discovery_all_spaces',
+  roles: [rulesReadAndAttackDiscoveryAll.name],
 };
 
 export const allUsers = [
   superUser,
   noKibanaPrivileges,
-  secOnly,
-  secOnlyNoIndices,
-  secOnlyNoDetectionIndices,
-  secOnlyNoAttackIndices,
+  rulesReadUser,
+  rulesReadNoIndicesUser,
+  rulesReadNoDetectionIndicesUser,
+  rulesReadNoAttackIndicesUser,
   attackDiscoveryOnly,
-  secAndAttackDiscoveryOnly,
+  rulesReadAndAttackDiscoveryAllUser,
 ];

@@ -10,6 +10,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { DashboardSaveModal } from './save_modal';
+
+jest.mock('@kbn/content-management-access-control-public', () => ({
+  AccessModeContainer: () => null,
+}));
 
 jest.mock('@kbn/saved-objects-plugin/public', () => ({
   SavedObjectSaveModal: () => null,
@@ -25,7 +30,33 @@ jest.mock('@kbn/saved-objects-plugin/public', () => ({
   ),
 }));
 
-import { DashboardSaveModal } from './save_modal';
+jest.mock('../../services/kibana_services', () => ({
+  coreServices: {
+    userProfile: {
+      getCurrent: jest.fn(),
+    },
+  },
+  savedObjectsTaggingService: undefined,
+  spacesService: {
+    getActiveSpace: jest.fn().mockResolvedValue({
+      id: 'default',
+      name: 'Default',
+      disabledFeatures: [],
+    }),
+  },
+}));
+
+jest.mock('../../services/access_control_service', () => ({
+  getAccessControlClient: jest.fn().mockReturnValue({
+    isInEditAccessMode: jest.fn().mockReturnValue(false),
+    getCapabilities: jest.fn().mockResolvedValue({
+      capabilities: {
+        createAccessMode: true,
+        createReadOnlyAccessMode: true,
+      },
+    }),
+  }),
+}));
 
 const mockSave = jest.fn();
 const mockClose = jest.fn();

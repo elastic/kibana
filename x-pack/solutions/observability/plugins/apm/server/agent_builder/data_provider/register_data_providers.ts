@@ -6,10 +6,15 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getRollupIntervalForTimeRange } from '@kbn/apm-data-access-plugin/server/utils';
+import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_error_sample_details';
+import { parseDatemath } from '../utils/time';
 import { getApmServiceSummary } from '../../routes/assistant_functions/get_apm_service_summary';
 import { getApmDownstreamDependencies } from '../../routes/assistant_functions/get_apm_downstream_dependencies';
+import { getServicesItems } from '../../routes/services/get_services/get_services_items';
 import { getApmErrors } from '../../routes/assistant_functions/get_observability_alert_details_context/get_apm_errors';
+import { ApmDocumentType } from '../../../common/document_type';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import {
   getExitSpanChangePoints,
   getServiceChangePoints,
@@ -61,16 +66,19 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'apmDownstreamDependencies',
     async ({ request, serviceName, serviceEnvironment, start, end }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
-      const [coreStart] = await core.getStartServices();
-      const randomSampler = await getRandomSampler({ coreStart, probability: 1, request });
+      const { apmEventClient, randomSampler } = await buildApmToolResources({
+        core,
+        plugins,
+        request,
+        logger,
+      });
 
       return getApmDownstreamDependencies({
         apmEventClient,
         randomSampler,
         arguments: {
           serviceName,
-          serviceEnvironment,
+          serviceEnvironment: serviceEnvironment ? serviceEnvironment : ENVIRONMENT_ALL.value,
           start,
           end,
         },
@@ -122,6 +130,56 @@ export function registerDataProviders({
         transactionName,
         start,
         end,
+      });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmErrorDetails',
+    async ({ request, errorId, serviceName, serviceEnvironment, start, end, kuery = '' }) => {
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
+
+      return getErrorSampleDetails({
+        apmEventClient,
+        errorId,
+        serviceName,
+        start: parseDatemath(start),
+        end: parseDatemath(end),
+        environment: serviceEnvironment ?? '',
+        kuery,
+      });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'servicesItems',
+    async ({ request, environment, kuery, start, end, searchQuery }) => {
+      const { apmEventClient, randomSampler, mlClient, apmAlertsClient } =
+        await buildApmToolResources({
+          core,
+          plugins,
+          request,
+          logger,
+        });
+
+      const startMs = parseDatemath(start);
+      const endMs = parseDatemath(end);
+
+      return getServicesItems({
+        apmEventClient,
+        apmAlertsClient,
+        randomSampler,
+        mlClient,
+        logger,
+        environment: environment ?? ENVIRONMENT_ALL.value,
+        kuery: kuery ?? '',
+        start: startMs,
+        end: endMs,
+        serviceGroup: null,
+        documentType: ApmDocumentType.TransactionMetric,
+        rollupInterval: getRollupIntervalForTimeRange(startMs, endMs),
+        useDurationSummary: true, // Note: This will not work for pre 8.7 data. See: https://github.com/elastic/kibana/issues/167578
+        searchQuery,
       });
     }
   );

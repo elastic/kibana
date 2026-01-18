@@ -35,7 +35,7 @@ import type {
   DetectedField,
   ProcessingSimulationResponse,
 } from '@kbn/streams-schema';
-import { getInheritedFieldsFromAncestors, Streams } from '@kbn/streams-schema';
+import { getInheritedFieldsFromAncestors, isOtelStream, Streams } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline } from '@kbn/streamlang';
@@ -140,6 +140,8 @@ export const simulateProcessing = async ({
     return prepareSimulationFailureResponse(ingestSimulationResult.error);
   }
 
+  const otelStream = isOtelStream(stream);
+
   /* 4. Extract all the documents reports and processor metrics from the simulations */
   const { docReports, processorsMetrics } = computePipelineSimulationResult(
     pipelineSimulationResult.simulation,
@@ -147,6 +149,7 @@ export const simulateProcessing = async ({
     simulationData.docs,
     params.body.processing,
     Streams.WiredStream.Definition.is(stream),
+    otelStream,
     streamFields
   );
 
@@ -314,7 +317,7 @@ const prepareIngestSimulationBody = (
  * If the simulation fails, we won't be able to extract the documents reports and the processor metrics.
  * In case any other error occurs, we delegate the error handling to currently in draft processor.
  */
-const executePipelineSimulation = async (
+export const executePipelineSimulation = async (
   scopedClusterClient: IScopedClusterClient,
   simulationBody: IngestSimulateRequest
 ): Promise<PipelineSimulationResult> => {
@@ -329,12 +332,12 @@ const executePipelineSimulation = async (
     };
   } catch (error) {
     if (error instanceof esErrors.ResponseError) {
-      const { processor_tag, reason } = error.body?.error;
+      const { processor_tag } = error.body?.error;
 
       return {
         status: 'failure',
         error: {
-          message: reason,
+          message: error.message,
           processor_id: processor_tag,
           type: 'generic_simulation_failure',
         },
@@ -476,6 +479,7 @@ const computePipelineSimulationResult = (
   sampleDocs: Array<{ _source: FlattenRecord }>,
   processing: StreamlangDSL,
   isWiredStream: boolean,
+  otelStream: boolean,
   streamFields: FieldDefinition
 ): {
   docReports: SimulationDocReport[];
@@ -494,7 +498,8 @@ const computePipelineSimulationResult = (
 
   const docReports = pipelineSimulationResult.docs.map((pipelineDocResult, id) => {
     const ingestDocResult = ingestSimulationResult.docs[id];
-    const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult);
+    const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult, otelStream);
+    const processedBy = collectProcessedByProcessorIds(pipelineDocResult.processor_results);
 
     const { errors, status, value } = getLastDoc(
       pipelineDocResult,
@@ -539,6 +544,7 @@ const computePipelineSimulationResult = (
     return {
       detected_fields: diff.detected_fields,
       errors,
+      processed_by: processedBy,
       status,
       value,
     };
@@ -727,7 +733,26 @@ const computeSimulationDocDiff = (
   return diffResult;
 };
 
-const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocumentResult) => {
+const collectProcessedByProcessorIds = (
+  processorResults: SuccessfulPipelineSimulateDocumentResult['processor_results']
+) => {
+  const processedBy = new Set<string>();
+
+  processorResults.forEach((processor) => {
+    if (!processor.tag || isSkippedProcessor(processor)) {
+      return;
+    }
+
+    processedBy.add(processor.tag);
+  });
+
+  return Array.from(processedBy);
+};
+
+const collectIngestDocumentErrors = (
+  docResult: SimulateIngestSimulateIngestDocumentResult,
+  otelStream: boolean
+) => {
   const errors: SimulationError[] = [];
 
   if (isMappingFailure(docResult)) {
@@ -738,10 +763,17 @@ const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocu
   }
 
   if (docResult.doc?.ignored_fields) {
+    // Drop ignored field errors for OTEL streams if they end in geo.location - This is a temporary workaround for https://github.com/elastic/elasticsearch/issues/140506
+    const fieldsWithoutLocation = docResult.doc.ignored_fields.filter(({ field }) => {
+      return !field.endsWith('geo.location');
+    });
+    if (otelStream && fieldsWithoutLocation.length === 0) {
+      return errors;
+    }
     errors.push({
       type: 'ignored_fields_failure',
       message: 'Some fields were ignored while simulating this document ingestion.',
-      ignored_fields: docResult.doc.ignored_fields,
+      ignored_fields: fieldsWithoutLocation,
     });
   }
 

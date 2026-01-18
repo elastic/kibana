@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser, isSubQuery } from '@kbn/esql-ast';
-import type { ESQLSource, ESQLCommand } from '@kbn/esql-ast';
+import { Parser, isSubQuery } from '@kbn/esql-language';
+import type { ESQLSource, ESQLCommand } from '@kbn/esql-language';
 
 function getSourcesFromAst(commands: ESQLCommand[]): string[] {
   const sourceCommand = commands.find(({ name }) => ['from', 'ts'].includes(name));

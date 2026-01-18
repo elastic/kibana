@@ -515,6 +515,13 @@ export const SpaceAssignedRolesTable = ({
           rowProps={getRowProps}
           cellProps={getCellProps}
           selection={selection}
+          tableCaption={i18n.translate(
+            'xpack.spaces.management.spaceDetails.rolesTable.tableCaption',
+            {
+              defaultMessage: 'Roles assigned to {spaceName}',
+              values: { spaceName: currentSpace.name },
+            }
+          )}
           pagination={{
             pageSize: pagination.size,
             pageIndex: pagination.index,

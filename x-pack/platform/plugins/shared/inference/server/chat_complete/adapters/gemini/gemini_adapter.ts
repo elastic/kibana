@@ -28,6 +28,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     modelName,
     abortSignal,
     metadata,
+    timeout,
   }) => {
     const connector = executor.getConnector();
     const useThoughtSignature = mustUseThoughtSignature(
@@ -49,6 +50,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           ...(metadata?.connectorTelemetry
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
+          ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
         },
       });
     }).pipe(
@@ -56,7 +58,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
       map((line) => {
         return JSON.parse(line) as GenerateContentResponseChunk;
       }),
-      processVertexStream()
+      processVertexStream(modelName)
     );
   },
 };

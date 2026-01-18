@@ -21,9 +21,9 @@ export async function read(
   const {
     saved_object: savedObject,
     outcome,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     alias_purpose,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     alias_target_id,
   } = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,

@@ -207,6 +207,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         button={button!}
         closePopover={closePopover}
         anchorPosition="leftUp"
+        hasArrow={true}
       >
         <EuiSelectable
           // workaround for auto-scroll to first element after clearing search

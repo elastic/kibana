@@ -39,7 +39,6 @@ export {
   createInternalServerError,
   isTokenLimitReachedError,
   isChatCompletionError,
-  createFunctionNotFoundError,
 } from './conversation_complete';
 
 export {

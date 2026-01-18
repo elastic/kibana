@@ -12,6 +12,7 @@ export class AccountSettingsPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly userMenu = this.ctx.getService('userMenu');
+  private readonly log = this.ctx.getService('log');
 
   async verifyAccountSettings(expectedUserName: string) {
     await this.userMenu.clickProvileLink();
@@ -28,17 +29,24 @@ export class AccountSettingsPageObject extends FtrService {
 
     const currentPasswordInput = await this.find.byName('current_password');
     await currentPasswordInput.clearValue();
-    await currentPasswordInput.type(currentPassword);
+    await currentPasswordInput.type(currentPassword, { charByChar: true });
 
     const passwordInput = await this.find.byName('password');
     await passwordInput.clearValue();
-    await passwordInput.type(newPassword);
+    await passwordInput.type(newPassword, { charByChar: true });
 
     const confirmPasswordInput = await this.find.byName('confirm_password');
     await confirmPasswordInput.clearValue();
-    await confirmPasswordInput.type(newPassword);
+    await confirmPasswordInput.type(newPassword, { charByChar: true });
 
-    await this.testSubjects.click('changePasswordFormSubmitButton');
+    // Debug logging for password fields before submitting
+    this.log.debug('Password fields before submit:', {
+      currentPassword,
+      newPassword,
+      confirmPassword: newPassword,
+    });
+
+    await this.testSubjects.clickWhenNotDisabled('changePasswordFormSubmitButton');
 
     const toast = await this.testSubjects.find('euiToastHeader', 20000);
     const title = await toast.getVisibleText();

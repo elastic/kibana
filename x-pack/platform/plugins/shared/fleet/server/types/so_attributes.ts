@@ -19,7 +19,12 @@ import type {
   OutputPreset,
   AgentlessPolicy,
 } from '../../common/types';
-import type { AgentStatus, AgentType, FleetServerAgentComponent } from '../../common/types/models';
+import type {
+  AgentStatus,
+  AgentType,
+  AgentUpgrade,
+  FleetServerAgentComponent,
+} from '../../common/types/models';
 
 import type {
   PackagePolicy,
@@ -35,7 +40,11 @@ import type {
   KafkaTopicWhenType,
   SimpleSOAssetType,
 } from '../../common/types';
-import type { CloudProvider, CloudConnectorVars } from '../../common/types/models/cloud_connector';
+import type {
+  CloudProvider,
+  CloudConnectorVars,
+  AccountType,
+} from '../../common/types/models/cloud_connector';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -95,6 +104,7 @@ export interface AgentSOAttributes {
   packages?: string[];
   namespaces?: string[];
   last_known_status?: AgentStatus;
+  upgrade?: AgentUpgrade;
 }
 
 export interface FleetProxySOAttributes {
@@ -275,6 +285,7 @@ export interface SettingsSOAttributes {
     metrics?: 'success' | null;
     synthetics?: 'success' | null;
   };
+  integration_knowledge_enabled?: boolean;
 }
 
 export interface SpaceSettingsSOAttributes {
@@ -301,8 +312,8 @@ export interface CloudConnectorSOAttributes {
   name: string;
   namespace?: string;
   cloudProvider: CloudProvider;
+  accountType?: AccountType;
   vars: CloudConnectorVars;
-  packagePolicyCount: number;
   created_at: string;
   updated_at: string;
 }

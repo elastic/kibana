@@ -114,9 +114,16 @@ export interface Index {
 export interface DataStreams {
   items: DataStream[];
 }
+
+export interface DataStreamLifeCycle {
+  enabled: boolean;
+  data_retention?: string;
+}
+
 export interface DataStream {
   datastream_name: string;
   ilm_policy?: string;
+  dsl?: DataStreamLifeCycle;
   template?: string;
   indices?: Index[];
 }

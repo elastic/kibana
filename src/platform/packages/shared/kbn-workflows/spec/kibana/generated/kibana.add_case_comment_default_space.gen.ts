@@ -30,7 +30,7 @@ import { FetcherConfigSchema } from '../../schema';
 
 // export contract
 export const ADD_CASE_COMMENT_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
-  type: 'kibana.addCaseCommentDefaultSpace',
+  type: 'kibana.addCaseComment',
   summary: `Add a case comment or alert`,
   description: `**Spaces method and path for this operation:**
 
@@ -48,7 +48,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     headerParams: ['kbn-xsrf'],
     pathParams: ['caseId'],
     urlParams: [],
-    bodyParams: [],
+    bodyParams: ['alertId', 'index', 'owner', 'rule', 'type', 'comment'],
   },
   paramsSchema: z.object({
     ...getShapeAt(add_case_comment_default_space_request, 'body'),

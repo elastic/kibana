@@ -92,7 +92,7 @@ async function fetchLinkedChildrenOfSpan({
 
   const linkedChildren = response.hits.hits.map((hit) => {
     const source = 'span' in hit._source ? hit._source : undefined;
-    const event = accessKnownApmEventFields(hit.fields).requireFields(requiredFields);
+    const event = accessKnownApmEventFields(hit.fields).requireFields(requiredFields).build();
 
     return {
       ...event,

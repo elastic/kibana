@@ -110,7 +110,7 @@ describe('Handle request to generate', () => {
         jobParams: mockJobParams,
       });
 
-      const { _id, created_at: _created_at, payload, ...snapObj } = report;
+      const { _id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "_index": ".reporting-foo-index-234",
@@ -168,7 +168,7 @@ describe('Handle request to generate', () => {
         jobParams: mockJobParams,
       });
 
-      const { _id, created_at: _created_at, ...snapObj } = report;
+      const { _id, created_at, ...snapObj } = report;
       expect(snapObj.payload.version).toBe('7.14.0');
     });
   });
@@ -250,19 +250,36 @@ describe('Handle request to generate', () => {
     });
 
     test('disallows invalid browser timezone', async () => {
-      expect(
-        await requestHandler.handleRequest({
-          exportTypeId: 'csv_searchsource',
-          jobParams: {
-            ...mockJobParams,
-            browserTimezone: 'America/Amsterdam',
+      const handler = new GenerateRequestHandler({
+        reporting: reportingCore,
+        user: { username: 'testymcgee' },
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: {
+          ...mockRequest,
+          body: {
+            jobParams: rison.encode({ ...mockJobParams, browserTimezone: 'America/Amsterdam' }),
           },
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "body": "Invalid timezone \\"America/Amsterdam\\".",
-        }
-    `);
+        },
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+      try {
+        await handler.getJobParams();
+      } catch (err) {
+        expect(err.statusCode).toBe(400);
+        expect(err.body).toMatchInlineSnapshot(`
+          "invalid params: [
+            {
+              \\"code\\": \\"custom\\",
+              \\"message\\": \\"Invalid timezone\\",
+              \\"path\\": [
+                \\"browserTimezone\\"
+              ]
+            }
+          ]"
+        `);
+      }
     });
 
     test('generates the download path', async () => {

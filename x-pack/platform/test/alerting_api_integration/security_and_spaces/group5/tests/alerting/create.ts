@@ -71,6 +71,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 flapping: {
+                  enabled: true,
                   look_back_window: 10,
                   status_change_threshold: 10,
                 },
@@ -135,6 +136,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 execution_status: response.body.execution_status,
                 revision: 0,
                 flapping: {
+                  enabled: true,
                   look_back_window: 10,
                   status_change_threshold: 10,
                 },

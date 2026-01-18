@@ -23,9 +23,12 @@ import {
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from '../../risk_engine/routes/translations';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const deleteEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
   logger: Logger,
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
@@ -65,6 +68,7 @@ export const deleteEntityEngineRoute = (
             body: TASK_MANAGER_UNAVAILABLE_ERROR,
           });
         }
+
         try {
           const secSol = await context.securitySolution;
           const body = await secSol
@@ -73,11 +77,17 @@ export const deleteEntityEngineRoute = (
               deleteData: !!(request.query.delete_data || request.query.data),
               deleteEngine: true,
             });
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({ body });
         } catch (e) {
           logger.error('Error in DeleteEntityEngine:', e);
           const error = transformError(e);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
@@ -89,6 +99,7 @@ export const deleteEntityEngineRoute = (
 
 export const deleteEntityEnginesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
   logger: Logger,
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
@@ -127,6 +138,7 @@ export const deleteEntityEnginesRoute = (
             body: TASK_MANAGER_UNAVAILABLE_ERROR,
           });
         }
+
         try {
           const secSol = await context.securitySolution;
           const client = await secSol.getEntityStoreDataClient();
@@ -151,7 +163,9 @@ export const deleteEntityEnginesRoute = (
           );
 
           const stillRunning = (await client.list()).engines?.map((e) => e.type);
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({
             body: {
               deleted: deletedEngines,
@@ -161,6 +175,10 @@ export const deleteEntityEnginesRoute = (
         } catch (e) {
           logger.error('Error in DeleteEntityEngines:', e);
           const error = transformError(e);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

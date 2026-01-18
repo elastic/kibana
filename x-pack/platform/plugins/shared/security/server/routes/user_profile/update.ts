@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components';
 
 import type { RouteDefinitionParams } from '..';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
@@ -15,11 +16,7 @@ import { getPrintableSessionId } from '../../session_management';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /** User profile data keys that are allowed to be updated by Cloud users */
-const ALLOWED_KEYS_UPDATE_CLOUD = [
-  'userSettings.darkMode',
-  'userSettings.contrastMode',
-  'solutionNavigationTour:completed', // TODO: remove with https://github.com/elastic/kibana/issues/239313
-];
+const ALLOWED_KEYS_UPDATE_CLOUD = ['userSettings.darkMode', 'userSettings.contrastMode'];
 
 const MAX_STRING_FIELD_LENGTH = 1024;
 
@@ -46,7 +43,6 @@ const userProfileUpdateSchema = schema.object({
       contrastMode: schema.maybe(
         schema.oneOf([schema.literal('system'), schema.literal('standard'), schema.literal('high')])
       ),
-      'solutionNavigationTour:completed': schema.maybe(schema.boolean()),
     })
   ),
 });
@@ -112,6 +108,17 @@ export function defineUpdateUserProfileDataRoute({
           return response.customError({
             body: 'Unsupported media type',
             statusCode: 415,
+          });
+        }
+      }
+
+      const avatarColor = userProfileData.avatar?.color;
+      if (avatarColor) {
+        const isValidColor = isValidUserProfileAvatarColor(avatarColor);
+        if (!isValidColor) {
+          return response.customError({
+            body: 'Invalid hex color',
+            statusCode: 400,
           });
         }
       }

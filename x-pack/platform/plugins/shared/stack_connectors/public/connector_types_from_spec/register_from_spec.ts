@@ -6,6 +6,7 @@
  */
 
 import { lazy } from 'react';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
@@ -68,6 +69,7 @@ const createConnectorTypeFromSpec = (
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
+    source: ACTION_TYPE_SOURCES.spec,
     selectMessage: spec.metadata.description,
     iconClass: getIcon(spec),
     // Temporary workaround to hide workflows connector when workflows UI setting is disabled.

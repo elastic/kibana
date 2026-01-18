@@ -28,7 +28,6 @@ type XYLensWithoutQueryAndFilters = Omit<XYLens, 'state'> & { state: XYLensState
 export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilters {
   // convert layers and produce references from them
   const { layers, usedDataviews } = buildDatasourceStates(
-    // @ts-expect-error upgrade typescript v5.9.3
     config,
     buildFormBasedXYLayer,
     getValueColumns

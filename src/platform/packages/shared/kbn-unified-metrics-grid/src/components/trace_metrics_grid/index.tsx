@@ -8,7 +8,6 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import React, { useMemo } from 'react';
 import { TraceMetricsProvider } from '../../context/trace_metrics_context';
 import { useEsqlQueryInfo } from '../../hooks';
@@ -16,6 +15,7 @@ import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
 import { ThroughputChart } from './throughput';
 import { MetricsGridWrapper } from '../metrics_grid_wrapper';
+import type { UnifiedMetricsGridProps } from '../../types';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
@@ -31,7 +31,7 @@ function TraceMetricsGrid({
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
-}: ChartSectionProps & {
+}: UnifiedMetricsGridProps & {
   dataSource: DataSource;
 }) {
   const { query, dataView } = fetchParams;

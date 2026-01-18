@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiLink, EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiComboBox, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
@@ -18,7 +18,10 @@ import { useKibana } from '../../../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../../../utils';
 import type { ProcessorFormState } from '../../../types';
 import { configDrivenProcessors } from './config_driven';
-import { useGetStreamEnrichmentState } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useGetStreamEnrichmentState,
+  useInteractiveModeSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { isStepUnderEdit } from '../../../state_management/steps_state_machine';
@@ -46,7 +49,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
     Streams.WiredStream.GetResponse.is(snapshot.context.definition)
   );
 
-  const isWithinWhereBlock = useStreamEnrichmentSelector((state) => {
+  const isWithinWhereBlock = useInteractiveModeSelector((state) => {
     const stepUnderEdit = state.context.stepRefs.find((stepRef) =>
       isStepUnderEdit(stepRef.getSnapshot())
     );
@@ -309,6 +312,123 @@ const getAvailableProcessors: (
       );
     },
   },
+  math: {
+    type: 'math' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.mathInputDisplay',
+      {
+        defaultMessage: 'Math',
+      }
+    ),
+    getDocUrl: () => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
+          defaultMessage="Evaluates arithmetic or logical expressions. Reference fields directly (for example, {example}). The result is written to the target field."
+          values={{
+            example: (
+              <>
+                <EuiCode>bytes / duration </EuiCode>
+              </>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  uppercase: {
+    type: 'uppercase' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseInputDisplay',
+      {
+        defaultMessage: 'Uppercase',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseHelpText"
+          defaultMessage="{uppercaseLink}. If the field is an array of strings, all members of the array will be converted."
+          values={{
+            uppercaseLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsUppercaseLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.uppercase}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.uppercaseLinkLabel', {
+                  defaultMessage: 'Converts a string to its uppercase equivalent.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  lowercase: {
+    type: 'lowercase' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseInputDisplay',
+      {
+        defaultMessage: 'Lowercase',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseHelpText"
+          defaultMessage="{lowercaseLink}. If the field is an array of strings, all members of the array will be converted."
+          values={{
+            lowercaseLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsLowercaseLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.lowercase}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.lowercaseLinkLabel', {
+                  defaultMessage: 'Converts a string to its lowercase equivalent.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  trim: {
+    type: 'trim' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimInputDisplay',
+      {
+        defaultMessage: 'Trim',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.trimHelpText"
+          defaultMessage="{trimLink} If the field is an array of strings, all members of the array will be trimmed."
+          values={{
+            trimLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsTrimLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.trim}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.trimLinkLabel', {
+                  defaultMessage: 'Trims whitespace from field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -347,7 +467,11 @@ const PROCESSOR_GROUP_MAP: Record<
   append: 'set',
   set: 'set',
   rename: 'set',
+  math: 'set',
   manual_ingest_pipeline: 'other',
+  uppercase: 'set',
+  lowercase: 'set',
+  trim: 'set',
 };
 
 const getProcessorDescription =

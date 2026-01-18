@@ -17,10 +17,9 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
-import { type Streams, isFeatureWithFilter, type Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
-import { ConditionPanel } from '../../data_management/shared';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
   SELECTED_FEATURES_URL_PARAM,
@@ -28,7 +27,6 @@ import {
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 import { StreamFeatureDetailsFlyout } from './stream_feature_details_flyout';
-import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 import { TableTitle } from './table_title';
 import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
 
@@ -37,24 +35,27 @@ export function StreamExistingFeaturesTable({
   features,
   definition,
   refreshFeatures,
+  aiFeatures,
 }: {
   isLoading?: boolean;
-  features: Feature[];
+  features: System[];
   definition: Streams.all.Definition;
   refreshFeatures: () => void;
+  aiFeatures: AIFeatures | null;
 }) {
   const router = useStreamsAppRouter();
 
-  const [selectedFeature, setSelectedFeature] = useState<Feature>();
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
-  const { removeFeaturesFromStream } = useStreamFeaturesApi(definition);
+  const [selectedFeature, setSelectedFeature] = useState<System>();
+  const [selectedFeatures, setSelectedFeatures] = useState<System[]>([]);
+  const { removeSystemsFromStream } = useStreamFeaturesApi(definition);
   const [isDeleting, setIsDeleting] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
-  const aiFeatures = useAIFeatures();
-  const { descriptionColumn } = useStreamFeaturesTable();
+  const { nameColumn, filterColumn, eventsLast24HoursColumn } = useStreamFeaturesTable({
+    definition,
+  });
 
-  const goToGenerateSignificantEvents = (significantEventsFeatures: Feature[]) => {
+  const goToGenerateSignificantEvents = (significantEventsFeatures: System[]) => {
     router.push('/{key}/management/{tab}', {
       path: { key: definition.name, tab: 'significantEvents' },
       query: {
@@ -64,33 +65,10 @@ export function StreamExistingFeaturesTable({
     });
   };
 
-  const columns: Array<EuiBasicTableColumn<Feature>> = [
-    {
-      field: 'name',
-      name: TITLE_LABEL,
-      width: '15%',
-      sortable: true,
-      truncateText: true,
-    },
-    descriptionColumn,
-    {
-      name: FILTER_LABEL,
-      width: '30%',
-      render: (feature: Feature) => {
-        if (isFeatureWithFilter(feature)) {
-          return <ConditionPanel condition={feature.filter} />;
-        }
-      },
-    },
-    {
-      name: EVENTS_LAST_24_HOURS_LABEL,
-      width: '15%',
-      render: (feature: Feature) => {
-        if (isFeatureWithFilter(feature)) {
-          return <FeatureEventsSparklineLast24hrs feature={feature} definition={definition} />;
-        }
-      },
-    },
+  const columns: Array<EuiBasicTableColumn<System>> = [
+    nameColumn,
+    filterColumn,
+    eventsLast24HoursColumn,
     {
       name: ACTIONS_COLUMN_HEADER_LABEL,
       width: '5%',
@@ -122,9 +100,9 @@ export function StreamExistingFeaturesTable({
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (feature: Feature) => {
+          onClick: (feature: System) => {
             setIsDeleting(true);
-            removeFeaturesFromStream([feature])
+            removeSystemsFromStream([feature])
               .then(() => {
                 refreshFeatures();
               })
@@ -137,11 +115,11 @@ export function StreamExistingFeaturesTable({
     },
   ];
 
-  const toggleDetails = (feature: Feature) => {
+  const toggleDetails = (feature: System) => {
     setSelectedFeature(feature);
   };
 
-  const columnsWithExpandingRowToggle: Array<EuiBasicTableColumn<Feature>> = [
+  const columnsWithExpandingRowToggle: Array<EuiBasicTableColumn<System>> = [
     {
       align: 'right',
       width: '40px',
@@ -151,7 +129,7 @@ export function StreamExistingFeaturesTable({
           <span>{OPEN_DETAILS_LABEL}</span>
         </EuiScreenReaderOnly>
       ),
-      render: (feature: Feature) => {
+      render: (feature: System) => {
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(feature)}
@@ -218,7 +196,7 @@ export function StreamExistingFeaturesTable({
             isDisabled={selectedFeatures.length === 0 || isLoading}
             onClick={() => {
               setIsDeleting(true);
-              removeFeaturesFromStream(selectedFeatures)
+              removeSystemsFromStream(selectedFeatures)
                 .then(() => {
                   setSelectedFeatures([]);
                 })
@@ -292,20 +270,6 @@ const GENERATE_SIGNIFICANT_EVENTS = i18n.translate(
 );
 
 // i18n labels moved to end of file
-const TITLE_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.title', {
-  defaultMessage: 'Title',
-});
-
-const FILTER_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.filter', {
-  defaultMessage: 'Filter',
-});
-
-const EVENTS_LAST_24_HOURS_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.eventsLast24Hours',
-  {
-    defaultMessage: 'Events (last 24 hours)',
-  }
-);
 
 const ACTIONS_COLUMN_HEADER_LABEL = i18n.translate(
   'xpack.streams.streamFeaturesTable.columns.actionsColumnHeader',

@@ -391,11 +391,72 @@ export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<ReplaceProcessor>;
 
+/**
+ * Math processor
+ */
+
+export interface MathProcessor extends ProcessorBaseWithWhere {
+  action: 'math';
+  expression: string; // TinyMath expression, e.g., "attributes.price * attributes.quantity"
+  to: string; // Target field for the result
+  ignore_missing?: boolean; // If true, skip processing if any of the referenced fields in the expression is missing
+}
+
+export const mathProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('math'),
+  expression: NonEmptyString,
+  to: StreamlangTargetField,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<MathProcessor>;
+
+export interface UppercaseProcessor extends ProcessorBaseWithWhere {
+  action: 'uppercase';
+  from: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const uppercaseProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('uppercase'),
+  from: StreamlangSourceField,
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<UppercaseProcessor>;
+
+export interface LowercaseProcessor extends ProcessorBaseWithWhere {
+  action: 'lowercase';
+  from: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const lowercaseProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('lowercase'),
+  from: StreamlangSourceField,
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<LowercaseProcessor>;
+
+export interface TrimProcessor extends ProcessorBaseWithWhere {
+  action: 'trim';
+  from: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const trimProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('trim'),
+  from: StreamlangSourceField,
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<TrimProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
   | DropDocumentProcessor
   | GrokProcessor
+  | MathProcessor
   | RenameProcessor
   | SetProcessor
   | AppendProcessor
@@ -403,6 +464,9 @@ export type StreamlangProcessorDefinition =
   | RemoveByPrefixProcessor
   | RemoveProcessor
   | ReplaceProcessor
+  | UppercaseProcessor
+  | LowercaseProcessor
+  | TrimProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -410,12 +474,16 @@ export const streamlangProcessorSchema = z.union([
   dissectProcessorSchema,
   dateProcessorSchema,
   dropDocumentProcessorSchema,
+  mathProcessorSchema,
   renameProcessorSchema,
   setProcessorSchema,
   appendProcessorSchema,
   removeByPrefixProcessorSchema,
   removeProcessorSchema,
   replaceProcessorSchema,
+  uppercaseProcessorSchema,
+  lowercaseProcessorSchema,
+  trimProcessorSchema,
   convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
@@ -433,6 +501,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     dissectProcessorSchema,
     convertProcessorSchema,
     replaceProcessorSchema,
+    mathProcessorSchema,
   ])
 );
 

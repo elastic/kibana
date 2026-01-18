@@ -383,6 +383,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
             disabled={!rule.isEditable || rule.isInternallyManaged}
             checked={isRowSelected(rule)}
             data-test-subj={`checkboxSelectRow-${rule.id}`}
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.selectRuleCheckbox',
+              {
+                defaultMessage: 'Select rule {ruleName}',
+                values: { ruleName: rule.name },
+              }
+            )}
           />
         );
       },

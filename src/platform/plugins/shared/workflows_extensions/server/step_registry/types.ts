@@ -8,6 +8,7 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { OrStringRecursive } from '@kbn/utility-types';
 import type { StepContext } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
@@ -45,14 +46,15 @@ import type { CommonStepDefinition } from '../../common';
  * ```
  */
 export interface ServerStepDefinition<
-  Input extends unknown = unknown,
-  Output extends unknown = unknown
-> extends CommonStepDefinition<z.ZodType<Input>, z.ZodType<Output>> {
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> extends CommonStepDefinition<Input, Output, Config> {
   /**
    * The handler function that executes this step's logic.
    * Input and output types are automatically inferred from the schemas.
    */
-  handler: StepHandler<Input, Output>;
+  handler: StepHandler<Input, Output, Config>;
 }
 
 /**
@@ -74,9 +76,13 @@ export interface ServerStepDefinition<
  * });
  * ```
  */
-export function createServerStepDefinition<Input = unknown, Output = unknown>(
-  definition: ServerStepDefinition<Input, Output>
-): ServerStepDefinition<Input, Output> {
+export function createServerStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+>(
+  definition: ServerStepDefinition<Input, Output, Config>
+): ServerStepDefinition<Input, Output, Config> {
   return definition;
 }
 
@@ -87,19 +93,32 @@ export function createServerStepDefinition<Input = unknown, Output = unknown>(
  * @param context - The runtime context for the step execution
  * @returns The step output (should conform to outputSchema)
  */
-export type StepHandler<Input = unknown, Output = unknown> = (
-  context: StepHandlerContext<Input>
-) => Promise<StepHandlerResult<Output>>;
+export type StepHandler<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> = (context: StepHandlerContext<Input, Config>) => Promise<StepHandlerResult<Output>>;
 
 /**
  * Context provided to custom step handlers during execution.
  * This gives access to runtime services needed for step execution.
  */
-export interface StepHandlerContext<TInput = unknown> {
+export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
   /**
    * The validated input provided to the step based on inputSchema
    */
-  input: TInput;
+  input: z.infer<TInput>;
+
+  /**
+   * The config provided to the step based on configSchema
+   */
+  config: z.infer<TConfig>;
+
+  /**
+   * The raw input configuration before template rendering.
+   * Has the same shape as input, but values may contain template strings.
+   */
+  rawInput: OrStringRecursive<z.infer<TInput>>;
 
   /**
    * Runtime context manager for accessing workflow state, context, and template evaluation
@@ -148,8 +167,10 @@ export interface ContextManager {
 
   /**
    * Evaluate a template string using the workflow context
+   * @param input - The value to render with template expressions
+   * @param additionalContext - Optional additional context to merge with workflow context
    */
-  renderInputTemplate<T>(input: T): T;
+  renderInputTemplate<T>(input: T, additionalContext?: Record<string, unknown>): T;
 
   /**
    * Returns the fake request
@@ -160,12 +181,12 @@ export interface ContextManager {
 /**
  * Result returned by a custom step handler
  */
-export interface StepHandlerResult<TOutput = unknown> {
+export interface StepHandlerResult<TOutput extends z.ZodType = z.ZodType> {
   /**
    * Output data from the step execution
    * This will be available to subsequent steps via template expressions
    */
-  output?: TOutput;
+  output?: z.infer<TOutput>;
   /**
    * Optional error information if the step failed
    */

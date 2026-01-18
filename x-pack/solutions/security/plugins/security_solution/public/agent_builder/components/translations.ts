@@ -7,9 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const VIEW_IN_AGENT_BUILDER = i18n.translate(
-  'xpack.securitySolution.agentBuilder.viewInAgentBuilderButtonLabel',
+export const ADD_TO_CHAT = i18n.translate(
+  'xpack.securitySolution.agentBuilder.addToChatButtonLabel',
   {
-    defaultMessage: 'View in Agent Builder',
+    defaultMessage: 'Add to chat',
+  }
+);
+
+export const UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT = i18n.translate(
+  'xpack.securitySolution.agentBuilder.upgradeToEnterpriseToUseAgentBuilderChatTooltip',
+  {
+    defaultMessage: 'Upgrade your license to use Agent builder chat.',
   }
 );

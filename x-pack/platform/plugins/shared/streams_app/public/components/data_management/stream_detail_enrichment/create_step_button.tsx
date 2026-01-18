@@ -18,6 +18,7 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
 import {
+  useInteractiveModeSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
@@ -64,7 +65,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
 }) => {
   const { addProcessor, addCondition } = useStreamEnrichmentEvents();
 
-  const canAddStep = useStreamEnrichmentSelector(
+  const canAddStep = useInteractiveModeSelector(
     (state) => state.can({ type: 'step.addProcessor' }) || state.can({ type: 'step.addCondition' })
   );
 

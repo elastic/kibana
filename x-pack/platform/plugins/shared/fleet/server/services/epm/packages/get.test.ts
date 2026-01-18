@@ -1710,7 +1710,8 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx'
+        'nginx',
+        undefined
       );
 
       expect(result).toEqual({
@@ -1747,7 +1748,8 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx'
+        'nginx',
+        undefined
       );
 
       expect(result).toEqual({
@@ -1769,7 +1771,8 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx'
+        'nginx',
+        undefined
       );
 
       expect(result).toBeUndefined();
@@ -1791,7 +1794,8 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx'
+        'nginx',
+        undefined
       );
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -1814,7 +1818,8 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        ''
+        '',
+        undefined
       );
 
       expect(result).toBeUndefined();

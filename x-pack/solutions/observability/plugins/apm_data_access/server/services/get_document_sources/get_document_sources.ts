@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
+import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
 import type { estypes } from '@elastic/elasticsearch';
 import { RollupInterval } from '../../../common/rollup';
 import type { TimeRangeMetadata } from '../../../common/time_range_metadata';
