@@ -12,10 +12,6 @@ import {
   SUB_ACTION as BEDROCK_SUB_ACTION,
 } from '@kbn/connector-schemas/bedrock/constants';
 import {
-  CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID,
-  SUB_ACTION as CROWDSTRIKE_SUB_ACTION,
-} from '@kbn/connector-schemas/crowdstrike/constants';
-import {
   CONNECTOR_ID as D3_SECURITY_CONNECTOR_ID,
   SUB_ACTION as D3SECURITY_SUB_ACTION,
 } from '@kbn/connector-schemas/d3security/constants';
@@ -36,10 +32,6 @@ import {
   SUB_ACTION as MCP_SUB_ACTION,
 } from '@kbn/connector-schemas/mcp/constants';
 import {
-  CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-  SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
-} from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
-import {
   CONNECTOR_ID as OPENAI_CONNECTOR_ID,
   SUB_ACTION as OPENAI_SUB_ACTION,
 } from '@kbn/connector-schemas/openai/constants';
@@ -47,10 +39,6 @@ import {
   CONNECTOR_ID as OpsgenieConnectorTypeId,
   SUB_ACTION as OpsgenieSubActions,
 } from '@kbn/connector-schemas/opsgenie/constants';
-import {
-  CONNECTOR_ID as SENTINELONE_CONNECTOR_ID,
-  SUB_ACTION as SENTINELONE_SUB_ACTION,
-} from '@kbn/connector-schemas/sentinelone/constants';
 import {
   CONNECTOR_ID as THEHIVE_CONNECTOR_ID,
   SUB_ACTION as THEHIVE_SUB_ACTION,
@@ -137,12 +125,6 @@ function createSubActionsMapping() {
     { id: JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID, actions: JiraServiceManagementSubActions },
     { id: OpsgenieConnectorTypeId, actions: OpsgenieSubActions },
     { id: MCP_CONNECTOR_ID, actions: MCP_SUB_ACTION },
-    { id: SENTINELONE_CONNECTOR_ID, actions: SENTINELONE_SUB_ACTION },
-    {
-      id: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-      actions: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
-    },
-    { id: CROWDSTRIKE_CONNECTOR_ID, actions: CROWDSTRIKE_SUB_ACTION },
     // Legacy connectors (using older ActionType pattern)
     { id: '.jira', actions: JIRA_SUB_ACTIONS },
     { id: '.servicenow-itsm', actions: SERVICENOW_ITSM_SUB_ACTIONS },
