@@ -137,9 +137,7 @@ export const createContextAwarenessMocks = ({
               id: 'doc_view_mock',
               title: 'Mock tab',
               order: 10,
-              component: () => {
-                return null;
-              },
+              render: () => <></>,
             });
             return prevValue.docViewsRegistry(registry);
           },

@@ -34,6 +34,8 @@
           "<any>"
         ],
         "path": "src/platform/packages/shared/kbn-cache-cli/src/stores/create_local_disk_cache_store.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "LocalDiskCacheOptions"
             ],
             "path": "src/platform/packages/shared/kbn-cache-cli/src/stores/create_local_disk_cache_store.ts",
+            "lineNumber": 21,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -71,6 +75,8 @@
           "<any>"
         ],
         "path": "src/platform/packages/shared/kbn-cache-cli/src/stores/create_tmp_dir_disk_cache_store.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +91,8 @@
               "TmpDirDiskCacheOptions"
             ],
             "path": "src/platform/packages/shared/kbn-cache-cli/src/stores/create_tmp_dir_disk_cache_store.ts",
+            "lineNumber": 21,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,6 +114,8 @@
           ", cb: () => Promise<T>, cacheValidator: ((val: T) => boolean) | undefined) => Promise<T>"
         ],
         "path": "src/platform/packages/shared/kbn-cache-cli/src/from_cache.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -120,6 +130,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-cache-cli/src/from_cache.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -135,6 +147,8 @@
               "Cache"
             ],
             "path": "src/platform/packages/shared/kbn-cache-cli/src/from_cache.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -150,6 +164,8 @@
               "() => Promise<T>"
             ],
             "path": "src/platform/packages/shared/kbn-cache-cli/src/from_cache.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -165,6 +181,8 @@
               "((val: T) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cache-cli/src/from_cache.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
