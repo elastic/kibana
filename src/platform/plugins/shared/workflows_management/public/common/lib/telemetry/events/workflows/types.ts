@@ -17,6 +17,7 @@ import type {
 } from './execution/types';
 import type {
   ReportWorkflowClonedActionParams,
+  ReportWorkflowCreatedActionParams,
   ReportWorkflowDeletedActionParams,
   ReportWorkflowEnabledStateChangedActionParams,
   ReportWorkflowUpdatedActionParams,
@@ -31,38 +32,6 @@ import type {
   ReportWorkflowValidationErrorActionParams,
   WorkflowValidationEventTypes,
 } from './validation/types';
-
-// Re-export all event types from subcategories
-export {
-  WorkflowLifecycleEventTypes,
-  type ReportWorkflowCreatedActionParams,
-  type ReportWorkflowUpdatedActionParams,
-  type ReportWorkflowDeletedActionParams,
-  type ReportWorkflowClonedActionParams,
-  type ReportWorkflowEnabledStateChangedActionParams,
-} from './lifecycle/types';
-
-export {
-  WorkflowValidationEventTypes,
-  type WorkflowValidationErrorType,
-  type ReportWorkflowValidationErrorActionParams,
-} from './validation/types';
-
-export {
-  WorkflowExecutionEventTypes,
-  type WorkflowTriggerType,
-  type ReportWorkflowTestRunInitiatedActionParams,
-  type ReportWorkflowStepTestRunInitiatedActionParams,
-  type ReportWorkflowRunInitiatedActionParams,
-  type ReportWorkflowRunCancelledActionParams,
-} from './execution/types';
-
-export {
-  WorkflowUIEventTypes,
-  type WorkflowDetailTab,
-  type ReportWorkflowListViewedActionParams,
-  type ReportWorkflowDetailViewedActionParams,
-} from './ui/types';
 
 /**
  * Base parameters for all workflow telemetry events that represent user actions/requests.
