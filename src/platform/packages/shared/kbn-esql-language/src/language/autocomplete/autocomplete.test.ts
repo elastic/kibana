@@ -89,8 +89,11 @@ describe('autocomplete', () => {
     },
   });
 
-  const sourceCommands = ['row', 'from', 'show', 'ts'];
-  const headerCommands = ['set'];
+  const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+  const headerCommands = esqlCommandRegistry
+    .getAllCommands()
+    .filter(({ metadata }) => metadata.type === 'header')
+    .map(({ name }) => name);
 
   const getSourceAndHeaderCommands = () => {
     return [
@@ -139,6 +142,18 @@ describe('autocomplete', () => {
     testSuggestions('from a metadata _id | /', commands);
     testSuggestions('from a | eval col0 = a | /', commands);
     testSuggestions('from a metadata _id | eval col0 = a | /', commands);
+
+    const promqlPipedQueries = [
+      'PROMQL index=metrics (sum by (instance) rate(http_requests_total[5m])) | /',
+      'PROMQL index=metrics sum by (instance) rate(http_requests_total[5m]) | /',
+      'PROMQL index=metrics (rate(http_requests_total[5m])) | /',
+      'PROMQL rate(http_requests_total[5m]) | /',
+      'PROMQL index=metrics col0=(rate(http_requests_total[5m])) | /',
+    ];
+
+    promqlPipedQueries.forEach((query) => {
+      testSuggestions(query, commands);
+    });
   });
 
   describe.each(['keep', 'drop'])('%s', (command) => {
