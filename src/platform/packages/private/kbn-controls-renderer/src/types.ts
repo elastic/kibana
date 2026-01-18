@@ -46,10 +46,13 @@ export type ControlsRendererParentApi = Pick<
   Partial<PublishesDisabledActionIds> & {
     registerChildApi: (api: DefaultEmbeddableApi) => void;
     layout$: BehaviorSubject<ControlsLayout>;
-    focusedPanelId$: BehaviorSubject<string | null>;
     isCompressed?: () => boolean;
   };
 
 export interface HasPrependWrapperRef {
   prependWrapperRef: React.RefObject<HTMLDivElement>;
+}
+
+export interface PublishesFocusedPanelId {
+  focusedPanelId$: BehaviorSubject<string | undefined>;
 }

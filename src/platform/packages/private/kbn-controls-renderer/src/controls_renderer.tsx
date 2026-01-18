@@ -32,11 +32,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
-import type { ControlsRendererParentApi, ControlsLayout } from './types';
-
-const isFocusedPanelId = (id: unknown): id is string => {
-  return typeof id === 'string' && id.length > 0;
-};
+import type { ControlsRendererParentApi, ControlsLayout, PublishesFocusedPanelId } from './types';
 
 export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererParentApi }) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
@@ -74,11 +70,17 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
   }, [parentApi]);
 
   useEffect(() => {
-    const focusSub = parentApi.focusedPanelId$.pipe(distinctUntilChanged()).subscribe((focusId) => {
-      setIsEditFlyoutOpen(isFocusedPanelId(focusId));
-    });
-
-    return () => focusSub.unsubscribe();
+    const publishesFocusedPanelId = (api: unknown): api is PublishesFocusedPanelId => {
+      return Boolean((api as PublishesFocusedPanelId).focusedPanelId$);
+    };
+    if (publishesFocusedPanelId(parentApi)) {
+      const focusSub = parentApi.focusedPanelId$
+        .pipe(distinctUntilChanged())
+        .subscribe((focusId) => {
+          setIsEditFlyoutOpen(Boolean(focusId));
+        });
+      return () => focusSub.unsubscribe();
+    }
   }, [parentApi]);
 
   /** Handle drag and drop */
