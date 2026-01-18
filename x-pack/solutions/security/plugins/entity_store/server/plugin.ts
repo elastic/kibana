@@ -17,13 +17,24 @@ import type {
   EntityStoreRequestHandlerContext,
   EntityStoreSetupPlugins,
   EntityStoreStartPlugins,
+  PluginStartContract,
+  PluginSetupContract,
 } from './types';
 import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerUiSettings } from './infra/feature_flags/register';
+import { installComponentTemplates } from './domain/assets_manager';
 
-export class EntityStorePlugin implements Plugin {
+export class EntityStorePlugin
+  implements
+    Plugin<
+      PluginSetupContract,
+      PluginStartContract,
+      EntityStoreSetupPlugins,
+      EntityStoreStartPlugins
+    >
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -48,6 +59,19 @@ export class EntityStorePlugin implements Plugin {
 
   public start(core: CoreStart, plugins: EntityStoreStartPlugins) {
     this.logger.info('Initializing plugin');
+    this.logger.debug('installing component templates');
+
+    // TODO: install entity latest index templates and index
+
+    installComponentTemplates({
+      esClient: core.elasticsearch.client.asInternalUser,
+    })
+      .then(() => {
+        this.logger.debug('installed component templates');
+      })
+      .catch((error) => {
+        this.logger.error(`Error installing component templates: ${error}`);
+      });
   }
 
   public stop() {
