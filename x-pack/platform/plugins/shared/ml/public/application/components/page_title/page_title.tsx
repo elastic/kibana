@@ -8,13 +8,20 @@
 import type { FC, ReactNode } from 'react';
 import React from 'react';
 import { EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface PageTitleProps {
   title: ReactNode;
+  breakWord?: boolean;
 }
 
-export const PageTitle: FC<PageTitleProps> = ({ title }) => (
-  <EuiTitle size="l">
-    <h1>{title}</h1>
-  </EuiTitle>
-);
+export const PageTitle: FC<PageTitleProps> = ({ title, breakWord = true }) => {
+  const titleStyles = css`
+    word-break: ${breakWord ? 'break-word' : 'normal'};
+  `;
+  return (
+    <EuiTitle size="l" css={titleStyles}>
+      <h1>{title}</h1>
+    </EuiTitle>
+  );
+};
