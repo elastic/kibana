@@ -8,59 +8,67 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import { selectUnit } from '@formatjs/intl-utils';
 import moment from 'moment';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedRelativeTime } from '@kbn/i18n-react';
-import { useFormattedDateTime } from '..';
+import { useGetFormattedDateTime } from '..';
 
-export interface FormattedRelativeEnhancedProps extends Intl.RelativeTimeFormatOptions {
+export interface FormattedRelativeEnhancedProps {
   value: Date | number | string;
-  thresholds?: Partial<Record<'second' | 'minute' | 'hour' | 'day', number>>;
-  updateIntervalInSeconds?: number;
   fullDateTooltip?: boolean;
   fullDateTooltipPosition?: 'top' | 'right' | 'bottom' | 'left';
 }
+
+// Configure moment thresholds to avoid "last year" for recent dates
+// This ensures dates like "Dec 20" viewed on "Jan 10" show "3 weeks ago" not "last year"
+// See: https://momentjs.com/docs/#/customization/relative-time-threshold/
+moment.relativeTimeThreshold('M', 12); // Only show "year" after 12 months (not based on calendar year)
+
 /**
- * Mimic `FormattedRelative` previous behavior from formatJS v2
+ * Enhanced relative time formatting using moment.js with configured thresholds.
+ * This avoids misleading "last year" displays for dates that are only a few weeks old
+ * but cross a year boundary.
  */
 export const FormattedRelativeEnhanced = ({
   value: valueInput,
-  updateIntervalInSeconds,
-  thresholds,
-  numeric = 'auto',
   fullDateTooltip = false,
   fullDateTooltipPosition,
-  ...rest
 }: FormattedRelativeEnhancedProps) => {
-  const valueDate = moment(valueInput).isValid() ? moment(valueInput).toDate() : new Date();
-  const fullDateFormatted = useFormattedDateTime(valueDate);
+  const valueDate = moment(valueInput);
+  const relativeTime = valueDate.isValid() ? valueDate.fromNow() : '';
 
-  const { value, unit } = selectUnit(valueDate, new Date(), thresholds);
-
-  if (unit === 'second') {
-    return i18n.translate('workflows.formattedRelativeEnhanced.justNow', {
-      defaultMessage: 'just now',
-    });
-  }
-
-  const content = (
-    <FormattedRelativeTime
-      value={value}
-      unit={unit}
-      updateIntervalInSeconds={updateIntervalInSeconds}
-      {...rest}
-    />
-  );
+  const content = <>{relativeTime}</>;
 
   if (!fullDateTooltip) {
     return content;
   }
 
   return (
+    <FormattedRelativeEnhancedWithTooltip
+      content={content}
+      valueDate={valueDate.toDate()}
+      fullDateTooltipPosition={fullDateTooltipPosition}
+    />
+  );
+};
+
+/**
+ * Separate component for tooltip to avoid requiring Kibana services when not needed.
+ */
+function FormattedRelativeEnhancedWithTooltip({
+  content,
+  valueDate,
+  fullDateTooltipPosition,
+}: {
+  content: React.ReactElement;
+  valueDate: Date;
+  fullDateTooltipPosition?: 'top' | 'right' | 'bottom' | 'left';
+}) {
+  const getFormattedDateTime = useGetFormattedDateTime();
+  const fullDateFormatted = getFormattedDateTime(valueDate);
+
+  return (
     <EuiToolTip content={fullDateFormatted} position={fullDateTooltipPosition}>
       {content}
     </EuiToolTip>
   );
-};
+}
