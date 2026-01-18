@@ -183,9 +183,16 @@ describe('buildContextOverride', () => {
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithForeach);
       const result = buildContextOverride(workflowGraph, mockStaticData);
 
-      // The foreach workflow might not extract inputs as expected,
-      // let's just check that it handles it gracefully
-      expect(result.stepContext).toEqual({});
+      // The foreach step should extract inputs from the template expression
+      expect(result.stepContext).toEqual({
+        steps: {
+          data_step: {
+            output: {
+              items: 'replace with your data',
+            },
+          },
+        },
+      });
       expect(result.schema).toBeDefined();
     });
 
