@@ -18,9 +18,8 @@ export const indexStatsEnricher = async (client: HttpSetup): Promise<EnricherRes
     .get<IndicesStatsResponse>(`${API_BASE_PATH}/indices_stats`)
     .then((response) => {
       const indices = response.indices || {};
-
       return {
-        indices: Object.keys(indices || {}).map((name) => ({
+        indices: Object.keys(indices).map((name) => ({
           name,
           health: indices[name]?.health,
           status: indices[name]?.status,

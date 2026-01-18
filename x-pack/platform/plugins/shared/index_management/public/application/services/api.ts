@@ -161,7 +161,7 @@ interface IndexMetadata {
   primary_size?: string;
 }
 
-export async function loadIndices() {
+export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
   // Run all requests in parallel
   const enrichedPromises = indexDataEnricher.enrichIndices(httpService.httpClient);
 
@@ -172,35 +172,36 @@ export async function loadIndices() {
     `${API_BASE_PATH}/indices_get`
   );
 
-  // todo emit update here
+  onIndicesLoaded(Object.values(indices));
 
   // todo review types
   const indicesWithMetadata: Record<string, IndexMetadata> = indices;
 
+  console.log('indicesWithMetadata', indicesWithMetadata);
   // iterate over all the requests for additional info
   enrichedPromises.forEach((enrichedPromise) => {
     enrichedPromise
       .then((enriched) => {
-        // todo
         // iterate over the array of additional data and merge it into the original index data
         if (enriched.indices) {
           enriched.indices.forEach((enrichedIndex) => {
-            Object.assign(indicesWithMetadata[enrichedIndex.name], enrichedIndex);
+            if (indicesWithMetadata[enrichedIndex.name]) {
+              Object.assign(indicesWithMetadata[enrichedIndex.name], enrichedIndex);
+            }
           });
+          onIndicesLoaded(Object.values(indicesWithMetadata));
         } else {
           console.error(enriched.error);
         }
       })
-
       .catch((error) => {
         // todo errors should be collected and displayed to the user
         console.error(error);
       });
-    // todo add finally block to emit update here?
   });
 
   // this is currently returning unenriched data
-  return Object.values(indicesWithMetadata);
+  // return Object.values(indicesWithMetadata);
 }
 
 export async function reloadIndices(

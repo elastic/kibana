@@ -14,11 +14,9 @@ export const loadIndicesError = createAction('INDEX_MANAGEMENT_LOAD_INDICES_ERRO
 
 export const loadIndices = () => async (dispatch) => {
   dispatch(loadIndicesStart());
-  let indices;
   try {
-    indices = await request();
+    await request((indices) => dispatch(loadIndicesSuccess({ indices })));
   } catch (error) {
     return dispatch(loadIndicesError(error));
   }
-  dispatch(loadIndicesSuccess({ indices }));
 };
