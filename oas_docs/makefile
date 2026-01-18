@@ -30,11 +30,6 @@ lens-docs:
 	npx @redocly/cli bundle output/kibana.tmp.yaml --ext yaml -o output/kibana.yaml
 	rm output/kibana.tmp*.yaml
 
-#	$(MAKE) space-aware-api-docs
-
-	echo "Rendering stateful docs preview..."
-	npx bump-cli preview "output/kibana.yaml"
-
 .PHONY: space-aware-api-docs
 space-aware-api-docs: ## Add special space aware description entries
 	node scripts/promote_space_awareness.js oas_docs/output/kibana.yaml
