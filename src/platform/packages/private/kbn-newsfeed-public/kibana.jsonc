@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/newsfeed-public",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "private"
+}

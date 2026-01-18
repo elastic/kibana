@@ -13,7 +13,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FetchResult } from '@kbn/newsfeed-plugin/public';
+import type { FetchResult } from '@kbn/newsfeed-public';
 
 interface Props {
   newsFetchResult: FetchResult | null | void;

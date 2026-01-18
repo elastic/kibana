@@ -33,7 +33,7 @@ import {
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import type { FetchResult } from '@kbn/newsfeed-plugin/public';
+import type { FetchResult } from '@kbn/newsfeed-public';
 import type {
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,

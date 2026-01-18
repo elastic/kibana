@@ -8,14 +8,12 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import type { NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart } from './plugin';
-import { NewsfeedPublicPlugin } from './plugin';
-import type { FetchResult, NewsfeedItem } from './types';
 import { NewsfeedApiEndpoint } from './lib/api';
-
-export type { NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart, FetchResult, NewsfeedItem };
-export { NewsfeedApiEndpoint };
+import { NewsfeedPublicPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new NewsfeedPublicPlugin(initializerContext);
 }
+
+export type { NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart } from './plugin';
+export { NewsfeedApiEndpoint };
