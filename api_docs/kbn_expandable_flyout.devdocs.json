@@ -24,6 +24,8 @@
           "): React.JSX.Element | null; displayName: string | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
+        "lineNumber": 48,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
+            "lineNumber": 48,
+            "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,6 +69,8 @@
           "({ children, urlKey, }: React.PropsWithChildren<ExpandableFlyoutProviderProps>) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/provider.tsx",
+        "lineNumber": 89,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -79,6 +85,8 @@
               "React.PropsWithChildren<ExpandableFlyoutProviderProps>"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/provider.tsx",
+            "lineNumber": 89,
+            "columnNumber": 96,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -107,6 +115,8 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/hooks/use_expandable_flyout_api.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -134,6 +144,8 @@
           "[]"
         ],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/hooks/use_expandable_flyout_history.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -160,6 +172,8 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/hooks/use_expandable_flyout_state.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -176,6 +190,8 @@
         "label": "ExpandableFlyoutApi",
         "description": [],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -216,6 +232,8 @@
               " | undefined; }) => void"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -227,6 +245,8 @@
                 "label": "panels",
                 "description": [],
                 "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+                "lineNumber": 14,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -248,6 +268,8 @@
                       " | undefined"
                     ],
                     "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+                    "lineNumber": 15,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -269,6 +291,8 @@
                       " | undefined"
                     ],
                     "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+                    "lineNumber": 16,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -290,6 +314,8 @@
                       " | undefined"
                     ],
                     "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+                    "lineNumber": 17,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -319,6 +345,8 @@
               ") => void"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -339,6 +367,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+                "lineNumber": 22,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -367,6 +397,8 @@
               ") => void"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -387,6 +419,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -415,6 +449,8 @@
               ") => void"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -435,6 +471,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+                "lineNumber": 30,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -455,6 +493,8 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -473,6 +513,8 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -491,6 +533,8 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -509,6 +553,8 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -527,6 +573,8 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -555,6 +603,8 @@
           ", \"onClose\">"
         ],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -572,6 +622,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -597,6 +649,8 @@
               ">"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -615,6 +669,8 @@
               ") => void) | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -632,6 +688,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -648,6 +706,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -662,6 +722,8 @@
         "label": "FlyoutPanelHistory",
         "description": [],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -675,6 +737,8 @@
               "\nTime at which the flyout was last opened"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -697,6 +761,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -711,6 +777,8 @@
         "label": "FlyoutPanelProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -724,6 +792,8 @@
               "\nUnique key to identify the panel"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -740,6 +810,8 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -763,6 +835,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -777,6 +851,8 @@
         "label": "FlyoutPanels",
         "description": [],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/store/state.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -800,6 +876,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/store/state.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -823,6 +901,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/store/state.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -846,6 +926,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/store/state.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -869,6 +951,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/store/state.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -883,6 +967,8 @@
         "label": "PanelPath",
         "description": [],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -896,6 +982,8 @@
               "\nTop level tab that to be displayed"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -912,6 +1000,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
