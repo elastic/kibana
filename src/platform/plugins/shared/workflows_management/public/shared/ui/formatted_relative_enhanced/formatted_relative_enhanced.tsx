@@ -13,7 +13,7 @@ import moment from 'moment';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelativeTime } from '@kbn/i18n-react';
-import { useGetFormattedDateTime } from '../use_formatted_date';
+import { useFormattedDateTime } from '..';
 
 export interface FormattedRelativeEnhancedProps extends Intl.RelativeTimeFormatOptions {
   value: Date | number | string;
@@ -49,31 +49,35 @@ export const FormattedRelativeEnhanced = ({
   let { value, unit } = selectUnit(valueDate, new Date(), thresholds);
 
   // Fix for year boundary issue: if selectUnit chose "year" but less than MIN_DAYS_FOR_YEAR_UNIT
-  // have passed, use months instead to avoid misleading "last year" for recent dates
+  // have passed, use a more appropriate unit to avoid misleading "last year" for recent dates
   if (unit === 'year') {
     const diffDays = Math.abs(moment().diff(moment(valueDate), 'days'));
     if (diffDays < MIN_DAYS_FOR_YEAR_UNIT) {
-      const diffMonths = moment().diff(moment(valueDate), 'months');
-      value = -Math.abs(diffMonths);
-      unit = 'month';
+      // Use the original selectUnit result's value sign to determine past/future
+      const isPast = value < 0;
+      const diffMonths = Math.abs(moment().diff(moment(valueDate), 'months'));
+      if (diffMonths >= 1) {
+        value = isPast ? -diffMonths : diffMonths;
+        unit = 'month';
+      } else {
+        // Less than a month - use weeks
+        const diffWeeks = Math.round(diffDays / 7);
+        value = isPast ? -diffWeeks : diffWeeks;
+        unit = 'week';
+      }
     }
   }
 
   if (unit === 'second') {
-    return (
-      <>
-        {i18n.translate('workflows.formattedRelativeEnhanced.justNow', {
-          defaultMessage: 'just now',
-        })}
-      </>
-    );
+    return i18n.translate('workflows.formattedRelativeEnhanced.justNow', {
+      defaultMessage: 'just now',
+    });
   }
 
   const content = (
     <FormattedRelativeTime
       value={value}
       unit={unit}
-      numeric={numeric}
       updateIntervalInSeconds={updateIntervalInSeconds}
       {...rest}
     />
@@ -84,32 +88,26 @@ export const FormattedRelativeEnhanced = ({
   }
 
   return (
-    <FormattedRelativeEnhancedWithTooltip
-      content={content}
-      valueDate={valueDate}
-      fullDateTooltipPosition={fullDateTooltipPosition}
-    />
+    <WithTooltip valueDate={valueDate} fullDateTooltipPosition={fullDateTooltipPosition}>
+      {content}
+    </WithTooltip>
   );
 };
 
-/**
- * Separate component for tooltip to avoid requiring Kibana services when not needed.
- */
-function FormattedRelativeEnhancedWithTooltip({
-  content,
+// Separate component to avoid calling useFormattedDateTime when fullDateTooltip is false
+function WithTooltip({
+  children,
   valueDate,
   fullDateTooltipPosition,
 }: {
-  content: React.ReactElement;
+  children: React.ReactElement;
   valueDate: Date;
   fullDateTooltipPosition?: 'top' | 'right' | 'bottom' | 'left';
 }) {
-  const getFormattedDateTime = useGetFormattedDateTime();
-  const fullDateFormatted = getFormattedDateTime(valueDate);
-
+  const fullDateFormatted = useFormattedDateTime(valueDate);
   return (
     <EuiToolTip content={fullDateFormatted} position={fullDateTooltipPosition}>
-      {content}
+      {children}
     </EuiToolTip>
   );
 }
