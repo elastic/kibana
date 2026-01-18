@@ -36,7 +36,14 @@ function convertJsonSchemaToZodWithRefs(
     }
   }
 
-  // If it's an object with properties, recursively handle nested properties
+  // After resolving $ref, try using z.fromJSONSchema (which handles objects, defaults, required, etc.)
+  const zodSchema = z.fromJSONSchema(schemaToConvert as Record<string, unknown>);
+  if (zodSchema !== undefined) {
+    return zodSchema;
+  }
+
+  // Fallback: If fromJSONSchema doesn't support this schema, use manual conversion
+  // This handles edge cases and ensures backward compatibility
   if (schemaToConvert.type === 'object' && schemaToConvert.properties) {
     const shape: Record<string, z.ZodType> = {};
     for (const [key, propSchema] of Object.entries(schemaToConvert.properties)) {
