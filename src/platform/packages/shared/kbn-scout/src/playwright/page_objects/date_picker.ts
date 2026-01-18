@@ -47,16 +47,17 @@ export class DatePicker {
 
     if (await showBtn.isVisible()) {
       await showBtn.click();
+      await this.page.testSubj.waitForSelector('superDatePickerAbsoluteTab');
+      await this.page.testSubj.click('superDatePickerstartDatePopoverButton');
     } else {
-      await endBtn.click();
+      await this.page.testSubj.waitForSelector('superDatePickerstartDatePopoverButton');
     }
-
-    await this.page.testSubj.waitForSelector('superDatePickerAbsoluteTab');
   }
 
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
     await this.showStartEndTimes();
     // we start with end date
+    await this.page.testSubj.click('superDatePickerendDatePopoverButton');
     await this.page.testSubj.click('superDatePickerAbsoluteTab');
     const inputFrom = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
     await inputFrom.clear();
