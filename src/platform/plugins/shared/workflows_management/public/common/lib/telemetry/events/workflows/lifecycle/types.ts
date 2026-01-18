@@ -194,4 +194,8 @@ export interface ReportWorkflowEnabledStateChangedActionParams
    * Whether this is a bulk operation
    */
   isBulkAction: boolean;
+  /**
+   * Number of workflows in the bulk action (only present when isBulkAction is true)
+   */
+  bulkActionCount?: number;
 }

@@ -9,6 +9,7 @@
 
 import type { RootSchema } from '@kbn/core/public';
 import type {
+  ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
   ReportWorkflowTestRunInitiatedActionParams,
@@ -20,6 +21,7 @@ export const workflowExecutionEventNames = {
   [WorkflowExecutionEventTypes.WorkflowTestRunInitiated]: 'Workflow test run initiated',
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: 'Workflow step test run initiated',
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: 'Workflow run initiated',
+  [WorkflowExecutionEventTypes.WorkflowRunCancelled]: 'Workflow run cancelled',
 };
 
 const baseResultActionSchema: RootSchema<BaseResultActionParams> = {
@@ -95,6 +97,13 @@ const workflowTestRunInitiatedSchema: RootSchema<ReportWorkflowTestRunInitiatedA
       optional: false,
     },
   },
+  triggerTab: {
+    type: 'keyword',
+    _meta: {
+      description: 'The trigger tab selected in the Test Workflow modal: manual, alert, or index',
+      optional: true,
+    },
+  },
 };
 
 const workflowStepTestRunInitiatedSchema: RootSchema<ReportWorkflowStepTestRunInitiatedActionParams> =
@@ -158,10 +167,44 @@ const workflowRunInitiatedSchema: RootSchema<ReportWorkflowRunInitiatedActionPar
       optional: false,
     },
   },
+  triggerTab: {
+    type: 'keyword',
+    _meta: {
+      description: 'The trigger tab selected in the Test Workflow modal: manual, alert, or index',
+      optional: true,
+    },
+  },
+};
+
+const workflowRunCancelledSchema: RootSchema<ReportWorkflowRunCancelledActionParams> = {
+  ...baseResultActionSchema,
+  ...eventNameSchema,
+  workflowExecutionId: {
+    type: 'keyword',
+    _meta: {
+      description: 'The workflow execution ID being cancelled',
+      optional: false,
+    },
+  },
+  workflowId: {
+    type: 'keyword',
+    _meta: {
+      description: 'The workflow ID (optional, may not be available for test runs)',
+      optional: true,
+    },
+  },
+  timeToCancellation: {
+    type: 'long',
+    _meta: {
+      description: 'Time in milliseconds from execution start to cancellation request',
+      optional: true,
+    },
+  },
 };
 
 export const workflowExecutionEventSchemas = {
   [WorkflowExecutionEventTypes.WorkflowTestRunInitiated]: workflowTestRunInitiatedSchema,
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: workflowStepTestRunInitiatedSchema,
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: workflowRunInitiatedSchema,
+  [WorkflowExecutionEventTypes.WorkflowRunCancelled]: workflowRunCancelledSchema,
 };

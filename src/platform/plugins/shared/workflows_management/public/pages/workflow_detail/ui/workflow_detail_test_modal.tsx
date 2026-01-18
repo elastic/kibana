@@ -37,8 +37,8 @@ export const WorkflowDetailTestModal = () => {
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
 
   const handleRunWorkflow = useCallback(
-    async (inputs: Record<string, unknown>) => {
-      const executionId = await testWorkflow({ inputs });
+    async (inputs: Record<string, unknown>, triggerTab?: 'manual' | 'alert' | 'index') => {
+      const executionId = await testWorkflow({ inputs, triggerTab });
 
       if (executionId) {
         setSelectedExecution(executionId.workflowExecutionId);

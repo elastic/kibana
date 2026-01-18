@@ -25,9 +25,19 @@ export enum WorkflowExecutionEventTypes {
    * This event tracks manual run initiation attempts.
    */
   WorkflowRunInitiated = 'workflows_workflow_run_initiated',
+  /**
+   * When a workflow run cancellation is requested from the UI
+   * This event tracks cancellation request attempts.
+   */
+  WorkflowRunCancelled = 'workflows_workflow_run_cancelled',
 }
 
 export type WorkflowTriggerType = 'manual' | 'alert' | 'scheduled';
+
+/**
+ * Trigger tab types available in the Test Workflow modal
+ */
+export type WorkflowTriggerTab = 'manual' | 'alert' | 'index';
 
 /**
  * Parameters for workflow test run initiation telemetry.
@@ -50,6 +60,10 @@ export interface ReportWorkflowTestRunInitiatedActionParams extends BaseResultAc
    * Editor context if test run was initiated from workflow detail page
    */
   editorType?: WorkflowEditorType;
+  /**
+   * The trigger tab selected in the Test Workflow modal: 'manual', 'alert', or 'index'
+   */
+  triggerTab?: WorkflowTriggerTab;
 }
 
 /**
@@ -100,4 +114,27 @@ export interface ReportWorkflowRunInitiatedActionParams extends BaseResultAction
    * Editor context if run was initiated from workflow detail page
    */
   editorType?: WorkflowEditorType;
+  /**
+   * The trigger tab selected in the Test Workflow modal: 'manual', 'alert', or 'index'
+   */
+  triggerTab?: WorkflowTriggerTab;
+}
+
+/**
+ * Parameters for workflow run cancellation telemetry.
+ */
+export interface ReportWorkflowRunCancelledActionParams extends BaseResultActionParams {
+  eventName: string;
+  /**
+   * The workflow execution ID being cancelled
+   */
+  workflowExecutionId: string;
+  /**
+   * The workflow ID (optional, may not be available for test runs)
+   */
+  workflowId?: string;
+  /**
+   * Time in milliseconds from execution start to cancellation request
+   */
+  timeToCancellation?: number;
 }

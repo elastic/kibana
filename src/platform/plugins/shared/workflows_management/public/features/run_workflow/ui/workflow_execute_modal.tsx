@@ -54,7 +54,7 @@ interface WorkflowExecuteModalProps {
   workflowId?: string;
   isTestRun: boolean;
   onClose: () => void;
-  onSubmit: (data: Record<string, unknown>) => void;
+  onSubmit: (data: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => void;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
   ({ definition, workflowId, onClose, onSubmit, isTestRun }) => {
@@ -73,9 +73,9 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const { euiTheme } = useEuiTheme();
 
     const handleSubmit = useCallback(() => {
-      onSubmit(JSON.parse(executionInput));
+      onSubmit(JSON.parse(executionInput), selectedTrigger);
       onClose();
-    }, [onSubmit, onClose, executionInput]);
+    }, [onSubmit, onClose, executionInput, selectedTrigger]);
 
     const handleChangeTrigger = useCallback(
       (trigger: TriggerType): void => {
@@ -98,7 +98,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     useEffect(() => {
       if (shouldAutoRun) {
-        onSubmit({});
+        onSubmit({}, 'manual'); // Auto-run defaults to manual trigger
         onClose();
         return;
       }

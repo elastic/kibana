@@ -87,9 +87,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   }, [refetch, selectedItems]);
 
   const handleRunWorkflow = useCallback(
-    (id: string, event: Record<string, unknown>) => {
+    (id: string, event: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
       runWorkflow.mutate(
-        { id, inputs: event },
+        { id, inputs: event, triggerTab },
         {
           onSuccess: ({ workflowExecutionId }) => {
             notifications?.toasts.addSuccess('Workflow run started', {

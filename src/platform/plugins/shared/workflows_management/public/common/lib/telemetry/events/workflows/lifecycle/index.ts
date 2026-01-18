@@ -88,6 +88,13 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
   ...eventNameSchema,
   ...workflowIdSchema,
   ...editorTypeSchema,
+  enabled: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the workflow is enabled',
+      optional: true,
+    },
+  },
   stepCount: {
     type: 'integer',
     _meta: {
@@ -96,7 +103,10 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
     },
   },
   connectorTypes: {
+    type: 'array',
+    items: {
     type: 'keyword',
+    },
     _meta: {
       description: 'Unique connector types used in the workflow',
       optional: true,
@@ -212,7 +222,10 @@ const workflowDeletedSchema: RootSchema<ReportWorkflowDeletedActionParams> = {
   ...baseResultActionSchema,
   ...eventNameSchema,
   workflowIds: {
+    type: 'array',
+    items: {
     type: 'keyword',
+    },
     _meta: {
       description: 'The workflow IDs being deleted',
       optional: false,
@@ -271,6 +284,14 @@ const workflowEnabledStateChangedSchema: RootSchema<ReportWorkflowEnabledStateCh
       _meta: {
         description: 'Whether this is a bulk operation',
         optional: false,
+      },
+    },
+    bulkActionCount: {
+      type: 'integer',
+      _meta: {
+        description:
+          'Number of workflows in the bulk action (only present when isBulkAction is true)',
+        optional: true,
       },
     },
     origin: {

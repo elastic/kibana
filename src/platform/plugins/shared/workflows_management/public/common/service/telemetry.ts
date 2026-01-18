@@ -16,6 +16,7 @@ import {
   WorkflowUIEventTypes,
   WorkflowValidationEventTypes,
 } from '../lib/telemetry/events/workflows';
+import type { WorkflowTriggerTab } from '../lib/telemetry/events/workflows/execution/types';
 import type {
   WorkflowEditorType,
   WorkflowTelemetryOrigin,
@@ -107,6 +108,7 @@ export class WorkflowsBaseTelemetry {
     error?: Error;
     editorType?: WorkflowEditorType;
     isBulkAction?: boolean;
+    bulkActionCount?: number;
     origin?: WorkflowTelemetryOrigin;
   }) => {
     const {
@@ -144,14 +146,17 @@ export class WorkflowsBaseTelemetry {
     if (enabledChanged) {
       const enabledValue = workflowUpdate.enabled ?? workflowDefinition?.enabled;
       if (enabledValue !== undefined) {
-        this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged, {
-          eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
+        this.reportWorkflowEnabledStateChanged({
           workflowId,
           enabled: enabledValue,
           isBulkAction,
+          ...(isBulkAction &&
+            params.bulkActionCount !== undefined && {
+              bulkActionCount: params.bulkActionCount,
+            }),
           ...(finalEditorType && { editorType: finalEditorType }),
           ...(origin && { origin }),
-          ...this.getBaseResultParams(error),
+          error,
         });
         return;
       }
@@ -221,16 +226,21 @@ export class WorkflowsBaseTelemetry {
     workflowId: string;
     enabled: boolean;
     isBulkAction: boolean;
+    bulkActionCount?: number;
     error?: Error;
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { workflowId, enabled, isBulkAction, error, editorType, origin } = params;
+    const { workflowId, enabled, isBulkAction, bulkActionCount, error, editorType, origin } =
+      params;
     this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged, {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
       workflowId,
       enabled,
       isBulkAction,
+      ...(bulkActionCount !== undefined && {
+        bulkActionCount,
+      }),
       ...(editorType && { editorType }),
       ...(origin && { origin }),
       ...this.getBaseResultParams(error),
@@ -324,8 +334,9 @@ export class WorkflowsBaseTelemetry {
     error?: Error;
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
+    triggerTab?: WorkflowTriggerTab;
   }) => {
-    const { workflowId, hasInputs, inputCount, error, editorType, origin } = params;
+    const { workflowId, hasInputs, inputCount, error, editorType, origin, triggerTab } = params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowTestRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowTestRunInitiated],
       ...(workflowId && { workflowId }),
@@ -333,6 +344,7 @@ export class WorkflowsBaseTelemetry {
       inputCount,
       ...(editorType && { editorType }),
       ...(origin && { origin }),
+      ...(triggerTab && { triggerTab }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -383,14 +395,38 @@ export class WorkflowsBaseTelemetry {
     error?: Error;
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
+    triggerTab?: WorkflowTriggerTab;
   }) => {
-    const { workflowId, hasInputs, inputCount, error, editorType, origin } = params;
+    const { workflowId, hasInputs, inputCount, error, editorType, origin, triggerTab } = params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunInitiated],
       workflowId,
       hasInputs,
       inputCount,
       ...(editorType && { editorType }),
+      ...(origin && { origin }),
+      ...(triggerTab && { triggerTab }),
+      ...this.getBaseResultParams(error),
+    });
+  };
+
+  /**
+   * Reports a workflow run cancellation request.
+   * Call this AFTER the cancellation request completes (in both success and error cases).
+   */
+  reportWorkflowRunCancelled = (params: {
+    workflowExecutionId: string;
+    workflowId?: string;
+    timeToCancellation?: number;
+    error?: Error;
+    origin?: WorkflowTelemetryOrigin;
+  }) => {
+    const { workflowExecutionId, workflowId, timeToCancellation, error, origin } = params;
+    this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunCancelled, {
+      eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunCancelled],
+      workflowExecutionId,
+      ...(workflowId && { workflowId }),
+      ...(timeToCancellation !== undefined && { timeToCancellation }),
       ...(origin && { origin }),
       ...this.getBaseResultParams(error),
     });

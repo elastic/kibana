@@ -24,6 +24,8 @@ type HttpError = IHttpFetchError<ResponseErrorBody>;
 export interface UpdateWorkflowParams {
   id: string;
   workflow: Partial<WorkflowDetailDto>;
+  isBulkAction?: boolean;
+  bulkActionCount?: number;
 }
 
 // Context type for storing previous query data to enable rollback on mutation errors
@@ -115,7 +117,10 @@ export function useWorkflowActions() {
         workflowUpdate: variables.workflow,
         hasValidationErrors: false,
         validationErrorCount: 0,
-        isBulkAction: false,
+        isBulkAction: variables.isBulkAction ?? false,
+        ...(variables.bulkActionCount !== undefined && {
+          bulkActionCount: variables.bulkActionCount,
+        }),
         origin: 'workflow_list',
         error: errorObj,
       });
@@ -128,7 +133,10 @@ export function useWorkflowActions() {
         workflowUpdate: variables.workflow,
         hasValidationErrors: false,
         validationErrorCount: 0,
-        isBulkAction: false,
+        isBulkAction: variables.isBulkAction ?? false,
+        ...(variables.bulkActionCount !== undefined && {
+          bulkActionCount: variables.bulkActionCount,
+        }),
         origin: 'workflow_list',
         error: undefined,
       });
@@ -215,7 +223,7 @@ export function useWorkflowActions() {
   const runWorkflow = useMutation<
     RunWorkflowResponseDto,
     HttpError,
-    RunWorkflowCommand & { id: string }
+    RunWorkflowCommand & { id: string; triggerTab?: 'manual' | 'alert' | 'index' }
   >({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }) => {
@@ -233,6 +241,7 @@ export function useWorkflowActions() {
         inputCount,
         origin: 'workflow_list',
         error: undefined,
+        triggerTab: variables.triggerTab,
       });
 
       // FIX: ensure workflow execution document is created at the end of the mutation
@@ -251,6 +260,7 @@ export function useWorkflowActions() {
         inputCount,
         origin: 'workflow_list',
         error: errorObj,
+        triggerTab: variables.triggerTab,
       });
     },
   });

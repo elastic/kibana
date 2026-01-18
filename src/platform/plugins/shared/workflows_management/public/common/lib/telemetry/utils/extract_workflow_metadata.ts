@@ -167,8 +167,12 @@ export function extractWorkflowMetadata(
         stepTypeCounts[stepType] = (stepTypeCounts[stepType] || 0) + 1;
 
         // Track connector types by checking if step has 'connector-id' field
-        if (isConnectorStep(step) && !connectorTypes.includes(stepType)) {
-          connectorTypes.push(stepType);
+        // Extract only the connector name (part before the dot), not the full step type
+        if (isConnectorStep(step)) {
+          const connectorName = stepType.split('.')[0];
+          if (!connectorTypes.includes(connectorName)) {
+            connectorTypes.push(connectorName);
+          }
         }
 
         // Recursively process nested steps

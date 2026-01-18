@@ -17,6 +17,7 @@ import { selectWorkflow, selectYamlString } from '../selectors';
 
 export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
+  triggerTab?: 'manual' | 'alert' | 'index';
 }
 
 export interface TestWorkflowResponse {
@@ -29,7 +30,7 @@ export const testWorkflowThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/testWorkflowThunk',
-  async ({ inputs }, { getState, rejectWithValue, extra: { services } }) => {
+  async ({ inputs, triggerTab }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     const workflowsManagement = (
       services as WorkflowsServices & {
@@ -71,6 +72,7 @@ export const testWorkflowThunk = createAsyncThunk<
         error: undefined,
         editorType: 'yaml', // Test runs are always from YAML editor context
         origin: 'workflow_detail',
+        triggerTab,
       });
 
       // Show success notification
@@ -99,6 +101,7 @@ export const testWorkflowThunk = createAsyncThunk<
         error: errorObj,
         origin: 'workflow_detail',
         editorType: 'yaml',
+        triggerTab,
       });
 
       notifications.toasts.addError(new Error(errorMessage), {
