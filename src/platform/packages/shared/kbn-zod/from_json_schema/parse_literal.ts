@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from 'zod/v4';
-import { z as zodV4 } from 'zod/v4';
-import { fromJSONSchema } from './from_json_schema';
+import { z } from 'zod/v4';
+import type { JsonSchema } from './types';
 
-// Augment z namespace with fromJSONSchema to match native Zod v4 API
-export const z = Object.assign(zodV4, { fromJSONSchema });
+export function parseLiteral(schema: JsonSchema): z.ZodType {
+  const value = schema.const;
+
+  if (value === null) {
+    return z.null();
+  }
+
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return z.literal(value);
+  }
+
+  return z.unknown();
+}
