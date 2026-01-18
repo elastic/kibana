@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export interface ToHaveDataOptions {
+  exactMatch?: boolean;
+}
+
 /**
  * Matchers for asserting on API Response (AxiosResponse) properties (status, headers, etc.)
  */
@@ -14,6 +18,7 @@ export interface ResponseMatchers {
   toHaveStatusCode(code: number): void;
   toHaveStatusText(text: string): void;
   toHaveHeaders(headers: Record<string, string>): void;
+  toHaveData(expected?: unknown, options?: ToHaveDataOptions): void;
 
   not: Omit<ResponseMatchers, 'not'>;
 }

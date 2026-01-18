@@ -8,6 +8,7 @@
  */
 
 import type { AxiosResponse } from 'axios';
+import { expect as baseExpect } from '@playwright/test';
 import { createMatcherError } from './utils';
 
 /**
@@ -22,9 +23,13 @@ export function toHaveStatusCode(
   expectedStatusCode: number,
   isNegated = false
 ): void {
-  const pass = response.status === expectedStatusCode;
-
-  if ((pass && isNegated) || (!pass && !isNegated)) {
+  try {
+    if (isNegated) {
+      baseExpect(response.status).not.toBe(expectedStatusCode);
+    } else {
+      baseExpect(response.status).toBe(expectedStatusCode);
+    }
+  } catch {
     throw createMatcherError(expectedStatusCode, 'toHaveStatusCode', response.status, isNegated);
   }
 }

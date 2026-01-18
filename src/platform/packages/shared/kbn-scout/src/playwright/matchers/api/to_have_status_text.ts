@@ -8,6 +8,8 @@
  */
 
 import type { AxiosResponse } from 'axios';
+import { expect as baseExpect } from '@playwright/test';
+import { createMatcherError } from './utils';
 
 /**
  * Asserts that the response has the expected status text.
@@ -19,21 +21,20 @@ import type { AxiosResponse } from 'axios';
 export function toHaveStatusText(
   response: AxiosResponse,
   expectedStatusText: string,
-  isNegated: boolean = false
+  isNegated = false
 ): void {
-  const pass = response.statusText === expectedStatusText;
-
-  if (isNegated) {
-    if (pass) {
-      throw new Error(
-        `Expected response not to have status text "${expectedStatusText}", but it did`
-      );
+  try {
+    if (isNegated) {
+      baseExpect(response.statusText).not.toBe(expectedStatusText);
+    } else {
+      baseExpect(response.statusText).toBe(expectedStatusText);
     }
-  } else {
-    if (!pass) {
-      throw new Error(
-        `Expected response to have status text "${expectedStatusText}", but received "${response.statusText}"`
-      );
-    }
+  } catch {
+    throw createMatcherError(
+      expectedStatusText,
+      'toHaveStatusText',
+      response.statusText,
+      isNegated
+    );
   }
 }

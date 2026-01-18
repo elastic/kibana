@@ -12,7 +12,8 @@ import type { AxiosResponse } from 'axios';
 import { toHaveStatusCode } from './to_have_status_code';
 import { toHaveStatusText } from './to_have_status_text';
 import { toHaveHeaders } from './to_have_headers';
-import type { ApiMatchers, ResponseMatchers, ValueMatchers } from './types';
+import { toHaveData } from './to_have_data';
+import type { ApiMatchers, ResponseMatchers, ToHaveDataOptions, ValueMatchers } from './types';
 
 /**
  * Type guard to check if a value is an AxiosResponse.
@@ -90,11 +91,15 @@ function createResponseMatchers(response: AxiosResponse): ResponseMatchers {
     toHaveStatusCode: (code: number) => toHaveStatusCode(response, code),
     toHaveStatusText: (text: string) => toHaveStatusText(response, text),
     toHaveHeaders: (headers: Record<string, string>) => toHaveHeaders(response, headers),
+    toHaveData: (expected?: unknown, options?: ToHaveDataOptions) =>
+      toHaveData(response, expected, options),
 
     not: {
       toHaveStatusCode: (code: number) => toHaveStatusCode(response, code, true),
       toHaveStatusText: (text: string) => toHaveStatusText(response, text, true),
       toHaveHeaders: (headers: Record<string, string>) => toHaveHeaders(response, headers, true),
+      toHaveData: (expected?: unknown, options?: ToHaveDataOptions) =>
+        toHaveData(response, expected, options, true),
     },
   };
 }

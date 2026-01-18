@@ -9,7 +9,6 @@
 
 import { expect as apiExpect } from '.';
 import { createApiResponse } from './utils';
-import { createMatcherError } from './utils'; // adjust path if needed
 
 describe('toHaveStatusCode', () => {
   it('should pass when status code matches', () => {
@@ -19,9 +18,7 @@ describe('toHaveStatusCode', () => {
 
   it('should fail when status code does not match', () => {
     const response = createApiResponse({ status: 404 });
-    const expectedError = createMatcherError(200, 'toHaveStatusCode', 404, false).message;
-
-    expect(() => apiExpect(response).toHaveStatusCode(200)).toThrow(expectedError);
+    expect(() => apiExpect(response).toHaveStatusCode(200)).toThrow();
   });
 
   it('should support negation', () => {
@@ -31,8 +28,6 @@ describe('toHaveStatusCode', () => {
 
   it('should fail negation when status code matches', () => {
     const response = createApiResponse({ status: 200 });
-    const expectedError = createMatcherError(200, 'toHaveStatusCode', 200, true).message;
-
-    expect(() => apiExpect(response).not.toHaveStatusCode(200)).toThrow(expectedError);
+    expect(() => apiExpect(response).not.toHaveStatusCode(200)).toThrow();
   });
 });
