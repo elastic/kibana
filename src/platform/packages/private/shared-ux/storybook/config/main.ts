@@ -17,7 +17,7 @@ module.exports = {
     '../../../../shared/shared-ux/**/guide.mdx',
     '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
     '../../../../shared/kbn-developer-toolbar/**/*.stories.+(tsx|mdx)',
-    '../app_menu.stories.tsx',
+    '../../../../../../core/packages/chrome/app-menu/core-chrome-app-menu-components/**/*.stories.+(tsx|mdx)',
   ],
   typescript: {
     reactDocgen: 'react-docgen-typescript',
