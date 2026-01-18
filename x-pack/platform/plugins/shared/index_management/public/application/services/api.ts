@@ -177,7 +177,6 @@ export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
   // todo review types
   const indicesWithMetadata: Record<string, IndexMetadata> = indices;
 
-  console.log('indicesWithMetadata', indicesWithMetadata);
   // iterate over all the requests for additional info
   enrichedPromises.forEach((enrichedPromise) => {
     enrichedPromise
