@@ -7,28 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface ToHaveDataOptions {
-  exactMatch?: boolean;
-}
+import type { ToHaveDataOptions } from './to_have_data';
 
-/**
- * Matchers for asserting on API Response (AxiosResponse) properties (status, headers, etc.)
- */
-export interface ResponseMatchers {
+export interface StatusMatchers {
   toHaveStatusCode(code: number): void;
-  toHaveStatusText(text: string): void;
-  toHaveHeaders(headers: Record<string, string>): void;
-  toHaveData(expected?: unknown, options?: ToHaveDataOptions): void;
-
-  not: Omit<ResponseMatchers, 'not'>;
 }
 
+export interface StatusTextMatchers {
+  toHaveStatusText(text: string): void;
+}
+
+export interface HeadersMatchers {
+  toHaveHeaders(headers: Record<string, string>): void;
+}
+
+export interface DataMatchers {
+  toHaveData(expected?: unknown, options?: ToHaveDataOptions): void;
+}
+
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
+/** Builds conditional response matchers based on properties in T */
+type ResponseMatchersFor<T> = (T extends { status: number } ? StatusMatchers : {}) &
+  (T extends { statusText: string } ? StatusTextMatchers : {}) &
+  (T extends { headers: object } ? HeadersMatchers : {}) &
+  (T extends { data: unknown } ? DataMatchers : {});
+
 /**
- * Subset of Playwright's GenericAssertions matchers for API tests.
+ * Returns matchers based on the input type T.
+ * - When T is `any`: only ValueMatchers (enforces explicit typing)
+ * - Otherwise: ValueMatchers + response matchers for properties present in T
  */
+export type MatchersFor<T> = IsAny<T> extends true
+  ? ValueMatchers
+  : ValueMatchers &
+      ResponseMatchersFor<T> & {
+        not: Omit<ValueMatchers, 'not'> & ResponseMatchersFor<T>;
+      };
+
 export interface ValueMatchers {
   toBe(expected: unknown): void;
   toEqual(expected: unknown): void;
+  toStrictEqual(expected: unknown): void;
   toContain(expected: unknown): void;
   toBeDefined(): void;
   toBeUndefined(): void;
@@ -37,15 +57,7 @@ export interface ValueMatchers {
   toBeGreaterThanOrEqual(expected: number | bigint): void;
   toBeLessThan(expected: number | bigint): void;
   toBeLessThanOrEqual(expected: number | bigint): void;
-  toMatchObject(expected: Record<string, unknown> | Array<unknown>): void;
-  toHaveProperty(keyPath: string | Array<string>, value?: unknown): void;
+  toHaveProperty(keyPath: string | string[], value?: unknown): void;
 
   not: Omit<ValueMatchers, 'not'>;
-}
-
-/**
- * Full API matchers (response + value) with `not` support.
- */
-export interface ApiMatchers extends ResponseMatchers, ValueMatchers {
-  not: Omit<ResponseMatchers, 'not'> & Omit<ValueMatchers, 'not'>;
 }

@@ -12,6 +12,11 @@ import { apiTest } from '../../../../../src/playwright';
 import { createAlertRuleParams } from '../../../fixtures/constants';
 import { expect } from '../../../../../api';
 
+interface ApiResponse {
+  status: number;
+  data: Record<string, any>;
+}
+
 apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, () => {
   let ruleId: string;
   const alertName = `index_threshold_rule_${randomUUID()}`;
@@ -19,7 +24,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
   const updatedAlertName = `updated_rule_${randomUUID()}`;
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    const createdResponse = await apiServices.alerting.rules.create({
+    const createdResponse: ApiResponse = await apiServices.alerting.rules.create({
       ruleTypeId,
       name: alertName,
       consumer: 'alerts',
@@ -30,13 +35,13 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
       tags: ['test'],
     });
     expect(createdResponse).toHaveStatusCode(200);
-    expect(createdResponse.data.enabled).toBe(false);
+    expect(createdResponse).toHaveData({ enabled: false });
     ruleId = createdResponse.data.id;
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
     await apiServices.alerting.rules.delete(ruleId);
-    const fetchedResponse = await apiServices.alerting.rules.get(ruleId, undefined, {
+    const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId, undefined, {
       ignoreErrors: [404],
     });
     expect(fetchedResponse).toHaveStatusCode(404);
@@ -44,45 +49,47 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
   });
 
   apiTest(`should fetch alert with 'alerting.rules.get'`, async ({ apiServices }) => {
-    const fetchedResponse = await apiServices.alerting.rules.get(ruleId);
+    const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
     expect(fetchedResponse).toHaveStatusCode(200);
-    expect(fetchedResponse.data.enabled).toBe(false);
-    expect(fetchedResponse.data.name).toBe(alertName);
-    expect(fetchedResponse.data.rule_type_id).toBe(ruleTypeId);
+    expect(fetchedResponse).toHaveData({
+      enabled: false,
+      name: alertName,
+      rule_type_id: ruleTypeId,
+    });
   });
 
   apiTest(`should update alert with 'alerting.rules.update'`, async ({ apiServices }) => {
-    const updatedResponse = await apiServices.alerting.rules.update(ruleId, {
+    const updatedResponse: ApiResponse = await apiServices.alerting.rules.update(ruleId, {
       name: updatedAlertName,
     });
-    expect(updatedResponse.status).toBe(200);
-    expect(updatedResponse.data.name).toBe(updatedAlertName);
+    expect(updatedResponse).toHaveStatusCode(200);
+    expect(updatedResponse).toHaveData({ name: updatedAlertName });
   });
 
   apiTest('should enable/disable rule', async ({ apiServices }) => {
     await apiTest.step(`with 'alerting.rules.enable'`, async () => {
       await apiServices.alerting.rules.enable(ruleId);
-      const fetchedResponse = await apiServices.alerting.rules.get(ruleId);
+      const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse.data.enabled).toBe(true);
+      expect(fetchedResponse).toHaveData({ enabled: true });
     });
 
     await apiTest.step(`with 'alerting.rules.disable'`, async () => {
       await apiServices.alerting.rules.disable(ruleId);
-      const fetchedResponse = await apiServices.alerting.rules.get(ruleId);
+      const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse.data.enabled).toBe(false);
+      expect(fetchedResponse).toHaveData({ enabled: false });
     });
   });
 
   apiTest(`should find rule with 'alerting.rules.find'`, async ({ apiServices }) => {
-    const foundResponse = await apiServices.alerting.rules.find({
+    const foundResponse: ApiResponse = await apiServices.alerting.rules.find({
       search: alertName,
       search_fields: ['name'],
       per_page: 10,
       page: 1,
     });
-    expect(foundResponse.status).toBe(200);
+    expect(foundResponse).toHaveStatusCode(200);
     const match = foundResponse.data.data.find((obj: any) => obj.name === alertName);
     expect(match).toBeDefined();
     expect(match?.id).toBe(ruleId);
@@ -92,17 +99,17 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
     await apiTest.step('alerting.rules.muteAll', async () => {
       await apiServices.alerting.rules.muteAll(ruleId);
 
-      const fetchedResponse = await apiServices.alerting.rules.get(ruleId);
+      const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse.data.mute_all).toBe(true);
+      expect(fetchedResponse).toHaveData({ mute_all: true });
     });
 
     await apiTest.step('alerting.rules.unmuteAll', async () => {
       await apiServices.alerting.rules.unmuteAll(ruleId);
 
-      const fetchedResponse = await apiServices.alerting.rules.get(ruleId);
+      const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse.data.mute_all).toBe(false);
+      expect(fetchedResponse).toHaveData({ mute_all: false });
     });
   });
 
@@ -111,7 +118,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
       const mockAlertId = 'test-alert-instance-id';
       await apiServices.alerting.rules.muteAlert(ruleId, mockAlertId);
 
-      const fetchedResponse = await apiServices.alerting.rules.get(ruleId);
+      const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
       expect(fetchedResponse.data.muted_alert_ids).toContain(mockAlertId);
     });
@@ -120,7 +127,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
       const mockAlertId = 'test-alert-instance-id';
       await apiServices.alerting.rules.unmuteAlert(ruleId, mockAlertId);
 
-      const fetchedResponse = await apiServices.alerting.rules.get(ruleId);
+      const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
       expect(fetchedResponse.data.muted_alert_ids).not.toContain(mockAlertId);
     });
@@ -129,17 +136,23 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
   apiTest(`should snooze/unsnooze rule`, async ({ apiServices }) => {
     await apiTest.step('alerting.rules.snooze', async () => {
       const durationMs = 3600000;
-      const snoozeResponse = await apiServices.alerting.rules.snooze(ruleId, durationMs);
-      expect(snoozeResponse.status).toBe(204);
+      const snoozeResponse: ApiResponse = await apiServices.alerting.rules.snooze(
+        ruleId,
+        durationMs
+      );
+      expect(snoozeResponse).toHaveStatusCode(204);
     });
 
     await apiTest.step('alerting.rules.unsnooze', async () => {
-      const beforeUnsnooze = await apiServices.alerting.rules.get(ruleId);
+      const beforeUnsnooze: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       const scheduleIds =
         beforeUnsnooze.data.snooze_schedule?.map((schedule: any) => schedule.id) || [];
 
-      const unsnoozeResponse = await apiServices.alerting.rules.unsnooze(ruleId, scheduleIds);
-      expect(unsnoozeResponse.status).toBe(204);
+      const unsnoozeResponse: ApiResponse = await apiServices.alerting.rules.unsnooze(
+        ruleId,
+        scheduleIds
+      );
+      expect(unsnoozeResponse).toHaveStatusCode(204);
     });
   });
 });

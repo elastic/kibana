@@ -42,34 +42,33 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
   });
 
   apiTest('should get all data views with getAll()', async ({ apiServices }) => {
-    const { data: dataViews, status } = await apiServices.dataViews.getAll();
+    const response = await apiServices.dataViews.getAll();
 
-    expect(status).toBe(200);
-    expect(Array.isArray(dataViews)).toBe(true);
-    expect(dataViews.length).toBeGreaterThan(0);
+    expect(response).toHaveStatusCode(200);
+    expect(Array.isArray(response.data)).toBe(true);
+    expect(response.data.length).toBeGreaterThan(0);
 
     // Verify our test data view is in the list
-    const foundDataView = dataViews.find((dv) => dv.id === dataViewId);
+    const foundDataView = response.data.find((dv) => dv.id === dataViewId);
     expect(foundDataView).toBeDefined();
     expect(foundDataView?.title).toBe(dataViewTitle);
   });
 
   apiTest('should get a single data view by ID with get()', async ({ apiServices }) => {
-    const { data: dataView, status } = await apiServices.dataViews.get(dataViewId);
+    const response = await apiServices.dataViews.get(dataViewId);
 
-    expect(status).toBe(200);
-    expect(dataView.id).toBe(dataViewId);
-    expect(dataView.title).toBe(dataViewTitle);
-    expect(dataView.version).toBeDefined();
+    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveData({ id: dataViewId, title: dataViewTitle });
+    expect(response.data.version).toBeDefined();
   });
 
   apiTest('should handle get() for non-existent data view', async ({ apiServices }) => {
     const nonExistentId = `non-existent-${Date.now()}`;
 
-    const { status } = await apiServices.dataViews.get(nonExistentId);
+    const response = await apiServices.dataViews.get(nonExistentId);
 
     // Should return 404 due to ignoreErrors
-    expect(status).toBe(404);
+    expect(response).toHaveStatusCode(404);
   });
 
   apiTest('should delete a data view with delete()', async ({ apiServices, kbnClient }) => {
@@ -88,22 +87,22 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
     const tempId = (createResponse.data as any).data_view.id;
 
     // Delete it
-    const { status } = await apiServices.dataViews.delete(tempId);
+    const deleteResponse = await apiServices.dataViews.delete(tempId);
 
-    expect(status).toBe(200);
+    expect(deleteResponse).toHaveStatusCode(200);
 
     // Verify it's deleted by trying to get it
-    const { status: getStatus } = await apiServices.dataViews.get(tempId);
-    expect(getStatus).toBe(404);
+    const getResponse = await apiServices.dataViews.get(tempId);
+    expect(getResponse).toHaveStatusCode(404);
   });
 
   apiTest('should handle delete() for non-existent data view', async ({ apiServices }) => {
     const nonExistentId = `non-existent-${Date.now()}`;
 
-    const { status } = await apiServices.dataViews.delete(nonExistentId);
+    const response = await apiServices.dataViews.delete(nonExistentId);
 
     // Should return 404 due to ignoreErrors
-    expect(status).toBe(404);
+    expect(response).toHaveStatusCode(404);
   });
 
   apiTest(
@@ -140,19 +139,19 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
 
       try {
         // Find data views with titles containing "test-find-alpha"
-        const { data: foundDataViews, status } = await apiServices.dataViews.find((dv) =>
+        const response = await apiServices.dataViews.find((dv) =>
           dv.title.includes('test-find-alpha')
         );
 
-        expect(status).toBe(200);
-        expect(foundDataViews.length).toBeGreaterThanOrEqual(1);
+        expect(response).toHaveStatusCode(200);
+        expect(response.data.length).toBeGreaterThanOrEqual(1);
 
-        const matchingDataView = foundDataViews.find((dv) => dv.id === id1);
+        const matchingDataView = response.data.find((dv) => dv.id === id1);
         expect(matchingDataView).toBeDefined();
         expect(matchingDataView?.title).toBe(title1);
 
         // Verify the other data view is NOT in the results
-        const nonMatchingDataView = foundDataViews.find((dv) => dv.id === id2);
+        const nonMatchingDataView = response.data.find((dv) => dv.id === id2);
         expect(nonMatchingDataView).toBeUndefined();
       } finally {
         // Clean up
@@ -165,12 +164,12 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
   apiTest(
     'should return empty array when find() predicate matches nothing',
     async ({ apiServices }) => {
-      const { data: foundDataViews, status } = await apiServices.dataViews.find(
+      const response = await apiServices.dataViews.find(
         (dv) => dv.title === 'this-will-never-match-anything-12345'
       );
 
-      expect(status).toBe(200);
-      expect(foundDataViews).toMatchObject([]);
+      expect(response).toHaveStatusCode(200);
+      expect(response).toHaveData([], { exactMatch: true });
     }
   );
 
@@ -193,13 +192,13 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
       const tempId = (createResponse.data as any).data_view.id;
 
       // Delete by title
-      const { status } = await apiServices.dataViews.deleteByTitle(tempTitle);
+      const deleteResponse = await apiServices.dataViews.deleteByTitle(tempTitle);
 
-      expect(status).toBe(200);
+      expect(deleteResponse).toHaveStatusCode(200);
 
       // Verify it's deleted
-      const { status: getStatus } = await apiServices.dataViews.get(tempId);
-      expect(getStatus).toBe(404);
+      const getResponse = await apiServices.dataViews.get(tempId);
+      expect(getResponse).toHaveStatusCode(404);
     }
   );
 
@@ -208,10 +207,10 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
     async ({ apiServices }) => {
       const nonExistentTitle = `non-existent-title-${Date.now()}`;
 
-      const { status } = await apiServices.dataViews.deleteByTitle(nonExistentTitle);
+      const response = await apiServices.dataViews.deleteByTitle(nonExistentTitle);
 
       // Should return 200 (not an error condition)
-      expect(status).toBe(200);
+      expect(response).toHaveStatusCode(200);
     }
   );
 
@@ -248,16 +247,16 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
 
       try {
         // Delete by title (should delete only the first one found)
-        const { status } = await apiServices.dataViews.deleteByTitle(sharedTitle);
-        expect(status).toBe(200);
+        const deleteResponse = await apiServices.dataViews.deleteByTitle(sharedTitle);
+        expect(deleteResponse).toHaveStatusCode(200);
 
         // Check which ones still exist
-        const { status: status1 } = await apiServices.dataViews.get(id1);
-        const { status: status2 } = await apiServices.dataViews.get(id2);
+        const getResponse1 = await apiServices.dataViews.get(id1);
+        const getResponse2 = await apiServices.dataViews.get(id2);
 
         // One should be deleted (404) and one should still exist (200)
-        const statuses = [status1, status2].sort();
-        expect(statuses).toMatchObject([200, 404]);
+        const statuses = [getResponse1.status, getResponse2.status].sort();
+        expect(statuses).toStrictEqual([200, 404]);
       } finally {
         // Clean up any remaining data views
         await apiServices.dataViews.delete(id1);
@@ -292,30 +291,30 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
       }
 
       // Get all and verify they exist
-      const { data: allDataViews } = await apiServices.dataViews.getAll();
-      const foundDataViews = allDataViews.filter((dv) => createdIds.includes(dv.id));
+      const getAllResponse = await apiServices.dataViews.getAll();
+      const foundDataViews = getAllResponse.data.filter((dv) => createdIds.includes(dv.id));
       expect(foundDataViews).toHaveLength(3);
 
       // Find with predicate
-      const { data: filteredDataViews } = await apiServices.dataViews.find((dv) =>
+      const findResponse = await apiServices.dataViews.find((dv) =>
         dv.title.includes('multi-test')
       );
-      expect(filteredDataViews.length).toBeGreaterThanOrEqual(3);
+      expect(findResponse.data.length).toBeGreaterThanOrEqual(3);
 
       // Delete one by ID
-      const { status: deleteStatus } = await apiServices.dataViews.delete(createdIds[0]);
-      expect(deleteStatus).toBe(200);
+      const deleteResponse = await apiServices.dataViews.delete(createdIds[0]);
+      expect(deleteResponse).toHaveStatusCode(200);
 
       // Delete one by title
-      const { status: deleteByTitleStatus } = await apiServices.dataViews.deleteByTitle(titles[1]);
-      expect(deleteByTitleStatus).toBe(200);
+      const deleteByTitleResponse = await apiServices.dataViews.deleteByTitle(titles[1]);
+      expect(deleteByTitleResponse).toHaveStatusCode(200);
 
       // Verify only one remains
-      const { data: remainingDataViews } = await apiServices.dataViews.find((dv) =>
+      const remainingResponse = await apiServices.dataViews.find((dv) =>
         createdIds.includes(dv.id)
       );
-      expect(remainingDataViews).toHaveLength(1);
-      expect(remainingDataViews[0].id).toBe(createdIds[2]);
+      expect(remainingResponse.data).toHaveLength(1);
+      expect(remainingResponse.data[0].id).toBe(createdIds[2]);
     } finally {
       // Clean up all created data views
       await Promise.all(createdIds.map((id) => apiServices.dataViews.delete(id)));
@@ -341,12 +340,12 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
       const tempId = (createResponse.data as any).data_view.id;
 
       // Delete it once
-      const { status: firstDeleteStatus } = await apiServices.dataViews.delete(tempId);
-      expect(firstDeleteStatus).toBe(200);
+      const firstDeleteResponse = await apiServices.dataViews.delete(tempId);
+      expect(firstDeleteResponse).toHaveStatusCode(200);
 
       // Delete it again (should not throw due to ignoreErrors)
-      const { status: secondDeleteStatus } = await apiServices.dataViews.delete(tempId);
-      expect(secondDeleteStatus).toBe(404);
+      const secondDeleteResponse = await apiServices.dataViews.delete(tempId);
+      expect(secondDeleteResponse).toHaveStatusCode(404);
     }
   );
 
@@ -366,11 +365,11 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
     });
 
     // Delete by title first time
-    const { status: firstStatus } = await apiServices.dataViews.deleteByTitle(tempTitle);
-    expect(firstStatus).toBe(200);
+    const firstResponse = await apiServices.dataViews.deleteByTitle(tempTitle);
+    expect(firstResponse).toHaveStatusCode(200);
 
     // Delete by title second time (should return 200, not an error)
-    const { status: secondStatus } = await apiServices.dataViews.deleteByTitle(tempTitle);
-    expect(secondStatus).toBe(200);
+    const secondResponse = await apiServices.dataViews.deleteByTitle(tempTitle);
+    expect(secondResponse).toHaveStatusCode(200);
   });
 });

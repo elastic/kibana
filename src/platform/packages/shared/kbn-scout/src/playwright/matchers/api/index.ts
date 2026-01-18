@@ -8,128 +8,105 @@
  */
 
 import { expect as baseExpect } from '@playwright/test';
-import type { AxiosResponse } from 'axios';
+import { toHaveData } from './to_have_data';
+import { toHaveHeaders } from './to_have_headers';
 import { toHaveStatusCode } from './to_have_status_code';
 import { toHaveStatusText } from './to_have_status_text';
-import { toHaveHeaders } from './to_have_headers';
-import { toHaveData } from './to_have_data';
-import type { ApiMatchers, ResponseMatchers, ToHaveDataOptions, ValueMatchers } from './types';
+import type { MatchersFor, ValueMatchers } from './types';
+import type { ToHaveDataOptions } from './to_have_data';
 
 /**
- * Type guard to check if a value is an AxiosResponse.
+ * Create dynamic matchers based on object keys
  */
-function isAxiosResponse(value: any): value is AxiosResponse {
-  if (!value || typeof value !== 'object') return false;
+function createDynamicMatchers(
+  obj: Record<string, unknown>
+): Record<string, unknown> & { not: Record<string, unknown> } {
+  const matchers: Record<string, unknown> = {};
+  const not: Record<string, unknown> = {};
 
-  const keys = Object.keys(value);
-  const validKeys5 = ['data', 'status', 'statusText', 'headers', 'config'];
-
-  if (keys.length === 5) {
-    return validKeys5.every((k) => k in value);
+  if ('status' in obj) {
+    matchers.toHaveStatusCode = (code: number) => toHaveStatusCode(obj, code);
+    not.toHaveStatusCode = (code: number) => toHaveStatusCode(obj, code, true);
+  }
+  if ('statusText' in obj) {
+    matchers.toHaveStatusText = (text: string) => toHaveStatusText(obj, text);
+    not.toHaveStatusText = (text: string) => toHaveStatusText(obj, text, true);
+  }
+  if ('headers' in obj) {
+    matchers.toHaveHeaders = (headers: Record<string, string>) => toHaveHeaders(obj, headers);
+    not.toHaveHeaders = (headers: Record<string, string>) => toHaveHeaders(obj, headers, true);
+  }
+  if ('data' in obj) {
+    matchers.toHaveData = (expected?: unknown, options?: ToHaveDataOptions) =>
+      toHaveData(obj, expected, options);
+    not.toHaveData = (expected?: unknown, options?: ToHaveDataOptions) =>
+      toHaveData(obj, expected, options, true);
   }
 
-  if (keys.length === 6) {
-    return validKeys5.every((k) => k in value) && 'request' in value;
-  }
-
-  return false;
+  return { ...matchers, not };
 }
 
 /**
- * Creates value matchers (delegating to Playwright's expect).
+ * Create value matchers delegating to Playwright expect
  */
-function createValueMatchers(base: ReturnType<typeof baseExpect>): ValueMatchers {
-  return {
-    toBe: (...args: Parameters<typeof base.toBe>) => base.toBe(...args),
-    toEqual: (...args: Parameters<typeof base.toEqual>) => base.toEqual(...args),
-    toContain: (...args: Parameters<typeof base.toContain>) => base.toContain(...args),
-    toBeDefined: (...args: Parameters<typeof base.toBeDefined>) => base.toBeDefined(...args),
-    toBeUndefined: (...args: Parameters<typeof base.toBeUndefined>) => base.toBeUndefined(...args),
-    toHaveLength: (...args: Parameters<typeof base.toHaveLength>) => base.toHaveLength(...args),
-    toBeGreaterThan: (...args: Parameters<typeof base.toBeGreaterThan>) =>
-      base.toBeGreaterThan(...args),
-    toBeGreaterThanOrEqual: (...args: Parameters<typeof base.toBeGreaterThanOrEqual>) =>
-      base.toBeGreaterThanOrEqual(...args),
-    toBeLessThan: (...args: Parameters<typeof base.toBeLessThan>) => base.toBeLessThan(...args),
-    toBeLessThanOrEqual: (...args: Parameters<typeof base.toBeLessThanOrEqual>) =>
-      base.toBeLessThanOrEqual(...args),
-    toMatchObject: (...args: Parameters<typeof base.toMatchObject>) => base.toMatchObject(...args),
-    toHaveProperty: (...args: Parameters<typeof base.toHaveProperty>) =>
-      base.toHaveProperty(...args),
-
-    not: {
-      toBe: (...args: Parameters<typeof base.not.toBe>) => base.not.toBe(...args),
-      toEqual: (...args: Parameters<typeof base.not.toEqual>) => base.not.toEqual(...args),
-      toContain: (...args: Parameters<typeof base.not.toContain>) => base.not.toContain(...args),
-      toBeDefined: (...args: Parameters<typeof base.not.toBeDefined>) =>
-        base.not.toBeDefined(...args),
-      toBeUndefined: (...args: Parameters<typeof base.not.toBeUndefined>) =>
-        base.not.toBeUndefined(...args),
-      toHaveLength: (...args: Parameters<typeof base.not.toHaveLength>) =>
-        base.not.toHaveLength(...args),
-      toBeGreaterThan: (...args: Parameters<typeof base.not.toBeGreaterThan>) =>
-        base.not.toBeGreaterThan(...args),
-      toBeGreaterThanOrEqual: (...args: Parameters<typeof base.not.toBeGreaterThanOrEqual>) =>
-        base.not.toBeGreaterThanOrEqual(...args),
-      toBeLessThan: (...args: Parameters<typeof base.not.toBeLessThan>) =>
-        base.not.toBeLessThan(...args),
-      toBeLessThanOrEqual: (...args: Parameters<typeof base.not.toBeLessThanOrEqual>) =>
-        base.not.toBeLessThanOrEqual(...args),
-      toMatchObject: (...args: Parameters<typeof base.not.toMatchObject>) =>
-        base.not.toMatchObject(...args),
-      toHaveProperty: (...args: Parameters<typeof base.not.toHaveProperty>) =>
-        base.not.toHaveProperty(...args),
-    },
-  };
-}
-
-/**
- * Creates Response matchers for AxiosResponse objects.
- */
-function createResponseMatchers(response: AxiosResponse): ResponseMatchers {
-  return {
-    toHaveStatusCode: (code: number) => toHaveStatusCode(response, code),
-    toHaveStatusText: (text: string) => toHaveStatusText(response, text),
-    toHaveHeaders: (headers: Record<string, string>) => toHaveHeaders(response, headers),
-    toHaveData: (expected?: unknown, options?: ToHaveDataOptions) =>
-      toHaveData(response, expected, options),
-
-    not: {
-      toHaveStatusCode: (code: number) => toHaveStatusCode(response, code, true),
-      toHaveStatusText: (text: string) => toHaveStatusText(response, text, true),
-      toHaveHeaders: (headers: Record<string, string>) => toHaveHeaders(response, headers, true),
-      toHaveData: (expected?: unknown, options?: ToHaveDataOptions) =>
-        toHaveData(response, expected, options, true),
-    },
-  };
-}
-
-/**
- * Custom expect wrapper for API responses.
- *
- * Provides a constrained interface with:
- * - API Response matchers (e.g. toHaveStatusCode)
- * - Essential value matchers (e.g. toBe, toEqual, toContain, etc.)
- *
- * @example
- * expect(response).toHaveStatusCode(200);
- *
- * expect(response.data.name).toBe('test');
- * expect(response.data.items).toHaveLength(3);
- */
-export function expect(actual: AxiosResponse): ResponseMatchers;
-export function expect(actual: any): ApiMatchers;
-export function expect<T>(actual: T): ValueMatchers;
-export function expect(actual: unknown): ResponseMatchers | ApiMatchers | ValueMatchers {
+function createValueMatchers(actual: unknown): ValueMatchers {
   // eslint-disable-next-line playwright/valid-expect
   const base = baseExpect(actual);
-
-  if (isAxiosResponse(actual)) {
-    return createResponseMatchers(actual);
-  }
-
-  return createValueMatchers(base);
+  return {
+    toBe: (expected) => base.toBe(expected),
+    toEqual: (expected) => base.toEqual(expected),
+    toStrictEqual: (expected) => base.toStrictEqual(expected),
+    toContain: (expected) => base.toContain(expected),
+    toBeDefined: () => base.toBeDefined(),
+    toBeUndefined: () => base.toBeUndefined(),
+    toHaveLength: (expected) => base.toHaveLength(expected),
+    toBeGreaterThan: (expected) => base.toBeGreaterThan(expected),
+    toBeGreaterThanOrEqual: (expected) => base.toBeGreaterThanOrEqual(expected),
+    toBeLessThan: (expected) => base.toBeLessThan(expected),
+    toBeLessThanOrEqual: (expected) => base.toBeLessThanOrEqual(expected),
+    toHaveProperty: (keyPath, value?) =>
+      value !== undefined ? base.toHaveProperty(keyPath, value) : base.toHaveProperty(keyPath),
+    not: {
+      toBe: (expected) => base.not.toBe(expected),
+      toEqual: (expected) => base.not.toEqual(expected),
+      toStrictEqual: (expected) => base.not.toStrictEqual(expected),
+      toContain: (expected) => base.not.toContain(expected),
+      toBeDefined: () => base.not.toBeDefined(),
+      toBeUndefined: () => base.not.toBeUndefined(),
+      toHaveLength: (expected) => base.not.toHaveLength(expected),
+      toBeGreaterThan: (expected) => base.not.toBeGreaterThan(expected),
+      toBeGreaterThanOrEqual: (expected) => base.not.toBeGreaterThanOrEqual(expected),
+      toBeLessThan: (expected) => base.not.toBeLessThan(expected),
+      toBeLessThanOrEqual: (expected) => base.not.toBeLessThanOrEqual(expected),
+      toHaveProperty: (keyPath, value?) =>
+        value !== undefined
+          ? base.not.toHaveProperty(keyPath, value)
+          : base.not.toHaveProperty(keyPath),
+    },
+  };
 }
 
-// Re-export types
-export type { ApiMatchers } from './types';
+/**
+ * Custom expect wrapper with dynamic matchers based on input properties.
+ *
+ * @example
+ * const response: { status: number } = await getApiResponse();
+ * expect(response).toHaveStatusCode(200);  // ✅ status exists
+ * expect(response).toHaveData({ id: 1 });  // ❌ data doesn't exist
+ * expect(response.status).toBe(200);       // ✅ value matchers always work
+ */
+export function expect<T>(actual: T): MatchersFor<T>;
+export function expect(actual: unknown) {
+  const valueMatchers = createValueMatchers(actual);
+
+  if (typeof actual === 'object' && actual !== null) {
+    const dynamicMatchers = createDynamicMatchers(actual as Record<string, unknown>);
+    return {
+      ...valueMatchers,
+      ...dynamicMatchers,
+      not: { ...valueMatchers.not, ...dynamicMatchers.not },
+    };
+  }
+
+  return valueMatchers;
+}

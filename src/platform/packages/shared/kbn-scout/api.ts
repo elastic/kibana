@@ -8,4 +8,3 @@
  */
 
 export { expect } from './src/playwright/matchers/api';
-export type { ApiMatchers } from './src/playwright/matchers/api';

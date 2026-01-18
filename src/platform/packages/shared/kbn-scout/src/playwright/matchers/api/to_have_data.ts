@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosResponse } from 'axios';
 import { expect as baseExpect } from '@playwright/test';
 import { createMatcherError } from './utils';
 
@@ -27,16 +26,14 @@ export interface ToHaveDataOptions {
  * expect(response).toHaveData({ id: 1 }, { exactMatch: true }); // exact match
  * expect(response).toHaveData('success'); // exact match for primitives
  */
-export function toHaveData(
-  response: AxiosResponse,
+export function toHaveData<T extends { data?: any }>(
+  obj: T,
   expected?: unknown,
   options?: ToHaveDataOptions,
   isNegated = false
 ): void {
-  const actual = response.data;
-  const opts: ToHaveDataOptions = options ?? {};
+  const actual = obj.data;
 
-  // No expected value provided - check that data exists (not null/undefined)
   if (expected === undefined) {
     const hasValue = actual !== null && actual !== undefined;
     if ((!hasValue && !isNegated) || (hasValue && isNegated)) {
@@ -45,6 +42,7 @@ export function toHaveData(
     return;
   }
 
+  const exactMatch = options?.exactMatch ?? false;
   const isObject =
     expected !== null &&
     typeof expected === 'object' &&
@@ -54,8 +52,7 @@ export function toHaveData(
   try {
     // eslint-disable-next-line playwright/valid-expect
     const assertion = isNegated ? baseExpect(actual).not : baseExpect(actual);
-
-    if (isObject && !opts.exactMatch) {
+    if (isObject && !exactMatch) {
       assertion.toMatchObject(expected as Record<string, unknown>);
     } else {
       assertion.toEqual(expected);

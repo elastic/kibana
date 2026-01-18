@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosResponse } from 'axios';
 import { expect as baseExpect } from '@playwright/test';
 import { createMatcherError } from './utils';
 
@@ -20,30 +19,33 @@ import { createMatcherError } from './utils';
  * expect(response).toHaveHeaders({ 'content-type': 'application/json' });
  * expect(response).not.toHaveHeaders({ 'x-forbidden': 'value' });
  */
-export function toHaveHeaders(
-  response: AxiosResponse,
+export function toHaveHeaders<T extends { headers?: Record<string, string> }>(
+  obj: T,
   expectedHeaders: Record<string, string>,
-  isNegated: boolean = false
+  isNegated = false
 ): void {
-  const responseHeaders: Record<string, string> = {};
-  for (const [key, value] of Object.entries(response.headers)) {
-    responseHeaders[key.toLowerCase()] = Array.isArray(value) ? value.join(', ') : value!;
+  const actualHeaders: Record<string, string> = {};
+  for (const [key, value] of Object.entries(obj.headers ?? {})) {
+    actualHeaders[key.toLowerCase()] = Array.isArray(value) ? value.join(', ') : value!;
   }
 
-  const normalizedExpectedHeaders: Record<string, string> = {};
+  const normalizedExpected: Record<string, string> = {};
   for (const [key, value] of Object.entries(expectedHeaders)) {
-    normalizedExpectedHeaders[key.toLowerCase()] = value;
+    normalizedExpected[key.toLowerCase()] = value;
   }
 
   try {
     if (isNegated) {
-      baseExpect(responseHeaders).not.toMatchObject(normalizedExpectedHeaders);
+      baseExpect(actualHeaders).not.toMatchObject(normalizedExpected);
     } else {
-      baseExpect(responseHeaders).toMatchObject(normalizedExpectedHeaders);
+      baseExpect(actualHeaders).toMatchObject(normalizedExpected);
     }
   } catch {
-    const expectedDisplay = JSON.stringify(expectedHeaders);
-    const actualDisplay = JSON.stringify(responseHeaders);
-    throw createMatcherError(expectedDisplay, 'toHaveHeaders', actualDisplay, isNegated);
+    throw createMatcherError(
+      JSON.stringify(normalizedExpected),
+      'toHaveHeaders',
+      JSON.stringify(actualHeaders),
+      isNegated
+    );
   }
 }

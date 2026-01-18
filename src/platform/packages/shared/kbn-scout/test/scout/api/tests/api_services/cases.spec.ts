@@ -18,34 +18,33 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   apiTest.beforeEach(async ({ apiServices, config }) => {
     caseOwner =
       config.serverless && config.projectType === 'security' ? 'securitySolution' : 'cases';
-    const { data, status } = await apiServices.cases.create({
+    const response = await apiServices.cases.create({
       ...createCasePayload,
       owner: caseOwner,
       category: 'test',
     });
-    expect(status).toBe(200);
-    expect(data.owner).toBe(caseOwner);
-    expect(data.status).toBe('open');
-    caseId = data.id;
+    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveData({ owner: caseOwner, status: 'open' });
+    caseId = response.data.id;
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
     await apiServices.cases.cleanup.deleteAllCases();
     const fetchedResponse = await apiServices.cases.get(caseId);
-    expect(fetchedResponse.status).toBe(404);
+    expect(fetchedResponse).toHaveStatusCode(404);
     caseId = '';
   });
 
   apiTest(`should fetch case with 'cases.get'`, async ({ apiServices }) => {
     const fetchedResponse = await apiServices.cases.get(caseId);
-    expect(fetchedResponse.status).toBe(200);
+    expect(fetchedResponse).toHaveStatusCode(200);
   });
 
   apiTest(`should update case with a new severity with 'cases.update'`, async ({ apiServices }) => {
     // First get the case to obtain its current version
     const currentCase = await apiServices.cases.get(caseId);
 
-    const { data: cases, status } = await apiServices.cases.update([
+    const response = await apiServices.cases.update([
       {
         id: caseId,
         version: currentCase.data.version,
@@ -53,14 +52,14 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
       },
     ]);
 
-    expect(status).toBe(200);
-    expect(cases).toHaveLength(1);
-    expect(cases[0].severity).toBe('medium');
+    expect(response).toHaveStatusCode(200);
+    expect(response.data).toHaveLength(1);
+    expect(response.data[0].severity).toBe('medium');
   });
 
   apiTest('should add a new connector to a case', async ({ apiServices }) => {
     const currentCase = await apiServices.cases.get(caseId);
-    const { status } = await apiServices.cases.update([
+    const response = await apiServices.cases.update([
       {
         id: caseId,
         version: currentCase.data.version,
@@ -73,7 +72,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
       },
     ]);
 
-    expect(status).toBe(200);
+    expect(response).toHaveStatusCode(200);
   });
 
   apiTest('should delete multiple cases', async ({ apiServices }) => {
@@ -85,15 +84,15 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
       ...createCasePayload,
       owner: caseOwner,
     });
-    expect(createdResponse1.status).toBe(200);
-    expect(createdResponse2.status).toBe(200);
+    expect(createdResponse1).toHaveStatusCode(200);
+    expect(createdResponse2).toHaveStatusCode(200);
 
     await apiServices.cases.cleanup.deleteAllCases();
 
     const fetchedResponse1 = await apiServices.cases.get(createdResponse1.data.id);
     const fetchedResponse2 = await apiServices.cases.get(createdResponse2.data.id);
-    expect(fetchedResponse1.status).toBe(404);
-    expect(fetchedResponse2.status).toBe(404);
+    expect(fetchedResponse1).toHaveStatusCode(404);
+    expect(fetchedResponse2).toHaveStatusCode(404);
   });
 
   apiTest('should delete cases by tags', async ({ apiServices }) => {
@@ -107,8 +106,8 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
       owner: caseOwner,
       tags: ['tag2'],
     });
-    expect(createdResponse1.status).toBe(200);
-    expect(createdResponse2.status).toBe(200);
+    expect(createdResponse1).toHaveStatusCode(200);
+    expect(createdResponse2).toHaveStatusCode(200);
 
     // delete all cases with tag "tag1"
     await apiServices.cases.cleanup.deleteCasesByTags(['tag1']);
@@ -117,32 +116,31 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     const fetchedResponse2 = await apiServices.cases.get(createdResponse2.data.id);
 
     // this case should have been deleted because it was assigned "tag1"
-    expect(fetchedResponse1.status).toBe(404);
+    expect(fetchedResponse1).toHaveStatusCode(404);
 
     // this case shouldn't have been deleted because it was assigned "tag2"
-    expect(fetchedResponse2.status).toBe(200);
+    expect(fetchedResponse2).toHaveStatusCode(200);
   });
 
   apiTest('should post and find a comment', async ({ apiServices }) => {
-    const { data: updatedCase, status } = await apiServices.cases.comments.create(caseId, {
+    const response = await apiServices.cases.comments.create(caseId, {
       type: 'user',
       comment: 'This is a test comment',
       owner: caseOwner,
     });
 
-    expect(status).toBe(200);
-    expect(updatedCase.totalComment).toBe(1);
-    expect(updatedCase.comments).toHaveLength(1);
+    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveData({ totalComment: 1 });
+    expect(response.data.comments).toHaveLength(1);
 
     // find comment by ID
-    const commentId = updatedCase.comments?.[0]?.id;
+    const commentId = response.data.comments?.[0]?.id;
     if (!commentId) throw new Error('Comment not found');
 
-    const { data: fetchedComment, status: fetchCommentStatus } =
-      await apiServices.cases.comments.get(caseId, commentId);
+    const fetchedResponse = await apiServices.cases.comments.get(caseId, commentId);
 
-    expect(fetchCommentStatus).toBe(200);
-    expect(fetchedComment.comment).toBe('This is a test comment');
+    expect(fetchedResponse).toHaveStatusCode(200);
+    expect(fetchedResponse).toHaveData({ comment: 'This is a test comment' });
   });
 
   apiTest('should post an alert', async ({ apiServices }) => {
@@ -154,13 +152,13 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
       rule: { id: 'test-rule-id', name: 'test-rule-name' },
     });
 
-    expect(createdAlert.status).toBe(200);
-    expect(createdAlert.data.totalAlerts).toBe(1);
+    expect(createdAlert).toHaveStatusCode(200);
+    expect(createdAlert).toHaveData({ totalAlerts: 1 });
   });
 
   apiTest('should search for a case by category', async ({ apiServices }) => {
-    const { data: cases, status } = await apiServices.cases.find({ category: 'test' });
-    expect(status).toBe(200);
-    expect(cases).toHaveLength(1);
+    const response = await apiServices.cases.find({ category: 'test' });
+    expect(response).toHaveStatusCode(200);
+    expect(response.data).toHaveLength(1);
   });
 });

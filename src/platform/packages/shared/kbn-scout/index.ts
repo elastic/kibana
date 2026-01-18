@@ -13,7 +13,6 @@ export * as cli from './src/cli';
 // Test framework
 export {
   expect,
-  expectApi,
   test,
   spaceTest,
   lighthouseTest,

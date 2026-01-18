@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosResponse } from 'axios';
 import { expect as baseExpect } from '@playwright/test';
 import { createMatcherError } from './utils';
 
@@ -18,23 +17,19 @@ import { createMatcherError } from './utils';
  * expect(response).toHaveStatusText('OK');
  * expect(response).not.toHaveStatusText('Not Found');
  */
-export function toHaveStatusText(
-  response: AxiosResponse,
-  expectedStatusText: string,
+export function toHaveStatusText<T extends { statusText?: string }>(
+  obj: T,
+  expected: string,
   isNegated = false
 ): void {
+  const actual = obj.statusText;
   try {
     if (isNegated) {
-      baseExpect(response.statusText).not.toBe(expectedStatusText);
+      baseExpect(actual).not.toBe(expected);
     } else {
-      baseExpect(response.statusText).toBe(expectedStatusText);
+      baseExpect(actual).toBe(expected);
     }
   } catch {
-    throw createMatcherError(
-      expectedStatusText,
-      'toHaveStatusText',
-      response.statusText,
-      isNegated
-    );
+    throw createMatcherError(expected, 'toHaveStatusText', actual, isNegated);
   }
 }
