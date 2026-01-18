@@ -210,6 +210,6 @@ export const ControlGroupRenderer = ({
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
   return !parentApi ? null : (
-    <ControlsRenderer parentApi={parentApi as unknown as ControlsRendererParentApi} />
+    <ControlsRenderer parentApi={parentApi as ControlsRendererParentApi} />
   );
 };
