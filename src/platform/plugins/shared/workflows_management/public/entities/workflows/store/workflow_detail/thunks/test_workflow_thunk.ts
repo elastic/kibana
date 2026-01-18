@@ -70,6 +70,7 @@ export const testWorkflowThunk = createAsyncThunk<
         inputCount,
         error: undefined,
         editorType: 'yaml', // Test runs are always from YAML editor context
+        origin: 'workflow_detail',
       });
 
       // Show success notification
@@ -96,6 +97,7 @@ export const testWorkflowThunk = createAsyncThunk<
         hasInputs: inputCount > 0,
         inputCount,
         error: errorObj,
+        origin: 'workflow_detail',
         editorType: 'yaml',
       });
 

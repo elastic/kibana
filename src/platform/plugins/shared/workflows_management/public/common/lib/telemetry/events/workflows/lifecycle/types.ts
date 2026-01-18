@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseEditorContextParams, BaseResultActionParams, WorkflowEditorType } from '../types';
+import type {
+  BaseEditorContextParams,
+  BaseResultActionParams,
+  WorkflowEditorType,
+  WorkflowTelemetryOrigin,
+} from '../types';
 
 export enum WorkflowLifecycleEventTypes {
   /**
@@ -37,8 +42,6 @@ export enum WorkflowLifecycleEventTypes {
    */
   WorkflowEnabledStateChanged = 'workflows_workflow_enabled_state_changed',
 }
-
-export type WorkflowUpdateType = 'yaml' | 'metadata' | 'enabled' | 'tags' | 'description';
 
 /**
  * Parameters for workflow creation attempt telemetry.
@@ -112,10 +115,6 @@ export interface ReportWorkflowUpdatedActionParams extends BaseResultActionParam
   eventName: string;
   workflowId: string;
   /**
-   * The type of update being performed
-   */
-  updateType: WorkflowUpdateType;
-  /**
    * Whether the update resulted in validation errors
    */
   hasValidationErrors: boolean;
@@ -131,6 +130,10 @@ export interface ReportWorkflowUpdatedActionParams extends BaseResultActionParam
    * Editor context if update was initiated from workflow detail page
    */
   editorType?: WorkflowEditorType;
+  /**
+   * Fields that were updated in this operation
+   */
+  updatedFields?: string[];
 }
 
 /**
@@ -146,6 +149,10 @@ export interface ReportWorkflowDeletedActionParams extends BaseResultActionParam
    * Whether this is a bulk delete operation
    */
   isBulkDelete: boolean;
+  /**
+   * Origin of the action: 'workflow_list' or 'workflow_detail'
+   */
+  origin?: WorkflowTelemetryOrigin;
 }
 
 /**
@@ -165,6 +172,10 @@ export interface ReportWorkflowClonedActionParams extends BaseResultActionParams
    * Editor context if clone was initiated from workflow detail page
    */
   editorType?: WorkflowEditorType;
+  /**
+   * Origin of the action: 'workflow_list' or 'workflow_detail'
+   */
+  origin?: WorkflowTelemetryOrigin;
 }
 
 /**

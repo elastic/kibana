@@ -11,13 +11,8 @@ import type { WorkflowEditorType } from '../types';
 
 export enum WorkflowUIEventTypes {
   /**
-   * When a workflow search is performed
-   * This tracks search and filter usage patterns.
-   */
-  WorkflowSearched = 'workflows_workflow_searched',
-  /**
    * When the workflow list page is viewed
-   * This tracks list page views and pagination.
+   * This tracks list page views, pagination, and search/filter usage patterns.
    */
   WorkflowListViewed = 'workflows_workflow_list_viewed',
   /**
@@ -30,10 +25,19 @@ export enum WorkflowUIEventTypes {
 export type WorkflowDetailTab = 'workflow' | 'executions' | 'logs';
 
 /**
- * Parameters for workflow search telemetry.
+ * Parameters for workflow list view telemetry.
+ * This event tracks list page views, pagination, and search/filter usage.
  */
-export interface ReportWorkflowSearchedActionParams {
+export interface ReportWorkflowListViewedActionParams {
   eventName: string;
+  /**
+   * Number of workflows in the list
+   */
+  workflowCount: number;
+  /**
+   * The page number being viewed
+   */
+  pageNumber: number;
   /**
    * Whether a search query was provided
    */
@@ -46,25 +50,6 @@ export interface ReportWorkflowSearchedActionParams {
    * Types of filters applied (e.g., 'enabled', 'createdBy')
    */
   filterTypes?: string[];
-  /**
-   * Number of results returned
-   */
-  resultCount: number;
-}
-
-/**
- * Parameters for workflow list view telemetry.
- */
-export interface ReportWorkflowListViewedActionParams {
-  eventName: string;
-  /**
-   * Number of workflows in the list
-   */
-  workflowCount: number;
-  /**
-   * The page number being viewed
-   */
-  pageNumber: number;
 }
 
 /**

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowEditorType } from '../types';
+import type { WorkflowEditorType, WorkflowTelemetryOrigin } from '../types';
 
 export enum WorkflowValidationEventTypes {
   /**
@@ -48,4 +48,8 @@ export interface ReportWorkflowValidationErrorActionParams {
    * Editor context if error occurred on workflow detail page
    */
   editorType?: WorkflowEditorType;
+  /**
+   * Origin of the action: 'workflow_list' or 'workflow_detail'
+   */
+  origin?: WorkflowTelemetryOrigin;
 }

@@ -15,10 +15,10 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { QueryClientProvider } from '@kbn/react-query';
 import { WorkflowsRoutes } from './routes';
 import { queryClient } from './shared/lib/query_client';
-import type { WorkflowsServices } from './types';
+import type { WorkflowsPublicPluginStart, WorkflowsServices } from './types';
 
 export const renderApp = (
-  services: WorkflowsServices,
+  services: WorkflowsServices & { workflowsManagement: WorkflowsPublicPluginStart },
   { history, element }: AppMountParameters
 ) => {
   const { theme } = services;

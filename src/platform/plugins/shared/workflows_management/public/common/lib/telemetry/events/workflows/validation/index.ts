@@ -8,10 +8,8 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type {
-  ReportWorkflowValidationErrorActionParams,
-  WorkflowValidationEventTypes,
-} from './types';
+import type { ReportWorkflowValidationErrorActionParams } from './types';
+import { WorkflowValidationEventTypes } from './types';
 import type { WorkflowEditorType } from '../types';
 
 export const workflowValidationEventNames = {
@@ -47,7 +45,8 @@ const workflowValidationErrorSchema: RootSchema<ReportWorkflowValidationErrorAct
     },
   },
   errorTypes: {
-    type: 'keyword',
+    type: 'array',
+    items: { type: 'keyword' },
     _meta: {
       description:
         'Unique validation error types (e.g., ["step-name-validation", "connector-id-validation"])',

@@ -24,7 +24,6 @@ import type {
 import type {
   ReportWorkflowDetailViewedActionParams,
   ReportWorkflowListViewedActionParams,
-  ReportWorkflowSearchedActionParams,
   WorkflowUIEventTypes,
 } from './ui/types';
 import type {
@@ -35,7 +34,6 @@ import type {
 // Re-export all event types from subcategories
 export {
   WorkflowLifecycleEventTypes,
-  type WorkflowUpdateType,
   type ReportWorkflowCreatedActionParams,
   type ReportWorkflowUpdatedActionParams,
   type ReportWorkflowDeletedActionParams,
@@ -60,7 +58,6 @@ export {
 export {
   WorkflowUIEventTypes,
   type WorkflowDetailTab,
-  type ReportWorkflowSearchedActionParams,
   type ReportWorkflowListViewedActionParams,
   type ReportWorkflowDetailViewedActionParams,
 } from './ui/types';
@@ -81,13 +78,22 @@ export interface BaseResultActionParams {
    * Error message if the action failed. Only present when result is 'failed'.
    */
   errorMessage?: string;
+  /**
+   * Origin of the action: 'workflow_list' or 'workflow_detail'
+   */
+  origin?: WorkflowTelemetryOrigin;
 }
 
 /**
  * Editor context for events that occur from the workflow detail page.
  * This helps track which editor interface users prefer when performing actions.
  */
-export type WorkflowEditorType = 'yaml' | 'visual' | 'both' | 'execution_graph';
+export type WorkflowEditorType = 'yaml' | 'visual' | 'both' | 'execution_graph' | 'ui';
+
+/**
+ * Origin of the telemetry event - indicates where the action was initiated from.
+ */
+export type WorkflowTelemetryOrigin = 'workflow_list' | 'workflow_detail';
 
 /**
  * Base parameters for events that can include editor context.
@@ -96,10 +102,11 @@ export type WorkflowEditorType = 'yaml' | 'visual' | 'both' | 'execution_graph';
 export interface BaseEditorContextParams {
   /**
    * The editor type(s) visible/active when the action was performed.
-   * - 'yaml': Only YAML editor was visible
+   * - 'yaml': Only YAML editor was visible, or update came from YAML editor
    * - 'visual': Only visual editor was visible
    * - 'both': Both YAML and visual editors were visible
    * - 'execution_graph': Execution graph was visible
+   * - 'ui': Update came from UI elements (buttons, toggles, etc.) rather than editors
    * - undefined: Action did not originate from workflow detail page (e.g., from list page, API, etc.)
    */
   editorType?: WorkflowEditorType;
@@ -115,7 +122,6 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowExecutionEventTypes.WorkflowTestRunInitiated]: ReportWorkflowTestRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: ReportWorkflowStepTestRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: ReportWorkflowRunInitiatedActionParams;
-  [WorkflowUIEventTypes.WorkflowSearched]: ReportWorkflowSearchedActionParams;
   [WorkflowUIEventTypes.WorkflowListViewed]: ReportWorkflowListViewedActionParams;
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
 }

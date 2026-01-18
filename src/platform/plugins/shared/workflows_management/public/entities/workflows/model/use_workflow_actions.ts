@@ -107,8 +107,32 @@ export function useWorkflowActions() {
       }
       // If YAML was being saved, we intentionally don't revert the detail query
       // The component's local state keeps the YAML, and the error toast will inform the user
+
+      // Report telemetry for failed update
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      telemetry.reportWorkflowUpdated({
+        workflowId: variables.id,
+        workflowUpdate: variables.workflow,
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        isBulkAction: false,
+        origin: 'workflow_list',
+        error: errorObj,
+      });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Report telemetry for successful update
+      // The telemetry service automatically determines which event to publish based on the update
+      telemetry.reportWorkflowUpdated({
+        workflowId: variables.id,
+        workflowUpdate: variables.workflow,
+        hasValidationErrors: false,
+        validationErrorCount: 0,
+        isBulkAction: false,
+        origin: 'workflow_list',
+        error: undefined,
+      });
+
       // Refetch to ensure data is in sync with server
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
@@ -165,8 +189,9 @@ export function useWorkflowActions() {
       const errorObj = err instanceof Error ? err : new Error(String(err));
       variables.ids.forEach((workflowId) => {
         telemetry.reportWorkflowDeleted({
-          workflowId,
-          isBulkAction: variables.ids.length > 1,
+          workflowIds: [workflowId],
+          isBulkDelete: variables.ids.length > 1,
+          origin: 'workflow_list',
           error: errorObj,
         });
       });
@@ -175,8 +200,9 @@ export function useWorkflowActions() {
       // Report telemetry for successful deletion
       variables.ids.forEach((workflowId) => {
         telemetry.reportWorkflowDeleted({
-          workflowId,
-          isBulkAction: variables.ids.length > 1,
+          workflowIds: [workflowId],
+          isBulkDelete: variables.ids.length > 1,
+          origin: 'workflow_list',
           error: undefined,
         });
       });
@@ -197,31 +223,33 @@ export function useWorkflowActions() {
         body: JSON.stringify({ inputs }),
       });
     },
-    onSuccess: (_, { id, inputs }) => {
-      const inputCount = Object.keys(inputs || {}).length;
+    onSuccess: (_, variables) => {
+      const inputCount = Object.keys(variables.inputs || {}).length;
 
       // Report telemetry for successful workflow run
       telemetry.reportWorkflowRunInitiated({
-        workflowId: id,
+        workflowId: variables.id,
         hasInputs: inputCount > 0,
         inputCount,
+        origin: 'workflow_list',
         error: undefined,
       });
 
       // FIX: ensure workflow execution document is created at the end of the mutation
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
-      queryClient.invalidateQueries({ queryKey: ['workflows', id, 'executions'] });
-      queryClient.invalidateQueries({ queryKey: ['workflows', id] });
+      queryClient.invalidateQueries({ queryKey: ['workflows', variables.id, 'executions'] });
+      queryClient.invalidateQueries({ queryKey: ['workflows', variables.id] });
     },
-    onError: (err, { id, inputs }) => {
-      const inputCount = Object.keys(inputs || {}).length;
+    onError: (err, variables) => {
+      const inputCount = Object.keys(variables.inputs || {}).length;
       const errorObj = err instanceof Error ? err : new Error(String(err));
 
       // Report telemetry for failed workflow run
       telemetry.reportWorkflowRunInitiated({
-        workflowId: id,
+        workflowId: variables.id,
         hasInputs: inputCount > 0,
         inputCount,
+        origin: 'workflow_list',
         error: errorObj,
       });
     },
@@ -234,27 +262,8 @@ export function useWorkflowActions() {
         body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
       });
     },
-    onSuccess: ({ workflowExecutionId }, { stepId, workflowYaml }) => {
-      // Report telemetry for successful step test run
-      // The telemetry service extracts step information from workflowYaml
-      telemetry.reportWorkflowStepTestRunInitiated({
-        workflowYaml,
-        stepId,
-        error: undefined,
-      });
-
+    onSuccess: ({ workflowExecutionId }) => {
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
-    },
-    onError: (err, { stepId, workflowYaml }) => {
-      const errorObj = err instanceof Error ? err : new Error(String(err));
-
-      // Report telemetry for failed step test run
-      // The telemetry service extracts step information from workflowYaml
-      telemetry.reportWorkflowStepTestRunInitiated({
-        workflowYaml,
-        stepId,
-        error: errorObj,
-      });
     },
   });
 
@@ -267,7 +276,8 @@ export function useWorkflowActions() {
       // Report telemetry for successful clone
       telemetry.reportWorkflowCloned({
         sourceWorkflowId: variables.id,
-        clonedWorkflowId: clonedWorkflow.id,
+        newWorkflowId: clonedWorkflow.id,
+        origin: 'workflow_list',
         error: undefined,
       });
 
@@ -278,6 +288,7 @@ export function useWorkflowActions() {
       const errorObj = err instanceof Error ? err : new Error(String(err));
       telemetry.reportWorkflowCloned({
         sourceWorkflowId: variables.id,
+        origin: 'workflow_list',
         error: errorObj,
       });
     },

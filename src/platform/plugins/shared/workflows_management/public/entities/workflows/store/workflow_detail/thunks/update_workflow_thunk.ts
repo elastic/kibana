@@ -17,7 +17,12 @@ import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry'
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { selectWorkflowDefinition, selectWorkflowId, selectYamlString } from '../selectors';
+import {
+  selectWorkflow,
+  selectWorkflowDefinition,
+  selectWorkflowId,
+  selectYamlString,
+} from '../selectors';
 import { setYamlString, updateWorkflow } from '../slice';
 
 export interface UpdateWorkflowParams {
@@ -58,16 +63,21 @@ export const updateWorkflowThunk = createAsyncThunk<
         body: JSON.stringify(workflow),
       });
 
+      // Get original workflow state for comparison
+      const originalWorkflow = selectWorkflow(state);
+
       // Report telemetry for successful update
-      // The telemetry service automatically determines which event to publish based on the update
+      // The telemetry service automatically determines editorType based on update fields
       telemetry?.reportWorkflowUpdated({
         workflowId: id,
         workflowUpdate: workflow,
         workflowDefinition: workflowDefinition || undefined,
-        hasValidationErrors: false, // TODO: Get from validation results if available
+        originalWorkflow: originalWorkflow?.definition || undefined,
+        hasValidationErrors: false,
         validationErrorCount: 0,
         isBulkAction: false,
         error: undefined,
+        origin: 'workflow_detail',
       });
 
       // Invalidate relevant queries from react-query cache
@@ -109,16 +119,18 @@ export const updateWorkflowThunk = createAsyncThunk<
       const errorObj = error instanceof Error ? error : new Error(errorMessage);
 
       // Report telemetry for failed update
-      // The telemetry service automatically determines which event to publish based on the update
       if (id) {
+        const originalWorkflow = selectWorkflow(state);
         telemetry?.reportWorkflowUpdated({
           workflowId: id,
           workflowUpdate: workflow,
           workflowDefinition: workflowDefinition || undefined,
-          hasValidationErrors: false, // TODO: Get from validation results if available
+          originalWorkflow: originalWorkflow?.definition || undefined,
+          hasValidationErrors: false,
           validationErrorCount: 0,
           isBulkAction: false,
           error: errorObj,
+          origin: 'workflow_detail',
         });
       }
 

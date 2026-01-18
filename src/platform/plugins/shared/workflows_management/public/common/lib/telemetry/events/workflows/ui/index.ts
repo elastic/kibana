@@ -11,13 +11,11 @@ import type { RootSchema } from '@kbn/core/public';
 import type {
   ReportWorkflowDetailViewedActionParams,
   ReportWorkflowListViewedActionParams,
-  ReportWorkflowSearchedActionParams,
-  WorkflowUIEventTypes,
 } from './types';
+import { WorkflowUIEventTypes } from './types';
 import type { WorkflowEditorType } from '../types';
 
 export const workflowUIEventNames = {
-  [WorkflowUIEventTypes.WorkflowSearched]: 'Workflow searched',
   [WorkflowUIEventTypes.WorkflowListViewed]: 'Workflow list viewed',
   [WorkflowUIEventTypes.WorkflowDetailViewed]: 'Workflow detail viewed',
 };
@@ -43,8 +41,22 @@ const editorTypeSchema: RootSchema<{ editorType?: WorkflowEditorType }> = {
   },
 };
 
-const workflowSearchedSchema: RootSchema<ReportWorkflowSearchedActionParams> = {
+const workflowListViewedSchema: RootSchema<ReportWorkflowListViewedActionParams> = {
   ...eventNameSchema,
+  workflowCount: {
+    type: 'integer',
+    _meta: {
+      description: 'Number of workflows in the list',
+      optional: false,
+    },
+  },
+  pageNumber: {
+    type: 'integer',
+    _meta: {
+      description: 'The page number being viewed',
+      optional: false,
+    },
+  },
   hasQuery: {
     type: 'boolean',
     _meta: {
@@ -60,35 +72,11 @@ const workflowSearchedSchema: RootSchema<ReportWorkflowSearchedActionParams> = {
     },
   },
   filterTypes: {
-    type: 'keyword',
+    type: 'array',
+    items: { type: 'keyword' },
     _meta: {
       description: 'Types of filters applied (e.g., enabled, createdBy)',
       optional: true,
-    },
-  },
-  resultCount: {
-    type: 'integer',
-    _meta: {
-      description: 'Number of results returned',
-      optional: false,
-    },
-  },
-};
-
-const workflowListViewedSchema: RootSchema<ReportWorkflowListViewedActionParams> = {
-  ...eventNameSchema,
-  workflowCount: {
-    type: 'integer',
-    _meta: {
-      description: 'Number of workflows in the list',
-      optional: false,
-    },
-  },
-  pageNumber: {
-    type: 'integer',
-    _meta: {
-      description: 'The page number being viewed',
-      optional: false,
     },
   },
 };
@@ -113,7 +101,6 @@ const workflowDetailViewedSchema: RootSchema<ReportWorkflowDetailViewedActionPar
 };
 
 export const workflowUIEventSchemas = {
-  [WorkflowUIEventTypes.WorkflowSearched]: workflowSearchedSchema,
   [WorkflowUIEventTypes.WorkflowListViewed]: workflowListViewedSchema,
   [WorkflowUIEventTypes.WorkflowDetailViewed]: workflowDetailViewedSchema,
 };

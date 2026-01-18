@@ -18,7 +18,7 @@ import {
 } from '../lib/telemetry/events/workflows';
 import type {
   WorkflowEditorType,
-  WorkflowUpdateType,
+  WorkflowTelemetryOrigin,
   WorkflowValidationErrorType,
 } from '../lib/telemetry/events/workflows/types';
 import type { TelemetryServiceStart } from '../lib/telemetry/types';
@@ -54,8 +54,9 @@ export class WorkflowsBaseTelemetry {
     error?: Error;
     editorType?: WorkflowEditorType;
     workflowDefinition?: Partial<WorkflowYaml> | null;
+    origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { workflowId, error, editorType, workflowDefinition } = params;
+    const { workflowId, error, editorType, workflowDefinition, origin } = params;
 
     // Extract metadata from workflow definition if provided
     const metadata = workflowDefinition ? extractWorkflowMetadata(workflowDefinition) : undefined;
@@ -64,6 +65,7 @@ export class WorkflowsBaseTelemetry {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowCreated],
       workflowId,
       ...(editorType && { editorType }),
+      ...(origin && { origin }),
       ...(metadata && {
         enabled: metadata.enabled,
         stepCount: metadata.stepCount,
@@ -79,35 +81,6 @@ export class WorkflowsBaseTelemetry {
       }),
       ...this.getBaseResultParams(error),
     });
-  };
-
-  /**
-   * Determines the update type from the workflow update object.
-   * This logic is centralized in the telemetry layer for better separation of concerns.
-   */
-  private determineUpdateType = (
-    workflow: Partial<{
-      yaml?: string;
-      enabled?: boolean;
-      tags?: unknown;
-      description?: string;
-      name?: string;
-    }>
-  ): WorkflowUpdateType => {
-    if (workflow.yaml !== undefined) {
-      return 'yaml';
-    }
-    if (workflow.enabled !== undefined) {
-      return 'enabled';
-    }
-    if (workflow.tags !== undefined) {
-      return 'tags';
-    }
-    if (workflow.description !== undefined) {
-      return 'description';
-    }
-    // name or other metadata fields
-    return 'metadata';
   };
 
   /**
@@ -127,68 +100,73 @@ export class WorkflowsBaseTelemetry {
       name?: string;
     }>;
     workflowDefinition?: Partial<WorkflowYaml> | null;
+    originalWorkflow?: Partial<WorkflowYaml> | null;
     hasValidationErrors: boolean;
     validationErrorCount: number;
     validationErrorTypes?: string[];
     error?: Error;
     editorType?: WorkflowEditorType;
     isBulkAction?: boolean;
+    origin?: WorkflowTelemetryOrigin;
   }) => {
     const {
       workflowId,
       workflowUpdate,
       workflowDefinition,
+      originalWorkflow,
       hasValidationErrors,
       validationErrorCount,
       validationErrorTypes,
       error,
       editorType,
       isBulkAction = false,
+      origin,
     } = params;
 
-    // For enable/disable actions, use the specific event instead of the general update event
-    if (workflowUpdate.enabled !== undefined) {
-      this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged, {
-        eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
-        workflowId,
-        enabled: workflowUpdate.enabled,
-        isBulkAction,
-        ...(editorType && { editorType }),
-        ...this.getBaseResultParams(error),
-      });
-      return;
+    // Check if enabled changed (directly or via YAML update)
+    const enabledChanged =
+      workflowUpdate.enabled !== undefined ||
+      (workflowUpdate.yaml !== undefined &&
+        originalWorkflow?.enabled !== undefined &&
+        workflowDefinition?.enabled !== undefined &&
+        originalWorkflow.enabled !== workflowDefinition.enabled);
+
+    // Determine editorType: 'yaml' if yaml is in update, otherwise use provided or default to 'ui'
+    const finalEditorType: WorkflowEditorType | undefined =
+      workflowUpdate.yaml !== undefined
+        ? 'yaml'
+        : editorType || (origin === 'workflow_detail' ? 'ui' : undefined);
+
+    // Build updatedFields list (simple: just the keys in workflowUpdate)
+    const updatedFields = Object.keys(workflowUpdate);
+
+    // Report enabled state changed event if enabled was modified
+    if (enabledChanged) {
+      const enabledValue = workflowUpdate.enabled ?? workflowDefinition?.enabled;
+      if (enabledValue !== undefined) {
+        this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged, {
+          eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
+          workflowId,
+          enabled: enabledValue,
+          isBulkAction,
+          ...(finalEditorType && { editorType: finalEditorType }),
+          ...(origin && { origin }),
+          ...this.getBaseResultParams(error),
+        });
+        return;
+      }
     }
 
-    // For all other updates, use the general update event
-    // Determine update type from the update object (centralized in telemetry layer)
-    const updateType = this.determineUpdateType(workflowUpdate);
-
-    // Extract metadata if workflow definition is provided
-    const metadata = workflowDefinition ? extractWorkflowMetadata(workflowDefinition) : undefined;
-
+    // Report general workflow updated event
     this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowUpdated, {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowUpdated],
       workflowId,
-      updateType,
       hasValidationErrors,
       validationErrorCount,
       ...(validationErrorTypes && { validationErrorTypes }),
-      ...(editorType && { editorType }),
-      ...(metadata && {
-        enabled: metadata.enabled,
-        stepCount: metadata.stepCount,
-        connectorTypes: metadata.connectorTypes,
-        stepTypeCounts: metadata.stepTypeCounts,
-        hasScheduledTriggers: metadata.hasScheduledTriggers,
-        hasAlertTriggers: metadata.hasAlertTriggers,
-        inputCount: metadata.inputCount,
-        triggerCount: metadata.triggerCount,
-        hasTimeout: metadata.hasTimeout,
-        hasConcurrency: metadata.hasConcurrency,
-        concurrencyMax: metadata.concurrencyMax,
-        concurrencyStrategy: metadata.concurrencyStrategy,
-        hasOnFailure: metadata.hasOnFailure,
-      }),
+      ...(finalEditorType && { editorType: finalEditorType }),
+      ...(origin && { origin }),
+      ...(updatedFields.length > 0 && { updatedFields }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -201,12 +179,14 @@ export class WorkflowsBaseTelemetry {
     workflowIds: string[];
     isBulkDelete: boolean;
     error?: Error;
+    origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { workflowIds, isBulkDelete, error } = params;
+    const { workflowIds, isBulkDelete, error, origin } = params;
     this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowDeleted, {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowDeleted],
       workflowIds,
       isBulkDelete,
+      ...(origin && { origin }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -220,13 +200,15 @@ export class WorkflowsBaseTelemetry {
     newWorkflowId?: string;
     error?: Error;
     editorType?: WorkflowEditorType;
+    origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { sourceWorkflowId, newWorkflowId, error, editorType } = params;
+    const { sourceWorkflowId, newWorkflowId, error, editorType, origin } = params;
     this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowCloned, {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowCloned],
       sourceWorkflowId,
       ...(newWorkflowId && { newWorkflowId }),
       ...(editorType && { editorType }),
+      ...(origin && { origin }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -241,14 +223,16 @@ export class WorkflowsBaseTelemetry {
     isBulkAction: boolean;
     error?: Error;
     editorType?: WorkflowEditorType;
+    origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { workflowId, enabled, isBulkAction, error, editorType } = params;
+    const { workflowId, enabled, isBulkAction, error, editorType, origin } = params;
     this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged, {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
       workflowId,
       enabled,
       isBulkAction,
       ...(editorType && { editorType }),
+      ...(origin && { origin }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -267,8 +251,9 @@ export class WorkflowsBaseTelemetry {
     workflowId?: string;
     validationResults: YamlValidationResult[];
     editorType?: WorkflowEditorType;
+    origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { workflowId, validationResults, editorType } = params;
+    const { workflowId, validationResults, editorType, origin } = params;
 
     // Filter for errors only
     const errorResults = validationResults.filter((result) => result.severity === 'error');
@@ -303,6 +288,7 @@ export class WorkflowsBaseTelemetry {
         errorTypes,
         errorCount,
         ...(editorType && { editorType }),
+        ...(origin && { origin }),
       });
 
       // Track reported errors for this workflow
@@ -337,14 +323,16 @@ export class WorkflowsBaseTelemetry {
     inputCount: number;
     error?: Error;
     editorType?: WorkflowEditorType;
+    origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { workflowId, hasInputs, inputCount, error, editorType } = params;
+    const { workflowId, hasInputs, inputCount, error, editorType, origin } = params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowTestRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowTestRunInitiated],
       ...(workflowId && { workflowId }),
       hasInputs,
       inputCount,
       ...(editorType && { editorType }),
+      ...(origin && { origin }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -361,8 +349,9 @@ export class WorkflowsBaseTelemetry {
     stepId: string;
     error?: Error;
     editorType?: WorkflowEditorType;
+    origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { workflowYaml, stepId, error, editorType } = params;
+    const { workflowYaml, stepId, error, editorType, origin } = params;
 
     // Extract step information from workflow YAML
     const stepInfo = workflowYaml ? extractStepInfoFromWorkflowYaml(workflowYaml, stepId) : null;
@@ -378,6 +367,7 @@ export class WorkflowsBaseTelemetry {
       stepType,
       ...(connectorType && { connectorType }),
       ...(editorType && { editorType }),
+      ...(origin && { origin }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -392,14 +382,16 @@ export class WorkflowsBaseTelemetry {
     inputCount: number;
     error?: Error;
     editorType?: WorkflowEditorType;
+    origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { workflowId, hasInputs, inputCount, error, editorType } = params;
+    const { workflowId, hasInputs, inputCount, error, editorType, origin } = params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunInitiated],
       workflowId,
       hasInputs,
       inputCount,
       ...(editorType && { editorType }),
+      ...(origin && { origin }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -407,14 +399,15 @@ export class WorkflowsBaseTelemetry {
   // UI interaction actions
 
   /**
-   * Reports a workflow search action.
-   * The telemetry service extracts filter information from the search params.
+   * Reports a workflow list page view.
+   * This event tracks list page views, pagination, and search/filter usage patterns.
    */
-  reportWorkflowSearched = (params: {
+  reportWorkflowListViewed = (params: {
+    workflowCount: number;
+    pageNumber: number;
     search: { query?: string; [key: string]: unknown };
-    resultCount: number;
   }) => {
-    const { search, resultCount } = params;
+    const { workflowCount, pageNumber, search } = params;
 
     // Extract query and filter information
     const hasQuery = Boolean(search.query);
@@ -427,24 +420,13 @@ export class WorkflowsBaseTelemetry {
       .map(([key]) => key);
     const hasFilters = filterTypes.length > 0;
 
-    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowSearched, {
-      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowSearched],
-      hasQuery,
-      hasFilters,
-      ...(filterTypes.length > 0 && { filterTypes }),
-      resultCount,
-    });
-  };
-
-  /**
-   * Reports a workflow list page view.
-   */
-  reportWorkflowListViewed = (params: { workflowCount: number; pageNumber: number }) => {
-    const { workflowCount, pageNumber } = params;
     this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowListViewed, {
       eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowListViewed],
       workflowCount,
       pageNumber,
+      hasQuery,
+      hasFilters,
+      ...(filterTypes.length > 0 && { filterTypes }),
     });
   };
 

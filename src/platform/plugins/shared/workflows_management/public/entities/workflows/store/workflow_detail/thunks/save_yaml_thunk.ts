@@ -17,7 +17,12 @@ import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry'
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { selectWorkflowDefinition, selectWorkflowId, selectYamlString } from '../selectors';
+import {
+  selectWorkflow,
+  selectWorkflowDefinition,
+  selectWorkflowId,
+  selectYamlString,
+} from '../selectors';
 import { setWorkflow } from '../slice';
 
 export type SaveYamlParams = void;
@@ -31,21 +36,30 @@ export const saveYamlThunk = createAsyncThunk<
   'detail/saveYamlThunk',
   async (_, { getState, dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications, application } = services;
+
+    // Initialize telemetry
+    // Access workflowsManagement from services (it's added in createWorkflowsStartServices)
+    // The services object should have workflowsManagement at runtime, even though TypeScript doesn't know about it
+    const workflowsManagement = (
+      services as WorkflowsServices & {
+        workflowsManagement?: { telemetry?: TelemetryServiceStart };
+      }
+    ).workflowsManagement;
+
+    // Always create telemetry instance - use real service if available, otherwise no-op
+    const telemetry = workflowsManagement?.telemetry
+      ? new WorkflowsBaseTelemetry(workflowsManagement.telemetry)
+      : new WorkflowsBaseTelemetry({
+          reportEvent: () => {
+            // No-op if telemetry service is not available
+          },
+        });
+
     try {
       const state = getState();
       const yamlString = selectYamlString(state);
       const workflowDefinition = selectWorkflowDefinition(state);
       const id = selectWorkflowId(state);
-
-      // Initialize telemetry
-      const workflowsManagement = (
-        services as WorkflowsServices & {
-          workflowsManagement?: { telemetry?: TelemetryServiceStart };
-        }
-      ).workflowsManagement;
-      const telemetry = workflowsManagement?.telemetry
-        ? new WorkflowsBaseTelemetry(workflowsManagement.telemetry)
-        : null;
 
       if (!yamlString) {
         return rejectWithValue('No YAML content to save');
@@ -57,12 +71,21 @@ export const saveYamlThunk = createAsyncThunk<
           body: JSON.stringify({ yaml: yamlString }),
         });
 
+        // Get original workflow state for comparison
+        const originalWorkflow = selectWorkflow(state);
+
         // Report telemetry for workflow update
-        telemetry?.reportWorkflowUpdated({
+        // The telemetry service automatically determines editorType ('yaml' when yaml is in update)
+        telemetry.reportWorkflowUpdated({
           workflowId: id,
-          updateType: 'yaml',
+          workflowUpdate: { yaml: yamlString },
           workflowDefinition: workflowDefinition || undefined,
+          originalWorkflow: originalWorkflow?.definition || undefined,
+          hasValidationErrors: false,
+          validationErrorCount: 0,
+          isBulkAction: false,
           error: undefined,
+          origin: 'workflow_detail',
         });
 
         // For consistency, dispatch the loadWorkflow thunk to update the workflow in the store to the latest version from the API
@@ -74,11 +97,12 @@ export const saveYamlThunk = createAsyncThunk<
         });
 
         // Report telemetry for workflow creation
-        telemetry?.reportWorkflowCreated({
+        telemetry.reportWorkflowCreated({
           workflowId: workflow.id,
           workflowDefinition: workflowDefinition || undefined,
           error: undefined,
           editorType: 'yaml', // Saving YAML always comes from YAML editor
+          origin: 'workflow_detail',
         });
 
         // Update the workflow in the store
@@ -102,19 +126,29 @@ export const saveYamlThunk = createAsyncThunk<
       const errorMessage = error.body?.message || error.message || 'Failed to save workflow';
       const errorObj = error instanceof Error ? error : new Error(errorMessage);
 
+      const errorState = getState();
+      const errorWorkflowDefinition = selectWorkflowDefinition(errorState);
+      const errorYamlString = selectYamlString(errorState);
+      const errorOriginalWorkflow = selectWorkflow(errorState);
+
       // Report telemetry for failed operation
       if (id) {
-        telemetry?.reportWorkflowUpdated({
+        telemetry.reportWorkflowUpdated({
           workflowId: id,
-          updateType: 'yaml',
-          workflowDefinition: workflowDefinition || undefined,
+          workflowUpdate: { yaml: errorYamlString },
+          workflowDefinition: errorWorkflowDefinition || undefined,
+          originalWorkflow: errorOriginalWorkflow?.definition || undefined,
+          hasValidationErrors: false,
+          validationErrorCount: 0,
+          isBulkAction: false,
           error: errorObj,
+          origin: 'workflow_detail',
         });
       } else {
-        telemetry?.reportWorkflowCreated({
-          workflowDefinition: workflowDefinition || undefined,
+        telemetry.reportWorkflowCreated({
+          workflowDefinition: errorWorkflowDefinition || undefined,
           error: errorObj,
-          editorType: 'yaml',
+          origin: 'workflow_detail',
         });
       }
 

@@ -12,8 +12,8 @@ import type {
   ReportWorkflowRunInitiatedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
   ReportWorkflowTestRunInitiatedActionParams,
-  WorkflowExecutionEventTypes,
 } from './types';
+import { WorkflowExecutionEventTypes } from './types';
 import type { BaseResultActionParams, WorkflowEditorType } from '../types';
 
 export const workflowExecutionEventNames = {
@@ -39,6 +39,13 @@ const baseResultActionSchema: RootSchema<BaseResultActionParams> = {
       optional: true,
     },
   },
+  origin: {
+    type: 'keyword',
+    _meta: {
+      description: 'Origin of the action: workflow_list or workflow_detail',
+      optional: true,
+    },
+  },
 };
 
 const eventNameSchema: RootSchema<{ eventName: string }> = {
@@ -56,7 +63,7 @@ const editorTypeSchema: RootSchema<{ editorType?: WorkflowEditorType }> = {
     type: 'keyword',
     _meta: {
       description:
-        'The editor type(s) visible/active when the action was performed. Only present when action originates from workflow detail page. Can be: yaml, visual, both, or execution_graph.',
+        'The editor type(s) visible/active when the action was performed. Only present when action originates from workflow detail page. Can be: yaml, visual, both, execution_graph, or ui.',
       optional: true,
     },
   },

@@ -14,8 +14,8 @@ import type {
   ReportWorkflowDeletedActionParams,
   ReportWorkflowEnabledStateChangedActionParams,
   ReportWorkflowUpdatedActionParams,
-  WorkflowLifecycleEventTypes,
 } from './types';
+import { WorkflowLifecycleEventTypes } from './types';
 import type { BaseResultActionParams, WorkflowEditorType } from '../types';
 
 export const workflowLifecycleEventNames = {
@@ -43,6 +43,13 @@ const baseResultActionSchema: RootSchema<BaseResultActionParams> = {
       optional: true,
     },
   },
+  origin: {
+    type: 'keyword',
+    _meta: {
+      description: 'Origin of the action: workflow_list or workflow_detail',
+      optional: true,
+    },
+  },
 };
 
 const eventNameSchema: RootSchema<{ eventName: string }> = {
@@ -60,7 +67,7 @@ const editorTypeSchema: RootSchema<{ editorType?: WorkflowEditorType }> = {
     type: 'keyword',
     _meta: {
       description:
-        'The editor type(s) visible/active when the action was performed. Only present when action originates from workflow detail page. Can be: yaml, visual, both, or execution_graph.',
+        'The editor type(s) visible/active when the action was performed. Only present when action originates from workflow detail page. Can be: yaml, visual, both, execution_graph, or ui.',
       optional: true,
     },
   },
@@ -166,13 +173,6 @@ const workflowUpdatedSchema: RootSchema<ReportWorkflowUpdatedActionParams> = {
       optional: false,
     },
   },
-  updateType: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of update: yaml, metadata, enabled, tags, or description',
-      optional: false,
-    },
-  },
   hasValidationErrors: {
     type: 'boolean',
     _meta: {
@@ -192,6 +192,17 @@ const workflowUpdatedSchema: RootSchema<ReportWorkflowUpdatedActionParams> = {
     _meta: {
       description:
         'Types of validation errors encountered (e.g., schema_error, step_name_duplicate)',
+      optional: true,
+    },
+  },
+  updatedFields: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+    },
+    _meta: {
+      description:
+        'List of field names that were updated (e.g., yaml, name, description, tags). Note: enabled changes are reported in a separate event.',
       optional: true,
     },
   },
@@ -260,6 +271,13 @@ const workflowEnabledStateChangedSchema: RootSchema<ReportWorkflowEnabledStateCh
       _meta: {
         description: 'Whether this is a bulk operation',
         optional: false,
+      },
+    },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description: 'Origin of the update action: workflow_list or workflow_detail',
+        optional: true,
       },
     },
   };

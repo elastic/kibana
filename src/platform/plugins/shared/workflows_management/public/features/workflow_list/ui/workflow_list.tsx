@@ -57,9 +57,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       telemetry.reportWorkflowListViewed({
         workflowCount: workflows.results.length,
         pageNumber: search.page || 1,
+        search,
       });
     }
-  }, [isLoadingWorkflows, workflows, search.page, telemetry]);
+  }, [isLoadingWorkflows, workflows, search, telemetry]);
 
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
   const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
