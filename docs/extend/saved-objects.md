@@ -297,6 +297,44 @@ const myType: SavedObjectsType = {
 };
 ```
 
+### Transitioning legacy Saved Objects
+
+If you are updating a legacy Saved Object (SO) type that lacks a model version, you must first establish a baseline. This requires a two-step PR process to ensure that Serverless environments can be safely rolled back in an emergency.
+
+#### The Initial Version PR
+
+The first PR must define the **current, existing shape** of the Saved Object.
+
+- No Mapping Changes: The initial version must not alter any existing mappings; it should only introduce the required schemas.
+- Deployment Requirement: This PR must be merged and released in Serverless before you submit a second PR with your desired changes.
+
+#### Schema definition
+
+While you can use a minimal configuration for the initial version, we recommend defining `create` and `forwardCompatibility` schemas that closely reflect your SO’s current structure. This enables full **Saved Objects Repository (SOR)** validation for both creation and retrieval.
+
+#### Minimal configuration example
+
+```ts
+const myType: SavedObjectsType = {
+  ...
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        create: schema.object({}, { unknowns: 'allow' }),
+        forwardCompatibility: (attrs) => _.pick([
+          'knownField1',
+          'knownField2',
+          ...
+          'knownFieldN',
+        ]),
+      },
+    },
+  ...
+```
+
+If your Saved Object type was defining `schemas:` along with the legacy `migrations:`, you can simply use the latest schema for the initial version.
+
 ## Structure of a model version [_structure_of_a_model_version]
 
 [Model versions](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L12-L20) are not just functions as the previous migrations were, but structured objects describing how the version behaves and what changed since the last one.

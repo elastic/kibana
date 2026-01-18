@@ -328,4 +328,45 @@ describe('ServiceCard', () => {
       expect(screen.queryByTestId('serviceCardSubscriptionMessage')).not.toBeInTheDocument();
     });
   });
+
+  describe('License requirements', () => {
+    it('should show license message when license is invalid and service is unsupported', () => {
+      renderWithIntl(
+        <ServiceCard
+          {...defaultProps}
+          supported={false}
+          validLicenseTypes={['enterprise', 'platinum']}
+          currentLicenseType="basic"
+        />
+      );
+
+      expect(screen.getByTestId('serviceCardLicenseMessage')).toBeInTheDocument();
+    });
+
+    it('should not show license message when license is valid', () => {
+      renderWithIntl(
+        <ServiceCard
+          {...defaultProps}
+          supported={true}
+          validLicenseTypes={['enterprise', 'platinum']}
+          currentLicenseType="enterprise"
+        />
+      );
+
+      expect(screen.queryByTestId('serviceCardLicenseMessage')).not.toBeInTheDocument();
+    });
+
+    it('should handle multiple license types in message', () => {
+      renderWithIntl(
+        <ServiceCard
+          {...defaultProps}
+          supported={false}
+          validLicenseTypes={['enterprise', 'platinum', 'gold']}
+          currentLicenseType="basic"
+        />
+      );
+
+      expect(screen.getByTestId('serviceCardLicenseMessage')).toBeInTheDocument();
+    });
+  });
 });

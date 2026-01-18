@@ -15,6 +15,8 @@
       "label": "SampleDataIngestPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -41,6 +43,8 @@
         ", \"install\" | \"getStatus\">"
       ],
       "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -55,6 +59,8 @@
             "(indexName: string) => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
+          "lineNumber": 16,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -69,6 +75,8 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
+              "lineNumber": 16,
+              "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -87,6 +95,8 @@
             "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
           ],
           "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
+          "lineNumber": 17,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -125,6 +135,8 @@
           ") => string"
         ],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/utils.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -145,6 +157,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/utils.ts",
+            "lineNumber": 11,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -174,6 +188,8 @@
           "SampleDataResponse"
         ],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -195,6 +211,8 @@
               ".Installed"
             ],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -206,6 +224,8 @@
             "label": "indexName",
             "description": [],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -217,6 +237,8 @@
             "label": "dashboardId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -242,6 +264,8 @@
           "SampleDataResponse"
         ],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -263,6 +287,8 @@
               ".Installing"
             ],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -274,6 +300,8 @@
             "label": "taskId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -288,6 +316,8 @@
         "label": "StatusResponse",
         "description": [],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -308,6 +338,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -322,6 +354,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -336,6 +370,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -350,6 +386,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -364,6 +402,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -380,6 +420,8 @@
         "label": "InstallationStatus",
         "description": [],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -394,6 +436,8 @@
         "label": "DatasetSampleType",
         "description": [],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -409,6 +453,8 @@
           "\"kibana_sample_data_\""
         ],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -424,6 +470,8 @@
           "\"/internal/sample_data_ingest/install\""
         ],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/routes.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -441,6 +489,8 @@
           "\".elser-2-elasticsearch\""
         ],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -456,6 +506,8 @@
           "\"enterprise\""
         ],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -471,6 +523,8 @@
           "\"/internal/sample_data_ingest/status\""
         ],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/routes.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

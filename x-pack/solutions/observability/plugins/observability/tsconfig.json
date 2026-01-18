@@ -146,7 +146,8 @@
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
     "@kbn/observability-agent-builder-plugin",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/kql",
   ],
   "exclude": ["target/**/*"]
 }

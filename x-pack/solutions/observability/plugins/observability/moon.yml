@@ -152,6 +152,7 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/code-editor'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod
