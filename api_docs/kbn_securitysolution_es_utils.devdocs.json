@@ -36,6 +36,8 @@
           " extends Error"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/bad_request_error/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -56,6 +58,8 @@
           ", index: string) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/create_boostrap_index/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -70,6 +74,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/create_boostrap_index/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,6 +91,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/create_boostrap_index/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -108,6 +116,8 @@
           ", name: string) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/create_data_stream/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +132,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/create_data_stream/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -137,6 +149,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/create_data_stream/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -156,6 +170,8 @@
           "(version: string | undefined) => {} | { ifSeqNo: number; ifPrimaryTerm: number; }"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/decode_version/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -170,6 +186,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/decode_version/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -191,6 +209,8 @@
           ", pattern: string, specifyAlias?: boolean, maxAttempts?: number) => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -205,6 +225,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -220,6 +242,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -235,6 +259,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -250,6 +276,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -273,6 +301,8 @@
           ", name: string) => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_data_stream/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -287,6 +317,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_data_stream/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -302,6 +334,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_data_stream/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -323,6 +357,8 @@
           ", name: string) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_index_template/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -337,6 +373,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_index_template/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -352,6 +390,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_index_template/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -373,6 +413,8 @@
           ", name: string) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_policy/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -387,6 +429,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_policy/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -402,6 +446,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_policy/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -423,6 +469,8 @@
           ", name: string) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_template/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -437,6 +485,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_template/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -452,6 +502,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/delete_template/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -473,6 +525,8 @@
           "<T>(hit: T) => string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/encode_hit_version/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -487,6 +541,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/encode_hit_version/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -510,6 +566,8 @@
           ", index: string) => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -526,6 +584,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -543,6 +603,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -566,6 +628,8 @@
           ", name: string) => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_data_stream_exists/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -580,6 +644,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_data_stream_exists/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -595,6 +661,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_data_stream_exists/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -618,6 +686,8 @@
           "; alias: string; index?: string | undefined; }) => Promise<IndexAlias[]>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -629,6 +699,8 @@
             "label": "{\n  esClient,\n  alias,\n  index,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1625,6 +1697,8 @@
                   "; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
+                "lineNumber": 32,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1636,6 +1710,8 @@
                 "label": "alias",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
+                "lineNumber": 33,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1650,6 +1726,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
+                "lineNumber": 34,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1676,6 +1754,8 @@
           "; index: string; }) => Promise<number>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_count/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1687,6 +1767,8 @@
             "label": "{\n  esClient,\n  index,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_count/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2683,6 +2765,8 @@
                   "; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_count/index.ts",
+                "lineNumber": 24,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2694,6 +2778,8 @@
                 "label": "index",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_count/index.ts",
+                "lineNumber": 25,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2718,6 +2804,8 @@
           ", index: string) => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_exists/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2732,6 +2820,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_exists/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2747,6 +2837,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_exists/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2768,6 +2860,8 @@
           ", template: string) => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_template_exists/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2782,6 +2876,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_template_exists/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2797,6 +2893,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_index_template_exists/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2818,6 +2916,8 @@
           ", name: string) => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_policy_exists/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2832,6 +2932,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_policy_exists/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2847,6 +2949,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_policy_exists/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2868,6 +2972,8 @@
           ", template: string) => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_template_exists/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2882,6 +2988,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_template_exists/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2897,6 +3005,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/get_template_exists/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2920,6 +3030,8 @@
           ", name: string) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/migrate_to_data_stream/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2934,6 +3046,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/migrate_to_data_stream/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2949,6 +3063,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/migrate_to_data_stream/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2974,6 +3090,8 @@
           ">) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2988,6 +3106,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3003,6 +3123,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3020,6 +3142,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3041,6 +3165,8 @@
           ", index: string) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/read_index/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3055,6 +3181,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/read_index/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3070,6 +3198,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/read_index/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3091,6 +3221,8 @@
           ", index: string) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/read_privileges/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3105,6 +3237,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/read_privileges/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3120,6 +3254,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/read_privileges/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3143,6 +3279,8 @@
           ", alias: string) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/remove_aliases/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3157,6 +3295,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/remove_aliases/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3174,6 +3314,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/remove_aliases/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3195,6 +3337,8 @@
           ", index: string) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/remove_policy_from_index/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3209,6 +3353,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/remove_policy_from_index/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3224,6 +3370,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/remove_policy_from_index/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3245,6 +3393,8 @@
           ", name: string, body: Record<string, unknown>) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3259,6 +3409,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3274,6 +3426,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3289,6 +3443,8 @@
               "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3310,6 +3466,8 @@
           ", name: string, body: Record<string, unknown>) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_policy/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3324,6 +3482,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_policy/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3339,6 +3499,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_policy/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3354,6 +3516,8 @@
               "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_policy/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3375,6 +3539,8 @@
           ", name: string, body: Record<string, unknown>) => Promise<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_template/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3389,6 +3555,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_template/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3404,6 +3572,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_template/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3419,6 +3589,8 @@
               "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/set_template/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3447,6 +3619,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/transform_error/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3463,6 +3637,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/transform_error/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3481,6 +3657,8 @@
         "label": "OutputError",
         "description": [],
         "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/transform_error/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3492,6 +3670,8 @@
             "label": "message",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/transform_error/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3503,6 +3683,8 @@
             "label": "statusCode",
             "description": [],
             "path": "src/platform/packages/shared/kbn-securitysolution-es-utils/src/transform_error/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
