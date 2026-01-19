@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiBadge,

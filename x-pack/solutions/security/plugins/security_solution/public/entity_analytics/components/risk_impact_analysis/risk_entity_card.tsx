@@ -43,9 +43,7 @@ export const RiskEntityCard: React.FC<RiskEntityCardProps> = ({ entity }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {entity.riskLevel && (
-            <EuiBadge color={colors?.badgeColor}>
-              {entity.riskLevel.toUpperCase()}
-            </EuiBadge>
+            <EuiBadge color={colors?.badgeColor}>{entity.riskLevel.toUpperCase()}</EuiBadge>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -99,7 +97,8 @@ export const RiskEntityCard: React.FC<RiskEntityCardProps> = ({ entity }) => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">
-                  <strong>{contributor.category}</strong>: {contributor.alertCount} alerts (score: {contributor.score.toFixed(1)})
+                  <strong>{contributor.category}</strong>: {contributor.alertCount} alerts (score:{' '}
+                  {contributor.score.toFixed(1)})
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

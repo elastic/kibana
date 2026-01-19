@@ -11,16 +11,14 @@ import type { RiskSeverity } from '../../../../common/search_strategy';
  * Helper function to get risk score colors based on risk level
  * Returns color name for EuiHealth and badge color
  */
-export const getRiskScoreColors = (
-  level?: RiskSeverity
-): { color: string; badgeColor: string } => {
+export const getRiskScoreColors = (level?: RiskSeverity): { color: string; badgeColor: string } => {
   if (!level) {
     return {
       color: 'subdued',
       badgeColor: 'default',
     };
   }
-  
+
   switch (level) {
     case 'Unknown':
       return {

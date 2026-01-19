@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../common/lib/kibana';
 import { RISK_IMPACT_URL } from '../../../../common/entity_analytics/risk_impact/constants';
 import type { ProactiveRiskAnalysisResponse } from '../../../../common/entity_analytics/risk_impact/types';

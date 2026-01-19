@@ -8,10 +8,6 @@
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { riskImpactRoute } from './risk_impact_route';
 
-export const registerRiskImpactRoutes = ({
-  router,
-  logger,
-  config,
-}: EntityAnalyticsRoutesDeps) => {
+export const registerRiskImpactRoutes = ({ router, logger, config }: EntityAnalyticsRoutesDeps) => {
   riskImpactRoute(router, logger);
 };

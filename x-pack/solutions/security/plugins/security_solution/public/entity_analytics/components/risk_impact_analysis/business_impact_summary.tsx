@@ -30,8 +30,7 @@ export const BusinessImpactSummary: React.FC<BusinessImpactSummaryProps> = ({
   impact,
   forecast,
 }) => {
-  const hasHighImpact =
-    (forecast?.projectedBurnRate ?? 0) > 10 || forecast?.confidence === 'high';
+  const hasHighImpact = (forecast?.projectedBurnRate ?? 0) > 10 || forecast?.confidence === 'high';
 
   return (
     <EuiPanel hasBorder paddingSize="l">
@@ -48,6 +47,7 @@ export const BusinessImpactSummary: React.FC<BusinessImpactSummaryProps> = ({
       {hasHighImpact && forecast.timeToBreach && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.riskImpact.criticalWarning"
@@ -111,7 +111,9 @@ export const BusinessImpactSummary: React.FC<BusinessImpactSummaryProps> = ({
           <EuiStat
             title={
               forecast?.currentBurnRate != null && forecast?.projectedBurnRate != null
-                ? `${forecast.currentBurnRate.toFixed(1)}x → ${forecast.projectedBurnRate.toFixed(1)}x`
+                ? `${forecast.currentBurnRate.toFixed(1)}x → ${forecast.projectedBurnRate.toFixed(
+                    1
+                  )}x`
                 : 'N/A'
             }
             description={

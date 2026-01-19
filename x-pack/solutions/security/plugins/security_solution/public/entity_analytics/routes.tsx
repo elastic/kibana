@@ -184,11 +184,7 @@ const EntityRiskImpactWrapper = () => (
 const EntityRiskImpactContainer: React.FC = React.memo(() => {
   return (
     <Routes>
-      <Route
-        path={ENTITY_ANALYTICS_RISK_IMPACT_PATH}
-        exact
-        component={EntityRiskImpactWrapper}
-      />
+      <Route path={ENTITY_ANALYTICS_RISK_IMPACT_PATH} exact component={EntityRiskImpactWrapper} />
       <Route component={NotFoundPage} />
     </Routes>
   );

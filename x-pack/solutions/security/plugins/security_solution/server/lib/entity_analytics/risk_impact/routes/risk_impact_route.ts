@@ -8,13 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
-import {
-  RISK_IMPACT_URL,
-} from '../../../../../common/entity_analytics/risk_impact/constants';
-import type {
-  RiskImpactAnalysisRequest,
-  ProactiveRiskAnalysisResponse,
-} from '../../../../../common/entity_analytics/risk_impact/types';
+import { RISK_IMPACT_URL } from '../../../../../common/entity_analytics/risk_impact/constants';
 import { APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { getRiskImpactMockData, getAllMockEntities } from '../get_risk_impact_mock_data';
