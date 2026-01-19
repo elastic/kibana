@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const formatPrivileges = (privileges: string[]) => privileges.map((p) => `'${p}'`).join(', ');
 
-  describe('@ess @serverless Endpoint Artifacts role backwards compatibility', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint Artifacts role backwards compatibility', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
     const config = getService('config');
     const isServerless = config.get('serverless');
