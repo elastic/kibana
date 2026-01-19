@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core-http-request-handler-context-server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { AssetManager } from './domain/asst_manager';
 import type { FeatureFlags } from './infra/feature_flags';
 
@@ -38,3 +39,5 @@ export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
 }>;
 
 export type EntityStorePluginRouter = IRouter<EntityStoreRequestHandlerContext>;
+
+export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, void>;
