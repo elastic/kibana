@@ -696,6 +696,8 @@ describe('Alerts Client', () => {
           alertsClient.determineFlappingAlerts();
           alertsClient.determineDelayedAlerts({ ...determineDelayedAlertsOpts, alertDelay: 3 });
 
+          await alertsClient.persistAlerts();
+
           expect(alert.isDelayed()).toBe(true);
         });
 

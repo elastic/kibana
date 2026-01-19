@@ -233,7 +233,7 @@ describe('determineDelayedAlerts', () => {
       trackedActiveAlerts: {},
       recoveredAlerts: { '1': alert1, '2': alert2 },
       trackedRecoveredAlerts: { '1': alert1, '2': alert2 },
-      delayedAlerts: {},
+      delayedAlerts: { '1': alert1 },
       alertDelay: 5,
       startedAt: null,
       ruleRunMetricsStore,
