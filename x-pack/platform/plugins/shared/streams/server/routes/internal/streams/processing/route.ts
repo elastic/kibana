@@ -6,7 +6,12 @@
  */
 
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { flattenRecord, namedFieldDefinitionConfigSchema } from '@kbn/streams-schema';
+import {
+  flattenRecord,
+  isEnabledFailureStore,
+  namedFieldDefinitionConfigSchema,
+} from '@kbn/streams-schema';
+import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { z } from '@kbn/zod';
 import { streamlangDSLSchema } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
@@ -14,7 +19,7 @@ import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
 import { STREAMS_API_PRIVILEGES, STREAMS_TIERED_ML_FEATURE } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
-import { checkAccess } from '../../../../lib/streams/stream_crud';
+import { checkAccess, getFailureStore } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
 import type { ProcessingSimulationParams } from './simulation_handler';
 import { simulateProcessing } from './simulation_handler';
@@ -261,6 +266,15 @@ export const failureStoreSamplesRoute = createServerRoute({
       throw new SecurityError(
         `Cannot read failure store for stream ${params.path.name}, insufficient privileges`
       );
+    }
+
+    // Check if failure store is enabled for this stream
+    const dataStream = await streamsClient.getDataStream(params.path.name);
+    const effectiveFailureStore = getFailureStore({
+      dataStream: dataStream as DataStreamWithFailureStore,
+    });
+    if (!isEnabledFailureStore(effectiveFailureStore)) {
+      throw new SecurityError(`Failure store is not enabled for stream ${params.path.name}`);
     }
 
     return getFailureStoreSamples({ params, scopedClusterClient, streamsClient });
