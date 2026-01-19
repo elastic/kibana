@@ -29,10 +29,10 @@ const INTERNAL_INFERENCE_CONNECTORS = [
   'OpenAI-GPT-OSS-20B',
   'OpenAI-o4',
   'OpenAI-o4-Mini',
-  'Google-Gemini-3-0-Pro',
-  'Google-Gemini-3-0-Flash',
   'Google-Gemini-2-5-Pro',
   'Google-Gemini-2-5-Flash',
+  'Google-Gemini-3-0-Pro',
+  'Google-Gemini-3-0-Flash',
 ];
 const INTERNAL_CONNECTORS = [...INTERNAL_CLOUD_CONNECTORS, ...INTERNAL_INFERENCE_CONNECTORS];
 

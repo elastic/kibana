@@ -37,10 +37,10 @@ export const INTERNAL_INFERENCE_CONNECTORS = [
   'OpenAI-GPT-OSS-20B',
   'OpenAI-o4',
   'OpenAI-o4-Mini',
-  'Google-Gemini-3-0-Pro',
-  'Google-Gemini-3-0-Flash',
   'Google-Gemini-2-5-Pro',
   'Google-Gemini-2-5-Flash',
+  'Google-Gemini-3-0-Pro',
+  'Google-Gemini-3-0-Flash',
 ];
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
