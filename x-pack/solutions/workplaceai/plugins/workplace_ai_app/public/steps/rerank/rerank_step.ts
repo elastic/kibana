@@ -32,15 +32,15 @@ export const createRerankStepDefinition = (core: CoreSetup) => {
         default: icon,
       }))
     ),
-    label: i18n.translate('searchWorkflows.rerankStep.label', {
+    label: i18n.translate('xpack.workplaceai.rerankStep.label', {
       defaultMessage: 'Rerank Results',
     }),
-    description: i18n.translate('searchWorkflows.rerankStep.description', {
+    description: i18n.translate('xpack.workplaceai.rerankStep.description', {
       defaultMessage:
         'Rerank documents using a rerank inference endpoint for improved relevance ordering',
     }),
     documentation: {
-      details: i18n.translate('searchWorkflows.rerankStep.documentation.details', {
+      details: i18n.translate('xpack.workplaceai.rerankStep.documentation.details', {
         defaultMessage: `The rerank step calls a rerank inference endpoint to reorder documents based on relevance to the provided text.
 
 **How it works:**
@@ -133,7 +133,7 @@ This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
             },
           },
           validation: {
-            validate: async (value, context) => {
+            validate: async (value, _context) => {
               const http = await getHttp();
               return createInferenceIdValidator(http)(value);
             },

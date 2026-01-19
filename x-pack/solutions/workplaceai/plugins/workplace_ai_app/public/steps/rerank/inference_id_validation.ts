@@ -66,7 +66,7 @@ export function createInferenceIdValidator(http: HttpStart) {
           severity: 'error',
           message: 'No rerank inference endpoints configured',
           hoverMessage:
-            'At least one rerank inference endpoint must be configured. [Manage endpoints](/app/management/ingest/inference_endpoints)',
+            'At least one rerank inference endpoint must be configured in Elasticsearch.',
         };
       }
 
@@ -77,7 +77,7 @@ export function createInferenceIdValidator(http: HttpStart) {
         return {
           severity: 'error',
           message: `Inference endpoint "${value}" not found`,
-          hoverMessage: `Available endpoints: ${availableIds}. [Manage endpoints](/app/management/ingest/inference_endpoints)`,
+          hoverMessage: `Available rerank endpoints: ${availableIds}`,
         };
       }
 
@@ -117,7 +117,3 @@ export function createInferenceIdCompletion(http: HttpStart) {
   };
 }
 
-export function clearInferenceEndpointsCache() {
-  cachedEndpoints = null;
-  cachePromise = null;
-}
