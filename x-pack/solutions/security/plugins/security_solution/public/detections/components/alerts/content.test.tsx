@@ -39,7 +39,7 @@ describe('AlertsPageContent', () => {
           },
           exceptions: {
             read: false,
-            crud: false,
+            edit: false,
           },
         },
       })
@@ -77,7 +77,7 @@ describe('AlertsPageContent', () => {
             },
             exceptions: {
               read: false,
-              crud: false,
+              edit: false,
             },
           },
         })
