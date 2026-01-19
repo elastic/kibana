@@ -24,7 +24,10 @@ interface Props {
   onChange: (aggregation: MetricsExplorerAggregation) => void;
 }
 
-type MetricsExplorerAggregationWithoutCustom = Exclude<MetricsExplorerAggregation, 'custom'>;
+type MetricsExplorerSelectableAggregation = Exclude<
+  MetricsExplorerAggregation,
+  'custom' | 'last_value'
+>;
 
 export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) => {
   const AGGREGATION_LABELS = {
@@ -72,7 +75,8 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
 
   const METRIC_EXPLORER_AGGREGATIONS_WITHOUT_CUSTOM = xor(METRIC_EXPLORER_AGGREGATIONS, [
     'custom',
-  ]) as MetricsExplorerAggregationWithoutCustom[];
+    'last_value',
+  ]) as MetricsExplorerSelectableAggregation[];
 
   return (
     <EuiSelect
