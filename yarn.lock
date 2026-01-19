@@ -8948,10 +8948,10 @@
     uuid "^10.0.0"
     weaviate-client "^3.5.2"
 
-"@launchdarkly/js-sdk-common@2.19.0":
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.19.0.tgz#aca7cb277a28ddcbeb9bb457ad4d6b7e82bad77c"
-  integrity sha512-p4MU3VxFSxj1T5yGm3OeJAS034nAiISGUF9Av3r9tClRCElcIdj159hADBYCE4VpiH6q+6KJ3cbvXF8v1200+g==
+"@launchdarkly/js-sdk-common@2.20.0":
+  version "2.20.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.20.0.tgz#1e9f762cc5c9d707003af173176ca5d5dc1a144f"
+  integrity sha512-g1Lyi5xL7AXAP6BP8BzRcqVqIhqOSVpA5Bx8Vvj8A/4A6sIHVz2vIZluykD/bJiKg1+G9ojm+OCfdL/c0ebi0A==
 
 "@launchdarkly/js-server-sdk-common@2.17.1":
   version "2.17.1"
