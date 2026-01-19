@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '../v4';
+import { z, fromJSONSchema } from '../v4';
 import type { ZodType, ZodDiscriminatedUnion } from 'zod/v4';
 
 const getMeta = (schema: ZodType) => {
@@ -26,7 +26,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['apiKey'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ apiKey: 'my-key' })).not.toThrow();
@@ -46,7 +46,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['name'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ name: 'test' })).not.toThrow();
@@ -64,7 +64,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['level'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ level: 'low' })).not.toThrow();
@@ -88,7 +88,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['config'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ config: { host: 'localhost' } })).not.toThrow();
@@ -121,7 +121,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         ],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ authType: 'api_key', apiKey: 'key123' })).not.toThrow();
@@ -144,7 +144,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         ],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(zodSchema).toBeInstanceOf(z.ZodDiscriminatedUnion);
@@ -170,7 +170,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         ],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema) as ZodDiscriminatedUnion;
+      const zodSchema = fromJSONSchema(jsonSchema) as ZodDiscriminatedUnion;
       expect(zodSchema).toBeInstanceOf(z.ZodDiscriminatedUnion);
 
       const discriminatorKey = (zodSchema as unknown as { _def: { discriminator: string } })._def
@@ -189,7 +189,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['password'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ password: '12345678' })).not.toThrow();
@@ -205,7 +205,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['code'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ code: 'short' })).not.toThrow();
@@ -221,7 +221,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['phone'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ phone: '+1234567890' })).not.toThrow();
@@ -237,7 +237,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['email'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ email: 'user@example.com' })).not.toThrow();
@@ -253,7 +253,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['id'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ id: '550e8400-e29b-41d4-a716-446655440000' })).not.toThrow();
@@ -269,7 +269,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['url'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ url: 'https://example.com' })).not.toThrow();
@@ -285,7 +285,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['timestamp'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ timestamp: '2023-12-25T10:30:00Z' })).not.toThrow();
@@ -301,7 +301,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['date'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ date: '2023-12-25' })).not.toThrow();
@@ -317,7 +317,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['time'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ time: '10:30:00' })).not.toThrow();
@@ -333,7 +333,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['username'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ username: 'user123' })).not.toThrow();
@@ -353,7 +353,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['age'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ age: 18 })).not.toThrow();
@@ -370,7 +370,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['score'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ score: 100 })).not.toThrow();
@@ -387,7 +387,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['price'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ price: 0.01 })).not.toThrow();
@@ -404,7 +404,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['discount'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ discount: 99 })).not.toThrow();
@@ -421,7 +421,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['quantity'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ quantity: 5 })).not.toThrow();
@@ -439,7 +439,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['count', 'ratio'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ count: 5, ratio: 3.14 })).not.toThrow();
@@ -456,7 +456,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['percentage'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ percentage: 50 })).not.toThrow();
@@ -477,7 +477,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['tags'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ tags: ['tag1', 'tag2'] })).not.toThrow();
@@ -494,7 +494,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['scores'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ scores: [1, 2, 3] })).not.toThrow();
@@ -510,7 +510,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['items'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ items: ['a', 'b'] })).not.toThrow();
@@ -528,7 +528,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['items'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ items: [] })).not.toThrow();
@@ -551,7 +551,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['matrix'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() =>
@@ -584,7 +584,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['users'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() =>
@@ -607,7 +607,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['items'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ items: ['a'] })).not.toThrow();
@@ -627,7 +627,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['type'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ type: 'api_key' })).not.toThrow();
@@ -643,7 +643,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['version'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ version: 1 })).not.toThrow();
@@ -659,7 +659,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['enabled'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ enabled: true })).not.toThrow();
@@ -675,7 +675,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['value'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       expect(() => zodSchema!.parse({ value: null })).not.toThrow();
@@ -694,7 +694,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['age'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       const result1 = zodSchema!.parse({ age: 25 }) as any;
@@ -714,7 +714,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['url'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       const result1 = zodSchema!.parse({ url: 'https://example.com' }) as any;
@@ -734,7 +734,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['name'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       const result1 = zodSchema!.parse({ name: 'test' }) as any;
@@ -754,7 +754,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['name'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       const result1 = zodSchema!.parse({ name: 'test' }) as any;
@@ -781,7 +781,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         required: ['name'],
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       const result1 = zodSchema!.parse({ name: 'test' }) as any;
@@ -797,13 +797,13 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
 
   describe('Edge cases', () => {
     it('returns undefined for invalid schema', () => {
-      const result = z.fromJSONSchema({ invalid: 'schema' });
+      const result = fromJSONSchema({ invalid: 'schema' });
       expect(result === undefined || typeof result === 'object').toBe(true);
     });
 
     it('handles empty schema gracefully', () => {
       const emptySchema = {};
-      const result = z.fromJSONSchema(emptySchema);
+      const result = fromJSONSchema(emptySchema);
       expect(result === undefined || typeof result === 'object').toBe(true);
     });
   });
@@ -831,7 +831,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         label: 'Authentication',
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
       expect(zodSchema).toBeInstanceOf(z.ZodDiscriminatedUnion);
 
@@ -864,7 +864,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
 
       const jsonSchema = z.toJSONSchema(originalSchema);
 
-      const restoredSchema = z.fromJSONSchema(jsonSchema);
+      const restoredSchema = fromJSONSchema(jsonSchema);
       expect(restoredSchema).toBeDefined();
 
       const schemaWithShape = restoredSchema as unknown as { shape?: Record<string, ZodType> };
@@ -893,7 +893,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         },
       };
 
-      const zodSchema = z.fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema);
       expect(zodSchema).toBeDefined();
 
       const schemaWithShape = zodSchema as unknown as { shape?: Record<string, ZodType> };

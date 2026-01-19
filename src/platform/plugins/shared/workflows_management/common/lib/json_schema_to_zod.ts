@@ -8,7 +8,7 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { z } from '@kbn/zod/v4';
+import { fromJSONSchema, z } from '@kbn/zod/v4';
 
 /**
  * Recursively converts a JSON Schema to a Zod schema
@@ -28,7 +28,7 @@ function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7 | null | undefi
   }
 
   // Try fromJSONSchema - it handles most cases
-  const zodSchema = z.fromJSONSchema(jsonSchema as Record<string, unknown>);
+  const zodSchema = fromJSONSchema(jsonSchema as Record<string, unknown>);
   if (zodSchema !== undefined) {
     return zodSchema;
   }
@@ -39,7 +39,7 @@ function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7 | null | undefi
 }
 
 /**
- * Converts a JSON Schema to a Zod schema using z.fromJSONSchema polyfill
+ * Converts a JSON Schema to a Zod schema using fromJSONSchema polyfill
  * @param jsonSchema - The JSON Schema to convert
  * @returns A Zod schema equivalent to the JSON Schema
  */
@@ -49,16 +49,16 @@ export function convertJsonSchemaToZod(jsonSchema: JSONSchema7 | null | undefine
     return z.any();
   }
 
-  // Note: z.fromJSONSchema doesn't handle $ref, so we need to resolve them first
+  // Note: fromJSONSchema doesn't handle $ref, so we need to resolve them first
   // For now, if there's a $ref, fall back to recursive converter
   // TODO: Resolve $ref before calling fromJSONSchema when remote ref support is added
   if (jsonSchema.$ref) {
     return convertJsonSchemaToZodRecursive(jsonSchema);
   }
 
-  // Use z.fromJSONSchema polyfill - it handles objects, arrays, strings, numbers, booleans,
+  // Use fromJSONSchema polyfill - it handles objects, arrays, strings, numbers, booleans,
   // enums, defaults, required fields, validation constraints, etc.
-  const zodSchema = z.fromJSONSchema(jsonSchema as Record<string, unknown>);
+  const zodSchema = fromJSONSchema(jsonSchema as Record<string, unknown>);
   if (zodSchema !== undefined) {
     return zodSchema;
   }

@@ -17,7 +17,7 @@ export function parseObject(
   schema: JsonSchema,
   parseJsonSchema: JsonSchemaParser
 ): z.ZodObject<z.ZodRawShape> {
-  const shape: z.ZodRawShape = {};
+  const shape: Record<string, z.ZodType> = {};
   const requiredFields = new Set(schema.required || []);
   const properties = schema.properties || {};
 
