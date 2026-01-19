@@ -46,6 +46,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
   const [isPopoverOpen, setIsPopoverOpen] = useState(isPopoverOpenInitialState);
 
   const layoutState = useStateFromPublishingSubject(api.parentApi.layout$);
+  console.log({ layoutState });
   const layoutEntry = useMemo(() => layoutState.controls[api.uuid], [layoutState, api.uuid]);
   const isToRightOfGrowControl = useMemo(
     () => layoutEntry.order > 0 && Object.values(layoutState.controls)[layoutEntry.order - 1].grow,

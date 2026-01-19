@@ -39,11 +39,12 @@ export class EditControlDisplaySettingsAction
     if (!apiIsPinnableControlApi(embeddable)) return null;
 
     return (
-      <ControlDisplaySettingsPopover
-        api={embeddable}
-        displayName={this.getDisplayName()}
-        iconType={this.getIconType()}
-      />
+      <></>
+      // <ControlDisplaySettingsPopover
+      //   api={embeddable}
+      //   displayName={this.getDisplayName()}
+      //   iconType={this.getIconType()}
+      // />
     );
   };
 

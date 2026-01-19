@@ -17,7 +17,6 @@ import type {
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { BehaviorSubject } from 'rxjs';
 
 type ControlState = ControlsGroupState[number];
 export type ControlPanelState = Pick<ControlState, 'width' | 'grow'> & { order: number };
@@ -32,10 +31,6 @@ export interface ControlsLayout {
   };
 }
 
-export interface PublishesControlsLayout {
-  layout$: BehaviorSubject<ControlsLayout>;
-}
-
 export type ControlsRendererParentApi = Pick<
   PresentationContainer,
   'children$' | 'addNewPanel' | 'replacePanel'
@@ -45,7 +40,6 @@ export type ControlsRendererParentApi = Pick<
   HasSerializedChildState<object> &
   Partial<PublishesDisabledActionIds> & {
     registerChildApi: (api: DefaultEmbeddableApi) => void;
-    layout$: BehaviorSubject<ControlsLayout>;
     isCompressed?: () => boolean;
   };
 
