@@ -5289,6 +5289,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-sidebar-mocks@link:src/core/packages/chrome/sidebar-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-sidebar@link:src/core/packages/chrome/sidebar":
   version "0.0.0"
   uid ""

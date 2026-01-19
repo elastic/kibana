@@ -323,6 +323,7 @@
     "@kbn/core-chrome-sidebar-components": "link:src/core/packages/chrome/sidebar-components",
     "@kbn/core-chrome-sidebar-context": "link:src/core/packages/chrome/sidebar-context",
     "@kbn/core-chrome-sidebar-internal": "link:src/core/packages/chrome/sidebar-internal",
+    "@kbn/core-chrome-sidebar-mocks": "link:src/core/packages/chrome/sidebar-mocks",
     "@kbn/core-config-server-internal": "link:src/core/packages/config/server-internal",
     "@kbn/core-custom-branding-browser": "link:src/core/packages/custom-branding/browser",
     "@kbn/core-custom-branding-browser-internal": "link:src/core/packages/custom-branding/browser-internal",

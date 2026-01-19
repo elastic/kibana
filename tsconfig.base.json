@@ -390,6 +390,8 @@
       "@kbn/core-chrome-sidebar-context/*": ["src/core/packages/chrome/sidebar-context/*"],
       "@kbn/core-chrome-sidebar-internal": ["src/core/packages/chrome/sidebar-internal"],
       "@kbn/core-chrome-sidebar-internal/*": ["src/core/packages/chrome/sidebar-internal/*"],
+      "@kbn/core-chrome-sidebar-mocks": ["src/core/packages/chrome/sidebar-mocks"],
+      "@kbn/core-chrome-sidebar-mocks/*": ["src/core/packages/chrome/sidebar-mocks/*"],
       "@kbn/core-config-server-internal": ["src/core/packages/config/server-internal"],
       "@kbn/core-config-server-internal/*": ["src/core/packages/config/server-internal/*"],
       "@kbn/core-custom-branding-browser": ["src/core/packages/custom-branding/browser"],

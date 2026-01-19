@@ -17,7 +17,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-chrome-browser-internal",
     "@kbn/lazy-object",
-    "@kbn/core-chrome-sidebar-internal"
+    "@kbn/core-chrome-sidebar-mocks"
   ],
   "exclude": [
     "target/**/*",
