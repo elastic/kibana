@@ -6,7 +6,6 @@
       "jest",
       "node",
       "react",
-      "@kbn/ambient-storybook-types",
     ]
   },
   "include": [
@@ -19,6 +18,5 @@
   "kbn_references": [
     "@kbn/split-button",
     "@kbn/i18n",
-    "@kbn/storybook",
   ]
 }
