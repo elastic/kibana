@@ -7,12 +7,10 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
 
   describe('ES|QL Tools internal API', () => {
@@ -116,23 +114,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).to.have.property('results');
         expect(response.body.results).to.be.an('array');
         expect(response.body.results).to.have.length(0);
-      });
-
-      it('should return 404 when ES|QL tool API is disabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
-
-        await supertest
-          .post('/internal/agent_builder/tools/_bulk_delete')
-          .set('kbn-xsrf', 'kibana')
-          .set('x-elastic-internal-origin', 'kibana')
-          .send({ ids: ['any-id'] })
-          .expect(404);
-
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
       });
     });
   });

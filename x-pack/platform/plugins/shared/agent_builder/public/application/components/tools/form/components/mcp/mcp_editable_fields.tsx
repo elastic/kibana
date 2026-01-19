@@ -126,6 +126,7 @@ export const McpEditableFields = ({
       connectors.map((connector) => ({
         label: connector.name,
         value: connector.id,
+        'data-test-subj': `mcpConnectorOption-${connector.id}`,
       })),
     [connectors]
   );
@@ -137,6 +138,7 @@ export const McpEditableFields = ({
         ...mcpTool,
         shortDescription: truncateAtSentence(mcpTool.description),
       },
+      'data-test-subj': `mcpToolOption-${mcpTool.name}`,
     }));
   }, [mcpTools]);
 
@@ -188,6 +190,7 @@ export const McpEditableFields = ({
             name="connectorId"
             render={({ field: { value, onChange, onBlur, ref, ...field } }) => (
               <EuiComboBox
+                data-test-subj="agentBuilderMcpConnectorSelect"
                 isInvalid={!!errors.connectorId}
                 fullWidth
                 singleSelection={{
@@ -224,6 +227,7 @@ export const McpEditableFields = ({
             name="mcpToolName"
             render={({ field: { value, onChange, onBlur, ref, ...field } }) => (
               <EuiComboBox
+                data-test-subj="agentBuilderMcpToolSelect"
                 isInvalid={!!errors.mcpToolName}
                 fullWidth
                 singleSelection={{
