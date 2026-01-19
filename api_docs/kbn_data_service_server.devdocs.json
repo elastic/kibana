@@ -25,6 +25,8 @@
           "{ readonly value: number; readonly pause: boolean; }"
         ],
         "path": "src/platform/packages/shared/kbn-data-service-server/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -65,6 +67,8 @@
           "<number>; }>"
         ],
         "path": "src/platform/packages/shared/kbn-data-service-server/src/refresh_interval.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
