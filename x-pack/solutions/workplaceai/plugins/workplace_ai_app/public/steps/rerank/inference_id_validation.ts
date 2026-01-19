@@ -116,4 +116,3 @@ export function createInferenceIdCompletion(http: HttpStart) {
     }
   };
 }
-
