@@ -135,9 +135,11 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
       expect(conversation.rounds[0].input.attachments ?? []).to.eql([]);
 
       expect(conversation.attachments).to.have.length(1);
-      expect(conversation.attachments[0].type).to.eql('text');
-      expect(conversation.attachments[0].current_version).to.eql(1);
-      expect(conversation.attachments[0].versions[0].data).to.eql({ content: 'some text content' });
+      expect(conversation.attachments?.[0].type).to.eql('text');
+      expect(conversation.attachments?.[0].current_version).to.eql(1);
+      expect(conversation.attachments?.[0].versions[0].data).to.eql({
+        content: 'some text content',
+      });
     });
   });
 }
