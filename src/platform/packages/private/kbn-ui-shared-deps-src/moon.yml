@@ -88,13 +88,3 @@ tasks:
       - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
-  update-build-inputs:
-    command: node
-    args:
-      - update_build_inputs.js
-    inputs:
-      - update_build_inputs.js
-      - moon.extend.yml
-      - src/entry.js
-    options:
-      cache: false
