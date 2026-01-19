@@ -181,25 +181,6 @@ describe('convertFormBasedToTextBasedLayer', () => {
     expect(result).toBeUndefined();
   });
 
-  it('returns undefined when visualization state has no layers', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: { 'test-index-pattern': mockIndexPattern },
-        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
-      },
-    });
-
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: mockConvertibleLayers,
-      attributes: mockAttributes,
-      visualizationState: { noLayers: true },
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
-    });
-
-    expect(result).toBeUndefined();
-  });
-
   it('returns undefined when layer ID does not exist in formBased state', () => {
     const framePublicAPI = createMockFramePublicAPI({
       dataViews: {
@@ -270,15 +251,17 @@ describe('convertFormBasedToTextBasedLayer', () => {
                 "layer1": Object {
                   "columns": Array [
                     Object {
-                      "columnId": "bucket_0_0",
+                      "columnId": "col2",
                       "fieldName": "bucket_0_0",
+                      "label": "Count of records",
                       "meta": Object {
                         "type": "number",
                       },
                     },
                     Object {
-                      "columnId": "@timestamp",
+                      "columnId": "col1",
                       "fieldName": "@timestamp",
+                      "label": "@timestamp",
                       "meta": Object {
                         "type": "date",
                       },
@@ -307,11 +290,11 @@ describe('convertFormBasedToTextBasedLayer', () => {
             "layers": Array [
               Object {
                 "accessors": Array [
-                  "bucket_0_0",
+                  "col2",
                 ],
                 "layerId": "layer1",
                 "layerType": "data",
-                "xAccessor": "@timestamp",
+                "xAccessor": "col1",
               },
             ],
           },
@@ -322,7 +305,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
     `);
   });
 
-  it('remaps column IDs in visualization state using pre-computed data', () => {
+  it('preserves original column IDs in visualization state', () => {
     const framePublicAPI = createMockFramePublicAPI({
       dataViews: {
         indexPatterns: { 'test-index-pattern': mockIndexPattern },
@@ -342,21 +325,39 @@ describe('convertFormBasedToTextBasedLayer', () => {
       framePublicAPI,
     });
 
-    // Original column IDs (col1, col2) should be remapped to ES|QL field names
+    // Visualization state should be passed through unchanged - original column IDs preserved
     expect(result?.state.visualization).toMatchInlineSnapshot(`
       Object {
         "layers": Array [
           Object {
             "accessors": Array [
-              "bucket_0_0",
+              "col2",
             ],
             "layerId": "layer1",
             "layerType": "data",
-            "xAccessor": "@timestamp",
+            "xAccessor": "col1",
           },
         ],
       }
     `);
+
+    // Text-based layer columns should use original column IDs with fieldName holding ES|QL field name
+    const textBasedState = result?.state.datasourceStates.textBased;
+    const columns = textBasedState?.layers[layerId]?.columns;
+    expect(columns).toEqual([
+      {
+        columnId: 'col2',
+        fieldName: 'bucket_0_0',
+        label: 'Count of records',
+        meta: { type: 'number' },
+      },
+      {
+        columnId: 'col1',
+        fieldName: '@timestamp',
+        label: '@timestamp',
+        meta: { type: 'date' },
+      },
+    ]);
   });
 
   it('uses custom pre-computed conversion data with different column mappings', () => {
@@ -419,24 +420,78 @@ describe('convertFormBasedToTextBasedLayer', () => {
     // Should use the pre-computed ES|QL query
     expect(result?.state.query).toEqual({ esql: preComputedEsql });
 
-    // Should use the pre-computed column mappings
+    // Visualization state should be passed through unchanged - original column IDs preserved
     expect(result?.state.visualization).toMatchInlineSnapshot(`
       Object {
         "layers": Array [
           Object {
             "accessors": Array [
-              "custom_count",
+              "col2",
             ],
             "layerId": "layer1",
             "layerType": "data",
-            "xAccessor": "custom_timestamp",
+            "xAccessor": "col1",
           },
         ],
       }
     `);
 
-    // Verify the text-based layer uses the pre-computed query
+    // Verify the text-based layer uses the pre-computed query and preserves original column IDs
     const textBasedState = result?.state.datasourceStates.textBased;
     expect(textBasedState?.layers[layerId]?.query).toEqual({ esql: preComputedEsql });
+
+    // Columns should have original IDs with fieldName holding ES|QL field names
+    const columns = textBasedState?.layers[layerId]?.columns;
+    expect(columns).toEqual([
+      {
+        columnId: 'col2',
+        fieldName: 'custom_count',
+        label: 'Count of records',
+        meta: { type: 'number' },
+      },
+      {
+        columnId: 'col1',
+        fieldName: 'custom_timestamp',
+        label: '@timestamp',
+        meta: { type: 'date' },
+      },
+    ]);
+  });
+
+  it('works with visualization states without layers array (e.g., Metric, Datatable)', () => {
+    const framePublicAPI = createMockFramePublicAPI({
+      dataViews: {
+        indexPatterns: { 'test-index-pattern': mockIndexPattern },
+        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
+      },
+      dateRange: {
+        fromDate: '2024-01-01T00:00:00.000Z',
+        toDate: '2024-01-02T00:00:00.000Z',
+      },
+    });
+
+    // Metric visualization state (no layers array)
+    const metricVisualizationState = {
+      layerId,
+      layerType: 'data',
+      accessor: 'col2',
+    };
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: mockConvertibleLayers,
+      attributes: mockAttributes,
+      visualizationState: metricVisualizationState,
+      datasourceStates: mockDatasourceStates,
+      framePublicAPI,
+    });
+
+    // Should succeed and pass through visualization state unchanged
+    expect(result).toBeDefined();
+    expect(result?.state.visualization).toEqual(metricVisualizationState);
+
+    // Text-based layer should have original column IDs
+    const textBasedState = result?.state.datasourceStates.textBased;
+    const columns = textBasedState?.layers[layerId]?.columns;
+    expect(columns?.map((c) => c.columnId)).toEqual(['col2', 'col1']);
   });
 });

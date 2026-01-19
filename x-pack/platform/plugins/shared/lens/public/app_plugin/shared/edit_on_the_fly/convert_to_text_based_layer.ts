@@ -29,77 +29,6 @@ interface LayerConversionData {
 }
 
 /**
- * Minimal interface for visualization states that contain layers.
- * Each visualization type (XY, partition, metric, etc.) has its own state shape,
- * but they all share a `layers` array. There's no common base type in @kbn/lens-common,
- * so we use this minimal interface for type narrowing.
- */
-interface VisualizationStateWithLayers {
-  layers: unknown[];
-}
-
-/**
- * Type guard to check if visualization state has a layers array
- */
-function hasLayers(state: unknown): state is VisualizationStateWithLayers {
-  return Array.isArray((state as VisualizationStateWithLayers | null)?.layers);
-}
-
-/**
- * Common layer properties used for column ID remapping during conversion.
- * There's no shared base layer type in @kbn/lens-common - each visualization
- * (XY, partition, heatmap, etc.) defines its own layer config. This interface
- * captures only the properties we need to remap for XY-like visualizations.
- */
-interface VisualizationLayer {
-  layerId?: string;
-  xAccessor?: string;
-  accessors?: string[];
-  splitAccessor?: string;
-}
-
-/**
- * Remaps visualization state column IDs to new ES|QL field names
- */
-function remapVisualizationState(
-  visualizationState: VisualizationStateWithLayers,
-  layersToConvert: string[],
-  columnIdMapping: Record<string, string>
-): VisualizationStateWithLayers {
-  const updatedVisualizationState = structuredClone(visualizationState);
-
-  updatedVisualizationState.layers = updatedVisualizationState.layers.map((vizLayer: unknown) => {
-    const layer = vizLayer as VisualizationLayer;
-    if (!layer.layerId || !layersToConvert.includes(layer.layerId)) {
-      return vizLayer;
-    }
-
-    const updatedLayer = structuredClone(layer);
-
-    // Remap xAccessor (horizontal axis, for example a time axis)
-    if (layer.xAccessor && columnIdMapping[layer.xAccessor]) {
-      updatedLayer.xAccessor = columnIdMapping[layer.xAccessor];
-    }
-
-    // Remap accessors array (vertical axis, for example counts or metrics)
-    if (Array.isArray(layer.accessors)) {
-      updatedLayer.accessors = layer.accessors.map(
-        (accessor) => columnIdMapping[accessor] || accessor
-      );
-    }
-
-    // Remap splitAccessor if present
-    if (layer.splitAccessor && columnIdMapping[layer.splitAccessor]) {
-      updatedLayer.splitAccessor = columnIdMapping[layer.splitAccessor];
-    }
-
-    return updatedLayer;
-  });
-
-  return updatedVisualizationState;
-}
-
-/**
  * Retrieves conversion data for a form-based layer using pre-computed data.
  * The pre-computed data is required - if missing, it indicates a bug in the conversion flow.
  */
@@ -124,24 +53,20 @@ function getLayerConversionData(
   };
 }
 
-interface BuildTextBasedStateReturnType {
-  newDatasourceState: TextBasedPrivateState;
-  columnIdMapping: Record<string, string>;
-}
-
 /**
- * Builds the text-based datasource state and column ID mapping.
+ * Builds the text-based datasource state.
  * Uses pre-computed conversion data from the passed ConvertibleLayer objects.
+ * Preserves original column IDs so visualizations can still reference them.
+ * The fieldName property holds the ES|QL field name.
  */
 function buildTextBasedState(
   layersToConvert: ConvertibleLayer[],
   layers: Record<string, FormBasedLayer>,
   framePublicAPI: FramePublicAPI
-): BuildTextBasedStateReturnType | undefined {
+): TextBasedPrivateState | undefined {
   if (layersToConvert.length === 0) return undefined;
 
   const newLayers: Record<string, TextBasedLayer> = {};
-  const columnIdMapping: Record<string, string> = {};
 
   for (const convertibleLayer of layersToConvert) {
     const layerId = convertibleLayer.id;
@@ -156,21 +81,20 @@ function buildTextBasedState(
     const { layer, conversionResult } = conversionData;
 
     // Build new text-based columns from esAggsIdMap
+    // Keep original column IDs so visualizations can still reference them
     const newColumns: TextBasedLayerColumn[] = Object.entries(conversionResult.esAggsIdMap).map(
       ([esqlFieldName, originalColumns]) => {
         const sourceColumn = originalColumns[0];
-        // Get the original column from the layer to access dataType
+        // Get the original column from the layer to access dataType and label
         const originalLayerColumn = layer.columns[sourceColumn.id];
         // Map Lens DataType to DatatableColumnType
         const dataType = originalLayerColumn?.dataType ?? 'string';
         const metaType = dataType === 'document' ? 'string' : dataType;
 
-        // Map old column ID to new ES|QL field name
-        columnIdMapping[sourceColumn.id] = esqlFieldName;
-
         return {
-          columnId: esqlFieldName,
+          columnId: sourceColumn.id,
           fieldName: esqlFieldName,
+          label: originalLayerColumn?.label ?? esqlFieldName,
           meta: {
             type: metaType as TextBasedLayerColumn['meta'] extends { type: infer T } ? T : never,
           },
@@ -188,7 +112,7 @@ function buildTextBasedState(
 
   if (Object.keys(newLayers).length === 0) return undefined;
 
-  const newDatasourceState: TextBasedPrivateState = {
+  return {
     layers: newLayers,
     indexPatternRefs: Object.values(framePublicAPI.dataViews.indexPatterns).map((ip) => ({
       id: ip.id!,
@@ -196,8 +120,6 @@ function buildTextBasedState(
       name: ip.name,
     })),
   };
-
-  return { newDatasourceState, columnIdMapping };
 }
 
 interface ConvertToEsqlParams {
@@ -219,6 +141,10 @@ interface ConvertToEsqlParams {
  * Uses pre-computed conversionData from the passed ConvertibleLayer objects to avoid
  * duplicate calls to generateEsqlQuery. The conversion data is computed once in
  * useEsqlConversionCheck and passed directly here.
+ *
+ * Preserves original column IDs in the text-based layer so visualizations can still
+ * reference them. This approach works with all visualization types (XY, Datatable,
+ * Metric, etc.) without needing to understand their different state structures.
  */
 export function convertFormBasedToTextBasedLayer({
   layersToConvert,
@@ -236,31 +162,15 @@ export function convertFormBasedToTextBasedLayer({
     return undefined;
   }
 
-  const conversionResult = buildTextBasedState(
+  const newDatasourceState = buildTextBasedState(
     layersToConvert,
     formBasedState.layers,
     framePublicAPI
   );
 
-  if (!conversionResult) {
+  if (!newDatasourceState) {
     return undefined;
   }
-
-  const { newDatasourceState, columnIdMapping } = conversionResult;
-
-  // Check if visualization state has layers to remap
-  if (!hasLayers(visualizationState)) {
-    return undefined;
-  }
-
-  // Extract layer IDs for visualization state remapping
-  const layerIdsToConvert = layersToConvert.map((layer) => layer.id);
-
-  const updatedVisualizationState = remapVisualizationState(
-    visualizationState,
-    layerIdsToConvert,
-    columnIdMapping
-  );
 
   // Get the ES|QL query from the first converted layer
   const firstLayerId = layersToConvert[0].id;
@@ -271,6 +181,7 @@ export function convertFormBasedToTextBasedLayer({
   }
 
   // Build new attributes with textBased datasource
+  // Keep visualization state unchanged - original column IDs are preserved in the text-based layer
   const newAttributes: TypedLensSerializedState['attributes'] = {
     ...attributes,
     state: {
@@ -279,7 +190,7 @@ export function convertFormBasedToTextBasedLayer({
       datasourceStates: {
         textBased: newDatasourceState,
       },
-      visualization: updatedVisualizationState,
+      visualization: visualizationState,
     },
   };
 
