@@ -13,7 +13,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "workplaceAIApp"],
-    "requiredPlugins": ["inference", "actions", "features", "dataSourcesRegistry", "spaces", "triggersActionsUi"],
+    "requiredPlugins": ["inference", "actions", "features", "dataCatalog", "spaces", "triggersActionsUi"],
     "optionalPlugins": ["cloud", "share"],
     "requiredBundles": ["kibanaReact", "stackConnectors"]
   }

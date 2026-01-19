@@ -32,6 +32,8 @@
           "(str: string) => number"
         ],
         "path": "x-pack/platform/packages/private/ml/string_hash/src/string_hash.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/string_hash/src/string_hash.ts",
+            "lineNumber": 11,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
