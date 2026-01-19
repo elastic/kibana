@@ -12,19 +12,28 @@ describe('formatPageFilterSearchParam', () => {
   it('returns the same data when all values are provided', () => {
     const filter: FilterControlConfig = {
       title: 'User',
-      fieldName: 'user.name',
-      selectedOptions: ['test_user'],
-      existsSelected: true,
+      field_name: 'user.name',
+      selected_options: ['test_user'],
+      exists_selected: true,
       exclude: true,
-      displaySettings: { hideActionBar: true },
+      display_settings: { hide_action_bar: true },
     };
 
-    expect(formatPageFilterSearchParam([filter])).toEqual([filter]);
+    expect(formatPageFilterSearchParam([filter])).toEqual([
+      {
+        title: 'User',
+        fieldName: 'user.name',
+        selectedOptions: ['test_user'],
+        existsSelected: true,
+        exclude: true,
+        displaySettings: { hideActionBar: true },
+      },
+    ]);
   });
 
   it('it sets default values when they are undefined', () => {
     const filter: FilterControlConfig = {
-      fieldName: 'user.name',
+      field_name: 'user.name',
     };
 
     expect(formatPageFilterSearchParam([filter])).toEqual([

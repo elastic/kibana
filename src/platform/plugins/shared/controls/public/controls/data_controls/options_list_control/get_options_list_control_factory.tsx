@@ -87,10 +87,10 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
           getInitialFilter: (dataView) =>
             buildFilter(dataView, uuid, {
-              fieldName: state.field_name,
-              existsSelected: state.exists_selected,
+              field_name: state.field_name,
+              exists_selected: state.exists_selected,
               exclude: state.exclude,
-              selectedOptions: state.selected_options,
+              selected_options: state.selected_options,
             }),
           editorStateManager,
         });
@@ -248,9 +248,9 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             if (!dataView) return;
 
             const newFilter = buildFilter(dataView, uuid, {
-              fieldName,
-              selectedOptions,
-              existsSelected,
+              field_name: fieldName,
+              selected_options: selectedOptions,
+              exists_selected: existsSelected,
               exclude,
               sectionId,
             });
