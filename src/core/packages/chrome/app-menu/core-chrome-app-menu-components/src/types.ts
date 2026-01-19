@@ -165,7 +165,7 @@ type AppMenuButtonItem = AppMenuItemBase & {
   /**
    * Sub-items to show in a popover when the item is clicked. Only used if `run` and `href` is not provided.
    */
-  items?: undefined;
+  items?: never;
   /**
    * Width of the popover in pixels.
    * Only used if `run` and `href` is not provided.
