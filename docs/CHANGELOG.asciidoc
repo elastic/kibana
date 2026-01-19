@@ -121,18 +121,18 @@ include::upgrade-notes.asciidoc[]
 [[release-notes-8.19.10]]
 == {kib} 8.19.10
 
-The 8.19.10 release includes the following fixes.
+The 8.19.10 release includes the following enhancements and fixes.
 
 [float]
 [[enhancement-v8.19.10]]
 === Enhancements
 Elastic Security solution::
-For the Elastic Security 8.19.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 8.19.10 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 [float]
 [[fixes-v8.19.10]]
 === Fixes
-Alerting and cases:
+Alerting and cases::
 * Adds maximum character validation to the email connector params and configuration ({kibana-pull}246453[#246453]).
 * Adds encoding to search terms in the **Cases** page to prevent decoding errors ({kibana-pull}247992[#247992]).
 Dashboards and Visualizations::
@@ -146,7 +146,7 @@ Elastic Observability solution::
 * Uses unicode escaping to prevent the agent from interpreting JS template literals as policy variables ({kibana-pull}247284[#247284]). 
 * Enables updating only those Synthetics package policies that use maintenance windows when maintenance windows are updated or deleted ({kibana-pull}246088[#246088]).
 Elastic Security solution::
-For the Elastic Security 8.19.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 8.19.10 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana platform::
 * Fixes `createAuditEvents` always returning failure as the outcome ({kibana-pull}247152[#247152]).
 Machine Learning::

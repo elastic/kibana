@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.19.10",
+  "version": "8.19.11",
   "branch": "8.19",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -72,7 +72,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "22.21.1",
+    "node": "22.22.0",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -1174,7 +1174,7 @@
     "del": "^6.1.0",
     "diff": "^8.0.2",
     "dompurify": "^3.3.0",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.2.3",
     "elastic-apm-node": "^4.13.0",
     "email-addresses": "^5.0.0",
     "eventsource-parser": "^3.0.0",
@@ -1207,7 +1207,7 @@
     "ipaddr.js": "2.0.0",
     "isbinaryfile": "4.0.2",
     "jest-diff": "^29.7.0",
-    "joi": "^17.13.3",
+    "joi": "18.0.2",
     "joi-to-json": "^4.3.2",
     "jquery": "^3.7.1",
     "js-search": "^1.4.3",
@@ -1609,7 +1609,7 @@
     "@parcel/watcher": "^2.5.1",
     "@playwright/test": "1.56.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.6.1",
-    "@redocly/cli": "^2.11.1",
+    "@redocly/cli": "2.14.2",
     "@statoscope/webpack-plugin": "^5.28.2",
     "@storybook/addon-a11y": "^8.6.15",
     "@storybook/addon-actions": "^8.6.15",
