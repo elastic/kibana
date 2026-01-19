@@ -18,16 +18,18 @@ import { getValueApiColumn } from '../../../columns/esql_column';
 import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '../../../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
 import { isMetricColumnESQL, isMetricColumnNoESQL } from '../helpers';
+import { stripUndefined } from '../../utils';
+
 type APIMetricRowCommonProps = Partial<
   Pick<DatatableState['metrics'][number], 'visible' | 'alignment' | 'width'>
 >;
 
 function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps {
-  return {
-    ...(column.hidden !== undefined ? { visible: !column.hidden } : {}),
-    ...(column.alignment ? { alignment: column.alignment } : {}),
-    ...(column.width !== undefined ? { width: column.width } : {}),
-  };
+  return stripUndefined<APIMetricRowCommonProps>({
+    visible: column.hidden != null ? !column.hidden : undefined,
+    alignment: column.alignment,
+    width: column.width,
+  });
 }
 
 /**

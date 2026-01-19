@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableVisualizationState } from '@kbn/lens-common';
-import { LENS_DATAGRID_DENSITY, LENS_ROW_HEIGHT_MODE } from '@kbn/lens-common';
+import { LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
 import { getTransposeId, TRANSPOSE_SEPARATOR } from '@kbn/transpose-utils';
 import type { DatatableState } from '../../../../schema';
+import { stripUndefined } from '../../utils';
 import { getAccessorName } from '../helpers';
 import { METRIC_ACCESSOR_PREFIX, ROW_ACCESSOR_PREFIX } from '../constants';
 
@@ -52,31 +53,31 @@ function buildDensityState(
   DatatableVisualizationState,
   'headerRowHeight' | 'headerRowHeightLines' | 'rowHeight' | 'rowHeightLines' | 'density'
 > {
-  return {
-    ...(config.density?.height?.header
-      ? config.density?.height?.header?.type === 'auto'
-        ? { headerRowHeight: LENS_ROW_HEIGHT_MODE.auto }
-        : {
-            headerRowHeight: LENS_ROW_HEIGHT_MODE.custom,
-            headerRowHeightLines: config.density?.height?.header?.max_lines,
-          }
-      : {}),
-    ...(config.density?.height?.value
-      ? config.density?.height?.value?.type === 'auto'
-        ? { rowHeight: LENS_ROW_HEIGHT_MODE.auto }
-        : {
-            rowHeight: LENS_ROW_HEIGHT_MODE.custom,
-            rowHeightLines: config.density?.height?.value?.lines,
-          }
-      : {}),
-    ...(config.density?.mode
-      ? config.density?.mode === 'compact'
-        ? { density: LENS_DATAGRID_DENSITY.COMPACT }
-        : config.density?.mode === 'expanded'
-        ? { density: LENS_DATAGRID_DENSITY.EXPANDED }
-        : { density: LENS_DATAGRID_DENSITY.NORMAL }
-      : {}),
-  };
+  const headerRowHeight = config.density?.height?.header?.type;
+  const headerRowHeightLines =
+    config.density?.height?.header?.type === 'custom'
+      ? config.density?.height?.header?.max_lines
+      : undefined;
+  const rowHeight = config.density?.height?.value?.type;
+  const rowHeightLines =
+    config.density?.height?.value?.type === 'custom'
+      ? config.density?.height?.value?.lines
+      : undefined;
+  const density =
+    config.density?.mode === 'default' ? LENS_DATAGRID_DENSITY.NORMAL : config.density?.mode;
+
+  return stripUndefined<
+    Pick<
+      DatatableVisualizationState,
+      'headerRowHeight' | 'headerRowHeightLines' | 'rowHeight' | 'rowHeightLines' | 'density'
+    >
+  >({
+    headerRowHeight,
+    headerRowHeightLines,
+    rowHeight,
+    rowHeightLines,
+    density,
+  });
 }
 
 function buildPagingState(config: DatatableState): Pick<DatatableVisualizationState, 'paging'> {
