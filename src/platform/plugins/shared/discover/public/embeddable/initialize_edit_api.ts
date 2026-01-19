@@ -90,6 +90,7 @@ export function initializeEditApi<
         state: {
           embeddableId: uuid,
           valueInput: undefined,
+          searchSessionId: partialApi.fetchContext$.getValue()?.searchSessionId,
           originatingApp: parentApiContext.currentAppId,
           originatingPath: parentApiContext.getCurrentPath?.(),
         },

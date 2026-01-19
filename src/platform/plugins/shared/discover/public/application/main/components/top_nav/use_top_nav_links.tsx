@@ -160,7 +160,7 @@ export const useTopNavLinks = ({
         items.push(backgroundSearchFlyoutMenuItem);
       }
 
-      if (!defaultMenu?.newItem?.disabled) {
+      if (!services.embeddableEditor.isEmbeddedEditor() && !defaultMenu?.newItem?.disabled) {
         const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
           isEsqlMode && currentDataView.type === ESQL_TYPE
             ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
@@ -184,7 +184,7 @@ export const useTopNavLinks = ({
         items.push(newSearchMenuItem);
       }
 
-      if (!defaultMenu?.openItem?.disabled) {
+      if (!services.embeddableEditor.isEmbeddedEditor() && !defaultMenu?.openItem?.disabled) {
         const openSearchMenuItem = getOpenSearchAppMenuItem({
           onOpenSavedSearch: state.actions.onOpenSavedSearch,
         });
