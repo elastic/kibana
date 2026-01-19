@@ -27,7 +27,7 @@ import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
-import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
+import { registerSampleData } from './register_sample_data';
 
 export class AgentBuilderPlugin
   implements
@@ -143,7 +143,7 @@ export class AgentBuilderPlugin
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
-      registerSampleDataSetLinks(this.home);
+      registerSampleData(this.home, this.logger);
     }
     return {
       agents: {
