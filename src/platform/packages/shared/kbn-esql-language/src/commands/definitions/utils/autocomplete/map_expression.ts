@@ -24,7 +24,7 @@ export const OBJECT_KEYS_REGEX = /"([^"]+)"\s*:/g;
 export interface MapParameterValues {
   type: MapValueType;
   suggestions?: ISuggestionItem[];
-  description: string;
+  description?: string;
 }
 
 export type MapParameters = Record<string, MapParameterValues>;
@@ -98,7 +98,7 @@ export function getCommandMapExpressionSuggestions(
         type === 'string'
           ? {
               ...suggestion,
-              detail: description,
+              detail: description || suggestion.detail,
               text: `"${suggestion.text}"`,
               filterText: `"${suggestion.text}"`,
               rangeToReplace,
