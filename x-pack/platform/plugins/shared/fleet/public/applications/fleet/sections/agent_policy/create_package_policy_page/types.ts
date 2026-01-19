@@ -9,7 +9,7 @@ import type { EuiStepProps } from '@elastic/eui';
 
 import type React from 'react';
 
-import type { AgentPolicy } from '../../../../../../common';
+import type { AgentPolicy, PackagePolicy } from '../../../../../../common';
 export type EditPackagePolicyFrom =
   | 'package'
   | 'package-edit'
@@ -18,6 +18,8 @@ export type EditPackagePolicyFrom =
   | 'upgrade-from-fleet-policy-list'
   | 'upgrade-from-integrations-policy-list'
   | 'upgrade-from-extension'
+  | 'copy-from-fleet-policy-list'
+  | 'copy-from-integrations-policy-list'
   | 'installed-integrations';
 
 export type PackagePolicyFormState =
@@ -45,6 +47,8 @@ export type CreatePackagePolicyParams = React.FunctionComponent<{
   pkgVersion?: string;
   integration?: string;
   pkgLabel?: string;
+  defaultPolicyData?: Partial<PackagePolicy>;
+  defaultAgentPolicies?: AgentPolicy[];
   addIntegrationFlyoutProps?: {
     selectIntegrationStep: EuiStepProps;
     onSubmitCompleted: () => void;

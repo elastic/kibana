@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES } from '../../common/constants';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
 import { policyHasFleetServer } from '../services';
@@ -126,13 +127,23 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           </EuiContextMenuItem>,
         ]
       : []),
-    // FIXME: implement Copy package policy action
-    // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="packagePolicyCopy">
-    //   <FormattedMessage
-    //     id="xpack.fleet.policyDetails.packagePoliciesTable.copyActionTitle"
-    //     defaultMessage="Copy integration"
-    //   />
-    // </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      disabled={
+        !canWriteIntegrationPolicies ||
+        EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES.includes(packagePolicy.package?.name || '')
+      }
+      href={getHref('copy_integration', {
+        packagePolicyId: packagePolicy.id,
+      })}
+      data-test-subj="PackagePolicyActionsCopyItem"
+      icon="copy"
+      key="packagePolicyCopy"
+    >
+      <FormattedMessage
+        id="xpack.fleet.policyDetails.packagePoliciesTable.copyActionTitle"
+        defaultMessage="Copy integration"
+      />
+    </EuiContextMenuItem>,
   ];
 
   if (!agentPolicy || !agentPolicyIsManaged || agentPolicy?.supports_agentless) {

@@ -42,6 +42,7 @@ export type DynamicPage =
   | 'policy_details'
   | 'add_integration_to_policy'
   | 'edit_integration'
+  | 'copy_integration'
   | 'upgrade_package_policy'
   | 'agent_list'
   | 'agent_details'
@@ -76,6 +77,7 @@ export const FLEET_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
+  copy_integration: '/policies/copy-integration/:packagePolicyId',
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
   enrollment_tokens: '/enrollment-tokens',
   uninstall_tokens: '/uninstall-tokens',
@@ -252,6 +254,10 @@ export const pagePathGetters: {
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
+  ],
+  copy_integration: ({ packagePolicyId }) => [
+    FLEET_BASE_PATH,
+    `/policies/copy-integration/${packagePolicyId}`,
   ],
   upgrade_package_policy: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,

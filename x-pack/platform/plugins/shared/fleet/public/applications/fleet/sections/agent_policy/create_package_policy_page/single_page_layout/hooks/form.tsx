@@ -284,6 +284,7 @@ export function useOnSubmit({
   setNewAgentPolicy,
   setSelectedPolicyTab,
   isAddIntegrationFlyout,
+  defaultPolicyData,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -296,6 +297,7 @@ export function useOnSubmit({
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   isAddIntegrationFlyout?: boolean;
+  defaultPolicyData?: Partial<PackagePolicy>;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
@@ -419,6 +421,23 @@ export function useOnSubmit({
           integrationToEnable
         );
 
+        if (defaultPolicyData) {
+          basePackagePolicy.name = defaultPolicyData.name || basePackagePolicy.name;
+          basePackagePolicy.description =
+            defaultPolicyData.description || basePackagePolicy.description;
+          basePackagePolicy.namespace = defaultPolicyData.namespace || basePackagePolicy.namespace;
+          if (defaultPolicyData.inputs) {
+            basePackagePolicy.inputs = defaultPolicyData.inputs;
+          }
+          if (defaultPolicyData.vars) {
+            basePackagePolicy.vars = defaultPolicyData.vars;
+          }
+
+          if (defaultPolicyData.policy_ids) {
+            basePackagePolicy.policy_ids = defaultPolicyData.policy_ids;
+          }
+        }
+
         // Set the package policy with the fetched package
         updatePackagePolicy(basePackagePolicy);
         setIsInitialized(true);
@@ -440,6 +459,8 @@ export function useOnSubmit({
     integration,
     setIntegration,
     isAddIntegrationFlyout,
+    defaultPolicyData,
+    setSelectedPolicyTab,
   ]);
 
   useEffect(() => {
