@@ -250,7 +250,6 @@ export const featuresTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
               taskId,
-              streamName: name,
               params: await (async (): Promise<FeaturesIdentificationTaskParams> => {
                 const connectorId = await resolveConnectorId({
                   connectorId: body.connector_id,
@@ -261,6 +260,7 @@ export const featuresTaskRoute = createServerRoute({
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
+                  streamName: name,
                 };
               })(),
               request,
