@@ -1062,5 +1062,5 @@ export const xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes: Len
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
 };
