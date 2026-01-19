@@ -22,6 +22,13 @@ export class DatePicker {
   private async showStartEndTimes() {
     await this.page.testSubj.waitForSelector('superDatePickerToggleQuickMenuButton');
 
+    // Close any open suggestion lists that might block the date picker button
+    const isSuggestionListVisible = await this.page.isVisible('div.kbnTypeahead');
+    if (isSuggestionListVisible) {
+      await this.page.testSubj.click('unifiedTabs_tabsBar');
+      await this.page.locator('div.kbnTypeahead').waitFor({ state: 'hidden' });
+    }
+
     // Initial check if show/end buttons are visible
     const showBtn = this.page.testSubj.locator('superDatePickerShowDatesButton');
     const endBtn = this.page.testSubj.locator('superDatePickerendDatePopoverButton');
@@ -46,6 +53,7 @@ export class DatePicker {
     }
 
     if (await showBtn.isVisible()) {
+      // Click to show start/end time pickers
       await showBtn.click();
       await this.page.testSubj.waitForSelector('superDatePickerAbsoluteTab');
       await this.page.testSubj.click('superDatePickerstartDatePopoverButton');
