@@ -365,9 +365,11 @@ describe('getCustomPropertySuggestions', () => {
     it('should include description when provided by selection', async () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(
-        jest.fn().mockResolvedValue([
-          { label: 'option', value: 'val', description: 'This is a description' },
-        ])
+        jest
+          .fn()
+          .mockResolvedValue([
+            { label: 'option', value: 'val', description: 'This is a description' },
+          ])
       );
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
