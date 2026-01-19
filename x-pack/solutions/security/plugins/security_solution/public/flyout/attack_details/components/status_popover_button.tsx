@@ -10,6 +10,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { i18n } from '@kbn/i18n';
+import { useInvalidateFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useAttackWorkflowStatusContextMenuItems } from '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { CLICK_TO_CHANGE_ALERT_STATUS } from '../../../detections/components/alerts_table/translations';
@@ -41,10 +42,17 @@ export const StatusPopoverButton = memo(({ enrichedFieldInfo }: StatusPopoverBut
   const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
+  // force attacks to be refetched automatically after status change
+  const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
+
   const currentWorkflowStatus = useMemo(
     () => enrichedFieldInfo.values[0] as AlertWorkflowStatus,
     [enrichedFieldInfo.values]
   );
+  const onWorkflowStatusChange = useCallback(() => {
+    invalidateFindAttackDiscoveries();
+    closeFlyout();
+  }, [closeFlyout, invalidateFindAttackDiscoveries]);
 
   const { items, panels } = useAttackWorkflowStatusContextMenuItems({
     attacksWithWorkflowStatus: [
@@ -55,9 +63,7 @@ export const StatusPopoverButton = memo(({ enrichedFieldInfo }: StatusPopoverBut
       },
     ],
     closePopover: togglePopover,
-    onSuccess: () => {
-      closeFlyout();
-    },
+    onSuccess: onWorkflowStatusChange,
   });
 
   const button = useMemo(
