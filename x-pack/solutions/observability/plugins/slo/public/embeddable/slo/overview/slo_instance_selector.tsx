@@ -131,7 +131,7 @@ export function SloInstanceSelector({ sloId, remoteName, onSelected, hasError }:
         fullWidth
         onSearchChange={onSearchChange}
         isInvalid={hasError}
-        singleSelection
+        singleSelection={{ asPlainText: true }}
       />
     </EuiFormRow>
   );
