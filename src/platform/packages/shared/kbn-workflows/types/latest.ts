@@ -54,10 +54,10 @@ export type {
   BaseConnectorContract,
   HttpMethod,
   StepPropertyHandler,
-  PropertyCompletionFn,
-  PropertyValidationFn,
-  PropertyValidationResult,
-  PropertyCompletionOption,
+  PropertySelectionHandler,
+  SelectionOption,
+  SelectionDetails,
+  SelectionContext,
   PropertyValidationContext,
 } from './v1';
 

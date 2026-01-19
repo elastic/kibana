@@ -244,6 +244,43 @@ export function useYamlValidation(
             ),
             options: decorationOptions,
           });
+        } else if (validationResult.owner === 'custom-property-validation') {
+          if (validationResult.severity !== null) {
+            markers.push({
+              severity: SEVERITY_MAP[validationResult.severity],
+              message: validationResult.message,
+              startLineNumber: validationResult.startLineNumber,
+              startColumn: validationResult.startColumn,
+              endLineNumber: validationResult.endLineNumber,
+              endColumn: validationResult.endColumn,
+              source: 'custom-property-validation',
+            });
+          }
+          const decorationOptions: monaco.editor.IModelDecorationOptions = {
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            hoverMessage: validationResult.hoverMessage
+              ? createMarkdownContent(validationResult.hoverMessage)
+              : null,
+            before: validationResult.beforeMessage
+              ? {
+                  content: validationResult.beforeMessage,
+                  cursorStops: monaco.editor.InjectedTextCursorStops.None,
+                  inlineClassName: `connector-name-badge`,
+                }
+              : null,
+          };
+          if (validationResult.severity !== null) {
+            decorationOptions.inlineClassName = `template-variable-${validationResult.severity}`;
+          }
+          decorations.push({
+            range: new monaco.Range(
+              validationResult.startLineNumber,
+              validationResult.startColumn,
+              validationResult.endLineNumber,
+              validationResult.endColumn
+            ),
+            options: decorationOptions,
+          });
         } else {
           if (validationResult.severity !== null) {
             markers.push({
