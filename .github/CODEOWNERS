@@ -525,6 +525,7 @@ src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
+src/platform/packages/shared/kbn-ftr-llm-proxy @elastic/appex-ai-infra
 src/platform/packages/shared/kbn-grok-ui @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
@@ -2163,8 +2164,10 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 
 # Exclude OAS error baseline file from @elastic/kibana-core ownership
 !/src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
-# Exclude usage collection schema from @elastic/kibana-core ownership
+# Exclude usage collection schemas from @elastic/kibana-core ownership
 !/src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
+!/src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts
+!/src/platform/plugins/private/kibana_usage_collection/server/collectors/management/types.ts
 
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core

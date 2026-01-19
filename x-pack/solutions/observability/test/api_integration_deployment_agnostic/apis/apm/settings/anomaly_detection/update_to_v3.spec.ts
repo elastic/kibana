@@ -6,23 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function apiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
+export default function apiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApi = getService('apmApi');
   const ml = getService('ml');
-
   const es = getService('es');
 
   function getJobs() {
-    return apmApiClient.writeUser({
+    return apmApi.writeUser({
       endpoint: `GET /internal/apm/settings/anomaly-detection/jobs`,
     });
   }
 
   function createJobs(environments: string[]) {
-    return apmApiClient.writeUser({
+    return apmApi.writeUser({
       endpoint: `POST /internal/apm/settings/anomaly-detection/jobs`,
       params: {
         body: { environments },
@@ -53,15 +51,15 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   function callUpdateEndpoint() {
-    return apmApiClient.writeUser({
+    return apmApi.writeUser({
       endpoint: 'POST /internal/apm/settings/anomaly-detection/update_to_v3',
     });
   }
 
-  registry.when('Updating ML jobs to v3', { config: 'trial', archives: [] }, () => {
+  describe('Updating ML jobs to v3', () => {
     before(async () => {
       // Ensure a clean state before running the test suite
-      await ml.cleanMlIndices();
+      await ml.api.cleanMlIndices();
     });
 
     describe('when there are no v2 jobs', () => {
@@ -74,7 +72,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
     describe('when there are only v2 jobs', () => {
       before(async () => {
-        await ml.cleanMlIndices();
+        await ml.api.cleanMlIndices();
         await createV2Jobs(['production', 'development']);
       });
       it('creates a new job for each environment that has a v2 job', async () => {
@@ -93,19 +91,19 @@ export default function apiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await ml.cleanMlIndices();
+        await ml.api.cleanMlIndices();
       });
     });
 
     describe('when there are both v2 and v3 jobs', () => {
       before(async () => {
-        await ml.cleanMlIndices();
+        await ml.api.cleanMlIndices();
         await createV2Jobs(['production', 'development']);
         await createV3Jobs(['production']);
       });
 
       after(async () => {
-        await ml.cleanMlIndices();
+        await ml.api.cleanMlIndices();
       });
 
       it('only creates new jobs for environments that did not have a v3 job', async () => {
