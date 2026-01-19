@@ -25,4 +25,22 @@ describe('toHaveStatusCode', () => {
   it('should fail negation when status code matches', () => {
     expect(() => apiExpect({ status: 200 }).not.toHaveStatusCode(200)).toThrow();
   });
+
+  describe('oneOf option', () => {
+    it('should pass when status is one of the expected codes', () => {
+      expect(() =>
+        apiExpect({ status: 404 }).toHaveStatusCode({ oneOf: [400, 404] })
+      ).not.toThrow();
+    });
+
+    it('should fail when status is not one of the expected codes', () => {
+      expect(() => apiExpect({ status: 500 }).toHaveStatusCode({ oneOf: [400, 404] })).toThrow();
+    });
+
+    it('should support negation with oneOf', () => {
+      expect(() =>
+        apiExpect({ status: 200 }).not.toHaveStatusCode({ oneOf: [400, 404] })
+      ).not.toThrow();
+    });
+  });
 });

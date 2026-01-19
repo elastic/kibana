@@ -146,7 +146,9 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     // Bulk get the policies
     const bulkResponse: ApiResponse = await apiServices.fleet.agent_policies.bulkGet(policyIds);
     expect(bulkResponse).toHaveStatusCode(200);
-    expect(bulkResponse.data.items).toHaveLength(2);
+    expect(bulkResponse).toHaveData({
+      items: [{ id: policy1Response.data.item.id }, { id: policy2Response.data.item.id }],
+    });
     // Clean up both policies
     await Promise.all([
       apiServices.fleet.agent_policies.delete(policy1Response.data.item.id),
@@ -333,7 +335,7 @@ apiTest.describe('Fleet Agent Management', { tag: ['@svlSecurity', '@ess'] }, ()
     const response: ApiResponse = await apiServices.fleet.agent.delete(nonExistentAgentId);
 
     // Should return 400 or 404 for non-existent agent due to ignoreErrors
-    expect([400, 404]).toContain(response.status);
+    expect(response).toHaveStatusCode({ oneOf: [400, 404] });
   });
 });
 

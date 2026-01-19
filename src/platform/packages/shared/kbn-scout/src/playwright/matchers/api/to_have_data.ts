@@ -44,6 +44,7 @@ function toPartialMatch(expected: unknown): unknown {
  * expect(response).toHaveData({ id: 1 }, { exactMatch: true });    // exact match
  * expect(response).toHaveData('success');                          // exact match for primitives
  * expect(response).toHaveData({ items: [{ name: 'foo' }] });       // at least one item with name 'foo'
+ * expect(response).toHaveData({ comments: [{}] });                 // at least one item exists in array
  */
 export function toHaveData<T extends { data: unknown }>(
   obj: T,

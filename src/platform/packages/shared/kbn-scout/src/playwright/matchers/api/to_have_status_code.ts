@@ -10,24 +10,33 @@
 import { expect as baseExpect } from '@playwright/test';
 import { createMatcherError } from './utils';
 
+export interface ToHaveStatusCodeOptions {
+  /** Match if the status code is one of these values */
+  oneOf: number[];
+  // Future: range?: [number, number];
+}
+
 /**
  * Asserts that the response has the expected HTTP status code.
  *
  * @example
  * expect(response).toHaveStatusCode(200);
+ * expect(response).toHaveStatusCode({ oneOf: [200, 201] });
  * expect(response).not.toHaveStatusCode(404);
  */
 export function toHaveStatusCode<T extends { status: unknown }>(
   obj: T,
-  expected: number,
+  expected: number | ToHaveStatusCodeOptions,
   isNegated = false
 ): void {
   const actual = obj.status;
+  const codes = typeof expected === 'number' ? [expected] : expected.oneOf;
+
   try {
     if (isNegated) {
-      baseExpect(actual).not.toBe(expected);
+      baseExpect(codes).not.toContain(actual);
     } else {
-      baseExpect(actual).toBe(expected);
+      baseExpect(codes).toContain(actual);
     }
   } catch {
     throw createMatcherError(expected, 'toHaveStatusCode', actual, isNegated);

@@ -45,13 +45,8 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
     const response = await apiServices.dataViews.getAll();
 
     expect(response).toHaveStatusCode(200);
-    expect(Array.isArray(response.data)).toBe(true);
-    expect(response.data.length).toBeGreaterThan(0);
-
     // Verify our test data view is in the list
-    const foundDataView = response.data.find((dv) => dv.id === dataViewId);
-    expect(foundDataView).toBeDefined();
-    expect(foundDataView?.title).toBe(dataViewTitle);
+    expect(response).toHaveData([{ id: dataViewId, title: dataViewTitle }]);
   });
 
   apiTest('should get a single data view by ID with get()', async ({ apiServices }) => {
@@ -144,15 +139,9 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
         );
 
         expect(response).toHaveStatusCode(200);
-        expect(response.data.length).toBeGreaterThanOrEqual(1);
-
-        const matchingDataView = response.data.find((dv) => dv.id === id1);
-        expect(matchingDataView).toBeDefined();
-        expect(matchingDataView?.title).toBe(title1);
-
-        // Verify the other data view is NOT in the results
-        const nonMatchingDataView = response.data.find((dv) => dv.id === id2);
-        expect(nonMatchingDataView).toBeUndefined();
+        // Should contain title1, but not title2
+        expect(response).toHaveData([{ id: id1, title: title1 }]);
+        expect(response).not.toHaveData([{ id: id2 }]);
       } finally {
         // Clean up
         await apiServices.dataViews.delete(id1);
@@ -255,8 +244,8 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
         const getResponse2 = await apiServices.dataViews.get(id2);
 
         // One should be deleted (404) and one should still exist (200)
-        const statuses = [getResponse1.status, getResponse2.status].sort();
-        expect(statuses).toStrictEqual([200, 404]);
+        expect(getResponse1).toHaveStatusCode({ oneOf: [200, 404] });
+        expect(getResponse2).toHaveStatusCode({ oneOf: [200, 404] });
       } finally {
         // Clean up any remaining data views
         await apiServices.dataViews.delete(id1);
@@ -290,16 +279,24 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
         createdIds.push((response.data as any).data_view.id);
       }
 
-      // Get all and verify they exist
+      // Get all and verify all three exist
       const getAllResponse = await apiServices.dataViews.getAll();
-      const foundDataViews = getAllResponse.data.filter((dv) => createdIds.includes(dv.id));
-      expect(foundDataViews).toHaveLength(3);
+      expect(getAllResponse).toHaveStatusCode(200);
+      expect(getAllResponse).toHaveData([
+        { id: createdIds[0] },
+        { id: createdIds[1] },
+        { id: createdIds[2] },
+      ]);
 
-      // Find with predicate
+      // Find with predicate - verify all three are found
       const findResponse = await apiServices.dataViews.find((dv) =>
         dv.title.includes('multi-test')
       );
-      expect(findResponse.data.length).toBeGreaterThanOrEqual(3);
+      expect(findResponse).toHaveData([
+        { id: createdIds[0] },
+        { id: createdIds[1] },
+        { id: createdIds[2] },
+      ]);
 
       // Delete one by ID
       const deleteResponse = await apiServices.dataViews.delete(createdIds[0]);
@@ -309,12 +306,11 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
       const deleteByTitleResponse = await apiServices.dataViews.deleteByTitle(titles[1]);
       expect(deleteByTitleResponse).toHaveStatusCode(200);
 
-      // Verify only one remains
+      // Verify only the third one remains
       const remainingResponse = await apiServices.dataViews.find((dv) =>
         createdIds.includes(dv.id)
       );
-      expect(remainingResponse.data).toHaveLength(1);
-      expect(remainingResponse.data[0].id).toBe(createdIds[2]);
+      expect(remainingResponse).toHaveData([{ id: createdIds[2] }]);
     } finally {
       // Clean up all created data views
       await Promise.all(createdIds.map((id) => apiServices.dataViews.delete(id)));

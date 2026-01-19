@@ -53,8 +53,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     ]);
 
     expect(response).toHaveStatusCode(200);
-    expect(response.data).toHaveLength(1);
-    expect(response.data[0].severity).toBe('medium');
+    expect(response).toHaveData([{ severity: 'medium' }]);
   });
 
   apiTest('should add a new connector to a case', async ({ apiServices }) => {
@@ -130,8 +129,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({ totalComment: 1 });
-    expect(response.data.comments).toHaveLength(1);
+    expect(response).toHaveData({ totalComment: 1, comments: [{}] });
 
     // find comment by ID
     const commentId = response.data.comments?.[0]?.id;
@@ -159,6 +157,6 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
   apiTest('should search for a case by category', async ({ apiServices }) => {
     const response = await apiServices.cases.find({ category: 'test' });
     expect(response).toHaveStatusCode(200);
-    expect(response.data).toHaveLength(1);
+    expect(response).toHaveData([{ id: caseId }]);
   });
 });

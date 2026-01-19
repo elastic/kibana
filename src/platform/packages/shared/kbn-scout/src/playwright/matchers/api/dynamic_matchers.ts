@@ -12,6 +12,7 @@ import { toHaveHeaders } from './to_have_headers';
 import { toHaveStatusCode } from './to_have_status_code';
 import { toHaveStatusText } from './to_have_status_text';
 import type { ToHaveDataOptions } from './to_have_data';
+import type { ToHaveStatusCodeOptions } from './to_have_status_code';
 
 /**
  * Union type for objects that can have dynamic matchers
@@ -32,8 +33,10 @@ export function createDynamicMatchers(
   const not: Record<string, unknown> = {};
 
   if ('status' in obj) {
-    matchers.toHaveStatusCode = (code: number) => toHaveStatusCode(obj, code);
-    not.toHaveStatusCode = (code: number) => toHaveStatusCode(obj, code, true);
+    matchers.toHaveStatusCode = (code: number | ToHaveStatusCodeOptions) =>
+      toHaveStatusCode(obj, code);
+    not.toHaveStatusCode = (code: number | ToHaveStatusCodeOptions) =>
+      toHaveStatusCode(obj, code, true);
   }
   if ('statusText' in obj) {
     matchers.toHaveStatusText = (text: string) => toHaveStatusText(obj, text);

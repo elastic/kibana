@@ -90,9 +90,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
       page: 1,
     });
     expect(foundResponse).toHaveStatusCode(200);
-    const match = foundResponse.data.data.find((obj: any) => obj.name === alertName);
-    expect(match).toBeDefined();
-    expect(match?.id).toBe(ruleId);
+    expect(foundResponse).toHaveData({ data: [{ name: alertName, id: ruleId }] });
   });
 
   apiTest(`should mute/unmute rule`, async ({ apiServices }) => {
@@ -120,7 +118,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
 
       const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse.data.muted_alert_ids).toContain(mockAlertId);
+      expect(fetchedResponse).toHaveData({ muted_alert_ids: [mockAlertId] });
     });
 
     await apiTest.step('alerting.rules.unmuteAlert', async () => {
@@ -129,7 +127,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
 
       const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse.data.muted_alert_ids).not.toContain(mockAlertId);
+      expect(fetchedResponse).not.toHaveData({ muted_alert_ids: [mockAlertId] });
     });
   });
 

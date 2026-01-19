@@ -9,8 +9,10 @@
 
 import type { ToHaveDataOptions } from './to_have_data';
 
+import type { ToHaveStatusCodeOptions } from './to_have_status_code';
+
 export interface StatusMatchers {
-  toHaveStatusCode(code: number): void;
+  toHaveStatusCode(code: number | ToHaveStatusCodeOptions): void;
 }
 
 export interface StatusTextMatchers {
@@ -46,18 +48,18 @@ export type MatchersFor<T> = IsAny<T> extends true
       };
 
 export interface ValueMatchers {
-  toBe(expected: unknown): void;
-  toEqual(expected: unknown): void;
-  toStrictEqual(expected: unknown): void;
-  toContain(expected: unknown): void;
+  // toBe(expected: unknown): void;
+  // toEqual(expected: unknown): void;
+  // toStrictEqual(expected: unknown): void;
+  // toContain(expected: unknown): void;
   toBeDefined(): void;
-  toBeUndefined(): void;
-  toHaveLength(expected: number): void;
-  toBeGreaterThan(expected: number | bigint): void;
-  toBeGreaterThanOrEqual(expected: number | bigint): void;
-  toBeLessThan(expected: number | bigint): void;
-  toBeLessThanOrEqual(expected: number | bigint): void;
-  toHaveProperty(keyPath: string | string[], value?: unknown): void;
+  // toBeUndefined(): void;
+  // toHaveLength(expected: number): void;
+  // toBeGreaterThan(expected: number | bigint): void;
+  // toBeGreaterThanOrEqual(expected: number | bigint): void;
+  // toBeLessThan(expected: number | bigint): void;
+  // toBeLessThanOrEqual(expected: number | bigint): void;
+  // toHaveProperty(keyPath: string | string[], value?: unknown): void;
 
   not: Omit<ValueMatchers, 'not'>;
 }

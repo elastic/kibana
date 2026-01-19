@@ -18,7 +18,7 @@ apiTest.describe(`SAML Auth fixture`, { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
 
   apiTest(`should create API Key for 'admin' role`, async ({ requestAuth }) => {
     const adminApiCredentials = await requestAuth.getApiKey('admin');
-    expect(adminApiCredentials.apiKey).toHaveProperty('id');
-    expect(adminApiCredentials.apiKey).toHaveProperty('name');
+    expect(adminApiCredentials.apiKey.id).toBeDefined();
+    expect(adminApiCredentials.apiKey.name).toBeDefined();
   });
 });
