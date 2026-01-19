@@ -873,7 +873,9 @@ export const BulkChangeAgentsPrivilegeLevelResponseSchema = ActionIdSchema;
 
 export const PostAgentRollbackRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({
+      meta: { description: 'The agent ID to rollback' },
+    }),
   }),
 };
 
