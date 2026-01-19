@@ -19,6 +19,7 @@ import type {
   PackageInfo,
   PackagePolicyInput,
   NewPackagePolicyInput,
+  PackagePolicySOAttributes,
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
@@ -28,7 +29,7 @@ import {
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../common/constants/epm';
-import { _compilePackagePolicyInputs } from '../package_policy';
+import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
 
@@ -179,7 +180,7 @@ export const getFullInputStreams = (
   };
 };
 
-const recompileInputsWithAgentVersion = async (
+export const recompileInputsWithAgentVersion = async (
   packageInfo: PackageInfo,
   packagePolicy: PackagePolicy,
   agentVersion: string,
@@ -209,7 +210,8 @@ export const storedPackagePoliciesToAgentInputs = async (
   agentPolicyNamespace?: string,
   globalDataTags?: GlobalDataTag[],
   agentVersion?: string,
-  soClient?: SavedObjectsClientContract
+  soClient?: SavedObjectsClientContract,
+  hasAgentVersionConditions?: boolean
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -230,21 +232,26 @@ export const storedPackagePoliciesToAgentInputs = async (
 
     let packagePolicyWithUpdatedInputs = packagePolicy;
     // recompile inputs to apply agent version conditions
-    if (agentVersion && appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+    if (
+      agentVersion &&
+      appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
+      hasAgentVersionConditions
+    ) {
       const span = apm.startSpan(
-        `recompileInputsWithAgentVersion ${packageInfo!.name}-${
+        `read packagePolicySO inputs_for_versions ${packageInfo!.name}-${
           packageInfo!.version
         } ${agentVersion}`,
         'full-agent-policy'
       );
-      // span?.addLabels({ pkg: `${packageInfo!.name}-${packageInfo!.version}`, agentVersion });
-      const inputs = await recompileInputsWithAgentVersion(
-        packageInfo!,
-        packagePolicy,
-        agentVersion,
-        soClient!
+      const packagePolicySO = await soClient?.get<PackagePolicySOAttributes>(
+        await getPackagePolicySavedObjectType(),
+        packagePolicy.id
       );
-      packagePolicyWithUpdatedInputs = { ...packagePolicy, inputs };
+      packagePolicyWithUpdatedInputs = {
+        ...packagePolicy,
+        inputs:
+          packagePolicySO!.attributes.inputs_for_versions?.[agentVersion] ?? packagePolicy.inputs,
+      };
       span?.end();
     }
 

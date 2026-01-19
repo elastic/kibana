@@ -163,6 +163,7 @@ export interface PackagePolicySOAttributes {
   overrides?: any | null;
   bump_agent_policy_revision?: boolean;
   latest_revision?: boolean;
+  inputs_for_versions?: Record<string, PackagePolicyInput[]>;
 }
 
 export interface OutputSoBaseAttributes {

@@ -69,6 +69,7 @@ export async function getVersionSpecificPolicies(
 
     // if none of the inputs have package level agent version conditions, it means some inputs have template level conditions, so have to recreate the full agent policy with agent version
     if (fullPolicy.inputs.every((input) => !input.meta?.package?.agentVersion)) {
+      // read compiled template for agent version from package policy SO
       updatedFullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, fullPolicy.id, {
         agentVersion: version,
       });
