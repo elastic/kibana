@@ -7,7 +7,7 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { StreamInsights } from '@kbn/streams-schema';
+import type { InsightsResult } from '@kbn/streams-schema';
 import { createHash } from 'node:crypto';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
@@ -68,7 +68,7 @@ export function createStreamsInsightsIdentificationTask(taskContext: TaskContext
                   logger: taskContext.logger.get('insights_identification'),
                 });
 
-                await taskClient.complete<InsightsIdentificationTaskParams, StreamInsights>(
+                await taskClient.complete<InsightsIdentificationTaskParams, InsightsResult>(
                   _task,
                   { streamNames, connectorId, start, end },
                   result

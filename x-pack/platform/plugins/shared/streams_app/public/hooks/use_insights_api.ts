@@ -44,5 +44,27 @@ export function useInsightsApi() {
         },
       });
     },
+    cancelInsightsIdentificationTask: async (streamNames: string[]) => {
+      return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
+        signal,
+        params: {
+          body: {
+            action: 'cancel' as const,
+            streamNames,
+          },
+        },
+      });
+    },
+    acknowledgeInsightsIdentificationTask: async (streamNames: string[]) => {
+      return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
+        signal,
+        params: {
+          body: {
+            action: 'acknowledge' as const,
+            streamNames,
+          },
+        },
+      });
+    },
   };
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface StreamInsights {
+export interface InsightsResult {
   summary: string;
   tokenUsage: {
     prompt: number;

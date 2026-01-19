@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { StreamInsights } from '@kbn/streams-schema';
+import type { InsightsResult } from '@kbn/streams-schema';
 import type { InsightsIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/insights_identification';
 import {
   getStreamsInsightsIdentificationTaskId,
@@ -21,7 +21,7 @@ import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
-export type InsightsTaskResult = TaskResult<StreamInsights>;
+export type InsightsTaskResult = TaskResult<InsightsResult>;
 
 const insightsTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/_insights/_task',
@@ -32,7 +32,7 @@ const insightsTaskRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -51,11 +51,11 @@ const insightsTaskRoute = createServerRoute({
       }),
       z.object({
         action: z.literal('cancel').describe('Cancel an in-progress generation task'),
-        taskId: z.string().describe('The ID of the task to cancel'),
+        streamNames: z.array(z.string()).describe('Names of the streams to identify insights in'),
       }),
       z.object({
         action: z.literal('acknowledge').describe('Acknowledge a completed generation task'),
-        taskId: z.string().describe('The ID of the task to acknowledge'),
+        streamNames: z.array(z.string()).describe('Names of the streams to identify insights in'),
       }),
     ]),
   }),
@@ -74,10 +74,7 @@ const insightsTaskRoute = createServerRoute({
 
     const { body } = params;
 
-    const taskId =
-      body.action === 'schedule'
-        ? getStreamsInsightsIdentificationTaskId(body.streamNames)
-        : body.taskId;
+    const taskId = getStreamsInsightsIdentificationTaskId(body.streamNames);
 
     const actionParams =
       body.action === 'schedule'
@@ -105,7 +102,7 @@ const insightsTaskRoute = createServerRoute({
           } as const)
         : ({ action: body.action } as const);
 
-    return handleTaskAction<InsightsIdentificationTaskParams, StreamInsights>({
+    return handleTaskAction<InsightsIdentificationTaskParams, InsightsResult>({
       taskClient,
       taskId,
       ...actionParams,
@@ -138,7 +135,7 @@ const insightsStatusRoute = createServerRoute({
 
     const { body } = params;
 
-    return taskClient.getStatus<InsightsIdentificationTaskParams, StreamInsights>(
+    return taskClient.getStatus<InsightsIdentificationTaskParams, InsightsResult>(
       getStreamsInsightsIdentificationTaskId(body.streamNames)
     );
   },
