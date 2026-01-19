@@ -9,8 +9,10 @@
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLAstQueryExpression } from '../..';
 import { BasicPrettyPrinter, SOURCE_COMMANDS } from '../..';
-import type { ESQLColumnData, ESQLPolicy } from '../commands/registry/types';
+import { UnmappedFieldsStrategy } from '../commands/registry/types';
+import { type ESQLColumnData, type ESQLPolicy } from '../commands/registry/types';
 import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
+import { getUnmappedFieldsStrategy } from '../commands/definitions/utils/settings';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -26,6 +28,13 @@ export class QueryColumns {
   private static readonly cache = new Map<string, ESQLColumnData[]>();
   // Adding a max size to the cache to prevent unbounded memory growth
   private static readonly MAX_CACHE_SIZE = 100;
+
+  /** Strategy to handle unmapped fields
+   * FAIL, not mapped columns are treated as errors.
+   * LOAD, not mapped columns are loaded from _source as a keyword field if possible.
+   * NULLIFY, not mapped columns are treated as null.
+   */
+  private unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL;
 
   /**
    * Retrieves from cache the columns for a given query, ignoring case.
@@ -69,8 +78,12 @@ export class QueryColumns {
     private readonly query: ESQLAstQueryExpression,
     private readonly originalQueryText: string,
     private readonly resourceRetriever?: ESQLCallbacks,
-    private readonly options?: { invalidateColumnsCache?: boolean }
-  ) {}
+    private readonly options?: {
+      invalidateColumnsCache?: boolean;
+    }
+  ) {
+    this.unmappedFieldsStrategy = getUnmappedFieldsStrategy(query.header);
+  }
 
   /**
    * Returns columns for this query, filtered by type and optionally ignoring some names.
@@ -175,7 +188,8 @@ export class QueryColumns {
         fields,
         fetchFields,
         getPolicies,
-        this.originalQueryText
+        this.originalQueryText,
+        this.unmappedFieldsStrategy
       );
     }
 
@@ -204,7 +218,8 @@ export class QueryColumns {
       fieldsAvailableAfterPreviousCommand,
       fetchFields,
       getPolicies,
-      this.originalQueryText
+      this.originalQueryText,
+      this.unmappedFieldsStrategy
     );
 
     return availableFields;
