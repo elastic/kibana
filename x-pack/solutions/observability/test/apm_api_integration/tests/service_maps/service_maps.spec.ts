@@ -206,29 +206,36 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           it('ensures anomaly scores are never null or undefined', () => {
             // Validates the fix for the bug where top_metrics on mixed document types
             // (record + model_plot) could return model_plot docs with null record_score
-            const dataWithAnomalies = response.body.anomalies?.serviceAnomalies;
+            const dataWithAnomalies = getElements(response).filter(
+              (el): el is { data: ServiceConnectionNode } =>
+                !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
+            );
+
             expect(dataWithAnomalies).not.to.be.empty();
 
             dataWithAnomalies.forEach((anomaly) => {
+              const node = anomaly.data;
+              const stats = node.serviceAnomalyStats;
+
               // anomalyScore must be a valid finite number >= 0 (never null/undefined/NaN)
-              expect(anomaly.anomalyScore).to.be.a('number');
-              expect(anomaly.anomalyScore).not.to.be(null);
-              expect(Number.isFinite(anomaly.anomalyScore)).to.be(true);
-              expect(anomaly.anomalyScore >= 0).to.be(true);
+              expect(stats?.anomalyScore).to.be.a('number');
+              expect(stats?.anomalyScore).not.to.be(null);
+              expect(Number.isFinite(stats?.anomalyScore)).to.be(true);
+              expect((stats?.anomalyScore ?? 0) >= 0).to.be(true);
 
               // All monitored services must have complete, valid data
-              expect(anomaly.actualValue).to.be.a('number');
-              expect(Number.isFinite(anomaly.actualValue)).to.be(true);
-              expect(anomaly.transactionType).to.be.a('string');
-              expect(anomaly.transactionType.length).to.be.greaterThan(0);
-              expect(anomaly.serviceName).to.be.a('string');
-              expect(anomaly.serviceName.length).to.be.greaterThan(0);
-              expect(anomaly.jobId).to.match(/^apm-/);
+              expect(stats?.actualValue).to.be.a('number');
+              expect(Number.isFinite(stats?.actualValue)).to.be(true);
+              expect(stats?.transactionType).to.be.a('string');
+              expect(stats?.transactionType?.length).to.be.greaterThan(0);
+              expect(node['service.name']).to.be.a('string');
+              expect(node['service.name']?.length).to.be.greaterThan(0);
+              expect(stats?.jobId).to.match(/^apm-/);
 
               // healthStatus must be valid and match anomalyScore
-              expect(anomaly.healthStatus).to.match(/^(healthy|warning|critical)$/);
-              if (anomaly.anomalyScore === 0) {
-                expect(anomaly.healthStatus).to.equal('healthy');
+              expect(stats?.healthStatus).to.match(/^(healthy|warning|critical)$/);
+              if (stats?.anomalyScore === 0) {
+                expect(stats?.healthStatus).to.equal('healthy');
               }
             });
           });
