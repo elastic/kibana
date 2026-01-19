@@ -8,6 +8,7 @@
 import type { SearchSLODefinitionsParams, SearchSLODefinitionResponse } from '@kbn/slo-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { getSummaryIndices } from './utils/get_summary_indices';
 import type { SLOSettings } from '../domain/models';
 
@@ -103,7 +104,9 @@ export class SearchSLODefinitions {
         const hit = bucket.slo_details.hits.hits[0];
         const sloSrc = hit?._source?.slo ?? {};
         const kibanaUrl = hit?._source?.kibanaUrl;
-        const remoteName = hit?.fields?.remoteName;
+        const indexName = hit?._index;
+        const remoteName =
+          indexName && isCCSRemoteIndexName(indexName) ? hit?.fields?.remoteName : undefined;
 
         const rawGroupBy = sloSrc.groupBy ?? sloSrc.groupings ?? ALL_VALUE;
         const groupBy = normalizeGroupBy(rawGroupBy);
