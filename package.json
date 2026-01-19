@@ -38,6 +38,9 @@
   },
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
+    "build:lens-docs": "node scripts/capture_oas_snapshot --include-path /api/lens --no-serverless --update",
+    "deploy:lens-docs": "cd oas_docs && make lens-docs",
+    "lens-docs": "yarn build:lens-docs && yarn deploy:lens-docs",
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
     "build": "node --no-experimental-require-module scripts/build --all-platforms",
     "build:apidocs": "node --no-experimental-require-module scripts/build_api_docs",
