@@ -12189,7 +12189,7 @@
     "@smithy/url-parser" "^4.2.0"
     tslib "^2.6.2"
 
-"@smithy/eventstream-codec@4.0.1", "@smithy/eventstream-codec@^4.0.1":
+"@smithy/eventstream-codec@4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@smithy/eventstream-codec/-/eventstream-codec-4.0.1.tgz#8e0beae84013eb3b497dd189470a44bac4411bae"
   integrity sha512-Q2bCAAR6zXNVtJgifsU16ZjKGqdw/DyecKNgIgi7dlqw04fqDu0mnq+JmGphqheypVc64CYq3azSuCpAdFk2+A==
@@ -12209,16 +12209,7 @@
     "@smithy/util-hex-encoding" "^4.1.0"
     tslib "^2.6.2"
 
-"@smithy/eventstream-serde-browser@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@smithy/eventstream-serde-browser/-/eventstream-serde-browser-4.0.1.tgz#cdbbb18b9371da363eff312d78a10f6bad82df28"
-  integrity sha512-HbIybmz5rhNg+zxKiyVAnvdM3vkzjE6ccrJ620iPL8IXcJEntd3hnBl+ktMwIy12Te/kyrSbUb8UCdnUT4QEdA==
-  dependencies:
-    "@smithy/eventstream-serde-universal" "^4.0.1"
-    "@smithy/types" "^4.1.0"
-    tslib "^2.6.2"
-
-"@smithy/eventstream-serde-browser@^4.0.5":
+"@smithy/eventstream-serde-browser@^4.0.1", "@smithy/eventstream-serde-browser@^4.0.5":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@smithy/eventstream-serde-browser/-/eventstream-serde-browser-4.1.1.tgz#f7df13ebd5a6028b12b496f12eecdd08c4c9b792"
   integrity sha512-Q9QWdAzRaIuVkefupRPRFAasaG/droBqn1feiMnmLa+LLEUG45pqX1+FurHFmlqiCfobB3nUlgoJfeXZsr7MPA==
@@ -12227,15 +12218,7 @@
     "@smithy/types" "^4.5.0"
     tslib "^2.6.2"
 
-"@smithy/eventstream-serde-config-resolver@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@smithy/eventstream-serde-config-resolver/-/eventstream-serde-config-resolver-4.0.1.tgz#3662587f507ad7fac5bd4505c4ed6ed0ac49a010"
-  integrity sha512-lSipaiq3rmHguHa3QFF4YcCM3VJOrY9oq2sow3qlhFY+nBSTF/nrO82MUQRPrxHQXA58J5G1UnU2WuJfi465BA==
-  dependencies:
-    "@smithy/types" "^4.1.0"
-    tslib "^2.6.2"
-
-"@smithy/eventstream-serde-config-resolver@^4.1.3":
+"@smithy/eventstream-serde-config-resolver@^4.0.1", "@smithy/eventstream-serde-config-resolver@^4.1.3":
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/@smithy/eventstream-serde-config-resolver/-/eventstream-serde-config-resolver-4.2.1.tgz#77333a110361bfe2749b685d31e01299ede87c40"
   integrity sha512-oSUkF9zDN9zcOUBMtxp8RewJlh71E9NoHWU8jE3hU9JMYCsmW4assVTpgic/iS3/dM317j6hO5x18cc3XrfvEw==
@@ -12243,7 +12226,7 @@
     "@smithy/types" "^4.5.0"
     tslib "^2.6.2"
 
-"@smithy/eventstream-serde-node@4.0.1", "@smithy/eventstream-serde-node@^4.0.1":
+"@smithy/eventstream-serde-node@4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@smithy/eventstream-serde-node/-/eventstream-serde-node-4.0.1.tgz#3799c33e0148d2b923a66577d1dbc590865742ce"
   integrity sha512-o4CoOI6oYGYJ4zXo34U8X9szDe3oGjmHgsMGiZM0j4vtNoT+h80TLnkUcrLZR3+E6HIxqW+G+9WHAVfl0GXK0Q==
@@ -12252,7 +12235,7 @@
     "@smithy/types" "^4.1.0"
     tslib "^2.6.2"
 
-"@smithy/eventstream-serde-node@^4.0.5":
+"@smithy/eventstream-serde-node@^4.0.1", "@smithy/eventstream-serde-node@^4.0.5":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@smithy/eventstream-serde-node/-/eventstream-serde-node-4.1.1.tgz#635819a756cb8a69a7e3eb91ca9076284ea00939"
   integrity sha512-tn6vulwf/ScY0vjhzptSJuDJJqlhNtUjkxJ4wiv9E3SPoEqTEKbaq6bfqRO7nvhTG29ALICRcvfFheOUPl8KNA==
@@ -12261,16 +12244,7 @@
     "@smithy/types" "^4.5.0"
     tslib "^2.6.2"
 
-"@smithy/eventstream-serde-universal@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@smithy/eventstream-serde-universal/-/eventstream-serde-universal-4.0.1.tgz#ddb2ab9f62b8ab60f50acd5f7c8b3ac9d27468e2"
-  integrity sha512-Z94uZp0tGJuxds3iEAZBqGU2QiaBHP4YytLUjwZWx+oUeohCsLyUm33yp4MMBmhkuPqSbQCXq5hDet6JGUgHWA==
-  dependencies:
-    "@smithy/eventstream-codec" "^4.0.1"
-    "@smithy/types" "^4.1.0"
-    tslib "^2.6.2"
-
-"@smithy/eventstream-serde-universal@^4.1.1":
+"@smithy/eventstream-serde-universal@^4.0.1", "@smithy/eventstream-serde-universal@^4.1.1":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@smithy/eventstream-serde-universal/-/eventstream-serde-universal-4.1.1.tgz#803cdde6a17ac501cc700ce38400caf70715ecb1"
   integrity sha512-uLOAiM/Dmgh2CbEXQx+6/ssK7fbzFhd+LjdyFxXid5ZBCbLHTFHLdD/QbXw5aEDsLxQhgzDxLLsZhsftAYwHJA==
@@ -25095,7 +25069,7 @@ langchain@0.3.35, "langchain@>=0.2.3 <0.3.0 || >=0.3.4 <0.4.0":
     yaml "^2.2.1"
     zod "^3.25.32"
 
-langsmith@0.3.29, "langsmith@>=0.2.8 <0.4.0", langsmith@^0.3.29:
+langsmith@0.3.29:
   version "0.3.29"
   resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.3.29.tgz#75b8df90b8a724f320ff0cdc784768117e17a922"
   integrity sha512-JPF2B339qpYy9FyuY4Yz1aWYtgPlFc/a+VTj3L/JcFLHCiMP7+Ig8I9jO+o1QwVa+JU3iugL1RS0wwc+Glw0zA==
@@ -25108,7 +25082,7 @@ langsmith@0.3.29, "langsmith@>=0.2.8 <0.4.0", langsmith@^0.3.29:
     semver "^7.6.3"
     uuid "^10.0.0"
 
-langsmith@^0.3.67:
+"langsmith@>=0.2.8 <0.4.0", langsmith@^0.3.29, langsmith@^0.3.67:
   version "0.3.72"
   resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.3.72.tgz#82e1dc8e23d7e1101e9e26353b18fb3170884f29"
   integrity sha512-XjTonMq2fIebzV0BRlPx8mi+Ih/NsQT6W484hrW/pJYuq0aT5kpLtzQthVVmsXH8ZYYkgkbQ5Gh5Mz1qoCrAwg==
