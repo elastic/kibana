@@ -24,7 +24,6 @@ import {
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
-import type { ConfigType } from '../../../../../../config';
 
 jest.mock('../../../../../machine_learning/authz');
 
