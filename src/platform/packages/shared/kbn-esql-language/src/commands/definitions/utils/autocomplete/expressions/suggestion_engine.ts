@@ -146,7 +146,11 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
 function computeDerivedState(ctx: ExpressionContext): ExpressionComputedMetadata {
   const { expressionRoot, innerText, cursorPosition, context } = ctx;
   const position: ExpressionPosition = getPosition(innerText, expressionRoot);
-  const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const expressionType = getExpressionType(
+    expressionRoot,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
   const isComplete = isExpressionComplete(expressionType, innerText);
   const insideFunction =
     (expressionRoot &&
