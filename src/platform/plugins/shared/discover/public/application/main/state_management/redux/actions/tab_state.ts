@@ -7,9 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isFunction } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  type AggregateQuery,
+  type Query,
+  type TimeRange,
+  isOfAggregateQueryType,
+  isOfQueryType,
+} from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
@@ -17,7 +28,14 @@ import {
   type TabActionPayload,
 } from '../internal_state';
 import { selectTab } from '../selectors';
-import type { DiscoverInternalState, TabState } from '../types';
+import { selectTabRuntimeState } from '../runtime_state';
+import type {
+  DiscoverAppState,
+  DiscoverInternalState,
+  TabState,
+  UpdateESQLQueryActionPayload,
+} from '../types';
+import { addLog } from '../../../../../utils/add_log';
 
 type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
 
@@ -130,4 +148,141 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
     ]);
+  };
+
+/**
+ * Triggered when transitioning from ESQL to Dataview
+ * Clean ups the ES|QL query and moves to the dataview mode
+ */
+export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataViewId: string }>]
+> = ({ tabId, dataViewId }) =>
+  async function transitionFromESQLToDataViewThunkFn(dispatch) {
+    dispatch(
+      updateAppState({
+        tabId,
+        appState: {
+          query: {
+            language: 'kuery',
+            query: '',
+          },
+          columns: [],
+          dataSource: {
+            type: DataSourceType.DataView,
+            dataViewId,
+          },
+        },
+      })
+    );
+  };
+
+const clearTimeFieldFromSort = (
+  sort: DiscoverAppState['sort'],
+  timeFieldName: string | undefined
+) => {
+  if (!Array.isArray(sort) || !timeFieldName) return sort;
+
+  const filteredSort = sort.filter(([field]) => field !== timeFieldName);
+
+  return filteredSort;
+};
+
+/**
+ * Triggered when transitioning from ESQL to Dataview
+ * Clean ups the ES|QL query and moves to the dataview mode
+ */
+export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView }>]
+> = ({ tabId, dataView }) =>
+  async function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+    const currentState = getState();
+    const appState = selectTab(currentState, tabId).appState;
+    const { query, sort } = appState;
+    const filterQuery = query && isOfQueryType(query) ? query : undefined;
+    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
+    const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
+
+    dispatch(
+      updateAppState({
+        tabId,
+        appState: {
+          query: { esql: queryString },
+          filters: [],
+          dataSource: {
+            type: DataSourceType.Esql,
+          },
+          columns: [],
+          sort: clearedSort,
+        },
+      })
+    );
+
+    // clears pinned filters
+    dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
+  };
+
+/**
+ * Updates the ES|QL query string
+ */
+export const updateESQLQuery: InternalStateThunkActionCreator<[UpdateESQLQueryActionPayload]> = ({
+  tabId,
+  queryOrUpdater,
+}) =>
+  async function updateESQLQueryThunkFn(dispatch, getState) {
+    addLog('updateESQLQuery');
+    const currentState = getState();
+    const appState = selectTab(currentState, tabId).appState;
+    const { query: currentQuery } = appState;
+
+    if (!isOfAggregateQueryType(currentQuery)) {
+      throw new Error(
+        'Cannot update a non-ES|QL query. Make sure this function is only called once in ES|QL mode.'
+      );
+    }
+
+    const queryUpdater = isFunction(queryOrUpdater) ? queryOrUpdater : () => queryOrUpdater;
+    const query = { esql: queryUpdater(currentQuery.esql) };
+
+    dispatch(updateAppState({ tabId, appState: { query } }));
+  };
+
+/**
+ * Triggered when a user submits a query in the search bar
+ */
+export const onQuerySubmit: InternalStateThunkActionCreator<
+  [
+    TabActionPayload<{
+      payload: { dateRange: TimeRange; query?: Query | AggregateQuery };
+      isUpdate?: boolean;
+    }>
+  ]
+> = ({ tabId, payload, isUpdate }) =>
+  async function onQuerySubmitThunkFn(
+    dispatch,
+    getState,
+    { searchSessionManager, runtimeStateManager, services }
+  ) {
+    const { scopedEbtManager$, stateContainer$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
+
+    const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
+      const scopedEbtManager = scopedEbtManager$.getValue();
+      const { fieldsMetadata } = services;
+
+      scopedEbtManager.trackSubmittingQuery({
+        query,
+        fieldsMetadata,
+      });
+    };
+
+    trackQueryFields(payload.query);
+
+    if (isUpdate === false) {
+      // remove the search session if the given query is not just updated
+      searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
+      addLog('onQuerySubmit triggers data fetching');
+      stateContainer$.getValue()?.dataState.fetch();
+    }
   };

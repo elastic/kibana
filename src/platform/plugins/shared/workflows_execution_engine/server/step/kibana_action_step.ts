@@ -22,7 +22,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 // Extend BaseStep for kibana-specific properties
 export interface KibanaActionStep extends BaseStep {
-  type: string; // e.g., 'kibana.createCaseDefaultSpace'
+  type: string; // e.g., 'kibana.createCase'
   with?: Record<string, any>;
 }
 
@@ -53,7 +53,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
     try {
-      // Support both direct step types (kibana.createCaseDefaultSpace) and atomic+configuration pattern
+      // Support both direct step types (kibana.createCase) and atomic+configuration pattern
       const stepType = this.step.type || (this.step as any).configuration?.type;
       // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
       const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;

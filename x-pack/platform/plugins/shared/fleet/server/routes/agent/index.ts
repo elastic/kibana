@@ -1242,6 +1242,38 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
               },
             },
           },
+          options: {
+            oasOperationObject: () => ({
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            actionId: 'actionId',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
         },
         rollbackAgentHandler
       );
@@ -1252,6 +1284,15 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         security: {
           authz: {
             requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Bulk rollback agents`,
+        description: `Rollback multiple agents to the previous version.`,
+        options: {
+          tags: ['oas-tag:Elastic Agent actions'],
+          availability: {
+            since: '9.4.0',
+            stability: 'experimental',
           },
         },
       })
@@ -1270,6 +1311,53 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
                 body: genericErrorResponse,
               },
             },
+          },
+          options: {
+            oasOperationObject: () => ({
+              requestBody: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      bulkRollbackAgentsRequest: {
+                        value: {
+                          agents: ['agent-1', 'agent-2'],
+                          batchSize: 100,
+                          includeInactive: false,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            actionIds: ['actionId1', 'actionId2'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
           },
         },
         bulkRollbackAgentHandler
