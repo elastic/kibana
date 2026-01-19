@@ -6202,7 +6202,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-connectors-plugin@link:x-pack/platform/plugins/shared/data_connectors":
+"@kbn/data-catalog-plugin@link:x-pack/platform/plugins/shared/data_catalog":
   version "0.0.0"
   uid ""
 
@@ -6238,7 +6238,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-sources-registry-plugin@link:x-pack/platform/plugins/shared/data_sources_registry":
+"@kbn/data-sources-plugin@link:x-pack/platform/plugins/shared/data_sources":
   version "0.0.0"
   uid ""
 
@@ -6306,7 +6306,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-data-connectors@link:src/platform/packages/shared/deeplinks/data_connectors":
+"@kbn/deeplinks-data-sources@link:src/platform/packages/shared/deeplinks/data_sources":
   version "0.0.0"
   uid ""
 
