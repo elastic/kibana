@@ -108,8 +108,7 @@ export class SearchSLODefinitions {
         const remoteName =
           indexName && isCCSRemoteIndexName(indexName) ? hit?.fields?.remoteName : undefined;
 
-        const rawGroupBy = sloSrc.groupBy ?? sloSrc.groupings ?? ALL_VALUE;
-        const groupBy = normalizeGroupBy(rawGroupBy);
+        const groupBy = normalizeGroupBy(sloSrc.groupBy);
 
         const item: {
           id: string;
