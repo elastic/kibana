@@ -7,16 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableVisualizationState } from '@kbn/lens-common';
-import {
-  LENS_ROW_HEIGHT_MODE,
-  LEGACY_SINGLE_ROW_HEIGHT_MODE,
-  LENS_DATAGRID_DENSITY,
-} from '@kbn/lens-common';
+import type { DatatableVisualizationState, RowHeightMode } from '@kbn/lens-common';
+import { LENS_ROW_HEIGHT_MODE, LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
 import { initial } from 'lodash';
 import { TRANSPOSE_SEPARATOR, getOriginalId, isTransposeId } from '@kbn/transpose-utils';
 import type { DatatableState } from '../../../../schema';
 import type { ColumnIdMapping } from './columns';
+import { stripUndefined } from '../../utils';
+
+type HeightAPI = NonNullable<NonNullable<DatatableState['density']>['height']>;
+type ValueHeightAPI = HeightAPI['value'];
+type HeaderHeightAPI = HeightAPI['header'];
+
+function buildHeightAPI(
+  type: 'value',
+  heightMode?: RowHeightMode,
+  heightLines?: number
+): ValueHeightAPI | undefined;
+function buildHeightAPI(
+  type: 'header',
+  heightMode?: RowHeightMode,
+  heightLines?: number
+): HeaderHeightAPI | undefined;
+function buildHeightAPI(
+  type: 'value' | 'header',
+  heightMode?: RowHeightMode,
+  heightLines?: number
+): ValueHeightAPI | HeaderHeightAPI | undefined {
+  if (!heightMode && !heightLines) {
+    return undefined;
+  }
+
+  if (heightMode === LENS_ROW_HEIGHT_MODE.auto) {
+    return { type: LENS_ROW_HEIGHT_MODE.auto };
+  }
+
+  const lines = heightLines ?? 1;
+  return type === 'value'
+    ? { type: LENS_ROW_HEIGHT_MODE.custom, lines }
+    : { type: LENS_ROW_HEIGHT_MODE.custom, max_lines: lines };
+}
 
 function parseDensityToAPI(
   visualization: Pick<
@@ -31,42 +61,12 @@ function parseDensityToAPI(
     return;
   }
 
-  const height: Record<string, unknown> = {};
-  const isLegacySingleMode = (heightMode: string) => heightMode === LEGACY_SINGLE_ROW_HEIGHT_MODE;
-  const getHeightMode = (heightMode: string) =>
-    isLegacySingleMode(heightMode) ? LENS_ROW_HEIGHT_MODE.custom : heightMode;
-  const shouldIncludeLines = (isLegacy: boolean, heightMode: string, heightLines?: number) =>
-    (heightMode === LENS_ROW_HEIGHT_MODE.custom && heightLines) || isLegacy;
-
-  if (rowHeight || rowHeightLines) {
-    // Handle legacy 'single' row height mode by mapping it to 'custom'
-    const isLegacyRowHeight = rowHeight ? isLegacySingleMode(rowHeight) : false;
-    const heightMode = rowHeight ? getHeightMode(rowHeight) : LENS_ROW_HEIGHT_MODE.custom;
-    const shouldIncludeRowLines = shouldIncludeLines(isLegacyRowHeight, heightMode, rowHeightLines);
-
-    height.value = {
-      type: heightMode,
-      ...(shouldIncludeRowLines ? { lines: rowHeightLines ?? 1 } : {}),
-    };
-  }
-
-  if (headerRowHeight || headerRowHeightLines) {
-    // Handle legacy 'single' header row height mode by mapping it to 'custom'
-    const isLegacyHeaderRowHeight = headerRowHeight ? isLegacySingleMode(headerRowHeight) : false;
-    const heightMode = headerRowHeight
-      ? getHeightMode(headerRowHeight)
-      : LENS_ROW_HEIGHT_MODE.custom;
-    const shouldIncludeHeaderMaxLines = shouldIncludeLines(
-      isLegacyHeaderRowHeight,
-      heightMode,
-      headerRowHeightLines
-    );
-
-    height.header = {
-      type: heightMode,
-      ...(shouldIncludeHeaderMaxLines ? { max_lines: headerRowHeightLines ?? 1 } : {}),
-    };
-  }
+  const valueHeight = buildHeightAPI('value', rowHeight, rowHeightLines);
+  const headerHeight = buildHeightAPI('header', headerRowHeight, headerRowHeightLines);
+  const height = stripUndefined<NonNullable<NonNullable<DatatableState['density']>['height']>>({
+    value: valueHeight,
+    header: headerHeight,
+  });
 
   return {
     ...(density ? { mode: density === LENS_DATAGRID_DENSITY.NORMAL ? 'default' : density } : {}),
