@@ -164,32 +164,40 @@ export class RuleDetailsPage {
   }
 
   /**
-   * Gets the dashboard selector input field locator
-   */
-  public get dashboardSelectorInput() {
-    return this.dashboardsSelector.getByTestId('comboBoxSearchInput');
-  }
-
-  /**
    * Gets the combobox options list locator
    */
   public get comboboxOptionsList() {
     return this.page.locator('[data-test-subj*="comboBoxOptionsList"]');
   }
 
-  async openDashboardsDropdown() {
+  /**
+   * Opens the dashboards combobox and returns all available option texts
+   */
+  async getDashboardsOptionsList(): Promise<string[]> {
+    // Click the dashboard selector to open the dropdown
     await this.dashboardsSelector.click();
+
+    // Wait for the dropdown portal to be created
     await expect(this.comboboxOptionsList).toBeAttached({ timeout: BIGGER_TIMEOUT });
+
     // Wait for the loading spinner to disappear if present
     const spinner = this.comboboxOptionsList.locator('.euiLoadingSpinner');
     await spinner.waitFor({ state: 'hidden', timeout: SHORTER_TIMEOUT }).catch(() => {
       // Spinner might not appear if data is cached or loads very quickly
     });
-    return this.comboboxOptionsList;
-  }
 
-  async closeDashboardsDropdown() {
+    // Wait for at least one option to be available
+    await expect(this.comboboxOptionsList.locator('[role="option"]')).not.toHaveCount(0, {
+      timeout: BIGGER_TIMEOUT,
+    });
+
+    // Get the visible text from all options
+    const optionsText = await this.comboboxOptionsList.allTextContents();
+
+    // Close the dropdown
     await this.page.keyboard.press('Escape');
+
+    return optionsText;
   }
 
   /**
