@@ -19,6 +19,8 @@
           "QueryDslQueryContainer"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
             "label": "{\n  filter,\n  kuery,\n  start,\n  end,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 82,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -45,6 +49,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "lineNumber": 83,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -59,6 +65,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "lineNumber": 84,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -73,6 +81,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "lineNumber": 85,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -87,6 +97,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "lineNumber": 86,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -109,6 +121,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -126,6 +140,8 @@
           "(kql: string | undefined) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -140,6 +156,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 60,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -161,6 +179,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,6 +195,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 33,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -196,6 +218,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,6 +234,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -225,6 +251,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -240,6 +268,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -263,6 +293,8 @@
           "200"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -280,6 +312,8 @@
           "{ readonly read: \"read_stream\"; readonly manage: \"manage_stream\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -295,6 +329,8 @@
           "{ readonly manage: \"manage\"; readonly show: \"show\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -308,6 +344,8 @@
       "label": "StreamsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+      "lineNumber": 30,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -322,6 +360,8 @@
       "label": "StreamsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1778,7 +1818,7 @@
               "section": "def-common.StreamDocsStat",
               "text": "StreamDocsStat"
             },
-            "[], undefined>; \"POST /internal/streams/{name}/features/_identify\": ",
+            "[], undefined>; \"POST /internal/streams/{name}/features/_task\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1786,7 +1826,7 @@
               "section": "def-common.ServerRoute",
               "text": "ServerRoute"
             },
-            "<\"POST /internal/streams/{name}/features/_identify\", ",
+            "<\"POST /internal/streams/{name}/features/_task\", ",
             "ZodObject",
             "<{ path: ",
             "ZodObject",
@@ -1794,13 +1834,13 @@
             "ZodString",
             "; }, \"strip\", ",
             "ZodTypeAny",
-            ", { name: string; }, { name: string; }>; query: ",
+            ", { name: string; }, { name: string; }>; body: ",
+            "ZodDiscriminatedUnion",
+            "<\"action\", [",
             "ZodObject",
-            "<{ connectorId: ",
-            "ZodOptional",
-            "<",
-            "ZodString",
-            ">; from: ",
+            "<{ action: ",
+            "ZodLiteral",
+            "<\"schedule\">; from: ",
             "ZodEffects",
             "<",
             "ZodString",
@@ -1808,31 +1848,53 @@
             "ZodEffects",
             "<",
             "ZodString",
-            ", Date, string>; }, \"strip\", ",
+            ", Date, string>; connector_id: ",
+            "ZodOptional",
+            "<",
+            "ZodString",
+            ">; }, \"strip\", ",
             "ZodTypeAny",
-            ", { from: Date; to: Date; connectorId?: string | undefined; }, { from: string; to: string; connectorId?: string | undefined; }>; }, \"strip\", ",
+            ", { action: \"schedule\"; from: Date; to: Date; connector_id?: string | undefined; }, { action: \"schedule\"; from: string; to: string; connector_id?: string | undefined; }>, ",
+            "ZodObject",
+            "<{ action: ",
+            "ZodLiteral",
+            "<\"cancel\">; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; }; query: { from: Date; to: Date; connectorId?: string | undefined; }; }, { path: { name: string; }; query: { from: string; to: string; connectorId?: string | undefined; }; }>, ",
+            ", { action: \"cancel\"; }, { action: \"cancel\"; }>, ",
+            "ZodObject",
+            "<{ action: ",
+            "ZodLiteral",
+            "<\"acknowledge\">; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { action: \"acknowledge\"; }, { action: \"acknowledge\"; }>]>; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { path: { name: string; }; body: { action: \"schedule\"; from: Date; to: Date; connector_id?: string | undefined; } | { action: \"cancel\"; } | { action: \"acknowledge\"; }; }, { path: { name: string; }; body: { action: \"schedule\"; from: string; to: string; connector_id?: string | undefined; } | { action: \"cancel\"; } | { action: \"acknowledge\"; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
-            "Observable",
-            "<{ features: ",
+            "FeaturesIdentificationTaskResult",
+            ", undefined>; \"GET /internal/streams/{name}/features/_status\": ",
             {
-              "pluginId": "@kbn/streams-schema",
+              "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
             },
-            "[]; tokensUsed: ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ChatCompletionTokenCount",
-              "text": "ChatCompletionTokenCount"
-            },
-            "; } & { type: \"identified_features\"; }>, undefined>; \"GET /internal/streams/{name}/features\": ",
+            "<\"GET /internal/streams/{name}/features/_status\", ",
+            "ZodObject",
+            "<{ path: ",
+            "ZodObject",
+            "<{ name: ",
+            "ZodString",
+            "; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { name: string; }, { name: string; }>; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { path: { name: string; }; }, { path: { name: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "FeaturesIdentificationTaskResult",
+            ", undefined>; \"GET /internal/streams/{name}/features\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1952,7 +2014,83 @@
             },
             "; }>, ",
             "StreamsRouteHandlerResources",
-            ", { acknowledged: boolean; }, undefined>; \"GET /internal/streams/{streamName}/attachments/_suggestions\": ",
+            ", { acknowledged: boolean; }, undefined>; \"POST /internal/streams/{name}/_description_generation/_task\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /internal/streams/{name}/_description_generation/_task\", ",
+            "ZodObject",
+            "<{ path: ",
+            "ZodObject",
+            "<{ name: ",
+            "ZodString",
+            "; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { name: string; }, { name: string; }>; body: ",
+            "ZodDiscriminatedUnion",
+            "<\"action\", [",
+            "ZodObject",
+            "<{ action: ",
+            "ZodLiteral",
+            "<\"schedule\">; from: ",
+            "ZodEffects",
+            "<",
+            "ZodString",
+            ", Date, string>; to: ",
+            "ZodEffects",
+            "<",
+            "ZodString",
+            ", Date, string>; connectorId: ",
+            "ZodOptional",
+            "<",
+            "ZodString",
+            ">; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { action: \"schedule\"; from: Date; to: Date; connectorId?: string | undefined; }, { action: \"schedule\"; from: string; to: string; connectorId?: string | undefined; }>, ",
+            "ZodObject",
+            "<{ action: ",
+            "ZodLiteral",
+            "<\"cancel\">; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { action: \"cancel\"; }, { action: \"cancel\"; }>, ",
+            "ZodObject",
+            "<{ action: ",
+            "ZodLiteral",
+            "<\"acknowledge\">; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { action: \"acknowledge\"; }, { action: \"acknowledge\"; }>]>; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { path: { name: string; }; body: { action: \"schedule\"; from: Date; to: Date; connectorId?: string | undefined; } | { action: \"cancel\"; } | { action: \"acknowledge\"; }; }, { path: { name: string; }; body: { action: \"schedule\"; from: string; to: string; connectorId?: string | undefined; } | { action: \"cancel\"; } | { action: \"acknowledge\"; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "DescriptionGenerationTaskResult",
+            ", undefined>; \"GET /internal/streams/{name}/_description_generation/_status\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams/{name}/_description_generation/_status\", ",
+            "ZodObject",
+            "<{ path: ",
+            "ZodObject",
+            "<{ name: ",
+            "ZodString",
+            "; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { name: string; }, { name: string; }>; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { path: { name: string; }; }, { path: { name: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "DescriptionGenerationTaskResult",
+            ", undefined>; \"GET /internal/streams/{streamName}/attachments/_suggestions\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2038,7 +2176,29 @@
               "section": "def-common.ProcessorSuggestionsResponse",
               "text": "ProcessorSuggestionsResponse"
             },
-            ", undefined>; \"GET /internal/streams/_significant_events\": ",
+            ", undefined>; \"POST /internal/streams/_significant_events/_generate_summary\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /internal/streams/_significant_events/_generate_summary\", ",
+            "ZodObject",
+            "<{ query: ",
+            "ZodObject",
+            "<{ connectorId: ",
+            "ZodString",
+            "; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { connectorId: string; }, { connectorId: string; }>; }, \"strip\", ",
+            "ZodTypeAny",
+            ", { query: { connectorId: string; }; }, { query: { connectorId: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "Observable",
+            "<{ summary: string; tokenUsage: { prompt: number; completion: number; }; } & { type: \"significant_events_summary\"; }>, undefined>; \"GET /internal/streams/_significant_events\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2292,53 +2452,7 @@
             "ZodTypeAny",
             ", { body: { featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; }; }, { body: { featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { results: Readonly<{ featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; systemsPromptOverride?: string | undefined; } & {}>; }, undefined>; \"POST /internal/streams/{name}/_describe_stream\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"POST /internal/streams/{name}/_describe_stream\", ",
-            "ZodObject",
-            "<{ path: ",
-            "ZodObject",
-            "<{ name: ",
-            "ZodString",
-            "; }, \"strip\", ",
-            "ZodTypeAny",
-            ", { name: string; }, { name: string; }>; query: ",
-            "ZodObject",
-            "<{ connectorId: ",
-            "ZodOptional",
-            "<",
-            "ZodString",
-            ">; from: ",
-            "ZodEffects",
-            "<",
-            "ZodString",
-            ", Date, string>; to: ",
-            "ZodEffects",
-            "<",
-            "ZodString",
-            ", Date, string>; }, \"strip\", ",
-            "ZodTypeAny",
-            ", { from: Date; to: Date; connectorId?: string | undefined; }, { from: string; to: string; connectorId?: string | undefined; }>; }, \"strip\", ",
-            "ZodTypeAny",
-            ", { path: { name: string; }; query: { from: Date; to: Date; connectorId?: string | undefined; }; }, { path: { name: string; }; query: { from: string; to: string; connectorId?: string | undefined; }; }>, ",
-            "StreamsRouteHandlerResources",
-            ", ",
-            "Observable",
-            "<{ description: string; tokensUsed: ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ChatCompletionTokenCount",
-              "text": "ChatCompletionTokenCount"
-            },
-            "; } & { type: \"stream_description\"; }>, undefined>; \"POST /internal/streams/{name}/systems/_task\": ",
+            ", { results: Readonly<{ featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; systemsPromptOverride?: string | undefined; } & {}>; }, undefined>; \"POST /internal/streams/{name}/systems/_task\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -3115,6 +3229,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3132,6 +3248,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "lineNumber": 34,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3148,6 +3266,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "lineNumber": 35,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -3166,6 +3286,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "lineNumber": 36,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -3184,6 +3306,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "lineNumber": 37,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3198,6 +3322,8 @@
                 "AbortSignal"
               ],
               "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+              "lineNumber": 37,
+              "columnNumber": 21,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3218,6 +3344,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "lineNumber": 38,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3232,6 +3360,8 @@
                 "AbortSignal"
               ],
               "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+              "lineNumber": 38,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3253,6 +3383,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3278,6 +3410,8 @@
           "{}"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/config.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4728,7 +4862,7 @@
             "section": "def-common.StreamDocsStat",
             "text": "StreamDocsStat"
           },
-          "[], undefined>; \"POST /internal/streams/{name}/features/_identify\": ",
+          "[], undefined>; \"POST /internal/streams/{name}/features/_task\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -4736,7 +4870,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"POST /internal/streams/{name}/features/_identify\", ",
+          "<\"POST /internal/streams/{name}/features/_task\", ",
           "ZodObject",
           "<{ path: ",
           "ZodObject",
@@ -4744,13 +4878,13 @@
           "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; }, { name: string; }>; query: ",
+          ", { name: string; }, { name: string; }>; body: ",
+          "ZodDiscriminatedUnion",
+          "<\"action\", [",
           "ZodObject",
-          "<{ connectorId: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; from: ",
+          "<{ action: ",
+          "ZodLiteral",
+          "<\"schedule\">; from: ",
           "ZodEffects",
           "<",
           "ZodString",
@@ -4758,31 +4892,53 @@
           "ZodEffects",
           "<",
           "ZodString",
-          ", Date, string>; }, \"strip\", ",
+          ", Date, string>; connector_id: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { from: Date; to: Date; connectorId?: string | undefined; }, { from: string; to: string; connectorId?: string | undefined; }>; }, \"strip\", ",
+          ", { action: \"schedule\"; from: Date; to: Date; connector_id?: string | undefined; }, { action: \"schedule\"; from: string; to: string; connector_id?: string | undefined; }>, ",
+          "ZodObject",
+          "<{ action: ",
+          "ZodLiteral",
+          "<\"cancel\">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; }; query: { from: Date; to: Date; connectorId?: string | undefined; }; }, { path: { name: string; }; query: { from: string; to: string; connectorId?: string | undefined; }; }>, ",
+          ", { action: \"cancel\"; }, { action: \"cancel\"; }>, ",
+          "ZodObject",
+          "<{ action: ",
+          "ZodLiteral",
+          "<\"acknowledge\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { action: \"acknowledge\"; }, { action: \"acknowledge\"; }>]>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { path: { name: string; }; body: { action: \"schedule\"; from: Date; to: Date; connector_id?: string | undefined; } | { action: \"cancel\"; } | { action: \"acknowledge\"; }; }, { path: { name: string; }; body: { action: \"schedule\"; from: string; to: string; connector_id?: string | undefined; } | { action: \"cancel\"; } | { action: \"acknowledge\"; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
-          "Observable",
-          "<{ features: ",
+          "FeaturesIdentificationTaskResult",
+          ", undefined>; \"GET /internal/streams/{name}/features/_status\": ",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
           },
-          "[]; tokensUsed: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionTokenCount",
-            "text": "ChatCompletionTokenCount"
-          },
-          "; } & { type: \"identified_features\"; }>, undefined>; \"GET /internal/streams/{name}/features\": ",
+          "<\"GET /internal/streams/{name}/features/_status\", ",
+          "ZodObject",
+          "<{ path: ",
+          "ZodObject",
+          "<{ name: ",
+          "ZodString",
+          "; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { name: string; }, { name: string; }>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { path: { name: string; }; }, { path: { name: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "FeaturesIdentificationTaskResult",
+          ", undefined>; \"GET /internal/streams/{name}/features\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -4902,7 +5058,83 @@
           },
           "; }>, ",
           "StreamsRouteHandlerResources",
-          ", { acknowledged: boolean; }, undefined>; \"GET /internal/streams/{streamName}/attachments/_suggestions\": ",
+          ", { acknowledged: boolean; }, undefined>; \"POST /internal/streams/{name}/_description_generation/_task\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/streams/{name}/_description_generation/_task\", ",
+          "ZodObject",
+          "<{ path: ",
+          "ZodObject",
+          "<{ name: ",
+          "ZodString",
+          "; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { name: string; }, { name: string; }>; body: ",
+          "ZodDiscriminatedUnion",
+          "<\"action\", [",
+          "ZodObject",
+          "<{ action: ",
+          "ZodLiteral",
+          "<\"schedule\">; from: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", Date, string>; to: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", Date, string>; connectorId: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { action: \"schedule\"; from: Date; to: Date; connectorId?: string | undefined; }, { action: \"schedule\"; from: string; to: string; connectorId?: string | undefined; }>, ",
+          "ZodObject",
+          "<{ action: ",
+          "ZodLiteral",
+          "<\"cancel\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { action: \"cancel\"; }, { action: \"cancel\"; }>, ",
+          "ZodObject",
+          "<{ action: ",
+          "ZodLiteral",
+          "<\"acknowledge\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { action: \"acknowledge\"; }, { action: \"acknowledge\"; }>]>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { path: { name: string; }; body: { action: \"schedule\"; from: Date; to: Date; connectorId?: string | undefined; } | { action: \"cancel\"; } | { action: \"acknowledge\"; }; }, { path: { name: string; }; body: { action: \"schedule\"; from: string; to: string; connectorId?: string | undefined; } | { action: \"cancel\"; } | { action: \"acknowledge\"; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "DescriptionGenerationTaskResult",
+          ", undefined>; \"GET /internal/streams/{name}/_description_generation/_status\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams/{name}/_description_generation/_status\", ",
+          "ZodObject",
+          "<{ path: ",
+          "ZodObject",
+          "<{ name: ",
+          "ZodString",
+          "; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { name: string; }, { name: string; }>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { path: { name: string; }; }, { path: { name: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "DescriptionGenerationTaskResult",
+          ", undefined>; \"GET /internal/streams/{streamName}/attachments/_suggestions\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -4988,7 +5220,29 @@
             "section": "def-common.ProcessorSuggestionsResponse",
             "text": "ProcessorSuggestionsResponse"
           },
-          ", undefined>; \"GET /internal/streams/_significant_events\": ",
+          ", undefined>; \"POST /internal/streams/_significant_events/_generate_summary\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/streams/_significant_events/_generate_summary\", ",
+          "ZodObject",
+          "<{ query: ",
+          "ZodObject",
+          "<{ connectorId: ",
+          "ZodString",
+          "; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { connectorId: string; }, { connectorId: string; }>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { query: { connectorId: string; }; }, { query: { connectorId: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "Observable",
+          "<{ summary: string; tokenUsage: { prompt: number; completion: number; }; } & { type: \"significant_events_summary\"; }>, undefined>; \"GET /internal/streams/_significant_events\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -5242,53 +5496,7 @@
           "ZodTypeAny",
           ", { body: { featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; }; }, { body: { featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { results: Readonly<{ featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; systemsPromptOverride?: string | undefined; } & {}>; }, undefined>; \"POST /internal/streams/{name}/_describe_stream\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /internal/streams/{name}/_describe_stream\", ",
-          "ZodObject",
-          "<{ path: ",
-          "ZodObject",
-          "<{ name: ",
-          "ZodString",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { name: string; }, { name: string; }>; query: ",
-          "ZodObject",
-          "<{ connectorId: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; from: ",
-          "ZodEffects",
-          "<",
-          "ZodString",
-          ", Date, string>; to: ",
-          "ZodEffects",
-          "<",
-          "ZodString",
-          ", Date, string>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { from: Date; to: Date; connectorId?: string | undefined; }, { from: string; to: string; connectorId?: string | undefined; }>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { path: { name: string; }; query: { from: Date; to: Date; connectorId?: string | undefined; }; }, { path: { name: string; }; query: { from: string; to: string; connectorId?: string | undefined; }; }>, ",
-          "StreamsRouteHandlerResources",
-          ", ",
-          "Observable",
-          "<{ description: string; tokensUsed: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionTokenCount",
-            "text": "ChatCompletionTokenCount"
-          },
-          "; } & { type: \"stream_description\"; }>, undefined>; \"POST /internal/streams/{name}/systems/_task\": ",
+          ", { results: Readonly<{ featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; systemsPromptOverride?: string | undefined; } & {}>; }, undefined>; \"POST /internal/streams/{name}/systems/_task\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -6063,6 +6271,8 @@
           "[]; canReadFailureStore: boolean; }, undefined>; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/server/routes/index.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6077,6 +6287,8 @@
       "label": "StreamsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
+      "lineNumber": 52,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -6091,6 +6303,8 @@
       "label": "StreamsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
+      "lineNumber": 54,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -6117,6 +6331,8 @@
           "QueryDslQueryContainer"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6128,6 +6344,8 @@
             "label": "{\n  filter,\n  kuery,\n  start,\n  end,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 82,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -6143,6 +6361,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "lineNumber": 83,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6157,6 +6377,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "lineNumber": 84,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6171,6 +6393,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "lineNumber": 85,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -6185,6 +6409,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "lineNumber": 86,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6207,6 +6433,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -6224,6 +6452,8 @@
           "(kql: string | undefined) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6238,6 +6468,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 60,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -6259,6 +6491,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6273,6 +6507,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 33,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -6294,6 +6530,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6308,6 +6546,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -6323,6 +6563,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -6338,6 +6580,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -6356,6 +6600,8 @@
         "label": "ProcessorPropertySuggestion",
         "description": [],
         "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6367,6 +6613,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6388,6 +6636,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6402,6 +6652,8 @@
         "label": "ProcessorSuggestion",
         "description": [],
         "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6413,6 +6665,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6434,6 +6688,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6448,6 +6704,8 @@
         "label": "ProcessorSuggestionsResponse",
         "description": [],
         "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6469,6 +6727,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6491,6 +6751,8 @@
               "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6505,6 +6767,8 @@
         "label": "StreamDocsStat",
         "description": [],
         "path": "x-pack/platform/plugins/shared/streams/common/doc_counts.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6516,6 +6780,8 @@
             "label": "stream",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/doc_counts.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6527,6 +6793,8 @@
             "label": "count",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/doc_counts.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6547,6 +6815,8 @@
           "50"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6563,6 +6833,8 @@
           " & { title: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/queries.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6579,6 +6851,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6593,6 +6867,8 @@
         "label": "STREAMS_TIERED_AI_FEATURE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6604,6 +6880,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6615,6 +6893,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6629,6 +6909,8 @@
               "{ name: \"observability\"; tier: \"complete\"; }[]"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6645,6 +6927,8 @@
           "\nTiered features"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6656,6 +6940,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6667,6 +6953,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6681,6 +6969,8 @@
               "{ name: \"observability\"; tier: \"complete\"; }[]"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6695,6 +6985,8 @@
         "label": "STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6706,6 +6998,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6717,6 +7011,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6731,6 +7027,8 @@
               "{ name: \"observability\"; tier: \"complete\"; }[]"
             ],
             "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

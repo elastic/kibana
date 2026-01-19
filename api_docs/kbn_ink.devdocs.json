@@ -24,6 +24,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ink/src/prepare_ink.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
