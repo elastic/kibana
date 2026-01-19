@@ -362,8 +362,60 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     [action, onDefaultParamsChange, dispatch]
   );
 
+  const updateActionParamsMessage = useCallback(
+    (group: string) => {
+      const prevActionGroup = getSelectedActionGroup({
+        group: action.group,
+        ruleType: selectedRuleType,
+        ruleTypeModel: selectedRuleTypeModel,
+      });
+
+      const prevDefaultMessage =
+        prevActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
+
+      const nextActionGroup = getSelectedActionGroup({
+        group,
+        ruleType: selectedRuleType,
+        ruleTypeModel: selectedRuleTypeModel,
+      });
+
+      const nextDefaultMessage =
+        nextActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
+
+      if (!action.params.message || action.params.message === prevDefaultMessage) {
+        const newActionParams = { ...action.params, message: nextDefaultMessage };
+        dispatch({
+          type: 'setActionParams',
+          payload: {
+            uuid: action.uuid!,
+            value: newActionParams,
+          },
+        });
+      }
+    },
+    [action, selectedRuleType, selectedRuleTypeModel, dispatch]
+  );
+
   const onActionGroupChange = useCallback(
     (group: string) => {
+      // const prevActionGroup = getSelectedActionGroup({
+      //   group: action.group,
+      //   ruleType: selectedRuleType,
+      //   ruleTypeModel: selectedRuleTypeModel,
+      // });
+      // const prevDefaultMessage =
+      //   prevActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
+
+      // const nextActionGroup = getSelectedActionGroup({
+      //   group,
+      //   ruleType: selectedRuleType,
+      //   ruleTypeModel: selectedRuleTypeModel,
+      // });
+      // const nextDefaultMessage =
+      //   nextActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
+
+      updateActionParamsMessage(group);
+
       dispatch({
         type: 'setActionProperty',
         payload: {
@@ -372,9 +424,20 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
           value: group,
         },
       });
+
+      // if (!action.params.message || action.params.message === prevDefaultMessage) {
+      //   const newActionParams = { ...action.params, message: nextDefaultMessage };
+      //   dispatch({
+      //     type: 'setActionParams',
+      //     payload: {
+      //       uuid: action.uuid!,
+      //       value: newActionParams,
+      //     },
+      //   });
+      // }
       onDefaultParamsChange(group, action.frequency?.summary);
     },
-    [action, onDefaultParamsChange, dispatch]
+    [action, dispatch, onDefaultParamsChange, updateActionParamsMessage]
   );
 
   const onAlertsFilterChange = useCallback(
