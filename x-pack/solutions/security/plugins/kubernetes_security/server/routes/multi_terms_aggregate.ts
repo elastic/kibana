@@ -61,6 +61,7 @@ export const registerMultiTermsAggregateRoute = (router: IRouter, logger: Logger
                   schema.literal(ENTRY_LEADER_ENTITY_ID),
                 ])
               ),
+              // maxSize is set to 8 to match the number of valid groupBy fields
               groupBys: schema.arrayOf(
                 schema.object({
                   field: schema.oneOf([
@@ -75,7 +76,7 @@ export const registerMultiTermsAggregateRoute = (router: IRouter, logger: Logger
                   ]),
                   missing: schema.maybe(schema.string()),
                 }),
-                { defaultValue: [] }
+                { defaultValue: [], maxSize: 8 }
               ),
               page: schema.number({ max: 10000, min: 0 }),
               perPage: schema.maybe(schema.number({ max: 100, min: 1 })),
