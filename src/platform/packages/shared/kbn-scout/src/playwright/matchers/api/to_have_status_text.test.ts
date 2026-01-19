@@ -8,26 +8,21 @@
  */
 
 import { expect as apiExpect } from '.';
-import { createApiResponse } from './utils';
 
 describe('toHaveStatusText', () => {
   it('should pass when status text matches', () => {
-    const response = createApiResponse({ statusText: 'OK' });
-    expect(() => apiExpect(response).toHaveStatusText('OK')).not.toThrow();
+    expect(() => apiExpect({ statusText: 'OK' }).toHaveStatusText('OK')).not.toThrow();
   });
 
   it('should fail when status text does not match', () => {
-    const response = createApiResponse({ statusText: 'Not Found' });
-    expect(() => apiExpect(response).toHaveStatusText('OK')).toThrow();
+    expect(() => apiExpect({ statusText: 'Not Found' }).toHaveStatusText('OK')).toThrow();
   });
 
   it('should support negation', () => {
-    const response = createApiResponse({ statusText: 'OK' });
-    expect(() => apiExpect(response).not.toHaveStatusText('Not Found')).not.toThrow();
+    expect(() => apiExpect({ statusText: 'OK' }).not.toHaveStatusText('Not Found')).not.toThrow();
   });
 
   it('should fail negation when status text matches', () => {
-    const response = createApiResponse({ statusText: 'OK' });
-    expect(() => apiExpect(response).not.toHaveStatusText('OK')).toThrow();
+    expect(() => apiExpect({ statusText: 'OK' }).not.toHaveStatusText('OK')).toThrow();
   });
 });

@@ -8,46 +8,54 @@
  */
 
 import { expect as apiExpect } from '.';
-import { createApiResponse } from './utils';
 
 describe('toHaveHeaders', () => {
   it('should pass when expected headers are present (partial match)', () => {
-    const response = createApiResponse({
+    const response = {
       headers: { 'content-type': 'application/json', 'x-custom': 'value', 'x-other': 'data' },
-    });
+    };
     expect(() =>
       apiExpect(response).toHaveHeaders({ 'content-type': 'application/json', 'x-custom': 'value' })
     ).not.toThrow();
   });
 
   it('should fail when header is missing', () => {
-    const response = createApiResponse({ headers: { 'content-type': 'application/json' } });
-    expect(() => apiExpect(response).toHaveHeaders({ 'x-missing': 'value' })).toThrow();
+    expect(() =>
+      apiExpect({ headers: { 'content-type': 'application/json' } }).toHaveHeaders({
+        'x-missing': 'value',
+      })
+    ).toThrow();
   });
 
   it('should fail when header value does not match', () => {
-    const response = createApiResponse({ headers: { 'content-type': 'text/plain' } });
     expect(() =>
-      apiExpect(response).toHaveHeaders({ 'content-type': 'application/json' })
+      apiExpect({ headers: { 'content-type': 'text/plain' } }).toHaveHeaders({
+        'content-type': 'application/json',
+      })
     ).toThrow();
   });
 
   it('should be case-insensitive for header keys', () => {
-    const response = createApiResponse({ headers: { 'Content-Type': 'application/json' } });
     expect(() =>
-      apiExpect(response).toHaveHeaders({ 'content-type': 'application/json' })
+      apiExpect({ headers: { 'Content-Type': 'application/json' } }).toHaveHeaders({
+        'content-type': 'application/json',
+      })
     ).not.toThrow();
   });
 
   it('should support negation', () => {
-    const response = createApiResponse({ headers: { 'content-type': 'application/json' } });
-    expect(() => apiExpect(response).not.toHaveHeaders({ 'x-forbidden': 'value' })).not.toThrow();
+    expect(() =>
+      apiExpect({ headers: { 'content-type': 'application/json' } }).not.toHaveHeaders({
+        'x-forbidden': 'value',
+      })
+    ).not.toThrow();
   });
 
   it('should fail negation when headers match', () => {
-    const response = createApiResponse({ headers: { 'content-type': 'application/json' } });
     expect(() =>
-      apiExpect(response).not.toHaveHeaders({ 'content-type': 'application/json' })
+      apiExpect({ headers: { 'content-type': 'application/json' } }).not.toHaveHeaders({
+        'content-type': 'application/json',
+      })
     ).toThrow();
   });
 });

@@ -8,26 +8,21 @@
  */
 
 import { expect as apiExpect } from '.';
-import { createApiResponse } from './utils';
 
 describe('toHaveStatusCode', () => {
   it('should pass when status code matches', () => {
-    const response = createApiResponse({ status: 200 });
-    expect(() => apiExpect(response).toHaveStatusCode(200)).not.toThrow();
+    expect(() => apiExpect({ status: 200 }).toHaveStatusCode(200)).not.toThrow();
   });
 
   it('should fail when status code does not match', () => {
-    const response = createApiResponse({ status: 404 });
-    expect(() => apiExpect(response).toHaveStatusCode(200)).toThrow();
+    expect(() => apiExpect({ status: 404 }).toHaveStatusCode(200)).toThrow();
   });
 
   it('should support negation', () => {
-    const response = createApiResponse({ status: 200 });
-    expect(() => apiExpect(response).not.toHaveStatusCode(404)).not.toThrow();
+    expect(() => apiExpect({ status: 200 }).not.toHaveStatusCode(404)).not.toThrow();
   });
 
   it('should fail negation when status code matches', () => {
-    const response = createApiResponse({ status: 200 });
-    expect(() => apiExpect(response).not.toHaveStatusCode(200)).toThrow();
+    expect(() => apiExpect({ status: 200 }).not.toHaveStatusCode(200)).toThrow();
   });
 });

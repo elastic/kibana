@@ -7,31 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { AxiosHeaders } from 'axios';
-
-/**
- * Creates a mock AxiosResponse for testing API matchers.
- */
-export function createApiResponse<T>(options: Partial<AxiosResponse<T>> = {}): AxiosResponse<T> {
-  const { data, status = 200, statusText = 'OK', headers = {} } = options;
-
-  const config: InternalAxiosRequestConfig = {
-    headers: new AxiosHeaders(),
-  };
-
-  const response: AxiosResponse<T> = {
-    data: data as T,
-    status,
-    statusText,
-    headers,
-    config,
-    request: {},
-  };
-
-  return response;
-}
-
 /**
  * Format error messages for API matchers like Playwright.
  */

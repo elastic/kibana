@@ -8,87 +8,90 @@
  */
 
 import { expect as apiExpect } from '.';
-import { createApiResponse } from './utils';
 
 describe('toHaveData', () => {
   describe('existence check (no arguments)', () => {
     it('passes when data exists (including falsy values like 0, false, "")', () => {
-      expect(() => apiExpect(createApiResponse({ data: { id: 1 } })).toHaveData()).not.toThrow();
-      expect(() => apiExpect(createApiResponse({ data: 0 })).toHaveData()).not.toThrow();
-      expect(() => apiExpect(createApiResponse({ data: false })).toHaveData()).not.toThrow();
-      expect(() => apiExpect(createApiResponse({ data: '' })).toHaveData()).not.toThrow();
+      expect(() => apiExpect({ data: { id: 1 } }).toHaveData()).not.toThrow();
+      expect(() => apiExpect({ data: 0 }).toHaveData()).not.toThrow();
+      expect(() => apiExpect({ data: false }).toHaveData()).not.toThrow();
+      expect(() => apiExpect({ data: '' }).toHaveData()).not.toThrow();
     });
 
     it('fails when data is null or undefined', () => {
-      expect(() => apiExpect(createApiResponse({ data: null })).toHaveData()).toThrow();
-      expect(() => apiExpect(createApiResponse({ data: undefined })).toHaveData()).toThrow();
+      expect(() => apiExpect({ data: null }).toHaveData()).toThrow();
+      expect(() => apiExpect({ data: undefined }).toHaveData()).toThrow();
     });
 
     it('supports negation', () => {
-      expect(() => apiExpect(createApiResponse({ data: null })).not.toHaveData()).not.toThrow();
+      expect(() => apiExpect({ data: null }).not.toHaveData()).not.toThrow();
     });
   });
 
   describe('primitive matching', () => {
     it('matches primitives exactly', () => {
-      expect(() =>
-        apiExpect(createApiResponse({ data: 'success' })).toHaveData('success')
-      ).not.toThrow();
-      expect(() => apiExpect(createApiResponse({ data: 42 })).toHaveData(42)).not.toThrow();
-      expect(() => apiExpect(createApiResponse({ data: 'a' })).toHaveData('b')).toThrow();
+      expect(() => apiExpect({ data: 'success' }).toHaveData('success')).not.toThrow();
+      expect(() => apiExpect({ data: 42 }).toHaveData(42)).not.toThrow();
+      expect(() => apiExpect({ data: 'a' }).toHaveData('b')).toThrow();
     });
   });
 
   describe('partial object matching (default)', () => {
     it('passes when data contains expected properties', () => {
-      const response = createApiResponse({ data: { id: 1, name: 'test', extra: 'ignored' } });
-      expect(() => apiExpect(response).toHaveData({ id: 1, name: 'test' })).not.toThrow();
+      expect(() =>
+        apiExpect({ data: { id: 1, name: 'test', extra: 'ignored' } }).toHaveData({
+          id: 1,
+          name: 'test',
+        })
+      ).not.toThrow();
     });
 
     it('fails when expected properties are missing', () => {
-      const response = createApiResponse({ data: { id: 1 } });
-      expect(() => apiExpect(response).toHaveData({ id: 1, name: 'test' })).toThrow();
+      expect(() => apiExpect({ data: { id: 1 } }).toHaveData({ id: 1, name: 'test' })).toThrow();
     });
 
     it('supports negation', () => {
-      const response = createApiResponse({ data: { id: 1 } });
-      expect(() => apiExpect(response).not.toHaveData({ id: 2 })).not.toThrow();
+      expect(() => apiExpect({ data: { id: 1 } }).not.toHaveData({ id: 2 })).not.toThrow();
     });
   });
 
   describe('exact matching with { exactMatch: true }', () => {
     it('fails when data has extra properties', () => {
-      const response = createApiResponse({ data: { id: 1, extra: 'field' } });
-      expect(() => apiExpect(response).toHaveData({ id: 1 }, { exactMatch: true })).toThrow();
+      expect(() =>
+        apiExpect({ data: { id: 1, extra: 'field' } }).toHaveData({ id: 1 }, { exactMatch: true })
+      ).toThrow();
     });
 
     it('passes only when data matches exactly', () => {
-      const response = createApiResponse({ data: { id: 1 } });
-      expect(() => apiExpect(response).toHaveData({ id: 1 }, { exactMatch: true })).not.toThrow();
+      expect(() =>
+        apiExpect({ data: { id: 1 } }).toHaveData({ id: 1 }, { exactMatch: true })
+      ).not.toThrow();
     });
 
     it('requires exact array length and order', () => {
-      const response = createApiResponse({ data: [{ id: 1 }, { id: 2 }, { id: 3 }] });
       expect(() =>
-        apiExpect(response).toHaveData([{ id: 1 }, { id: 2 }], { exactMatch: true })
+        apiExpect({ data: [{ id: 1 }, { id: 2 }, { id: 3 }] }).toHaveData([{ id: 1 }, { id: 2 }], {
+          exactMatch: true,
+        })
       ).toThrow();
     });
   });
 
   describe('partial array matching (default)', () => {
     it('allows extra items and ignores order', () => {
-      const response = createApiResponse({ data: [{ id: 3 }, { id: 1 }, { id: 2 }] });
-      expect(() => apiExpect(response).toHaveData([{ id: 1 }])).not.toThrow();
+      expect(() =>
+        apiExpect({ data: [{ id: 3 }, { id: 1 }, { id: 2 }] }).toHaveData([{ id: 1 }])
+      ).not.toThrow();
     });
 
     it('allows extra properties on array items', () => {
-      const response = createApiResponse({ data: [{ id: 1, extra: 'a' }] });
-      expect(() => apiExpect(response).toHaveData([{ id: 1 }])).not.toThrow();
+      expect(() =>
+        apiExpect({ data: [{ id: 1, extra: 'a' }] }).toHaveData([{ id: 1 }])
+      ).not.toThrow();
     });
 
     it('fails when expected item is not found', () => {
-      const response = createApiResponse({ data: [{ id: 1 }, { id: 2 }] });
-      expect(() => apiExpect(response).toHaveData([{ id: 999 }])).toThrow();
+      expect(() => apiExpect({ data: [{ id: 1 }, { id: 2 }] }).toHaveData([{ id: 999 }])).toThrow();
     });
   });
 
@@ -105,11 +108,10 @@ describe('toHaveData', () => {
     };
 
     it('matches multiple branches and nested arrays simultaneously', () => {
-      const response = createApiResponse({ data: complexData });
       // This tests: partial object matching, partial array matching, deep nesting,
       // and matching two different items in the same array (parallel branches)
       expect(() =>
-        apiExpect(response).toHaveData({
+        apiExpect({ data: complexData }).toHaveData({
           meta: { version: '1.0' },
           results: {
             total: 100,
@@ -120,9 +122,8 @@ describe('toHaveData', () => {
     });
 
     it('fails when any branch does not match', () => {
-      const response = createApiResponse({ data: complexData });
       expect(() =>
-        apiExpect(response).toHaveData({
+        apiExpect({ data: complexData }).toHaveData({
           meta: { version: '1.0' },
           results: { items: [{ id: 'nonexistent' }] },
         })
