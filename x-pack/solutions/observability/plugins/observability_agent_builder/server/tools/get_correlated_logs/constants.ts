@@ -8,7 +8,6 @@
 // Correlation identifier fields in priority order
 export const DEFAULT_CORRELATION_IDENTIFIER_FIELDS = [
   'trace.id',
-  'trace_id',
   'x-trace-id',
   'request.id',
   'request_id',

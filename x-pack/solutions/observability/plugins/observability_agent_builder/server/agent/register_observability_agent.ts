@@ -46,6 +46,7 @@ export async function registerObservabilityAgent({
         dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
         
         ${getInvestigationInstructions()}
+        ${getToolSelectionInstructions()}
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
         ${getKqlInstructions()}
