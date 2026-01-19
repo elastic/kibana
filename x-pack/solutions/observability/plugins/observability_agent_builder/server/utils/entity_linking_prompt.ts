@@ -22,36 +22,23 @@ import dedent from 'dedent';
  * - Observability agent instructions
  */
 export const ENTITY_LINKING_PROMPT = dedent(`
-  ## Formatting Guidelines
+  ## Entity Linking Guidelines
 
   Use markdown for readability. When referencing entities, create clickable links:
 
-  | Entity | Link Format |
-  |--------|-------------|
-  | Service | \`[service-name](/app/apm/services/service-name)\` |
-  | Trace | \`[trace-id](/app/apm/link-to/trace/trace-id)\` |
-  | Error | \`[error-key](/app/apm/services/service-name/errors/error-key)\` |
-  | Service Errors | \`[Errors](/app/apm/services/service-name/errors)\` |
-  | Service Logs | \`[Logs](/app/apm/services/service-name/logs)\` |
-  | Logs | \`[Logs](/app/logs)\` or \`[Logs](/app/observability-logs-explorer)\` |
-  | Transaction | \`[transaction-name](/app/apm/services/service-name/transactions)\` |
-  | Dependencies | \`[Dependencies](/app/apm/services/service-name/dependencies)\` |
-  | Service Map | \`[Service Map](/app/apm/services/service-name/service-map)\` |
-  | Host | \`[host-name](/app/metrics/detail/host/host-name)\` |
-  | Alert | \`[alert-id](/app/observability/alerts/alert-id)\` |
-  | ML Job | \`[job-id](/app/ml/jobs)\` or \`[job-id](/app/ml/explorer?_g=(ml:(jobIds:!(job-id))))\` |
+  | Entity | Link Format | Example |
+  |--------|-------------|---------|
+  | Service | \`[<serviceName>](/app/apm/services/<serviceName>)\` | "The [payments](/app/apm/services/payments) service is experiencing high latency." |
+  | Transaction | \`[<transactionName>](/app/apm/services/<serviceName>/transactions)\` | "The transaction [POST /checkout](/app/apm/services/payments/transactions) took 500ms." |
+  | Trace | \`[<traceId>](/app/apm/link-to/trace/<traceId>)\` | "See trace [8bc26008603e16819bd6fcfb80fceff5](/app/apm/link-to/trace/8bc26008603e16819bd6fcfb80fceff5)" |
+  | Error | \`[<errorKey>](/app/apm/services/<serviceName>/errors/<errorKey>)\` | "Error [upstream-5xx](/app/apm/services/catalog-api/errors/upstream-5xx) suggests a dependency failure." |
+  | Service Errors | \`[errors](/app/apm/services/<serviceName>/errors)\` | "Review all [errors](/app/apm/services/frontend/errors) for the [frontend](/app/apm/services/frontend) service." |
+  | Service Logs | \`[logs](/app/apm/services/<serviceName>/logs)\` | "Check [logs](/app/apm/services/frontend/logs) for the [frontend](/app/apm/services/frontend) service." |
+  | Host | \`[<hostName>](/app/metrics/detail/host/<hostName>)\` | "Host [web-01](/app/metrics/detail/host/web-01) is experiencing high CPU usage." |
+  | Service Map | \`[Service Map](/app/apm/services/<serviceName>/service-map)\` | "Check the [Service Map](/app/apm/services/payments/service-map) to see dependencies." |
+  | Dependencies | \`[Dependencies](/app/apm/services/<serviceName>/dependencies)\` | "View [Dependencies](/app/apm/services/catalog-api/dependencies) to identify upstream issues." |
+  | Alert | \`[<alertId>](/app/observability/alerts/<alertId>)\` | "Alert [alert-uuid-123](/app/observability/alerts/alert-uuid-123) was triggered." |
+  | Logs Explorer | \`[Logs](/app/logs)\` | "View [Logs](/app/logs) to investigate the issue further." |
+  | ML Job | \`[<jobId>](/app/ml/jobs)\` | "ML job [anomaly-detection](/app/ml/jobs) detected unusual patterns." |
 
-  **Examples:**
-  - "The [billing-service](/app/apm/services/billing-service) is experiencing high latency."
-  - "See trace [8a3c42](/app/apm/link-to/trace/8a3c42) for the full request flow."
-  - "Error [abcde](/app/apm/services/frontend/errors/abcde) in [frontend](/app/apm/services/frontend)."
-  - "View all [errors](/app/apm/services/frontend/errors) for the [frontend](/app/apm/services/frontend) service."
-  - "Check [logs](/app/apm/services/frontend/logs) for the [frontend](/app/apm/services/frontend) service."
-  - "Transaction [GET /api/users](/app/apm/services/api-service/transactions). "
-  - "Last transaction [user_index](/app/apm/services/load-generator/transactions)."
-  - "Check the [Service Map](/app/apm/service-map) to see service dependencies."
-  - "View [Logs](/app/logs) to investigate the issue."
-  - "Host [web-server-01](/app/metrics/detail/host/web-server-01) is experiencing high CPU usage."
-  - "Alert [alert-uuid-123](/app/observability/alerts/alert-uuid-123) was triggered."
-  - "ML job [anomaly-detection-job](/app/ml/jobs) detected unusual patterns."
 `);
