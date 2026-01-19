@@ -65,7 +65,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const defaultControlsObj = useMemo(
     () =>
       defaultControls.reduce<Record<string, (typeof defaultControls)[0]>>((prev, current) => {
-        prev[current.fieldName] = current;
+        prev[current.field_name] = current;
         return prev;
       }, {}),
     [defaultControls]
@@ -187,7 +187,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
           !isEqualWith(
             panelsFormatted,
             controlsUrlState,
-            getFilterControlsComparator('fieldName', 'title')
+            getFilterControlsComparator('field_name', 'title')
           )
         ) {
           setShowFiltersChangedBanner(true);
@@ -269,10 +269,10 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     overridingControls = overridingControls.map((item) => {
       return {
         // give default value to params which are coming from the URL
-        fieldName: item.fieldName,
+        field_name: item.field_name,
         title: item.title,
-        selectedOptions: item.selectedOptions ?? [],
-        existsSelected: item.existsSelected ?? false,
+        selected_options: item.selected_options ?? [],
+        exists_selected: item.exists_selected ?? false,
         exclude: item.exclude,
       };
     });
@@ -301,11 +301,11 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
             ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
             // option List controls will handle an invalid dataview
             // & display an appropriate message
-            dataViewId: dataViewId ?? '',
+            data_view_id: dataViewId ?? '',
             ...control,
-            displaySettings: {
-              ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.displaySettings,
-              ...control.displaySettings,
+            display_settings: {
+              ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.display_settings,
+              ...control.display_settings,
             },
           },
           String(idx)
@@ -345,7 +345,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       defaultControls,
     });
 
-    if (!isEqualWith(reorderedControls, currentPanels, getFilterControlsComparator('fieldName'))) {
+    if (!isEqualWith(reorderedControls, currentPanels, getFilterControlsComparator('field_name'))) {
       // reorder only if fields are in different order
       // or not same.
       const newInput = { initialChildControlState: {} };
@@ -357,12 +357,12 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
             ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
             // option List controls will handle an invalid dataview
             // & display an appropriate message
-            dataViewId: dataViewId ?? '',
-            selectedOptions: control.selectedOptions,
+            data_view_id: dataViewId ?? '',
+            selected_options: control.selected_options,
             ...control,
-            displaySettings: {
-              ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.displaySettings,
-              ...control.displaySettings,
+            display_settings: {
+              ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.display_settings,
+              ...control.display_settings,
             },
           },
           String(idx)
@@ -389,10 +389,10 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
           ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
         };
 
-        if ((newInput as DataControlState).fieldName in defaultControlsObj) {
+        if ((newInput as DataControlState).field_name in defaultControlsObj) {
           result = {
             ...result,
-            ...defaultControlsObj[(newInput as DataControlState).fieldName],
+            ...defaultControlsObj[(newInput as DataControlState).field_name],
             //  title should not be overridden by the initial controls, hence the hardcoding
             title: newInput.title ?? result.title,
           };

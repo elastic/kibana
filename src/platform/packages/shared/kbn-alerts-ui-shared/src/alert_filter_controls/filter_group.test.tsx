@@ -74,7 +74,7 @@ const TestComponent: FC<Partial<FilterGroupProps>> = (props) => {
       defaultControls={[
         ...DEFAULT_CONTROLS,
         {
-          fieldName: 'host.name',
+          field_name: 'host.name',
           title: 'Host',
         },
       ]}
@@ -537,7 +537,7 @@ describe(' Filter Group Component ', () => {
         <TestComponent
           controlsUrlState={[
             {
-              fieldName: 'abc',
+              field_name: 'abc',
             },
           ]}
         />
@@ -556,7 +556,7 @@ describe(' Filter Group Component ', () => {
         <TestComponent
           controlsUrlState={[
             {
-              fieldName: 'abc',
+              field_name: 'abc',
             },
           ]}
         />

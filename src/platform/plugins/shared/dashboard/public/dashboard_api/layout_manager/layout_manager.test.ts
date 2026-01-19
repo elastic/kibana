@@ -56,8 +56,8 @@ describe('layout manager', () => {
       uid: 'control1',
       type: 'optionsListControl',
       config: {
-        dataViewId: '',
-        fieldName: '',
+        data_view_id: '',
+        field_name: '',
       },
     },
     {
@@ -66,8 +66,8 @@ describe('layout manager', () => {
       width: 'small',
       type: 'optionsListControl',
       config: {
-        dataViewId: '',
-        fieldName: '',
+        data_view_id: '',
+        field_name: '',
       },
     },
   ];
