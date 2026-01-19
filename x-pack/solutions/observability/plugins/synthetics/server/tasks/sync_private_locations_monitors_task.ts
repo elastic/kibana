@@ -379,8 +379,10 @@ export const runSynPrivateLocationMonitorsTaskSoon = async ({
 
 export const resetSyncPrivateCleanUpState = async ({
   server,
+  hasAlreadyDoneCleanup = false,
 }: {
   server: SyntheticsServerSetup;
+  hasAlreadyDoneCleanup: boolean;
 }) => {
   const {
     logger,
@@ -389,7 +391,7 @@ export const resetSyncPrivateCleanUpState = async ({
   logger.debug(`Resetting Synthetics sync private location monitors cleanup state`);
   await taskManager.bulkUpdateState([PRIVATE_LOCATIONS_SYNC_TASK_ID], (state) => ({
     ...state,
-    hasAlreadyDoneCleanup: false,
+    hasAlreadyDoneCleanup,
   }));
   await runSynPrivateLocationMonitorsTaskSoon({ server });
   logger.debug(`Synthetics sync private location monitors cleanup state reset successfully`);

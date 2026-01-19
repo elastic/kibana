@@ -203,7 +203,9 @@ export class DeployPrivateLocationMonitors {
         )}`
       );
       await this.deployEditMonitors({
-        allPrivateLocations,
+        allPrivateLocations: allPrivateLocations.filter(
+          (loc) => loc.id === privateLocationId || !privateLocationId
+        ),
         configsBySpaces,
         monitorSpaceIds,
         paramsBySpace,
