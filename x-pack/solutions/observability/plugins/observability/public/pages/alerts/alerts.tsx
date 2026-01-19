@@ -263,7 +263,7 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
+  const manageRulesHref = http.basePath.prepend('/app/rules');
 
   return (
     <Provider value={alertSearchBarStateContainer}>
