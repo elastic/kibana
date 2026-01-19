@@ -44,6 +44,8 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const commandStart = command.location.min; // Don't assume 0; PROMQL can start in a subquery in the future.
   const innerCommandText = innerText.substring(commandStart);
+  // We can't rely on command.location.max: it can stop at a mis-parsed last param, so we'd either
+  // truncate or include the wrong text. The first pipe is the only stable delimiter here for now.
   const pipeIndex = query.indexOf('|', commandStart);
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
   const position = getPosition(innerText, command);
