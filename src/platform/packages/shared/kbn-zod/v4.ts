@@ -29,7 +29,8 @@ export const z = Object.assign(zodV4, { fromJSONSchema });
 export namespace z {
   // eslint-disable-next-line @typescript-eslint/naming-convention -- Must match Zod's API: z.infer<T>
   export type infer<T extends zodV4.ZodType> = zodV4.infer<T>;
-  export type ZodType = zodV4.ZodType;
+  // @ts-expect-error -- Input constraint is enforced by zodV4.ZodType at usage (not definition)
+  export type ZodType<Output = any, Def = any, Input = any> = zodV4.ZodType<Output, Def, Input>;
   export type ZodObject<T extends zodV4.ZodRawShape = zodV4.ZodRawShape> = zodV4.ZodObject<T>;
   export type ZodRawShape = zodV4.ZodRawShape;
   export type ZodSchema<T = any> = zodV4.ZodSchema<T>;
