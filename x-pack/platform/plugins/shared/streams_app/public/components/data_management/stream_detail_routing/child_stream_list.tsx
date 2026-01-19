@@ -41,7 +41,6 @@ import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_s
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { NoDataEmptyPrompt } from './empty_prompt';
-import { SuggestPartitionPanel } from './partition_suggestions/suggest_partition_panel';
 import { SuggestionLoadingPrompt } from '../shared/suggestion_loading_prompt';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
@@ -161,19 +160,21 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
       <CurrentStreamEntry definition={definition} />
 
       {!hasData && !isLoadingSuggestions && !isRefreshing ? (
-        <NoDataEmptyPrompt createNewRule={createNewRule}>
+        <NoDataEmptyPrompt
+          createNewRule={createNewRule}
+          isLoading={!!aiFeatures?.loading}
+          isAiEnabled={!!aiFeatures?.enabled}
+        >
           {aiFeatures?.enabled && (
-            <SuggestPartitionPanel>
-              <GenerateSuggestionButton
-                size="s"
-                onClick={getSuggestionsForStream}
-                isLoading={isLoadingSuggestions}
-                isDisabled={isEditingOrReorderingStreams}
-                aiFeatures={aiFeatures}
-              >
-                {suggestPartitionsCardButtonText}
-              </GenerateSuggestionButton>
-            </SuggestPartitionPanel>
+            <GenerateSuggestionButton
+              size="s"
+              onClick={getSuggestionsForStream}
+              isLoading={isLoadingSuggestions}
+              isDisabled={isEditingOrReorderingStreams}
+              aiFeatures={aiFeatures}
+            >
+              {suggestPartitionsWithAIText}
+            </GenerateSuggestionButton>
           )}
         </NoDataEmptyPrompt>
       ) : (
@@ -308,10 +309,3 @@ const suggestPartitionsWithAIText = i18n.translate(
 const createPartitionManuallyText = i18n.translate('xpack.streams.streamDetailRouting.addRule', {
   defaultMessage: 'Create partition manually',
 });
-
-const suggestPartitionsCardButtonText = i18n.translate(
-  'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.cardButton',
-  {
-    defaultMessage: 'Suggest partitions',
-  }
-);
