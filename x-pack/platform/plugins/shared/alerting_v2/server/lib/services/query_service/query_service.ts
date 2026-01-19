@@ -8,7 +8,6 @@
 import { ESQL_SEARCH_STRATEGY, isRunningResponse } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
-import { set } from '@kbn/safer-lodash-set';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { inject, injectable } from 'inversify';
 import { catchError, lastValueFrom, map, filter as rxFilter, throwError } from 'rxjs';
@@ -24,7 +23,6 @@ interface ExecuteQueryParams {
 
 export interface QueryServiceContract {
   executeQuery(params: ExecuteQueryParams): Promise<ESQLSearchResponse>;
-  queryResponseToRecords<T extends Record<string, any>>(response: ESQLSearchResponse): T[];
 }
 
 @injectable()
@@ -92,29 +90,5 @@ export class QueryService implements QueryServiceContract {
 
       throw error;
     }
-  }
-
-  public queryResponseToRecords<T extends Record<string, any>>(response: ESQLSearchResponse): T[] {
-    const objects: T[] = [];
-
-    if (response.columns.length === 0 || response.values.length === 0) {
-      return [];
-    }
-
-    for (const row of response.values) {
-      const object: T = {} as T;
-
-      for (const [columnIndex, value] of row.entries()) {
-        const columnName = response.columns[columnIndex]?.name;
-
-        if (columnName) {
-          set(object, columnName.split('.'), value);
-        }
-      }
-
-      objects.push(object);
-    }
-
-    return objects;
   }
 }

@@ -11,9 +11,6 @@ export function createMockQueryService() {
   type QueryServiceMock = jest.Mocked<QueryServiceContract>;
   const queryService = {
     executeQuery: jest.fn() as jest.MockedFunction<QueryServiceContract['executeQuery']>,
-    queryResponseToRecords: jest.fn() as jest.MockedFunction<
-      QueryServiceContract['queryResponseToRecords']
-    >,
   } satisfies QueryServiceMock;
 
   return queryService;
