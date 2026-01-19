@@ -145,7 +145,6 @@ const externals = {
   '@kbn/react-kibana-context-render': '__kbnSharedDeps__.KbnReactKibanaContextRender',
   '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
   '@kbn/react-kibana-context-env': '__kbnSharedDeps__.KbnReactKibanaContextEnv',
-  '@kbn/react-context-registry': '__kbnSharedDeps__.KbnReactContextRegistry',
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
   '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
   '@kbn/visualizations-common': '__kbnSharedDeps__.KbnVisualizationsCommon',

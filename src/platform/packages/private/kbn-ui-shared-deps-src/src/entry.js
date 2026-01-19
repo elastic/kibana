@@ -115,7 +115,6 @@ export const KbnReactKibanaContextRoot = require('@kbn/react-kibana-context-root
 export const KbnReactKibanaContextRender = require('@kbn/react-kibana-context-render');
 export const KbnReactKibanaContextTheme = require('@kbn/react-kibana-context-theme');
 export const KbnReactKibanaContextEnv = require('@kbn/react-kibana-context-env');
-export const KbnReactContextRegistry = require('@kbn/react-context-registry');
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
 export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');
 export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
