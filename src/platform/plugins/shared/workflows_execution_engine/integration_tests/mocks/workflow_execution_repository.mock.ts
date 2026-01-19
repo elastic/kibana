@@ -104,6 +104,26 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     workflowId: string,
     spaceId: string,
     triggeredBy?: string
+  ): Promise<boolean> {
+    let results = Array.from(this.workflowExecutions.values()).filter(
+      (exec) =>
+        exec.workflowId === workflowId &&
+        exec.spaceId === spaceId &&
+        !TerminalExecutionStatuses.includes(exec.status)
+    );
+
+    if (triggeredBy) {
+      results = results.filter((exec) => exec.triggeredBy === triggeredBy);
+    }
+
+    // Return true if there's at least one running execution
+    return results.length > 0;
+  }
+
+  public async getRunningExecutionsByWorkflowId(
+    workflowId: string,
+    spaceId: string,
+    triggeredBy?: string
   ): Promise<Array<{ _source: EsWorkflowExecution; _id: string; _index: string }>> {
     let results = Array.from(this.workflowExecutions.values()).filter(
       (exec) =>
