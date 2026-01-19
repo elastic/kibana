@@ -13,11 +13,16 @@ import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  sharedPanelInfoSchema,
+  legendTruncateAfterLinesSchema,
+} from '../shared';
 import {
   legendNestedSchema,
   legendSizeSchema,
-  legendTruncateAfterLinesSchema,
   legendVisibleSchema,
   valueDisplaySchema,
 } from './partition_shared';
@@ -108,6 +113,7 @@ export const treemapStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    ...dslOnlyPanelInfoSchema,
     ...treemapSharedStateSchema,
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
@@ -213,6 +219,7 @@ const treemapStateSchemaESQL = schema.object(
 
 export const treemapStateSchema = schema.oneOf([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
   meta: {
+    id: 'treemapChartSchema',
     description: 'Treemap chart configuration: DSL or ES|QL query based',
   },
 });

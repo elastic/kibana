@@ -12,7 +12,13 @@ import { schema } from '@kbn/config-schema';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  legendTruncateAfterLinesSchema,
+  sharedPanelInfoSchema,
+} from '../shared';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
@@ -20,7 +26,6 @@ import {
 import {
   legendNestedSchema,
   legendSizeSchema,
-  legendTruncateAfterLinesSchema,
   legendVisibleSchema,
   valueDisplaySchema,
 } from './partition_shared';
@@ -116,6 +121,7 @@ export const pieStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    ...dslOnlyPanelInfoSchema,
     ...pieStateSharedSchema,
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
@@ -192,7 +198,10 @@ const pieStateSchemaESQL = schema.object(
  * Complete pie/donut chart configuration supporting both standard and ES|QL queries
  */
 export const pieStateSchema = schema.oneOf([pieStateSchemaNoESQL, pieStateSchemaESQL], {
-  meta: { description: 'Pie/donut chart state: standard query or ES|QL query' },
+  meta: {
+    description: 'Pie/donut chart state: standard query or ES|QL query',
+    id: 'pieChartSchema',
+  },
 });
 
 export type PieState = TypeOf<typeof pieStateSchema>;

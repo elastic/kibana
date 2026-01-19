@@ -12,11 +12,15 @@ import { schema } from '@kbn/config-schema';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  legendTruncateAfterLinesSchema,
+  sharedPanelInfoSchema,
+} from '../shared';
 import {
   legendNestedSchema,
-  legendTruncateAfterLinesSchema,
   legendVisibleSchema,
   legendSizeSchema,
   valueDisplaySchema,
@@ -111,6 +115,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    ...dslOnlyPanelInfoSchema,
     ...mosaicStateSharedSchema,
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
@@ -208,6 +213,7 @@ const mosaicStateSchemaESQL = schema.object(
 
 export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
   meta: {
+    id: 'mosaicChartSchema',
     description:
       'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
   },

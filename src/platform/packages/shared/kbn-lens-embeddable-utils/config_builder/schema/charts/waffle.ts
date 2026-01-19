@@ -12,14 +12,14 @@ import { schema } from '@kbn/config-schema';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
-  legendVisibleSchema,
-  legendSizeSchema,
-  valueDisplaySchema,
-} from './partition_shared';
+} from '../shared';
+import { legendVisibleSchema, legendSizeSchema, valueDisplaySchema } from './partition_shared';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
@@ -100,6 +100,7 @@ export const waffleStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    ...dslOnlyPanelInfoSchema,
     ...waffleStateSharedSchema,
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
@@ -172,7 +173,10 @@ const waffleStateSchemaESQL = schema.object(
  * Complete waffle chart configuration supporting both standard and ES|QL queries
  */
 export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
-  meta: { description: 'Waffle chart configuration: DSL or ES|QL query based' },
+  meta: {
+    id: 'waffleChartSchema',
+    description: 'Waffle chart configuration: DSL or ES|QL query based',
+  },
 });
 
 export type WaffleState = TypeOf<typeof waffleStateSchema>;

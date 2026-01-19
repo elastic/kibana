@@ -58,10 +58,10 @@ export const regionMapStateSchemaESQL = schema.object({
   region: schema.allOf([regionMapStateRegionOptionsSchema, esqlColumnSchema]),
 });
 
-export const regionMapStateSchema = schema.oneOf([
-  regionMapStateSchemaNoESQL,
-  regionMapStateSchemaESQL,
-]);
+export const regionMapStateSchema = schema.oneOf(
+  [regionMapStateSchemaNoESQL, regionMapStateSchemaESQL],
+  { meta: { id: 'regionMapChartSchema' } }
+);
 
 export type RegionMapState = TypeOf<typeof regionMapStateSchema>;
 export type RegionMapStateNoESQL = TypeOf<typeof regionMapStateSchemaNoESQL>;

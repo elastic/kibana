@@ -102,10 +102,12 @@ export const tagcloudStateSchemaESQL = schema.object({
   tag_by: schema.allOf([tagcloudStateTagsByOptionsSchema, esqlColumnSchema]),
 });
 
-export const tagcloudStateSchema = schema.oneOf([
-  tagcloudStateSchemaNoESQL,
-  tagcloudStateSchemaESQL,
-]);
+export const tagcloudStateSchema = schema.oneOf(
+  [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],
+  {
+    meta: { id: 'tagcloudChartSchema' },
+  }
+);
 
 export type TagcloudState = TypeOf<typeof tagcloudStateSchema>;
 export type TagcloudStateNoESQL = TypeOf<typeof tagcloudStateSchemaNoESQL>;

@@ -15,6 +15,7 @@ import {
   dslOnlyPanelInfoSchema,
   ignoringGlobalFiltersSchemaRaw,
   layerSettingsSchema,
+  legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
 import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
@@ -172,9 +173,7 @@ const sharedLegendSchema = {
       maxSize: statisticsOptionsSize,
     })
   ),
-  truncate_after_lines: schema.maybe(
-    schema.number({ min: 1, max: 5, meta: { description: 'Maximum lines before truncation' } })
-  ),
+  truncate_after_lines: legendTruncateAfterLinesSchema,
 };
 
 /**
@@ -679,7 +678,7 @@ export const xyStateSchema = schema.object(
       }
     ),
   },
-  { meta: { description: 'Complete XY chart configuration' } }
+  { meta: { id: 'xyChartSchema', description: 'Complete XY chart configuration' } }
 );
 
 export type XYState = TypeOf<typeof xyStateSchema>;
