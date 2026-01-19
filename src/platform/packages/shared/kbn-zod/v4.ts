@@ -8,7 +8,6 @@
  */
 
 import { z as zodV4 } from 'zod/v4';
-import { fromJSONSchema } from './from_json_schema';
 
 // Re-export all Zod exports (types and values)
 export * from 'zod/v4';
@@ -17,9 +16,32 @@ export * from 'zod/v4';
 // where z.fromJSONSchema will be available natively. This allows consumers to use
 // the same API (z.fromJSONSchema) now and later without code changes.
 //
+// Lazy-load fromJSONSchema to avoid bundling it when only types are needed.
+// This prevents plugins that only import types from pulling in the polyfill code.
+// Using a getter with a factory function pattern that webpack can tree-shake.
+// The import is wrapped in a function so webpack only includes it when the getter is accessed.
+function createFromJSONSchemaGetter() {
+  let fromJSONSchemaImpl: typeof import('./from_json_schema').fromJSONSchema | undefined;
+
+  return function getFromJSONSchema() {
+    if (!fromJSONSchemaImpl) {
+      // Use a factory pattern that webpack can tree-shake
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      fromJSONSchemaImpl = require('./from_json_schema').fromJSONSchema;
+    }
+    return fromJSONSchemaImpl;
+  };
+}
+
+const getFromJSONSchema = createFromJSONSchemaGetter();
+
 // When Kibana upgrades to true Zod v4, this entire file can be replaced with:
 //   export { z } from 'zod/v4';
-export const z = Object.assign(zodV4, { fromJSONSchema });
+export const z = Object.assign(zodV4, {
+  get fromJSONSchema() {
+    return getFromJSONSchema();
+  },
+});
 
 // Namespace merging to preserve type utilities during the polyfill period.
 //
