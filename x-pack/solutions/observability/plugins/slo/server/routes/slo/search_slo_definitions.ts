@@ -21,19 +21,13 @@ export const searchSloDefinitionsRoute = createSloServerRoute({
   params: searchSLODefinitionsParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { scopedClusterClient, repository, spaceId, settingsRepository } = await getScopedClients(
-      { request, logger }
-    );
+    const { scopedClusterClient, spaceId, settingsRepository } = await getScopedClients({
+      request,
+      logger,
+    });
 
     const settings = await settingsRepository.get();
     const esClient = scopedClusterClient.asCurrentUser;
-    // const searchSloDefinitionsClient = new SearchSloDefinitionsClient(
-    //   repository,
-    //   esClient,
-    //   logger,
-    //   spaceId,
-    //   settings
-    // );
     const searchSLODefinitions = new SearchSLODefinitions(esClient, logger, spaceId, settings);
 
     return await searchSLODefinitions.execute(params.query);
