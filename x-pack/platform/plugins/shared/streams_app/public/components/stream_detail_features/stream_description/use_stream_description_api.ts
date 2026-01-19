@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
-import { firstValueFrom } from 'rxjs';
-import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { getLast24HoursTimeRange } from '../../../util/time_range';
-import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { getFormattedError } from '../../../util/errors';
 import { useUpdateStreams } from '../../../hooks/use_update_streams';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -21,20 +20,13 @@ import { useKibana } from '../../../hooks/use_kibana';
 export const useStreamDescriptionApi = ({
   definition,
   refreshDefinition,
-  aiFeatures,
   silent = false,
 }: {
   definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
-  aiFeatures: AIFeatures | null;
   silent?: boolean;
 }) => {
-  const { signal, abort: abortController, refresh } = useAbortController();
-
-  const abort = useCallback(() => {
-    abortController();
-    refresh();
-  }, [abortController, refresh]);
+  const { signal } = useAbortController();
 
   const updateStream = useUpdateStreams(definition.stream.name);
 
@@ -43,15 +35,13 @@ export const useStreamDescriptionApi = ({
     dependencies: {
       start: { streams },
     },
-    services: { telemetryClient },
   } = useKibana();
 
   const [description, setDescription] = useState(definition.stream.description || '');
 
-  const [isGenerating, setIsGenerating] = useState(false);
-
   const [isUpdating, setIsUpdating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
   // Save the updated description; show success and error toasts unless silent
   const save = useCallback(
     async (nextDescription: string) => {
@@ -120,109 +110,140 @@ export const useStreamDescriptionApi = ({
     ]
   );
 
-  const generate = useCallback(async () => {
-    if (!aiFeatures?.genAiConnectors.selectedConnector) {
-      return;
-    }
-
-    setIsGenerating(true);
-
-    try {
-      const { from, to } = getLast24HoursTimeRange();
-      const { description: generatedDescription, tokensUsed } = await firstValueFrom(
-        streams.streamsRepositoryClient.stream('POST /internal/streams/{name}/_describe_stream', {
-          signal,
-          params: {
-            path: {
-              name: definition.stream.name,
-            },
-            query: {
-              connectorId: aiFeatures.genAiConnectors.selectedConnector,
-              from,
-              to,
-            },
-          },
-        })
-      );
-
-      setDescription(generatedDescription);
-
-      telemetryClient.trackStreamDescriptionGenerated({
-        stream_name: definition.stream.name,
-        stream_type: getStreamTypeFromDefinition(definition.stream),
-        input_tokens_used: tokensUsed.prompt,
-        output_tokens_used: tokensUsed.completion,
-      });
-
-      return generatedDescription;
-    } catch (error) {
-      setIsGenerating(false);
-      if (error.name === 'AbortError') {
-        return;
-      }
-      if (!silent) {
-        notifications.toasts.addError(error, {
-          title: i18n.translate(
-            'xpack.streams.streamDetailView.streamDescription.generateErrorTitle',
-            { defaultMessage: 'Failed to generate description' }
-          ),
-          toastMessage: getFormattedError(error).message,
-        });
-      }
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [
-    silent,
-    aiFeatures?.genAiConnectors.selectedConnector,
-    streams.streamsRepositoryClient,
-    signal,
-    definition.stream,
-    telemetryClient,
-    notifications.toasts,
-  ]);
-
-  const onCancelEdit = useCallback(() => {
-    setDescription(definition.stream.description);
-    setIsEditing(false);
-  }, [setIsEditing, setDescription, definition.stream.description]);
-
-  const onGenerateDescription = useCallback(async () => {
-    const result = await generate();
-    if (result) {
-      setIsEditing(true);
-    }
-    return result;
-  }, [generate, setIsEditing]);
-
   const onStartEditing = useCallback(() => {
     setIsEditing(true);
   }, [setIsEditing]);
 
-  const onSaveDescription = useCallback(
-    (desc?: string) => {
-      const generatedDescription = desc ?? description;
-      if (generatedDescription !== definition.stream.description) {
-        return save(generatedDescription).then(() => setIsEditing(false));
+  const getDescriptionGenerationStatus = useCallback(async () => {
+    return await streams.streamsRepositoryClient.fetch(
+      'GET /internal/streams/{name}/_description_generation/_status',
+      {
+        signal,
+        params: {
+          path: { name: definition.stream.name },
+        },
       }
-      setIsEditing(false);
+    );
+  }, [definition.stream.name, signal, streams.streamsRepositoryClient]);
+
+  const scheduleDescriptionGenerationTask = useCallback(
+    async (connectorId: string) => {
+      const { from, to } = getLast24HoursTimeRange();
+      await streams.streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/_description_generation/_task',
+        {
+          signal,
+          params: {
+            path: { name: definition.stream.name },
+            body: {
+              action: 'schedule',
+              to,
+              from,
+              connectorId,
+            },
+          },
+        }
+      );
     },
-    [description, definition.stream.description, save, setIsEditing]
+    [definition.stream.name, signal, streams.streamsRepositoryClient]
   );
 
-  const areButtonsDisabled = isUpdating || isGenerating;
+  const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] = useAsyncFn(
+    scheduleDescriptionGenerationTask
+  );
+
+  const cancelDescriptionGenerationTask = useCallback(async () => {
+    await streams.streamsRepositoryClient.fetch(
+      'POST /internal/streams/{name}/_description_generation/_task',
+      {
+        signal,
+        params: {
+          path: { name: definition.stream.name },
+          body: {
+            action: 'cancel',
+          },
+        },
+      }
+    );
+  }, [definition.stream.name, signal, streams.streamsRepositoryClient]);
+
+  const acknowledgeDescriptionGenerationTask = useCallback(async () => {
+    try {
+      await streams.streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/_description_generation/_task',
+        {
+          signal,
+          params: {
+            path: { name: definition.stream.name },
+            body: {
+              action: 'acknowledge',
+            },
+          },
+        }
+      );
+    } catch (error) {
+      if (!(isHttpFetchError(error) && error.response?.status === 409)) {
+        throw error;
+      }
+    }
+  }, [definition.stream.name, signal, streams.streamsRepositoryClient]);
+
+  const [{ loading: isTaskLoading, value: task, error: taskError }, refreshTask] = useAsyncFn(
+    getDescriptionGenerationStatus
+  );
+
+  const onCancelEdit = useCallback(() => {
+    acknowledgeDescriptionGenerationTask()
+      .then(refreshTask)
+      .then(() => {
+        setDescription(definition.stream.description);
+        setIsEditing(false);
+      });
+  }, [acknowledgeDescriptionGenerationTask, definition.stream.description, refreshTask]);
+
+  const onSaveDescription = useCallback(
+    (desc?: string) => {
+      acknowledgeDescriptionGenerationTask().then(() => {
+        const generatedDescription = desc ?? description;
+        if (generatedDescription !== definition.stream.description) {
+          return save(generatedDescription).then(() => setIsEditing(false));
+        }
+        setIsEditing(false);
+      });
+    },
+    [acknowledgeDescriptionGenerationTask, description, definition.stream.description, save]
+  );
+
+  useEffect(() => {
+    if (task?.status === 'completed') {
+      setDescription(task.description);
+      setIsEditing(true);
+    }
+  }, [task, description]);
+
+  const areButtonsDisabled =
+    isSchedulingGenerationTask ||
+    task?.status === 'in_progress' ||
+    task?.status === 'being_canceled' ||
+    isTaskLoading ||
+    isUpdating;
 
   return {
     description,
     setDescription,
-    isGenerating,
     isUpdating,
     isEditing,
-    areButtonsDisabled,
     onCancelEdit,
-    onGenerateDescription,
     onStartEditing,
     onSaveDescription,
-    abort,
+    isTaskLoading,
+    task,
+    taskError,
+    refreshTask,
+    getDescriptionGenerationStatus,
+    scheduleDescriptionGenerationTask: doScheduleGenerationTask,
+    cancelDescriptionGenerationTask,
+    acknowledgeDescriptionGenerationTask,
+    areButtonsDisabled,
   };
 };

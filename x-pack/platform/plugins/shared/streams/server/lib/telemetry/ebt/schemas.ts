@@ -9,6 +9,7 @@ import type { RootSchema } from '@elastic/ebt/client';
 import type {
   StreamEndpointLatencyProps,
   StreamsSystemIdentificationIdentifiedProps,
+  StreamsDescriptionGeneratedProps,
   StreamsSignificantEventsQueriesGeneratedProps,
   StreamsStateErrorProps,
 } from './types';
@@ -100,6 +101,33 @@ const streamsSystemIdentificationIdentifiedSchema: RootSchema<StreamsSystemIdent
     },
   };
 
+const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of input tokens used for the generation request',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of output tokens used for the generation request',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+};
+
 const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignificantEventsQueriesGeneratedProps> =
   {
     count: {
@@ -144,5 +172,6 @@ export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
   streamsSystemIdentificationIdentifiedSchema,
+  streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
 };
