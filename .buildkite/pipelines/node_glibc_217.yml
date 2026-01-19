@@ -483,6 +483,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 105
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -500,6 +501,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 105
     depends_on:
       - build
     timeout_in_minutes: 60

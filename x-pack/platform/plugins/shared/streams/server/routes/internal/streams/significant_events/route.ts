@@ -11,6 +11,9 @@ import {
   type SignificantEventsGetResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type { Observable } from 'rxjs';
+import { from as toObservableFrom, map } from 'rxjs';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
@@ -18,6 +21,8 @@ import {
 } from '../../../../lib/tasks/task_definitions/significant_events_queries_generation';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { generateSignificantEventsSummary } from '../../../../lib/significant_events/insights/generate_significant_events_summary';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
@@ -219,8 +224,71 @@ const readAllSignificantEventsRoute = createServerRoute({
   },
 });
 
+type SignificantEventsSummaryEvent = ServerSentEventBase<
+  'significant_events_summary',
+  { summary: string; tokenUsage: { prompt: number; completion: number } }
+>;
+
+const generateSummaryRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/_significant_events/_generate_summary',
+  options: {
+    access: 'internal',
+    summary: 'Generate a summary of detected significant events',
+    description: 'Generate a summary of detected significant events',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z.object({
+      connectorId: z.string(),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<Observable<SignificantEventsSummaryEvent>> => {
+    const {
+      licensing,
+      uiSettingsClient,
+      inferenceClient,
+      streamsClient,
+      queryClient,
+      scopedClusterClient,
+    } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return toObservableFrom(
+      generateSignificantEventsSummary({
+        streamsClient,
+        queryClient,
+        esClient: scopedClusterClient.asCurrentUser,
+        inferenceClient: inferenceClient.bindTo({ connectorId: params.query.connectorId }),
+        signal: getRequestAbortSignal(request),
+        logger,
+      })
+    ).pipe(
+      map((result) => {
+        return {
+          type: 'significant_events_summary',
+          ...result,
+        };
+      })
+    );
+  },
+});
+
 export const internalSignificantEventsRoutes = {
   ...significantEventsQueriesGenerationStatusRoute,
   ...significantEventsQueriesGenerationTaskRoute,
   ...readAllSignificantEventsRoute,
+  ...generateSummaryRoute,
 };
