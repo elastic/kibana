@@ -123,7 +123,7 @@ function parseSortingToAPI(
           column_type: 'split_metrics_by',
           metric_index: parsed.metricIndex,
           values: parsed.values,
-          direction: direction || DEFAULT_DIRECTION,
+          direction: direction ?? DEFAULT_DIRECTION,
         }
       : undefined;
   }
@@ -137,7 +137,7 @@ function parseSortingToAPI(
   return {
     column_type: mapped.type,
     index: mapped.index,
-    direction: direction || DEFAULT_DIRECTION,
+    direction: direction ?? DEFAULT_DIRECTION,
   };
 }
 
