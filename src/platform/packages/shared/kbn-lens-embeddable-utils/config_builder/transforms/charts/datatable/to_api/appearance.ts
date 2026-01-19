@@ -13,7 +13,8 @@ import {
   LEGACY_SINGLE_ROW_HEIGHT_MODE,
   LENS_DATAGRID_DENSITY,
 } from '@kbn/lens-common';
-import { last, initial } from 'lodash';
+import { initial } from 'lodash';
+import { TRANSPOSE_SEPARATOR, getOriginalId, isTransposeId } from '@kbn/transpose-utils';
 import type { DatatableState } from '../../../../schema';
 import type { ColumnIdMapping } from './columns';
 
@@ -80,13 +81,13 @@ function parseSplitMetricsBySorting(
   columnId: string,
   columnIdMapping: ColumnIdMapping
 ): { values: string[]; metricIndex: number } | undefined {
-  const parts = columnId.split('---');
-  if (parts.length < 2) {
+  if (!isTransposeId(columnId)) {
     return undefined;
   }
 
+  const parts = columnId.split(TRANSPOSE_SEPARATOR);
   // The last part is the metric column ID
-  const metricColumnId = last(parts);
+  const metricColumnId = getOriginalId(columnId);
   const mapped = metricColumnId ? columnIdMapping.get(metricColumnId) : undefined;
 
   if (!mapped || mapped.type !== 'metric') {
@@ -115,7 +116,7 @@ function parseSortingToAPI(
   const DEFAULT_DIRECTION = 'asc' as const;
 
   // Split_metrics_by sorting (contains ---)
-  if (columnId.includes('---')) {
+  if (columnId.includes(TRANSPOSE_SEPARATOR)) {
     const parsed = parseSplitMetricsBySorting(columnId, columnIdMapping);
     return parsed
       ? {

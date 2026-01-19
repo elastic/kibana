@@ -8,6 +8,7 @@
  */
 import type { DatatableVisualizationState } from '@kbn/lens-common';
 import { LENS_DATAGRID_DENSITY, LENS_ROW_HEIGHT_MODE } from '@kbn/lens-common';
+import { getTransposeId, TRANSPOSE_SEPARATOR } from '@kbn/transpose-utils';
 import type { DatatableState } from '../../../../schema';
 import { getAccessorName } from '../helpers';
 import { METRIC_ACCESSOR_PREFIX, ROW_ACCESSOR_PREFIX } from '../constants';
@@ -20,7 +21,7 @@ function getSortingColumnId(sortBy: NonNullable<DatatableState['sort_by']>): str
       return getAccessorName(ROW_ACCESSOR_PREFIX, sortBy.index);
     case 'split_metrics_by': {
       const metricColumnId = getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.metric_index);
-      return `${sortBy.values.join('---')}---${metricColumnId}`;
+      return getTransposeId(sortBy.values.join(TRANSPOSE_SEPARATOR), metricColumnId);
     }
     default:
       return undefined;
