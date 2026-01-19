@@ -22,10 +22,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
 
-  const { dashboard, dashboardControls, discover } = getPageObjects([
+  const { dashboard, dashboardControls, discover, common, timePicker } = getPageObjects([
     'dashboard',
     'dashboardControls',
     'discover',
+    'common',
+    'timePicker',
   ]);
 
   describe('discover esql controls', () => {
@@ -45,7 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    describe('when adding an ES|QL panel with controls in dashboards and exploring it in discover', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/248030
+    describe.skip('when adding an ES|QL panel with controls in dashboards and exploring it in discover', () => {
       it('should retain the controls and their state', async () => {
         // Go to dashboard app
         await dashboard.navigateToApp();
@@ -93,6 +96,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Verify that the control exists in discover
         const control = await dashboardControls.getControlElementById(createdControlId);
         expect(control).to.be.ok();
+      });
+    });
+
+    describe('when unlinking a ES|QL panel with controls and explorting it in discover', () => {
+      it('should retain the controls and their state', async () => {
+        // Go to discover
+        await common.navigateToApp('discover');
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+
+        // Create a search with controls
+        await timePicker.setDefaultAbsoluteRange();
+        await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
+        await discover.waitUntilTabIsLoaded();
+
+        // Save session
+        await discover.saveSearch('ESQL control unlink test');
+
+        // Go to dashboards
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+
+        // Add the saved search
+        await dashboardAddPanel.addSavedSearch('ESQL control unlink test');
+
+        // Unlink the saved search
+        await dashboardPanelActions.clickPanelActionByTitle(
+          'embeddablePanelAction-unlinkFromLibrary',
+          'ESQL control unlink test'
+        );
+
+        // Save dashboard and go to view mode
+        await dashboard.saveDashboard('ESQL control unlink test dashboard');
+        await dashboard.switchToViewMode();
+
+        // Go to discover from the panel
+        await dashboardPanelActions.clickPanelActionByTitle(
+          'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH',
+          'ESQL control unlink test'
+        );
+
+        // Verify that we are in discover and the control exists
+        await discover.expectOnDiscover();
+        expect(await dashboardControls.getControlsCount()).to.be(1);
       });
     });
   });
