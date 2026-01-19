@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiLink } from '@elastic/eui';
 
-interface ScriptNameNavLinkProps {
+export interface ScriptNameNavLinkProps {
   name: string;
   href: string;
   'data-test-subj'?: string;
