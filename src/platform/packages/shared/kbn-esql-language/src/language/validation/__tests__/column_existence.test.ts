@@ -43,4 +43,16 @@ describe('column existence checks', () => {
       ]
     );
   });
+
+  it('returns an error if trying to use an unmapped column after dropping it', async () => {
+    const { expectErrors } = await setup();
+    await expectErrors(
+      'SET unmapped_fields = "LOAD"; FROM index | DROP unmapped | WHERE unmapped == ""',
+      ['Unknown column "unmapped"']
+    );
+    await expectErrors(
+      'SET unmapped_fields = "LOAD"; FROM index | RENAME unmapped AS unmapped2 | WHERE unmapped == ""',
+      ['Unknown column "unmapped"']
+    );
+  });
 });
