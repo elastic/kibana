@@ -203,6 +203,7 @@ const updateCaseAttachmentStats = async ({
 
   const totalComments = attachmentStats.get(caseId)?.userComments ?? 0;
   const totalAlerts = attachmentStats.get(caseId)?.alerts ?? 0;
+  const totalEvents = attachmentStats.get(caseId)?.events ?? 0;
 
   await caseService.patchCase({
     originalCase,
@@ -212,6 +213,7 @@ const updateCaseAttachmentStats = async ({
       updated_by: user,
       total_comments: totalComments,
       total_alerts: totalAlerts,
+      total_events: totalEvents,
     },
     refresh: false,
   });

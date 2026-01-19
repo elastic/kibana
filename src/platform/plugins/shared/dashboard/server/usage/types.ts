@@ -8,7 +8,6 @@
  */
 
 import type { SavedObjectAccessControl, SavedObjectReference } from '@kbn/core/server';
-import type { ControlGroupTelemetry } from '@kbn/controls-plugin/server';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 
 export interface DashboardHit {
@@ -35,7 +34,14 @@ export interface DashboardCollectorData {
       };
     };
   };
-  controls: ControlGroupTelemetry;
+  controls: {
+    total: number;
+    by_type: {
+      [key: string]: {
+        total: number;
+      };
+    };
+  };
   sections: {
     total: number;
   };

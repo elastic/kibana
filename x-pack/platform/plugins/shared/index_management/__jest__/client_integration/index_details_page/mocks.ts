@@ -117,3 +117,9 @@ export const testIndexStats = {
     },
   },
 };
+
+export const testUserStartPrivilegesResponse = {
+  privileges: {
+    canManageIndex: true,
+  },
+};

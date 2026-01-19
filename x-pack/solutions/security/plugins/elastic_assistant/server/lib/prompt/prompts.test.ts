@@ -19,7 +19,7 @@ describe('prompts', () => {
     [GEMINI_SYSTEM_PROMPT, 'You are an assistant', 1],
     [BEDROCK_SYSTEM_PROMPT, 'You are a security analyst', 1],
   ])(
-    '"%s" contains "%s" %s times',
+    'simple prompt validation',
     (prompt: string, containedString: string, expectedCount: number) => {
       const regex = new RegExp(containedString, 'g');
       expect((prompt.match(regex) || []).length).toBe(expectedCount);

@@ -26,11 +26,7 @@ export const RULES_DATA_INPUT_CREATE_MIGRATION_ERROR = i18n.translate(
   { defaultMessage: 'Failed to upload rules file' }
 );
 
-export type CreateMigration = ({
-  rules,
-  migrationName,
-  migrationSource,
-}: CreateRuleMigrationParams) => void;
+export type CreateMigration = ({ rules, migrationName, vendor }: CreateRuleMigrationParams) => void;
 export type OnSuccess = (migrationStats: RuleMigrationStats) => void;
 
 export const useCreateMigration = (onSuccess: OnSuccess) => {

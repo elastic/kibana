@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { HeaderMenu } from '../../header_menu';
+import * as i18n from '../../translations';
 
 export interface ExceptionItemCardHeaderProps {
   item: ExceptionListItemSchema;
@@ -31,7 +32,7 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
             iconType="boxesHorizontal"
             disableActions={disableActions}
             actions={actions}
-            aria-label="Exception item actions menu"
+            ariaLabel={i18n.EXCEPTION_ITEM_CARD_ACTIONS_ARIA_LABEL(item.name)}
             dataTestSubj={dataTestSubj}
             anchorPosition="downCenter"
           />

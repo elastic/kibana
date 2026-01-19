@@ -104,6 +104,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/zod'
   - '@kbn/securitysolution-es-utils'
+  - '@kbn/response-ops-retry-service'
 tags:
   - plugin
   - prod

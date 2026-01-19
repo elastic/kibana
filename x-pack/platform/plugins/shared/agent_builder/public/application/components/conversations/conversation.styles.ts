@@ -15,7 +15,7 @@ const maxConversationWidthStyles = css`
 `;
 
 export const conversationElementPaddingStyles = css`
-  padding: 0px 16px 16px;
+  padding: 0px 16px;
 `;
 
 // Ensures the conversation element is always 100% of it's parent or 800px, whichever is smaller.

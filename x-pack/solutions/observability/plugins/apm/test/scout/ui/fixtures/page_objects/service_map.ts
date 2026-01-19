@@ -8,6 +8,7 @@
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { SERVICE_OPBEANS_JAVA } from '../constants';
 
 export class ServiceMapPage {
   public serviceMap: Locator;
@@ -35,7 +36,7 @@ export class ServiceMapPage {
     await this.page.goto(
       `${this.kbnUrl.app(
         'apm'
-      )}/services/opbeans-java/service-map?&rangeFrom=${start}&rangeTo=${end}`
+      )}/services/${SERVICE_OPBEANS_JAVA}/service-map?&rangeFrom=${start}&rangeTo=${end}`
     );
     return await waitForApmSettingsHeaderLink(this.page);
   }
@@ -46,8 +47,9 @@ export class ServiceMapPage {
 
   async typeInTheSearchBar(text: string) {
     await this.getSearchBar();
-    await this.page.testSubj.typeWithDelay('apmUnifiedSearchBar', text);
-    return this.page.getByTestId('querySubmitButton').press('Enter');
+    await this.page.testSubj.typeWithDelay('apmUnifiedSearchBar', text, { delay: 150 });
+    // extra delay needed for MKI/ECH environments to process the input
+    await this.page.getByTestId('querySubmitButton').press('Enter');
   }
 
   async waitForServiceMapToLoad() {

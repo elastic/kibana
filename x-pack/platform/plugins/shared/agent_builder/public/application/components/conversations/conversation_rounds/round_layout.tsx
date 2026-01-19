@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -37,6 +37,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   rawRound,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
+  const [hasBeenLoading, setHasBeenLoading] = useState(false);
   const { steps, response, input, status, pending_prompt: pendingPrompt } = rawRound;
 
   const {
@@ -58,23 +59,35 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     !isResuming;
 
   const handleConfirm = useCallback(() => {
-    resumeRound({ confirm: true });
-  }, [resumeRound]);
+    resumeRound({ promptId: pendingPrompt!.id, confirm: true });
+  }, [resumeRound, pendingPrompt]);
 
   const handleCancel = useCallback(() => {
-    resumeRound({ confirm: false });
-  }, [resumeRound]);
+    resumeRound({ promptId: pendingPrompt!.id, confirm: false });
+  }, [resumeRound, pendingPrompt]);
+
+  // Track if this round has ever been in a loading state during this session
+  useEffect(() => {
+    if (isCurrentRound && isResponseLoading) {
+      setHasBeenLoading(true);
+    }
+  }, [isCurrentRound, isResponseLoading]);
 
   useEffect(() => {
-    // Pending rounds and error rounds should have a min-height to match the scroll container height
-    if ((isCurrentRound && isResponseLoading) || isErrorCurrentRound || isAwaitingPrompt) {
-      setRoundContainerMinHeight(scrollContainerHeight);
-    } else {
-      setRoundContainerMinHeight(0);
-    }
+    // Keep min-height if:
+    // - Round is loading, errored, or awaiting prompt
+    // - Round has finished streaming but is still the current round (hasBeenLoading)
+    // Remove min-height when a new round starts (isCurrentRound becomes false)
+    const shouldHaveMinHeight =
+      isErrorCurrentRound ||
+      isAwaitingPrompt ||
+      (isCurrentRound && (isResponseLoading || hasBeenLoading));
+
+    setRoundContainerMinHeight(shouldHaveMinHeight ? scrollContainerHeight : 0);
   }, [
     isCurrentRound,
     isResponseLoading,
+    hasBeenLoading,
     scrollContainerHeight,
     isErrorCurrentRound,
     isAwaitingPrompt,
@@ -133,6 +146,9 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           </EuiFlexItem>
         </EuiFlexItem>
       )}
+
+      {/* Add spacing after the final round so that text is not cut off by the scroll mask */}
+      {isCurrentRound && <EuiSpacer size="l" />}
     </EuiFlexGroup>
   );
 };

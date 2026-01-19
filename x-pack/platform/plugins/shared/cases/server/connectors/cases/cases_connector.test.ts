@@ -17,11 +17,11 @@ import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import { CasesConnectorError } from './cases_connector_error';
 import { CaseError } from '../../common/error';
-import { fullJitterBackoffFactory } from '../../common/retry_service/full_jitter_backoff';
+import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('./cases_connector_executor');
-jest.mock('../../common/retry_service/full_jitter_backoff');
+jest.mock('@kbn/response-ops-retry-service/full_jitter_backoff');
 
 const CasesConnectorExecutorMock = CasesConnectorExecutor as jest.Mock;
 const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;

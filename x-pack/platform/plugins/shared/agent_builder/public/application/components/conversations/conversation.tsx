@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiOverflowScroll, useEuiScrollBar } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiOverflowScroll,
+  useEuiScrollBar,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
@@ -28,6 +34,7 @@ import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 
 export const Conversation: React.FC<{}> = () => {
+  const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
@@ -43,16 +50,12 @@ export const Conversation: React.FC<{}> = () => {
   });
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const {
-    showScrollButton,
-    scrollToMostRecentRoundBottom,
-    scrollToMostRecentRoundTop,
-    stickToBottom,
-  } = useConversationScrollActions({
-    isResponseLoading,
-    conversationId: conversationId || '',
-    scrollContainer: scrollContainerRef.current,
-  });
+  const { showScrollButton, smoothScrollToBottom, scrollToMostRecentRoundTop, stickToBottom } =
+    useConversationScrollActions({
+      isResponseLoading,
+      conversationId: conversationId || '',
+      scrollContainer: scrollContainerRef.current,
+    });
 
   const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
@@ -69,17 +72,34 @@ export const Conversation: React.FC<{}> = () => {
     ${fullWidthAndHeightStyles}
   `;
 
+  const scrollMaskHeight = euiTheme.size.l;
+
   // Necessary to position the scroll button absolute to the container.
   const scrollWrapperStyles = css`
     ${fullWidthAndHeightStyles}
     position: relative;
     min-height: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: ${scrollMaskHeight};
+      pointer-events: none;
+      z-index: 1;
+      background: linear-gradient(to top, ${euiTheme.colors.backgroundBasePlain}, transparent);
+    }
   `;
 
-  // TODO: Add custom mask for overflow scroll top and bottom
   const scrollableStyles = css`
     ${useEuiScrollBar()}
     ${useEuiOverflowScroll('y')}
+  `;
+
+  const inputPaddingStyles = css`
+    padding-bottom: ${euiTheme.size.base};
   `;
 
   if (!hasActiveConversation) {
@@ -87,7 +107,7 @@ export const Conversation: React.FC<{}> = () => {
   }
 
   return (
-    <EuiFlexGroup direction="column" alignItems="center" css={containerStyles}>
+    <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
       <EuiFlexItem grow={true} css={scrollWrapperStyles}>
         <EuiFlexGroup
           direction="column"
@@ -99,10 +119,10 @@ export const Conversation: React.FC<{}> = () => {
             <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {showScrollButton && <ScrollButton onClick={scrollToMostRecentRoundBottom} />}
+        {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
       </EuiFlexItem>
       <EuiFlexItem
-        css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
+        css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
         grow={false}
       >
         <ConversationInput onSubmit={scrollToMostRecentRoundTop} />

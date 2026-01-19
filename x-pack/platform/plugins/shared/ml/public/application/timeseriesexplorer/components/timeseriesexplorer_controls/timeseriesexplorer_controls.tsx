@@ -193,7 +193,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
       };
 
       const state = {
-        serializedState: { rawState: embeddableInput, references: [] },
+        serializedState: embeddableInput,
         type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
       };
 

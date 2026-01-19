@@ -39,8 +39,8 @@ export abstract class ServiceDetailsTab extends Tab {
 
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/services/${urlServiceName}/${this.tabName}?${new URLSearchParams({
-        rangeFrom: overrides.rangeFrom ?? testData.OPBEANS_START_DATE,
-        rangeTo: overrides.rangeTo ?? testData.OPBEANS_END_DATE,
+        rangeFrom: overrides.rangeFrom ?? testData.START_DATE,
+        rangeTo: overrides.rangeTo ?? testData.END_DATE,
       })}`
     );
     await this.waitForTabLoad();

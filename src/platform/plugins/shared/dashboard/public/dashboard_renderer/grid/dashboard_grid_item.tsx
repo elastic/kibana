@@ -62,6 +62,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       useMargins,
       viewMode,
       dashboardContainerRef,
+      arePanelsRelated,
     ] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
@@ -69,13 +70,17 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.focusedPanelId$,
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
-      dashboardInternalApi.dashboardContainerRef$
+      dashboardInternalApi.dashboardContainerRef$,
+      dashboardInternalApi.arePanelsRelated$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
     const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
-    const blurPanel = focusedPanelId !== undefined && focusedPanelId !== id;
+    const blurPanel =
+      focusedPanelId !== undefined &&
+      focusedPanelId !== id &&
+      !arePanelsRelated(id, focusedPanelId);
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
@@ -127,10 +132,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           getParentApi={() => dashboardApi}
           key={`${type}_${id}`}
           panelProps={panelProps}
-          onApiAvailable={(api) => dashboardInternalApi.registerChildApi(api)}
+          onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
         />
       );
-    }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);
+    }, [id, dashboardApi, type, useMargins, setDragHandles]);
 
     const { euiTheme } = useEuiTheme();
     const hoverActionsHeight = euiTheme.base * 2;

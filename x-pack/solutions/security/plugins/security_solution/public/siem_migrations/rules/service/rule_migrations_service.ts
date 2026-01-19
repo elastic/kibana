@@ -35,6 +35,7 @@ import { MigrationSource } from '../../common/types';
 import { raiseSuccessToast } from './notification/success_notification';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import { requiredRuleMigrationCapabilities } from './capabilities';
+import type { SiemMigrationVendor } from '../../../../common/siem_migrations/types';
 
 const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
@@ -42,12 +43,12 @@ export type CreateRuleMigrationParams =
   | {
       rules: CreateRuleMigrationRulesRequestBody;
       migrationName: string;
-      migrationSource: MigrationSource.SPLUNK;
+      vendor: 'splunk';
     }
   | {
       rules: CreateQRadarRuleMigrationRulesRequestBody;
       migrationName: string;
-      migrationSource: MigrationSource.QRADAR;
+      vendor: 'qradar';
     };
 
 export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMigrationStats> {
@@ -118,16 +119,20 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   public async createRuleMigration({
     rules,
     migrationName,
-    migrationSource,
+    vendor,
   }: CreateRuleMigrationParams): Promise<string> {
     if (!rules) {
       const emptyRulesError = new Error(i18n.EMPTY_RULES_ERROR);
-      this.telemetry.reportSetupMigrationCreated({ count: 0, error: emptyRulesError });
+      this.telemetry.reportSetupMigrationCreated({
+        count: 0,
+        error: emptyRulesError,
+        vendor,
+      });
       throw emptyRulesError;
     }
 
     try {
-      if (migrationSource === MigrationSource.QRADAR) {
+      if (vendor === MigrationSource.QRADAR) {
         if (!rules.xml) {
           throw new Error(i18n.EMPTY_RULES_ERROR);
         }
@@ -137,7 +142,7 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
           name: migrationName,
         });
         const { count } = await this.addQradarRulesToMigration(migrationId, rules);
-        this.telemetry.reportSetupMigrationCreated({ migrationId, count });
+        this.telemetry.reportSetupMigrationCreated({ migrationId, count, vendor });
 
         return migrationId;
       } else {
@@ -150,37 +155,56 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
           name: migrationName,
         });
         await this.addRulesToMigration(migrationId, rules);
-        this.telemetry.reportSetupMigrationCreated({ migrationId, count: rules.length });
+        this.telemetry.reportSetupMigrationCreated({
+          migrationId,
+          count: rules.length,
+          vendor,
+        });
 
         return migrationId;
       }
     } catch (error) {
-      this.telemetry.reportSetupMigrationCreated({ count: 0, error });
+      this.telemetry.reportSetupMigrationCreated({ count: 0, error, vendor });
       throw error;
     }
   }
 
   /** Deletes a rule migration by its ID, refreshing the stats to remove it from the list */
-  public async deleteMigration(migrationId: string): Promise<string> {
+  public async deleteMigration({
+    migrationId,
+    vendor,
+  }: {
+    migrationId: string;
+    vendor?: SiemMigrationVendor;
+  }): Promise<string> {
     try {
       await api.deleteMigration({ migrationId });
 
       // Refresh stats to remove the deleted migration from the list. All UI observables will be updated automatically
       await this.getMigrationsStats();
 
-      this.telemetry.reportSetupMigrationDeleted({ migrationId });
+      this.telemetry.reportSetupMigrationDeleted({ migrationId, vendor });
       return migrationId;
     } catch (error) {
-      this.telemetry.reportSetupMigrationDeleted({ migrationId, error });
+      this.telemetry.reportSetupMigrationDeleted({
+        migrationId,
+        error,
+        vendor,
+      });
       throw error;
     }
   }
 
   /** Upserts resources for a rule migration, batching the requests to avoid hitting the max payload size limit of the API */
-  public async upsertMigrationResources(
-    migrationId: string,
-    body: UpsertRuleMigrationResourcesRequestBody
-  ): Promise<void> {
+  public async upsertMigrationResources({
+    migrationId,
+    vendor,
+    body,
+  }: {
+    migrationId: string;
+    vendor?: SiemMigrationVendor;
+    body: UpsertRuleMigrationResourcesRequestBody;
+  }): Promise<void> {
     const count = body.length;
     if (count === 0) {
       throw new Error(i18n.EMPTY_RULES_ERROR);
@@ -193,19 +217,36 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
         const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
         await api.upsertMigrationResources({ migrationId, body: bodyBatch });
       }
-      this.telemetry.reportSetupResourceUploaded({ migrationId, type, count });
+      this.telemetry.reportSetupResourceUploaded({
+        migrationId,
+        type,
+        count,
+        vendor,
+      });
     } catch (error) {
-      this.telemetry.reportSetupResourceUploaded({ migrationId, type, count, error });
+      this.telemetry.reportSetupResourceUploaded({
+        migrationId,
+        type,
+        count,
+        error,
+        vendor,
+      });
       throw error;
     }
   }
 
   /** Starts a rule migration task and waits for the task to start running */
-  public async startRuleMigration(
-    migrationId: string,
-    retry?: SiemMigrationRetryFilter,
-    settings?: RuleMigrationSettings
-  ): Promise<StartRuleMigrationResponse> {
+  public async startRuleMigration({
+    migrationId,
+    vendor,
+    retry,
+    settings,
+  }: {
+    migrationId: string;
+    vendor: SiemMigrationVendor;
+    retry?: SiemMigrationRetryFilter;
+    settings?: RuleMigrationSettings;
+  }): Promise<StartRuleMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
       this.core.notifications.toasts.add(
@@ -245,16 +286,22 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
 
       this.startPolling();
 
-      this.telemetry.reportStartTranslation(params);
+      this.telemetry.reportStartTranslation({ ...params, vendor });
       return result;
     } catch (error) {
-      this.telemetry.reportStartTranslation({ ...params, error });
+      this.telemetry.reportStartTranslation({ ...params, error, vendor });
       throw error;
     }
   }
 
   /** Stops a running rule migration task and waits for the task to completely stop */
-  public async stopRuleMigration(migrationId: string): Promise<StopRuleMigrationResponse> {
+  public async stopRuleMigration({
+    migrationId,
+    vendor,
+  }: {
+    migrationId: string;
+    vendor?: SiemMigrationVendor;
+  }): Promise<StopRuleMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
       this.core.notifications.toasts.add(
@@ -263,9 +310,8 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
       return { stopped: false };
     }
 
-    const params: api.StopRuleMigrationParams = { migrationId };
     try {
-      const result = await api.stopRuleMigration(params);
+      const result = await api.stopRuleMigration({ migrationId });
 
       // Should take a few seconds to stop the task, so we poll until it is not running anymore
       await this.migrationTaskPollingUntil(
@@ -274,18 +320,21 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
         { sleepSecs: START_STOP_POLLING_SLEEP_SECONDS, timeoutSecs: 90 } // wait up to 90 seconds for the task to stop
       );
 
-      this.telemetry.reportStopTranslation(params);
+      this.telemetry.reportStopTranslation({ migrationId, vendor });
       return result;
     } catch (error) {
-      this.telemetry.reportStopTranslation({ ...params, error });
+      this.telemetry.reportStopTranslation({ migrationId, vendor, error });
       throw error;
     }
   }
 
-  protected async startMigrationFromStats(
-    connectorId: string,
-    taskStats: RuleMigrationStats
-  ): Promise<void> {
+  protected async startMigrationFromStats({
+    connectorId,
+    taskStats,
+  }: {
+    connectorId: string;
+    taskStats: RuleMigrationStats;
+  }): Promise<void> {
     const skipPrebuiltRulesMatching = taskStats.last_execution?.skip_prebuilt_rules_matching;
     await api.startRuleMigration({
       migrationId: taskStats.id,

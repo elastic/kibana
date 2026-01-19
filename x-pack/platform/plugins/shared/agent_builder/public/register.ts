@@ -34,6 +34,7 @@ export const registerApp = ({
     title: AGENT_BUILDER_SHORT_TITLE,
     euiIconType: 'logoElasticsearch',
     visibleIn: ['sideNav', 'globalSearch'],
+    keywords: ['agent builder', 'ai agent', 'chat agent'],
     deepLinks: [
       {
         id: 'conversations',
@@ -46,6 +47,7 @@ export const registerApp = ({
         id: 'tools',
         path: '/tools',
         title: i18n.translate('xpack.agentBuilder.tools.title', { defaultMessage: 'Tools' }),
+        keywords: ['mcp'],
       },
       {
         id: 'agents',
