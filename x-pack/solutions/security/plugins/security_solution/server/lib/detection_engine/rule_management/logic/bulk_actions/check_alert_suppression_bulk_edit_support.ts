@@ -22,16 +22,8 @@ export const checkAlertSuppressionBulkEditSupport = async ({
   licensing: LicensingApiRequestHandlerContext;
 }) => {
   const hasAlertSuppressionActions = hasAlertSuppressionBulkEditAction(editActions);
-  const isAlertSuppressionEnabled = experimentalFeatures.bulkEditAlertSuppressionEnabled;
 
   if (hasAlertSuppressionActions) {
-    if (!isAlertSuppressionEnabled) {
-      return {
-        body: `Bulk alert suppression actions are not supported. Use "experimentalFeatures.bulkEditAlertSuppressionEnabled" config field to enable it.`,
-        statusCode: 400,
-      };
-    }
-
     const isAlertSuppressionLicenseValid = await licensing.license.hasAtLeast(
       MINIMUM_LICENSE_FOR_SUPPRESSION
     );

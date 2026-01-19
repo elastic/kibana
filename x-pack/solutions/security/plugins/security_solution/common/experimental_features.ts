@@ -117,11 +117,6 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForTrustedAppsEnabled: false,
 
   /**
-   * Enables the rule's bulk action to manage alert suppression
-   */
-  bulkEditAlertSuppressionEnabled: true,
-
-  /**
    * Enables the ability to use does not match condition for indicator match rules
    */
   doesNotMatchForIndicatorMatchRuleEnabled: true,
