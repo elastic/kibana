@@ -124,7 +124,10 @@ import {
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
-import { createEngineDescription } from './installation/engine_description';
+import {
+  createEngineDescription,
+  engineDescriptionRegistry,
+} from './installation/engine_description';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
 import type { ApiKeyManager } from './auth/api_key';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
@@ -932,6 +935,441 @@ export class EntityStoreDataClient {
     };
 
     return { records, total, inspect };
+  }
+
+  /**
+   * List filterable entities for entity resolution UI (FIELDS Architecture).
+   * Returns primary entities (those without Resolved_by field) with their resolved_count.
+   */
+  public async listFilterableEntities(params: {
+    entityType: EntityType;
+    excludeEntityId?: string;
+    searchTerm?: string;
+    limit: number;
+  }): Promise<{
+    entities: Array<{
+      id: string;
+      name: string;
+      type: string;
+      risk_score: number | null;
+      resolved_count: number;
+    }>;
+    total: number;
+  }> {
+    const { entityType, excludeEntityId, searchTerm, limit } = params;
+    const index = getEntitiesIndexName(entityType, this.options.namespace);
+
+    // Build query for primary entities (those without Resolved_by)
+    const mustClauses: estypes.QueryDslQueryContainer[] = [
+      {
+        bool: {
+          must_not: {
+            exists: {
+              field: 'entity.relationships.Resolved_by',
+            },
+          },
+        },
+      },
+    ];
+
+    // Exclude specific entity if provided
+    if (excludeEntityId) {
+      mustClauses.push({
+        bool: {
+          must_not: {
+            term: {
+              'entity.id': excludeEntityId,
+            },
+          },
+        },
+      });
+    }
+
+    // Add search term filter on entity name
+    if (searchTerm) {
+      mustClauses.push({
+        bool: {
+          should: [
+            {
+              match: {
+                'entity.name': {
+                  query: searchTerm,
+                  fuzziness: 'AUTO',
+                },
+              },
+            },
+            {
+              wildcard: {
+                'entity.name': {
+                  value: `*${searchTerm}*`,
+                  case_insensitive: true,
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    }
+
+    const query: estypes.QueryDslQueryContainer = {
+      bool: {
+        must: mustClauses,
+      },
+    };
+
+    // First, get the primary entities
+    const response = await this.esClient.search<EntityRecord>({
+      index,
+      query,
+      size: Math.min(limit, MAX_SEARCH_RESPONSE_SIZE),
+      sort: [{ 'entity.name': 'asc' }],
+      ignore_unavailable: true,
+    });
+
+    const { hits } = response;
+    const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+
+    // Get the entity IDs to count how many entities resolve to each primary
+    const entityIds = hits.hits
+      .map((hit) => (hit._source as EntityRecord)?.entity?.id)
+      .filter((id): id is string => !!id);
+
+    // Count resolved entities for each primary using aggregation
+    let resolvedCounts: Record<string, number> = {};
+    if (entityIds.length > 0) {
+      const countResponse = await this.esClient.search({
+        index,
+        size: 0,
+        query: {
+          terms: {
+            'entity.relationships.Resolved_by': entityIds,
+          },
+        },
+        aggs: {
+          resolved_by_counts: {
+            terms: {
+              field: 'entity.relationships.Resolved_by',
+              size: entityIds.length,
+            },
+          },
+        },
+        ignore_unavailable: true,
+      });
+
+      const buckets =
+        (
+          countResponse.aggregations?.resolved_by_counts as estypes.AggregationsTermsAggregateBase<{
+            key: string;
+            doc_count: number;
+          }>
+        )?.buckets || [];
+
+      if (Array.isArray(buckets)) {
+        resolvedCounts = buckets.reduce((acc, bucket) => {
+          acc[bucket.key] = bucket.doc_count;
+          return acc;
+        }, {} as Record<string, number>);
+      }
+    }
+
+    // Map results to FilterableEntity format
+    const entities = hits.hits.map((hit) => {
+      const source = hit._source as EntityRecord;
+      const entityId = source?.entity?.id ?? '';
+      return {
+        id: entityId,
+        name: source?.entity?.name ?? '',
+        type: source?.entity?.type ?? entityType,
+        risk_score: source?.entity?.risk?.calculated_score_norm ?? null,
+        resolved_count: resolvedCounts[entityId] ?? 0,
+      };
+    });
+
+    return { entities, total };
+  }
+
+  /**
+   * Link secondary entities to a primary entity for entity resolution (FIELDS Architecture).
+   * Sets entity.relationships.Resolved_by on each secondary to point to the primary.
+   * Also executes the enrich policy to ensure field retention on next transform cycle.
+   */
+  public async linkEntities(params: {
+    entityType: EntityType;
+    primaryEntityId: string;
+    secondaryEntityIds: string[];
+  }): Promise<{
+    linked: boolean;
+    primary_entity_id: string;
+    secondary_entity_ids: string[];
+    errors?: Array<{ entity_id: string; message: string }>;
+  }> {
+    const { entityType, primaryEntityId, secondaryEntityIds } = params;
+    const { namespace, logger } = this.options;
+    const index = getEntitiesIndexName(entityType, namespace);
+
+    // Check that the engine is running
+    const engineRunning = await this.isEngineRunning(entityType);
+    if (!engineRunning) {
+      throw new Error(`Entity engine for ${entityType} is not running`);
+    }
+
+    const errors: Array<{ entity_id: string; message: string }> = [];
+    const linkedIds: string[] = [];
+
+    // Update each secondary entity to set Resolved_by pointing to the primary
+    for (const secondaryId of secondaryEntityIds) {
+      try {
+        const updateResult = await this.esClient.updateByQuery({
+          index,
+          query: {
+            term: {
+              'entity.id': secondaryId,
+            },
+          },
+          script: {
+            source: `
+              if (ctx._source.entity == null) {
+                ctx._source.entity = [:];
+              }
+              if (ctx._source.entity.relationships == null) {
+                ctx._source.entity.relationships = [:];
+              }
+              ctx._source.entity.relationships.Resolved_by = params.primaryId;
+            `,
+            lang: 'painless',
+            params: {
+              primaryId: primaryEntityId,
+            },
+          },
+          conflicts: 'proceed',
+          refresh: true,
+        });
+
+        if (updateResult.updated && updateResult.updated > 0) {
+          linkedIds.push(secondaryId);
+          this.log(
+            'info',
+            entityType,
+            `Linked entity ${secondaryId} to primary ${primaryEntityId}`
+          );
+        } else if (updateResult.version_conflicts && updateResult.version_conflicts > 0) {
+          errors.push({
+            entity_id: secondaryId,
+            message: 'Version conflict during update',
+          });
+        } else {
+          errors.push({
+            entity_id: secondaryId,
+            message: 'Entity not found',
+          });
+        }
+      } catch (e) {
+        logger.error(`Error linking entity ${secondaryId}: ${e.message}`);
+        errors.push({
+          entity_id: secondaryId,
+          message: e.message,
+        });
+      }
+    }
+
+    // Execute enrich policy to ensure field retention on next transform cycle
+    if (linkedIds.length > 0) {
+      try {
+        const description = engineDescriptionRegistry[entityType];
+        await executeFieldRetentionEnrichPolicy({
+          entityType,
+          version: description.version,
+          esClient: this.esClient,
+          logger,
+          options: { namespace },
+        });
+        this.log(
+          'info',
+          entityType,
+          `Executed enrich policy after linking ${linkedIds.length} entities`
+        );
+      } catch (e) {
+        logger.error(`Error executing enrich policy: ${e.message}`);
+        // Don't fail the operation if enrich policy fails - the background task will pick it up
+      }
+    }
+
+    return {
+      linked: linkedIds.length > 0,
+      primary_entity_id: primaryEntityId,
+      secondary_entity_ids: linkedIds,
+      errors: errors.length > 0 ? errors : undefined,
+    };
+  }
+
+  /**
+   * List primary entities with resolved counts for grouped view (FIELDS Architecture).
+   * Primary entities are those without a Resolved_by field.
+   * Implements QUERY-1 (deduplicated view) with pagination.
+   */
+  public async listPrimaryEntities(params: {
+    entityType: EntityType;
+    page: number;
+    perPage: number;
+    sortField: string;
+    sortOrder: SortOrder;
+    filterQuery?: string;
+  }): Promise<{
+    primaries: Array<EntityRecord & { resolved_count: number }>;
+    total: number;
+    inspect: InspectQuery;
+  }> {
+    const { entityType, page, perPage, sortField, sortOrder, filterQuery } = params;
+    const index = getEntitiesIndexName(entityType, this.options.namespace);
+
+    // Build base query for primary entities (those without Resolved_by)
+    const mustClauses: estypes.QueryDslQueryContainer[] = [
+      {
+        bool: {
+          must_not: {
+            exists: {
+              field: 'entity.relationships.Resolved_by',
+            },
+          },
+        },
+      },
+    ];
+
+    // Add user-provided filter query if present
+    if (filterQuery) {
+      try {
+        const parsedFilter = JSON.parse(filterQuery);
+        mustClauses.push(parsedFilter);
+      } catch (e) {
+        this.options.logger.warn(`Invalid filter query JSON: ${filterQuery}`);
+      }
+    }
+
+    const query: estypes.QueryDslQueryContainer = {
+      bool: {
+        must: mustClauses,
+      },
+    };
+
+    const from = (page - 1) * perPage;
+
+    // Build the search request
+    const searchRequest = {
+      index,
+      query,
+      size: Math.min(perPage, MAX_SEARCH_RESPONSE_SIZE),
+      from,
+      sort: [{ [sortField]: sortOrder }],
+      ignore_unavailable: true,
+    };
+
+    // Execute search for primaries
+    const response = await this.esClient.search<EntityRecord>(searchRequest);
+
+    const { hits } = response;
+    const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+
+    // Get the entity IDs to count how many entities resolve to each primary
+    const entityIds = hits.hits
+      .map((hit) => (hit._source as EntityRecord)?.entity?.id)
+      .filter((id): id is string => !!id);
+
+    // Count resolved entities for each primary using aggregation
+    let resolvedCounts: Record<string, number> = {};
+    if (entityIds.length > 0) {
+      const countResponse = await this.esClient.search({
+        index,
+        size: 0,
+        query: {
+          terms: {
+            'entity.relationships.Resolved_by': entityIds,
+          },
+        },
+        aggs: {
+          resolved_by_counts: {
+            terms: {
+              field: 'entity.relationships.Resolved_by',
+              size: entityIds.length,
+            },
+          },
+        },
+        ignore_unavailable: true,
+      });
+
+      const buckets =
+        (
+          countResponse.aggregations?.resolved_by_counts as estypes.AggregationsTermsAggregateBase<{
+            key: string;
+            doc_count: number;
+          }>
+        )?.buckets || [];
+
+      if (Array.isArray(buckets)) {
+        resolvedCounts = buckets.reduce((acc, bucket) => {
+          acc[bucket.key] = bucket.doc_count;
+          return acc;
+        }, {} as Record<string, number>);
+      }
+    }
+
+    // Map results to include resolved_count
+    const primaries = hits.hits.map((hit) => {
+      const source = hit._source as EntityRecord;
+      const entityId = source?.entity?.id ?? '';
+      return {
+        ...source,
+        resolved_count: resolvedCounts[entityId] ?? 0,
+      };
+    });
+
+    // Build inspect query
+    const inspect: InspectQuery = {
+      dsl: [JSON.stringify(searchRequest, null, 2)],
+      response: [JSON.stringify(response, null, 2)],
+    };
+
+    return { primaries, total, inspect };
+  }
+
+  /**
+   * List secondary entities for a primary (FIELDS Architecture).
+   * Secondary entities have Resolved_by pointing to the primary.
+   * Implements QUERY-2 (find group members).
+   */
+  public async listSecondaryEntities(params: {
+    entityType: EntityType;
+    primaryEntityId: string;
+  }): Promise<{
+    secondaries: EntityRecord[];
+    total: number;
+  }> {
+    const { entityType, primaryEntityId } = params;
+    const index = getEntitiesIndexName(entityType, this.options.namespace);
+
+    // Query for entities where Resolved_by points to this primary
+    const query: estypes.QueryDslQueryContainer = {
+      term: {
+        'entity.relationships.Resolved_by': primaryEntityId,
+      },
+    };
+
+    const response = await this.esClient.search<EntityRecord>({
+      index,
+      query,
+      size: MAX_SEARCH_RESPONSE_SIZE, // Groups should be small, no pagination needed
+      sort: [{ '@timestamp': 'desc' }],
+      ignore_unavailable: true,
+    });
+
+    const { hits } = response;
+    const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+
+    const secondaries = hits.hits
+      .map((hit) => hit._source as EntityRecord)
+      .filter((source): source is EntityRecord => !!source);
+
+    return { secondaries, total };
   }
 
   public async applyDataViewIndices(): Promise<{

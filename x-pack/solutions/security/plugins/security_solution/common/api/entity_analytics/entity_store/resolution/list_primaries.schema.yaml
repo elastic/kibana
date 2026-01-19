@@ -1,0 +1,110 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - List Primary Entities (FIELDS Architecture)
+paths:
+  /api/entity_store/resolution/{entityType}/primaries:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ListPrimaryEntities
+      summary: List primary entities with resolved counts for grouped view
+      description: >
+        Returns paginated list of primary entities (entities without Resolved_by)
+        with their resolved_count for the Data Grid grouped view.
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number (1-indexed)
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: Number of items per page
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            type: string
+            default: '@timestamp'
+          description: Field to sort by
+        - name: sort_order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort order
+        - name: filter_query
+          in: query
+          required: false
+          schema:
+            type: string
+          description: JSON-encoded filter query
+      responses:
+        '200':
+          description: Primary entities returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - primaries
+                  - total
+                properties:
+                  primaries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PrimaryEntity'
+                  total:
+                    type: integer
+                    description: Total number of primary entities
+                  inspect:
+                    $ref: '../common.schema.yaml#/components/schemas/InspectQuery'
+        '400':
+          description: Bad request - invalid entity type
+        '503':
+          description: Engine not running
+
+components:
+  schemas:
+    PrimaryEntity:
+      type: object
+      required:
+        - entity
+        - resolved_count
+      properties:
+        '@timestamp':
+          type: string
+          format: date-time
+        entity:
+          $ref: '../entities/common.schema.yaml#/components/schemas/EntityField'
+        user:
+          type: object
+          additionalProperties: true
+        host:
+          type: object
+          additionalProperties: true
+        service:
+          type: object
+          additionalProperties: true
+        asset:
+          $ref: '../entities/common.schema.yaml#/components/schemas/Asset'
+        resolved_count:
+          type: integer
+          description: Number of entities resolved to this primary (0 if standalone)

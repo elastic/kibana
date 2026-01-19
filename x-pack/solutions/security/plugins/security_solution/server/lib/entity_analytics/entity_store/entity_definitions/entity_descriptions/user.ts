@@ -6,7 +6,7 @@
  */
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
-import { collectValues as collect } from './field_utils';
+import { collectValues as collect, newestValue } from './field_utils';
 
 export const USER_DEFINITION_VERSION = '1.0.0';
 export const USER_IDENTITY_FIELD = 'user.name';
@@ -79,6 +79,16 @@ export const userEntityEngineDescription: EntityDescription = {
     collect({
       source: `user.entity.relationships.Supervised_by`,
       destination: 'entity.relationships.Supervised_by',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+
+    // Entity Resolution: Resolved_by field for FIELDS architecture
+    // Points to the primary entity's entity.id that this entity resolves to
+    // Single value (not array) - uses newestValue to preserve API-set value through transform cycles
+    newestValue({
+      source: `user.entity.relationships.Resolved_by`,
+      destination: 'entity.relationships.Resolved_by',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),

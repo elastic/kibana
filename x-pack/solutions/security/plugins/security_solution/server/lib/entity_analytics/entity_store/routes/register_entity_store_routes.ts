@@ -20,6 +20,10 @@ import { enableEntityStoreRoute } from './enablement';
 import { upsertEntity } from './entity_crud/upsert_entity';
 import { upsertEntitiesBulk } from './entity_crud/upsert_entities_bulk';
 import { deleteEntity } from './entity_crud/delete_entity';
+import { listFilterableEntitiesRoute } from './resolution/list_filterable_entities';
+import { linkEntitiesRoute } from './resolution/link_entities';
+import { listPrimariesRoute } from './resolution/list_primaries';
+import { listSecondariesRoute } from './resolution/list_secondaries';
 
 export const registerEntityStoreRoutes = ({
   router,
@@ -43,4 +47,10 @@ export const registerEntityStoreRoutes = ({
   upsertEntity(router, telemetry, logger);
   upsertEntitiesBulk(router, telemetry, logger);
   deleteEntity(router, telemetry, logger);
+
+  // Entity Resolution (FIELDS Architecture)
+  listFilterableEntitiesRoute(router, telemetry, logger);
+  linkEntitiesRoute(router, telemetry, logger);
+  listPrimariesRoute(router, telemetry, logger);
+  listSecondariesRoute(router, telemetry, logger);
 };

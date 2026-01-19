@@ -1,0 +1,83 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - Link Entities (FIELDS Architecture)
+paths:
+  /api/entity_store/resolution/{entityType}/link:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: LinkEntities
+      summary: Link secondary entities to a primary entity
+      description: >
+        Sets the Resolved_by field on secondary entities to point to the primary entity.
+        This establishes the resolution relationship where the primary entity represents
+        all linked secondary entities. Also triggers enrich policy execution to ensure
+        field retention on next transform cycle.
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - primary_entity_id
+                - secondary_entity_ids
+              properties:
+                primary_entity_id:
+                  type: string
+                  description: The entity.id of the primary entity
+                secondary_entity_ids:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+                  description: Array of entity.id values for secondary entities to link
+      responses:
+        '200':
+          description: Entities linked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - linked
+                  - primary_entity_id
+                  - secondary_entity_ids
+                properties:
+                  linked:
+                    type: boolean
+                    description: Whether the linking operation was successful
+                  primary_entity_id:
+                    type: string
+                    description: The primary entity ID
+                  secondary_entity_ids:
+                    type: array
+                    items:
+                      type: string
+                    description: The secondary entity IDs that were linked
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - entity_id
+                        - message
+                      properties:
+                        entity_id:
+                          type: string
+                        message:
+                          type: string
+                    description: Any errors that occurred during linking (partial success)
+        '400':
+          description: Bad request - invalid entity type or entity IDs
+        '404':
+          description: Primary entity not found
+        '503':
+          description: Engine not running

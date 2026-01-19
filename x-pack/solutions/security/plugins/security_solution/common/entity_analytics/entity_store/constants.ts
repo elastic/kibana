@@ -14,6 +14,13 @@ export const ENTITY_STORE_INTERNAL_PRIVILEGES_URL = `${ENTITY_STORE_URL}/privile
 export const ENTITIES_URL = `${ENTITY_STORE_URL}/entities` as const;
 export const LIST_ENTITIES_URL = `${ENTITIES_URL}/list` as const;
 
+// Entity Resolution (FIELDS Architecture)
+export const ENTITY_RESOLUTION_URL = `${ENTITY_STORE_URL}/resolution` as const;
+export const LIST_FILTERABLE_ENTITIES_URL = `${ENTITY_RESOLUTION_URL}/{entityType}/entities` as const;
+export const LINK_ENTITIES_URL = `${ENTITY_RESOLUTION_URL}/{entityType}/link` as const;
+export const LIST_PRIMARIES_URL = `${ENTITY_RESOLUTION_URL}/{entityType}/primaries` as const;
+export const LIST_SECONDARIES_URL = `${ENTITY_RESOLUTION_URL}/{entityType}/secondaries` as const;
+
 export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',
   'manage_transform',

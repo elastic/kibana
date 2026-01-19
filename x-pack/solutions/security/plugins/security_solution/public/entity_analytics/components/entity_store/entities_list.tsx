@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
@@ -27,6 +28,8 @@ import { ENTITIES_LIST_TABLE_ID, rowItems } from './constants';
 import { useEntitiesListColumns } from './hooks/use_entities_list_columns';
 import type { EntitySourceTag } from './types';
 import { useEntityStoreTypes } from '../../hooks/use_enabled_entity_types';
+import { ResolveEntitiesModal } from './components/resolve_entities_modal';
+import { GroupedEntitiesTable } from './components/grouped_entities_table';
 
 export const EntitiesList: React.FC = () => {
   const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
@@ -41,6 +44,16 @@ export const EntitiesList: React.FC = () => {
   const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
   const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
   const [selectedSources, setSelectedSources] = useState<EntitySourceTag[]>([]);
+
+  // Entity Resolution Modal state
+  const [isResolveModalVisible, setIsResolveModalVisible] = useState(false);
+
+  // View mode state (list vs grouped)
+  const [viewMode, setViewMode] = useState<'list' | 'grouped'>('list');
+
+  const handleViewModeToggle = useCallback((e: EuiSwitchEvent) => {
+    setViewMode(e.target.checked ? 'grouped' : 'list');
+  }, []);
 
   const filter = useEntitiesListFilters({
     selectedSeverities,
@@ -114,52 +127,109 @@ export const EntitiesList: React.FC = () => {
     error
   );
 
+  // Common header filters JSX
+  const headerFilters = (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          <SeverityFilter
+            selectedItems={selectedSeverities}
+            onSelect={setSelectedSeverities}
+          />
+          <AssetCriticalityFilter
+            selectedItems={selectedCriticalities}
+            onChange={setSelectedCriticalities}
+          />
+          <EntitySourceFilter selectedItems={selectedSources} onChange={setSelectedSources} />
+        </EuiFilterGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.groupedViewToggle',
+            { defaultMessage: 'Grouped view' }
+          )}
+          checked={viewMode === 'grouped'}
+          onChange={handleViewModeToggle}
+          compressed
+          data-test-subj="entitiesListGroupedViewToggle"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          iconType="link"
+          onClick={() => setIsResolveModalVisible(true)}
+          data-test-subj="resolveEntitiesButton"
+        >
+          {i18n.translate(
+            'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.resolveEntities',
+            { defaultMessage: 'Resolve Entities' }
+          )}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
-    <PaginatedTable
-      id={ENTITIES_LIST_TABLE_ID}
-      activePage={activePage}
-      columns={columns}
-      headerCount={data?.total ?? 0}
-      titleSize="s"
-      headerTitle={i18n.translate(
-        'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle',
-        {
-          defaultMessage: 'Entities',
-        }
+    <>
+      {viewMode === 'list' ? (
+        <PaginatedTable
+          id={ENTITIES_LIST_TABLE_ID}
+          activePage={activePage}
+          columns={columns}
+          headerCount={data?.total ?? 0}
+          titleSize="s"
+          headerTitle={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle',
+            {
+              defaultMessage: 'Entities',
+            }
+          )}
+          headerTooltip={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTooltip',
+            {
+              defaultMessage: 'Entity data can take a couple of minutes to appear',
+            }
+          )}
+          limit={limit}
+          loading={isLoading || isRefetching}
+          isInspect={false}
+          updateActivePage={setActivePage}
+          loadPage={noop} // It isn't necessary because the page loads when activePage changes
+          pageOfItems={data?.records ?? []}
+          setQuerySkip={setQuerySkip}
+          showMorePagesIndicator={false}
+          updateLimitPagination={setLimit}
+          totalCount={data?.total ?? 0}
+          itemsPerRow={rowItems}
+          sorting={sorting}
+          onChange={onSort}
+          headerFilters={headerFilters}
+        />
+      ) : (
+        <>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" style={{ marginBottom: 16 }}>
+            <EuiFlexItem grow={false}>
+              <h4>
+                {i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle',
+                  { defaultMessage: 'Entities' }
+                )}
+              </h4>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>
+          </EuiFlexGroup>
+          <GroupedEntitiesTable entityType="user" skip={querySkip} />
+        </>
       )}
-      headerTooltip={i18n.translate(
-        'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTooltip',
-        {
-          defaultMessage: 'Entity data can take a couple of minutes to appear',
-        }
-      )}
-      limit={limit}
-      loading={isLoading || isRefetching}
-      isInspect={false}
-      updateActivePage={setActivePage}
-      loadPage={noop} // It isn't necessary because the page loads when activePage changes
-      pageOfItems={data?.records ?? []}
-      setQuerySkip={setQuerySkip}
-      showMorePagesIndicator={false}
-      updateLimitPagination={setLimit}
-      totalCount={data?.total ?? 0}
-      itemsPerRow={rowItems}
-      sorting={sorting}
-      onChange={onSort}
-      headerFilters={
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiFilterGroup>
-              <SeverityFilter selectedItems={selectedSeverities} onSelect={setSelectedSeverities} />
-              <AssetCriticalityFilter
-                selectedItems={selectedCriticalities}
-                onChange={setSelectedCriticalities}
-              />
-              <EntitySourceFilter selectedItems={selectedSources} onChange={setSelectedSources} />
-            </EuiFilterGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    />
+
+      {/* Entity Resolution Modal */}
+      <ResolveEntitiesModal
+        visible={isResolveModalVisible}
+        onClose={() => setIsResolveModalVisible(false)}
+        entityType="user"
+      />
+    </>
   );
 };

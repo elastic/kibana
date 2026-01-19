@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - List Filterable Entities (FIELDS Architecture)
+paths:
+  /api/entity_store/resolution/{entityType}/entities:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ListFilterableEntities
+      summary: List primary entities for resolution selection UI
+      description: >
+        Returns a list of primary entities (entities without Resolved_by) for the
+        resolution selection UI. In FIELDS architecture, primaries are entities
+        that don't have the Resolved_by field set.
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+        - name: exclude_entity_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Entity ID to exclude from results (used to exclude selected primary in step 2)
+        - name: search_term
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search term to filter entities by name
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 1000
+          description: Maximum number of entities to return
+      responses:
+        '200':
+          description: Entities returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - entities
+                  - total
+                properties:
+                  entities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FilterableEntity'
+                  total:
+                    type: integer
+                    description: Total number of matching entities
+        '400':
+          description: Bad request - invalid entity type
+        '503':
+          description: Engine not running
+
+components:
+  schemas:
+    FilterableEntity:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - resolved_count
+      properties:
+        id:
+          type: string
+          description: The entity ID (entity.id)
+        name:
+          type: string
+          description: The entity name (entity.name)
+        type:
+          type: string
+          description: The entity type (user, host, service, generic)
+        risk_score:
+          type: number
+          nullable: true
+          description: The entity's risk score (if available)
+        resolved_count:
+          type: integer
+          description: Number of entities resolved to this primary (0 if standalone)

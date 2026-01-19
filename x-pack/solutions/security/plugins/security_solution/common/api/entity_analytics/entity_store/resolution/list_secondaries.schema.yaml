@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - List Secondary Entities (FIELDS Architecture)
+paths:
+  /api/entity_store/resolution/{entityType}/secondaries:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ListSecondaryEntities
+      summary: List entities resolved to a primary
+      description: >
+        Returns all entities that have Resolved_by pointing to the specified
+        primary entity. Used for expanding grouped view rows.
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+        - name: primary_entity_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The entity.id of the primary to find secondaries for
+      responses:
+        '200':
+          description: Secondary entities returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - secondaries
+                  - total
+                properties:
+                  secondaries:
+                    type: array
+                    items:
+                      $ref: '../entities/common.schema.yaml#/components/schemas/Entity'
+                  total:
+                    type: integer
+                    description: Total number of secondary entities
+        '400':
+          description: Bad request - invalid entity type or missing primary_entity_id
+        '503':
+          description: Engine not running
