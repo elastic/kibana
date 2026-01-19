@@ -337,7 +337,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             // This proves they came from 'record' docs, not 'model_plot' docs with null record_score
             expect(
               spikeAnomaliesWithScores.every(
-                (a) => Number.isFinite(a.y) && a.y > 0 && Number.isFinite(a.actual)
+                (a) => Number.isFinite(a.y) && (a.y ?? 0) > 0 && Number.isFinite(a.actual)
               )
             ).to.be(true);
 
