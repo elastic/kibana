@@ -9,12 +9,6 @@
 
 import { within } from '../../../ast/location';
 import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
-import {
-  getPromqlParam,
-  isPromqlParamName,
-  looksLikePromqlParamAssignment,
-  PromqlParamValueType,
-} from './parameters';
 import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
 
 type PromqlPositionType =
@@ -153,6 +147,106 @@ function isAfterParamKeyword(text: string): boolean {
 function getTrailingIdentifier(text: string): string | undefined {
   const match = text.match(TRAILING_PARAM_NAME_REGEX);
   return match ? match[1] : undefined;
+}
+
+// ============================================================================
+// Param definitions
+// ============================================================================
+
+export enum PromqlParamValueType {
+  TimeseriesSources = 'timeseries_sources',
+  DateLiterals = 'date_literals',
+  Static = 'static',
+}
+
+type PromqlParamName = (typeof PROMQL_PARAMS)[number]['name'];
+
+export interface PromqlParamDefinition {
+  name: string;
+  description: string;
+  valueType: PromqlParamValueType;
+  suggestedValues?: string[];
+}
+
+const PROMQL_REQUIRED_PARAMS: PromqlParamName[] = ['step', 'start', 'end'];
+
+const PROMQL_PARAMS: PromqlParamDefinition[] = [
+  {
+    name: 'index',
+    description: 'Index pattern to query',
+    valueType: PromqlParamValueType.TimeseriesSources,
+  },
+  {
+    name: 'step',
+    description: 'Query resolution step (e.g. 1m, 5m, 1h)',
+    valueType: PromqlParamValueType.Static,
+    suggestedValues: ['1m', '5m', '15m', '30m', '1h', '6h', '1d'],
+  },
+  {
+    name: 'start',
+    description: 'Range query start time',
+    valueType: PromqlParamValueType.DateLiterals,
+  },
+  {
+    name: 'end',
+    description: 'Range query end time',
+    valueType: PromqlParamValueType.DateLiterals,
+  },
+];
+
+export const PROMQL_PARAM_NAMES: string[] = PROMQL_PARAMS.map((param) => param.name);
+
+export function getPromqlParamDefinitions(): PromqlParamDefinition[] {
+  return PROMQL_PARAMS;
+}
+
+export function getPromqlParam(name: string): PromqlParamDefinition | undefined {
+  return PROMQL_PARAMS.find((param) => param.name === name);
+}
+
+export function areRequiredPromqlParamsPresent(usedParams: Set<string>): boolean {
+  return PROMQL_REQUIRED_PARAMS.every((param) => usedParams.has(param));
+}
+
+export const isPromqlParamName = (name: string): name is PromqlParamName =>
+  PROMQL_PARAM_NAMES.includes(name);
+
+export function looksLikePromqlParamAssignment(text: string): boolean {
+  const trimmed = text.trim().toLowerCase();
+
+  if (trimmed.startsWith(',')) {
+    return true;
+  }
+
+  return PROMQL_PARAM_NAMES.some((param) => {
+    if (trimmed === param) {
+      return true;
+    }
+
+    if (trimmed.startsWith(param)) {
+      const afterParam = trimmed.substring(param.length).trimStart();
+      return afterParam.startsWith('=');
+    }
+
+    return false;
+  });
+}
+
+/*
+ * Scans the PROMQL command text to avoid suggesting params already typed.
+ * We don't rely on AST params because the parser can put the last param in the query field.
+ */
+export function getUsedPromqlParamNames(commandText: string): Set<string> {
+  const used = new Set<string>();
+  const tokens = commandText.toLowerCase().split(/\s+/);
+
+  for (const param of PROMQL_PARAM_NAMES) {
+    if (tokens.some((token) => token === param || token.startsWith(`${param}=`))) {
+      used.add(param);
+    }
+  }
+
+  return used;
 }
 
 /*

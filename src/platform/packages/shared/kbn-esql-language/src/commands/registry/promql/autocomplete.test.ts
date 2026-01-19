@@ -10,8 +10,12 @@
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { suggest } from '../../../__tests__/commands/autocomplete';
 import { autocomplete } from './autocomplete';
-import { assignCompletionItem, pipeCompleteItem } from '../complete_items';
-import { getPromqlParam, getPromqlParamKeySuggestions, PROMQL_PARAM_NAMES } from './parameters';
+import {
+  assignCompletionItem,
+  getPromqlParamKeySuggestions,
+  pipeCompleteItem,
+} from '../complete_items';
+import { getPromqlParam, PROMQL_PARAM_NAMES } from './utils';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../../definitions/utils/literals';
 

@@ -22,14 +22,12 @@ export const promqlCommand = {
   methods: promqlCommandMethods,
   metadata: {
     type: 'source' as const,
-    hidden: false,
+    hidden: true,
     preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.promqlDoc', {
       defaultMessage:
         'Execute PromQL queries against time series data. Requires step=, start=, end= for range queries. The index= parameter defaults to * if not specified.',
     }),
-    // step=, start=, end= are required for range queries (grammar allows optional, but semantically required)
-    // index= is optional and defaults to * (all time series indices)
     declaration:
       'PROMQL step=<duration> start=<time> end=<time> [index=<pattern>] [column=](<query>)',
     examples: [

@@ -17,17 +17,17 @@ import {
   assignCompletionItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
+  getPromqlParamKeySuggestions,
+  getPromqlParamValueSuggestions,
   pipeCompleteItem,
   valuePlaceholderConstant,
 } from '../complete_items';
 import {
   areRequiredPromqlParamsPresent,
   getPromqlParam,
-  getPromqlParamKeySuggestions,
-  getPromqlParamValueSuggestions,
   getUsedPromqlParamNames,
   PromqlParamValueType,
-} from './parameters';
+} from './utils';
 import {
   getPosition,
   getIndexAssignmentContext,
