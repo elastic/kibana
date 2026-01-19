@@ -5,19 +5,30 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
 import type { Streams } from '@kbn/streams-schema';
+import type { Condition } from '@kbn/streamlang';
 import type { Query } from '../../../../common/queries';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import { getRuleIdFromQueryLink } from '../../streams/assets/query/helpers/query';
 import type { StreamsClient } from '../../streams/client';
 import { SecurityError } from '../../streams/errors/security_error';
-import { SummarizeEventsPrompt } from './prompts/summarize_events/prompt';
 import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
 import { SummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
+
+interface QueryData {
+  title: string;
+  kql: string;
+  feature?: {
+    name: string;
+    filter: Condition;
+  };
+  currentCount: number;
+  sampleEvents: string[];
+}
 
 export async function generateSignificantEventsSummary({
   streamsClient,
@@ -101,44 +112,31 @@ async function generateStreamSummary({
 }) {
   const queries = await queryClient.getAssets(stream.name);
 
-  const querySummaries = await Promise.all(
+  const queryDataResults = await Promise.all(
     queries.map((query) =>
-      generateQuerySummary({
+      collectQueryData({
         query,
-        streamName: stream.name,
         esClient,
-        inferenceClient,
-        signal,
-        logger,
       })
     )
   );
 
-  const summaries = querySummaries.filter(
-    (
-      querySummary
-    ): querySummary is { summary: string; tokenUsage: ChatCompletionTokenCount | undefined } =>
-      querySummary !== undefined
-  );
+  // Filter out queries with no events
+  const queryDataList = queryDataResults.filter((data): data is QueryData => data !== undefined);
 
-  const tokenUsage = summaries.reduce(
-    (acc, summary) => {
-      if (summary.tokenUsage) {
-        acc.prompt += summary.tokenUsage.prompt;
-        acc.completion += summary.tokenUsage.completion;
-        acc.cached += summary.tokenUsage.cached ?? 0;
-      }
-      return acc;
-    },
-    { prompt: 0, completion: 0, cached: 0 }
-  );
+  if (queryDataList.length === 0) {
+    return {
+      summary: `No significant events found in stream ${stream.name}`,
+      tokenUsage: { prompt: 0, completion: 0 },
+    };
+  }
 
   try {
     const response = await inferenceClient.prompt({
       prompt: SummarizeQueriesPrompt,
       input: {
         streamName: stream.name,
-        summaries: summaries.map(({ summary }) => summary).join('\n'),
+        queries: JSON.stringify(queryDataList, null, 2),
       },
       abortSignal: signal,
     });
@@ -146,18 +144,18 @@ async function generateStreamSummary({
     return {
       summary: response.content,
       tokenUsage: {
-        prompt: tokenUsage.prompt + (response.tokens?.prompt ?? 0),
-        completion: tokenUsage.completion + (response.tokens?.completion ?? 0),
-        cached: tokenUsage.cached + (response.tokens?.cached ?? 0),
+        prompt: response.tokens?.prompt ?? 0,
+        completion: response.tokens?.completion ?? 0,
+        cached: response.tokens?.cached ?? 0,
       },
     };
   } catch (error) {
     if (error.message.includes(`The request exceeded the model's maximum context length`)) {
-      const summary = `Context too big when generating query summary for stream ${stream.name}, number of queries: ${summaries.length}`;
+      const summary = `Context too big when generating summary for stream ${stream.name}, number of queries: ${queryDataList.length}`;
       logger.debug(summary, { error });
       return {
         summary,
-        tokenUsage,
+        tokenUsage: { prompt: 0, completion: 0 },
       };
     }
 
@@ -165,34 +163,29 @@ async function generateStreamSummary({
   }
 }
 
-async function generateQuerySummary({
+const SAMPLE_EVENTS_COUNT = 5;
+const CURRENT_WINDOW_MINUTES = 15;
+
+async function collectQueryData({
   query,
-  streamName,
   esClient,
-  inferenceClient,
-  signal,
-  logger,
 }: {
   query: Query;
-  streamName: string;
   esClient: ElasticsearchClient;
-  inferenceClient: BoundInferenceClient;
-  signal: AbortSignal;
-  logger: Logger;
-}) {
+}): Promise<QueryData | undefined> {
   const ruleId = getRuleIdFromQueryLink(query);
 
-  const esResponse = await esClient
-    .search<{ original_source: any }>({
+  const currentResponse = await esClient
+    .search<{ original_source: Record<string, unknown> }>({
       index: '.alerts-streams.alerts-default',
-      size: 10_000,
+      size: SAMPLE_EVENTS_COUNT,
       query: {
         bool: {
           filter: [
             {
               range: {
                 '@timestamp': {
-                  gte: 'now-15m',
+                  gte: `now-${CURRENT_WINDOW_MINUTES}m`,
                   lte: 'now',
                 },
               },
@@ -205,6 +198,7 @@ async function generateQuerySummary({
           ],
         },
       },
+      track_total_hits: true,
     })
     .catch((err) => {
       const isResponseError = err instanceof errors.ResponseError;
@@ -217,40 +211,26 @@ async function generateQuerySummary({
       throw err;
     });
 
-  if (esResponse.hits.hits.length === 0) {
+  const currentCount =
+    typeof currentResponse.hits.total === 'number'
+      ? currentResponse.hits.total
+      : currentResponse.hits.total?.value ?? 0;
+
+  if (currentCount === 0) {
     return undefined;
   }
 
-  const events = esResponse.hits.hits.map((hit) =>
-    JSON.stringify(omit(hit._source!.original_source, '_id'))
+  const sampleEvents = currentResponse.hits.hits.map((hit) =>
+    JSON.stringify(omit(hit._source?.original_source ?? {}, '_id'))
   );
 
-  try {
-    const response = await inferenceClient.prompt({
-      prompt: SummarizeEventsPrompt,
-      input: {
-        streamName,
-        queryTitle: query.query.title,
-        queryKql: query.query.kql.query,
-        events: events.join('\n'),
-      },
-      abortSignal: signal,
-    });
-
-    return {
-      summary: response.content,
-      tokenUsage: response.tokens,
-    };
-  } catch (error) {
-    if (error.message.includes(`The request exceeded the model's maximum context length`)) {
-      const summary = `Context too big when generating event summary for stream ${streamName} and query ${query.query.title}, number of events: ${events.length}`;
-      logger.debug(summary, { error });
-      return {
-        summary,
-        tokenUsage: undefined,
-      };
-    }
-
-    throw error;
-  }
+  return {
+    title: query.query.title,
+    kql: query.query.kql.query,
+    feature: query.query.feature
+      ? { name: query.query.feature.name, filter: query.query.feature.filter }
+      : undefined,
+    currentCount,
+    sampleEvents,
+  };
 }

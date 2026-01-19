@@ -14,7 +14,7 @@ export const SummarizeQueriesPrompt = createPrompt({
   name: 'summarize_queries',
   input: z.object({
     streamName: z.string(),
-    summaries: z.string(),
+    queries: z.string(),
   }),
 })
   .version({
