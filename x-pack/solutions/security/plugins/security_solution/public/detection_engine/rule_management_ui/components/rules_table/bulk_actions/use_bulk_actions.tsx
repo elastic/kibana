@@ -786,7 +786,6 @@ export const useBulkActions = ({
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
-      isBulkEditAlertSuppressionFeatureEnabled,
       startServices,
       canCreateTimelines,
       isAlertSuppressionLicenseValid,
