@@ -122,9 +122,9 @@ export async function createDataSourceAndRelatedResources(
       // e.g., "sources.github.search_issues" -> "search_issues"
       const workflowBaseName = originalName.split('.').pop() || originalName;
 
-      // Tool ID structure: data_source_name.type.workflow_base_name
+      // Tool ID structure: type.data_source_name.workflow_base_name
       const tool = await toolRegistry.create({
-        id: `${slugify(name)}.${type}.${workflowBaseName}`,
+        id: `${type}.${slugify(name)}.${workflowBaseName}`,
         type: ToolType.workflow,
         description: `Workflow tool for ${type} data source`,
         tags: ['data-source', type],
