@@ -74,9 +74,11 @@ export class InventoryPage {
     await this.page.getByTestId('savedViews-openPopover-loaded').waitFor();
   }
 
-  public async goToPage() {
+  public async goToPage(opts: { skipLoadWait?: boolean } = {}) {
     await this.page.goto(`${this.kbnUrl.app('metrics')}/inventory`);
-    await this.waitForPageToLoad();
+    if (!opts.skipLoadWait) {
+      await this.waitForPageToLoad();
+    }
   }
 
   public async reload() {
