@@ -12,6 +12,8 @@
         "label": "OverlayBannersStart",
         "description": [],
         "path": "src/core/packages/overlays/browser/src/banners.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "<HTMLElement>, priority?: number | undefined) => string"
             ],
             "path": "src/core/packages/overlays/browser/src/banners.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -47,6 +51,8 @@
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 22,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -64,6 +70,8 @@
                   "number | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 22,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -86,6 +94,8 @@
               "(id: string) => boolean"
             ],
             "path": "src/core/packages/overlays/browser/src/banners.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -102,6 +112,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 30,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -126,6 +138,8 @@
               "<HTMLElement>, priority?: number | undefined) => string"
             ],
             "path": "src/core/packages/overlays/browser/src/banners.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -142,6 +156,8 @@
                   "string | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 41,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -160,6 +176,8 @@
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 41,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -177,6 +195,8 @@
                   "number | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 41,
+                "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -197,6 +217,8 @@
               "() => JSX.Element"
             ],
             "path": "src/core/packages/overlays/browser/src/banners.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -215,6 +237,8 @@
           "\nAPIs to open and manage fly-out dialogs.\n"
         ],
         "path": "src/core/packages/overlays/browser/src/flyout.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -238,6 +262,8 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/flyout.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -255,6 +281,8 @@
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/flyout.ts",
+                "lineNumber": 27,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -273,6 +301,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/flyout.ts",
+                "lineNumber": 27,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -291,6 +321,8 @@
         "label": "OverlayModalConfirmOptions",
         "description": [],
         "path": "src/core/packages/overlays/browser/src/modal.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -305,6 +337,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -319,6 +353,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -333,6 +369,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -347,6 +385,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -361,6 +401,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -375,6 +417,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -389,6 +433,8 @@
               "\"cancel\" | \"confirm\" | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -403,6 +449,8 @@
               "\"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -417,6 +465,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -433,6 +483,8 @@
               "string | number | boolean | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -447,6 +499,8 @@
         "label": "OverlayModalOpenOptions",
         "description": [],
         "path": "src/core/packages/overlays/browser/src/modal.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -461,6 +515,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -475,6 +531,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -489,6 +547,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -503,6 +563,8 @@
               "string | number | boolean | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -517,6 +579,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -533,6 +597,8 @@
           "\nAPIs to open and manage modal dialogs.\n"
         ],
         "path": "src/core/packages/overlays/browser/src/modal.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -556,6 +622,8 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -573,6 +641,8 @@
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 50,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -591,6 +661,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 50,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -615,6 +687,8 @@
               " | undefined) => Promise<boolean>"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -633,6 +707,8 @@
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 59,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -651,6 +727,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 59,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -669,6 +747,8 @@
         "label": "OverlayStart",
         "description": [],
         "path": "src/core/packages/overlays/browser/src/overlays.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -685,6 +765,8 @@
               "OverlayBannersStart"
             ],
             "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -706,6 +788,8 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -722,6 +806,8 @@
                   "UnmountCallback"
                 ],
                 "path": "src/core/packages/overlays/browser/src/flyout.ts",
+                "lineNumber": 27,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -737,6 +823,8 @@
                       "T"
                     ],
                     "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+                    "lineNumber": 19,
+                    "columnNumber": 64,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -754,6 +842,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/flyout.ts",
+                "lineNumber": 27,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -775,6 +865,8 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -790,6 +882,8 @@
                   "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "lineNumber": 36,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -805,6 +899,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "lineNumber": 36,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -828,6 +924,8 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -844,6 +942,8 @@
                   "UnmountCallback"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 50,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -859,6 +959,8 @@
                       "T"
                     ],
                     "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+                    "lineNumber": 19,
+                    "columnNumber": 64,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -876,6 +978,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 50,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -898,6 +1002,8 @@
               " | undefined) => Promise<boolean>"
             ],
             "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -915,6 +1021,8 @@
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 59,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -930,6 +1038,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 59,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -948,6 +1058,8 @@
           "\nAPIs to open and manage fly-out dialogs.\n"
         ],
         "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -969,6 +1081,8 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -985,6 +1099,8 @@
                   "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "lineNumber": 36,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1003,6 +1119,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "lineNumber": 36,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1033,6 +1151,8 @@
           ") => void) | undefined; session?: \"never\" | undefined; isResizable?: boolean | undefined; }"
         ],
         "path": "src/core/packages/overlays/browser/src/flyout.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1050,6 +1170,8 @@
           ", \"session\"> & { session?: \"start\" | \"inherit\" | \"never\" | undefined; }"
         ],
         "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
