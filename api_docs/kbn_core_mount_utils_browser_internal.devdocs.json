@@ -12,6 +12,8 @@
         "label": "MountWrapperComponentProps",
         "description": [],
         "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,6 +29,8 @@
               "UnmountCallback"
             ],
             "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -42,6 +46,8 @@
                   "T"
                 ],
                 "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+                "lineNumber": 19,
+                "columnNumber": 64,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -58,6 +64,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

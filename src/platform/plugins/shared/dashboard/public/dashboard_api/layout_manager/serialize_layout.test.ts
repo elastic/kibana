@@ -34,7 +34,7 @@ describe('serializeLayout', () => {
           type: 'testPanelType',
         },
       },
-      controls: {
+      pinnedPanels: {
         control1: {
           grow: true,
           width: 'small',
@@ -72,7 +72,7 @@ describe('serializeLayout', () => {
       },
     };
 
-    const { panels, controlGroupInput } = serializeLayout(layout, childState);
+    const { panels, pinned_panels } = serializeLayout(layout, childState);
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -113,27 +113,25 @@ describe('serializeLayout', () => {
         },
       ]
     `);
-    expect(controlGroupInput).toMatchInlineSnapshot(`
-      Object {
-        "controls": Array [
-          Object {
-            "config": Object {
-              "anotherValue": "test",
-            },
-            "type": "someOtherControl",
-            "uid": "control2",
+    expect(pinned_panels).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "config": Object {
+            "anotherValue": "test",
           },
-          Object {
-            "config": Object {
-              "selection": "some value",
-            },
-            "grow": true,
-            "type": "someControl",
-            "uid": "control1",
-            "width": "small",
+          "type": "someOtherControl",
+          "uid": "control2",
+        },
+        Object {
+          "config": Object {
+            "selection": "some value",
           },
-        ],
-      }
+          "grow": true,
+          "type": "someControl",
+          "uid": "control1",
+          "width": "small",
+        },
+      ]
     `);
   });
 });
