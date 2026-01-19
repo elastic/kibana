@@ -43,7 +43,7 @@ import { ColorLabel } from './color_label';
 import { LegendSteps, type LegendStep } from './legend_steps';
 import { PalettePreview } from './palette_preview';
 
-interface Props {
+export interface Props {
   onChange: (options: {
     auto: boolean;
     bounds: InfraWaffleMapBounds;
