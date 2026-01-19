@@ -87,7 +87,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               id: 'doc_view_example',
               title: 'Example',
               order: 0,
-              component: () => (
+              render: () => (
                 <EuiPanel color="transparent" hasShadow={false}>
                   <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
                   <pre data-test-subj="exampleDataSourceProfileDocViewRecord">
