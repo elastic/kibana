@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { NodeViewModel } from '../../types';
 import { getNodeDocumentMode } from '../../utils';
 import {
@@ -15,17 +16,19 @@ import { EVENT_ACTION } from '../../../common/constants';
 import type { FilterActionType } from '../../graph_investigation/filter_actions';
 
 /**
- * Action descriptor for label expand popover items.
- * Contains all the data needed to render a menu item and emit filter actions.
- * Does NOT contain labels or onClick handlers - those are bound by the caller.
+ * Label expand popover item with label included.
+ * Contains all the data needed to render a menu item.
+ * onClick handler is NOT included - the caller must bind it.
  */
-export interface LabelExpandItemDescriptor {
+export interface LabelExpandPopoverItem {
   /** Unique item type identifier */
   type: 'show-events-with-action' | 'show-event-details';
   /** Icon to display */
   iconType: string;
   /** Test subject for automation */
   testSubject: string;
+  /** Resolved i18n label */
+  label: string;
   /** The field to filter on (for filter actions) */
   field?: string;
   /** The value to filter for */
@@ -34,13 +37,11 @@ export interface LabelExpandItemDescriptor {
   currentAction?: 'show' | 'hide';
   /** Filter action type to emit when clicked */
   filterActionType?: FilterActionType;
-  /** Document mode for determining label text */
-  docMode?: ReturnType<typeof getNodeDocumentMode>;
 }
 
 /**
  * Input for label expand item generation.
- * Contains the minimal data needed to generate item descriptors.
+ * Contains the minimal data needed to generate items.
  */
 export interface LabelExpandInput {
   /** Label text (node.label) */
@@ -55,44 +56,76 @@ export interface LabelExpandInput {
  */
 export const createLabelExpandInput = (node: NodeViewModel): LabelExpandInput => {
   const docMode = getNodeDocumentMode(node);
-  const label = 'label' in node && typeof node.label === 'string' ? node.label : '';
+  const nodeLabel = 'label' in node && typeof node.label === 'string' ? node.label : '';
 
   return {
-    label,
+    label: nodeLabel,
     docMode,
   };
 };
 
 /**
- * Pure function to generate label expand item descriptors.
- * Returns an array of item descriptors based on the node state.
- * The caller is responsible for:
- * - Resolving labels (i18n)
- * - Binding onClick handlers
- * - Determining current filter state (isFilterActive)
+ * Resolves the i18n label for a label expand item.
+ */
+const resolveLabel = (
+  type: LabelExpandPopoverItem['type'],
+  currentAction?: 'show' | 'hide',
+  docMode?: ReturnType<typeof getNodeDocumentMode>
+): string => {
+  switch (type) {
+    case 'show-events-with-action':
+      return currentAction === 'show'
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showRelatedEvents',
+            { defaultMessage: 'Show related events' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideRelatedEvents',
+            { defaultMessage: 'Hide related events' }
+          );
+    case 'show-event-details':
+      return docMode === 'single-alert'
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
+            { defaultMessage: 'Show alert details' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
+            { defaultMessage: 'Show event details' }
+          );
+    default:
+      return '';
+  }
+};
+
+/**
+ * Generates label expand popover items with labels included.
+ * Returns complete items ready for rendering - caller only needs to bind onClick handlers.
  *
  * @param input - Label expand input containing node data
  * @param isFilterActive - Function to check if a filter is currently active
  * @param hasEventDetailsHandler - Whether event details handler is available
- * @returns Array of item descriptors
+ * @returns Array of items with labels
  */
 export const getLabelExpandItems = (
   input: LabelExpandInput,
   isFilterActive: (field: string, value: string) => boolean,
   hasEventDetailsHandler: boolean
-): LabelExpandItemDescriptor[] => {
+): LabelExpandPopoverItem[] => {
   const { label, docMode } = input;
 
   const eventsWithActionActive = isFilterActive(EVENT_ACTION, label);
+  const eventsAction: 'show' | 'hide' = eventsWithActionActive ? 'hide' : 'show';
 
-  const items: LabelExpandItemDescriptor[] = [
+  const items: LabelExpandPopoverItem[] = [
     {
       type: 'show-events-with-action',
       iconType: 'analyzeEvent',
       testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+      label: resolveLabel('show-events-with-action', eventsAction),
       field: EVENT_ACTION,
       value: label,
-      currentAction: eventsWithActionActive ? 'hide' : 'show',
+      currentAction: eventsAction,
       filterActionType: 'TOGGLE_EVENTS_WITH_ACTION',
     },
   ];
@@ -106,7 +139,7 @@ export const getLabelExpandItems = (
       type: 'show-event-details',
       iconType: 'expand',
       testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
-      docMode, // Pass doc mode for label resolution (alert vs event)
+      label: resolveLabel('show-event-details', undefined, docMode),
     });
   }
 

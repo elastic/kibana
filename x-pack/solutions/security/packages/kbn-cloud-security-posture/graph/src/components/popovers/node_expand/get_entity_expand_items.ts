@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { NodeViewModel } from '../../types';
 import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
 import {
@@ -17,11 +18,11 @@ import { RELATED_ENTITY } from '../../../common/constants';
 import type { FilterActionType } from '../../graph_investigation/filter_actions';
 
 /**
- * Action descriptor for entity expand popover items.
- * Contains all the data needed to render a menu item and emit filter actions.
- * Does NOT contain labels or onClick handlers - those are bound by the caller.
+ * Entity expand popover item with label included.
+ * Contains all the data needed to render a menu item.
+ * onClick handler is NOT included - the caller must bind it.
  */
-export interface EntityExpandItemDescriptor {
+export interface EntityExpandPopoverItem {
   /** Unique item type identifier */
   type:
     | 'show-actions-by-entity'
@@ -32,6 +33,8 @@ export interface EntityExpandItemDescriptor {
   iconType: string;
   /** Test subject for automation */
   testSubject: string;
+  /** Resolved i18n label */
+  label: string;
   /** The field to filter on (for filter actions) */
   field?: string;
   /** The value to filter for */
@@ -48,7 +51,7 @@ export interface EntityExpandItemDescriptor {
 
 /**
  * Input for entity expand item generation.
- * Contains the minimal data needed to generate item descriptors.
+ * Contains the minimal data needed to generate items.
  */
 export interface EntityExpandInput {
   /** Entity ID (node.id) */
@@ -133,31 +136,81 @@ export const createEntityExpandInput = (
   };
 };
 
+const DISABLED_TOOLTIP = i18n.translate(
+  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
+  { defaultMessage: 'Details not available' }
+);
+
 /**
- * Pure function to generate entity expand item descriptors.
- * Returns an array of item descriptors based on the node state.
- * The caller is responsible for:
- * - Resolving labels (i18n)
- * - Binding onClick handlers
- * - Determining current filter state (isFilterActive)
+ * Resolves the i18n label for an entity expand item.
+ */
+const resolveLabel = (
+  type: EntityExpandPopoverItem['type'],
+  currentAction?: 'show' | 'hide'
+): string => {
+  switch (type) {
+    case 'show-actions-by-entity':
+      return currentAction === 'show'
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showThisEntitysActions',
+            { defaultMessage: "Show this entity's actions" }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideThisEntitysActions',
+            { defaultMessage: "Hide this entity's actions" }
+          );
+    case 'show-actions-on-entity':
+      return currentAction === 'show'
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
+            { defaultMessage: 'Show actions done to this entity' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsDoneToThisEntity',
+            { defaultMessage: 'Hide actions done to this entity' }
+          );
+    case 'show-related-events':
+      return currentAction === 'show'
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
+            { defaultMessage: 'Show related events' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideRelatedEntities',
+            { defaultMessage: 'Hide related events' }
+          );
+    case 'show-entity-details':
+      return i18n.translate(
+        'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+        { defaultMessage: 'Show entity details' }
+      );
+    default:
+      return '';
+  }
+};
+
+/**
+ * Generates entity expand popover items with labels included.
+ * Returns complete items ready for rendering - caller only needs to bind onClick handlers.
  *
  * @param input - Entity expand input containing node data
  * @param isFilterActive - Function to check if a filter is currently active
- * @returns Array of item descriptors
+ * @returns Array of items with labels
  */
 export const getEntityExpandItems = (
   input: EntityExpandInput,
   isFilterActive: (field: string, value: string) => boolean
-): EntityExpandItemDescriptor[] => {
+): EntityExpandPopoverItem[] => {
   const { id, docMode, actorField, targetField, entityDetailsDisabled } = input;
 
   // Entity details item (shared between single-entity and grouped-entities)
-  const entityDetailsItem: EntityExpandItemDescriptor = {
+  const entityDetailsItem: EntityExpandPopoverItem = {
     type: 'show-entity-details',
     iconType: 'expand',
     testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+    label: resolveLabel('show-entity-details'),
     disabled: entityDetailsDisabled,
-    disabledTooltip: entityDetailsDisabled ? 'Details not available' : undefined,
+    disabledTooltip: entityDetailsDisabled ? DISABLED_TOOLTIP : undefined,
   };
 
   // For 'grouped-entities', only show entity details
@@ -171,32 +224,39 @@ export const getEntityExpandItems = (
     const actionsOnEntityActive = isFilterActive(targetField, id);
     const relatedEventsActive = isFilterActive(RELATED_ENTITY, id);
 
+    const actionsByAction: 'show' | 'hide' = actionsByEntityActive ? 'hide' : 'show';
+    const actionsOnAction: 'show' | 'hide' = actionsOnEntityActive ? 'hide' : 'show';
+    const relatedAction: 'show' | 'hide' = relatedEventsActive ? 'hide' : 'show';
+
     return [
       {
         type: 'show-actions-by-entity',
         iconType: 'sortRight',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
+        label: resolveLabel('show-actions-by-entity', actionsByAction),
         field: actorField,
         value: id,
-        currentAction: actionsByEntityActive ? 'hide' : 'show',
+        currentAction: actionsByAction,
         filterActionType: 'TOGGLE_ACTIONS_BY_ENTITY',
       },
       {
         type: 'show-actions-on-entity',
         iconType: 'sortLeft',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
+        label: resolveLabel('show-actions-on-entity', actionsOnAction),
         field: targetField,
         value: id,
-        currentAction: actionsOnEntityActive ? 'hide' : 'show',
+        currentAction: actionsOnAction,
         filterActionType: 'TOGGLE_ACTIONS_ON_ENTITY',
       },
       {
         type: 'show-related-events',
         iconType: 'analyzeEvent',
         testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
+        label: resolveLabel('show-related-events', relatedAction),
         field: RELATED_ENTITY,
         value: id,
-        currentAction: relatedEventsActive ? 'hide' : 'show',
+        currentAction: relatedAction,
         filterActionType: 'TOGGLE_RELATED_EVENTS',
       },
       entityDetailsItem,

@@ -8,7 +8,6 @@
 import type React from 'react';
 import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps } from '../../types';
 import { GRAPH_LABEL_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
@@ -17,42 +16,7 @@ import type {
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
 import { addFilter, containsFilter, removeFilter } from '../../graph_investigation/search_filters';
-import {
-  getLabelExpandItems,
-  createLabelExpandInput,
-  type LabelExpandItemDescriptor,
-} from './get_label_expand_items';
-
-/**
- * Resolves labels for label expand item descriptors.
- * Handles i18n translation based on item type and current action.
- */
-const resolveLabelItemLabel = (descriptor: LabelExpandItemDescriptor): string => {
-  switch (descriptor.type) {
-    case 'show-events-with-action':
-      return descriptor.currentAction === 'show'
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showRelatedEvents',
-            { defaultMessage: 'Show related events' }
-          )
-        : i18n.translate(
-            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideRelatedEvents',
-            { defaultMessage: 'Hide related events' }
-          );
-    case 'show-event-details':
-      return descriptor.docMode === 'single-alert'
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
-            { defaultMessage: 'Show alert details' }
-          )
-        : i18n.translate(
-            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
-            { defaultMessage: 'Show event details' }
-          );
-    default:
-      return '';
-  }
-};
+import { getLabelExpandItems, createLabelExpandInput } from './get_label_expand_items';
 
 /**
  * Hook to handle the label node expand popover.
@@ -77,39 +41,39 @@ export const useLabelNodeExpandPopover = (
       // Create input for item generation
       const input = createLabelExpandInput(node.data);
 
-      // Generate item descriptors using pure function
-      const descriptors = getLabelExpandItems(
+      // Generate items with labels using pure function
+      const popoverItems = getLabelExpandItems(
         input,
         (field, value) => containsFilter(searchFilters, field, value),
         Boolean(onShowEventDetailsClick)
       );
 
-      if (descriptors.length === 0) {
+      if (popoverItems.length === 0) {
         return [];
       }
 
-      // Convert descriptors to popover items with labels and click handlers
+      // Convert items to popover list items with click handlers
       const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
 
-      descriptors.forEach((descriptor, index) => {
+      popoverItems.forEach((popoverItem, index) => {
         // Add separator before event details item
-        if (descriptor.type === 'show-event-details' && index > 0) {
+        if (popoverItem.type === 'show-event-details' && index > 0) {
           items.push({ type: 'separator' });
         }
 
         const item: ItemExpandPopoverListItemProps = {
           type: 'item',
-          iconType: descriptor.iconType,
-          testSubject: descriptor.testSubject,
-          label: resolveLabelItemLabel(descriptor),
+          iconType: popoverItem.iconType,
+          testSubject: popoverItem.testSubject,
+          label: popoverItem.label,
           onClick: () => {
-            if (descriptor.type === 'show-event-details') {
+            if (popoverItem.type === 'show-event-details') {
               onShowEventDetailsClick?.(node);
-            } else if (descriptor.field && descriptor.value && descriptor.currentAction) {
+            } else if (popoverItem.field && popoverItem.value && popoverItem.currentAction) {
               // Handle filter toggle actions
-              const action = descriptor.currentAction;
-              const field = descriptor.field;
-              const value = descriptor.value;
+              const action = popoverItem.currentAction;
+              const field = popoverItem.field;
+              const value = popoverItem.value;
 
               if (action === 'show') {
                 setSearchFilters((prev) => addFilter(dataViewId, prev, field, value));

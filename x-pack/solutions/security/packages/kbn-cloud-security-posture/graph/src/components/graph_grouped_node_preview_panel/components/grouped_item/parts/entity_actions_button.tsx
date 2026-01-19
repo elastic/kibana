@@ -18,10 +18,10 @@ import {
 import type { EntityItem } from '../types';
 import { useFilterState } from '../../../../graph_investigation/filter_state';
 import { emitFilterAction } from '../../../../graph_investigation/filter_actions';
+import { emitGroupedItemClick } from '../../../events';
 import {
   getEntityExpandItems,
   type EntityExpandInput,
-  type EntityExpandItemDescriptor,
 } from '../../../../popovers/node_expand/get_entity_expand_items';
 
 const actionsButtonAriaLabel = i18n.translate(
@@ -31,67 +31,17 @@ const actionsButtonAriaLabel = i18n.translate(
   }
 );
 
-/**
- * Resolves labels for entity expand item descriptors.
- * Handles i18n translation based on item type and current action.
- */
-const resolveEntityItemLabel = (descriptor: EntityExpandItemDescriptor): string => {
-  switch (descriptor.type) {
-    case 'show-actions-by-entity':
-      return descriptor.currentAction === 'show'
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showThisEntitysActions',
-            { defaultMessage: "Show this entity's actions" }
-          )
-        : i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideThisEntitysActions',
-            { defaultMessage: "Hide this entity's actions" }
-          );
-    case 'show-actions-on-entity':
-      return descriptor.currentAction === 'show'
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
-            { defaultMessage: 'Show actions done to this entity' }
-          )
-        : i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsDoneToThisEntity',
-            { defaultMessage: 'Hide actions done to this entity' }
-          );
-    case 'show-related-events':
-      return descriptor.currentAction === 'show'
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
-            { defaultMessage: 'Show related events' }
-          )
-        : i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideRelatedEntities',
-            { defaultMessage: 'Hide related events' }
-          );
-    case 'show-entity-details':
-      return i18n.translate(
-        'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-        { defaultMessage: 'Show entity details' }
-      );
-    default:
-      return '';
-  }
-};
-
 export interface EntityActionsButtonProps {
   item: EntityItem;
-  /**
-   * Callback when "show entity details" is clicked.
-   * If not provided, the entity details action will be disabled.
-   */
-  onShowEntityDetails?: (item: EntityItem) => void;
 }
 
 /**
  * Actions button for entity items in the grouped node preview panel.
  * Shows a popover with filter toggle actions and entity details option.
  * Emits filter actions via pub-sub for GraphInvestigation to handle.
+ * Emits grouped item click via pub-sub for entity details.
  */
-export const EntityActionsButton = ({ item, onShowEntityDetails }: EntityActionsButtonProps) => {
+export const EntityActionsButton = ({ item }: EntityActionsButtonProps) => {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const { state, actions } = useGraphPopoverState('grouped-item-entity-actions-popover');
   const { isFilterActive } = useFilterState();
@@ -109,46 +59,46 @@ export const EntityActionsButton = ({ item, onShowEntityDetails }: EntityActions
       docMode: 'single-entity', // In flyout, we treat entities as single
       actorField: 'entity.id', // Default field - could be extended based on item.type
       targetField: 'entity.target.id',
-      entityDetailsDisabled: !onShowEntityDetails,
+      entityDetailsDisabled: false, // Entity details always enabled in flyout
     }),
-    [item.id, onShowEntityDetails]
+    [item.id]
   );
 
-  // Generate item descriptors
-  const descriptors = useMemo(
+  // Generate items with labels
+  const popoverItems = useMemo(
     () => getEntityExpandItems(input, isFilterActive),
     [input, isFilterActive]
   );
 
-  // Convert descriptors to popover items
+  // Convert items to popover list items
   const items: ItemExpandPopoverListItemProps[] = useMemo(() => {
-    return descriptors.map((descriptor) => ({
+    return popoverItems.map((popoverItem) => ({
       type: 'item' as const,
-      iconType: descriptor.iconType,
-      testSubject: descriptor.testSubject,
-      label: resolveEntityItemLabel(descriptor),
-      disabled: descriptor.disabled,
+      iconType: popoverItem.iconType,
+      testSubject: popoverItem.testSubject,
+      label: popoverItem.label,
+      disabled: popoverItem.disabled,
       onClick: () => {
-        if (descriptor.type === 'show-entity-details') {
-          onShowEntityDetails?.(item);
+        if (popoverItem.type === 'show-entity-details') {
+          emitGroupedItemClick(item);
         } else if (
-          descriptor.field &&
-          descriptor.value &&
-          descriptor.currentAction &&
-          descriptor.filterActionType
+          popoverItem.field &&
+          popoverItem.value &&
+          popoverItem.currentAction &&
+          popoverItem.filterActionType
         ) {
           // Emit filter action via pub-sub
           emitFilterAction({
-            type: descriptor.filterActionType,
-            field: descriptor.field,
-            value: descriptor.value,
-            action: descriptor.currentAction,
+            type: popoverItem.filterActionType,
+            field: popoverItem.field,
+            value: popoverItem.value,
+            action: popoverItem.currentAction,
           });
         }
         actions.closePopover();
       },
     }));
-  }, [descriptors, item, onShowEntityDetails, actions]);
+  }, [popoverItems, item, actions]);
 
   return (
     <>

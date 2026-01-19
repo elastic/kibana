@@ -27,8 +27,8 @@ import {
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
-import type { EntityOrEventItem, EntityItem, EventItem, AlertItem } from '../types';
 import { emitGroupedItemClick } from '../../../events';
+import type { EntityOrEventItem, EntityItem, EventItem, AlertItem } from '../types';
 import { displayEntityName, displayEventName } from '../utils';
 import { EntityActionsButton } from './entity_actions_button';
 import { EventActionsButton } from './event_actions_button';
@@ -128,15 +128,9 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {item.itemType === DOCUMENT_TYPE_ENTITY ? (
-          <EntityActionsButton
-            item={item as EntityItem}
-            onShowEntityDetails={(entityItem) => emitGroupedItemClick(entityItem)}
-          />
+          <EntityActionsButton item={item as EntityItem} />
         ) : (
-          <EventActionsButton
-            item={item as EventItem | AlertItem}
-            onShowEventDetails={(eventItem) => emitGroupedItemClick(eventItem)}
-          />
+          <EventActionsButton item={item as EventItem | AlertItem} />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

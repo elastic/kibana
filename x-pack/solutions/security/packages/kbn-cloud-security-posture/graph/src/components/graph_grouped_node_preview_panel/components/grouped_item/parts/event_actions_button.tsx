@@ -21,10 +21,10 @@ import {
 import type { EventItem, AlertItem } from '../types';
 import { useFilterState } from '../../../../graph_investigation/filter_state';
 import { emitFilterAction } from '../../../../graph_investigation/filter_actions';
+import { emitGroupedItemClick } from '../../../events';
 import {
   getLabelExpandItems,
   type LabelExpandInput,
-  type LabelExpandItemDescriptor,
 } from '../../../../popovers/node_expand/get_label_expand_items';
 
 const actionsButtonAriaLabel = i18n.translate(
@@ -34,52 +34,17 @@ const actionsButtonAriaLabel = i18n.translate(
   }
 );
 
-/**
- * Resolves labels for label expand item descriptors.
- * Handles i18n translation based on item type and current action.
- */
-const resolveLabelItemLabel = (descriptor: LabelExpandItemDescriptor): string => {
-  switch (descriptor.type) {
-    case 'show-events-with-action':
-      return descriptor.currentAction === 'show'
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showRelatedEvents',
-            { defaultMessage: 'Show related events' }
-          )
-        : i18n.translate(
-            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideRelatedEvents',
-            { defaultMessage: 'Hide related events' }
-          );
-    case 'show-event-details':
-      return descriptor.docMode === 'single-alert'
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
-            { defaultMessage: 'Show alert details' }
-          )
-        : i18n.translate(
-            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
-            { defaultMessage: 'Show event details' }
-          );
-    default:
-      return '';
-  }
-};
-
 export interface EventActionsButtonProps {
   item: EventItem | AlertItem;
-  /**
-   * Callback when "show event/alert details" is clicked.
-   * If not provided, the event details action will not be shown.
-   */
-  onShowEventDetails?: (item: EventItem | AlertItem) => void;
 }
 
 /**
  * Actions button for event/alert items in the grouped node preview panel.
  * Shows a popover with filter toggle actions and event details option.
  * Emits filter actions via pub-sub for GraphInvestigation to handle.
+ * Emits grouped item click via pub-sub for event/alert details.
  */
-export const EventActionsButton = ({ item, onShowEventDetails }: EventActionsButtonProps) => {
+export const EventActionsButton = ({ item }: EventActionsButtonProps) => {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const { state, actions } = useGraphPopoverState('grouped-item-event-actions-popover');
   const { isFilterActive } = useFilterState();
@@ -99,44 +64,44 @@ export const EventActionsButton = ({ item, onShowEventDetails }: EventActionsBut
     [item.action, item.itemType]
   );
 
-  // Generate item descriptors
-  const descriptors = useMemo(
-    () => getLabelExpandItems(input, isFilterActive, Boolean(onShowEventDetails)),
-    [input, isFilterActive, onShowEventDetails]
+  // Generate items with labels - always enable event details in flyout
+  const popoverItems = useMemo(
+    () => getLabelExpandItems(input, isFilterActive, true),
+    [input, isFilterActive]
   );
 
-  // Convert descriptors to popover items
+  // Convert items to popover list items
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> =
     useMemo(() => {
       const result: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> =
         [];
 
-      descriptors.forEach((descriptor, index) => {
+      popoverItems.forEach((popoverItem, index) => {
         // Add separator before event details item
-        if (descriptor.type === 'show-event-details' && index > 0) {
+        if (popoverItem.type === 'show-event-details' && index > 0) {
           result.push({ type: 'separator' });
         }
 
         result.push({
           type: 'item' as const,
-          iconType: descriptor.iconType,
-          testSubject: descriptor.testSubject,
-          label: resolveLabelItemLabel(descriptor),
+          iconType: popoverItem.iconType,
+          testSubject: popoverItem.testSubject,
+          label: popoverItem.label,
           onClick: () => {
-            if (descriptor.type === 'show-event-details') {
-              onShowEventDetails?.(item);
+            if (popoverItem.type === 'show-event-details') {
+              emitGroupedItemClick(item);
             } else if (
-              descriptor.field &&
-              descriptor.value &&
-              descriptor.currentAction &&
-              descriptor.filterActionType
+              popoverItem.field &&
+              popoverItem.value &&
+              popoverItem.currentAction &&
+              popoverItem.filterActionType
             ) {
               // Emit filter action via pub-sub
               emitFilterAction({
-                type: descriptor.filterActionType,
-                field: descriptor.field,
-                value: descriptor.value,
-                action: descriptor.currentAction,
+                type: popoverItem.filterActionType,
+                field: popoverItem.field,
+                value: popoverItem.value,
+                action: popoverItem.currentAction,
               });
             }
             actions.closePopover();
@@ -145,7 +110,7 @@ export const EventActionsButton = ({ item, onShowEventDetails }: EventActionsBut
       });
 
       return result;
-    }, [descriptors, item, onShowEventDetails, actions]);
+    }, [popoverItems, item, actions]);
 
   return (
     <>
