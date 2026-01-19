@@ -43,13 +43,14 @@ export async function registerObservabilityAgent({
       },
     },
     configuration: {
-      instructions:
-        dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
+      instructions: dedent(
+        `You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
         
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
-      ` + ENTITY_LINKING_PROMPT ),
+      ` + ENTITY_LINKING_PROMPT
+      ),
       tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
     },
   });
