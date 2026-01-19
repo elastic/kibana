@@ -97,7 +97,7 @@ describe('SET Autocomplete', () => {
       });
     });
 
-    it('suggests suggests the value without semicolon if already present in the query', async () => {
+    it('suggests the value without semicolon if already present in the query', async () => {
       await setExpectSuggestions('SET project_routing = ^;', ['"_alias: *"', '"_alias:_origin"']);
       await setExpectSuggestions('SET project_routing = ^ ;', ['"_alias: *"', '"_alias:_origin"']);
     });
