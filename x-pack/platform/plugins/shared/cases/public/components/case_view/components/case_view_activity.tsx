@@ -53,7 +53,7 @@ import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
-import { CaseViewTemplateFields } from '../../templates_v2';
+import { CaseViewExtendedFields } from '../../templates_v2';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
@@ -155,6 +155,14 @@ export const CaseViewActivity = ({
     [assignees, onUpdateField]
   );
 
+  const handleUpdateExtendedFields = useCallback(
+    (extendedFields: Record<string, unknown>) => {
+      console.log('handleUpdateExtendedFields', extendedFields);
+      onUpdateField({ key: 'extendedFields', value: extendedFields });
+    },
+    [onUpdateField]
+  );
+
   const { isLoading: isLoadingAllAvailableConnectors, data: supportedActionConnectors } =
     useGetSupportedActionConnectors();
 
@@ -226,7 +234,7 @@ export const CaseViewActivity = ({
           onUpdateField={onUpdateField}
         />
         <EuiSpacer size="l" />
-        <CaseViewTemplateFields caseData={caseData} />
+        <CaseViewExtendedFields onChanges={handleUpdateExtendedFields} caseData={caseData} />
         <EuiSpacer size="l" />
         <EuiFlexItem grow={false}>
           <UserActionsActivityBar

@@ -24,6 +24,7 @@ import {
   EuiIconTip,
   EuiBadge,
   EuiCallOut,
+  EuiSelect,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { CodeEditor } from '@kbn/code-editor';
@@ -553,25 +554,23 @@ export const CreateCaseTemplateFields = () => {
 CreateCaseTemplateFields.displayName = 'TemplateFields';
 
 const CaseViewTemplateFieldsInner = ({
-  template,
-  // TODO: needed for updates
-  caseId,
-  extendedFields,
+  caseData,
+  onChanges,
 }: {
-  template: {
-    id: string;
-    version: number;
-  };
-  caseId: string;
-  extendedFields: unknown;
+  caseData: CaseUI;
+  onChanges: (extendedFields: Record<string, unknown>) => void;
 }) => {
-  const templateQuery = useTemplate(template.id, template.version);
+  const { template, extendedFields } = caseData;
+  const templateQuery = useTemplate(template?.id as string, template?.version);
 
   if (templateQuery.isFetching) {
     return <EuiLoadingSpinner />;
   }
 
   const fields = templateQuery.data?.definition.fields;
+
+  // eslint-disable-next-line no-console
+  console.log('template fields', fields, { onChanges });
 
   return (
     <>
@@ -586,7 +585,7 @@ const CaseViewTemplateFieldsInner = ({
                 content={`Based on template "${templateQuery.data?.name}" (${
                   templateQuery.data?.isLatest
                     ? 'latest template version'
-                    : `v${template.version}, current version is ${templateQuery.data?.latestVersion}`
+                    : `v${template?.version}, current version is ${templateQuery.data?.latestVersion}`
                 })`}
               />
             </EuiBadge>
@@ -595,10 +594,31 @@ const CaseViewTemplateFieldsInner = ({
       </EuiTitle>
       <EuiSpacer size="xs" />
       {fields?.map((field) => {
+        const fieldNameRaw = `${field.name}_as_${field.type}`;
+        const fieldNameNormalized = camelCase(fieldNameRaw);
+
         return (
           <div key={field.name}>
             <strong>{`${field.name}:`}</strong>{' '}
-            {(extendedFields as any)?.[`${camelCase(`${field.name}_as_${field.type}`)}`]}
+            <EuiSelect
+              aria-label={`${field.name}`}
+              options={(field.metadata.options as string[]).map((value) => ({
+                value,
+                text: value,
+              }))}
+              name={fieldNameNormalized}
+              value={extendedFields?.[fieldNameNormalized]}
+              onChange={(element) => {
+                const value = element.currentTarget.value;
+
+                const updatedPayload = {
+                  ...structuredClone(extendedFields),
+                  [fieldNameNormalized]: value,
+                };
+
+                onChanges(updatedPayload);
+              }}
+            />
           </div>
         );
       })}
@@ -608,21 +628,25 @@ const CaseViewTemplateFieldsInner = ({
 
 CaseViewTemplateFieldsInner.displayName = 'CaseViewTemplateFieldsInner';
 
-export const CaseViewTemplateFields = ({ caseData }: { caseData: CaseUI }) => {
+export const CaseViewExtendedFields = ({
+  caseData,
+  onChanges,
+}: {
+  caseData: CaseUI;
+  onChanges: (extendedFields: Record<string, unknown>) => void;
+}) => {
   if (!caseData.template) {
-    return <pre>{`Debug: missing template data on the case`}</pre>;
+    return <pre>{`Debug: missing template data in the case object`}</pre>;
   }
 
-  return (
-    <CaseViewTemplateFieldsInner
-      template={caseData.template}
-      caseId={caseData.id}
-      extendedFields={caseData.extendedFields}
-    />
-  );
+  if (!(camelCase(CASE_EXTENDED_FIELDS) in caseData)) {
+    return <pre>{`Debug: missing extended fields property in the case object`}</pre>;
+  }
+
+  return <CaseViewTemplateFieldsInner onChanges={onChanges} caseData={caseData} />;
 };
 
-CaseViewTemplateFields.displayName = 'CaseViewTemplateFields';
+CaseViewExtendedFields.displayName = 'CaseViewExtendedFields';
 
 export const TemplateFlyout = ({
   onClose,

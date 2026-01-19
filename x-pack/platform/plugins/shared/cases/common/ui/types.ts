@@ -17,6 +17,7 @@ import type {
   ASSIGN_CASE_CAPABILITY,
 } from '..';
 import type {
+  CASE_EXTENDED_FIELDS,
   CASES_CONNECTORS_CAPABILITY,
   CASES_SETTINGS_CAPABILITY,
   PUSH_CASES_CAPABILITY,
@@ -249,6 +250,7 @@ export type UpdateKey = keyof Pick<
   | 'assignees'
   | 'category'
   | 'customFields'
+  | typeof CASE_EXTENDED_FIELDS
 >;
 
 export interface UpdateByKey {

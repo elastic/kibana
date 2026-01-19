@@ -133,6 +133,7 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      * The alert sync settings
      */
     settings: CaseSettingsRt,
+    [CASE_EXTENDED_FIELDS]: rt.any,
   })
 );
 
