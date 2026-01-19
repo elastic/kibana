@@ -24,7 +24,7 @@ describe('AttachmentStateManager', () => {
       case 'text':
         return {
           id: 'text',
-          validate: (input) => {
+          validate: (input: unknown) => {
             if (
               typeof input === 'object' &&
               input !== null &&
@@ -39,7 +39,7 @@ describe('AttachmentStateManager', () => {
       case 'screen_context':
         return {
           id: 'screen_context',
-          validate: (input) => {
+          validate: (input: unknown) => {
             if (typeof input !== 'object' || input === null) {
               return { valid: false, error: 'Expected object' };
             }
@@ -59,7 +59,7 @@ describe('AttachmentStateManager', () => {
       case 'esql':
         return {
           id: 'esql',
-          validate: (input) => {
+          validate: (input: unknown) => {
             if (
               typeof input === 'object' &&
               input !== null &&
