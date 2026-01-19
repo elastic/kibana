@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/share-plugin'
-  - '@kbn/controls-plugin'
   - '@kbn/presentation-util-plugin'
   - '@kbn/url-forwarding-plugin'
   - '@kbn/usage-collection-plugin'
@@ -101,6 +100,7 @@ dependsOn:
   - '@kbn/data-service-server'
   - '@kbn/controls-schemas'
   - '@kbn/controls-constants'
+  - '@kbn/controls-renderer'
   - '@kbn/presentation-util'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-saved-objects-common'
@@ -110,6 +110,9 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-chrome-layout-utils'
   - '@kbn/cps'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-chrome-app-menu'
+  - '@kbn/test-jest-helpers'
 tags:
   - plugin
   - prod

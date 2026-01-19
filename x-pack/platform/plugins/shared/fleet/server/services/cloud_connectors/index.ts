@@ -11,12 +11,6 @@ export {
 } from './integration_helpers';
 
 export {
-  decrementCloudConnectorPackageCount,
-  incrementCloudConnectorPackageCount,
-  cleanupCloudConnectorForPolicy,
-} from './lifecycle';
-
-export {
   createAndIntegrateCloudConnector,
   type CloudConnectorIntegrationResult,
 } from './agentless_policy_integration';

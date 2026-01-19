@@ -6,7 +6,9 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -35,6 +37,7 @@ const mockAppContextService = appContextService;
 describe('CloudConnectorService', () => {
   let service: CloudConnectorService;
   let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockLogger: jest.Mocked<ReturnType<typeof loggerMock.create>>;
 
   beforeEach(() => {
@@ -45,6 +48,7 @@ describe('CloudConnectorService', () => {
     mockAppContextService.getLogger = jest.fn().mockReturnValue(mockLogger);
 
     mockSoClient = createSavedObjectClientMock();
+    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     service = new CloudConnectorService();
   });
 
@@ -88,7 +92,6 @@ describe('CloudConnectorService', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 1,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T00:00:00.000Z',
       },
@@ -117,7 +120,6 @@ describe('CloudConnectorService', () => {
           name: 'test-connector',
           namespace: '*',
           cloudProvider: 'aws',
-          packagePolicyCount: 1,
           created_at: expect.any(String),
           updated_at: expect.any(String),
           vars: expect.objectContaining({
@@ -140,6 +142,7 @@ describe('CloudConnectorService', () => {
         id: 'cloud-connector-123',
         name: 'test-connector',
         cloudProvider: 'aws',
+        packagePolicyCount: 0,
         namespace: '*',
         vars: {
           role_arn: {
@@ -154,7 +157,6 @@ describe('CloudConnectorService', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 1,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T00:00:00.000Z',
       });
@@ -532,7 +534,6 @@ describe('CloudConnectorService', () => {
                 type: 'password',
               },
             },
-            packagePolicyCount: 1,
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
@@ -543,8 +544,28 @@ describe('CloudConnectorService', () => {
       per_page: 20,
     };
 
-    it('should get cloud connectors list successfully', async () => {
-      mockSoClient.find.mockResolvedValue(mockCloudConnectors);
+    // Mock aggregation response for package policy counts (perPage: 0 means no docs returned)
+    const mockPackagePolicies = {
+      saved_objects: [],
+      total: 1,
+      page: 1,
+      per_page: 0,
+      aggregations: {
+        packagePolicyCounts: {
+          buckets: [{ key: 'cloud-connector-1', doc_count: 1 }],
+        },
+      },
+    };
+
+    it('should get cloud connectors list successfully with computed packagePolicyCount', async () => {
+      // Mock find to return different results based on the type
+      mockSoClient.find.mockImplementation((options: any) => {
+        if (options.type === CLOUD_CONNECTOR_SAVED_OBJECT_TYPE) {
+          return Promise.resolve(mockCloudConnectors);
+        }
+        // Package policies query for computing count
+        return Promise.resolve(mockPackagePolicies);
+      });
 
       const result = await service.getList(mockSoClient);
 
@@ -599,7 +620,12 @@ describe('CloudConnectorService', () => {
         ],
       };
 
-      mockSoClient.find.mockResolvedValue(mockCloudConnectorsWithAccountType);
+      mockSoClient.find.mockImplementation((options: any) => {
+        if (options.type === CLOUD_CONNECTOR_SAVED_OBJECT_TYPE) {
+          return Promise.resolve(mockCloudConnectorsWithAccountType);
+        }
+        return Promise.resolve(mockPackagePolicies);
+      });
 
       const result = await service.getList(mockSoClient);
 
@@ -772,14 +798,37 @@ describe('CloudConnectorService', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 2,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T01:00:00.000Z',
       },
     };
 
-    it('should get cloud connector by id successfully', async () => {
+    // Mock package policies for computing count
+    const mockPackagePolicies = {
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+        {
+          id: 'pp-2',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+      ],
+      total: 2,
+      page: 1,
+      per_page: 0,
+    };
+
+    it('should get cloud connector by id successfully with computed packagePolicyCount', async () => {
       mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePolicies);
 
       const result = await service.getById(mockSoClient, 'cloud-connector-123');
 
@@ -833,6 +882,7 @@ describe('CloudConnectorService', () => {
 
     it('should log info messages correctly', async () => {
       mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePolicies);
 
       await service.getById(mockSoClient, 'cloud-connector-123');
 
@@ -842,7 +892,7 @@ describe('CloudConnectorService', () => {
       );
     });
 
-    it('should handle cloud connector with minimal data', async () => {
+    it('should handle cloud connector with minimal data and zero package policies', async () => {
       const minimalSavedObject = {
         ...mockSavedObject,
         attributes: {
@@ -850,13 +900,20 @@ describe('CloudConnectorService', () => {
           namespace: 'default',
           cloudProvider: 'aws',
           vars: {},
-          packagePolicyCount: 0,
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-01-01T00:00:00.000Z',
         },
       };
 
+      const noPackagePolicies = {
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+      };
+
       mockSoClient.get.mockResolvedValue(minimalSavedObject);
+      mockSoClient.find.mockResolvedValue(noPackagePolicies);
 
       const result = await service.getById(mockSoClient, 'cloud-connector-123');
 
@@ -895,10 +952,25 @@ describe('CloudConnectorService', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 1,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T00:00:00.000Z',
       },
+    };
+
+    // Mock package policies for computing count
+    const mockPackagePoliciesForUpdate = {
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 0,
     };
 
     it('should update cloud connector name successfully', async () => {
@@ -913,6 +985,7 @@ describe('CloudConnectorService', () => {
 
       mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
       mockSoClient.update.mockResolvedValue(mockUpdatedSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
 
       const result = await service.update(mockSoClient, 'cloud-connector-123', {
         name: 'updated-name',
@@ -1404,7 +1477,7 @@ describe('CloudConnectorService', () => {
   });
 
   describe('delete', () => {
-    const mockSavedObjectWithZeroCount = {
+    const mockSavedObject = {
       id: 'cloud-connector-123',
       type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
       references: [],
@@ -1413,25 +1486,53 @@ describe('CloudConnectorService', () => {
         namespace: '*',
         cloudProvider: 'aws',
         vars: {},
-        packagePolicyCount: 0,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T01:00:00.000Z',
       },
     };
 
-    const mockSavedObjectWithNonZeroCount = {
-      ...mockSavedObjectWithZeroCount,
-      attributes: {
-        ...mockSavedObjectWithZeroCount.attributes,
-        packagePolicyCount: 3,
-      },
+    const mockNoPackagePolicies = {
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 0,
     };
 
-    it('should delete cloud connector successfully when packagePolicyCount is 0', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithZeroCount);
+    const mockPackagePoliciesWithCount = {
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+        {
+          id: 'pp-2',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+        {
+          id: 'pp-3',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+      ],
+      total: 3,
+      page: 1,
+      per_page: 0,
+    };
+
+    it('should delete cloud connector successfully when no package policies use it', async () => {
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockNoPackagePolicies);
       mockSoClient.delete.mockResolvedValue({});
 
-      const result = await service.delete(mockSoClient, 'cloud-connector-123');
+      const result = await service.delete(mockSoClient, mockEsClient, 'cloud-connector-123');
 
       expect(mockSoClient.get).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -1444,10 +1545,13 @@ describe('CloudConnectorService', () => {
       expect(result).toEqual({ id: 'cloud-connector-123' });
     });
 
-    it('should throw error when packagePolicyCount > 0 and force is false', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithNonZeroCount);
+    it('should throw error when package policies exist and force is false', async () => {
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesWithCount);
 
-      await expect(service.delete(mockSoClient, 'cloud-connector-123', false)).rejects.toThrow(
+      await expect(
+        service.delete(mockSoClient, mockEsClient, 'cloud-connector-123', false)
+      ).rejects.toThrow(
         'Cannot delete cloud connector "test-connector" as it is being used by 3 package policies'
       );
 
@@ -1457,11 +1561,12 @@ describe('CloudConnectorService', () => {
       );
     });
 
-    it('should delete successfully when packagePolicyCount > 0 and force is true', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithNonZeroCount);
+    it('should delete successfully when package policies exist and force is true', async () => {
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesWithCount);
       mockSoClient.delete.mockResolvedValue({});
 
-      const result = await service.delete(mockSoClient, 'cloud-connector-123', true);
+      const result = await service.delete(mockSoClient, mockEsClient, 'cloud-connector-123', true);
 
       expect(mockSoClient.delete).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -1470,30 +1575,35 @@ describe('CloudConnectorService', () => {
       expect(result).toEqual({ id: 'cloud-connector-123' });
     });
 
-    it('should log warning when force deleting connector with packagePolicyCount > 0', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithNonZeroCount);
+    it('should log warning when force deleting connector with package policies', async () => {
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesWithCount);
       mockSoClient.delete.mockResolvedValue({});
 
-      await service.delete(mockSoClient, 'cloud-connector-123', true);
+      await service.delete(mockSoClient, mockEsClient, 'cloud-connector-123', true);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'Force deleting cloud connector "test-connector" which is still being used by 3 package policies'
       );
     });
 
-    it('should not log warning when force deleting connector with packagePolicyCount = 0', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithZeroCount);
+    it('should not log warning when force deleting connector with no package policies', async () => {
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockNoPackagePolicies);
       mockSoClient.delete.mockResolvedValue({});
 
-      await service.delete(mockSoClient, 'cloud-connector-123', true);
+      await service.delete(mockSoClient, mockEsClient, 'cloud-connector-123', true);
 
       expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('should default force parameter to false when not provided', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithNonZeroCount);
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesWithCount);
 
-      await expect(service.delete(mockSoClient, 'cloud-connector-123')).rejects.toThrow(
+      await expect(
+        service.delete(mockSoClient, mockEsClient, 'cloud-connector-123')
+      ).rejects.toThrow(
         'Cannot delete cloud connector "test-connector" as it is being used by 3 package policies'
       );
 
@@ -1506,7 +1616,7 @@ describe('CloudConnectorService', () => {
       const error = new Error('Saved object not found');
       mockSoClient.get.mockRejectedValue(error);
 
-      await expect(service.delete(mockSoClient, 'non-existent-id')).rejects.toThrow(
+      await expect(service.delete(mockSoClient, mockEsClient, 'non-existent-id')).rejects.toThrow(
         'Failed to delete cloud connector: Saved object not found'
       );
 
@@ -1517,10 +1627,11 @@ describe('CloudConnectorService', () => {
     });
 
     it('should log info messages correctly', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithZeroCount);
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockNoPackagePolicies);
       mockSoClient.delete.mockResolvedValue({});
 
-      await service.delete(mockSoClient, 'cloud-connector-123');
+      await service.delete(mockSoClient, mockEsClient, 'cloud-connector-123');
 
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Deleting cloud connector cloud-connector-123 (force: false)'
@@ -1531,21 +1642,25 @@ describe('CloudConnectorService', () => {
     });
 
     it('should re-throw CloudConnectorDeleteError as-is', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithNonZeroCount);
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesWithCount);
 
-      await expect(service.delete(mockSoClient, 'cloud-connector-123')).rejects.toThrow(
+      await expect(
+        service.delete(mockSoClient, mockEsClient, 'cloud-connector-123')
+      ).rejects.toThrow(
         'Cannot delete cloud connector "test-connector" as it is being used by 3 package policies'
       );
     });
 
     it('should handle saved object delete failure', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithZeroCount);
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockNoPackagePolicies);
       const deleteError = new Error('Database delete failed');
       mockSoClient.delete.mockRejectedValue(deleteError);
 
-      await expect(service.delete(mockSoClient, 'cloud-connector-123')).rejects.toThrow(
-        'Failed to delete cloud connector: Database delete failed'
-      );
+      await expect(
+        service.delete(mockSoClient, mockEsClient, 'cloud-connector-123')
+      ).rejects.toThrow('Failed to delete cloud connector: Database delete failed');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to delete cloud connector',
@@ -1918,7 +2033,7 @@ describe('CloudConnectorService', () => {
             namespace: '*',
             cloudProvider: 'azure',
             vars: azureRequest.vars,
-            packagePolicyCount: 1,
+            packagePolicyCount: 0,
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
@@ -1944,7 +2059,6 @@ describe('CloudConnectorService', () => {
           cloudProvider: 'azure',
           namespace: '*',
           vars: azureRequest.vars,
-          packagePolicyCount: 1,
         });
         expect((createCall as any).created_at).toBeDefined();
         expect((createCall as any).updated_at).toBeDefined();
@@ -1955,7 +2069,7 @@ describe('CloudConnectorService', () => {
           namespace: '*',
           cloudProvider: 'azure',
           vars: azureRequest.vars,
-          packagePolicyCount: 1,
+          packagePolicyCount: 0,
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-01-01T00:00:00.000Z',
         });
@@ -2000,7 +2114,6 @@ describe('CloudConnectorService', () => {
           cloudProvider: 'azure',
           namespace: '*',
           vars: azureRequest.vars,
-          packagePolicyCount: 1,
         });
         expect((createCall as any).created_at).toBeDefined();
         expect((createCall as any).updated_at).toBeDefined();

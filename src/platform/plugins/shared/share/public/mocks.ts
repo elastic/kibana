@@ -55,6 +55,8 @@ const createStartContract = (): Start => {
     toggleShareContextMenu: jest.fn(),
     availableIntegrations: jest.fn(),
     navigate: jest.fn(),
+    getExportHandler: jest.fn(),
+    getExportDerivativeHandler: jest.fn(),
   };
   return startContract;
 };

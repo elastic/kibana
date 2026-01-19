@@ -15,6 +15,7 @@ import type { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
+import { getVariablesSchema } from './get_variables_schema';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 
 // Implementation should be the same as in the 'WorkflowContextManager.getContext' function
@@ -40,6 +41,9 @@ export function getContextSchemaForPath(
   if (Object.keys(stepsCollectionSchema.shape).length > 0) {
     schema = schema.extend({ steps: stepsCollectionSchema });
   }
+
+  const variablesSchema = getVariablesSchema(workflowGraph, nearestStep.name);
+  schema = schema.extend({ variables: variablesSchema });
 
   const enrichments = getStepContextSchemaEnrichmentEntries(
     schema,

@@ -495,6 +495,87 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  uppercase: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.uppercase.name', {
+      defaultMessage: 'Uppercase',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.uppercase.description', {
+      defaultMessage: 'Convert a field to uppercase',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.uppercase.usage', {
+      defaultMessage: 'Convert a field to uppercase',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.uppercase.examples.simple', {
+          defaultMessage: 'Convert a field to uppercase into a target field',
+        }),
+        yaml: `- action: uppercase
+  from: message
+  to: message_upper`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.uppercase.tips.ignoreMissing', {
+        defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
+    ],
+  },
+
+  lowercase: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.lowercase.name', {
+      defaultMessage: 'Lowercase',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.lowercase.description', {
+      defaultMessage: 'Convert a field to lowercase',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.lowercase.usage', {
+      defaultMessage: 'Convert a field to lowercase',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.lowercase.examples.simple', {
+          defaultMessage: 'Convert a field to lowercase into a target field',
+        }),
+        yaml: `- action: lowercase
+  from: message
+  to: message_lower`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.lowercase.tips.ignoreMissing', {
+        defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
+    ],
+  },
+
+  trim: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.trim.name', {
+      defaultMessage: 'Trim',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.trim.description', {
+      defaultMessage: 'Trim a field',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.trim.usage', {
+      defaultMessage: 'Trim a field',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.trim.examples.simple', {
+          defaultMessage: 'Trim opening and closing whitespace from a field into a target field',
+        }),
+        yaml: `- action: trim
+  from: message
+  to: message_trimmed`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.trim.tips.ignoreMissing', {
+        defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',

@@ -220,10 +220,8 @@ export const interactiveModeMachine = setup({
     sendStepsToSimulator: enqueueActions(({ context }) => {
       // Check parent for any errors (schema or validation) - don't simulate if there are errors
       if (hasErrorsInParentSnapshot(context.parentRef.getSnapshot())) {
-        context.parentRef.send({ type: 'simulation.reset' });
         return;
       }
-
       const { simulationMode, selectedConditionId } = context;
 
       if (simulationMode === 'partial' && selectWhetherAnyProcessorBeforePersisted(context)) {

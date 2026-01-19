@@ -696,11 +696,15 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         .map((obj) => `${obj.type}:${obj.id}`)
         .sort()
         .join(',');
-      const msg = `Unable to ${authzAction} ${targetTypes}${
+      // Enhanced error message: when access control restrictions apply, provide additional context
+      // explaining that this may be due to lacking the "manage_access_control" privilege or
+      // attempting to modify objects owned by another user (in "write_restricted" mode).
+      const accessControlHint =
         inaccessibleObjects.size > 0
-          ? ', access control restrictions for ' + inaccessibleObjectsString
-          : ''
-      }`;
+          ? `. Access control restrictions for objects: ${inaccessibleObjectsString}. ` +
+            `The "manage_access_control" privilege is required to affect write restricted objects owned by another user.`
+          : '';
+      const msg = `Unable to ${authzAction} ${targetTypes}${accessControlHint}`;
       // if we are bypassing all auditing, or bypassing failure auditing, do not log the event
       const error = this.errors.decorateForbiddenError(new Error(msg));
       if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
@@ -1225,24 +1229,35 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const spacesToAuthorize = new Set<string>([namespaceString]);
 
-    const { types: typesRequiringAccessControl } =
+    const { types: typesRequiringAccessControl, objects: objectsRequiringPrivilegeCheck } =
       this.accessControlService.getObjectsRequiringPrivilegeCheck({
         objects,
         actions: new Set([action]),
       });
 
+    // Derive typesRequiringRbac for the authorization check below.
+    // Objects owned by the current user require the 'update' action instead of 'manage_access_control'.
+    const typesRequiringRbac = new Set(
+      objectsRequiringPrivilegeCheck
+        .filter((object) => object.requiresManageAccessControl === false)
+        .map((object) => object.type)
+    );
+
     /**
      * AccessControl operations do not fall under the regular authorization actions for
-     * Saved Objects, but still require authorization. Hence, we pass an empty actions list to the base
-     * authorization checks.
+     * Saved Objects, but still require authorization. Hence, we may pass an empty actions list
+     * to the base authorization checks if none of the objects are owned by the current user.
+     *
+     * Objects not owned by the current user will require the 'manage_access_control' privilege.
+     * Objects owned by the current user will require the 'update' privilege.
      */
 
     let authorizationResult: CheckAuthorizationResult<A>;
-    if (typesRequiringAccessControl.size > 0) {
+    if (typesRequiringAccessControl.size > 0 || typesRequiringRbac.size > 0) {
       authorizationResult = await this.checkAuthorization({
-        types: new Set(typesRequiringAccessControl),
+        types: typesRequiringRbac.size > 0 ? typesRequiringRbac : typesRequiringAccessControl,
         spaces: spacesToAuthorize,
-        actions: new Set<A>([]),
+        actions: new Set<A>(typesRequiringRbac.size > 0 ? ['update' as A] : []),
         options: { allowGlobalResource: true, typesRequiringAccessControl },
       });
 
@@ -1252,7 +1267,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
        * list of SOs must all support access control.
        */
       this.accessControlService.enforceAccessControl({
-        typesRequiringAccessControl,
+        objectsRequiringPrivilegeCheck,
         authorizationResult,
         currentSpace: namespaceString,
         addAuditEventFn: (types: string[]) => {
@@ -1261,7 +1276,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           this.addAuditEvent({
             action: auditAction!,
             error: err,
-            unauthorizedTypes: [...typesRequiringAccessControl],
+            unauthorizedTypes: types,
             unauthorizedSpaces: [...spacesToAuthorize],
           });
         },

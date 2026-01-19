@@ -30,9 +30,17 @@ interface ResourceCardProps {
   description: string;
   actionHref: string;
   actionText: string;
+  dataTestSubj: string;
 }
 
-const ResourceCard = ({ title, icon, description, actionHref, actionText }: ResourceCardProps) => {
+const ResourceCard = ({
+  title,
+  icon,
+  description,
+  actionHref,
+  actionText,
+  dataTestSubj,
+}: ResourceCardProps) => {
   const assetBasePath = useAssetBasePath();
   const { euiTheme } = useEuiTheme();
 
@@ -42,6 +50,7 @@ const ResourceCard = ({ title, icon, description, actionHref, actionText }: Reso
       css={css({
         maxWidth: euiTheme.base * 36,
       })}
+      data-test-subj={dataTestSubj}
     >
       <EuiSplitPanel.Inner
         paddingSize="none"
@@ -73,7 +82,7 @@ const ResourceCard = ({ title, icon, description, actionHref, actionText }: Reso
               iconSide="left"
               iconType="sortRight"
               color="text"
-              data-test-subj="searchHomepageSearchHomepageBodyEnableElasticInferenceServiceButton"
+              data-test-subj="searchHomepageSearchCloudResourceCardAction"
               href={actionHref}
               target="_blank"
             >
@@ -114,6 +123,7 @@ export const CloudResources = () => {
         defaultMessage: 'Go to Billing',
       }),
       actionHref: billingUrl,
+      dataTestSubj: 'cloudResourceCard-billing',
     },
     {
       icon: (assetBasePath: string) => `${assetBasePath}/search_analytics.svg`,
@@ -127,7 +137,8 @@ export const CloudResources = () => {
       actionText: i18n.translate('xpack.searchHomepage.cloudResources.autoops.actionText', {
         defaultMessage: 'AutoOps',
       }),
-      actionHref: cloud?.performanceUrl ?? '',
+      actionHref: cloud?.performanceUrl || `https://cloud.elastic.co`,
+      dataTestSubj: 'cloudResourceCard-autoops',
     },
   ];
   const HOSTED_CARDS: ResourceCardProps[] = [
@@ -144,6 +155,7 @@ export const CloudResources = () => {
         defaultMessage: 'Connect this cluster',
       }),
       actionHref: docLinks.cloudConnect,
+      dataTestSubj: 'cloudResourceCard-cloudConnect',
     },
     {
       icon: (assetBasePath: string) => `${assetBasePath}/search_serverless.svg`,
@@ -158,6 +170,7 @@ export const CloudResources = () => {
         defaultMessage: 'Elastic Cloud',
       }),
       actionHref: docLinks.elasticCloud,
+      dataTestSubj: 'cloudResourceCard-serverless',
     },
   ];
 
@@ -184,6 +197,7 @@ export const CloudResources = () => {
                 description={card.description}
                 actionHref={card.actionHref}
                 actionText={card.actionText}
+                dataTestSubj={card.dataTestSubj}
               />
             </EuiFlexItem>
           ))}

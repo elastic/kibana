@@ -497,7 +497,7 @@ ROW a = "12 15.5 15.6 true"
       label: i18n.translate('languageDocumentation.documentationESQL.inline_stats', {
         defaultMessage: 'INLINE STATS',
       }),
-      preview: false,
+      preview: true,
       description: {
         markdownContent: i18n.translate(
           'languageDocumentation.documentationESQL.inline_stats.markdown',

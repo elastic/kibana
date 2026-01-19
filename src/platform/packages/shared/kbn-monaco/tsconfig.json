@@ -8,7 +8,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/repo-info",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/esql-types",
   ],
   "exclude": ["target/**/*"]

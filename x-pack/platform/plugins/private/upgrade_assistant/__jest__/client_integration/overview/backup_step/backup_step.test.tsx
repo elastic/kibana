@@ -9,16 +9,18 @@ import {
   CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
   CLOUD_SNAPSHOT_REPOSITORY,
 } from '../../../../common/constants';
-import { setupEnvironment, advanceTime } from '../../helpers';
-import type { OverviewTestBed } from '../overview.helpers';
+import { act } from 'react-dom/test-utils';
+import { screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import { advanceTime } from '../../helpers/time_manipulation';
 import { setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Backup Step', () => {
-  let testBed: OverviewTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let setDelayResponse: ReturnType<typeof setupEnvironment>['setDelayResponse'];
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -27,18 +29,17 @@ describe('Overview - Backup Step', () => {
 
   describe('On-prem', () => {
     beforeEach(async () => {
-      testBed = await setupOverviewPage(httpSetup);
+      await setupOverviewPage(httpSetup);
     });
 
     test('Shows link to Snapshot and Restore', () => {
-      const { exists, find } = testBed;
-      expect(exists('snapshotRestoreLink')).toBe(true);
-      expect(find('snapshotRestoreLink').props().href).toBe('snapshotAndRestoreUrl');
+      const link = screen.getByTestId('snapshotRestoreLink') as HTMLAnchorElement;
+      expect(link).toBeInTheDocument();
+      expect(link.getAttribute('href')).toBe('snapshotAndRestoreUrl');
     });
 
     test('renders step as incomplete ', () => {
-      const { exists } = testBed;
-      expect(exists('backupStep-incomplete')).toBe(true);
+      expect(screen.getByTestId('backupStep-incomplete')).toBeInTheDocument();
     });
   });
 
@@ -57,35 +58,35 @@ describe('Overview - Backup Step', () => {
       beforeEach(async () => {
         // We don't want the request to load backup status to resolve immediately.
         setDelayResponse(true);
-        testBed = await setupCloudOverviewPage();
+        await setupCloudOverviewPage();
       });
 
-      test('is rendered', () => {
-        const { exists } = testBed;
-        expect(exists('cloudBackupLoading')).toBe(true);
+      test('is rendered', async () => {
+        expect(await screen.findByTestId('cloudBackupLoading')).toBeInTheDocument();
       });
     });
 
     describe('error state', () => {
-      beforeEach(async () => {
+      test('is rendered', async () => {
         httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
           statusCode: 400,
           message: 'error',
         });
 
-        testBed = await setupCloudOverviewPage();
+        await setupCloudOverviewPage();
+
+        expect(await screen.findByTestId('cloudBackupErrorCallout')).toBeInTheDocument();
       });
 
-      test('is rendered', () => {
-        const { exists } = testBed;
-        testBed.component.update();
-        expect(exists('cloudBackupErrorCallout')).toBe(true);
-      });
+      test('lets the user attempt to reload backup status', async () => {
+        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
+          statusCode: 400,
+          message: 'error',
+        });
 
-      test('lets the user attempt to reload backup status', () => {
-        const { exists } = testBed;
-        testBed.component.update();
-        expect(exists('cloudBackupRetryButton')).toBe(true);
+        await setupCloudOverviewPage();
+
+        expect(await screen.findByTestId('cloudBackupRetryButton')).toBeInTheDocument();
       });
 
       test('loads on prem if missing found-snapshots repository', async () => {
@@ -94,14 +95,10 @@ describe('Overview - Backup Step', () => {
           message: `[${CLOUD_SNAPSHOT_REPOSITORY}] missing`,
         });
 
-        testBed = await setupCloudOverviewPage();
+        await setupCloudOverviewPage();
 
-        const { exists } = testBed;
-
-        testBed.component.update();
-
-        expect(exists('snapshotRestoreLink')).toBe(true);
-        expect(exists('cloudBackupErrorCallout')).toBe(false);
+        expect(await screen.findByTestId('snapshotRestoreLink')).toBeInTheDocument();
+        expect(screen.queryByTestId('cloudBackupErrorCallout')).not.toBeInTheDocument();
       });
     });
 
@@ -113,19 +110,19 @@ describe('Overview - Backup Step', () => {
             lastBackupTime: '2021-08-25T19:59:59.863Z',
           });
 
-          testBed = await setupCloudOverviewPage();
+          await setupCloudOverviewPage();
         });
 
         test('renders link to Cloud backups and last backup time ', () => {
-          const { exists, find } = testBed;
-          expect(exists('dataBackedUpStatus')).toBe(true);
-          expect(exists('cloudSnapshotsLink')).toBe(true);
-          expect(find('dataBackedUpStatus').text()).toContain('Last snapshot created on');
+          expect(screen.getByTestId('dataBackedUpStatus')).toBeInTheDocument();
+          expect(screen.getByTestId('cloudSnapshotsLink')).toBeInTheDocument();
+          expect(screen.getByTestId('dataBackedUpStatus')).toHaveTextContent(
+            'Last snapshot created on'
+          );
         });
 
-        test('renders step as complete ', () => {
-          const { exists } = testBed;
-          expect(exists('backupStep-complete')).toBe(true);
+        test('renders step as complete ', async () => {
+          expect(await screen.findByTestId('backupStep-complete')).toBeInTheDocument();
         });
       });
 
@@ -136,25 +133,23 @@ describe('Overview - Backup Step', () => {
             lastBackupTime: undefined,
           });
 
-          testBed = await setupCloudOverviewPage();
+          await setupCloudOverviewPage();
         });
 
         test('renders link to Cloud backups and "not backed up" status', () => {
-          const { exists } = testBed;
-          expect(exists('dataNotBackedUpStatus')).toBe(true);
-          expect(exists('cloudSnapshotsLink')).toBe(true);
+          expect(screen.getByTestId('dataNotBackedUpStatus')).toBeInTheDocument();
+          expect(screen.getByTestId('cloudSnapshotsLink')).toBeInTheDocument();
         });
 
         test('renders step as incomplete ', () => {
-          const { exists } = testBed;
-          expect(exists('backupStep-incomplete')).toBe(true);
+          expect(screen.getByTestId('backupStep-incomplete')).toBeInTheDocument();
         });
       });
     });
 
     describe('poll for new status', () => {
       beforeEach(async () => {
-        jest.useFakeTimers({ legacyFakeTimers: true });
+        jest.useFakeTimers();
 
         // First request will succeed.
         httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
@@ -162,16 +157,19 @@ describe('Overview - Backup Step', () => {
           lastBackupTime: '2021-08-25T19:59:59.863Z',
         });
 
-        testBed = await setupCloudOverviewPage();
+        await setupCloudOverviewPage();
       });
 
-      afterEach(() => {
+      afterEach(async () => {
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
+        jest.clearAllTimers();
         jest.useRealTimers();
       });
 
       test('renders step as incomplete when a success state is followed by an error state', async () => {
-        const { exists } = testBed;
-        expect(exists('backupStep-complete')).toBe(true);
+        expect(await screen.findByTestId('backupStep-complete')).toBeInTheDocument();
 
         // Second request will error.
         httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
@@ -181,9 +179,9 @@ describe('Overview - Backup Step', () => {
 
         // Resolve the polling timeout.
         await advanceTime(CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS);
-        testBed.component.update();
-
-        expect(exists('backupStep-incomplete')).toBe(true);
+        await waitFor(() => {
+          expect(screen.getByTestId('backupStep-incomplete')).toBeInTheDocument();
+        });
       });
     });
   });

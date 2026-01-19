@@ -134,6 +134,7 @@ export const AlertsPageContent = memo(
             <FiltersSection
               assignees={assignees}
               dataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
+              pageFilters={pageFilters}
               setStatusFilter={setStatusFilter}
               setPageFilters={setPageFilters}
               setPageFilterHandler={setPageFilterHandler}

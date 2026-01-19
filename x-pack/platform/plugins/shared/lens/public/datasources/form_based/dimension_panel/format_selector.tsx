@@ -244,7 +244,10 @@ export function FormatSelector(props: FormatSelectorProps) {
       const defaultDecimals = supportedFormats[id].defaultDecimals;
       onChange({
         id: choices[0].value,
-        params: { decimals: defaultDecimals ?? decimals },
+        params: {
+          decimals: defaultDecimals ?? decimals,
+          ...(id === 'duration' ? { compact: true } : {}),
+        },
       });
       setDecimals(defaultDecimals ?? decimals);
     },

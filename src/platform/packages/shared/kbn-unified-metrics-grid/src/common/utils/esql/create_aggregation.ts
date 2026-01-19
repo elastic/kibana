@@ -13,7 +13,7 @@ import {
   isCommand,
   isFunctionExpression,
   type ESQLAstQueryExpression,
-} from '@kbn/esql-ast';
+} from '@kbn/esql-language';
 import { replaceParameters } from '@kbn/esql-composer';
 import type { MetricField } from '../../../types';
 

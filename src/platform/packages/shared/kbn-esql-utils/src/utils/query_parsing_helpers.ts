@@ -15,7 +15,8 @@ import {
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
-} from '@kbn/esql-ast';
+  esqlCommandRegistry,
+} from '@kbn/esql-language';
 
 import type {
   ESQLSource,
@@ -25,7 +26,7 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
   ESQLAstForkCommand,
-} from '@kbn/esql-ast';
+} from '@kbn/esql-language';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
@@ -642,3 +643,17 @@ export function hasDateBreakdown(esql: string, columns: DatatableColumn[] = []):
 
   return foundDateField;
 }
+
+/**
+ * Checks if the ESQL query contains only source commands (e.g., FROM, TS).
+ * @param esql: string - The ESQL query string
+ * @returns true if the query contains only source commands, false otherwise
+ */
+export const hasOnlySourceCommand = (query: string): boolean => {
+  const { root } = Parser.parse(query);
+  const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+  return (
+    root.commands.length > 0 &&
+    root.commands.every((command) => sourceCommands.includes(command.name))
+  );
+};

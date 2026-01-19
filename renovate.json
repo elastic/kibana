@@ -17,10 +17,10 @@
   ],
   "baseBranches": [
     "main",
+    "9.3",
     "9.2",
     "9.1",
-    "8.19",
-    "7.17"
+    "8.19"
   ],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -489,7 +489,6 @@
         "@emotion/css",
         "@emotion/react",
         "@emotion/serialize",
-        "@emotion/server",
         "@emotion/styled"
       ],
       "reviewers": [
@@ -1294,27 +1293,6 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/elasticsearch",
-      "matchDepNames": [
-        "@elastic/elasticsearch"
-      ],
-      "reviewers": [
-        "team:kibana-operations",
-        "team:kibana-core"
-      ],
-      "allowedVersions": "<8.0.0",
-      "matchBaseBranches": [
-        "7.17"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Operations",
-        "Team:Core",
-        "backport:skip"
-      ],
-      "enabled": true
-    },
-    {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
         "launchdarkly-js-client-sdk",
@@ -1965,7 +1943,7 @@
     {
       "groupName": "workflow-yaml",
       "matchDepNames": [
-        "@hey-api/openapi-ts", 
+        "@hey-api/openapi-ts",
         "vscode-languageserver-textdocument",
         "yaml-language-server"
       ],
@@ -1976,8 +1954,8 @@
         "main"
       ],
       "labels": [
-        "Team:One Workflow", 
-        "backport:all-open", 
+        "Team:One Workflow",
+        "backport:all-open",
         "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
@@ -3683,7 +3661,8 @@
       "groupName": "CodeQL",
       "matchPackageNames": [
         "github/codeql-action/analyze",
-        "github/codeql-action/init"
+        "github/codeql-action/init",
+        "advanced-security/dismiss-alerts"
       ],
       "matchManagers": [
         "github-actions"

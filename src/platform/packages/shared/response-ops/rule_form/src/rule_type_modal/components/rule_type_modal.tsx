@@ -193,6 +193,8 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                     }}
                   >
                     <EuiFieldSearch
+                      id="ruleTypeModalSearch"
+                      data-test-subj="ruleTypeModalSearch"
                       placeholder={searchPlaceholder}
                       value={searchString}
                       onChange={({ target: { value } }) => onChangeSearch(value)}

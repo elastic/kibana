@@ -1,5 +1,28 @@
 {
   "capabilities": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "method": [
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "path": [
+        "/"
+      ],
+      "parameters": [],
+      "capabilities": [],
+      "local_only": "__flag__",
+      "timeout": [
+        "-1",
+        "0"
+      ]
+    },
     "methods": [
       "GET"
     ],

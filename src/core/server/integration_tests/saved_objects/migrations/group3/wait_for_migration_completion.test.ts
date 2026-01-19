@@ -35,12 +35,8 @@ describe('migration with waitForCompletion=true', () => {
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('waits for another instance to complete the migration', async () => {
