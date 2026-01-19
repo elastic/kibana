@@ -746,4 +746,146 @@ describe('convertFormBasedToTextBasedLayer', () => {
     expect(columns?.[0]).not.toHaveProperty('params');
     expect(columns?.[0]).not.toHaveProperty('customLabel');
   });
+
+  it('preserves data view field format from fieldFormatMap when column has no format', () => {
+    // Create an index pattern with fieldFormatMap containing a currency format
+    const indexPatternWithFieldFormat: IndexPattern = {
+      ...mockIndexPattern,
+      fieldFormatMap: {
+        bytes: { id: 'currency', params: { pattern: '$0,0.00' } },
+      },
+    } as unknown as IndexPattern;
+
+    const framePublicAPI = createMockFramePublicAPI({
+      dataViews: {
+        indexPatterns: { 'test-index-pattern': indexPatternWithFieldFormat },
+        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
+      },
+      dateRange: {
+        fromDate: '2024-01-01T00:00:00.000Z',
+        toDate: '2024-01-02T00:00:00.000Z',
+      },
+    });
+
+    // Column that uses the 'bytes' field but has no format configured
+    const layersWithFieldFormatFromDataView: ConvertibleLayer[] = [
+      {
+        id: layerId,
+        icon: 'layers',
+        name: '',
+        type: 'data',
+        query: 'FROM test-index | STATS total_bytes = SUM(bytes)',
+        isConvertibleToEsql: true,
+        conversionData: {
+          esAggsIdMap: {
+            total_bytes: [
+              {
+                id: 'col2',
+                label: 'Total Bytes',
+                operationType: 'sum',
+                sourceField: 'bytes',
+                dataType: 'number',
+                // No format defined - should fall back to fieldFormatMap
+                interval: undefined as never,
+              },
+            ],
+          },
+          partialRows: false,
+        },
+      },
+    ];
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: layersWithFieldFormatFromDataView,
+      attributes: mockAttributes,
+      visualizationState: mockVisualizationState,
+      datasourceStates: mockDatasourceStates,
+      framePublicAPI,
+    });
+
+    const textBasedState = result?.state.datasourceStates.textBased;
+    const columns = textBasedState?.layers[layerId]?.columns;
+
+    // Should have the format from fieldFormatMap
+    expect(columns).toEqual([
+      {
+        columnId: 'col2',
+        fieldName: 'total_bytes',
+        label: 'Total Bytes',
+        params: { format: { id: 'currency', params: { pattern: '$0,0.00' } } },
+        meta: { type: 'number' },
+      },
+    ]);
+  });
+
+  it('prefers column format over data view field format', () => {
+    // Create an index pattern with fieldFormatMap
+    const indexPatternWithFieldFormat: IndexPattern = {
+      ...mockIndexPattern,
+      fieldFormatMap: {
+        bytes: { id: 'currency', params: { pattern: '$0,0.00' } },
+      },
+    } as unknown as IndexPattern;
+
+    const framePublicAPI = createMockFramePublicAPI({
+      dataViews: {
+        indexPatterns: { 'test-index-pattern': indexPatternWithFieldFormat },
+        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
+      },
+      dateRange: {
+        fromDate: '2024-01-01T00:00:00.000Z',
+        toDate: '2024-01-02T00:00:00.000Z',
+      },
+    });
+
+    // Column that has its own format configured (should take precedence)
+    const layersWithExplicitFormat: ConvertibleLayer[] = [
+      {
+        id: layerId,
+        icon: 'layers',
+        name: '',
+        type: 'data',
+        query: 'FROM test-index | STATS total_bytes = SUM(bytes)',
+        isConvertibleToEsql: true,
+        conversionData: {
+          esAggsIdMap: {
+            total_bytes: [
+              {
+                id: 'col2',
+                label: 'Total Bytes',
+                operationType: 'sum',
+                sourceField: 'bytes',
+                dataType: 'number',
+                format: { id: 'bytes', params: { decimals: 2 } }, // Explicit format
+                interval: undefined as never,
+              },
+            ],
+          },
+          partialRows: false,
+        },
+      },
+    ];
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: layersWithExplicitFormat,
+      attributes: mockAttributes,
+      visualizationState: mockVisualizationState,
+      datasourceStates: mockDatasourceStates,
+      framePublicAPI,
+    });
+
+    const textBasedState = result?.state.datasourceStates.textBased;
+    const columns = textBasedState?.layers[layerId]?.columns;
+
+    // Should use the explicit column format, not the fieldFormatMap format
+    expect(columns).toEqual([
+      {
+        columnId: 'col2',
+        fieldName: 'total_bytes',
+        label: 'Total Bytes',
+        params: { format: { id: 'bytes', params: { decimals: 2 } } },
+        meta: { type: 'number' },
+      },
+    ]);
+  });
 });

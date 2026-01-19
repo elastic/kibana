@@ -20,7 +20,7 @@ import type {
   ValueFormatConfig,
   GenericIndexPatternColumn,
 } from '@kbn/lens-common';
-import { isColumnOfType } from './operations/definitions/helpers';
+import { isColumnOfType, isColumnFormatted } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';
 import { operationDefinitionMap } from './operations';
@@ -188,6 +188,9 @@ export function generateEsqlQuery(
       : `bucket_${index}_${aggId}`;
 
     const format =
+      // 1. User-configured format in Lens (highest priority)
+      (isColumnFormatted(col) ? col.params?.format : undefined) ??
+      // 2. Operation-specific format
       operationDefinitionMap[col.operationType].getSerializedFormat?.(
         col,
         col,
@@ -195,10 +198,11 @@ export function generateEsqlQuery(
         uiSettings,
         dateRange
       ) ??
+      // 3. Field's default format from data view
       ('sourceField' in col
         ? col.sourceField === '___records___'
           ? { id: 'number' }
-          : indexPattern.getFormatterForField(col.sourceField)
+          : undefined
         : undefined);
 
     esAggsIdMap[esAggsId] = [
@@ -315,13 +319,18 @@ export function generateEsqlQuery(
     }
 
     const format =
+      // 1. User-configured format in Lens (highest priority)
+      (isColumnFormatted(col) ? col.params?.format : undefined) ??
+      // 2. Operation-specific format
       operationDefinitionMap[col.operationType].getSerializedFormat?.(
         col,
         col,
         indexPattern,
         uiSettings,
         dateRange
-      ) ?? ('sourceField' in col ? indexPattern.getFormatterForField(col.sourceField) : undefined);
+      ) ??
+      // 3. Field's default format from data view (buckets don't need fallback)
+      undefined;
 
     esAggsIdMap[esAggsId] = [
       {

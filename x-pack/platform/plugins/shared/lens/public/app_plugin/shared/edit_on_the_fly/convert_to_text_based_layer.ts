@@ -81,6 +81,9 @@ function buildTextBasedState(
 
     const { layer, conversionResult } = conversionData;
 
+    // Get index pattern for field format lookup
+    const indexPattern = framePublicAPI.dataViews.indexPatterns[layer.indexPatternId];
+
     // Build new text-based columns from esAggsIdMap
     // Keep original column IDs so visualizations can still reference them
     // sourceColumn from esAggsIdMap already has properly computed label (via getDefaultLabel) and format
@@ -105,9 +108,18 @@ function buildTextBasedState(
           column.customLabel = sourceColumn.customLabel;
         }
 
+        // Determine format: user-configured first, then data view field format as fallback
+        let format = sourceColumn.format;
+        if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
+          const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
+          if (fieldFormat?.id) {
+            format = fieldFormat as typeof sourceColumn.format;
+          }
+        }
+
         // Only include params if format has a valid id
-        if (sourceColumn.format?.id !== undefined) {
-          column.params = { format: sourceColumn.format as ValueFormatConfig };
+        if (format?.id !== undefined) {
+          column.params = { format: format as ValueFormatConfig };
         }
 
         return column;
