@@ -30,6 +30,15 @@ export const ADD_PANEL_ANNOTATION_GROUP = {
   order: 900, // This is the order of the group in the context menu
 };
 
+export const ADD_PANEL_DISCOVER_GROUP = {
+  id: 'Discover',
+  getDisplayName: () =>
+    i18n.translate('embeddableApi.common.constants.grouping.annotations', {
+      defaultMessage: 'Discover',
+    }),
+  order: 899, // This is the order of the group in the context menu
+};
+
 export const ADD_PANEL_OTHER_GROUP = {
   id: 'other',
   getDisplayName: () =>

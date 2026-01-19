@@ -30,11 +30,12 @@ import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warni
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { initializeEditApi } from './initialize_edit_api';
-import { initializeFetch, isEsqlMode } from './initialize_fetch';
+import { initializeFetch, isEsqlMode, recentState } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import type { SearchEmbeddableApi } from './types';
@@ -220,6 +221,14 @@ export const getSearchEmbeddableFactory = ({
         },
       });
 
+      const title = api.title$.getValue();
+      if (recentState.totalHitCount && title === "cached" ) {
+        searchEmbeddable.stateManager.totalHitCount.next(recentState.totalHitCount);
+      }
+      if (recentState.rows && title === "cached") {
+        searchEmbeddable.stateManager.rows.next(recentState.rows);
+      }
+
       const unsubscribeFromFetch = initializeFetch({
         api: {
           ...api,
@@ -309,52 +318,67 @@ export const getSearchEmbeddableFactory = ({
           );
 
           return (
-            <KibanaRenderContextProvider {...discoverServices.core}>
-              <KibanaContextProvider services={discoverServices}>
-                <ScopedServicesProvider
-                  scopedProfilesManager={scopedProfilesManager}
-                  scopedEBTManager={scopedEbtManager}
-                >
-                  <AppWrapper>
-                    {renderAsFieldStatsTable ? (
-                      <SearchEmbeddablFieldStatsTableComponent
-                        api={{
-                          ...api,
-                          fetchContext$,
-                        }}
-                        dataView={dataView!}
-                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
-                        stateManager={searchEmbeddable.stateManager}
-                      />
-                    ) : (
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={
-                          discoverServices.uiActions.getTriggerCompatibleActions
-                        }
+            <>
+              <EuiFlexGroup gutterSize="s" direction="column">
+                <EuiFlexItem grow={false} style={{ padding: '4px 8px 0 8px' }}>
+                  <EuiFormRow fullWidth={true}>
+                    <EuiSelect
+                      options={[{ value: 'none', text: 'Displayed Tab: My favorite tab' }]}
+                      compressed={true}
+                      fullWidth
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <KibanaRenderContextProvider {...discoverServices.core}>
+                    <KibanaContextProvider services={discoverServices}>
+                      <ScopedServicesProvider
+                        scopedProfilesManager={scopedProfilesManager}
+                        scopedEBTManager={scopedEbtManager}
                       >
-                        <SearchEmbeddableGridComponent
-                          api={{ ...api, fetchWarnings$, fetchContext$ }}
-                          dataView={dataView!}
-                          onAddFilter={
-                            isEsqlMode(savedSearch) ||
-                            runtimeState.nonPersistedDisplayOptions?.enableFilters === false
-                              ? undefined
-                              : onAddFilter
-                          }
-                          enableDocumentViewer={
-                            runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
-                            undefined
-                              ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
-                              : true
-                          }
-                          stateManager={searchEmbeddable.stateManager}
-                        />
-                      </CellActionsProvider>
-                    )}
-                  </AppWrapper>
-                </ScopedServicesProvider>
-              </KibanaContextProvider>
-            </KibanaRenderContextProvider>
+                        <AppWrapper>
+                          {renderAsFieldStatsTable ? (
+                            <SearchEmbeddablFieldStatsTableComponent
+                              api={{
+                                ...api,
+                                fetchContext$,
+                              }}
+                              dataView={dataView!}
+                              onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                              stateManager={searchEmbeddable.stateManager}
+                            />
+                          ) : (
+                            <CellActionsProvider
+                              getTriggerCompatibleActions={
+                                discoverServices.uiActions.getTriggerCompatibleActions
+                              }
+                            >
+                              <SearchEmbeddableGridComponent
+                                api={{ ...api, fetchWarnings$, fetchContext$ }}
+                                dataView={dataView!}
+                                onAddFilter={
+                                  isEsqlMode(savedSearch) ||
+                                  runtimeState.nonPersistedDisplayOptions?.enableFilters === false
+                                    ? undefined
+                                    : onAddFilter
+                                }
+                                enableDocumentViewer={
+                                  runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                                  undefined
+                                    ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
+                                    : true
+                                }
+                                stateManager={searchEmbeddable.stateManager}
+                              />
+                            </CellActionsProvider>
+                          )}
+                        </AppWrapper>
+                      </ScopedServicesProvider>
+                    </KibanaContextProvider>
+                  </KibanaRenderContextProvider>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
           );
         },
       };

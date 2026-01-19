@@ -63,6 +63,11 @@ export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): bool
   return isOfAggregateQueryType(query);
 };
 
+export const recentState = {
+  totalHitCount: undefined,
+  rows: [] as unknown[],
+};
+
 const getExecutionContext = async (
   api: SavedSearchPartialFetchApi,
   discoverServices: DiscoverServices
@@ -283,6 +288,9 @@ export function initializeFetch({
         setBlockingError(next?.error);
         return;
       }
+
+      recentState.totalHitCount = next.hitCount;
+      recentState.rows = next.rows;
 
       stateManager.rows.next(next.rows ?? []);
       stateManager.totalHitCount.next(next.hitCount);
