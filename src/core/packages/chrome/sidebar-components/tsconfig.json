@@ -12,7 +12,11 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/zod",
+    "@kbn/i18n",
+    "@kbn/use-observable",
+    "@kbn/core-chrome-layout-utils",
+    "@kbn/core-chrome-layout-components",
     "@kbn/core-chrome-sidebar",
+    "@kbn/core-chrome-sidebar-context",
   ]
 }

@@ -5277,6 +5277,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-sidebar-components@link:src/core/packages/chrome/sidebar-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-sidebar-context@link:src/core/packages/chrome/sidebar-context":
   version "0.0.0"
   uid ""

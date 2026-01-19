@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import { Sidebar as SidebarComponent } from '@kbn/core-chrome-sidebar-internal';
+import { Sidebar as SidebarComponent } from '@kbn/core-chrome-sidebar-components/internal';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SidebarProps {}

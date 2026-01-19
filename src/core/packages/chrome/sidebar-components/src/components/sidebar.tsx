@@ -16,6 +16,9 @@ import { useSidebar } from '../hooks';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SidebarProps {}
 
+/**
+ * @internal
+ */
 export function Sidebar(props: SidebarProps) {
   const { close, isOpen, currentAppId } = useSidebar();
   const sidebarService = useSidebarService();

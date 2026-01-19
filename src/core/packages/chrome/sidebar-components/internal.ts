@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  SidebarApp,
-  SidebarAppButton,
-  SidebarAppContent,
-  SidebarSetup,
-  SidebarStart,
-} from '@kbn/core-chrome-sidebar';
+// Components that are meant for internal use only (chrome-internal)
+export { Sidebar } from './src/components';
+export type { SidebarProps } from './src/components';

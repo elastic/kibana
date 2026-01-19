@@ -320,6 +320,7 @@
     "@kbn/core-chrome-layout-utils": "link:src/core/packages/chrome/layout/core-chrome-layout-utils",
     "@kbn/core-chrome-navigation": "link:src/core/packages/chrome/navigation",
     "@kbn/core-chrome-sidebar": "link:src/core/packages/chrome/sidebar",
+    "@kbn/core-chrome-sidebar-components": "link:src/core/packages/chrome/sidebar-components",
     "@kbn/core-chrome-sidebar-context": "link:src/core/packages/chrome/sidebar-context",
     "@kbn/core-chrome-sidebar-internal": "link:src/core/packages/chrome/sidebar-internal",
     "@kbn/core-config-server-internal": "link:src/core/packages/config/server-internal",

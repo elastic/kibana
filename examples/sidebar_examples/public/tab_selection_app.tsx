@@ -10,8 +10,8 @@
 import React from 'react';
 import { EuiPanel, EuiSpacer, EuiButtonGroup, EuiText, EuiFormRow, EuiTitle } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
-import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar-internal';
-import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-internal';
+import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
+import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
 
 export const tabSelectionAppId = 'sidebarExampleTabs';
 

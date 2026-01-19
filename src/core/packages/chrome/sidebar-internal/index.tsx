@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Re-export public types and utilities from sidebar-types package
+// Re-export public types and utilities from sidebar package
 export type {
   SidebarAppId,
   SidebarComponentProps,
@@ -25,7 +25,3 @@ export {
 } from '@kbn/core-chrome-sidebar';
 
 export { SidebarService } from './src/services';
-export { Sidebar, SidebarHeader, SidebarBody } from './src/components';
-export type { SidebarProps, SidebarHeaderProps, SidebarBodyProps } from './src/components';
-export { useSidebar, useSidebarWidth, useSidebarApp } from './src/hooks';
-export type { UseSidebarApi, UseSidebarAppApi } from './src/hooks';
