@@ -296,7 +296,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(resp).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message: 'logRate metric is not supported without time series',
+          message: 'The following metrics require time series: logRate',
         });
       });
     });
