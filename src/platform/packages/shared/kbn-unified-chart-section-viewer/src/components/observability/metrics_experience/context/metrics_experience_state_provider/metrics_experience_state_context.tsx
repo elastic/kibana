@@ -9,8 +9,11 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
-import type { Dimension } from '../../types';
-import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
+import type { Dimension } from '../../../../../types';
+import {
+  type MetricsExperienceRestorableState,
+  useRestorableState,
+} from '../../../../../restorable_state';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   onPageChange: (value: number) => void;

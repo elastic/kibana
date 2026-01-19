@@ -10,9 +10,9 @@
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import type { MetricField, Dimension } from '../../../types';
-import { hasValue } from '../../../common/utils/fields';
-import { DIMENSION_TYPES } from '../../../common/constants';
+import type { MetricField, Dimension } from '../../../../../../types';
+import { hasValue } from '../../../../../../common/utils/fields';
+import { DIMENSION_TYPES } from '../../../../../../common/constants';
 
 const FILTER_OUT_FIELDS = new Set([
   '_id',

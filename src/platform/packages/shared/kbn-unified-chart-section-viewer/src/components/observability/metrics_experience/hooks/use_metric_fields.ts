@@ -11,8 +11,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { Dimension, MetricField, MetricUnit } from '../../../../types';
 import { useMetricsExperienceFieldsContext } from '../context/metrics_experience_fields_provider';
-import { normalizeUnit } from '../../common/utils/metric_unit/normalize_unit';
-import { hasValue } from '../../common/utils/fields';
+import { normalizeUnit } from '../../../../common/utils/metric_unit/normalize_unit';
+import { hasValue } from '../../../../common/utils/fields';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { useMetricFieldsFilter } from './use_metric_fields_filter';
 

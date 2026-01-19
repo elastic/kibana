@@ -9,9 +9,9 @@
 
 import { SPAN_ID, TRANSACTION_ID } from '@kbn/apm-types';
 import React from 'react';
-import { useTraceMetricsContext } from '../../context/trace_metrics_context';
-import { Chart } from '../chart';
-import { useChartLayers } from '../chart/hooks/use_chart_layers';
+import { useTraceMetricsContext } from './context/trace_metrics_context';
+import { Chart } from '../../chart';
+import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { getThroughputChart } from './trace_charts_definition';
 
 type ThroughputChartContentProps = NonNullable<ReturnType<typeof getThroughputChart>> & {

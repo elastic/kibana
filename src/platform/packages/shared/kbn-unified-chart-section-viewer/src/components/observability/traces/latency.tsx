@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { useTraceMetricsContext } from '../../context/trace_metrics_context';
-import { Chart } from '../chart';
-import { useChartLayers } from '../chart/hooks/use_chart_layers';
+import { useTraceMetricsContext } from './context/trace_metrics_context';
+import { Chart } from '../../chart';
+import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { getLatencyChart } from './trace_charts_definition';
 
 type LatencyChartContentProps = NonNullable<ReturnType<typeof getLatencyChart>>;

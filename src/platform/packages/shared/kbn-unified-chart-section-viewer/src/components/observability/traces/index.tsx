@@ -9,13 +9,13 @@
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import { TraceMetricsProvider } from '../../context/trace_metrics_context';
-import { useEsqlQueryInfo } from '../../hooks';
+import { TraceMetricsProvider } from './context/trace_metrics_context';
+import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
 import { ThroughputChart } from './throughput';
-import { MetricsGridWrapper } from '../metrics_grid_wrapper';
-import type { UnifiedMetricsGridProps } from '../../types';
+import { MetricsGridWrapper } from '../../metrics_grid_wrapper';
+import type { UnifiedMetricsGridProps } from '../../../types';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 

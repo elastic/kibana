@@ -8,8 +8,8 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { DataSource } from '../../components/trace_metrics_grid';
-import type { UnifiedMetricsGridProps } from '../../types';
+import type { DataSource } from '../..';
+import type { UnifiedMetricsGridProps } from '../../../../../types';
 
 type TraceMetricsContextProps = {
   dataSource: DataSource;

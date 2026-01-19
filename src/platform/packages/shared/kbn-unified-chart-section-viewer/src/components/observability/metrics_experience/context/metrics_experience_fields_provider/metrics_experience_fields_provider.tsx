@@ -11,7 +11,7 @@ import React, { createContext, useCallback, useMemo, type PropsWithChildren } fr
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type { Dimension, MetricField } from '../../types';
+import type { Dimension, MetricField } from '../../../../../types';
 import { categorizeFields, createSampleRowByField } from './helpers/fields_parser';
 
 export type FieldCapsResponseMap = Record<

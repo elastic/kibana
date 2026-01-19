@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useEsqlQueryInfo } from './use_esql_query_info';
 export { usePagination } from './use_pagination';
 export { useMetricsGridFullScreen } from './use_metrics_grid_fullscreen';
 export { useMetricFields } from './use_metric_fields';

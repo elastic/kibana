@@ -22,9 +22,9 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 
-jest.mock('../context/metrics_experience_state_provider');
-jest.mock('.hooks');
-jest.mock('./chart', () => ({
+jest.mock('./context/metrics_experience_state_provider');
+jest.mock('./hooks');
+jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
 }));
 
