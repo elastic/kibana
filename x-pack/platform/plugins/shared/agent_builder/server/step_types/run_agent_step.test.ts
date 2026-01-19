@@ -272,9 +272,11 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
   it('fails when the workflow abort signal is already aborted', async () => {
     const chat = {
-      converse: jest.fn().mockReturnValue(
-        throwError(() => createRequestAbortedError('Converse request was aborted'))
-      ),
+      converse: jest
+        .fn()
+        .mockReturnValue(
+          throwError(() => createRequestAbortedError('Converse request was aborted'))
+        ),
     };
     const runner = { runAgent: jest.fn() };
     const abortController = new AbortController();
