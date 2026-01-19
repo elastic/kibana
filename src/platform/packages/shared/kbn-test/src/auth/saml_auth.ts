@@ -117,7 +117,6 @@ export const createCloudSession = async (
     try {
       sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
       if (sessionResponse?.status !== 200) {
-        console.error(JSON.stringify(sessionResponse?.data, null, 2));
         throw new Error(
           `Failed to create the new cloud session: 'POST ${cloudLoginUrl}' returned ${sessionResponse?.status}`
         );
