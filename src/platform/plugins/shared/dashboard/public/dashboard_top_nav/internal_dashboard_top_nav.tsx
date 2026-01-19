@@ -58,6 +58,8 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { DashboardLayout } from '../dashboard_api/layout_manager';
+import { ControlsLayout } from '@kbn/controls-renderer/src/types';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -97,7 +99,7 @@ export function InternalDashboardTopNav({
     query,
     title,
     viewMode,
-    { pinnedPanels },
+    // { pinnedPanels },
     publishedChildFilters,
     unpublishedChildFilters,
     publishedTimeslice,
@@ -112,7 +114,7 @@ export function InternalDashboardTopNav({
     dashboardApi.query$,
     dashboardApi.title$,
     dashboardApi.viewMode$,
-    dashboardApi.layout$,
+    // dashboardApi.layout$,
     dashboardApi.publishedChildFilters$,
     dashboardApi.unpublishedChildFilters$,
     dashboardApi.publishedTimeslice$,
@@ -368,7 +370,29 @@ export function InternalDashboardTopNav({
     },
     []
   );
-  console.log({ pinnedPanels });
+
+  const onControlsLayoutChanged = useCallback(
+    ({ controls }: ControlsLayout) => {
+      dashboardApi.layout$.next({
+        ...dashboardApi.layout$.getValue(),
+        pinnedPanels: controls,
+      });
+    },
+    [dashboardApi.layout$]
+  );
+
+  const [controls, setControls] = useState<{ controls: DashboardLayout['pinnedPanels'] }>({
+    controls: dashboardApi.layout$.getValue().pinnedPanels,
+  });
+  useEffect(() => {
+    const controlLayoutChangedSubscription = dashboardApi.layout$.subscribe(({ pinnedPanels }) => {
+      setControls({ controls: pinnedPanels });
+    });
+    return () => {
+      controlLayoutChangedSubscription.unsubscribe();
+    };
+  }, [dashboardApi.layout$]);
+
   return (
     <div css={styles.container}>
       <EuiScreenReaderOnly>
@@ -422,8 +446,8 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' ? (
         <ControlsRenderer
           parentApi={dashboardApi}
-          controls={{ controls: pinnedPanels }} // only controls can currently be pinned
-          onControlsChanged={() => {}}
+          controls={controls} // only controls can currently be pinned
+          onControlsChanged={onControlsLayoutChanged}
         />
       ) : null}
 
