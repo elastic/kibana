@@ -68,8 +68,16 @@ export function TraceExplorerWaterfall() {
     ? waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name
     : unifiedWaterfallFetchResult.entryTransaction?.service.name;
 
+  const activeStatus = waterfallFetchResult.useLegacy
+    ? waterfallFetchResult.status
+    : unifiedWaterfallFetchResult.status;
+
+  const traceDocsTotal = waterfallFetchResult.useLegacy
+    ? waterfallFetchResult.waterfall.traceDocsTotal
+    : unifiedWaterfallFetchResult.traceItems.length;
+
   useEffect(() => {
-    if (waterfallFetchResult.status === FETCH_STATUS.SUCCESS) {
+    if (activeStatus === FETCH_STATUS.SUCCESS) {
       onPageReady({
         meta: {
           rangeFrom,
@@ -77,11 +85,11 @@ export function TraceExplorerWaterfall() {
         },
         customMetrics: {
           key1: 'traceDocsTotal',
-          value1: waterfallFetchResult.waterfall.traceDocsTotal,
+          value1: traceDocsTotal,
         },
       });
     }
-  }, [waterfallFetchResult, onPageReady, rangeFrom, rangeTo]);
+  }, [activeStatus, traceDocsTotal, onPageReady, rangeFrom, rangeTo]);
 
   const onSampleClick = useCallback(
     (sample: any) => {
@@ -118,9 +126,11 @@ export function TraceExplorerWaterfall() {
     [history]
   );
 
-  const isWaterfallLoading =
-    waterfallFetchResult.status === FETCH_STATUS.LOADING &&
-    !waterfallFetchResult.waterfall.entryWaterfallTransaction;
+  const isWaterfallLoading = waterfallFetchResult.useLegacy
+    ? waterfallFetchResult.status === FETCH_STATUS.LOADING &&
+      !waterfallFetchResult.waterfall.entryWaterfallTransaction
+    : unifiedWaterfallFetchResult.status === FETCH_STATUS.LOADING &&
+      !unifiedWaterfallFetchResult.entryTransaction;
 
   return (
     <ResettingHeightRetainer reset={!isWaterfallLoading}>

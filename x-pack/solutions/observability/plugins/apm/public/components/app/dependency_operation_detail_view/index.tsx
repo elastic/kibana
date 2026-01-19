@@ -133,8 +133,11 @@ export function DependencyOperationDetailView() {
   const isWaterfallLoading =
     spanFetch.status === FETCH_STATUS.NOT_INITIATED ||
     (spanFetch.status === FETCH_STATUS.LOADING && samples.length === 0) ||
-    (waterfallFetch.status === FETCH_STATUS.LOADING &&
-      !waterfallFetch.waterfall.entryWaterfallTransaction);
+    (waterfallFetch.useLegacy
+      ? waterfallFetch.status === FETCH_STATUS.LOADING &&
+        !waterfallFetch.waterfall.entryWaterfallTransaction
+      : unifiedWaterfallFetchResult.status === FETCH_STATUS.LOADING &&
+        !unifiedWaterfallFetchResult.entryTransaction);
 
   const onSampleClick = useCallback(
     (sample: any) => {

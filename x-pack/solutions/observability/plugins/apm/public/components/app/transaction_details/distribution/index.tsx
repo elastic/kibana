@@ -73,8 +73,9 @@ export function TransactionDistribution({
     entryTransactionId: transactionId,
   });
 
-  const markerCurrentEvent =
-    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+  const markerCurrentEvent = waterfallFetchResult.useLegacy
+    ? waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us
+    : unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us;
 
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDistributionChartData();
