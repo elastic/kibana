@@ -106,13 +106,7 @@ Supports filtering by status (active/recovered) and KQL queries.`,
       },
     },
     handler: async (toolParams, { request }) => {
-      const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        kqlFilter,
-        includeRecovered,
-        fields,
-      } = toolParams;
+      const { start, end, kqlFilter, includeRecovered, fields } = toolParams;
 
       try {
         const { alerts, total } = await getToolHandler({
