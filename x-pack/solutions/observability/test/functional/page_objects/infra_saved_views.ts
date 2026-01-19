@@ -17,7 +17,7 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
 
   return {
     async clickSavedViewsButton() {
-      const button = await testSubjects.find('savedViews-openPopover');
+      const button = await testSubjects.find('savedViews-openPopover-loaded');
 
       await retry.waitFor('Wait for button to be enabled', async () => {
         const isDisabled = Boolean(await button.getAttribute('disabled'));
