@@ -4470,6 +4470,26 @@
       "enabled": true
     },
     {
+      "groupName": "Nested drag and drop",
+      "matchDepNames": [
+        "@atlaskit/pragmatic-drag-and-drop",
+        "@atlaskit/pragmatic-drag-and-drop-hitbox"
+      ],
+      "reviewers": [
+        "team:obs-onboarding-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:obs-onboarding",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "OpenTelemetry modules",
       "matchDepNames": [
         "@grpc/grpc-js",
