@@ -1,5 +1,5 @@
 {
-  "project_routing.get": {
+  "project.create_many_routing": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -7,12 +7,12 @@
       "pretty": "__flag__"
     },
     "methods": [
-      "GET"
+      "PUT"
     ],
     "patterns": [
-      "_project_routing/{name}"
+      "_project_routing"
     ],
-    "documentation": "",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
     "availability": {
       "stack": false,
       "serverless": true
