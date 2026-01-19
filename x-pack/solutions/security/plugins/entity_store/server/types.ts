@@ -16,8 +16,8 @@ import type {
 import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { AssetManager } from './domain/asst_manager';
 import type { FeatureFlags } from './infra/feature_flags';
+import type { AssetManager } from './domain/asset_manager';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
