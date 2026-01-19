@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { z } from 'zod/v4';
-
 export * from 'zod/v4';
 
 // Export fromJSONSchema polyfill separately
