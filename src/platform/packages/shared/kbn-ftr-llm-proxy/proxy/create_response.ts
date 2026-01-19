@@ -1,16 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 } from 'uuid';
 import type OpenAI from 'openai';
-import type { ToolMessage, LLMMessage } from './create_llm_proxy';
+import type { LLMMessage, ToolMessage } from './types';
 
 export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatCompletionChunk {
-  msg = typeof msg === 'string' ? { content: msg } : msg;
+  let delta: OpenAI.ChatCompletionChunk.Choice.Delta;
+  if (typeof msg === 'string') {
+    delta = { role: 'user', content: msg };
+  } else {
+    delta = {
+      role: msg.role,
+      content: msg.content,
+      tool_calls: msg.tool_calls?.map((tc) => ({ ...tc, index: 0 })),
+    };
+  }
 
   return {
     id: v4(),
@@ -19,7 +30,7 @@ export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatComplet
     model: 'gpt-4',
     choices: [
       {
-        delta: msg,
+        delta,
         index: 0,
         finish_reason: null,
       },
@@ -36,15 +47,7 @@ export function createOpenAIResponse(msg: LLMMessage): OpenAI.ChatCompletion {
   } else if (Array.isArray(msg)) {
     content = msg.join('');
   } else if (msg && typeof msg === 'object') {
-    toolCalls =
-      msg.tool_calls?.map((toolCall) => ({
-        id: toolCall.toolCallId ?? v4(),
-        function: {
-          name: toolCall.function.name,
-          arguments: toolCall.function.arguments,
-        },
-        type: 'function',
-      })) ?? [];
+    toolCalls = msg.tool_calls;
   }
 
   return {
