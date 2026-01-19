@@ -1,0 +1,14 @@
+{
+  "0.0.0": [
+    {
+      "aTextAttribute": "Hello world!",
+      "aBooleanAttribute": "false"
+    }
+  ],
+  "10.1.0": [
+    {
+      "aTextAttribute": "Hello world!",
+      "aBooleanAttribute": "false"
+    }
+  ]
+}

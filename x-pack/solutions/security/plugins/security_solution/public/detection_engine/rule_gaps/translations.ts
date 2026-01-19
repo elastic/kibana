@@ -239,7 +239,7 @@ export const BACKFILLS_TABLE_COLUMN_ACTION = i18n.translate(
 export const RULE_SETTINGS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleSettings.title',
   {
-    defaultMessage: 'Rule settings',
+    defaultMessage: 'Rule setting',
   }
 );
 
@@ -253,14 +253,15 @@ export const GAP_AUTO_FILL_HEADER = i18n.translate(
 export const GAP_AUTO_FILL_TOGGLE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillToggle',
   {
-    defaultMessage: 'Enable auto gap fill',
+    defaultMessage: 'Turn on auto gap fills',
   }
 );
 
 export const GAP_AUTO_FILL_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillDescription',
   {
-    defaultMessage: 'Detected run gaps will be automatically filled.',
+    defaultMessage:
+      'If this setting is turned on, all gaps in rule execution will be automatically filled. ',
   }
 );
 
