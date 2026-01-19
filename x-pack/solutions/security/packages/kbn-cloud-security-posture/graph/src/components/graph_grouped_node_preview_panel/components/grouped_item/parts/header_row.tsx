@@ -27,10 +27,11 @@ import {
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
-import type { EntityOrEventItem } from '../types';
+import type { EntityOrEventItem, EntityItem, EventItem, AlertItem } from '../types';
 import { emitGroupedItemClick } from '../../../events';
 import { displayEntityName, displayEventName } from '../utils';
-import { ActionsButton } from './actions_button';
+import { EntityActionsButton } from './entity_actions_button';
+import { EventActionsButton } from './event_actions_button';
 
 const entityUnavailableTooltip = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.entityUnavailable.tooltip',
@@ -126,7 +127,17 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ActionsButton item={item} />
+        {item.itemType === DOCUMENT_TYPE_ENTITY ? (
+          <EntityActionsButton
+            item={item as EntityItem}
+            onShowEntityDetails={(entityItem) => emitGroupedItemClick(entityItem)}
+          />
+        ) : (
+          <EventActionsButton
+            item={item as EventItem | AlertItem}
+            onShowEventDetails={(eventItem) => emitGroupedItemClick(eventItem)}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

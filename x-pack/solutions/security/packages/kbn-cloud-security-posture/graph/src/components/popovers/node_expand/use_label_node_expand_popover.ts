@@ -11,20 +11,48 @@ import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps } from '../../types';
-import {
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
-  GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
-} from '../../test_ids';
+import { GRAPH_LABEL_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
 import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
-import { EVENT_ACTION } from '../../../common/constants';
 import { addFilter, containsFilter, removeFilter } from '../../graph_investigation/search_filters';
-import { getNodeDocumentMode } from '../../utils';
+import {
+  getLabelExpandItems,
+  createLabelExpandInput,
+  type LabelExpandItemDescriptor,
+} from './get_label_expand_items';
 
-type NodeToggleAction = 'show' | 'hide';
+/**
+ * Resolves labels for label expand item descriptors.
+ * Handles i18n translation based on item type and current action.
+ */
+const resolveLabelItemLabel = (descriptor: LabelExpandItemDescriptor): string => {
+  switch (descriptor.type) {
+    case 'show-events-with-action':
+      return descriptor.currentAction === 'show'
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showRelatedEvents',
+            { defaultMessage: 'Show related events' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideRelatedEvents',
+            { defaultMessage: 'Hide related events' }
+          );
+    case 'show-event-details':
+      return descriptor.docMode === 'single-alert'
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
+            { defaultMessage: 'Show alert details' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
+            { defaultMessage: 'Show event details' }
+          );
+    default:
+      return '';
+  }
+};
 
 /**
  * Hook to handle the label node expand popover.
@@ -42,91 +70,69 @@ export const useLabelNodeExpandPopover = (
   searchFilters: Filter[],
   onShowEventDetailsClick?: (node: NodeProps) => void
 ) => {
-  const onShowEventsWithThisActionClick = useCallback(
-    (node: NodeProps, action: NodeToggleAction) => {
-      if (action === 'show') {
-        setSearchFilters((prev) =>
-          addFilter(dataViewId, prev, EVENT_ACTION, node.data.label ?? '')
-        );
-      } else if (action === 'hide') {
-        setSearchFilters((prev) => removeFilter(prev, EVENT_ACTION, node.data.label ?? ''));
-      }
-    },
-    [dataViewId, setSearchFilters]
-  );
-
   const itemsFn = useCallback(
     (
       node: NodeProps
     ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
-      const eventsWithThisActionToggleAction = containsFilter(
-        searchFilters,
-        EVENT_ACTION,
-        node.data.label ?? ''
-      )
-        ? 'hide'
-        : 'show';
+      // Create input for item generation
+      const input = createLabelExpandInput(node.data);
 
-      const shouldShowEventDetailsListItem =
-        onShowEventDetailsClick &&
-        ['single-alert', 'single-event', 'grouped-events'].includes(getNodeDocumentMode(node.data));
+      // Generate item descriptors using pure function
+      const descriptors = getLabelExpandItems(
+        input,
+        (field, value) => containsFilter(searchFilters, field, value),
+        Boolean(onShowEventDetailsClick)
+      );
 
-      return [
-        {
+      if (descriptors.length === 0) {
+        return [];
+      }
+
+      // Convert descriptors to popover items with labels and click handlers
+      const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
+
+      descriptors.forEach((descriptor, index) => {
+        // Add separator before event details item
+        if (descriptor.type === 'show-event-details' && index > 0) {
+          items.push({ type: 'separator' });
+        }
+
+        const item: ItemExpandPopoverListItemProps = {
           type: 'item',
-          iconType: 'analyzeEvent',
-          testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
-          label:
-            eventsWithThisActionToggleAction === 'show'
-              ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showRelatedEvents',
-                  { defaultMessage: 'Show related events' }
-                )
-              : i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideRelatedEvents',
-                  { defaultMessage: 'Hide related events' }
-                ),
+          iconType: descriptor.iconType,
+          testSubject: descriptor.testSubject,
+          label: resolveLabelItemLabel(descriptor),
           onClick: () => {
-            onShowEventsWithThisActionClick(node, eventsWithThisActionToggleAction);
+            if (descriptor.type === 'show-event-details') {
+              onShowEventDetailsClick?.(node);
+            } else if (descriptor.field && descriptor.value && descriptor.currentAction) {
+              // Handle filter toggle actions
+              const action = descriptor.currentAction;
+              const field = descriptor.field;
+              const value = descriptor.value;
+
+              if (action === 'show') {
+                setSearchFilters((prev) => addFilter(dataViewId, prev, field, value));
+              } else {
+                setSearchFilters((prev) => removeFilter(prev, field, value));
+              }
+            }
           },
-        },
-        ...(shouldShowEventDetailsListItem
-          ? ([
-              {
-                type: 'separator',
-              },
-              {
-                type: 'item',
-                iconType: 'expand',
-                testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
-                label:
-                  getNodeDocumentMode(node.data) === 'single-alert'
-                    ? i18n.translate(
-                        'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
-                        {
-                          defaultMessage: 'Show alert details',
-                        }
-                      )
-                    : i18n.translate(
-                        'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
-                        {
-                          defaultMessage: 'Show event details',
-                        }
-                      ),
-                onClick: () => {
-                  onShowEventDetailsClick(node);
-                },
-              },
-            ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>)
-          : []),
-      ];
+        };
+
+        items.push(item);
+      });
+
+      return items;
     },
-    [onShowEventDetailsClick, onShowEventsWithThisActionClick, searchFilters]
+    [onShowEventDetailsClick, searchFilters, dataViewId, setSearchFilters]
   );
+
   const labelNodeExpandPopover = useNodeExpandPopover({
     id: 'label-node-expand-popover',
     testSubject: GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
     itemsFn,
   });
+
   return labelNodeExpandPopover;
 };

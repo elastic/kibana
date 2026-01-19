@@ -30,12 +30,18 @@ import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
+import {
+  CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
+  addFilter,
+  removeFilter,
+} from './search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
 import { isLabelNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
+import { pushFilterState, pushDataViewId } from './filter_state';
+import { filterAction$ } from './filter_actions';
 
 const useGraphPopovers = ({
   dataViewId,
@@ -307,6 +313,30 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         showErrorToast(toasts, error);
       }
     }, [error, isError, notifications]);
+
+    // Push filter state to pub-sub for flyout components to read
+    useEffect(() => {
+      pushFilterState(searchFilters);
+    }, [searchFilters]);
+
+    // Push dataViewId to pub-sub for flyout components to use when constructing filters
+    useEffect(() => {
+      pushDataViewId(dataView?.id ?? '');
+    }, [dataView?.id]);
+
+    // Subscribe to filter actions from flyout components
+    useEffect(() => {
+      const subscription = filterAction$.subscribe((payload) => {
+        const { field, value, action } = payload;
+        if (action === 'show') {
+          setSearchFilters((prev) => addFilter(dataView?.id ?? '', prev, field, value));
+        } else {
+          setSearchFilters((prev) => removeFilter(prev, field, value));
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }, [dataView?.id]);
 
     const nodeDetailsClickHandler = useCallback(
       (node: NodeProps) => {
