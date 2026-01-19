@@ -35,11 +35,26 @@ export const useConversation = () => {
     // Disable query if we are on a new conversation or if there is a message currently being sent
     // Otherwise a refetch will overwrite our optimistic updates
     enabled: Boolean(conversationId) && !isSendingMessage,
-    queryFn: () => {
+    queryFn: async () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
       }
-      return conversationsService.get({ conversationId });
+      try {
+        return await conversationsService.get({ conversationId });
+      } catch (error) {
+        // Handle conversation not found errors (404)
+        if (error?.response?.status === 404) {
+          throw new Error('Conversation not found');
+        }
+        throw error;
+      }
+    },
+    retry: (failureCount, error: Error) => {
+      // Never retry if conversation doesn't exist
+      if (error?.message === 'Conversation not found') {
+        return false;
+      }
+      return failureCount < 3;
     },
   });
 
