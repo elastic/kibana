@@ -22,7 +22,6 @@ import {
   transformFindRuleTemplatesQueryV1,
   transformFindRuleTemplatesResponseV1,
 } from './transforms';
-import { ruleTemplateResponseSchemaV1 } from '../../../../../common/routes/rule_template/response';
 
 export const findInternalRuleTemplatesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
