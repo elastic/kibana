@@ -89,20 +89,11 @@ const DraggableConcatTextInput = ({ index }: DraggableConcatInputProps) => {
     <Controller
       control={control}
       name={`from.${index}.value`}
-      rules={{
-        required: {
-          value: true,
-          message: i18n.translate('xpack.streams.draggableConcatTextInput.textRequiredError', {
-            defaultMessage: 'Text is required.',
-          }),
-        },
-      }}
-      render={({ field, fieldState }) => (
-        <EuiFormRow isInvalid={fieldState.invalid} error={fieldState.error?.message}>
+      render={({ field }) => (
+        <EuiFormRow>
           <EuiFieldText
             value={field.value}
             onChange={field.onChange}
-            isInvalid={fieldState.invalid}
             prepend={i18n.translate('xpack.streams.draggableConcatTextInput.textLabel', {
               defaultMessage: 'Text',
             })}

@@ -488,7 +488,7 @@ interface ConcatFromLiteral {
 
 const concatFromLiteralSchema = z.object({
   type: z.literal('literal'),
-  value: StreamlangSeparator,
+  value: z.string(),
 }) satisfies z.Schema<ConcatFromLiteral>;
 
 type ConcatFrom = ConcatFromField | ConcatFromLiteral;
