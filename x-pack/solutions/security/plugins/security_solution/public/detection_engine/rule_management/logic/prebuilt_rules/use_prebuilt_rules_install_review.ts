@@ -17,7 +17,7 @@ import type { PrebuiltRuleAssetsFilter } from '../../../../../common/api/detecti
 interface UsePrebuiltRulesInstallReviewParams {
   page: number;
   perPage: number;
-  filterOptions: AddPrebuiltRulesTableFilterOptions;
+  filterOptions?: AddPrebuiltRulesTableFilterOptions;
   sortingOptions?: PrebuiltRuleAssetsSortItem;
 }
 
@@ -51,8 +51,12 @@ export const usePrebuiltRulesInstallReview = (
  * Converts filter options from a simplified UI format to a format expected by the API.
  */
 function prepareFilters(
-  filterOptions: AddPrebuiltRulesTableFilterOptions
+  filterOptions: AddPrebuiltRulesTableFilterOptions | undefined
 ): PrebuiltRuleAssetsFilter | undefined {
+  if (!filterOptions) {
+    return undefined;
+  }
+
   const filter: PrebuiltRuleAssetsFilter = {
     fields: {},
   };
