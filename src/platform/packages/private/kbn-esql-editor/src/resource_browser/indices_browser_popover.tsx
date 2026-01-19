@@ -84,6 +84,7 @@ export const IndicesBrowserPopover: React.FC<IndicesBrowserPopoverProps> = ({
         data: {
           type: source.type,
           typeKey: getSourceTypeKey(source.type),
+          integrationName: source.integrationName,
         },
       }));
     },
