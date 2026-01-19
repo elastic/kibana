@@ -656,7 +656,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: NodeDataModel) => {
-          if (node.shape !== 'group') {
+          if (node.shape !== 'group' && node.shape !== 'relationship') {
             expect(node).to.have.property('color');
             expect(node.color).equal(
               'primary',
