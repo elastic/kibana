@@ -194,6 +194,7 @@ describe('getFlattenedTraceWaterfall', () => {
         errors: [],
         serviceName: 'svcA',
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
       {
         id: 'd8',
@@ -206,6 +207,7 @@ describe('getFlattenedTraceWaterfall', () => {
         serviceName: 'svcb',
         parentId: 'b5',
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '9d',
@@ -219,6 +221,7 @@ describe('getFlattenedTraceWaterfall', () => {
         serviceName: 'svcb',
         type: 'browser-timing',
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: 'b5',
@@ -232,6 +235,7 @@ describe('getFlattenedTraceWaterfall', () => {
         serviceName: 'svcb',
         type: 'browser-timing',
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ];
 
@@ -266,6 +270,7 @@ describe('getLegends', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
       {
         id: '2',
@@ -276,6 +281,7 @@ describe('getLegends', () => {
         serviceName: 'svcB',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '3',
@@ -286,6 +292,7 @@ describe('getLegends', () => {
         serviceName: 'svcC',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '4',
@@ -297,6 +304,7 @@ describe('getLegends', () => {
         type: 'db',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '5',
@@ -308,6 +316,7 @@ describe('getLegends', () => {
         type: 'http',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '6',
@@ -319,6 +328,7 @@ describe('getLegends', () => {
         type: 'cache',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ];
 
@@ -345,6 +355,7 @@ describe('getLegends', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
       {
         id: '2',
@@ -355,6 +366,7 @@ describe('getLegends', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '3',
@@ -365,6 +377,7 @@ describe('getLegends', () => {
         serviceName: 'svcB',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '5',
@@ -376,6 +389,7 @@ describe('getLegends', () => {
         type: 'http',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '6',
@@ -387,6 +401,7 @@ describe('getLegends', () => {
         type: 'http',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ];
 
@@ -415,7 +430,8 @@ describe('getLegends', () => {
       serviceName: `svc${i}`,
       errors: [],
       spanLinksCount: { incoming: 0, outgoing: 0 },
-    }));
+      docType: i === 0 ? 'transaction' : 'span',
+    })) as TraceItem[];
 
     const result = getLegends(traceItems);
 
@@ -438,6 +454,7 @@ describe('getColorByType', () => {
       serviceName: 'svcA',
       errors: [],
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'transaction',
     },
     {
       id: '2',
@@ -448,6 +465,7 @@ describe('getColorByType', () => {
       serviceName: 'svcB',
       errors: [],
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
     },
     {
       id: '3',
@@ -458,6 +476,7 @@ describe('getColorByType', () => {
       serviceName: 'svcC',
       errors: [],
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
     },
     {
       id: '4',
@@ -469,6 +488,7 @@ describe('getColorByType', () => {
       type: 'db',
       errors: [],
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
     },
     {
       id: '5',
@@ -480,6 +500,7 @@ describe('getColorByType', () => {
       type: 'http',
       errors: [],
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
     },
     {
       id: '6',
@@ -491,6 +512,7 @@ describe('getColorByType', () => {
       type: 'cache',
       errors: [],
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
     },
   ];
 
@@ -548,6 +570,7 @@ describe('getTraceParentChildrenMap', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
       {
         id: '2',
@@ -559,6 +582,7 @@ describe('getTraceParentChildrenMap', () => {
         parentId: '1',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '3',
@@ -570,6 +594,7 @@ describe('getTraceParentChildrenMap', () => {
         parentId: '1',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '4',
@@ -581,6 +606,7 @@ describe('getTraceParentChildrenMap', () => {
         parentId: '2',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ];
 
@@ -605,6 +631,7 @@ describe('getTraceParentChildrenMap', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
     ];
 
@@ -625,6 +652,7 @@ describe('getTraceParentChildrenMap', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
       {
         id: '2',
@@ -635,6 +663,7 @@ describe('getTraceParentChildrenMap', () => {
         serviceName: 'svcB',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
     ];
 
@@ -655,6 +684,7 @@ describe('getTraceParentChildrenMap', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '2',
@@ -666,6 +696,7 @@ describe('getTraceParentChildrenMap', () => {
         serviceName: 'svcB',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ];
 
@@ -752,6 +783,7 @@ describe('getTraceWaterfallDuration', () => {
         errors: [],
         isOrphan: false,
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
       {
         id: '2',
@@ -767,6 +799,7 @@ describe('getTraceWaterfallDuration', () => {
         errors: [],
         isOrphan: false,
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '3',
@@ -782,6 +815,7 @@ describe('getTraceWaterfallDuration', () => {
         errors: [],
         isOrphan: false,
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ];
     expect(getTraceWaterfallDuration(items)).toBe(155);
