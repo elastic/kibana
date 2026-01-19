@@ -17,6 +17,10 @@ import {
   parseJsPropertyAccess,
 } from '@kbn/workflows/common/utils';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  applyInputDefaults,
+  normalizeInputsToJsonSchema,
+} from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
 
 export interface ContextOverrideData {
@@ -70,6 +74,7 @@ function readPropertyRecursive(
  * Build inputs object from workflow input definitions with their default values.
  * This allows the test step modal to pre-populate input fields with defined defaults.
  * Supports both legacy array format and new JSON Schema format.
+ * Uses the same logic as the exec modal to ensure consistency.
  */
 function buildInputsFromDefinition(
   inputsDefinition: LegacyWorkflowInput[] | JsonModelSchemaType | undefined
@@ -78,29 +83,18 @@ function buildInputsFromDefinition(
     return undefined;
   }
 
-  const inputs: Record<string, unknown> = {};
+  // Normalize inputs to JSON Schema format (handles both legacy array and JSON Schema formats)
+  const normalizedInputs = normalizeInputsToJsonSchema(inputsDefinition);
 
-  // Handle legacy array format
-  if (Array.isArray(inputsDefinition)) {
-    if (inputsDefinition.length === 0) {
-      return undefined;
-    }
-    for (const input of inputsDefinition) {
-      if (input.default !== undefined) {
-        inputs[input.name] = input.default;
-      }
-    }
-  }
-  // Handle JSON Schema format
-  else if (typeof inputsDefinition === 'object' && inputsDefinition.properties) {
-    for (const [propertyName, propertySchema] of Object.entries(inputsDefinition.properties)) {
-      if (propertySchema.default !== undefined) {
-        inputs[propertyName] = propertySchema.default;
-      }
-    }
+  if (!normalizedInputs) {
+    return undefined;
   }
 
-  return Object.keys(inputs).length > 0 ? inputs : undefined;
+  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
+  // This ensures the same behavior as the exec modal and handles all JSON Schema features
+  const defaults = applyInputDefaults(undefined, normalizedInputs);
+
+  return defaults;
 }
 
 export function buildContextOverride(

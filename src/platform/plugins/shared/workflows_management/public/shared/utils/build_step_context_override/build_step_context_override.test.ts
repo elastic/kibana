@@ -650,13 +650,12 @@ describe('buildContextOverride', () => {
       };
       const result = buildContextOverride(workflowGraph, staticDataWithInputs);
 
-      // Note: Nested object defaults are not currently extracted by buildInputsFromDefinition
-      // This test verifies the current behavior - nested paths still get placeholder
+      // Nested object defaults are now extracted using applyInputDefaults (same as exec modal)
       expect(result.stepContext).toEqual({
         inputs: {
           user: {
-            name: 'replace with your data',
-            email: 'replace with your data',
+            name: 'John Doe',
+            email: 'john@example.com',
           },
         },
       });
