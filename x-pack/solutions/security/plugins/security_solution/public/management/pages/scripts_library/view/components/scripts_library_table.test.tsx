@@ -54,6 +54,7 @@ const defaultProps: ScriptsLibraryTableProps = {
   },
   totalItemCount: 1,
   isLoading: false,
+  searchParams: '',
   sort: {
     field: 'name',
     direction: 'asc',

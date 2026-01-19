@@ -286,8 +286,9 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
           getTestId,
           getAppUrl,
           queryParams,
+          searchParams,
         }),
-      [formatBytes, getTestId, getAppUrl, queryParams]
+      [formatBytes, getTestId, getAppUrl, queryParams, searchParams]
     );
 
     const setTableRowProps = useCallback((scriptData: ScriptItems[number]) => {
