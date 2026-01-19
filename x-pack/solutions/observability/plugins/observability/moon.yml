@@ -152,6 +152,7 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/kql'
+  - '@kbn/lens-common'
 tags:
   - plugin
   - prod
