@@ -56,6 +56,7 @@ interface YamlValidationResultBase {
   endColumn: number;
   hoverMessage: string | null;
   afterMessage?: string | null;
+  beforeMessage?: string | null;
   source?: string; // the source of the marker, details e.g. yaml schema uri
 }
 
