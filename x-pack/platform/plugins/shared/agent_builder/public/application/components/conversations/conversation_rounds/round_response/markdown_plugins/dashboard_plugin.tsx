@@ -131,7 +131,7 @@ export function createDashboardRenderer({
 
     return (
       <>
-        <DashboardCard title={title || 'Dashboard'} url={url} />
+        <DashboardCard title={title} url={url} />
         <EuiSpacer size="m" />
       </>
     );
