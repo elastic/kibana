@@ -3433,7 +3433,6 @@ export function _compilePackagePolicyInputs(
         `_compilePackagePolicyInputs ${pkgInfo.name}-${pkgInfo.version} ${agentVersion}`,
         'full-agent-policy'
       );
-      // span?.addLabels({ pkg: `${pkgInfo.name}-${pkgInfo.version}`, agentVersion, input_type: input.type, policy_template: input.policy_template });
       const compiledInput = _compilePackagePolicyInput(
         pkgInfo,
         vars,

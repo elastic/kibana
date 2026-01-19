@@ -1944,7 +1944,6 @@ class AgentPolicyService {
       `getFullAgentPolicy ${id} ${options?.agentVersion ?? ''}`,
       'full-agent-policy'
     );
-    // span?.addLabels({ agentPolicyId: id, agentVersion: options?.agentVersion ?? '' });
     const result = await getFullAgentPolicy(soClient, id, options);
     span?.end();
     return result;
