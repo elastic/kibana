@@ -228,14 +228,16 @@ const checkIfEntitiesIndexLookupMode = async (
 /**
  * Generates ESQL statements for building entity fields with enrichment data.
  * This is used when entity store enrichment is available (via LOOKUP JOIN or ENRICH).
+ * Uses REPLACE to fix "{," pattern that occurs when first property is null.
  */
 const buildEnrichedEntityFieldsEsql = (): string => {
   return `// Construct actor and target entities data
 // Build entity field conditionally - only include fields that have values
+// All properties use comma prefix, then REPLACE fixes "{," -> "{"
 | EVAL actorEntityField = CASE(
     actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":", "{",
-      ${formatJsonProperty('name', 'actorEntityName', false)},
+    REPLACE(CONCAT(",\\"entity\\":", "{",
+      ${formatJsonProperty('name', 'actorEntityName')},
       ${formatJsonProperty('type', 'actorEntityType')},
       ${formatJsonProperty('sub_type', 'actorEntitySubType')},
       CASE(
@@ -245,7 +247,7 @@ const buildEnrichedEntityFieldsEsql = (): string => {
       ),
       ",\\"availableInEntityStore\\":true",
       ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
-    "}"),
+    "}"), "\\\\{,", "{"),
     CONCAT(",\\"entity\\":", "{",
       "\\"availableInEntityStore\\":false",
       ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
@@ -253,8 +255,8 @@ const buildEnrichedEntityFieldsEsql = (): string => {
   )
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":", "{",
-      ${formatJsonProperty('name', 'targetEntityName', false)},
+    REPLACE(CONCAT(",\\"entity\\":", "{",
+      ${formatJsonProperty('name', 'targetEntityName')},
       ${formatJsonProperty('type', 'targetEntityType')},
       ${formatJsonProperty('sub_type', 'targetEntitySubType')},
       CASE(
@@ -264,7 +266,7 @@ const buildEnrichedEntityFieldsEsql = (): string => {
       ),
       ",\\"availableInEntityStore\\":true",
       ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
-    "}"),
+    "}"), "\\\\{,", "{"),
     CONCAT(",\\"entity\\":", "{",
       "\\"availableInEntityStore\\":false",
       ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",

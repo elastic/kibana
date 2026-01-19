@@ -52,31 +52,30 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
 };
 
 /**
- * Generates an ESQL CASE statement that formats a JSON property.
- * If the value is NOT NULL, it returns the value, otherwise returns "undefined".
- * This ensures the JSON structure remains valid even when values are missing.
+ * Generates an ESQL expression that formats a JSON property with comma prefix.
+ * If the value is NOT NULL, it returns the full property with quoted value.
+ * If the value is NULL, it returns an empty string (property is omitted entirely).
+ *
+ * Always includes comma prefix - use with REPLACE to fix leading comma after "{".
  *
  * @param propertyName - The JSON property name (e.g., "name", "type", "sub_type")
  * @param valueVar - The ESQL variable name containing the value
- * @param includeComma - Whether to include a comma prefix (default: true)
- * @returns ESQL CONCAT statement string that always outputs a valid JSON property
+ * @returns ESQL expression that outputs a JSON property or empty string
  *
  * @example
  * ```typescript
- * formatJsonProperty('name', 'actorEntityName', false)
- * // Returns: CONCAT("\"name\":\"", COALESCE(actorEntityName, "undefined"), "\"")
- *
  * formatJsonProperty('type', 'actorEntityType')
- * // Returns: CONCAT(",\"type\":\"", COALESCE(actorEntityType, "undefined"), "\"")
+ * // If actorEntityType = "user" → ,"type":"user"
+ * // If actorEntityType = null   → "" (empty, property omitted)
+ *
+ * // Usage with REPLACE to fix leading comma:
+ * REPLACE(CONCAT("{", formatJsonProperty('name', 'name'), ...}"), "\\{,", "{")
  * ```
  */
-export const formatJsonProperty = (
-  propertyName: string,
-  valueVar: string,
-  includeComma: boolean = true
-): string => {
-  const comma = includeComma ? ',' : '';
-  return `CONCAT("${comma}\\"${propertyName}\\":\\"", COALESCE(${valueVar}, "undefined"), "\\"")`;
+export const formatJsonProperty = (propertyName: string, valueVar: string): string => {
+  // CONCAT returns null if any argument is null, so if valueVar is null,
+  // the entire CONCAT returns null, and COALESCE returns empty string
+  return `COALESCE(CONCAT(",\\"${propertyName}\\":\\"", ${valueVar}, "\\""), "")`;
 };
 
 /**

@@ -85,44 +85,20 @@ describe('ESQL utils', () => {
   });
 
   describe('formatJsonProperty', () => {
-    it('should generate CONCAT statement with comma prefix by default', () => {
-      const result = formatJsonProperty('type', 'actorEntityType');
+    it('should generate ESQL that outputs JSON property with comma prefix, or empty string if null', () => {
+      const result = formatJsonProperty('name', 'entityName');
 
-      expect(result).toBe(
-        'CONCAT(",\\"type\\":\\"", COALESCE(actorEntityType, "undefined"), "\\"")'
-      );
+      // Verify structure: COALESCE(CONCAT(",\"prop\":\"", var, "\""), "")
+      // - CONCAT with comma prefix for property chaining
+      // - COALESCE returns "" when value is null (property omitted)
+      expect(result).toBe('COALESCE(CONCAT(",\\"name\\":\\"", entityName, "\\""), "")');
     });
 
-    it('should generate CONCAT statement without comma when includeComma is false', () => {
-      const result = formatJsonProperty('name', 'actorEntityName', false);
+    it('should include the property name and variable in the output', () => {
+      const result = formatJsonProperty('customProp', 'customVar');
 
-      expect(result).toBe(
-        'CONCAT("\\"name\\":\\"", COALESCE(actorEntityName, "undefined"), "\\"")'
-      );
-    });
-
-    it('should handle sub_type property', () => {
-      const result = formatJsonProperty('sub_type', 'actorEntitySubType');
-
-      expect(result).toBe(
-        'CONCAT(",\\"sub_type\\":\\"", COALESCE(actorEntitySubType, "undefined"), "\\"")'
-      );
-    });
-
-    it('should handle target entity properties', () => {
-      const result = formatJsonProperty('type', 'targetEntityType');
-
-      expect(result).toBe(
-        'CONCAT(",\\"type\\":\\"", COALESCE(targetEntityType, "undefined"), "\\"")'
-      );
-    });
-
-    it('should handle target name property without comma', () => {
-      const result = formatJsonProperty('name', 'targetEntityName', false);
-
-      expect(result).toBe(
-        'CONCAT("\\"name\\":\\"", COALESCE(targetEntityName, "undefined"), "\\"")'
-      );
+      expect(result).toContain('customProp');
+      expect(result).toContain('customVar');
     });
   });
 

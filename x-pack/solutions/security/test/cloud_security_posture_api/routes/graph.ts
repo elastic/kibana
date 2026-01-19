@@ -1095,7 +1095,7 @@ export default function (providerContext: FtrProviderContext) {
               })
             );
           });
-        }); // end of v2 without lookup mode tests
+        });
       });
 
       describe('Enrich graph with entity metadata', () => {
@@ -1536,6 +1536,87 @@ export default function (providerContext: FtrProviderContext) {
               });
             });
           });
+
+          it('should handle entities with partial data (name only or type/subtype only)', async () => {
+            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                    originEventIds: [{ id: 'partial-entity-event-id', isAlert: false }],
+                    start: '2024-09-12T09:00:00Z',
+                    end: '2024-09-12T11:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(3);
+              expect(response.body).to.have.property('edges').length(2);
+              expect(response.body).not.to.have.property('messages');
+
+              // Verify actor node - entity with only name (no type/sub_type)
+              const actorNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'partial-user@example.com'
+              ) as EntityNodeDataModel;
+              expect(actorNode).not.to.be(undefined);
+              // Label should be the entity name since it exists
+              expect(actorNode.label).to.equal('partial-user@example.com');
+              // Icon and shape should be defaults since type is missing
+              expect(actorNode.icon).to.equal('magnifyWithExclamation');
+              expect(actorNode.shape).to.equal('rectangle');
+              expect(actorNode.documentsData).to.have.length(1);
+              expectExpect(actorNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'partial-user@example.com',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'PartialUserNameOnly',
+                    ecsParentField: 'user',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+              // Verify type and sub_type are NOT present in the entity data
+              expectExpect(actorNode.documentsData![0].entity).not.toHaveProperty('type');
+              expectExpect(actorNode.documentsData![0].entity).not.toHaveProperty('sub_type');
+
+              // Verify target node - entity with only type/sub_type (no name)
+              const targetNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'partial-host-instance-1'
+              ) as EntityNodeDataModel;
+              expect(targetNode).not.to.be(undefined);
+              // Icon and shape should be based on type since it exists
+              expect(targetNode.icon).to.equal('container');
+              expect(targetNode.shape).to.equal('rectangle');
+              expect(targetNode.tag).to.equal('Container');
+              expect(targetNode.documentsData).to.have.length(1);
+              expectExpect(targetNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'partial-host-instance-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    type: 'Container',
+                    sub_type: 'GCP Compute Instance',
+                    ecsParentField: 'host',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+              // Verify name is NOT present in the entity data
+              expectExpect(targetNode.documentsData![0].entity).not.toHaveProperty('name');
+
+              // Verify label node
+              const labelNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.shape === 'label'
+              ) as LabelNodeDataModel;
+              expect(labelNode).not.to.be(undefined);
+              expect(labelNode.label).to.equal('google.compute.v1.Instances.start');
+              expect(labelNode.color).to.equal('primary');
+            });
+          });
         };
 
         before(async () => {
@@ -1603,7 +1684,7 @@ export default function (providerContext: FtrProviderContext) {
               logger,
               retry,
               entitiesIndex: `.entities.v1.latest.security_generic_${entitiesSpaceId}`,
-              expectedCount: 11,
+              expectedCount: 13,
             });
 
             // Wait for enrich policy to be created and execute it
@@ -1626,7 +1707,7 @@ export default function (providerContext: FtrProviderContext) {
               logger,
               retry,
               entitiesIndex: getEntitiesLatestIndexName(entitiesSpaceId),
-              expectedCount: 11,
+              expectedCount: 13,
             });
           });
 
