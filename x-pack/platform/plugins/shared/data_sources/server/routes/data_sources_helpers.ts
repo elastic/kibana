@@ -9,67 +9,22 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
-import type { DataSource } from '@kbn/data-catalog-plugin/common';
+import type { DataSource } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { connectorsSpecs } from '@kbn/connector-specs';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
+import { createStackConnector } from '../utils/create_stack_connector';
 import type {
   DataSourcesServerSetupDependencies,
   DataSourcesServerStartDependencies,
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
 
-/**
- * Builds the secrets object for a stack connector based on its spec
- * @param connectorType - The connector type ID (e.g., '.notion')
- * @param token - The authentication token
- * @returns The secrets object to pass to the actions client
- * @throws Error if the connector spec is not found
- */
-export function buildSecretsFromConnectorSpec(
-  connectorType: string,
-  token: string
-): Record<string, string> {
-  const connectorSpec = Object.values(connectorsSpecs).find(
-    (spec) => spec.metadata.id === connectorType
-  );
-  if (!connectorSpec) {
-    throw new Error(`Stack connector spec not found for type "${connectorType}"`);
-  }
-
-  const hasBearerAuth = connectorSpec.auth?.types.some((authType) => {
-    const typeId = typeof authType === 'string' ? authType : authType.type;
-    return typeId === 'bearer';
-  });
-
-  const secrets: Record<string, string> = {};
-  if (hasBearerAuth) {
-    secrets.authType = 'bearer';
-    secrets.token = token;
-  } else {
-    const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
-      const typeId = typeof authType === 'string' ? authType : authType.type;
-      return typeId === 'api_key_header';
-    });
-
-    const headerField =
-      typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
-        ? String(apiKeyHeaderAuth.defaults.headerField)
-        : 'ApiKey'; // default fallback
-
-    secrets.authType = 'api_key_header';
-    secrets.apiKey = token;
-    secrets.headerField = headerField;
-  }
-
-  return secrets;
-}
-
 interface CreateDataSourceAndResourcesParams {
   name: string;
   type: string;
-  token: string;
+  credentials: string;
   stackConnectorId?: string;
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
@@ -102,7 +57,7 @@ export async function createDataSourceAndRelatedResources(
   const {
     name,
     type,
-    token,
+    credentials,
     stackConnectorId,
     savedObjectsClient,
     request,
@@ -112,6 +67,10 @@ export async function createDataSourceAndRelatedResources(
     dataSource,
     agentBuilder,
   } = params;
+
+  const workflowIds: string[] = [];
+  const toolIds: string[] = [];
+
   let finalStackConnectorId: string;
 
   // Pattern 1: Reuse existing stack connector (from flyout)
@@ -121,19 +80,19 @@ export async function createDataSourceAndRelatedResources(
   }
   // Pattern 2: Create new stack connector (direct API call)
   else {
-    const connectorType = dataSource.stackConnector.type;
-    const secrets = buildSecretsFromConnectorSpec(connectorType, token);
+    const toolRegistry = await agentBuilder.tools.getRegistry({ request });
+    const stackConnectorConfig = dataSource.stackConnector;
+    const stackConnector: ActionResult = await createStackConnector(
+      toolRegistry,
+      actions,
+      request,
+      stackConnectorConfig,
+      name,
+      toolIds,
+      credentials,
+      logger
+    );
 
-    logger.info(`Creating Kibana stack connector for data connector '${name}'`);
-    const actionsClient = await actions.getActionsClientWithRequest(request);
-    const stackConnector = await actionsClient.create({
-      action: {
-        name: `${type} stack connector for data connector '${name}'`,
-        actionTypeId: connectorType,
-        config: {},
-        secrets,
-      },
-    });
     finalStackConnectorId = stackConnector.id;
   }
 
@@ -143,8 +102,6 @@ export async function createDataSourceAndRelatedResources(
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
-  const workflowIds: string[] = [];
-  const toolIds: string[] = [];
 
   for (const workflowInfo of workflowInfos) {
     // Extract original workflow name from YAML and prefix it with the data source name

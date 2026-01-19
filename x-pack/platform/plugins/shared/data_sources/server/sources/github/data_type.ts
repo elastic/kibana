@@ -6,12 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
 import {
   generateGithubSearchIssuesWorkflow,
-  generateGithubGetDocsWorkflow,
-  generateGithubListRepositoriesWorkflow,
+  generateGithubSearchCodeWorkflow,
+  generateGithubSearchPullRequestsWorkflow,
+  generateGithubSearchRepositoriesWorkflow,
+  generateGithubSearchUsersWorkflow,
 } from './workflows';
 
 export const githubDataSource: DataSource = {
@@ -29,16 +32,52 @@ export const githubDataSource: DataSource = {
   },
 
   stackConnector: {
-    type: '.github',
-    config: {},
+    type: '.mcp',
+    config: {
+      serverUrl: 'https://api.githubcopilot.com/mcp/',
+      hasAuth: true,
+      authType: MCPAuthType.Bearer,
+    },
+    importedTools: [
+      'get_commit',
+      'get_file_contents',
+      'get_label',
+      'get_latest_release',
+      'get_me',
+      'get_tag',
+      'get_team_members',
+      'get_teams',
+      'list_branches',
+      'list_commits',
+      'list_issue_types',
+      'list_issues',
+      'list_pull_requests',
+      'list_releases',
+      'list_tags',
+      'pull_request_read',
+    ],
   },
 
   generateWorkflows(stackConnectorId: string) {
     return [
-      { content: generateGithubSearchIssuesWorkflow(stackConnectorId), shouldGenerateABTool: true },
-      { content: generateGithubGetDocsWorkflow(stackConnectorId), shouldGenerateABTool: true },
       {
-        content: generateGithubListRepositoriesWorkflow(stackConnectorId),
+        content: generateGithubSearchIssuesWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubSearchCodeWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubSearchPullRequestsWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubSearchRepositoriesWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubSearchUsersWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
     ];

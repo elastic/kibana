@@ -147,7 +147,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       const coreContext = await context.core;
 
       try {
-        const { name, type, token, stack_connector_id } = request.body;
+        const { name, type, credentials, stack_connector_id } = request.body;
         const [, { actions, dataCatalog, agentBuilder }] = await getStartServices();
         const savedObjectsClient = coreContext.savedObjects.client;
 
@@ -164,7 +164,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
         }
 
         // Validate required fields based on pattern
-        if (!stack_connector_id && (!name || !token)) {
+        if (!stack_connector_id && (!name || !credentials)) {
           return response.badRequest({
             body: {
               message: 'name and token are required when stack_connector_id is not provided',
@@ -175,7 +175,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const dataSourceId = await createDataSourceAndRelatedResources({
           name: name || `Data source for ${type}`,
           type,
-          token: token || '',
+          credentials: credentials || '',
           stackConnectorId: stack_connector_id,
           savedObjectsClient,
           request,
