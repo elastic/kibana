@@ -24,7 +24,6 @@ const TEMPLATE_PLACEHOLDER = '"__TEMPLATE_PLACEHOLDER__"';
  * @returns The KQL string with template expressions replaced by placeholders
  */
 function replaceTemplateExpressions(kql: string): string {
-  //
   // First, match complete {{ ... }} patterns
   // Use [^{}]* instead of [^}]* to prevent ReDoS from catastrophic backtracking
   let result = kql.replace(/\{\{[^{}]*\}\}/g, TEMPLATE_PLACEHOLDER);
