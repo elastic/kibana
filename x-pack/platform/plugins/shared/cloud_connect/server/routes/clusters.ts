@@ -357,8 +357,6 @@ export const registerClustersRoute = ({
           }
         }
 
-
-
         return response.ok({ body: { success: true } });
       } catch (error) {
         logger.error('Failed to update cluster services', { error });
