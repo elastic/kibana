@@ -23,6 +23,7 @@ import type {
   BulkCreateAlertActionItemData,
   CreateAlertActionData,
 } from '../../routes/schemas/alert_action_schema';
+import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { QueryService } from '../services/query_service/query_service';
 import type { StorageService } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
@@ -146,7 +147,7 @@ export class AlertActionsClient {
       sort({ '@timestamp': SortOrder.Desc }),
       limit(1)
     );
-    const result = this.queryService.queryResponseToRecords<AlertEvent>(
+    const result = queryResponseToRecords<AlertEvent>(
       await this.queryService.executeQuery({ query: query.toString() })
     );
 
@@ -171,7 +172,7 @@ export class AlertActionsClient {
       sort({ '@timestamp': SortOrder.Desc }),
       limit(1)
     );
-    const result = this.queryService.queryResponseToRecords<AlertTransition>(
+    const result = queryResponseToRecords<AlertTransition>(
       await this.queryService.executeQuery({ query: query.toString() })
     );
 
