@@ -49,23 +49,23 @@ export function useOutputs(
   };
 }
 
-interface UseVarGroupSelectionsParams<T extends { var_group_selections?: VarGroupSelection }> {
+interface UseVarGroupSelectionsParams {
   varGroups: RegistryVarGroup[] | undefined;
   savedSelections: VarGroupSelection | undefined;
   isAgentlessEnabled: boolean;
-  onSelectionsChange: (update: Pick<T, 'var_group_selections'>) => void;
+  onSelectionsChange: (update: { var_group_selections: VarGroupSelection }) => void;
 }
 
 /**
  * Hook for managing var group selections state.
  * Handles deriving current selections, initializing defaults, and selection changes.
  */
-export function useVarGroupSelections<T extends { var_group_selections?: VarGroupSelection }>({
+export function useVarGroupSelections({
   varGroups,
   savedSelections,
   isAgentlessEnabled,
   onSelectionsChange,
-}: UseVarGroupSelectionsParams<T>) {
+}: UseVarGroupSelectionsParams) {
   // Derive current selections from saved or compute defaults
   const selections = useMemo((): VarGroupSelection => {
     if (savedSelections) return savedSelections;
@@ -77,7 +77,7 @@ export function useVarGroupSelections<T extends { var_group_selections?: VarGrou
     if (varGroups && varGroups.length > 0 && !savedSelections) {
       const defaults = computeDefaultVarGroupSelections(varGroups, isAgentlessEnabled);
       if (Object.keys(defaults).length > 0) {
-        onSelectionsChange({ var_group_selections: defaults } as Pick<T, 'var_group_selections'>);
+        onSelectionsChange({ var_group_selections: defaults });
       }
     }
   }, [varGroups, isAgentlessEnabled, savedSelections, onSelectionsChange]);
@@ -90,7 +90,7 @@ export function useVarGroupSelections<T extends { var_group_selections?: VarGrou
           ...savedSelections,
           [groupName]: optionName,
         },
-      } as Pick<T, 'var_group_selections'>);
+      });
     },
     [savedSelections, onSelectionsChange]
   );

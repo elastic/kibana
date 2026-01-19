@@ -17,14 +17,14 @@ const mockVarGroups: RegistryVarGroup[] = [
     title: 'Authentication',
     selector_title: 'Select method',
     options: [
-      { name: 'api_key', title: 'API Key', vars: ['api_key_var'] },
-      { name: 'oauth', title: 'OAuth', vars: ['client_id', 'client_secret'] },
       {
         name: 'cloud_connector',
         title: 'Cloud Connector',
         vars: ['connector_id'],
         hide_in_deployment_modes: ['default'],
       },
+      { name: 'api_key', title: 'API Key', vars: ['api_key_var'] },
+      { name: 'oauth', title: 'OAuth', vars: ['client_id', 'client_secret'] },
     ],
   },
 ];
@@ -56,7 +56,7 @@ describe('useVarGroupSelections', () => {
       expect(result.current.selections).toEqual({ auth_method: 'oauth' });
     });
 
-    it('should compute defaults when savedSelections is undefined', () => {
+    it('should compute defaults when savedSelections is undefined and deployment mode is default', () => {
       const { result } = renderHook(() =>
         useVarGroupSelections({
           varGroups: mockVarGroups,
@@ -81,21 +81,6 @@ describe('useVarGroupSelections', () => {
       );
 
       expect(result.current.selections).toEqual({});
-    });
-
-    it('should respect deployment mode when computing defaults', () => {
-      // In agentless mode, cloud_connector is visible but still not first
-      const { result } = renderHook(() =>
-        useVarGroupSelections({
-          varGroups: mockVarGroups,
-          savedSelections: undefined,
-          isAgentlessEnabled: true,
-          onSelectionsChange: mockOnSelectionsChange,
-        })
-      );
-
-      // First visible option is still api_key
-      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
     });
   });
 

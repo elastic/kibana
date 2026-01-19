@@ -282,10 +282,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               const { name: varName, type: varType } = varDef;
               if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
               const value = packagePolicy.vars[varName].value;
-              const requiredByVarGroup =
-                packageInfo.var_groups && packageInfo.var_groups.length > 0
-                  ? isVarRequiredByVarGroup(varName, packageInfo.var_groups, varGroupSelections)
-                  : false;
+              const requiredByVarGroup = isVarRequiredByVarGroup(
+                varName,
+                packageInfo.var_groups,
+                varGroupSelections
+              );
 
               return (
                 <EuiFlexItem key={varName}>
@@ -499,14 +500,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     const { name: varName, type: varType } = varDef;
                     if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
                     const value = packagePolicy.vars![varName].value;
-                    const requiredByVarGroup =
-                      packageInfo.var_groups && packageInfo.var_groups.length > 0
-                        ? isVarRequiredByVarGroup(
-                            varName,
-                            packageInfo.var_groups,
-                            varGroupSelections
-                          )
-                        : false;
+                    const requiredByVarGroup = isVarRequiredByVarGroup(
+                      varName,
+                      packageInfo.var_groups,
+                      varGroupSelections
+                    );
                     return (
                       <EuiFlexItem key={varName}>
                         <PackagePolicyInputVarField

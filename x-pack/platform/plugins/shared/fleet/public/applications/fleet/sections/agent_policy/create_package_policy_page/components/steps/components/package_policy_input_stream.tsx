@@ -320,14 +320,11 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                 const varConfigEntry = packagePolicyInputStream.vars?.[varName];
                 const value = varConfigEntry?.value;
                 const frozen = varConfigEntry?.frozen ?? false;
-                const requiredByVarGroup =
-                  effectiveVarGroups && effectiveVarGroups.length > 0
-                    ? isVarRequiredByVarGroup(
-                        varName,
-                        effectiveVarGroups,
-                        effectiveVarGroupSelections
-                      )
-                    : false;
+                const requiredByVarGroup = isVarRequiredByVarGroup(
+                  varName,
+                  effectiveVarGroups,
+                  effectiveVarGroupSelections
+                );
                 return (
                   <EuiFlexItem key={varName}>
                     <PackagePolicyInputVarField
@@ -466,14 +463,11 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         if (!packagePolicyInputStream.vars) return null;
                         const { name: varName, type: varType } = varDef;
                         const value = packagePolicyInputStream.vars?.[varName]?.value;
-                        const requiredByVarGroup =
-                          effectiveVarGroups && effectiveVarGroups.length > 0
-                            ? isVarRequiredByVarGroup(
-                                varName,
-                                effectiveVarGroups,
-                                effectiveVarGroupSelections
-                              )
-                            : false;
+                        const requiredByVarGroup = isVarRequiredByVarGroup(
+                          varName,
+                          effectiveVarGroups,
+                          effectiveVarGroupSelections
+                        );
 
                         return (
                           <EuiFlexItem key={varName}>
