@@ -73,6 +73,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
   DocViewerExtensionParams,
+  UpdateESQLQueryFn,
 } from '../../../../context_awareness';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
@@ -308,12 +309,19 @@ function DiscoverDocumentsComponent({
     timeRange: requestParams.timeRangeAbsolute,
   });
 
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
+    (queryOrUpdater) => {
+      dispatch(updateESQLQuery({ queryOrUpdater }));
+    },
+    [dispatch, updateESQLQuery]
+  );
   const docViewerExtensionActions = useMemo<DocViewerExtensionParams['actions']>(
     () => ({
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTabExtPointAction(params)),
-      updateESQLQuery: stateContainer.actions.updateESQLQuery,
+      updateESQLQuery: onUpdateESQLQuery,
     }),
-    [dispatch, stateContainer.actions.updateESQLQuery]
+    [dispatch, onUpdateESQLQuery]
   );
 
   const setInitialDocViewerTabIdAction = useCurrentTabAction(
@@ -528,7 +536,7 @@ function DiscoverDocumentsComponent({
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
-            onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
+            onUpdateESQLQuery={onUpdateESQLQuery}
             query={query}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
             cellActionsMetadata={cellActionsMetadata}

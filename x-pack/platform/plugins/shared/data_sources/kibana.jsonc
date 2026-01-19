@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-sources-plugin",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Manages connections to external data sources",
+  "plugin": {
+    "id": "dataSources",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "dataSources"],
+    "requiredPlugins": ["actions", "dataCatalog", "agentBuilder", "workflowsManagement", "triggersActionsUi"],
+    "optionalPlugins": [],
+    "requiredBundles": ["kibanaReact"],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}
