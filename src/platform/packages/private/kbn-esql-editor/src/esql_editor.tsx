@@ -34,6 +34,7 @@ import {
   getEditorExtensions,
   fixESQLQueryWithVariables,
   prettifyQuery,
+  hasOnlySourceCommand,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -52,6 +53,7 @@ import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
@@ -77,6 +79,12 @@ import {
   parseWarning,
   useDebounceWithOptions,
 } from './helpers';
+import {
+  useInitLatencyTracking,
+  useInputLatencyTracking,
+  useSuggestionsLatencyTracking,
+  useValidationLatencyTracking,
+} from './use_latency_tracking';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
 import { useRestorableState, withRestorableState } from './restorable_state';
@@ -122,6 +130,7 @@ const ESQLEditorInternal = function ESQLEditor({
   formLabel,
   mergeExternalMessages,
   hideQuickSearch,
+  openVisorOnSourceCommands,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -131,6 +140,9 @@ const ESQLEditorInternal = function ESQLEditor({
   const editorCommandDisposables = useRef(
     new WeakMap<monaco.editor.IStandaloneCodeEditor, monaco.IDisposable[]>()
   );
+
+  const sessionIdRef = useRef<string>(uuidv4());
+  const interactionIdRef = useRef(0);
 
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const isFirstFocusRef = useRef<boolean>(true);
@@ -193,6 +205,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
   const isVisorOpenRef = useRef(isVisorOpen);
+  const hasOpenedVisorOnMount = useRef(false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -202,6 +215,20 @@ const ESQLEditorInternal = function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
+
+  // Open visor on initial render if query has only source commands
+  useEffect(() => {
+    if (
+      openVisorOnSourceCommands &&
+      !hasOpenedVisorOnMount.current &&
+      code &&
+      hasOnlySourceCommand(code)
+    ) {
+      setIsVisorOpen(true);
+      hasOpenedVisorOnMount.current = true;
+    }
+  }, [code, openVisorOnSourceCommands]);
+
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
@@ -209,6 +236,32 @@ const ESQLEditorInternal = function ESQLEditor({
     },
     [onTextLangQueryChange]
   );
+
+  const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
+    telemetryService,
+    sessionIdRef,
+    interactionIdRef,
+  });
+
+  const { trackInputLatencyOnKeystroke, reportInputLatency } = useInputLatencyTracking({
+    telemetryService,
+    sessionIdRef,
+    interactionIdRef,
+  });
+
+  const { trackValidationLatencyStart, trackValidationLatencyEnd, resetValidationTracking } =
+    useValidationLatencyTracking({
+      telemetryService,
+      sessionIdRef,
+      interactionIdRef,
+    });
+
+  const { reportInitLatency } = useInitLatencyTracking({ telemetryService, sessionIdRef });
+
+  const resetPendingTracking = useCallback(() => {
+    resetValidationTracking();
+    resetSuggestionsTracking();
+  }, [resetValidationTracking, resetSuggestionsTracking]);
 
   const onQuerySubmit = useCallback(
     (source: TelemetryQuerySubmittedProps['source']) => {
@@ -298,6 +351,11 @@ const ESQLEditorInternal = function ESQLEditor({
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
+
+  // Measure keystroke to React commit by waiting for the code state update.
+  useEffect(() => {
+    reportInputLatency();
+  }, [code, reportInputLatency]);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -551,8 +609,9 @@ const ESQLEditorInternal = function ESQLEditor({
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
       onSuggestionsWithCustomCommandShown: (commands) =>
         telemetryService.trackSuggestionsWithCustomCommandShown(commands),
+      onSuggestionsReady,
     }),
-    [telemetryService]
+    [onSuggestionsReady, telemetryService]
   );
 
   const onClickQueryHistory = useCallback(
@@ -770,6 +829,8 @@ const ESQLEditorInternal = function ESQLEditor({
         }
       }
 
+      trackValidationLatencyEnd(active);
+
       if (active) {
         setEditorMessages({ errors: allErrors, warnings: allWarnings });
         monaco.editor.setModelMarkers(
@@ -789,6 +850,7 @@ const ESQLEditorInternal = function ESQLEditor({
       serverWarning,
       dataErrorsControl?.enabled,
       mergeExternalMessages,
+      trackValidationLatencyEnd,
     ]
   );
 
@@ -832,7 +894,11 @@ const ESQLEditorInternal = function ESQLEditor({
     async () => {
       if (!editorModel.current) return;
       const subscription = { active: true };
+      trackValidationLatencyStart(code);
+
       if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
+        resetValidationTracking();
+
         const parsedErrors = parseErrors(serverErrors || [], code);
         const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
         setEditorMessages({
@@ -906,12 +972,14 @@ const ESQLEditorInternal = function ESQLEditor({
         }
       }
 
+      resetPendingTracking();
+
       editorModel.current?.dispose();
       editorRef.current?.dispose();
       editorModel.current = undefined;
       editorRef.current = undefined;
     };
-  }, []);
+  }, [resetPendingTracking]);
 
   // When the layout changes, and the editor is not focused, we want to
   // recalculate the visible code so it fills up the available space. We
@@ -1091,6 +1159,9 @@ const ESQLEditorInternal = function ESQLEditor({
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
                   editorDidMount={async (editor) => {
+                    // Track editor init time once per mount
+                    reportInitLatency();
+
                     editorRef.current = editor;
                     const model = editor.getModel();
                     if (model) {
@@ -1137,7 +1208,8 @@ const ESQLEditorInternal = function ESQLEditor({
                     editor.onDidFocusEditorText(() => {
                       // Skip triggering suggestions on initial focus to avoid interfering
                       // with editor initialization and automated tests
-                      if (!isFirstFocusRef.current) {
+                      // Also skip when date picker is open to prevent overlap
+                      if (!isFirstFocusRef.current && !datePickerOpenStatusRef.current) {
                         triggerSuggestions();
                       }
 
@@ -1168,6 +1240,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     editor.onDidChangeModelContent(async () => {
+                      trackInputLatencyOnKeystroke(editor.getValue() ?? '');
                       await addLookupIndicesDecorator();
                       maybeTriggerSuggestions();
                     });
@@ -1281,7 +1354,9 @@ const ESQLEditorInternal = function ESQLEditor({
                     lineContent.length + 1
                   );
 
-                  const addition = `"${date.toISOString()}"${contentAfterCursor}`;
+                  const dateString = `"${date.toISOString()}"`;
+                  const addition = `${dateString}${contentAfterCursor}`;
+
                   editorRef.current?.executeEdits('time', [
                     {
                       range: {
@@ -1302,7 +1377,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   // move the cursor past the date we just inserted
                   editorRef.current?.setPosition({
                     lineNumber: currentCursorPosition?.lineNumber ?? 0,
-                    column: (currentCursorPosition?.column ?? 0) + addition.length - 1,
+                    column: (currentCursorPosition?.column ?? 0) + dateString.length,
                   });
                   // restore focus to the editor
                   editorRef.current?.focus();

@@ -45,13 +45,11 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
   const getParentApi = useCallback(
     () => ({
       getSerializedStateForChild: () => ({
-        rawState: {
-          traceId,
-          rangeFrom,
-          rangeTo,
-          docId,
-          mode: 'summary',
-        },
+        traceId,
+        rangeFrom,
+        rangeTo,
+        docId,
+        mode: 'summary',
       }),
     }),
     [docId, rangeFrom, rangeTo, traceId]
