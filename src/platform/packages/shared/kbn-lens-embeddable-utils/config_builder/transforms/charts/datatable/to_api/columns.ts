@@ -183,27 +183,30 @@ export function convertDatatableColumnsToAPI(
       if (!apiOperation) throw new Error('Column not found');
 
       if (isMetricColumnNoESQL(column, layer.columns[columnId])) {
-        if (!isAPIColumnOfMetricType(apiOperation))
+        if (!isAPIColumnOfMetricType(apiOperation)) {
           throw new Error(
             `Metric column ${columnId} must be a metric operation (got ${apiOperation.operation})`
           );
+        }
         columnIdMapping.set(columnId, { type: 'metric', index: metrics.length });
         metrics.push({
           ...apiOperation,
           ...buildMetricsAPI(column),
         });
       } else if (column.isTransposed) {
-        if (!isAPIColumnOfBucketType(apiOperation))
+        if (!isAPIColumnOfBucketType(apiOperation)) {
           throw new Error(
             `Split metric column ${columnId} must be a bucket operation (got ${apiOperation.operation})`
           );
+        }
         columnIdMapping.set(columnId, { type: 'split_metrics_by', index: splitMetricsBy.length });
         splitMetricsBy.push(apiOperation);
       } else {
-        if (!isAPIColumnOfBucketType(apiOperation))
+        if (!isAPIColumnOfBucketType(apiOperation)) {
           throw new Error(
             `Row column ${columnId} must be a bucket operation (got ${apiOperation.operation})`
           );
+        }
         columnIdMapping.set(columnId, { type: 'row', index: rows.length });
         rows.push({
           ...apiOperation,
