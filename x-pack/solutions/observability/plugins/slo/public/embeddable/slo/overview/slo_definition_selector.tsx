@@ -36,11 +36,6 @@ export function SloDefinitionSelector({ onSelected, hasError, remoteName }: Prop
     remoteName,
   });
 
-  // const { isLoading, data: definitionsData } = useFetchSloDefinitions({
-  //   name: search,
-  //   perPage: 100,
-  // });
-
   const options = useMemo(() => {
     return (
       definitionsData?.results.map((slo) => ({

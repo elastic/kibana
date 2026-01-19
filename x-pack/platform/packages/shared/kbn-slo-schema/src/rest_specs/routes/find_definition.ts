@@ -6,7 +6,6 @@
  */
 import { toBooleanRt } from '@kbn/io-ts-utils/src/to_boolean_rt';
 import * as t from 'io-ts';
-import type { remoteSchema } from '../../schema';
 import { sloDefinitionSchema, transformHealthSchema } from '../../schema';
 
 const findSloDefinitionsParamsSchema = t.partial({
@@ -42,18 +41,9 @@ type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSc
 
 type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionResponseSchema>;
 
-type SLODefinitionResponseWithRemote = SLODefinitionResponse & {
-  remote?: t.TypeOf<typeof remoteSchema>;
-};
-
 export {
   findSloDefinitionsParamsSchema,
   findSloDefinitionsResponseSchema,
   sloDefinitionResponseSchema,
 };
-export type {
-  FindSLODefinitionsParams,
-  FindSLODefinitionsResponse,
-  SLODefinitionResponse,
-  SLODefinitionResponseWithRemote,
-};
+export type { FindSLODefinitionsParams, FindSLODefinitionsResponse, SLODefinitionResponse };
