@@ -34,7 +34,7 @@ async function hasDataRequest(apmEventClient: APMEventClient, dataTiers?: DataTi
       events: [ProcessorEvent.transaction, ProcessorEvent.span],
     },
     terminate_after: 1,
-    track_total_hits: 1,
+    track_total_hits: false,
     size: 0,
     query,
   };
