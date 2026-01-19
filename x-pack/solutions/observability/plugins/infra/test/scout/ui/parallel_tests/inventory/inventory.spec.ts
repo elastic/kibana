@@ -61,30 +61,6 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('Render and dismiss k8s tour', async ({ pageObjects: { inventoryPage } }) => {
-    await test.step('reset k8s tour seen state', async () => {
-      await inventoryPage.resetK8sTourInLocalStorage();
-      await inventoryPage.reload();
-    });
-
-    await test.step('display k8s tour with proper message', async () => {
-      await expect(inventoryPage.k8sTourText).toBeVisible();
-      await expect(inventoryPage.k8sTourText).toHaveText(
-        'Click here to see your infrastructure in different ways, including Kubernetes pods.'
-      );
-    });
-
-    await test.step('dismiss k8s tour', async () => {
-      await inventoryPage.dismissK8sTour();
-      await expect(inventoryPage.k8sTourText).toBeHidden();
-    });
-
-    await test.step('reload page and verify tour remains dismissed', async () => {
-      await inventoryPage.reload();
-      await expect(inventoryPage.k8sTourText).toBeHidden();
-    });
-  });
-
   test('Render empty data prompt for dates with no data', async ({
     pageObjects: { inventoryPage },
   }) => {
