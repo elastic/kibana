@@ -32,7 +32,15 @@ export interface DriftQuery {
   interval: number;
   snapshot: boolean;
   removed: boolean;
-  category: 'privileges' | 'persistence' | 'network' | 'software' | 'posture' | 'certificates' | 'hardware' | 'runtime';
+  category:
+    | 'privileges'
+    | 'persistence'
+    | 'network'
+    | 'software'
+    | 'posture'
+    | 'certificates'
+    | 'hardware'
+    | 'runtime';
   ecsMapping: Record<string, { field: string }>;
 }
 
@@ -2893,7 +2901,7 @@ export const DRIFT_QUERIES = {
 } as const;
 
 /**
- * Get all drift queries as a flat array
+ * Get all drift queries as a flat array -
  */
 export const getAllDriftQueries = (): DriftQuery[] => [
   // Privileges
@@ -3183,7 +3191,15 @@ export const getDriftQueriesForPlatform = (
  * Get queries by category
  */
 export const getDriftQueriesByCategory = (
-  category: 'privileges' | 'persistence' | 'network' | 'software' | 'posture' | 'certificates' | 'hardware' | 'runtime'
+  category:
+    | 'privileges'
+    | 'persistence'
+    | 'network'
+    | 'software'
+    | 'posture'
+    | 'certificates'
+    | 'hardware'
+    | 'runtime'
 ): DriftQuery[] => {
   return getAllDriftQueries().filter((query) => query.category === category);
 };
