@@ -335,38 +335,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             // ALL anomalies with scores during the spike MUST have valid actual values
             // This proves they came from 'record' docs, not 'model_plot' docs with null record_score
-            spikeAnomaliesWithScores.forEach((anomaly) => {
-              // The bug would cause: anomaly.y could be null OR anomaly.actual could be null
-              // because top_metrics on mixed docs can return model_plot with null fields
-              expect(anomaly.y).to.not.be(null);
-              expect(typeof anomaly.y).to.equal('number');
-              expect(Number.isFinite(anomaly.y)).to.be(true);
-              expect(anomaly.y).to.be.greaterThan(0);
-
-              expect(anomaly.actual).to.not.be(null);
-              expect(anomaly.actual).to.not.be(undefined);
-              expect(typeof anomaly.actual).to.equal('number');
-              expect(Number.isFinite(anomaly.actual)).to.be(true);
-            });
+            expect(
+              spikeAnomaliesWithScores.every(
+                (a) => Number.isFinite(a.y) && a.y > 0 && Number.isFinite(a.actual)
+              )
+            ).to.be(true);
 
             // Verify all series have valid structure
             allAnomalyTimeseries.forEach((series) => {
-              // Check timestamps are valid
-              series.anomalies.forEach((anomaly) => {
-                expect(typeof anomaly.x).to.equal('number');
-                expect(Number.isFinite(anomaly.x)).to.be(true);
-              });
-
-              // Check model bounds are valid when present
-              series.bounds.forEach((bound) => {
-                expect(typeof bound.x).to.equal('number');
-                if (bound.y0 !== null && bound.y0 !== undefined) {
-                  expect(Number.isFinite(bound.y0)).to.be(true);
-                }
-                if (bound.y1 !== null && bound.y1 !== undefined) {
-                  expect(Number.isFinite(bound.y1)).to.be(true);
-                }
-              });
+              expect(series.anomalies.every((a) => Number.isFinite(a.x))).to.be(true);
+              expect(
+                series.bounds.every(
+                  (b) =>
+                    Number.isFinite(b.x) &&
+                    (b.y0 == null || Number.isFinite(b.y0)) &&
+                    (b.y1 == null || Number.isFinite(b.y1))
+                )
+              ).to.be(true);
             });
           });
         });
