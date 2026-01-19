@@ -81,7 +81,7 @@ const getFailureTooltip = (reason: EsqlConversionFailureReason | undefined): str
   return failureReasonMessages[reason] ?? failureReasonMessages.unknown;
 };
 
-interface EsqlConversionDisabledSettings {
+interface EsqlConversionSettings {
   isConvertToEsqlButtonDisabled: boolean;
   convertToEsqlButtonTooltip: string;
   convertibleLayers: ConvertibleLayer[];
@@ -89,7 +89,7 @@ interface EsqlConversionDisabledSettings {
 
 const getEsqlConversionDisabledSettings = (
   tooltip: string = cannotConvertToEsqlTooltip
-): EsqlConversionDisabledSettings => ({
+): EsqlConversionSettings => ({
   isConvertToEsqlButtonDisabled: true,
   convertToEsqlButtonTooltip: tooltip,
   convertibleLayers: [],
@@ -117,7 +117,7 @@ export const useEsqlConversionCheck = (
     coreStart: CoreStart;
     startDependencies: LensPluginStartDependencies;
   }
-): EsqlConversionDisabledSettings => {
+): EsqlConversionSettings => {
   // Get datasourceStates from Redux
   const { datasourceStates } = useLensSelector((state) => state.lens);
 
