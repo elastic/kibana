@@ -97,7 +97,6 @@ export class ProductFeaturesService {
         savedObjects: [...rulesV3SavedObjects, ...securityExceptionsSavedObjects],
       }),
     ]);
-    console.log('>>> getRulesV3Feature', getRulesV3Feature, getAlertsFeature);
     this.productFeaturesRegistry.create('alerts', [getAlertsFeature()]);
     if (!experimentalFeatures.siemMigrationsDisabled) {
       this.productFeaturesRegistry.create('siemMigrations', [getSiemMigrationsFeature()]);
