@@ -2919,7 +2919,7 @@
           "<TOptions>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-        "lineNumber": 190,
+        "lineNumber": 194,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2934,7 +2934,7 @@
               "\nThe text content of the LLM response."
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-            "lineNumber": 196,
+            "lineNumber": 200,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2952,7 +2952,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-            "lineNumber": 200,
+            "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2977,7 +2977,7 @@
               "<TOptions>[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-            "lineNumber": 204,
+            "lineNumber": 208,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3002,7 +3002,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-            "lineNumber": 208,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3020,7 +3020,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-            "lineNumber": 212,
+            "lineNumber": 216,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3036,7 +3036,7 @@
         "label": "ChatCompleteRetryConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-        "lineNumber": 144,
+        "lineNumber": 148,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3054,7 +3054,7 @@
               "\"auto\" | \"all\" | ((err: Error) => boolean) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-            "lineNumber": 145,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3072,7 +3072,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-            "lineNumber": 156,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3090,7 +3090,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-            "lineNumber": 162,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6287,7 +6287,7 @@
           "<TOptions>> : never)"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-        "lineNumber": 170,
+        "lineNumber": 174,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6335,7 +6335,7 @@
             "section": "def-common.ChatCompleteRetryConfiguration",
             "text": "ChatCompleteRetryConfiguration"
           },
-          " | undefined; stream?: boolean | undefined; } & ",
+          " | undefined; stream?: boolean | undefined; timeout?: number | undefined; } & ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6384,7 +6384,7 @@
           "<TOptions>>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-        "lineNumber": 181,
+        "lineNumber": 185,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6866,7 +6866,7 @@
           "\"auto\" | \"native\" | \"simulated\""
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-        "lineNumber": 218,
+        "lineNumber": 222,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8324,7 +8324,7 @@
           "\nOptions used to call the {@link BoundChatCompleteAPI}"
         ],
         "signature": [
-          "{ system?: string | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+          "{ system?: string | undefined; timeout?: number | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -8445,7 +8445,7 @@
           "\nOptions used to call the {@link BoundPromptAPI}"
         ],
         "signature": [
-          "{ abortSignal?: AbortSignal | undefined; input: ",
+          "{ timeout?: number | undefined; abortSignal?: AbortSignal | undefined; input: ",
           "input",
           "<TPrompt[\"input\"]>; metadata?: ",
           {
