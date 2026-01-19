@@ -143,15 +143,15 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Removes the `AI Assistants Settings` privilege [#239144]({{kib-pull}}239144).
 
 **Machine Learning**:
-* Adds Security ML modules for GCP Audit and Azure Activity Logs [#236849]({{kib-pull}}236849).
-* Removes median line length categorization check [#243827]({{kib-pull}}243827).
-* Adds custom header support to inference endpoints creation [#242187]({{kib-pull}}242187).
-* Improves the layout for custom inference endpoint [#241779]({{kib-pull}}241779).
-* Anomaly Detection: Adds an action to create an anomaly detection alerting rule [#241274]({{kib-pull}}241274).
-* Makes the Machine Learning "Update space" APIs public [#241109]({{kib-pull}}241109).
-* Data Visualizer: Improves display of long fields values in top values list [#241006]({{kib-pull}}241006).
-* Enable alerts filtering with KQL bar [#240100]({{kib-pull}}240100).
-* Anomaly Detection: Adds feedback button to the Anomaly Explorer and Single Metric Viewer [#239883]({{kib-pull}}239883).
+* Adds Security {{ml}} modules for GCP Audit and Azure Activity Logs [#236849]({{kib-pull}}236849).
+* Removes median line length anomaly detection categorization check [#243827]({{kib-pull}}243827).
+* Adds custom header support to inference endpoints creation UI [#242187]({{kib-pull}}242187).
+* Improves the layout for custom inference endpoint UI [#241779]({{kib-pull}}241779).
+* Adds an action to create an anomaly detection alerting rule [#241274]({{kib-pull}}241274).
+* Makes the {{ml}} update space APIs public [#241109]({{kib-pull}}241109).
+* Improves display of long fields values in top values list [#241006]({{kib-pull}}241006).
+* Adds the ability to narrow down the list of anomalies that the Anomaly detection rule looks for [#240100]({{kib-pull}}240100).
+* Adds feedback button to the Anomaly Explorer and Single Metric Viewer [#239883]({{kib-pull}}239883).
 
 **Search**:
 * When creating a new Elasticsearch solution project, you will now land on the **Elasticsearch home page** by default instead of the **Create index** page to get immediate access to relevant tutorials and educational content [#237612]({{kib-pull}}237612).
@@ -283,23 +283,23 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Disables field statistics when using the {{esql}} `TS` command in Data Visualizer [#247641]({{kib-pull}}247641).
 * Fixes display of Data Visualizer's map view for small screen sizes [#247615]({{kib-pull}}247615).
 * Fixes anomaly chart empty query issue [#246841]({{kib-pull}}246841).
-* Fixes creating new Anomaly detection jobs from Discover sessions with no data view [#246410]({{kib-pull}}246410).
+* Fixes creating new anomaly detection jobs from Discover sessions with no data view [#246410]({{kib-pull}}246410).
 * Ensures Anomaly detection result chart tooltips are always shown correctly [#246077]({{kib-pull}}246077).
-* Prevents clearing cell selections after hiding the alerts table popover in anomaly explorer [#244183]({{kib-pull}}244183).
-* Optimizes and enables text field analysis in contextual insights for log rate analysis: [#244109]({{kib-pull}}244109).
-* Ensures deleted text in the Inference connector, AI connector, and Inference endpoint creation forms is not sent as an empty string [#244059]({{kib-pull}}244059).
+* Prevents clearing cell selections after hiding the alert's table popover in Anomaly explorer [#244183]({{kib-pull}}244183).
+* Optimizes and enables text field analysis in contextual insights for log rate analysis [#244109]({{kib-pull}}244109).
+* Ensures deleted text in the inference connector, AI connector, and inference endpoint creation forms is not sent as an empty string [#244059]({{kib-pull}}244059).
 * Fixes wizard for data view with runtime fields for data frame analytics [#242557]({{kib-pull}}242557).
-* Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs [#242263]({{kib-pull}}242263).
+* Fixes import and improves validation for Anomaly detection and Data frame analytics jobs [#242263]({{kib-pull}}242263).
 * Ensures max tokens parameter is passed as expected during Anthropic endpoint creation [#241212]({{kib-pull}}241212).
-* Fixes index names causing incompatible cluster errors when product docs are installed for multiple Inference IDs [#240506]({{kib-pull}}240506).
+* Fixes index names causing incompatible cluster errors when product docs are installed for multiple inference IDs [#240506]({{kib-pull}}240506).
 * Ensures inference endpoints UI list loads when provider is custom [#240189]({{kib-pull}}240189).
-* Fixes layout of fields in Overview and Notifications pages [#239113]({{kib-pull}}239113).
+* Fixes layout of fields in {{ml}} overview and notifications pages [#239113]({{kib-pull}}239113).
 * Adds unique accessible labels for **Show top field values** buttons [#237972]({{kib-pull}}237972).
 * Fixes tool calling unavailable tools [#237174]({{kib-pull}}237174).
 * Improves trained models list performance [#237072]({{kib-pull}}237072).
 * Fixes partition field settings errors in the single metric viewer dashboard panel [#237046]({{kib-pull}}237046).
-* Prevents URL-like strings from being displayed as links in Alerts [#226849]({{kib-pull}}226849).
-* Improves anonymization error messages when NER model is not available [#247696]({{kib-pull}}247696).
+* Prevents URL-like strings from being displayed as links in alerts [#226849]({{kib-pull}}226849).
+* Improves anonymization error messages when NER model is unavailable [#247696]({{kib-pull}}247696).
 * Adds table caption for empty top categories in logs category table [#246041]({{kib-pull}}246041).
 
 
