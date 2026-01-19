@@ -257,12 +257,28 @@ if (false || allPresent) {
     Object {
       "set": Object {
         "description": undefined,
-        "field": "full_name",
         "if": undefined,
-        "ignore_empty_value": undefined,
         "ignore_failure": undefined,
+        "lang": "painless",
+        "source": "def fromValues = [];
+  boolean allFieldsPresent = true;
+
+  if (ctx.containsKey('first_name') && ctx['first_name'] != null) {
+  fromValues.add(ctx['first_name'].toString());
+} else {
+  allFieldsPresent = false;
+}
+fromValues.add(' ');if (ctx.containsKey('last_name') && ctx['last_name'] != null) {
+  fromValues.add(ctx['last_name'].toString());
+} else {
+  allFieldsPresent = false;
+}
+
+
+  if (allFieldsPresent || false) {
+    ctx['full_name'] = fromValues.stream().collect(Collectors.joining(''));
+  }",
         "tag": undefined,
-        "value": "{{{first_name}}} {{{last_name}}}",
       },
     },
     Object {
