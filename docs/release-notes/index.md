@@ -63,14 +63,14 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds support for headers in the OpenAI integration [#238710]({{kib-pull}}238710).
 
 **Dashboards and Visualizations**:
-* Dashboards now support ownership and "write_restricted" mode. You can now keep dashboards publicly editable or in a write-restricted state until they are ready to be published, giving you more control over who can edit your dashboards, regardless of broader space permissions. [#224552]({{kib-pull}}224552).
+* Dashboards now support ownership and "write_restricted" mode. You can now keep dashboards publicly editable or in a write-restricted state until they are ready to be published, giving you more control over who can edit your dashboards, regardless of broader space permissions [#224552]({{kib-pull}}224552).
 * Adds support for chaining variable controls. You can now set up variable controls to depend on the values selected for another variable control [#242909]({{kib-pull}}242909).
 * Adds basic filtering support for interactions with {{esql}} charts [#243439]({{kib-pull}}243439).
 * Removes the **Supporting visualization** section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under **Appearance** [#245979]({{kib-pull}}245979).
 * Reorganizes and renames color settings in the Primary Metric dimension editor. For numeric metrics, the "Color by value" and "Color mapping"/"Color" settings are now located under the "Background chart" field. The settings have been renamed as follows: "Color by value" is now "Color mode", and "Color mapping" is now "Dynamic color mapping" [#243608]({{kib-pull}}243608).
 * In **dashboard visualization in-line editing** and **Lens workspace**, the 'Appearance', 'Titles and text', 'Axis', and 'Legend' settings have been moved from a popover into a dedicated flyout panel [#240804]({{kib-pull}}240804).
-* Moves the Lens visualization toolbar from the workspace section to the configuration panel. [#239879]({{kib-pull}}239879)
-* Moves the **Save as** and **Reset** options under the top nav **Save** button when the dashboard is in edit mode. [#237211]({{kib-pull}}237211).
+* Moves the Lens visualization toolbar from the workspace section to the configuration panel [#239879]({{kib-pull}}239879)
+* Moves the **Save as** and **Reset** options under the top nav **Save** button when the dashboard is in edit mode [#237211]({{kib-pull}}237211).
 * The Lens configuration panel has been redesigned to display layers as tabs instead of vertically stacked panels. Layer actions (clone, remove, save) are now accessible through a menu in each tab, improving the editing experience when working with multiple data layers, annotations, and reference lines [#235372]({{kib-pull}}235372).
 
 **Data ingestion and Fleet**:
@@ -245,7 +245,7 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Fixes MSI commands for installing Elastic Agent and Fleet Server [#236994]({{kib-pull}}236994).
 
 **Discover**:
-* Fixes an issue in Discover where default app state could trigger unsaved changes in saved Discover sessions, such as default columns applied through the `defaultColumns` advanced setting. [#246664]({{kib-pull}}246664).
+* Fixes an issue in Discover where default app state could trigger unsaved changes in saved Discover sessions, such as default columns applied through the `defaultColumns` advanced setting [#246664]({{kib-pull}}246664).
 * Fixes an issue with Discover tabs that occurs when navigating to a different tab while the previous tab is still initializing [#245752]({{kib-pull}}245752).
 * Fixes truncation for longer text in the Discover table [#241440]({{kib-pull}}241440).
 * Fixes missing fields when using combined filters with the `ignoreFilterIfFieldNotInIndex` advanced setting enabled [#238945]({{kib-pull}}238945).
