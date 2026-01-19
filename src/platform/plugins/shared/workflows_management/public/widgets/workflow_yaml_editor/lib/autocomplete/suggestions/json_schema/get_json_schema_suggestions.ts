@@ -232,26 +232,47 @@ function shouldProvideEnumSuggestions(
 }
 
 /**
- * Check if we should provide property key suggestions
+ * Check if we should provide property key suggestions.
+ * Returns false if line already has a property key with colon (e.g., "type: ") to allow value suggestions instead.
  */
 function shouldProvidePropertyKeySuggestions(
   path: (string | number)[],
-  lineUpToCursor: string
+  lineUpToCursor: string,
+  autocompleteContext: ExtendedAutocompleteContext
 ): boolean {
-  if (path.length < 3 || path[0] !== 'inputs' || path[1] !== 'properties') {
+  if (path.length < 2 || path[0] !== 'inputs' || path[1] !== 'properties') {
     return false;
   }
 
-  // If path length is 3, we're at the property level and can suggest keys
-  // If path length is 4+, we're inside a nested property
-  if (path.length === 3 || (path.length === 4 && typeof path[3] === 'string')) {
-    // Check if the line looks like we're typing a property key
-    const lineMatch = lineUpToCursor.match(/^\s*([a-zA-Z_][a-zA-Z0-9_-]*)?\s*:?\s*$/);
-    if (lineMatch) {
-      // Don't suggest if we already have a complete key:value pair
-      const hasCompletePair = lineUpToCursor.match(/^\s*\w+\s*:\s*\S/);
-      return !hasCompletePair;
+  if (autocompleteContext.isInTriggersContext || autocompleteContext.isInStepsContext) {
+    return false;
+  }
+
+  // Don't suggest property keys if line already has a property key with colon
+  const hasPropertyKeyWithColon = /^\s*[a-zA-Z_][a-zA-Z0-9_-]*\s*:\s*/.test(lineUpToCursor);
+  if (hasPropertyKeyWithColon) {
+    return false;
+  }
+
+  const isEmptyOrWhitespace = /^\s*$/.test(lineUpToCursor);
+  const isTypingPropertyKey = /^\s*([a-zA-Z_][a-zA-Z0-9_-]*)?\s*:?\s*$/.test(lineUpToCursor);
+
+  if (!isEmptyOrWhitespace && !isTypingPropertyKey) {
+    return false;
+  }
+
+  // Handle empty line after property definition (path length 2 with 6+ spaces indentation)
+  if (path.length === 2) {
+    const indentMatch = lineUpToCursor.match(/^(\s*)/);
+    const indentLevel = indentMatch ? indentMatch[1].length : 0;
+    if (indentLevel >= 6) {
+      return true;
     }
+  }
+
+  // Inside property definition (path length 3) or nested property (path length 4)
+  if (path.length === 3 || (path.length === 4 && typeof path[3] === 'string')) {
+    return true;
   }
 
   return false;
@@ -265,14 +286,39 @@ export function getJsonSchemaSuggestions(
 ): monaco.languages.CompletionItem[] {
   const { lineParseResult, path, range, workflowDefinition, lineUpToCursor } = autocompleteContext;
 
-  // Only provide suggestions if we're in the inputs.properties context
-  if (!isInInputsPropertiesContext(path)) {
+  let inferredPath = path;
+  if (path.length === 0 && autocompleteContext.model) {
+    const indentLevel = lineUpToCursor.match(/^(\s*)/)?.[1]?.length ?? 0;
+    if (indentLevel >= 6) {
+      const lineNumber = autocompleteContext.position.lineNumber;
+      for (let prevLineNum = lineNumber - 1; prevLineNum >= 1; prevLineNum--) {
+        const prevLine = autocompleteContext.model.getLineContent(prevLineNum);
+        if (prevLine.trim() !== '') {
+          if (prevLine.match(/^\s{2}properties\s*:/)) {
+            inferredPath = ['inputs', 'properties'];
+            break;
+          }
+          const propertyMatch = prevLine.match(/^\s{4}([a-zA-Z_][a-zA-Z0-9_-]*)\s*:/);
+          if (propertyMatch && indentLevel >= 6) {
+            inferredPath = ['inputs', 'properties', propertyMatch[1]];
+            break;
+          }
+          if (prevLine.match(/^\s{0,2}[a-zA-Z]/)) {
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  if (!isInInputsPropertiesContext(inferredPath)) {
     return [];
   }
 
-  // Check if we're completing a type field value
-  if (shouldProvideTypeSuggestions(lineParseResult, path, autocompleteContext) && lineParseResult) {
-    // Type guard: matchType === 'type' ensures lineParseResult is TypeLineParseResult
+  if (
+    shouldProvideTypeSuggestions(lineParseResult, inferredPath, autocompleteContext) &&
+    lineParseResult
+  ) {
     if (lineParseResult.matchType === 'type') {
       const adjustedRange = {
         ...range,
@@ -283,7 +329,6 @@ export function getJsonSchemaSuggestions(
     }
   }
 
-  // Check if we're completing a format field value
   const formatMatch = shouldProvideFormatSuggestions(lineUpToCursor);
   if (formatMatch?.groups) {
     const adjustedRange = {
@@ -294,8 +339,7 @@ export function getJsonSchemaSuggestions(
     return getFormatSuggestions(adjustedRange);
   }
 
-  // Check if we're completing an enum field value
-  const enumResult = shouldProvideEnumSuggestions(lineUpToCursor, path);
+  const enumResult = shouldProvideEnumSuggestions(lineUpToCursor, inferredPath);
   if (enumResult && enumResult.match.groups) {
     const adjustedRange = {
       ...range,
@@ -305,8 +349,7 @@ export function getJsonSchemaSuggestions(
     return getEnumSuggestions(adjustedRange, enumResult.propertyName, workflowDefinition);
   }
 
-  // Check if we're at a property key level (e.g., after "properties.myProperty:")
-  if (shouldProvidePropertyKeySuggestions(path, lineUpToCursor)) {
+  if (shouldProvidePropertyKeySuggestions(inferredPath, lineUpToCursor, autocompleteContext)) {
     return getPropertyKeySuggestions(range);
   }
 
