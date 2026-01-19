@@ -7,15 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Re-export everything from zod/v4 first (this exports the z namespace type)
-export * from 'zod/v4';
-// Then import z as a value to augment it
 import { z as zodV4 } from 'zod/v4';
 import { fromJSONSchema } from './from_json_schema';
 
-// Augment z value with fromJSONSchema to match native Zod v4 API
-Object.assign(zodV4, { fromJSONSchema });
+// Re-export all Zod exports (types and values)
+export * from 'zod/v4';
 
-// Re-export the augmented z value
-// The z namespace type from 'zod/v4' is already exported above and will merge with this value export
-export { zodV4 as z };
+// Temporary polyfill: Augment z with fromJSONSchema until Kibana upgrades to Zod v4+
+// where z.fromJSONSchema will be available natively. This allows consumers to use
+// the same API (z.fromJSONSchema) now and later without code changes.
+//
+// When Kibana upgrades to true Zod v4, this entire file can be replaced with:
+//   export { z } from 'zod/v4';
+export const z = Object.assign(zodV4, { fromJSONSchema });
+
+// Namespace merging to preserve type utilities during the polyfill period.
+//
+// TypeScript doesn't support wildcard type re-exports, so we manually list the
+// type utilities actually used across the codebase.
+// eslint-disable-next-line @typescript-eslint/no-namespace -- Namespaces are discouraged in modern TS, but required here to restore type utilities that Object.assign loses
+export namespace z {
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- Must match Zod's API: z.infer<T>
+  export type infer<T extends zodV4.ZodType> = zodV4.infer<T>;
+  export type ZodType = zodV4.ZodType;
+  export type ZodObject<T extends zodV4.ZodRawShape = zodV4.ZodRawShape> = zodV4.ZodObject<T>;
+  export type ZodRawShape = zodV4.ZodRawShape;
+  export type ZodSchema<T = any> = zodV4.ZodSchema<T>;
+}
