@@ -38,6 +38,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     logger,
     abortSignal,
     metadata,
+    timeout,
     stream = false,
   }) => {
     const connector = executor.getConnector();
@@ -83,6 +84,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           ...(metadata?.connectorTelemetry
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
+          ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
         },
       });
     });

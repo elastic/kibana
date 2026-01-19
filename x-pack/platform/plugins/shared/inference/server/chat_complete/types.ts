@@ -50,6 +50,7 @@ export type InferenceAdapterChatCompleteOptions = {
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
   stream?: boolean;
+  timeout?: number;
 } & ToolOptions;
 
 /**

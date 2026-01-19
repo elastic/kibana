@@ -39,6 +39,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     modelName,
     abortSignal,
     metadata,
+    timeout,
     stream = false,
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
@@ -62,6 +63,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
+      ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
     };
 
     const connectorResult$ = defer(async () => {

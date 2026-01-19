@@ -26,6 +26,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     logger,
     abortSignal,
     metadata,
+    timeout,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -52,6 +53,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
           ...(metadata?.connectorTelemetry
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
+          ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
         },
       });
     }).pipe(
