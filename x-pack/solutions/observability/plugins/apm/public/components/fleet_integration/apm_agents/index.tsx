@@ -9,34 +9,26 @@ import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { AgentInstructionsAccordion } from './agent_instructions_accordion';
 import { ApmAgentInstructionsMappings } from './agent_instructions_mappings';
-import type {
-  NewPackagePolicy,
-  PackagePolicy,
-  PackagePolicyEditExtensionComponentProps,
-} from '../apm_policy_form/typings';
+import type { PackagePolicyEditExtensionComponentProps } from '../apm_policy_form/typings';
 
-interface Props {
-  policy: PackagePolicy;
-  newPolicy: NewPackagePolicy;
-  onChange: PackagePolicyEditExtensionComponentProps['onChange'];
-}
+export function ApmAgents({ newPolicy }: PackagePolicyEditExtensionComponentProps) {
+  const vars = newPolicy?.inputs?.[0]?.vars;
+  const apmServerUrl = vars?.url.value;
+  const secretToken = vars?.secret_token.value;
 
-export function ApmAgents({ policy, newPolicy, onChange }: Props) {
   return (
     <div>
       {ApmAgentInstructionsMappings.map(
-        ({ agentName, title, createAgentInstructions, variantId, AgentRuntimeAttachment }) => (
-          <Fragment key={agentName}>
+        ({ agentName, title, createAgentInstructions, variantId }) => (
+          <Fragment key={`${agentName}-${variantId}`}>
             <EuiPanel>
               <AgentInstructionsAccordion
                 agentName={agentName}
                 title={title}
                 createAgentInstructions={createAgentInstructions}
                 variantId={variantId}
-                AgentRuntimeAttachment={AgentRuntimeAttachment}
-                policy={policy}
-                newPolicy={newPolicy}
-                onChange={onChange}
+                apmServerUrl={apmServerUrl}
+                secretToken={secretToken}
               />
             </EuiPanel>
             <EuiSpacer />
