@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const genericEntityFlyout = pageObjects.genericEntityFlyout;
 
-  describe('Security Network Page - Generic Entity Popover', function () {
+  describe('Security Network Page - Generic Entity Preview flyout', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
