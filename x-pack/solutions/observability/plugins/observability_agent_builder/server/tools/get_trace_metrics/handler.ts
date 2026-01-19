@@ -29,7 +29,7 @@ import {
 
 export interface TraceMetricsItem {
   group: string;
-  latency: number | null;
+  latency: number;
   throughput: number;
   failureRate: number;
 }
@@ -46,6 +46,7 @@ export async function getToolHandler({
   kqlFilter,
   groupBy,
   latencyType = 'avg',
+  sortBy = 'latency',
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -59,6 +60,7 @@ export async function getToolHandler({
   groupBy: string;
   kqlFilter?: string;
   latencyType: LatencyAggregationType | undefined;
+  sortBy: 'latency' | 'throughput' | 'failureRate';
 }): Promise<{
   items: TraceMetricsItem[];
 }> {
@@ -124,7 +126,7 @@ export async function getToolHandler({
     });
 
     const latencyMs =
-      latencyValue !== null && latencyValue !== undefined ? latencyValue / 1000 : null;
+      latencyValue !== null && latencyValue !== undefined ? latencyValue / 1000 : -1;
 
     const failureRate = calculateFailedTransactionRate(bucket);
 
@@ -143,6 +145,6 @@ export async function getToolHandler({
   });
 
   return {
-    items,
+    items: items.sort((a, b) => b[sortBy] - a[sortBy]),
   };
 }

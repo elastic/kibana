@@ -40,6 +40,10 @@ const getTraceMetricsSchema = z.object({
     .enum(['avg', 'p95', 'p99'])
     .describe('Aggregation type for latency change points analysis. default is avg.')
     .optional(),
+  sortBy: z
+    .enum(['latency', 'throughput', 'failureRate'])
+    .describe('Metric to sort the results by. Default is latency.')
+    .optional(),
 });
 
 export function createGetTraceMetricsTool({
@@ -93,7 +97,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
       },
     },
     handler: async (
-      { start, end, kqlFilter, groupBy = 'service.name', latencyType = 'avg' },
+      { start, end, kqlFilter, groupBy = 'service.name', latencyType = 'avg', sortBy = 'latency' },
       context
     ) => {
       const { request } = context;
@@ -109,6 +113,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
           kqlFilter,
           groupBy,
           latencyType,
+          sortBy,
         });
 
         return {
