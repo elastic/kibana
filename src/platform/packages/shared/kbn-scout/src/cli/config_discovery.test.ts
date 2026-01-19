@@ -1055,7 +1055,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
           g.group === 'platform' &&
           g.scoutCommand === 'node scripts/scout run-tests --stateful --testTarget=cloud'
       );
-      // For stateful (ECH), deploymentType should be based on group: 'test' => 'classic' (unknown group defaults to general)
+      // For stateful (ECH), deploymentType should be based on group: 'test' => 'classic' (unknown group defaults to classic)
       expect(statefulGroup).toBeDefined();
       expect(statefulGroup.deploymentType).toBe('classic');
       expect(statefulGroup.configs).toContain('pluginMultiMode/config1.playwright.config.ts');
