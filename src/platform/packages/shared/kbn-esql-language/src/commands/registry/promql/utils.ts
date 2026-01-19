@@ -29,6 +29,8 @@ interface PromqlPosition {
   currentParam?: string;
 }
 
+const TRAILING_PARAM_NAME_REGEX = /([A-Za-z_][A-Za-z0-9_]*)\s*$/;
+
 export function getPosition(innerText: string, command: ESQLAstAllCommands): PromqlPosition {
   const promqlCommand = command as ESQLAstPromqlCommand;
 
@@ -127,9 +129,9 @@ function getIncompleteParamFromText(text: string): string | undefined {
   }
 
   const beforeEquals = trimmed.slice(0, -1).trimEnd();
-  const paramName = findFinalWord(beforeEquals).toLowerCase();
+  const paramName = getTrailingIdentifier(beforeEquals)?.toLowerCase();
 
-  return isPromqlParamName(paramName) ? paramName : undefined;
+  return paramName && isPromqlParamName(paramName) ? paramName : undefined;
 }
 
 /* Detects the "param name + space" pattern to suggest the "=" token. */
@@ -139,9 +141,18 @@ function isAfterParamKeyword(text: string): boolean {
   }
 
   const trimmed = text.trimEnd();
-  const lastWord = findFinalWord(trimmed).toLowerCase();
+  const lastWord = getTrailingIdentifier(trimmed)?.toLowerCase();
 
-  return isPromqlParamName(lastWord);
+  return lastWord ? isPromqlParamName(lastWord) : false;
+}
+
+/*
+ * Extracts the trailing param name when it is immediately after a quoted value.
+ * This lets us detect `start` in cases like `end="..."start =`.
+ */
+function getTrailingIdentifier(text: string): string | undefined {
+  const match = text.match(TRAILING_PARAM_NAME_REGEX);
+  return match ? match[1] : undefined;
 }
 
 /*

@@ -167,6 +167,12 @@ describe('param keyword suggestions', () => {
     });
   });
 
+  test('suggests = after param keyword when glued to quoted value', async () => {
+    await expectPromqlSuggestions('PROMQL end="2026-01-13T11:30:00.000Z"start ', {
+      textsContain: [assignCompletionItem.text],
+    });
+  });
+
   test.each(['PROMQL start="2024-01-01" step ', "PROMQL start='2024-01-01' step "])(
     'suggests = after param keyword even after quoted value (%s)',
     async (query) => {
