@@ -15,7 +15,7 @@ export function registerSampleData(home: HomeServerPluginSetup, logger: Logger) 
     defaultMessage: 'Agent Builder',
   });
   const { addAppLinksToSampleDataset } = home.sampleData;
-  const sampleDataSetsId = ['ecommerce', 'flights', 'logs'];
+  const sampleDataSetsId = ['ecommerce', 'flights', 'logs', 'logstsdb'];
   sampleDataSetsId.forEach((item) => {
     try {
       addAppLinksToSampleDataset(item, [
