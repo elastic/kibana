@@ -132,7 +132,6 @@ export function SloInstanceSelector({ sloId, remoteName, onSelected, hasError }:
         onSearchChange={onSearchChange}
         isInvalid={hasError}
         singleSelection
-        isClearable
       />
     </EuiFormRow>
   );
