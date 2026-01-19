@@ -106,5 +106,6 @@
     "@kbn/react-query",
     "@kbn/timerange",
     "@kbn/inference-common",
+    "@kbn/core-http-common",
   ]
 }
