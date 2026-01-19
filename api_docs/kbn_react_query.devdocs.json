@@ -14292,12 +14292,12 @@
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/public/application/hooks/use_connectors.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/public/application/hooks/use_edit_active_source_flyout.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_edit_active_source_flyout.ts"
               },
               {
                 "plugin": "maintenanceWindows",
