@@ -367,30 +367,31 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    // @skipInServerless - waiting for https://github.com/elastic/kibana/pull/248962
-    describe('@skipInServerless read-only user on non-existent list', () => {
+    describe('read-only user on non-existent list', () => {
       let readOnlyNoSoWriteSupertest: TestAgent;
 
       before(async () => {
-        const loadedRole = await rolesUsersProvider.loader.create({
+        const role: CustomRole = {
           name: 'endpoint_exceptions_read_no_so_write',
-          kibana: [
-            {
-              base: [],
-              feature: {
-                [SECURITY_FEATURE_ID]: ['minimal_read', 'endpoint_exceptions_read'],
+          privileges: {
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  [SECURITY_FEATURE_ID]: ['minimal_read', 'endpoint_exceptions_read'],
+                },
+                spaces: ['*'],
               },
-              spaces: ['*'],
-            },
-          ],
-          elasticsearch: { cluster: [], indices: [], run_as: [] },
-        });
+            ],
+            elasticsearch: { cluster: [], indices: [] },
+          },
+        };
 
-        readOnlyNoSoWriteSupertest = await utils.createSuperTest(loadedRole.username);
+        readOnlyNoSoWriteSupertest = await utils.createSuperTestWithCustomRole(role);
       });
 
       after(async () => {
-        await rolesUsersProvider.loader.delete('endpoint_exceptions_read_no_so_write');
+        await utils.cleanUpCustomRoles();
       });
 
       beforeEach(async () => {
