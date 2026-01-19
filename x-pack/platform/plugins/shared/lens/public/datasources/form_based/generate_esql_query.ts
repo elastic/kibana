@@ -30,20 +30,16 @@ import { resolveTimeShift } from './time_shift_utils';
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
 
 // Used for metrics and buckets ES|QL verification
-interface EsqlResult {
+interface EsqlConversionResult {
   esql: string;
 }
-
-interface EsqlError {
+interface EsqlConversionError {
   error: EsqlConversionFailureReason;
   operationType?: string;
 }
-
-const isValidEsqlResults = (
-  metrics: Array<EsqlResult | EsqlError>
-): metrics is Array<EsqlResult> => {
-  return metrics.every((m) => typeof m === 'object' && 'esql' in m);
-};
+type EsqlConversion = EsqlConversionResult | EsqlConversionError;
+const isValidEsqlConversionItems = (metrics: EsqlConversion[]): metrics is EsqlConversionResult[] =>
+  metrics.every((m) => typeof m === 'object' && 'esql' in m);
 
 /**
  * Specific reasons why ES|QL conversion failed.
@@ -165,7 +161,7 @@ export function generateEsqlQuery(
     ([_, col]) => !col.isBucketed
   );
 
-  const metrics: Array<EsqlResult | EsqlError> = metricEsAggsEntries.map(([colId, col], index) => {
+  const metrics: EsqlConversion[] = metricEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
     if (!def.toESQL)
@@ -259,7 +255,7 @@ export function generateEsqlQuery(
   });
 
   // Check for metric conversion errors with a type guard
-  if (!isValidEsqlResults(metrics)) {
+  if (!isValidEsqlConversionItems(metrics)) {
     const metricError = metrics.find((m) => typeof m === 'object' && 'error' in m);
     if (metricError && typeof metricError === 'object' && 'error' in metricError) {
       return getEsqlQueryFailedResult(
@@ -270,7 +266,7 @@ export function generateEsqlQuery(
     return getEsqlQueryFailedResult('function_not_supported');
   }
 
-  const buckets: Array<EsqlResult | EsqlError> = bucketEsAggsEntries.map(([colId, col], index) => {
+  const buckets: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
     if (!def.toESQL)
@@ -392,7 +388,7 @@ export function generateEsqlQuery(
   });
 
   // Check for bucket conversion errors with type guard
-  if (!isValidEsqlResults(buckets)) {
+  if (!isValidEsqlConversionItems(buckets)) {
     const bucketError = buckets.find((b) => typeof b === 'object' && 'error' in b);
     if (bucketError && typeof bucketError === 'object' && 'error' in bucketError) {
       return getEsqlQueryFailedResult(
