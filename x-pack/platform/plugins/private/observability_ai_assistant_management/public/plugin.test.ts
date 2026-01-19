@@ -75,11 +75,11 @@ describe('Observability AI Assistant Management plugin', () => {
         ml: {} as any,
       });
     });
-    afterEach(async () => {
+    afterEach(() => {
       plugin.stop();
     });
 
-    it('is disabled by default, enabled for enterprise if the AI Assistant is enabled, and disabled for platinum', async () => {
+    it('is disabled by default, enabled for enterprise if the AI Assistant is enabled, and disabled for platinum', () => {
       const app = (management.sections.section.ai as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
@@ -107,7 +107,7 @@ describe('Observability AI Assistant Management plugin', () => {
       expect(app.enabled).toBe(false);
     });
 
-    it('is disabled by default for all license types when the AI Assistant is disabled', async () => {
+    it('is disabled by default for all license types when the AI Assistant is disabled', () => {
       const app = (management.sections.section.ai as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
