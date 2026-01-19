@@ -277,6 +277,7 @@ function ReactFlowGraphInner({
               onChange={handleLayoutDirectionChange}
               buttonSize="compressed"
               isIconOnly
+              data-test-subj="serviceMapLayoutToggle"
               css={css`
                 background-color: ${euiTheme.colors.backgroundBasePlain};
                 border-radius: ${euiTheme.border.radius.medium};

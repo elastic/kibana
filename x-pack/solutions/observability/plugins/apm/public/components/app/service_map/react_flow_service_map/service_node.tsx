@@ -61,7 +61,13 @@ export const ServiceNode = memo(
     const CIRCLE_SIZE = 56;
 
     return (
-      <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup
+        direction="column"
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        data-test-subj={`serviceMapNode-service-${data.id}`}
+      >
         {/* Circle container with handles inside for proper edge positioning */}
         <EuiFlexItem
           grow={false}
