@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { StreamDetailFailureStore } from './failure_store';
 import { StreamDetailGeneralData } from './general_data';
 import { useDataStreamStats } from './hooks/use_data_stream_stats';
@@ -27,13 +28,15 @@ export function StreamDetailLifecycle({
 
   const { onPageReady } = usePerformanceContext();
 
+  const queryRangeSeconds = getTimeDifferenceInSeconds(timeState.timeRange);
+
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (definition && !data.isLoading) {
       const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
         meta: {
-          description: `[ttfmp_streams] streamType: ${streamType}`,
+          description: `[ttfmp_streams_detail_retention] streamType: ${streamType}`,
         },
         customMetrics: {
           key1: 'dataStreamStatsTotalDocs',
@@ -42,6 +45,8 @@ export function StreamDetailLifecycle({
           value2: timeState.start,
           key3: 'timeTo',
           value3: timeState.end,
+          key4: 'queryRangeSeconds',
+          value4: queryRangeSeconds,
         },
       });
     }
@@ -52,6 +57,7 @@ export function StreamDetailLifecycle({
     data.stats?.ds?.stats?.totalDocs,
     timeState.start,
     timeState.end,
+    queryRangeSeconds,
   ]);
 
   return (

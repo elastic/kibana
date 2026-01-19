@@ -7,11 +7,11 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery } from '@kbn/observability-plugin/server';
+import { getOutcomeAggregation } from '@kbn/apm-data-access-plugin/server/utils';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getOutcomeAggregation } from '../../../lib/helpers/transaction_error_rate';
 import { fetchSeries } from './fetch_timeseries';
 
 export async function getTransactionFailureRate({

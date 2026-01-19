@@ -27,7 +27,7 @@ export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: Emb
   > = {
     type: APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject(state.serviceName);
       const transactionType$ = new BehaviorSubject(state.transactionType);
@@ -42,19 +42,17 @@ export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: Emb
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            serviceName: serviceName$.getValue(),
-            transactionType: transactionType$.getValue(),
-            transactionName: transactionName$.getValue(),
-            environment: environment$.getValue(),
-            rangeFrom: rangeFrom$.getValue(),
-            rangeTo: rangeTo$.getValue(),
-            rule: rule$.getValue(),
-            alert: alert$.getValue(),
-            kuery: kuery$.getValue(),
-            filters: filters$.getValue(),
-          },
+          ...titleManager.getLatestState(),
+          serviceName: serviceName$.getValue(),
+          transactionType: transactionType$.getValue(),
+          transactionName: transactionName$.getValue(),
+          environment: environment$.getValue(),
+          rangeFrom: rangeFrom$.getValue(),
+          rangeTo: rangeTo$.getValue(),
+          rule: rule$.getValue(),
+          alert: alert$.getValue(),
+          kuery: kuery$.getValue(),
+          filters: filters$.getValue(),
         };
       }
 
@@ -89,17 +87,17 @@ export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: Emb
           filters: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          serviceName$.next(lastSaved?.rawState.serviceName ?? '');
-          transactionType$.next(lastSaved?.rawState.transactionType);
-          transactionName$.next(lastSaved?.rawState.transactionName);
-          environment$.next(lastSaved?.rawState.environment);
-          rangeFrom$.next(lastSaved?.rawState.rangeFrom);
-          rangeTo$.next(lastSaved?.rawState.rangeTo);
-          rule$.next(lastSaved?.rawState.rule as EmbeddableApmAlertingVizProps['rule']);
-          alert$.next(lastSaved?.rawState.alert as EmbeddableApmAlertingVizProps['alert']);
-          kuery$.next(lastSaved?.rawState.kuery);
-          filters$.next(lastSaved?.rawState.filters);
+          titleManager.reinitializeState(lastSaved);
+          serviceName$.next(lastSaved?.serviceName ?? '');
+          transactionType$.next(lastSaved?.transactionType);
+          transactionName$.next(lastSaved?.transactionName);
+          environment$.next(lastSaved?.environment);
+          rangeFrom$.next(lastSaved?.rangeFrom);
+          rangeTo$.next(lastSaved?.rangeTo);
+          rule$.next(lastSaved?.rule as EmbeddableApmAlertingVizProps['rule']);
+          alert$.next(lastSaved?.alert as EmbeddableApmAlertingVizProps['alert']);
+          kuery$.next(lastSaved?.kuery);
+          filters$.next(lastSaved?.filters);
         },
       });
 
