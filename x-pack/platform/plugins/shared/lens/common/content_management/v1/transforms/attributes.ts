@@ -7,7 +7,7 @@
 
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 
-import type { LensAttributes } from '../../../../server/content_management';
+import type { LensAttributes } from '../../../../server/content_management/v1';
 import type { LensSOAttributesV0 } from '../../../../server/content_management/v0';
 
 /**

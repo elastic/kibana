@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-/**
- * Lens CM Item Version `v1`
- */
-export const LENS_ITEM_VERSION_V1 = 1 as const;
-export type LENS_ITEM_VERSION_V1 = typeof LENS_ITEM_VERSION_V1;
+import { objectTypeToGetResultSchema } from '@kbn/content-management-utils';
+
+import { lensSavedObjectSchemaV2 } from './common';
+
+export const lensCMGetResultSchema = objectTypeToGetResultSchema(lensSavedObjectSchemaV2);

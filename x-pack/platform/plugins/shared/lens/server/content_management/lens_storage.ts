@@ -18,7 +18,9 @@ import type { SOWithMetadata } from '@kbn/content-management-utils';
 import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import { LENS_CONTENT_TYPE } from '../../common/constants';
+
+// pick up types for the CM storage from the latest version
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import type {
   LensAttributes,
   LensGetOut,
@@ -164,7 +166,7 @@ export class LensStorage extends SOContentStorage<LensCrud> {
     // transform data from given version to latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.down<
       LensCreateIn['data'],
-      LensCreateIn['data']
+      LensAttributes
     >(data, itemVersion);
 
     if (dataError) {
@@ -240,7 +242,7 @@ export class LensStorage extends SOContentStorage<LensCrud> {
 
     // transform data from given version to latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.down<
-      LensAttributes,
+      LensUpdateIn['data'],
       LensAttributes
     >(data, itemVersion);
 
