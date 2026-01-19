@@ -39,7 +39,6 @@ export const findInternalRuleTemplatesRoute = (
         },
         response: {
           200: {
-            body: () => ruleTemplateResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
           400: {
