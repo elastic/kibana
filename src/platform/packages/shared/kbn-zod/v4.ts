@@ -11,5 +11,10 @@ export * from 'zod/v4';
 import { z as zodV4 } from 'zod/v4';
 import { fromJSONSchema } from './from_json_schema';
 
-// Augment z namespace with fromJSONSchema to match native Zod v4 API
-export const z = Object.assign(zodV4, { fromJSONSchema });
+// Augment z value with fromJSONSchema to match native Zod v4 API
+Object.assign(zodV4, { fromJSONSchema });
+
+// Re-export the augmented z value
+// The z namespace type from 'zod/v4' is already exported above and will merge with this value export
+export { zodV4 as z };
+
