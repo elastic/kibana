@@ -121,7 +121,6 @@ const servicesRoute = createApmServerRoute({
     const spacesStart = await plugins.spaces?.start();
     const spaceId = spacesStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-    // Check if user has SLO read capability
     const capabilities = await coreStart.capabilities.resolveCapabilities(request, {
       capabilityPath: 'slo.*',
     });

@@ -26,7 +26,6 @@ export interface ServiceSloInfo {
 
 export type ServiceSlosResponse = ServiceSloInfo[];
 
-// Map SLO schema status (uppercase) to our lowercase status
 const STATUS_MAP: Record<string, SloStatus> = {
   VIOLATED: 'violated',
   DEGRADING: 'degrading',
@@ -66,7 +65,6 @@ export async function getServicesSlos({
       ? [{ term: { 'service.environment': environment } }]
       : [];
 
-  // Only query for specific services if provided (optimization)
   const serviceNameFilter = serviceNames?.length
     ? [{ terms: { 'service.name': serviceNames } }]
     : [];
