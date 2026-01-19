@@ -16,7 +16,7 @@ import { getTypedSearch } from '../../utils/get_typed_search';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
-import { warningAndAboveLogFilter } from '../../utils/ecs_otel_fields';
+import { warningAndAboveLogFilter } from '../../utils/warning_and_above_log_filter';
 
 export async function getToolHandler({
   core,

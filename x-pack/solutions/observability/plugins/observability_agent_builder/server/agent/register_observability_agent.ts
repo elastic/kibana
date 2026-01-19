@@ -45,9 +45,10 @@ export async function registerObservabilityAgent({
       instructions:
         dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
         
-        ${getInvestigationInstructions()}
+        ${getInvestigationInstructions()}        
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
+        ${getKqlInstructions()}
       `),
       tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
     },
@@ -70,6 +71,32 @@ function getInvestigationInstructions() {
   `);
 }
 
+function getToolSelectionInstructions() {
+  return dedent(`
+    ### TOOL SELECTION
+    
+    **Overview (start here)**
+    - \`get_services\`: Service health with RED metrics (latency, error rate, throughput)
+    - \`get_alerts\`: Active alerts for services/hosts
+    - \`get_hosts\`: Infrastructure health (CPU, memory, disk, network)
+    
+    **Drill-down (narrow the scope)**
+    - \`get_trace_metrics\`: RED metrics with flexible groupBy (service → transaction → host)
+    - \`get_downstream_dependencies\`: Service topology and blast radius
+    - \`get_log_categories\`: Summarize log patterns into categories
+    
+    **Timeline (when did it change?)**
+    - \`get_trace_change_points\`: Detect changes in latency/throughput/failure rate
+    - \`get_log_change_points\`: Detect changes in log message patterns
+    - \`get_metric_change_points\`: Detect changes in infrastructure metrics
+    - \`run_log_rate_analysis\`: Correlate log volume spikes/drops with field values
+    
+    **Deep investigation (understand why)**
+    - \`get_correlated_logs\`: Full log sequences around errors (trace by correlation ID)
+    - \`get_anomaly_detection_jobs\`: ML-detected anomalies
+  `);
+}
+
 function getReasoningInstructions() {
   return dedent(`
     ### REASONING PRINCIPLES
@@ -86,5 +113,18 @@ function getFieldDiscoveryInstructions() {
     ### FIELD DISCOVERY
     Before using field names in \`groupBy\`, \`kqlFilter\`, or \`aggregation.field\` parameters, call \`${OBSERVABILITY_GET_INDEX_INFO_TOOL_ID}\` first.
     Clusters use different naming conventions (ECS vs OpenTelemetry) - discovering fields first prevents errors.
+  `);
+}
+
+function getKqlInstructions() {
+  return dedent(`
+    ### KQL (Kibana Query Language)
+    Use KQL syntax for \`kqlFilter\` parameters:
+    - Match: \`field: value\`, \`field: (a OR b OR c)\`
+    - Range: \`field > 100\`, \`field >= 10 and field <= 20\`
+    - Wildcards: \`field: prefix*\` (trailing only)
+    - Negation: \`NOT field: value\`
+    - Combine with \`AND\`/\`OR\`, use parentheses for precedence
+    - Use quotes for exact phrases in text fields: \`message: "connection refused"\`
   `);
 }

@@ -30,41 +30,14 @@ export const DEFAULT_CORRELATION_IDENTIFIER_FIELDS = [
 export const DEFAULT_LOG_SOURCE_FIELDS = [
   '@timestamp',
   'message',
-  // OpenTelemetry log fields
-  'body.text',
-  'severity_text',
-  'severity_number',
-  // Correlation fields
-  ...DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
-
-  // Error severity fields
   'log.level',
-  'level',
-  'severity',
-  'event.severity',
-
-  // Service fields
   'service.*',
-
-  // Host fields
   'host.*',
-
-  // Container fields
   'container.*',
-
-  // Kubernetes fields
   'kubernetes.*',
-
-  // Cloud fields
   'cloud.*',
-
-  // Error fields
   'error.*',
-
-  // Event fields
   'event.*',
-
-  // HTTP/URL/User Agent fields
   'url.*',
   'user_agent.*',
   'http.request.method',

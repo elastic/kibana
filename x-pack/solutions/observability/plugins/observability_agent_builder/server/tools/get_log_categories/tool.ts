@@ -46,17 +46,16 @@ const getLogsSchema = z.object({
     ),
   fields: z
     .array(z.string())
-    .optional()
+    .default([])
     .describe(
       'Additional fields to return for each log sample. "@timestamp" and the message field are always included. Example: ["service.name", "host.name"]'
     ),
   messageField: z
     .string()
-    .optional()
+    .default('message')
     .describe(
-      'The field containing the log message. Use "message" for ECS logs or "body.text" for OpenTelemetry logs. Defaults to "message".'
-    )
-    .default('message'),
+      'The field containing the log message. Use "message" for ECS logs or "body.text" for OpenTelemetry logs.'
+    ),
 });
 
 export function createGetLogCategoriesTool({
@@ -102,7 +101,7 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, { esClient }) => {
-      const { index, start, end, kqlFilter, fields = [], messageField } = toolParams;
+      const { index, start, end, kqlFilter, fields, messageField } = toolParams;
 
       try {
         const { highSeverityCategories, lowSeverityCategories } = await getToolHandler({

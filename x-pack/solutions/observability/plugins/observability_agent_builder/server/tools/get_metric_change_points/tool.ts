@@ -43,13 +43,10 @@ const getMetricChangePointsSchema = z.object({
     .optional(),
   groupBy: z
     .array(z.string())
+    .default([])
     .describe(
-      `Optional keyword fields to break down metrics by to identify which specific group experienced a change.
-Use only low-cardinality fields. Using many fields or high-cardinality fields can cause a large number of groups and severely impact performance.
-Examples: ['service.name', 'service.version'], ['service.name', 'host.name'], ['cloud.availability_zone']
-`
-    )
-    .optional(),
+      `Fields to break down metrics by. Use low-cardinality fields. Examples: ['service.name', 'service.version'], ['service.name', 'host.name'], ['cloud.availability_zone'].`
+    ),
 });
 
 export function createGetMetricChangePointsTool({
@@ -80,7 +77,7 @@ When to use:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, index, kqlFilter, aggregation, groupBy = [] }, { esClient }) => {
+    handler: async ({ start, end, index, kqlFilter, aggregation, groupBy }, { esClient }) => {
       try {
         const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
 
