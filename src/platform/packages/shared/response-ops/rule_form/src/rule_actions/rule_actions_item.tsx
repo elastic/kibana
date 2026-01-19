@@ -398,22 +398,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const onActionGroupChange = useCallback(
     (group: string) => {
-      // const prevActionGroup = getSelectedActionGroup({
-      //   group: action.group,
-      //   ruleType: selectedRuleType,
-      //   ruleTypeModel: selectedRuleTypeModel,
-      // });
-      // const prevDefaultMessage =
-      //   prevActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
-
-      // const nextActionGroup = getSelectedActionGroup({
-      //   group,
-      //   ruleType: selectedRuleType,
-      //   ruleTypeModel: selectedRuleTypeModel,
-      // });
-      // const nextDefaultMessage =
-      //   nextActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
-
       updateActionParamsMessage(group);
 
       dispatch({
@@ -425,16 +409,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         },
       });
 
-      // if (!action.params.message || action.params.message === prevDefaultMessage) {
-      //   const newActionParams = { ...action.params, message: nextDefaultMessage };
-      //   dispatch({
-      //     type: 'setActionParams',
-      //     payload: {
-      //       uuid: action.uuid!,
-      //       value: newActionParams,
-      //     },
-      //   });
-      // }
       onDefaultParamsChange(group, action.frequency?.summary);
     },
     [action, dispatch, onDefaultParamsChange, updateActionParamsMessage]
