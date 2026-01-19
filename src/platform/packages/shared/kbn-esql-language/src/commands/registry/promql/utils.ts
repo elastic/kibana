@@ -9,7 +9,12 @@
 
 import { within } from '../../../ast/location';
 import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
-import { getPromqlParam, isPromqlParamName, looksLikePromqlParamAssignment } from './parameters';
+import {
+  getPromqlParam,
+  isPromqlParamName,
+  looksLikePromqlParamAssignment,
+  PromqlParamValueType,
+} from './parameters';
 import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
 
 type PromqlPositionType =
@@ -180,11 +185,11 @@ export function isParamValueComplete(
     return true;
   }
 
-  if (definition.valueType === 'static') {
+  if (definition.valueType === PromqlParamValueType.Static) {
     return Boolean(definition.suggestedValues?.includes(firstToken));
   }
 
-  if (definition.valueType === 'date_literals') {
+  if (definition.valueType === PromqlParamValueType.DateLiterals) {
     return isDateLiteralToken(firstToken);
   }
 

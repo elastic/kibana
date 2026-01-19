@@ -26,6 +26,7 @@ import {
   getPromqlParamKeySuggestions,
   getPromqlParamValueSuggestions,
   getUsedPromqlParamNames,
+  PromqlParamValueType,
 } from './parameters';
 import {
   getPosition,
@@ -208,12 +209,12 @@ function suggestParamValues(
 
   const { valueType } = definition;
 
-  if (valueType === 'timeseries_sources') {
+  if (valueType === PromqlParamValueType.TimeseriesSources) {
     const sources = context?.timeSeriesSources;
     return sources ? specialIndicesToSuggestions(sources) : [];
   }
 
-  if (valueType === 'date_literals') {
+  if (valueType === PromqlParamValueType.DateLiterals) {
     return getDateLiterals();
   }
 

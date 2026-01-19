@@ -12,7 +12,11 @@ import type { ISuggestionItem } from '../types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { SuggestionCategory } from '../../../shared/sorting/types';
 
-type PromqlParamValueType = 'timeseries_sources' | 'date_literals' | 'static';
+export enum PromqlParamValueType {
+  TimeseriesSources = 'timeseries_sources',
+  DateLiterals = 'date_literals',
+  Static = 'static',
+}
 type PromqlParamName = (typeof PROMQL_PARAMS)[number]['name'];
 
 interface PromqlParamDefinition {
@@ -25,15 +29,27 @@ interface PromqlParamDefinition {
 const PROMQL_REQUIRED_PARAMS: PromqlParamName[] = ['step', 'start', 'end'];
 
 const PROMQL_PARAMS: PromqlParamDefinition[] = [
-  { name: 'index', description: 'Index pattern to query', valueType: 'timeseries_sources' },
+  {
+    name: 'index',
+    description: 'Index pattern to query',
+    valueType: PromqlParamValueType.TimeseriesSources,
+  },
   {
     name: 'step',
     description: 'Query resolution step (e.g. 1m, 5m, 1h)',
-    valueType: 'static',
+    valueType: PromqlParamValueType.Static,
     suggestedValues: ['1m', '5m', '15m', '30m', '1h', '6h', '1d'],
   },
-  { name: 'start', description: 'Range query start time', valueType: 'date_literals' },
-  { name: 'end', description: 'Range query end time', valueType: 'date_literals' },
+  {
+    name: 'start',
+    description: 'Range query start time',
+    valueType: PromqlParamValueType.DateLiterals,
+  },
+  {
+    name: 'end',
+    description: 'Range query end time',
+    valueType: PromqlParamValueType.DateLiterals,
+  },
 ];
 
 export const PROMQL_PARAM_NAMES: string[] = PROMQL_PARAMS.map((param) => param.name);
