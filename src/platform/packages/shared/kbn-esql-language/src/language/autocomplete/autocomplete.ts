@@ -240,7 +240,7 @@ export async function suggest(
     // Indices are suggested in FROM/TS commands, fields are suggested in other commands
     const commandName = astContext.command.name.toLowerCase();
     const isSourceCommand = commandName === 'from' || commandName === 'ts';
-    
+
     // Check if we have field suggestions (kind 'Variable' indicates fields)
     const hasFieldSuggestions = commandsSpecificSuggestions.some((s) => s.kind === 'Variable');
 
