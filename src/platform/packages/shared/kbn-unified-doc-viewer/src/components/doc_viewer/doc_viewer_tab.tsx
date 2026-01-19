@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import type { DocView, DocViewRenderProps } from '../../types';
 import type { DocViewerProps } from './doc_viewer';
@@ -32,10 +32,9 @@ export const DocViewerTab = ({
   initialDocViewerState,
   onInitialDocViewerStateChange,
 }: Props) => {
-  const initialState = useMemo(
-    () => initialDocViewerState?.docViewerTabsState?.[docView.id] as ExtractState<typeof docView>,
-    [initialDocViewerState, docView.id]
-  );
+  const initialState = initialDocViewerState?.docViewerTabsState?.[docView.id] as ExtractState<
+    typeof docView
+  >;
 
   const onInitialStateChange = useCallback(
     (state: object) => {
