@@ -121,9 +121,20 @@ export const RuleFormRoute = () => {
           }
         }}
         onSubmit={(ruleId) => {
-          application.navigateToApp('management', {
-            path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
-          });
+          if (returnApp === 'rules') {
+            // Navigate to rule details page in the rules app
+            application.navigateToApp('rules', {
+              path: getRuleDetailsRoute(ruleId),
+            });
+          } else if (returnApp && returnPath) {
+            // Navigate back to the original app/path for other apps
+            application.navigateToApp(returnApp, { path: returnPath });
+          } else {
+            // Default: navigate to management app rule details (existing behavior)
+            application.navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
+            });
+          }
         }}
         multiConsumerSelection={AlertConsumers.ALERTS}
       />
