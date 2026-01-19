@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EndpointScriptsGenerator } from '../../../common/endpoint/data_generators/endpoint_scripts_generator';
+import { SCRIPTS_LIBRARY_ROUTE } from '../../../common/endpoint/constants';
+import type { EndpointScriptListApiResponse } from '../../../common/endpoint/types';
+import {
+  httpHandlerMockFactory,
+  type ResponseProvidersInterface,
+} from '../../common/mock/endpoint/http_handler_mock_factory';
+
+export type ScriptsLibraryHttpMocksInterface = ResponseProvidersInterface<{
+  getScriptsList: () => EndpointScriptListApiResponse;
+}>;
+
+export const scriptsLibraryHttpMocks = httpHandlerMockFactory<ScriptsLibraryHttpMocksInterface>([
+  {
+    id: 'getScriptsList',
+    method: 'get',
+    path: SCRIPTS_LIBRARY_ROUTE,
+    handler: (): EndpointScriptListApiResponse => {
+      // default to 13 items
+      const items = Array.from({ length: 13 }).fill({}) as EndpointScriptListApiResponse['data'];
+      const response = new EndpointScriptsGenerator('seed').generateListOfScripts(items);
+      return {
+        data: response,
+        page: 1,
+        pageSize: 10,
+        sortField: 'name',
+        sortDirection: 'asc',
+        total: items.length,
+      };
+    },
+  },
+]);
