@@ -1724,14 +1724,13 @@ class AgentPolicyService {
         appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
         policy.has_agent_version_conditions
       ) {
-        fleetServerPolicies.push(
-          ...(await getVersionSpecificPolicies(
-            soClient,
-            fleetServerPolicy,
-            fullPolicy,
-            options?.agentVersions
-          ))
+        const versionSpecificPolicies = await getVersionSpecificPolicies(
+          soClient,
+          fleetServerPolicy,
+          fullPolicy,
+          options?.agentVersions
         );
+        fleetServerPolicies.push(...versionSpecificPolicies);
       }
     }
 

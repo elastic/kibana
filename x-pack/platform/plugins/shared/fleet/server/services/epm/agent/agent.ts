@@ -262,6 +262,7 @@ function semverSatisfiesHelper(
   versionCondition: string,
   options: any
 ) {
+  // without agent version (parent policy), the condition is not met, the conditional template is not included
   if (!agentVersion) {
     return options.inverse(this);
   }
