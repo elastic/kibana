@@ -1154,6 +1154,7 @@ x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elasti
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
+x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/nav-icons @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-team
 x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-team
