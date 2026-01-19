@@ -86,7 +86,7 @@ export function getDashboardApi({
     viewModeManager,
     incomingEmbeddables,
     initialState.panels,
-    initialState.controlGroupInput,
+    initialState.pinned_panels,
     trackPanel
   );
 
@@ -138,7 +138,7 @@ export function getDashboardApi({
   });
 
   function getState() {
-    const { panels, controlGroupInput } = layoutManager.internalApi.serializeLayout();
+    const { panels, pinned_panels } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const projectRoutingState = projectRoutingManager?.internalApi.getState();
     return {
@@ -146,7 +146,7 @@ export function getDashboardApi({
       ...unifiedSearchState,
       ...projectRoutingState,
       panels,
-      controlGroupInput,
+      pinned_panels,
     } satisfies DashboardState;
   }
 
