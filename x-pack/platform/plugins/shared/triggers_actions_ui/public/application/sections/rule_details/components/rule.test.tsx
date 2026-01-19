@@ -65,15 +65,6 @@ jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
   default: mockAlertsTable,
 }));
 
-const mockRuleAlertList = jest.fn(() => {
-  return <div data-test-subj="ruleAlertList" />;
-});
-jest.mock('./rule_alert_list', () => ({
-  __esModule: true,
-  RuleAlertList: mockRuleAlertList,
-  default: mockRuleAlertList,
-}));
-
 const { loadExecutionLogAggregations } = jest.requireMock(
   '../../../lib/rule_api/load_execution_log_aggregations'
 );
