@@ -71,14 +71,11 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
   }, [parentApi]);
 
   useEffect(() => {
-    const publishesFocusedPanelId = apiPublishesFocusedPanelId(parentApi);
-    if (publishesFocusedPanelId) {
-      const focusSub = parentApi.focusedPanelId$
+    if (parentApi && apiPublishesFocusedPanelId(parentApi)) {
+      const focusedPanelIdSubscription = parentApi.focusedPanelId$
         .pipe(distinctUntilChanged())
-        .subscribe((focusId) => {
-          setIsEditFlyoutOpen(Boolean(focusId));
-        });
-      return () => focusSub.unsubscribe();
+        .subscribe((focusId) => setIsEditFlyoutOpen(Boolean(focusId)));
+      return () => focusedPanelIdSubscription.unsubscribe();
     }
   }, [parentApi]);
 
