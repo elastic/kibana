@@ -17,7 +17,7 @@ import type {
   ESQLSingleAstItem,
 } from '../../../types';
 import type { SupportedDataType } from '../..';
-import { MAP_PARAMS_REGEX } from '../../definitions/utils/autocomplete/expressions/signature_analyzer';
+import { TypeMap, validateMap } from '../../definitions/utils/validation/map';
 
 export const validate = (command: ESQLAstAllCommands, commands: ESQLCommand[]): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
@@ -78,25 +78,6 @@ function getSettingValue(command: ESQLAstAllCommands): ESQLSingleAstItem | null 
   return null;
 }
 
-function getValuesTypeFromMapParamDefinition(mapParamsStr: string): Record<string, string[]> {
-  const result: Record<string, string[]> = {};
-
-  for (const match of mapParamsStr.matchAll(MAP_PARAMS_REGEX)) {
-    const paramName = match[1];
-    const rawType = match[4] ?? 'keyword';
-    const typesFromDefinition = rawType.split(',').map((type) => type.trim() ?? 'keyword');
-    result[paramName] = typesFromDefinition;
-  }
-
-  return result;
-}
-
-// the setting 'approximate' uses 'map_param' as a type,
-// whereas the expression type in the AST is 'function_named_parameters'.
-const TypeMap: Record<SupportedDataType, string> = {
-  function_named_parameters: 'map_param',
-};
-
 function validateSettingValues(
   command: ESQLAstAllCommands,
   setting: { name: string; type: SupportedDataType[]; mapParams?: string }
@@ -117,38 +98,7 @@ function validateSettingValues(
     }
 
     // If the setting value is a map, validate its parameters
-    if (valueType === 'map_param' && isMap(settingValue) && setting.mapParams) {
-      const mapParamsDefinition = getValuesTypeFromMapParamDefinition(setting.mapParams);
-      const mapParamsEntries = settingValue.entries;
-
-      for (const param of mapParamsEntries) {
-        const paramKey = 'valueUnquoted' in param.key ? param.key.valueUnquoted : param.key.text;
-        if (!mapParamsDefinition[paramKey]) {
-          return getMessageFromId({
-            messageId: 'unknownMapParameterName',
-            values: { paramName: paramKey, map: JSON.stringify(mapParamsDefinition) },
-            locations: param.key.location,
-          });
-        }
-
-        const paramValueType = getExpressionType(param.value);
-        if (
-          mapParamsDefinition[paramKey] &&
-          param.incomplete === false &&
-          !mapParamsDefinition[paramKey].includes(paramValueType)
-        ) {
-          return getMessageFromId({
-            messageId: 'invalidMapParameterValueType',
-            values: {
-              paramName: paramKey,
-              expectedTypes: mapParamsDefinition[paramKey].join(', '),
-              actualType: paramValueType,
-            },
-            locations: param.value.location,
-          });
-        }
-      }
-    }
+    return validateMap(settingValue, setting.mapParams || '');
   }
   return null;
 }
