@@ -49,7 +49,7 @@ import {
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
-import { useDataState } from '../../hooks/use_data_state';
+import { useCustomDataState } from '../../hooks/use_data_state';
 
 /**
  * Helper function to build the top nav links
@@ -89,7 +89,12 @@ export const useTopNavLinks = ({
       toasts: services.notifications.toasts,
     });
   const totalHits$ = state.dataState.data$.totalHits$;
-  const totalHitsState = useDataState(totalHits$);
+  // Sometimes state can jump from one complete to another complete state
+  // without passing through loading, so be sure to check the result before discarding the update
+  const totalHitsState = useCustomDataState(
+    totalHits$,
+    (next, current) => next.fetchStatus === current.fetchStatus && next.result !== current.result
+  );
 
   const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
     ruleTypes

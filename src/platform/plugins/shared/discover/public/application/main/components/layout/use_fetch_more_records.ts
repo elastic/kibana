@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import { FetchStatus } from '../../../types';
-import { useDataState } from '../../hooks/use_data_state';
+import { useCustomDataState, useDataState } from '../../hooks/use_data_state';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
@@ -39,7 +39,12 @@ export const useFetchMoreRecords = ({
   const documents$ = stateContainer.dataState.data$.documents$;
   const totalHits$ = stateContainer.dataState.data$.totalHits$;
   const documentState = useDataState(documents$);
-  const totalHitsState = useDataState(totalHits$);
+  // Sometimes state can jump from one complete to another complete state
+  // without passing through loading, so be sure to check the result before discarding the update
+  const totalHitsState = useCustomDataState(
+    totalHits$,
+    (next, current) => next.fetchStatus === current.fetchStatus && next.result !== current.result
+  );
   const isEsqlMode = useIsEsqlMode();
 
   const rows = documentState.result || [];
