@@ -14,7 +14,7 @@ export * from './tools/get_correlated_logs/correlated_logs';
 export * from './tools/get_downstream_dependencies/dependencies';
 export * from './tools/get_alerts/alerts';
 export * from './tools/get_alerts/apm_errors';
-export * from './tools/get_data_sources/data_sources';
 export * from './tools/run_log_rate_analysis/log_rate_analysis_spike';
 export * from './tools/get_anomaly_detection_jobs/anomalies';
 export * from './tools/get_trace_metrics/trace_metrics';
+export * from './tools/get_index_info/field_discovery';
