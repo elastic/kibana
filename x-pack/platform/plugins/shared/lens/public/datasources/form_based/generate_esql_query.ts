@@ -61,6 +61,20 @@ export type EsqlQueryResult =
       reason: EsqlConversionFailureReason;
       operationType?: string;
     };
+
+/**
+ * Helper function to create a consistent failure result for ES|QL query generation.
+ */
+function getEsqlQueryFailedResult(
+  reason: EsqlConversionFailureReason,
+  operationType?: string
+): EsqlQueryResult {
+  if (operationType) {
+    return { success: false, reason, operationType };
+  }
+  return { success: false, reason };
+}
+
 // Need a more complex logic for decimals percentiles
 
 export function generateEsqlQuery(
@@ -77,32 +91,32 @@ export function generateEsqlQuery(
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   const utcOffset = moment.tz(timeZone).utcOffset() / 60;
   if (utcOffset !== 0) {
-    return { success: false, reason: 'non_utc_timezone' };
+    return getEsqlQueryFailedResult('non_utc_timezone');
   }
 
   // Check for unsupported column features in layer.columns
   for (const col of Object.values(layer.columns)) {
     if (col.operationType === 'formula') {
-      return { success: false, reason: 'formula_not_supported' };
+      return getEsqlQueryFailedResult('formula_not_supported');
     }
     if (col.timeShift) {
-      return { success: false, reason: 'time_shift_not_supported' };
+      return getEsqlQueryFailedResult('time_shift_not_supported');
     }
     if ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime) {
-      return { success: false, reason: 'runtime_field_not_supported' };
+      return getEsqlQueryFailedResult('runtime_field_not_supported');
     }
   }
 
   // Also check esAggEntries for unsupported features (in case columns differ)
   for (const [, col] of esAggEntries) {
     if (col.operationType === 'formula') {
-      return { success: false, reason: 'formula_not_supported' };
+      return getEsqlQueryFailedResult('formula_not_supported');
     }
     if (col.timeShift) {
-      return { success: false, reason: 'time_shift_not_supported' };
+      return getEsqlQueryFailedResult('time_shift_not_supported');
     }
     if ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime) {
-      return { success: false, reason: 'runtime_field_not_supported' };
+      return getEsqlQueryFailedResult('runtime_field_not_supported');
     }
   }
 
@@ -224,14 +238,13 @@ export function generateEsqlQuery(
   // Check for metric conversion errors
   const metricError = metrics.find((m) => typeof m === 'object' && 'error' in m);
   if (metricError && typeof metricError === 'object' && 'error' in metricError) {
-    return {
-      success: false,
-      reason: metricError.error,
-      ...('operationType' in metricError ? { operationType: metricError.operationType } : {}),
-    };
+    return getEsqlQueryFailedResult(
+      metricError.error,
+      'operationType' in metricError ? metricError.operationType : undefined
+    );
   }
   if (metrics.some((m) => !m)) {
-    return { success: false, reason: 'function_not_supported' };
+    return getEsqlQueryFailedResult('function_not_supported');
   }
 
   const buckets = bucketEsAggsEntries.map(([colId, col], index) => {
@@ -353,14 +366,13 @@ export function generateEsqlQuery(
   // Check for bucket conversion errors
   const bucketError = buckets.find((b) => typeof b === 'object' && 'error' in b);
   if (bucketError && typeof bucketError === 'object' && 'error' in bucketError) {
-    return {
-      success: false,
-      reason: bucketError.error,
-      ...('operationType' in bucketError ? { operationType: bucketError.operationType } : {}),
-    };
+    return getEsqlQueryFailedResult(
+      bucketError.error,
+      'operationType' in bucketError ? bucketError.operationType : undefined
+    );
   }
   if (buckets.some((m) => !m)) {
-    return { success: false, reason: 'function_not_supported' };
+    return getEsqlQueryFailedResult('function_not_supported');
   }
 
   // Type assertion after error checks - we know these are all strings now
@@ -369,7 +381,7 @@ export function generateEsqlQuery(
 
   if (validBuckets.length > 0) {
     if (validBuckets.some((b) => !b || b.includes('undefined'))) {
-      return { success: false, reason: 'function_not_supported' };
+      return getEsqlQueryFailedResult('function_not_supported');
     }
 
     if (validMetrics.length > 0) {
@@ -406,6 +418,6 @@ export function generateEsqlQuery(
       esAggsIdMap,
     };
   } catch (e) {
-    return { success: false, reason: 'unknown' };
+    return getEsqlQueryFailedResult('unknown');
   }
 }
