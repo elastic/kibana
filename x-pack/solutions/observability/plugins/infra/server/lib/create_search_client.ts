@@ -12,7 +12,6 @@ import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/ex
 import type { InfraPluginRequestHandlerContext } from '../types';
 import type { CallWithRequestParams, InfraDatabaseSearchResponse } from './adapters/framework';
 import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
-
 export const createSearchClient =
   (
     requestContext: InfraPluginRequestHandlerContext,

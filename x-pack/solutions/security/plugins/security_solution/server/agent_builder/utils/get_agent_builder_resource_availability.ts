@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolAvailabilityResult } from '@kbn/onechat-server';
+import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**

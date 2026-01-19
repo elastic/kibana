@@ -17,13 +17,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { ConnectorListButton } from '../connector_list_button/connector_list_button';
 import { useStreamDescriptionApi } from './stream_description/use_stream_description_api';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
+import type { AIFeatures } from '../../hooks/use_ai_features';
+import { DescriptionGenerationControl } from './stream_description/description_generation_control';
 
 export interface AISummaryProps {
   definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
+  aiFeatures: AIFeatures | null;
 }
 
 const STREAM_DESCRIPTION_PANEL_TITLE = i18n.translate(
@@ -37,7 +39,7 @@ const STREAM_DESCRIPTION_HELP = i18n.translate(
   'xpack.streams.streamDetailView.streamDescription.helpText',
   {
     defaultMessage:
-      'This is a natural language description of your data. This will be used in AI workflows like feature identification and significant event generation.',
+      'This is a natural language description of your data. This will be used in AI workflows like feature identification and significant event generation. Generation uses the last 24 hours of data.',
   }
 );
 
@@ -45,13 +47,6 @@ const STREAM_DESCRIPTION_EMPTY = i18n.translate(
   'xpack.streams.streamDetailView.streamDescription.emptyText',
   {
     defaultMessage: 'No description',
-  }
-);
-
-const GENERATE_DESCRIPTION_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.streamDetailView.streamDescription.generateButtonLabel',
-  {
-    defaultMessage: 'Generate description',
   }
 );
 
@@ -83,17 +78,26 @@ const CANCEL_LABEL = i18n.translate(
   }
 );
 
-export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refreshDefinition }) => {
+export const StreamDescription: React.FC<AISummaryProps> = ({
+  definition,
+  refreshDefinition,
+  aiFeatures,
+}) => {
   const {
-    isGenerating,
     description,
     isUpdating,
     isEditing,
     setDescription,
     onCancelEdit,
-    onGenerateDescription,
     onSaveDescription,
     onStartEditing,
+    isTaskLoading,
+    task,
+    taskError,
+    refreshTask,
+    getDescriptionGenerationStatus,
+    scheduleDescriptionGenerationTask,
+    cancelDescriptionGenerationTask,
     areButtonsDisabled,
   } = useStreamDescriptionApi({ definition, refreshDefinition });
 
@@ -139,19 +143,6 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                       </EuiFlexItem>
                     )}
                     <EuiFlexItem grow={false}>
-                      <ConnectorListButton
-                        buttonProps={{
-                          size: 's',
-                          iconType: 'sparkles',
-                          children: GENERATE_DESCRIPTION_BUTTON_LABEL,
-                          onClick: onGenerateDescription,
-                          isDisabled: areButtonsDisabled,
-                          isLoading: isGenerating,
-                          'data-test-subj': 'stream_description_generate_button',
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
                       <EuiButton
                         iconType={isEditing ? 'save' : 'pencil'}
                         size="s"
@@ -174,6 +165,18 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                       >
                         {isEditing ? SAVE_DESCRIPTION_BUTTON_LABEL : EDIT_DESCRIPTION_BUTTON_LABEL}
                       </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <DescriptionGenerationControl
+                        isTaskLoading={isTaskLoading}
+                        task={task}
+                        taskError={taskError}
+                        refreshTask={refreshTask}
+                        getDescriptionGenerationStatus={getDescriptionGenerationStatus}
+                        scheduleDescriptionGenerationTask={scheduleDescriptionGenerationTask}
+                        cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
+                        aiFeatures={aiFeatures}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ),
@@ -202,16 +205,15 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ConnectorListButton
-                    buttonProps={{
-                      size: 'm',
-                      iconType: 'sparkles',
-                      children: GENERATE_DESCRIPTION_BUTTON_LABEL,
-                      onClick: onGenerateDescription,
-                      isDisabled: areButtonsDisabled,
-                      isLoading: isGenerating,
-                      'data-test-subj': 'stream_description_generate_button',
-                    }}
+                  <DescriptionGenerationControl
+                    isTaskLoading={isTaskLoading}
+                    task={task}
+                    taskError={taskError}
+                    refreshTask={refreshTask}
+                    getDescriptionGenerationStatus={getDescriptionGenerationStatus}
+                    scheduleDescriptionGenerationTask={scheduleDescriptionGenerationTask}
+                    cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
+                    aiFeatures={aiFeatures}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

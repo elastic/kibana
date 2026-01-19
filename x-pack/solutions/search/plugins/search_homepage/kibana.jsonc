@@ -23,7 +23,7 @@
       "usageCollection",
       "sampleDataIngest",
       "dataViews",
-      "onechat",
+      "agentBuilder",
     ],
     "requiredBundles": [
       "kibanaReact"

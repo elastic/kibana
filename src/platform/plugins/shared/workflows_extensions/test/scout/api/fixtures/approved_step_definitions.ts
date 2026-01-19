@@ -25,11 +25,27 @@
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
+    id: 'ai.agent',
+    handlerHash: '82a43b4327d93a7e8ae69676e2571cc3701d41ebb0ad2b428c80f3243062db12',
+  },
+  {
     id: 'ai.prompt',
     handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
   },
   {
-    id: 'onechat.runAgent',
-    handlerHash: '4f61ed4415041b7423c43fb4a2ef0d19032360092cef14b99587c2003ba7667e',
+    id: 'data.dedupe',
+    handlerHash: '16c3b3d67e68e77e66ed68869790a4388423a5b4b5aa8a194035f3ff52192836',
+  },
+  {
+    id: 'data.map',
+    handlerHash: '6e795a15958a869b328bc8a19836958eafaf088fad7a20a377617fff453dc513',
+  },
+  {
+    id: 'data.regex_extract',
+    handlerHash: 'ab7b47758fa93b773f537351149845c8b60c22ae10efd0e1c592406170bb3cb6',
+  },
+  {
+    id: 'data.regex_replace',
+    handlerHash: '95c4970a0154de57472d394bc05514c6dcc483b74abb008b2950a5816398aaae',
   },
 ];

@@ -12,6 +12,8 @@ class SearchIndicesDocLinks {
   public searchAPIReference: string = '';
   public setupSemanticSearch: string = '';
   public analyzeLogs: string = '';
+  public elasticInferenceService: string = '';
+  public elasticInferenceServicePricing: string = '';
 
   constructor() {}
 
@@ -20,6 +22,8 @@ class SearchIndicesDocLinks {
     this.setupSemanticSearch = newDocLinks.enterpriseSearch.semanticSearch;
     this.analyzeLogs = newDocLinks.serverlessSearch.integrations;
     this.searchAPIReference = newDocLinks.query.queryDsl;
+    this.elasticInferenceService = newDocLinks.elasticsearch.elasticInferenceService;
+    this.elasticInferenceServicePricing = newDocLinks.elasticsearch.elasticInferenceServicePricing;
   }
 }
 export const docLinks = new SearchIndicesDocLinks();

@@ -55,6 +55,7 @@ export function registerSearchRoute(
                 retrieveResults: schema.maybe(schema.boolean()),
                 stream: schema.maybe(schema.boolean()),
                 requestHash: schema.maybe(schema.string()),
+                projectRouting: schema.maybe(schema.string()),
               },
               { unknowns: 'allow' }
             ),
@@ -70,6 +71,7 @@ export function registerSearchRoute(
           retrieveResults,
           stream,
           requestHash,
+          projectRouting,
           ...searchRequest
         } = request.body;
         const { strategy, id } = request.params;
@@ -104,6 +106,7 @@ export function registerSearchRoute(
                   retrieveResults,
                   stream,
                   requestHash,
+                  projectRouting,
                 }
               )
               .pipe(first())

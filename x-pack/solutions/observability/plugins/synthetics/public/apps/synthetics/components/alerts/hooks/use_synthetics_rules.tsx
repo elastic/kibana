@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { selectDynamicSettings } from '../../../state/settings';
+import { selectDynamicSettings } from '../../../state/settings/selectors';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import {
   selectSyntheticsAlerts,
@@ -26,9 +26,9 @@ import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/syntheti
 import {
   selectAlertFlyoutVisibility,
   selectIsNewRule,
-  selectMonitorListState,
   setAlertFlyoutVisible,
 } from '../../../state';
+import { selectMonitorListState } from '../../../state/monitor_list/selectors';
 import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const useSyntheticsRules = (isOpen: boolean) => {

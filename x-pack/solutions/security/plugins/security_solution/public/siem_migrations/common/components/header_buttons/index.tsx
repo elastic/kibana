@@ -133,7 +133,6 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
             fullWidth
           />
         </EuiFlexItem>
-        <EuiSpacer size="s" />
         <EuiFlexItem grow={false}>{addAnotherMigrationButton}</EuiFlexItem>
       </EuiFlexGroup>
     );

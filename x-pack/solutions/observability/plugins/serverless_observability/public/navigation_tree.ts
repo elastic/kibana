@@ -212,7 +212,6 @@ export const createNavigationTree = ({
         {
           link: 'agent_builder',
           icon: LazyAgentBuilderIcon, // Temp svg until we have the icon in EUI
-          badgeType: 'techPreview',
         },
         !showAiAssistant
       ),

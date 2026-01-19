@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-ast';
-import type { EsqlAttachmentData } from '@kbn/onechat-common/attachments';
-import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/onechat-common/attachments';
-import { platformCoreTools } from '@kbn/onechat-common/tools';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
+import { validateQuery } from '@kbn/esql-language';
+import type { EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 
 /**
  * Creates the definition for the `text` attachment type.

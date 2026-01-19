@@ -13,9 +13,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
 
   describe('Intercept User Interaction APIs', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/246120
-    this.tags(['failsOnMKI']);
-
     describe(`GET ${TRIGGER_USER_INTERACTION_METADATA_API_ROUTE}`, () => {
       it('should return 200 with empty object when no interaction exists', async () => {
         const supertest = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {

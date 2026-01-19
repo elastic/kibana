@@ -7,7 +7,15 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
-import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -146,6 +154,7 @@ export function JobSelector({
     onSelectionChange?.({ jobIds: newSelection, time: undefined });
   };
 
+  const { euiTheme } = useEuiTheme();
   const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
 
   const redirectToADJobManagement = useCreateAndNavigateToManagementMlLink('', 'anomaly_detection');
@@ -153,7 +162,7 @@ export function JobSelector({
   function renderJobSelectionBar() {
     return (
       <>
-        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             {selectedIds.length > 0 ? (
               <EuiFlexGroup
@@ -175,17 +184,22 @@ export function JobSelector({
                 />
               </EuiFlexGroup>
             ) : (
-              <span>
+              <EuiText
+                size="s"
+                css={css`
+                  color: ${euiTheme.colors.textSubdued};
+                `}
+              >
                 <FormattedMessage
                   id="xpack.ml.jobSelector.noJobsSelectedLabel"
                   defaultMessage="No jobs selected"
                 />
-              </span>
+              </EuiText>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              size="xs"
+              size="s"
               iconType="pencil"
               onClick={handleJobSelectionClick}
               data-test-subj="mlButtonEditJobSelection"

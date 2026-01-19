@@ -500,6 +500,7 @@ export function StreamsTreeTable({
                   data_stream_exists: !!item.data_stream,
                 } as Streams.ingest.all.GetResponse
               }
+              isWiredStream={item.type === 'wired'}
             />
           ),
         },

@@ -2,7 +2,7 @@
 
 exports[`FeedbackPanel renders with the expected inner components based on the feedback view: negative 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasShadow-FeedbackPanel"
+  class="euiPanel euiPanel--transparent emotion-euiPanel-m-transparent-FeedbackPanel"
   data-test-subj="feedbackSnippetPanel"
 >
   <div
@@ -40,7 +40,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-center-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row-FeedbackPanel"
   >
     <button
       aria-label="Take quick survey"
@@ -65,7 +65,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
 
 exports[`FeedbackPanel renders with the expected inner components based on the feedback view: positive 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasShadow-FeedbackPanel"
+  class="euiPanel euiPanel--transparent emotion-euiPanel-m-transparent-FeedbackPanel"
   data-test-subj="feedbackSnippetPanel"
 >
   <div
@@ -87,7 +87,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-center-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row-FeedbackPanel"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -106,7 +106,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
 
 exports[`FeedbackPanel renders with the expected inner components based on the feedback view: prompt 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasShadow-FeedbackPanel"
+  class="euiPanel euiPanel--transparent emotion-euiPanel-m-transparent-FeedbackPanel"
   data-test-subj="feedbackSnippetPanel"
 >
   <div
@@ -144,13 +144,13 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-center-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row-FeedbackPanel"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-danger"
+        class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-base-text"
         data-test-subj="feedbackSnippetTestIdPanelThumbDown"
         id="feedbackSnippetTestIdPanelThumbDown"
         type="button"
@@ -159,6 +159,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
           class="emotion-euiButtonDisplayContent"
         >
           <span
+            color="danger"
             data-euiicon-type="thumbDown"
           >
             Thumb down
@@ -167,10 +168,10 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
       </button>
     </div>
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-success"
+        class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-base-text"
         data-test-subj="feedbackSnippetTestIdPanelThumbUp"
         id="feedbackSnippetTestIdPanelThumbUp"
         type="button"
@@ -179,6 +180,7 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
           class="emotion-euiButtonDisplayContent"
         >
           <span
+            color="success"
             data-euiicon-type="thumbUp"
           >
             Thumb up

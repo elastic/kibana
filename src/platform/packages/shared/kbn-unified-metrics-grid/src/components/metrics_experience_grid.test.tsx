@@ -11,7 +11,6 @@ import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from '../hooks';
-import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 import type {
   UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
@@ -19,13 +18,21 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField, Dimension } from '../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from '../context/metrics_experience_state_provider';
 import type { UnifiedMetricsGridProps } from '../types';
+import * as metricsExperienceFieldsCapsProvider from '../context/metrics_experience_fields_provider';
 
 jest.mock('../context/metrics_experience_state_provider');
+jest.mock('../context/metrics_experience_fields_provider');
+jest.mock('@kbn/ebt-tools', () => ({
+  PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  usePerformanceContext: () => ({
+    onPageReady: jest.fn(),
+  }),
+}));
 jest.mock('../hooks');
 jest.mock('./metrics_experience_grid_content', () => ({
   MetricsExperienceGridContent: jest.fn(() => (
@@ -55,14 +62,17 @@ const useMetricsExperienceStateMock =
     typeof metricsExperienceStateProvider.useMetricsExperienceState
   >;
 
-const useMetricFieldsQueryMock = hooks.useMetricFieldsQuery as jest.MockedFunction<
-  typeof hooks.useMetricFieldsQuery
->;
-const useDimensionsQueryMock = hooks.useDimensionsQuery as jest.MockedFunction<
-  typeof hooks.useDimensionsQuery
->;
 const useMetricsGridFullScreenMock = hooks.useMetricsGridFullScreen as jest.MockedFunction<
   typeof hooks.useMetricsGridFullScreen
+>;
+
+const useMetricFieldsContextMock =
+  metricsExperienceFieldsCapsProvider.useMetricsExperienceFieldsContext as jest.MockedFunction<
+    typeof metricsExperienceFieldsCapsProvider.useMetricsExperienceFieldsContext
+  >;
+
+const useMetricFieldsMock = hooks.useMetricFields as jest.MockedFunction<
+  typeof hooks.useMetricFields
 >;
 
 const dimensions: Dimension[] = [
@@ -121,25 +131,13 @@ describe('MetricsExperienceGrid', () => {
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
-      dimensions: [],
-      valueFilters: [],
+      selectedDimensions: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onValuesChange: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
-    });
-
-    useDimensionsQueryMock.mockReturnValue({
-      data: dimensions,
-    } as unknown as ReturnType<typeof hooks.useDimensionsQuery>);
-
-    useMetricFieldsQueryMock.mockReturnValue({
-      data: allFields,
-      status: 'success',
-      isFetching: false,
     });
 
     useMetricsGridFullScreenMock.mockReturnValue({
@@ -151,6 +149,18 @@ describe('MetricsExperienceGrid', () => {
         'metricsGrid--restrictBody': 'mock-restrict-body-class',
       },
     });
+
+    useMetricFieldsContextMock.mockReturnValue({
+      metricFields: [],
+      dimensions: [],
+      getSampleRow: jest.fn(() => undefined),
+    });
+
+    useMetricFieldsMock.mockReturnValue({
+      allMetricFields: allFields,
+      visibleMetricFields: allFields,
+      dimensions,
+    });
   });
 
   afterEach(() => {
@@ -159,13 +169,19 @@ describe('MetricsExperienceGrid', () => {
   });
 
   it('renders the loading state when fields API is fetching', () => {
-    useMetricFieldsQueryMock.mockReturnValue({
-      data: [],
-      status: 'loading',
-      isFetching: true,
+    useMetricFieldsContextMock.mockReturnValue({
+      metricFields: [],
+      dimensions: [],
+      getSampleRow: jest.fn(() => undefined),
     });
 
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+    useMetricFieldsMock.mockReturnValue({
+      allMetricFields: [],
+      visibleMetricFields: [],
+      dimensions: [],
+    });
+
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} isChartLoading />, {
       wrapper: IntlProvider,
     });
 
@@ -173,11 +189,18 @@ describe('MetricsExperienceGrid', () => {
   });
 
   it('renders the no data state covering the entire container when Fields API returns no data', () => {
-    useMetricFieldsQueryMock.mockReturnValue({
-      data: [],
-      status: 'success',
-      isFetching: false,
+    useMetricFieldsContextMock.mockReturnValue({
+      metricFields: [],
+      dimensions: [],
+      getSampleRow: jest.fn(() => undefined),
     });
+
+    useMetricFieldsMock.mockReturnValue({
+      allMetricFields: [],
+      visibleMetricFields: [],
+      dimensions: [],
+    });
+
     const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
     });
@@ -188,7 +211,7 @@ describe('MetricsExperienceGrid', () => {
   });
 
   it('renders the toolbar', () => {
-    const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
     });
 
@@ -196,28 +219,6 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
     expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
-    expect(queryByTestId('metricsExperienceValuesSelectorButton')).not.toBeInTheDocument();
-  });
-
-  it('render <ValuesSelector /> when dimensions are selected', () => {
-    useMetricsExperienceStateMock.mockReturnValue({
-      currentPage: 0,
-      dimensions: [{ name: 'foo', type: ES_FIELD_TYPES.KEYWORD }],
-      valueFilters: [`foo${FIELD_VALUE_SEPARATOR}bar`],
-      onDimensionsChange: jest.fn(),
-      onPageChange: jest.fn(),
-      onValuesChange: jest.fn(),
-      isFullscreen: false,
-      searchTerm: '',
-      onSearchTermChange: jest.fn(),
-      onToggleFullscreen: jest.fn(),
-    });
-
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument();
   });
 
   it('shows and updates the search input when the search button is clicked', () => {
@@ -227,11 +228,9 @@ describe('MetricsExperienceGrid', () => {
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
-      dimensions: [],
-      valueFilters: [],
+      selectedDimensions: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onValuesChange: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
       onSearchTermChange,
@@ -271,11 +270,9 @@ describe('MetricsExperienceGrid', () => {
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
-      dimensions: [],
-      valueFilters: [],
+      selectedDimensions: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onValuesChange: jest.fn(),
       isFullscreen,
       searchTerm: '',
       onSearchTermChange: jest.fn(),

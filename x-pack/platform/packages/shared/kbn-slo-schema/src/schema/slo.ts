@@ -111,18 +111,6 @@ const artifactsWithRefIdSchema = t.partial({ artifacts: dashboardsWithRefIdSchem
 const sloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithIdSchema]);
 const storedSloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithRefIdSchema]);
 
-const storedSloDefinitionTemplateSchema = t.partial({
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  timeWindow: timeWindowSchema,
-  budgetingMethod: budgetingMethodSchema,
-  objective: objectiveSchema,
-  settings: settingsSchema,
-  tags: tagsSchema,
-  groupBy: groupBySchema,
-});
-
 export {
   budgetingMethodSchema,
   groupBySchema,
@@ -133,7 +121,6 @@ export {
   sloDefinitionSchema,
   sloIdSchema,
   storedSloDefinitionSchema,
-  storedSloDefinitionTemplateSchema,
   tagsSchema,
   targetSchema,
   timeslicesBudgetingMethodSchema,

@@ -14,7 +14,7 @@ steps:
     foreach: '{{event.alerts}}'
     steps:
       - name: create_case
-        type: kibana.createCaseDefaultSpace
+        type: kibana.createCase
         with:
           owner: securitySolution
           title: '[Attack Discovery] {{foreach.item.attack_discovery.title_with_replacements}}'

@@ -4,79 +4,83 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
-import { merge } from 'lodash';
-import systemPromptDefault from '../significant_events/system_prompt.text';
-import systemPromptTemplate from './system_prompt.text';
-import userPromptTemplate from './user_prompt.text';
+import featuresUserPrompt from './user_prompt.text';
+import featuresSystemPrompt from './system_prompt.text';
 
-const systemsSchemaBase = {
+export { featuresSystemPrompt as featuresPrompt };
+
+const featuresSchema = {
   type: 'object',
   properties: {
-    systems: {
+    features: {
       type: 'array',
       items: {
         type: 'object',
         properties: {
+          type: {
+            type: 'string',
+          },
+          description: {
+            type: 'string',
+            description: 'A summary of the feature.',
+          },
           name: {
             type: 'string',
           },
-          filter: {
+          value: {
             type: 'object',
             properties: {},
           },
+          confidence: {
+            type: 'number',
+            minimum: 0,
+            maximum: 100,
+          },
+          evidence: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description:
+              'The evidences that support the feature. Can be a short sentence or a `key: value` string.',
+          },
+          tags: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description: 'The tags that describe the feature.',
+          },
+          meta: {
+            type: 'object',
+            properties: {},
+            description: 'Useful metadata that is not captured in other properties.',
+          },
         },
+        required: [
+          'type',
+          'description',
+          'name',
+          'value',
+          'confidence',
+          'evidence',
+          'tags',
+          'meta',
+        ],
       },
     },
   },
-  required: ['systems'],
+  required: ['features'],
 } as const;
 
-const systemsSchema = merge({}, systemsSchemaBase, {
-  properties: {
-    systems: {
-      items: {
-        required: ['name', 'filter'],
-      },
-    },
-  },
-} as const);
-
-const finalSystemsSchema = merge({}, systemsSchema);
-
-export interface ValidateSystemsResponse {
-  systems: Array<{
-    name: string;
-    filter: string;
-  }>;
-}
-
-export interface FinalizeSystemsResponse {
-  systems: Array<{
-    name: string;
-    filter: string;
-    description: string;
-  }>;
-}
-
-export function createIdentifySystemsPrompt({
-  systemPromptOverride,
-}: {
-  systemPromptOverride?: string;
-} = {}) {
-  const systemPrompt = systemPromptOverride ?? systemPromptDefault;
-
+export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: string }) {
   return createPrompt({
-    name: 'identify_systems',
+    name: 'identify_features',
     input: z.object({
-      stream: z.object({
-        name: z.string(),
-        description: z.string(),
-      }),
-      dataset_analysis: z.string(),
-      initial_clustering: z.string(),
-      condition_schema: z.string(),
+      sample_documents: z.string(),
     }),
   })
     .version({
@@ -87,21 +91,15 @@ export function createIdentifySystemsPrompt({
       },
       template: {
         mustache: {
-          template: userPromptTemplate,
+          template: featuresUserPrompt,
         },
       },
       tools: {
-        validate_systems: {
-          description: `Validate systems before finalizing`,
-          schema: systemsSchema,
-        },
-        finalize_systems: {
-          description: 'Finalize system identification',
-          schema: finalSystemsSchema,
+        finalize_features: {
+          description: 'Finalize features identification',
+          schema: featuresSchema,
         },
       },
     })
     .get();
 }
-
-export { systemPromptTemplate as featuresSystemPromptTemplate };

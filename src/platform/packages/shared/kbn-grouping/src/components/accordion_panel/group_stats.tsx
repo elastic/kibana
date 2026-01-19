@@ -41,6 +41,8 @@ interface GroupStatsProps<T> {
     items: EuiContextMenuPanelItemDescriptor[];
     panels: EuiContextMenuPanelDescriptor[];
   };
+  /** Optional array of additional action buttons to display before the Take actions button */
+  additionalActionButtons?: React.ReactElement[];
 }
 
 const Separator = () => {
@@ -65,6 +67,7 @@ const GroupStatsComponent = <T,>({
   onTakeActionsOpen,
   stats,
   takeActionItems: getTakeActionItems,
+  additionalActionButtons,
 }: GroupStatsProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -136,6 +139,16 @@ const GroupStatsComponent = <T,>({
     [stats, euiTheme, xsFontSize]
   );
 
+  const additionalActionButtonsComponents = useMemo(
+    () =>
+      additionalActionButtons?.map((button, index) => (
+        <EuiFlexItem grow={false} key={`additional-action-button-${index}`}>
+          {button}
+        </EuiFlexItem>
+      )) ?? [],
+    [additionalActionButtons]
+  );
+
   const takeActionMenu = useMemo(
     () =>
       takeActionItems.length ? (
@@ -170,12 +183,14 @@ const GroupStatsComponent = <T,>({
       gutterSize="m"
       alignItems="center"
     >
-      {[...statsComponents, takeActionMenu].filter(Boolean).map((component, index, { length }) => (
-        <Fragment key={index}>
-          {component}
-          {index < length - 1 && <Separator />}
-        </Fragment>
-      ))}
+      {[...statsComponents, ...additionalActionButtonsComponents, takeActionMenu]
+        .filter(Boolean)
+        .map((component, index, { length }) => (
+          <Fragment key={index}>
+            {component}
+            {index < length - 1 && <Separator />}
+          </Fragment>
+        ))}
     </EuiFlexGroup>
   );
 };

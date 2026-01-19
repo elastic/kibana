@@ -64,7 +64,13 @@ export const PanelFooter = memo(() => {
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             {isAgentChatExperienceEnabled && (
-              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                telemetry={{
+                  pathway: 'alerts_flyout',
+                  attachments: ['alert'],
+                }}
+              />
             )}
             {showAssistant && !isAgentChatExperienceEnabled && (
               <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />

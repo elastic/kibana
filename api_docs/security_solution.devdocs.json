@@ -42,6 +42,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,6 +58,8 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -71,6 +75,8 @@
                   "<object>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+                "lineNumber": 89,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -110,6 +116,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -135,6 +143,8 @@
                   ">"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+                "lineNumber": 108,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -150,6 +160,8 @@
                   "SetupPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+                "lineNumber": 109,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -179,6 +191,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+            "lineNumber": 273,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -193,6 +207,8 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+                "lineNumber": 273,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -208,6 +224,8 @@
                   "StartPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+                "lineNumber": 273,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -226,6 +244,8 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+            "lineNumber": 287,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -244,6 +264,8 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+            "lineNumber": 291,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -258,6 +280,8 @@
                   "SetupPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+                "lineNumber": 291,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -278,6 +302,8 @@
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+            "lineNumber": 305,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -297,6 +323,8 @@
         "label": "FetchRulesResponse",
         "description": [],
         "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -308,6 +336,8 @@
             "label": "page",
             "description": [],
             "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -319,6 +349,8 @@
             "label": "perPage",
             "description": [],
             "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -330,6 +362,8 @@
             "label": "total",
             "description": [],
             "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -341,15 +375,15 @@
             "label": "data",
             "description": [],
             "signature": [
-              "({ id: string; type: \"eql\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
+              "({ id: string; type: \"eql\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"eql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"eql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; tiebreaker_field?: string | undefined; timestamp_field?: string | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; tiebreaker_field?: string | undefined; timestamp_field?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -389,15 +423,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; event_category_override?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"query\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; event_category_override?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"query\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -437,15 +471,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"saved_query\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"saved_query\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; description: string; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; saved_id: string; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; saved_id: string; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; query?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; query?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -485,15 +519,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"threshold\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"threshold\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threshold: { value: number; field: string | string[]; cardinality?: { value: number; field: string; }[] | undefined; }; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threshold: { value: number; field: string | string[]; cardinality?: { value: number; field: string; }[] | undefined; }; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -533,15 +567,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { duration: { value: number; unit: \"m\" | \"s\" | \"h\"; }; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"threat_match\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { duration: { value: number; unit: \"m\" | \"s\" | \"h\"; }; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"threat_match\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; threat_query: string; threat_mapping: { entries: { value: string; type: \"mapping\"; field: string; negate?: boolean | undefined; }[]; }[]; threat_index: string[]; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; threat_query: string; threat_mapping: { entries: { value: string; type: \"mapping\"; field: string; negate?: boolean | undefined; }[]; }[]; threat_index: string[]; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -581,15 +615,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; threat_filters?: unknown[] | undefined; threat_indicator_path?: string | undefined; threat_language?: \"kuery\" | \"lucene\" | undefined; concurrent_searches?: number | undefined; items_per_search?: number | undefined; } | { id: string; type: \"machine_learning\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; threat_filters?: unknown[] | undefined; threat_indicator_path?: string | undefined; threat_language?: \"kuery\" | \"lucene\" | undefined; concurrent_searches?: number | undefined; items_per_search?: number | undefined; } | { id: string; type: \"machine_learning\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; description: string; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; anomaly_threshold: number; machine_learning_job_id: string | string[]; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; anomaly_threshold: number; machine_learning_job_id: string | string[]; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -629,15 +663,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"new_terms\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"new_terms\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; new_terms_fields: string[]; history_window_start: string; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; new_terms_fields: string[]; history_window_start: string; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -677,15 +711,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"esql\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"esql\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; from: string; to: string; language: \"esql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"esql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -728,6 +762,24 @@
               ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; })[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.FetchRulesResponse.warnings",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              "{ type: string; message: string; actionPath: string; buttonLabel?: string | undefined; }[] | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -742,6 +794,8 @@
         "label": "LinkItem",
         "description": [],
         "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -759,6 +813,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -791,6 +847,8 @@
               ">[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -807,6 +865,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -820,9 +880,11 @@
               "\nExperimental flag needed to enable the link"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"bulkFillRuleGapsEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"bulkEditAlertSuppressionEnabled\" | \"doesNotMatchForIndicatorMatchRuleEnabled\" | \"entityStoreDisabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"attacksAlertsAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"gapAutoFillSchedulerEnabled\" | \"linuxDnsEvents\" | undefined"
+              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"bulkFillRuleGapsEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"bulkEditAlertSuppressionEnabled\" | \"doesNotMatchForIndicatorMatchRuleEnabled\" | \"entityStoreDisabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"attacksAlertsAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"gapAutoFillSchedulerEnabled\" | \"linuxDnsEvents\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -839,6 +901,8 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -855,6 +919,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -871,6 +937,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -887,6 +955,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -900,9 +970,11 @@
               "\nExperimental flag needed to disable the link. Opposite of experimentalKey"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"bulkFillRuleGapsEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"bulkEditAlertSuppressionEnabled\" | \"doesNotMatchForIndicatorMatchRuleEnabled\" | \"entityStoreDisabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"attacksAlertsAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"gapAutoFillSchedulerEnabled\" | \"linuxDnsEvents\" | undefined"
+              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"bulkFillRuleGapsEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"bulkEditAlertSuppressionEnabled\" | \"doesNotMatchForIndicatorMatchRuleEnabled\" | \"entityStoreDisabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"attacksAlertsAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"gapAutoFillSchedulerEnabled\" | \"linuxDnsEvents\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -925,6 +997,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -941,6 +1015,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -957,6 +1033,8 @@
               "{ text: string; } | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -974,6 +1052,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -990,6 +1070,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1006,6 +1088,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1029,6 +1113,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1042,6 +1128,8 @@
               "\nLink path relative to security root"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1058,6 +1146,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1074,6 +1164,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1091,6 +1183,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1107,6 +1201,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1120,6 +1216,8 @@
               "\nTitle of the link"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1136,6 +1234,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1152,6 +1252,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1169,6 +1271,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1185,6 +1289,8 @@
               "string | { key: string; value: unknown; } | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1199,6 +1305,8 @@
         "label": "TimelineModel",
         "description": [],
         "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1215,6 +1323,8 @@
               "TimelineTabs"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1229,6 +1339,8 @@
               "TimelineTabs"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1246,6 +1358,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1262,6 +1376,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1275,6 +1391,8 @@
               "A summary of the events and notes in this timeline"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1295,6 +1413,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1312,6 +1432,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1328,6 +1450,8 @@
               "{ [x: string]: string[]; }"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1344,6 +1468,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1357,6 +1483,8 @@
               "The chronological history of actions related to this timeline"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1370,6 +1498,8 @@
               "When true, this timeline was marked as \"favorite\" by the user"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1383,6 +1513,8 @@
               "When true, the timeline will update as new data arrives"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1399,6 +1531,8 @@
               "\"search\" | \"filter\""
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1412,6 +1546,8 @@
               "Title"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1428,6 +1564,8 @@
               "\"default\" | \"template\""
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1444,6 +1582,8 @@
               "string | null"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1460,6 +1600,8 @@
               "number | null"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1476,6 +1618,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1492,6 +1636,8 @@
               "{ [x: string]: boolean; }"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1506,6 +1652,8 @@
               "{ [x: string]: { version: string; eventId: string; timelineId: string; pinnedEventId: string; createdBy?: string | null | undefined; updatedBy?: string | null | undefined; created?: number | null | undefined; updated?: number | null | undefined; }; }"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1521,6 +1669,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1535,6 +1685,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1549,6 +1701,8 @@
               "string | null | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1562,6 +1716,8 @@
               "When true, show the timeline flyover"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1578,6 +1734,8 @@
               "\"active\" | \"draft\" | \"immutable\""
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1594,6 +1752,8 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1610,6 +1770,8 @@
               "string | null | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1623,6 +1785,8 @@
               "timeline is saving"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1637,6 +1801,8 @@
               "string | null"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1651,6 +1817,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1665,6 +1833,8 @@
               "string | null"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1682,6 +1852,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1699,6 +1871,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1714,6 +1888,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1737,6 +1913,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1753,6 +1931,8 @@
               "string | null"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1769,6 +1949,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1780,6 +1962,8 @@
             "label": "documentType",
             "description": [],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1794,6 +1978,8 @@
               "(\"alert\" | \"system\" | \"alerts\" | \"registry\" | \"auditd\" | \"plain\" | \"auditd_file\" | \"library\" | \"netflow\" | \"suricata\" | \"system_dns\" | \"system_endgame_process\" | \"system_file\" | \"system_fim\" | \"system_security_event\" | \"system_socket\" | \"threat_match\" | \"zeek\")[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1815,6 +2001,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1829,6 +2017,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1843,6 +2033,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1857,6 +2049,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1873,6 +2067,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1887,6 +2083,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1900,6 +2098,8 @@
               "The number of items to show in a single page of results"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1916,6 +2116,8 @@
               "number[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1934,6 +2136,8 @@
               " | null; }"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1950,6 +2154,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1966,6 +2172,8 @@
               "{ start: string; end: string; }"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1979,6 +2187,8 @@
               "Uniquely identifies the timeline"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2001,6 +2211,8 @@
               "[]; }"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2014,6 +2226,8 @@
               "If selectAll checkbox in header is checked"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2025,6 +2239,8 @@
             "label": "selectAll",
             "description": [],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2039,6 +2255,8 @@
               "string | null"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2060,6 +2278,8 @@
               " | null"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2071,6 +2291,8 @@
             "label": "isDataProviderVisible",
             "description": [],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2087,6 +2309,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2101,6 +2325,8 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2112,6 +2338,8 @@
             "label": "sampleSize",
             "description": [],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2128,6 +2356,8 @@
               "string | null | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2146,6 +2376,8 @@
       "label": "PluginSetup",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+      "lineNumber": 228,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2162,6 +2394,8 @@
             ">"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+          "lineNumber": 229,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -2175,9 +2409,11 @@
           "label": "experimentalFeatures",
           "description": [],
           "signature": [
-            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
+            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+          "lineNumber": 230,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -2200,6 +2436,8 @@
             ") => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+          "lineNumber": 231,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2220,6 +2458,8 @@
                 }
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+              "lineNumber": 231,
+              "columnNumber": 27,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2239,6 +2479,8 @@
       "label": "PluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+      "lineNumber": 234,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2253,6 +2495,8 @@
             "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; AdditionalChargesMessage: React.ComponentType<{}>; }>) => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+          "lineNumber": 235,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2268,6 +2512,8 @@
                 "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; AdditionalChargesMessage?: React.ComponentType<{}> | undefined; }"
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/public/contract_components.ts",
+              "lineNumber": 17,
+              "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2288,6 +2534,8 @@
             ">"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+          "lineNumber": 236,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -2305,6 +2553,8 @@
             "UpsellingService"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+          "lineNumber": 237,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -2321,6 +2571,8 @@
             "({ userUrl, isAgentlessAvailable, projectUrl, deploymentUrl, }: { userUrl: UserUrl; isAgentlessAvailable: boolean; projectUrl?: string | undefined; deploymentUrl?: string | undefined; }) => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+          "lineNumber": 238,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2336,6 +2588,8 @@
                 "{ userUrl: UserUrl; isAgentlessAvailable: boolean; projectUrl?: string | undefined; deploymentUrl?: string | undefined; }"
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/service/onboarding_service.ts",
+              "lineNumber": 40,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2356,6 +2610,8 @@
             ", string, string> | null) => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+          "lineNumber": 239,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2373,6 +2629,8 @@
                 ", string, string> | null"
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
+              "lineNumber": 239,
+              "columnNumber": 31,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -2395,6 +2653,8 @@
         "label": "AppClient",
         "description": [],
         "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2409,6 +2669,8 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2423,6 +2685,8 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+                "lineNumber": 27,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2444,6 +2708,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+                "lineNumber": 28,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2459,6 +2725,8 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+                "lineNumber": 29,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2474,6 +2742,8 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+                "lineNumber": 30,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2495,6 +2765,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+                "lineNumber": 31,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2513,6 +2785,8 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2529,6 +2803,8 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2545,6 +2821,8 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2561,6 +2839,8 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2577,6 +2857,8 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2593,6 +2875,8 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2609,6 +2893,8 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2632,6 +2918,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/client/client.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2680,6 +2968,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
+        "lineNumber": 159,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2694,6 +2984,8 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
+            "lineNumber": 189,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2709,6 +3001,8 @@
                   "<unknown>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
+                "lineNumber": 189,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2738,6 +3032,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
+            "lineNumber": 255,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2752,6 +3048,8 @@
                   "SecuritySolutionPluginCoreSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
+                "lineNumber": 256,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2767,6 +3065,8 @@
                   "SecuritySolutionPluginSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
+                "lineNumber": 257,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2796,6 +3096,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
+            "lineNumber": 661,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2810,6 +3112,8 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
+                "lineNumber": 662,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2825,6 +3129,8 @@
                   "SecuritySolutionPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
+                "lineNumber": 663,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2843,6 +3149,8 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
+            "lineNumber": 934,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2862,6 +3170,8 @@
         "label": "SecuritySolutionApiRequestHandlerContext",
         "description": [],
         "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2876,6 +3186,8 @@
               "CoreRequestHandlerContext"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2891,6 +3203,8 @@
               "AnalyticsServiceSetup"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2907,6 +3221,8 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2927,6 +3243,8 @@
               ">>"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2944,6 +3262,8 @@
               "EndpointAppContextService"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2967,6 +3287,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2984,6 +3306,8 @@
               "FrameworkRequest"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3007,6 +3331,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3023,6 +3349,8 @@
               "() => string"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3046,6 +3374,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3063,6 +3393,8 @@
               "IDetectionRulesClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3080,6 +3412,8 @@
               "IDetectionEngineHealthClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3097,6 +3431,8 @@
               "IRuleExecutionLogForRoutes"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3123,6 +3459,8 @@
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3138,6 +3476,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+                "lineNumber": 70,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3158,6 +3498,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3181,6 +3523,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3204,6 +3548,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3221,6 +3567,8 @@
               "ApiKeyManager"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3245,6 +3593,8 @@
               " | null"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3262,6 +3612,8 @@
               "EndpointInternalFleetServicesInterface"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3279,6 +3631,8 @@
               "RiskEngineDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3296,6 +3650,8 @@
               "RiskScoreDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3313,6 +3669,8 @@
               "AssetCriticalityDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3330,6 +3688,8 @@
               "EntityStoreDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3347,6 +3707,8 @@
               "EntityStoreCrudClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3364,6 +3726,8 @@
               "PrivilegeMonitoringDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3381,6 +3745,8 @@
               "MonitoringEntitySourceDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3398,6 +3764,8 @@
               "ApiKeyManager"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3415,6 +3783,8 @@
               "PadPackageInstallationClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3431,6 +3801,8 @@
               "SiemMigrationClients"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3452,6 +3824,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3469,6 +3843,8 @@
               "AssetInventoryDataClient"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3486,6 +3862,8 @@
               "ProductFeaturesService"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3503,6 +3881,8 @@
               "MlAuthz"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3522,7 +3902,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Omit<Readonly<{ telemetry?: Readonly<{} & { queryConfig: Readonly<{ pageSize?: number | undefined; maxResponseSize?: number | undefined; maxCompressedResponseSize?: number | undefined; } & {}>; }> | undefined; prebuiltRulesPackageVersion?: string | undefined; siemRuleMigrations?: Readonly<{ elserInferenceId?: string | undefined; } & {}> | undefined; cdn?: Readonly<{ url?: string | undefined; publicKey?: string | undefined; } & {}> | undefined; } & { enabled: boolean; enableUiSettingsValidations: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskTimeout: string; packagerTaskPackagePolicyUpdateBatchSize: number; completeExternalResponseActionsTaskInterval: string; completeExternalResponseActionsTaskTimeout: string; maxUploadResponseActionFileBytes: number; maxEndpointScriptFileSize: number; disableEndpointRuleAutoInstall: boolean; offeringSettings: Record<string, boolean>; entityAnalytics: Readonly<{} & { monitoring: Readonly<{} & { privileges: Readonly<{} & { users: Readonly<{} & { csvUpload: Readonly<{} & { errorRetries: number; maxBulkRequestBodySizeBytes: number; }>; maxPrivilegedUsersAllowed: number; }>; }>; }>; riskEngine: Readonly<{} & { alertSampleSizePerShard: number; }>; assetCriticality: Readonly<{} & { csvUpload: Readonly<{} & { errorRetries: number; maxBulkRequestBodySizeBytes: number; }>; }>; entityStore: Readonly<{} & { frequency: moment.Duration; syncDelay: moment.Duration; developer: Readonly<{} & { pipelineDebugMode: boolean; }>; }>; }>; }>, \"offeringSettings\"> & { experimentalFeatures: ",
+          "Omit<Readonly<{ telemetry?: Readonly<{} & { queryConfig: Readonly<{ pageSize?: number | undefined; maxResponseSize?: number | undefined; maxCompressedResponseSize?: number | undefined; } & {}>; }> | undefined; prebuiltRulesPackageVersion?: string | undefined; siemRuleMigrations?: Readonly<{ elserInferenceId?: string | undefined; } & {}> | undefined; cdn?: Readonly<{ url?: string | undefined; publicKey?: string | undefined; } & {}> | undefined; } & { enabled: boolean; enableUiSettingsValidations: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskTimeout: string; packagerTaskPackagePolicyUpdateBatchSize: number; completeExternalResponseActionsTaskInterval: string; completeExternalResponseActionsTaskTimeout: string; maxUploadResponseActionFileBytes: number; maxEndpointScriptFileSize: number; disableEndpointRuleAutoInstall: boolean; offeringSettings: Record<string, boolean>; entityAnalytics: Readonly<{} & { monitoring: Readonly<{} & { privileges: Readonly<{} & { users: Readonly<{} & { csvUpload: Readonly<{} & { errorRetries: number; maxBulkRequestBodySizeBytes: number; }>; maxPrivilegedUsersAllowed: number; }>; }>; }>; entityStore: Readonly<{} & { frequency: moment.Duration; syncDelay: moment.Duration; developer: Readonly<{} & { pipelineDebugMode: boolean; }>; }>; riskEngine: Readonly<{} & { alertSampleSizePerShard: number; }>; assetCriticality: Readonly<{} & { csvUpload: Readonly<{} & { errorRetries: number; maxBulkRequestBodySizeBytes: number; }>; }>; }>; }>, \"offeringSettings\"> & { experimentalFeatures: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -3535,6 +3915,8 @@
           "; enableUiSettingsValidations: boolean; }"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/server/config.ts",
+        "lineNumber": 239,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3549,6 +3931,8 @@
       "label": "SecuritySolutionPluginSetup",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
+      "lineNumber": 99,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3573,6 +3957,8 @@
             ") => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
+          "lineNumber": 100,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -3594,6 +3980,8 @@
                 }
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/product_features_service/product_features_service.ts",
+              "lineNumber": 101,
+              "columnNumber": 41,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -3609,9 +3997,11 @@
             "\nThe security solution generic experimental features"
           ],
           "signature": [
-            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
+            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
+          "lineNumber": 104,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3627,6 +4017,8 @@
       "label": "SecuritySolutionPluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
+      "lineNumber": 111,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -3647,6 +4039,8 @@
         "label": "SecurityPageName",
         "description": [],
         "path": "src/platform/packages/shared/deeplinks/security/deep_links.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3661,6 +4055,8 @@
         "label": "ADD_DATA_PATH",
         "description": [],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3678,6 +4074,8 @@
           "\"securitySolution\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3693,6 +4091,8 @@
           "\"/app/security\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3708,6 +4108,8 @@
           "\"securitySolutionUI\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3723,6 +4125,8 @@
           "\"securitySolutionCasesV3\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3738,6 +4142,8 @@
           "\"/api/detection_engine/rules/_find\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 289,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3755,6 +4161,8 @@
           "\"9a1a2dae-0b5f-4c3d-8305-a268d404c306\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/detection_engine/constants.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3770,6 +4178,8 @@
           "\"alert.attributes.enabled\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/detection_engine/rule_management/rule_fields.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3787,6 +4197,8 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 562,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3799,9 +4211,11 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
+          "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3817,6 +4231,8 @@
           "\"/manage\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 95,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3832,6 +4248,8 @@
           "\"siemV5\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3849,6 +4267,8 @@
           "\"logs-sentinel_one.activity-*\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/endpoint/service/response_actions/sentinel_one.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3864,6 +4284,8 @@
           "\"siem\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3880,9 +4302,11 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsSentinelOneRunScriptEnabled: true; readonly responseActionsEndpointMemoryDump: false; readonly responseActionsScriptLibraryManagement: false; readonly assistantModelEvaluation: false; readonly enableRiskScoreResetToZero: true; readonly enableRiskScorePrivmonModifier: true; readonly riskScoreAssistantToolDisabled: false; readonly entityDetailsHighlightsEnabled: true; readonly entityThreatHuntingEnabled: false; readonly esqlRulesDisabled: false; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: true; readonly storeGapsInEventLogEnabled: true; readonly bulkFillRuleGapsEnabled: true; readonly filterProcessDescendantsForTrustedAppsEnabled: false; readonly bulkEditAlertSuppressionEnabled: true; readonly doesNotMatchForIndicatorMatchRuleEnabled: true; readonly entityStoreDisabled: false; readonly siemMigrationsDisabled: false; readonly defendInsightsPolicyResponseFailure: true; readonly endpointExceptionsMovedUnderManagement: false; readonly crowdstrikeRunScriptEnabled: true; readonly newDataViewPickerEnabled: true; readonly microsoftDefenderEndpointRunScriptEnabled: true; readonly trustedAppsAdvancedMode: true; readonly trustedDevices: true; readonly automaticDashboardsMigration: true; readonly siemReadinessDashboard: false; readonly microsoftDefenderEndpointCancelEnabled: true; readonly attacksAlertsAlignment: false; readonly qradarRulesMigration: false; readonly kubernetesEnabled: false; readonly entityAnalyticsWatchlistEnabled: false; readonly gapAutoFillSchedulerEnabled: false; readonly linuxDnsEvents: false; }"
+          "{ readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsSentinelOneRunScriptEnabled: true; readonly responseActionsEndpointMemoryDump: false; readonly responseActionsEndpointRunScript: false; readonly responseActionsScriptLibraryManagement: false; readonly assistantModelEvaluation: false; readonly enableRiskScoreResetToZero: true; readonly enableRiskScorePrivmonModifier: true; readonly riskScoreAssistantToolDisabled: false; readonly entityDetailsHighlightsEnabled: true; readonly entityThreatHuntingEnabled: false; readonly esqlRulesDisabled: false; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: true; readonly storeGapsInEventLogEnabled: true; readonly bulkFillRuleGapsEnabled: true; readonly filterProcessDescendantsForTrustedAppsEnabled: false; readonly bulkEditAlertSuppressionEnabled: true; readonly doesNotMatchForIndicatorMatchRuleEnabled: true; readonly entityStoreDisabled: false; readonly siemMigrationsDisabled: false; readonly defendInsightsPolicyResponseFailure: true; readonly endpointExceptionsMovedUnderManagement: false; readonly crowdstrikeRunScriptEnabled: true; readonly newDataViewPickerEnabled: true; readonly microsoftDefenderEndpointRunScriptEnabled: true; readonly trustedAppsAdvancedMode: true; readonly trustedDevices: true; readonly automaticDashboardsMigration: true; readonly siemReadinessDashboard: false; readonly microsoftDefenderEndpointCancelEnabled: true; readonly attacksAlertsAlignment: false; readonly qradarRulesMigration: false; readonly kubernetesEnabled: true; readonly entityAnalyticsWatchlistEnabled: false; readonly gapAutoFillSchedulerEnabled: false; readonly linuxDnsEvents: false; }"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

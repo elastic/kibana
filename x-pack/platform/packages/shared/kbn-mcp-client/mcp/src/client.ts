@@ -82,12 +82,12 @@ export class McpClient {
    */
   async connect(): Promise<{ connected: boolean; capabilities?: ServerCapabilities }> {
     if (!this.connected) {
-      this.logger.info(`Attempting to connect to MCP server ${this.name}, ${this.version}`);
+      this.logger.debug(`Attempting to connect to MCP server ${this.name}, ${this.version}`);
       try {
         // connect() performs the initialization handshake with the MCP server as per MCP protocol
         await this.client.connect(this.transport);
         this.connected = true;
-        this.logger.info(`Connected to MCP server ${this.name}, ${this.version}`);
+        this.logger.debug(`Connected to MCP server ${this.name}, ${this.version}`);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         this.logger.error(
@@ -117,10 +117,10 @@ export class McpClient {
    */
   async disconnect(): Promise<void> {
     if (this.connected) {
-      this.logger.info(`Attempting to disconnect from MCP server ${this.name}, ${this.version}`);
+      this.logger.debug(`Attempting to disconnect from MCP server ${this.name}, ${this.version}`);
       await this.client.close();
       this.connected = false;
-      this.logger.info(`Disconnected from MCP client ${this.name}, ${this.version}`);
+      this.logger.debug(`Disconnected from MCP client ${this.name}, ${this.version}`);
     }
   }
 
@@ -132,7 +132,7 @@ export class McpClient {
       throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
     }
 
-    this.logger.info(`Listing tools from MCP server ${this.name}, ${this.version}`);
+    this.logger.debug(`Listing tools from MCP server ${this.name}, ${this.version}`);
     const getNextPage = async (cursor?: string): Promise<Tool[]> => {
       const response = await this.client.listTools({
         cursor,
@@ -174,20 +174,24 @@ export class McpClient {
       throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
     }
 
-    this.logger.info(`Calling tool ${params.name} on MCP server ${this.name}, ${this.version}`);
+    this.logger.debug(`Calling tool ${params.name} on MCP server ${this.name}, ${this.version}`);
     const response = await this.client.callTool({
       name: params.name,
       arguments: params.arguments,
     });
 
-    if (response.isError) {
-      throw new Error(
-        `Error calling tool ${params.name} with ${params.arguments}: ${response.error}`
-      );
-    }
-
     const content = response.content as Array<ContentPart | null | undefined>;
     const textParts = content.filter(isTextPart);
+
+    if (response.isError) {
+      // Tool execution errors are returned as text content parts
+      // See https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling
+      throw new Error(
+        `Error calling tool '${params.name}' with arguments '${JSON.stringify(
+          params.arguments
+        )}': ${textParts.map((part) => part.text).join('\n')}`
+      );
+    }
 
     return {
       content: textParts,

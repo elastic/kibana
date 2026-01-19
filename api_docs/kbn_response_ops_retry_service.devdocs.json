@@ -1,0 +1,395 @@
+{
+  "id": "@kbn/response-ops-retry-service",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/response-ops-retry-service",
+        "id": "def-server.RetryService",
+        "type": "Class",
+        "tags": [],
+        "label": "RetryService",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-retry-service",
+            "id": "def-server.RetryService.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-retry-service",
+            "id": "def-server.RetryService.serviceName",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-retry-service",
+            "id": "def-server.RetryService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-retry-service",
+                "id": "def-server.RetryService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+                "lineNumber": 21,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/response-ops-retry-service",
+                "id": "def-server.RetryService.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "backOffFactory",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/response-ops-retry-service",
+                    "scope": "server",
+                    "docId": "kibKbnResponseOpsRetryServicePluginApi",
+                    "section": "def-server.BackoffFactory",
+                    "text": "BackoffFactory"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+                "lineNumber": 22,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/response-ops-retry-service",
+                "id": "def-server.RetryService.Unnamed.$3",
+                "type": "string",
+                "tags": [],
+                "label": "serviceName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+                "lineNumber": 23,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/response-ops-retry-service",
+                "id": "def-server.RetryService.Unnamed.$4",
+                "type": "number",
+                "tags": [],
+                "label": "maxAttempts",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+                "lineNumber": 24,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-retry-service",
+            "id": "def-server.RetryService.retryWithBackoff",
+            "type": "Function",
+            "tags": [],
+            "label": "retryWithBackoff",
+            "description": [],
+            "signature": [
+              "<T>(cb: () => Promise<T>) => Promise<T>"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-retry-service",
+                "id": "def-server.RetryService.retryWithBackoff.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "cb",
+                "description": [],
+                "signature": [
+                  "() => Promise<T>"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+                "lineNumber": 32,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-retry-service",
+            "id": "def-server.RetryService.isRetryableError",
+            "type": "Function",
+            "tags": [],
+            "label": "isRetryableError",
+            "description": [],
+            "signature": [
+              "(error: Error) => boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-retry-service",
+                "id": "def-server.RetryService.isRetryableError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/retry-service/retry_service.ts",
+                "lineNumber": 86,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/response-ops-retry-service",
+        "id": "def-server.fullJitterBackoffFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "fullJitterBackoffFactory",
+        "description": [],
+        "signature": [
+          "({ baseDelay, maxBackoffTime, }: { baseDelay: number; maxBackoffTime: number; }) => ",
+          {
+            "pluginId": "@kbn/response-ops-retry-service",
+            "scope": "server",
+            "docId": "kibKbnResponseOpsRetryServicePluginApi",
+            "section": "def-server.BackoffFactory",
+            "text": "BackoffFactory"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/retry-service/full_jitter_backoff.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-retry-service",
+            "id": "def-server.fullJitterBackoffFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  baseDelay,\n  maxBackoffTime,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/retry-service/full_jitter_backoff.ts",
+            "lineNumber": 37,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-retry-service",
+                "id": "def-server.fullJitterBackoffFactory.$1.baseDelay",
+                "type": "number",
+                "tags": [],
+                "label": "baseDelay",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/response-ops/retry-service/full_jitter_backoff.ts",
+                "lineNumber": 38,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/response-ops-retry-service",
+                "id": "def-server.fullJitterBackoffFactory.$1.maxBackoffTime",
+                "type": "number",
+                "tags": [],
+                "label": "maxBackoffTime",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/response-ops/retry-service/full_jitter_backoff.ts",
+                "lineNumber": 39,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/response-ops-retry-service",
+        "id": "def-server.BackoffFactory",
+        "type": "Interface",
+        "tags": [],
+        "label": "BackoffFactory",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/retry-service/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-retry-service",
+            "id": "def-server.BackoffFactory.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/response-ops-retry-service",
+                "scope": "server",
+                "docId": "kibKbnResponseOpsRetryServicePluginApi",
+                "section": "def-server.BackoffStrategy",
+                "text": "BackoffStrategy"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/retry-service/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-retry-service",
+        "id": "def-server.BackoffStrategy",
+        "type": "Interface",
+        "tags": [],
+        "label": "BackoffStrategy",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/retry-service/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-retry-service",
+            "id": "def-server.BackoffStrategy.nextBackOff",
+            "type": "Function",
+            "tags": [],
+            "label": "nextBackOff",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/retry-service/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

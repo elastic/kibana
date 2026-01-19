@@ -6,10 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { listSearchSources } from '@kbn/onechat-genai-utils';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { listSearchSources } from '@kbn/agent-builder-genai-utils';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const listIndicesSchema = z.object({
   pattern: z

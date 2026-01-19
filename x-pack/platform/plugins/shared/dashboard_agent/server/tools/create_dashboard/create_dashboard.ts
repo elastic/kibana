@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod';
 import type { RequestHandlerContext, SavedObjectsServiceStart } from '@kbn/core/server';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -63,7 +63,7 @@ This tool will:
     tags: [],
     handler: async (
       { title, description, panels, markdownContent },
-      { logger, request, esClient }
+      { logger, request, esClient, resultStore }
     ) => {
       try {
         const coreContext = {
@@ -82,7 +82,7 @@ This tool will:
         // Build markdown panel and offset other panels accordingly
         const markdownPanel = buildMarkdownPanel(markdownContent);
         const yOffset = getMarkdownPanelHeight(markdownContent);
-        const normalizedPanels = [markdownPanel, ...normalizePanels(panels, yOffset)];
+        const normalizedPanels = [markdownPanel, ...normalizePanels(panels, yOffset, resultStore)];
 
         const dashboardCreateResponse = await dashboard.client.create(requestHandlerContext, {
           data: { title, description, panels: normalizedPanels },

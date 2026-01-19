@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export const DEFAULT_DATA_STREAM_PATTERNS = ['logs-*', 'metrics-*', 'traces-*'];
 
@@ -22,7 +22,7 @@ export interface SnapshotInfo {
 // Base configuration shared by both operations
 interface BaseConfig {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   snapshotUrl: string;
   // If omitted, the loader will select the latest SUCCESS snapshot in the repository.
   snapshotName?: string;

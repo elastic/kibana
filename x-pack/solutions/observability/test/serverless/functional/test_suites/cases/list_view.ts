@@ -19,7 +19,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlObltNavigation = getService('svlObltNavigation');
   const toasts = getService('toasts');
 
-  describe('Cases list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/246157
+  describe.skip('Cases list', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();

@@ -110,6 +110,10 @@ paths:
                     type: array
                     items:
                       $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '../../model/warning_schema.schema.yaml#/components/schemas/WarningSchema'
                 required:
                   - page
                   - perPage

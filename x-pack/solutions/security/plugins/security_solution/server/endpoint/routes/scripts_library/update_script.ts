@@ -11,7 +11,7 @@ import type {
   PatchUpdateRequestBody,
   PatchUpdateRequestParams,
 } from '../../../../common/api/endpoint/scripts_library';
-import { PatchUpdateRequestSchema } from '../../../../common/api/endpoint/scripts_library';
+import { PatchUpdateScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type {
   SecuritySolutionPluginRouter,
@@ -78,7 +78,7 @@ export const registerPatchUpdateScriptRoute = (
       {
         version: '2023-10-31',
         validate: {
-          request: PatchUpdateRequestSchema,
+          request: PatchUpdateScriptRequestSchema,
         },
       },
       withEndpointAuthz(

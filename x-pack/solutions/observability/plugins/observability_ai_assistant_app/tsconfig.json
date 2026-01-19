@@ -57,7 +57,7 @@
     "@kbn/config-schema",
     "@kbn/es-query",
     "@kbn/rule-registry-plugin",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/field-types",
     "@kbn/security-plugin",
     "@kbn/observability-plugin",
@@ -88,7 +88,8 @@
     "@kbn/utility-types-jest",
     "@kbn/zod",
     "@kbn/connector-schemas",
-    "@kbn/onechat-plugin"
+    "@kbn/agent-builder-plugin",
+    "@kbn/object-utils",
   ],
   "exclude": ["target/**/*"]
 }

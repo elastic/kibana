@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField } from '../../types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
