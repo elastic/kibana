@@ -17,12 +17,12 @@ export type {
   SidebarApp,
   SidebarSetup,
   SidebarStart,
-} from '@kbn/core-chrome-sidebar-types';
+} from '@kbn/core-chrome-sidebar';
 export {
   VALID_SIDEBAR_APP_IDS,
   EXAMPLE_APP_ID_PREFIX,
   isValidSidebarAppId,
-} from '@kbn/core-chrome-sidebar-types';
+} from '@kbn/core-chrome-sidebar';
 
 export { SidebarService } from './src/services';
 export { Sidebar, SidebarHeader, SidebarBody } from './src/components';

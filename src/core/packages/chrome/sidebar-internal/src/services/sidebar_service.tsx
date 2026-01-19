@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SidebarSetup, SidebarStart } from '@kbn/core-chrome-sidebar-types';
+import type { SidebarSetup, SidebarStart } from '@kbn/core-chrome-sidebar';
 import { SidebarRegistryService } from './sidebar_registry_service';
 import { SidebarStateService } from './sidebar_state_service';
 import { SidebarAppStateService } from './sidebar_app_state_service';
 
-export type { SidebarSetup, SidebarStart } from '@kbn/core-chrome-sidebar-types';
+export type { SidebarSetup, SidebarStart } from '@kbn/core-chrome-sidebar';
 
 /**
  * Composite service for sidebar functionality

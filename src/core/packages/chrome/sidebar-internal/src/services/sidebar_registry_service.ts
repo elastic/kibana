@@ -10,8 +10,8 @@
 import type { Observable } from 'rxjs';
 import { map, startWith, Subject } from 'rxjs';
 import { memoize } from 'decko';
-import type { SidebarApp, SidebarAppId } from '@kbn/core-chrome-sidebar-types';
-import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar-types';
+import type { SidebarApp, SidebarAppId } from '@kbn/core-chrome-sidebar';
+import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar';
 
 export class SidebarRegistryService {
   private readonly registeredApps = new Map<string, SidebarApp>();

@@ -17,7 +17,7 @@ import type {
   InternalChromeStart,
 } from '@kbn/core-chrome-browser-internal';
 import { lazyObject } from '@kbn/lazy-object';
-import { sidebarServiceMock } from '@kbn/core-chrome-sidebar/mocks';
+import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-internal/mocks';
 
 const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
   return lazyObject({

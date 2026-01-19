@@ -20,7 +20,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/developer-examples-plugin'
-  - '@kbn/core-chrome-sidebar'
+  - '@kbn/core-chrome-sidebar-internal'
   - '@kbn/zod'
 tags:
   - plugin

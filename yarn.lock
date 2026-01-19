@@ -5281,7 +5281,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-sidebar-types@link:src/core/packages/chrome/sidebar-types":
+"@kbn/core-chrome-sidebar-internal@link:src/core/packages/chrome/sidebar-internal":
   version "0.0.0"
   uid ""
 

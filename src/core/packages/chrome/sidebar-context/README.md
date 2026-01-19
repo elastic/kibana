@@ -4,7 +4,7 @@ React context provider and hook for accessing the Sidebar service across Kibana 
 
 ## Why This Is a Separate Package
 
-This package exists separately from `@kbn/core-chrome-sidebar` to solve a React context sharing problem in Kibana's plugin architecture.
+This package exists separately from `@kbn/core-chrome-sidebar-internal` to solve a React context sharing problem in Kibana's plugin architecture.
 
 ### The Problem
 
@@ -13,14 +13,14 @@ Kibana's plugin bundling system creates separate instances of package dependenci
 ```typescript
 // ❌ BROKEN: Plugin A and Plugin B get different Context instances
 
-// If context was defined in @kbn/core-chrome-sidebar
+// If context was defined in @kbn/core-chrome-sidebar-internal
 const SidebarContext = createContext(null);
 
 // Plugin A (provides the context)
-import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar';
+import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-internal';
 
 // Plugin B (consumes the context)
-import { useSidebarService } from '@kbn/core-chrome-sidebar';
+import { useSidebarService } from '@kbn/core-chrome-sidebar-internal';
 
 // Result: useSidebarService() in Plugin B returns null because
 // it's looking at a different Context instance than Plugin A provided
@@ -62,4 +62,4 @@ sidebar.open('myApp');
 
 ## Important
 
-This package is intentionally minimal - it only contains the React context and related hooks. The actual Sidebar service implementation lives in `@kbn/core-chrome-sidebar`. This separation ensures the context can be shared while keeping the implementation details in the main package.
+This package is intentionally minimal - it only contains the React context and related hooks. The actual Sidebar service implementation lives in `@kbn/core-chrome-sidebar-internal`. This separation ensures the context can be shared while keeping the implementation details in the main package.

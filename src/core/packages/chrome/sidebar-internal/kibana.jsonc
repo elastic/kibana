@@ -1,6 +1,6 @@
 {
-  "type": "shared-common",
-  "id": "@kbn/core-chrome-sidebar-types",
+  "type": "shared-browser",
+  "id": "@kbn/core-chrome-sidebar-internal",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "shared"

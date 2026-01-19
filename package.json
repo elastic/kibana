@@ -321,7 +321,7 @@
     "@kbn/core-chrome-navigation": "link:src/core/packages/chrome/navigation",
     "@kbn/core-chrome-sidebar": "link:src/core/packages/chrome/sidebar",
     "@kbn/core-chrome-sidebar-context": "link:src/core/packages/chrome/sidebar-context",
-    "@kbn/core-chrome-sidebar-types": "link:src/core/packages/chrome/sidebar-types",
+    "@kbn/core-chrome-sidebar-internal": "link:src/core/packages/chrome/sidebar-internal",
     "@kbn/core-config-server-internal": "link:src/core/packages/config/server-internal",
     "@kbn/core-custom-branding-browser": "link:src/core/packages/custom-branding/browser",
     "@kbn/core-custom-branding-browser-internal": "link:src/core/packages/custom-branding/browser-internal",

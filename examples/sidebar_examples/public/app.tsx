@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { useSidebar } from '@kbn/core-chrome-sidebar';
+import { useSidebar } from '@kbn/core-chrome-sidebar-internal';
 import React from 'react';
 import { counterAppId, type CounterSidebarParams } from './counter_app';
 import { textInputAppId, type TextInputSidebarParams } from './text_input_app';

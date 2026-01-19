@@ -10,7 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { useObservable } from '@kbn/use-observable';
 import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
-import type { SidebarAppId } from '@kbn/core-chrome-sidebar-types';
+import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
 
 /**
  * Hook based API for interacting with the sidebar state

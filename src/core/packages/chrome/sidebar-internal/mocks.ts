@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { SidebarStart, SidebarSetup } from '@kbn/core-chrome-sidebar-types';
+import type { SidebarStart, SidebarSetup } from '@kbn/core-chrome-sidebar';
 
 const DEFAULT_WIDTH = 400;
 

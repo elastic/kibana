@@ -10,7 +10,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { z } from '@kbn/zod/v4';
-import type { SidebarAppId } from '@kbn/core-chrome-sidebar-types';
+import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
 import type { SidebarRegistryService } from './sidebar_registry_service';
 
 const isDev = process.env.NODE_ENV !== 'production';

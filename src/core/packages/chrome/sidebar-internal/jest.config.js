@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/core/packages/chrome/sidebar-types'],
+  roots: ['<rootDir>/src/core/packages/chrome/sidebar'],
 };

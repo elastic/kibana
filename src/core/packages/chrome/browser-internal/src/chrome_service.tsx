@@ -60,7 +60,7 @@ import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
 import { Router } from '@kbn/shared-ux-router';
-import { SidebarService } from '@kbn/core-chrome-sidebar';
+import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { isPrinting$ } from './utils/printing_observable';
 import { handleEuiFullScreenChanges } from './handle_eui_fullscreen_changes';

@@ -11,7 +11,7 @@ import React, { lazy, Suspense, useMemo, useCallback } from 'react';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { useObservable } from '@kbn/use-observable';
 import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
-import type { SidebarAppId, SidebarComponentType } from '@kbn/core-chrome-sidebar-types';
+import type { SidebarAppId, SidebarComponentType } from '@kbn/core-chrome-sidebar';
 
 interface SidebarAppRendererProps {
   appId: SidebarAppId;

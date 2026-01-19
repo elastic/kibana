@@ -13,4 +13,4 @@ export type {
   SidebarAppContent,
   SidebarSetup,
   SidebarStart,
-} from '@kbn/core-chrome-sidebar';
+} from '@kbn/core-chrome-sidebar-internal';

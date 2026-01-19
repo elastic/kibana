@@ -8,7 +8,7 @@
  */
 
 import React, { type ReactNode, useContext, createContext } from 'react';
-import type { SidebarStart } from '@kbn/core-chrome-sidebar-types';
+import type { SidebarStart } from '@kbn/core-chrome-sidebar';
 
 interface SidebarContextValue {
   sidebar: SidebarStart;
