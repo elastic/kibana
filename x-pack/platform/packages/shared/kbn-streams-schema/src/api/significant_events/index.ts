@@ -37,6 +37,7 @@ interface SignificantEventOccurrence {
 }
 
 type SignificantEventsResponse = StreamQueryKql & {
+  stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
