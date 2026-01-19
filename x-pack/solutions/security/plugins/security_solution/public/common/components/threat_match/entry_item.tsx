@@ -138,7 +138,6 @@ export const EntryItem: React.FC<EntryItemProps> = ({
     );
   }, [handleThreatFieldChange, threatIndexPatterns, entry, showLabel]);
 
-  const matchOperatorLabel = entry.negate ? i18n.DOES_NOT_MATCH : i18n.MATCHES;
   return (
     <EuiFlexGroup
       direction="row"

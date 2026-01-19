@@ -15,7 +15,6 @@ import { ThreatMatchComponent } from '../../../../common/components/threat_match
 import * as i18n from '../../../../common/components/threat_match/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const DEFAULT_THREAT_MAPPING_VALUE = [createOrNewEntryItem()];
 
