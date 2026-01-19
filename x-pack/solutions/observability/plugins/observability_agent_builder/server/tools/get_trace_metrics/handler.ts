@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { orderBy } from 'lodash';
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   calculateFailedTransactionRate,
@@ -63,6 +64,7 @@ export async function getToolHandler({
   sortBy: 'latency' | 'throughput' | 'failureRate';
 }): Promise<{
   items: TraceMetricsItem[];
+  latencyType: LatencyAggregationType;
 }> {
   const { apmEventClient, apmDataAccessServices } = await buildApmResources({
     core,
@@ -145,6 +147,7 @@ export async function getToolHandler({
   });
 
   return {
-    items: items.sort((a, b) => b[sortBy] - a[sortBy]),
+    items: orderBy(items, [sortBy], ['desc']),
+    latencyType,
   };
 }
