@@ -93,7 +93,6 @@ enabled:
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
   - src/platform/test/functional/apps/discover/tabs3/config.ts
-  - src/platform/test/functional/apps/discover/tabs_disabled/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
   - src/platform/test/functional/apps/kibana_overview/config.ts
@@ -347,8 +346,6 @@ enabled:
   - x-pack/platform/test/reindex_service/config.ts
   - x-pack/platform/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
-  - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
-  - x-pack/performance/journeys_e2e/ecommerce_dashboard_http2.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys_e2e/flight_dashboard.ts
   - x-pack/performance/journeys_e2e/login.ts

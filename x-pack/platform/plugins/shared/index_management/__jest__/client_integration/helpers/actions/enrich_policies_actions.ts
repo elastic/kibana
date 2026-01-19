@@ -94,22 +94,61 @@ export const exists = (testId: string): boolean => {
  * Actions for interacting with the create enrich policy form.
  */
 export const createCreateEnrichPolicyActions = () => {
-  const user = userEvent.setup();
+  const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
 
-  const clickNextButton = async () => {
-    fireEvent.click(screen.getByTestId('nextButton'));
+  const clickNextButton = async ({ waitForTestId }: { waitForTestId?: string } = {}) => {
+    // Best-effort cleanup: close any open combobox popovers before navigation.
+    // This avoids leaving EuiPopover mounted during step transitions, which can trigger act() warnings.
+    if (exists('fieldSelectionForm')) {
+      const matchFieldComboBox = new EuiComboBoxTestHarness('matchField');
+      if (matchFieldComboBox.getElement()) {
+        await matchFieldComboBox.close();
+      }
+
+      const enrichFieldsComboBox = new EuiComboBoxTestHarness('enrichFields');
+      if (enrichFieldsComboBox.getElement()) {
+        await enrichFieldsComboBox.close();
+      }
+    }
+    await user.click(screen.getByTestId('nextButton'));
+
+    // If the caller expects a step transition (e.g. async submit handlers),
+    // wait for the next step boundary here to keep state updates within RTL's act().
+    if (waitForTestId) {
+      await screen.findByTestId(waitForTestId);
+    }
   };
 
-  const clickBackButton = async () => {
-    fireEvent.click(screen.getByTestId('backButton'));
+  const clickBackButton = async ({ waitForTestId }: { waitForTestId?: string } = {}) => {
+    // Best-effort cleanup: if we're on the field selection step, make sure combo boxes
+    // are fully closed before navigating away. Leaving an EuiPopover open here can
+    // schedule late async updates and trigger act() warnings.
+    if (exists('fieldSelectionForm')) {
+      const matchFieldComboBox = new EuiComboBoxTestHarness('matchField');
+      if (matchFieldComboBox.getElement()) {
+        await matchFieldComboBox.close();
+      }
+
+      const enrichFieldsComboBox = new EuiComboBoxTestHarness('enrichFields');
+      if (enrichFieldsComboBox.getElement()) {
+        await enrichFieldsComboBox.close();
+      }
+    }
+    await user.click(screen.getByTestId('backButton'));
+
+    // Optional step boundary wait (mirrors clickNextButton's API) to keep navigation-driven
+    // updates within RTL's act() and reduce flake on slow CI.
+    if (waitForTestId) {
+      await screen.findByTestId(waitForTestId);
+    }
   };
 
   const clickRequestTab = async () => {
-    fireEvent.click(screen.getByTestId('requestTab'));
+    await user.click(screen.getByTestId('requestTab'));
   };
 
   const clickCreatePolicy = async () => {
-    fireEvent.click(screen.getByTestId('createButton'));
+    await user.click(screen.getByTestId('createButton'));
   };
 
   const isOnConfigurationStep = (): boolean => {
@@ -155,14 +194,11 @@ export const createCreateEnrichPolicyActions = () => {
     // Handle comma-separated indices for multiple selection
     const indexNames = (indices ?? 'test-1').split(',').map((s) => s.trim());
     for (const indexName of indexNames) {
-      await indicesComboBox.selectAsync(indexName);
+      await indicesComboBox.select(indexName);
     }
 
-    // Close any open listbox/popover to avoid EuiPopover async updates after this step.
-    await user.keyboard('{Escape}');
-    // Intentionally separate boundary: the listbox is a portal. We must wait for it to unmount
-    // so it can't intercept subsequent clicks/keystrokes or schedule late EuiPopover updates.
-    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+    // Close the combobox popover (portal) so it can't intercept later clicks/keystrokes.
+    await indicesComboBox.close();
 
     // Wait for form state to update - the form uses RxJS observables
     // The onChange handler is async, and field.setValue triggers RxJS subject updates
@@ -177,7 +213,7 @@ export const createCreateEnrichPolicyActions = () => {
     // (hook-form-lib + observable updates). Waiting for the button state prevents flake.
     await waitFor(() => expect(screen.getByTestId('nextButton')).toBeEnabled());
 
-    await clickNextButton();
+    await clickNextButton({ waitForTestId: 'fieldSelectionForm' });
   };
 
   const completeFieldsSelectionStep = async () => {
@@ -186,22 +222,19 @@ export const createCreateEnrichPolicyActions = () => {
     const matchFieldComboBox = new EuiComboBoxTestHarness('matchField');
     // `matchField` uses EuiComboBox singleSelection { asPlainText: true }, so there are no pills.
     // Use the sync selection API and rely on downstream UI boundaries (Next enabled) for validation.
-    matchFieldComboBox.select('first_name');
-    await user.keyboard('{Escape}');
-    // Intentionally separate boundary: close the listbox portal first so it can't race with validation updates.
-    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+    await matchFieldComboBox.select('first_name');
+    // Selecting a singleSelection option should auto-close; avoid "toggle-click" close() here.
+    await matchFieldComboBox.waitForClosed();
 
     // Enrich fields using harness
     await screen.findByTestId('enrichFields');
     const enrichFieldsComboBox = new EuiComboBoxTestHarness('enrichFields');
-    enrichFieldsComboBox.select('age');
-    await user.keyboard('{Escape}');
-    // 1) Close listbox (portal) to avoid late popover updates.
-    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+    await enrichFieldsComboBox.select('age');
+    await enrichFieldsComboBox.close();
     // 2) Then wait for validation to settle (Next enabled). This can update after the listbox is gone.
     await waitFor(() => expect(screen.getByTestId('nextButton')).toBeEnabled());
 
-    await clickNextButton();
+    await clickNextButton({ waitForTestId: 'creationStep' });
   };
 
   const getErrorsMessages = (): string[] => {

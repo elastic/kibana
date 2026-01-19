@@ -21,18 +21,16 @@ jest.mock('../../../kibana_services', () => ({
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {
     const dashboardState: DashboardState = {
-      controlGroupInput: {
-        controls: [
-          {
-            config: { anyKey: 'some value' },
-            grow: false,
-            uid: 'foo',
-            order: 0,
-            type: 'type1',
-            width: 'small',
-          } as unknown as PinnedControlState,
-        ],
-      },
+      pinned_panels: [
+        {
+          config: { anyKey: 'some value' },
+          grow: false,
+          uid: 'foo',
+          order: 0,
+          type: 'type1',
+          width: 'small',
+        } as unknown as PinnedControlState,
+      ],
       description: 'description',
       query: { query: 'test', language: 'KQL' },
       options: {
@@ -113,28 +111,6 @@ describe('transformDashboardIn', () => {
         },
         "error": null,
         "references": Array [],
-      }
-    `);
-  });
-
-  it('should return error when passed references', () => {
-    const dashboardState: DashboardState = {
-      title: 'title',
-      references: [
-        {
-          name: 'someTagRef',
-          type: 'tag',
-          id: '1',
-        },
-      ],
-    };
-
-    const output = transformDashboardIn(dashboardState);
-    expect(output).toMatchInlineSnapshot(`
-      Object {
-        "attributes": null,
-        "error": [Error: References are not supported.],
-        "references": null,
       }
     `);
   });

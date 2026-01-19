@@ -11,7 +11,9 @@ import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
 import { ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
+import { isInvalidAnonymizationError } from '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization';
 import {
   reportAttackDiscoveryGenerationFailure,
   reportAttackDiscoveryGenerationSuccess,
@@ -226,6 +228,10 @@ export const attackDiscoveryScheduleExecutor = async ({
       scheduleInfo,
       telemetry,
     });
+
+    if (isInvalidAnonymizationError(error)) {
+      throw createTaskRunError(error, TaskErrorSource.USER);
+    }
     throw error;
   }
 

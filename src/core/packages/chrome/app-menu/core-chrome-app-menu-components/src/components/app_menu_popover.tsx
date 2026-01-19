@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, type ReactElement } from 'react';
+import React, { useMemo, useState, type ReactElement } from 'react';
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from '../utils';
@@ -27,8 +27,9 @@ interface AppMenuContextMenuProps {
   primaryActionItem?: AppMenuPrimaryActionItem;
   secondaryActionItem?: AppMenuSecondaryActionItem;
   anchorPosition?: PopoverAnchorPosition;
-  testId?: string;
+  popoverTestId?: string;
   onClose: () => void;
+  onCloseOverflowButton?: () => void;
 }
 
 export const AppMenuPopover = ({
@@ -41,17 +42,35 @@ export const AppMenuPopover = ({
   primaryActionItem,
   secondaryActionItem,
   anchorPosition,
-  testId,
+  popoverTestId,
   onClose,
+  onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
-  const panels = useMemo(
-    () => getPopoverPanels({ items, primaryActionItem, secondaryActionItem }),
-    [items, primaryActionItem, secondaryActionItem]
+  const [activePanelId, setActivePanelId] = useState<string>('0');
+
+  const { panels, panelIdToTestId } = useMemo(
+    () =>
+      getPopoverPanels({
+        items,
+        primaryActionItem,
+        secondaryActionItem,
+        onClose,
+        onCloseOverflowButton,
+      }),
+    [items, primaryActionItem, secondaryActionItem, onClose, onCloseOverflowButton]
   );
 
   if (panels.length === 0) {
     return null;
   }
+
+  /**
+   * Determine the active test ID for the popover panel.
+   * EuiContextMenuPanelItemDescriptor does not support data-test-subj directly,
+   * so we map panel IDs to test IDs when creating the panels.
+   * TODO: Remove this implementation if EUI fix is provided: https://github.com/elastic/eui/issues/9321
+   */
+  const activeTestId = panelIdToTestId[activePanelId] || popoverTestId || 'app-menu-popover';
 
   const { content, title } = getTooltip({ tooltipContent, tooltipTitle });
   const showTooltip = Boolean(content || title);
@@ -66,7 +85,6 @@ export const AppMenuPopover = ({
 
   return (
     <EuiPopover
-      data-test-subj={testId || 'top-nav-menu-popover'}
       button={button}
       isOpen={isOpen}
       closePopover={onClose}
@@ -76,8 +94,15 @@ export const AppMenuPopover = ({
       panelStyle={{
         width: popoverWidth,
       }}
+      panelProps={{
+        'data-test-subj': activeTestId,
+      }}
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={panels}
+        onPanelChange={({ panelId }) => setActivePanelId(String(panelId))}
+      />
     </EuiPopover>
   );
 };
