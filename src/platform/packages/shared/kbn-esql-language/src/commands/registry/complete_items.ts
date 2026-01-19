@@ -18,7 +18,7 @@ import {
   ESQL_COMMON_NUMERIC_TYPES,
   ESQL_NAMED_PARAMS_TYPE,
 } from '../definitions/types';
-import { getPromqlParam, getPromqlParamDefinitions } from './promql/utils';
+import { getPromqlParamDefinitions } from './promql/utils';
 
 const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -185,25 +185,6 @@ export function getPromqlParamKeySuggestions(): ISuggestionItem[] {
       }),
     })
   );
-}
-
-export function getPromqlParamValueSuggestions(param: string): ISuggestionItem[] {
-  const definition = getPromqlParam(param);
-
-  if (!definition?.suggestedValues) {
-    return [];
-  }
-
-  return definition.suggestedValues.map((value) => ({
-    label: value,
-    text: value,
-    kind: 'Value',
-    detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.paramValueDoc', {
-      defaultMessage: '{param} value',
-      values: { param },
-    }),
-    category: SuggestionCategory.VALUE,
-  }));
 }
 
 export const commaCompleteItem = buildCharCompleteItem(

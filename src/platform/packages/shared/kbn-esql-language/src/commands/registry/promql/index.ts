@@ -22,7 +22,7 @@ export const promqlCommand = {
   methods: promqlCommandMethods,
   metadata: {
     type: 'source' as const,
-    hidden: true,
+    hidden: process.env.NODE_ENV === 'test' ? false : true, // TODO: Temporary until making it GA
     preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.promqlDoc', {
       defaultMessage:

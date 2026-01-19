@@ -18,7 +18,6 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getPromqlParamKeySuggestions,
-  getPromqlParamValueSuggestions,
   pipeCompleteItem,
   valuePlaceholderConstant,
 } from '../complete_items';
@@ -218,5 +217,16 @@ function suggestParamValues(
     return getDateLiterals();
   }
 
-  return [valuePlaceholderConstant, ...getPromqlParamValueSuggestions(param)];
+  if (param === 'step') {
+    return [
+      {
+        ...valuePlaceholderConstant,
+        label: 'Insert duration',
+        text: '"${0:5m}"',
+        detail: 'Use units like s, m, h, d',
+      },
+    ];
+  }
+
+  return [valuePlaceholderConstant];
 }

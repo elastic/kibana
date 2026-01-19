@@ -180,7 +180,6 @@ const PROMQL_PARAMS: PromqlParamDefinition[] = [
     name: 'step',
     description: 'Query resolution step (e.g. 1m, 5m, 1h)',
     valueType: PromqlParamValueType.Static,
-    suggestedValues: ['1m', '5m', '15m', '30m', '1h', '6h', '1d'],
   },
   {
     name: 'start',
