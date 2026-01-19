@@ -9,14 +9,17 @@ import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 
 import { BrowseIntegrationPage } from './browse_integrations_page';
+import { CopyIntegrationPage } from './copy_integration_page';
 
 export interface StreamsPageObjects extends PageObjects {
   browseIntegrations: BrowseIntegrationPage;
+  copyIntegration: CopyIntegrationPage;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): StreamsPageObjects {
   return {
     ...pageObjects,
     browseIntegrations: createLazyPageObject(BrowseIntegrationPage, page),
+    copyIntegration: createLazyPageObject(CopyIntegrationPage, page),
   };
 }
