@@ -46,6 +46,7 @@ interface Props<TSample extends {}> {
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
   useLegacy: boolean;
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
+  entryTransactionId?: string;
 }
 
 export function WaterfallWithSummary<TSample extends {}>({
@@ -66,6 +67,7 @@ export function WaterfallWithSummary<TSample extends {}>({
   onLogsTableConfigChange,
   useLegacy,
   unifiedWaterfallFetchResult,
+  entryTransactionId,
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
@@ -162,6 +164,8 @@ export function WaterfallWithSummary<TSample extends {}>({
                   transaction={entryTransaction}
                   waterfall={waterfallFetchResult}
                   environment={environment}
+                  useLegacy={useLegacy}
+                  traceItems={unifiedWaterfallFetchResult.traceItems}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -213,6 +217,7 @@ export function WaterfallWithSummary<TSample extends {}>({
           onLogsTableConfigChange={onLogsTableConfigChange}
           useLegacy={useLegacy}
           unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+          entryTransactionId={entryTransactionId}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

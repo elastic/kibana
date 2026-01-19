@@ -216,6 +216,7 @@ export function TransactionDistribution({
           onLogsTableConfigChange={onLogsTableConfigChange}
           useLegacy={waterfallFetchResult.useLegacy}
           unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+          entryTransactionId={transactionId}
         />
       </div>
     </ResettingHeightRetainer>

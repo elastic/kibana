@@ -104,6 +104,7 @@ function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
         waterfallItemId={waterfallItemId}
         showCriticalPath={false}
         onShowCriticalPathChange={noop}
+        entryTransactionId="transaction-1"
       />
     </Router>
   );

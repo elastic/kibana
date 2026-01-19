@@ -32,6 +32,7 @@ export interface TraceItem {
   };
   parentId?: string;
   serviceName: string;
+  serviceEnvironment?: string;
   type?: string;
   sync?: boolean;
   agentName?: AgentName;

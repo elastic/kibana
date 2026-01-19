@@ -38,6 +38,7 @@ interface Props {
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
   useLegacy: boolean;
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
+  entryTransactionId?: string;
 }
 
 export function TransactionTabs({
@@ -54,6 +55,7 @@ export function TransactionTabs({
   onLogsTableConfigChange,
   useLegacy,
   unifiedWaterfallFetchResult,
+  entryTransactionId,
 }: Props) {
   const tabs: Record<TransactionTab, { label: string; component: React.ReactNode }> = useMemo(
     () => ({
@@ -70,6 +72,7 @@ export function TransactionTabs({
             onShowCriticalPathChange={onShowCriticalPathChange}
             useLegacy={useLegacy}
             unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+            entryTransactionId={entryTransactionId}
           />
         ),
       },
@@ -99,6 +102,7 @@ export function TransactionTabs({
       },
     }),
     [
+      entryTransactionId,
       logsTableConfig,
       onLogsTableConfigChange,
       onShowCriticalPathChange,
@@ -152,6 +156,7 @@ function TimelineTabContent({
   onShowCriticalPathChange,
   useLegacy,
   unifiedWaterfallFetchResult,
+  entryTransactionId,
 }: {
   waterfallItemId?: string;
   serviceName?: string;
@@ -160,6 +165,7 @@ function TimelineTabContent({
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
   useLegacy: boolean;
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
+  entryTransactionId?: string;
 }) {
   if (useLegacy) {
     return (
@@ -182,6 +188,7 @@ function TimelineTabContent({
       serviceName={serviceName}
       showCriticalPath={showCriticalPath}
       onShowCriticalPathChange={onShowCriticalPathChange}
+      entryTransactionId={entryTransactionId}
     />
   );
 }

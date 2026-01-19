@@ -24,6 +24,7 @@ interface Props {
   serviceName?: string;
   showCriticalPath: boolean;
   onShowCriticalPathChange: (value: boolean) => void;
+  entryTransactionId?: string;
 }
 
 const toggleFlyout = ({
@@ -53,6 +54,7 @@ export function UnifiedWaterfallContainer({
   waterfallItemId,
   showCriticalPath,
   onShowCriticalPathChange,
+  entryTransactionId,
 }: Props) {
   const history = useHistory();
   const handleErrorClick = useErrorClickHandler(traceItems);
@@ -75,6 +77,7 @@ export function UnifiedWaterfallContainer({
           agentMarks={agentMarks}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
+          entryTransactionId={entryTransactionId}
         >
           <UnifiedWaterfallFlyout
             waterfallItemId={waterfallItemId}

@@ -149,6 +149,7 @@ export function TraceExplorerWaterfall() {
         onShowCriticalPathChange={onShowCriticalPathChange}
         useLegacy={waterfallFetchResult.useLegacy}
         unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+        entryTransactionId={transactionId}
       />
     </ResettingHeightRetainer>
   );

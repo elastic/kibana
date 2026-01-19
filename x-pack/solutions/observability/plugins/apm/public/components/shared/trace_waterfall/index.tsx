@@ -49,6 +49,7 @@ export interface Props {
   defaultShowCriticalPath?: boolean;
   onShowCriticalPathChange?: (value: boolean) => void;
   children?: React.ReactNode;
+  entryTransactionId?: string;
 }
 
 export function TraceWaterfall({
@@ -70,6 +71,7 @@ export function TraceWaterfall({
   defaultShowCriticalPath,
   onShowCriticalPathChange,
   children,
+  entryTransactionId,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -90,6 +92,7 @@ export function TraceWaterfall({
       showCriticalPath={showCriticalPath}
       defaultShowCriticalPath={defaultShowCriticalPath}
       onShowCriticalPathChange={onShowCriticalPathChange}
+      entryTransactionId={entryTransactionId}
     >
       <TraceWarning>
         <TraceWaterfallComponent />

@@ -210,6 +210,7 @@ export function DependencyOperationDetailView() {
               onShowCriticalPathChange={onShowCriticalPathChange}
               useLegacy={waterfallFetch.useLegacy}
               unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+              entryTransactionId={selectedSample?.transactionId}
             />
           </ResettingHeightRetainer>
         </EuiPanel>

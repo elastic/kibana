@@ -43,11 +43,13 @@ export function useTraceWaterfall({
   isFiltered = false,
   errors,
   onErrorClick,
+  entryTransactionId,
 }: {
   traceItems: TraceItem[];
   isFiltered?: boolean;
   errors?: Error[];
   onErrorClick?: OnErrorClick;
+  entryTransactionId?: string;
 }) {
   const waterfall = useMemo(() => {
     try {
@@ -57,7 +59,8 @@ export function useTraceWaterfall({
       const traceParentChildrenMap = getTraceParentChildrenMap(traceItems, isFiltered);
       const { rootItem, traceState, orphans } = getRootItemOrFallback(
         traceParentChildrenMap,
-        traceItems
+        traceItems,
+        entryTransactionId
       );
 
       const traceWaterfall = rootItem
@@ -103,7 +106,7 @@ export function useTraceWaterfall({
         errorMarks: [],
       };
     }
-  }, [traceItems, isFiltered, errors, onErrorClick]);
+  }, [traceItems, isFiltered, errors, onErrorClick, entryTransactionId]);
 
   return waterfall;
 }
@@ -230,7 +233,8 @@ export enum TraceDataState {
 
 export function getRootItemOrFallback(
   traceParentChildrenMap: Record<string, TraceItem[]>,
-  traceItems: TraceItem[]
+  traceItems: TraceItem[],
+  entryTransactionId?: string
 ) {
   if (traceItems.length === 0) {
     return {
@@ -238,7 +242,9 @@ export function getRootItemOrFallback(
     };
   }
 
-  const rootItem = traceParentChildrenMap.root?.[0];
+  const rootItem = entryTransactionId
+    ? traceItems.find((item) => item.id === entryTransactionId)
+    : traceParentChildrenMap.root?.[0];
 
   const parentIds = new Set(traceItems.map(({ id }) => id));
   // TODO: Reuse waterfall util methods where possible or if logic is the same

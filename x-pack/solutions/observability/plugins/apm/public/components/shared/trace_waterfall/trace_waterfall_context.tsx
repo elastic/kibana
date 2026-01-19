@@ -107,6 +107,7 @@ interface Props {
   showCriticalPath?: boolean;
   defaultShowCriticalPath?: boolean;
   onShowCriticalPathChange?: (value: boolean) => void;
+  entryTransactionId?: string;
 }
 
 export function TraceWaterfallContextProvider({
@@ -128,6 +129,7 @@ export function TraceWaterfallContextProvider({
   showCriticalPath: controlledValue,
   defaultShowCriticalPath = false,
   onShowCriticalPathChange,
+  entryTransactionId,
 }: Props) {
   const {
     duration,
@@ -144,6 +146,7 @@ export function TraceWaterfallContextProvider({
     isFiltered,
     errors,
     onErrorClick,
+    entryTransactionId,
   });
 
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultShowCriticalPath);
