@@ -19,7 +19,6 @@ project:
     sourceRoot: src/platform/packages/shared/kbn-visualization-ui-components
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/unified-search-plugin'
   - '@kbn/utility-types'
   - '@kbn/es-query'
   - '@kbn/core-http-browser'
@@ -36,6 +35,7 @@ dependsOn:
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/visualization-utils'
   - '@kbn/shared-ux-button-toolbar'
+  - '@kbn/kql'
 tags:
   - shared-browser
   - package

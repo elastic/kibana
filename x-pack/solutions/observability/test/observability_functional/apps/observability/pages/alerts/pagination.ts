@@ -116,9 +116,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('Previous page button is disabled', async () => {
-          const prevButtonDisabledValue =
-            await observability.alerts.pagination.getPrevButtonDisabledValue();
-          expect(prevButtonDisabledValue).to.be('true');
+          await observability.alerts.common.alertDataHasLoaded();
+          await retry.try(async () => {
+            const prevButtonDisabledValue =
+              await observability.alerts.pagination.getPrevButtonDisabledValue();
+            expect(prevButtonDisabledValue).to.be('true');
+          });
         });
 
         it('Goes to nth page', async () => {

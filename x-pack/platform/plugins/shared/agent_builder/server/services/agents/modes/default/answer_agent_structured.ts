@@ -10,6 +10,7 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
+import { wrapJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { Logger } from '@kbn/logging';
 import type { ProcessedAttachmentType } from '../utils/prepare_conversation';
 import type { ResolvedConfiguration } from '../types';
@@ -28,6 +29,8 @@ export const structuredOutputSchema = z.object({
     .optional()
     .describe('Optional structured data to include in the response'),
 });
+
+const wrappedSchemaProp = 'response';
 
 /**
  * Structured output answer agent with structured error handling.
@@ -54,22 +57,12 @@ export const createAnswerAgentStructured = ({
       events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     }
     try {
-      let schemaToUse = outputSchema
-        ? (outputSchema as Record<string, any>)
-        : structuredOutputSchema;
-
-      // Add description to JSON Schema if it doesn't have one, for some reason without it this doesnt seem to work reliably
-      if (
-        !('description' in schemaToUse) &&
-        typeof schemaToUse === 'object' &&
-        schemaToUse !== null
-      ) {
-        schemaToUse = {
-          ...schemaToUse,
-          description:
-            "Use this structured format to respond to the user's request with the required data.",
-        };
-      }
+      const { schema: schemaToUse, wrapped } = wrapJsonSchema({
+        schema: outputSchema ?? structuredOutputSchema,
+        property: wrappedSchemaProp,
+        description:
+          "Use this structured format to respond to the user's request with the required data.",
+      });
 
       const structuredModel = chatModel
         .withStructuredOutput(schemaToUse, {
@@ -88,7 +81,12 @@ export const createAnswerAgentStructured = ({
         attachmentTypes,
       });
 
-      const response = await structuredModel.invoke(prompt);
+      let response = await structuredModel.invoke(prompt);
+      // unwrap response if schema was wrapped
+      if (wrapped && response[wrappedSchemaProp]) {
+        response = response[wrappedSchemaProp];
+      }
+
       const action = processStructuredAnswerResponse(response);
 
       return {
