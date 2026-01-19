@@ -6,36 +6,47 @@
  */
 
 import { z } from '@kbn/zod';
-import { streamObjectNameSchema } from './shared/stream_object_name';
 
-const featureTypes = ['infrastructure'] as const;
-export type FeatureType = (typeof featureTypes)[number];
+const featureStatus = ['active', 'stale', 'expired'] as const;
+export type FeatureStatus = (typeof featureStatus)[number];
 
-export const featureTypeSchema = z.enum(featureTypes);
+export const featureStatusSchema = z.enum(featureStatus);
 
-export interface BaseFeature<T extends FeatureType = FeatureType> {
-  type: T;
+export interface BaseFeature {
+  type: string;
   name: string;
   description: string;
+  value: Record<string, any>;
+  confidence: number;
+  evidence: string[];
+  tags: string[];
+  meta: Record<string, any>;
+}
+
+export interface Feature extends BaseFeature {
+  id: string;
+  status: FeatureStatus;
+  last_seen: string;
 }
 
 export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
-  type: featureTypeSchema,
-  name: streamObjectNameSchema,
+  type: z.string(),
+  name: z.string(),
   description: z.string(),
+  value: z.record(z.string(), z.any()),
+  confidence: z.number().min(0).max(100),
+  evidence: z.array(z.string()),
+  tags: z.array(z.string()),
+  meta: z.record(z.string(), z.any()),
 });
 
-export type InfrastructureFeature = BaseFeature<'infrastructure'>;
-
-export const infrastructureFeatureSchema: z.Schema<InfrastructureFeature> = baseFeatureSchema.and(
+export const featureSchema: z.Schema<Feature> = baseFeatureSchema.and(
   z.object({
-    type: z.literal('infrastructure'),
+    id: z.string(),
+    status: featureStatusSchema,
+    last_seen: z.string(),
   })
 );
-
-export type Feature = InfrastructureFeature;
-
-export const featureSchema: z.Schema<Feature> = infrastructureFeatureSchema;
 
 export function isFeature(feature: any): feature is Feature {
   return featureSchema.safeParse(feature).success;

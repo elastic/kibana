@@ -74,14 +74,16 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
   }) => {
     await pageObjects.streams.clickAddProcessor();
 
-    await expect(page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')).toBeHidden();
+    await expect(
+      page.getByTestId('streamsAppStreamDetailEnrichmentCreateProcessorButton')
+    ).toBeHidden();
 
     // Cancel the operation
     await pageObjects.streams.clickCancelProcessorChanges();
 
     // Verify we're back to idle state
     await expect(
-      page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')
+      page.getByTestId('streamsAppStreamDetailEnrichmentCreateProcessorButton')
     ).toBeEnabled();
   });
 
@@ -153,9 +155,11 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     await browserAuth.loginAsViewer();
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
 
-    // Create button should be disabled or show tooltip
-    const createButton = page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton');
-    await expect(createButton).toBeHidden();
+    // Create buttons should be hidden for users without edit privileges
+    const createProcessorButton = page.getByTestId(
+      'streamsAppStreamDetailEnrichmentCreateProcessorButton'
+    );
+    await expect(createProcessorButton).toBeHidden();
   });
 
   test('should duplicate a processor', async ({ pageObjects }) => {

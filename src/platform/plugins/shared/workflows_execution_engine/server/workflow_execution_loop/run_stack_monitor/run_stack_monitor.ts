@@ -68,6 +68,14 @@ export async function runStackMonitor(
   monitorAbortController: AbortController
 ): Promise<void> {
   while (!monitorAbortController.signal.aborted) {
+    // Check cancellation immediately before waiting - ensures fast cancellation detection
+    await processNodeStackMonitoring(params, monitoredStepExecutionRuntime);
+
+    // If monitoring was aborted during the check, exit early
+    if (monitorAbortController.signal.aborted) {
+      return;
+    }
+
     try {
       await abortableTimeout(500, monitorAbortController.signal);
     } catch (error) {
@@ -78,7 +86,5 @@ export async function runStackMonitor(
 
       throw error;
     }
-
-    await processNodeStackMonitoring(params, monitoredStepExecutionRuntime);
   }
 }
