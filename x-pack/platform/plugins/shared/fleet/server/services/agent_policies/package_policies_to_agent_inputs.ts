@@ -250,7 +250,7 @@ export const storedPackagePoliciesToAgentInputs = async (
       packagePolicyWithUpdatedInputs = {
         ...packagePolicy,
         inputs:
-          packagePolicySO!.attributes.inputs_for_versions?.[agentVersion] ?? packagePolicy.inputs,
+          packagePolicySO?.attributes.inputs_for_versions?.[agentVersion] ?? packagePolicy.inputs,
       };
       span?.end();
     }

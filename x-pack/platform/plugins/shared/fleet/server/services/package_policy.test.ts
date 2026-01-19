@@ -365,13 +365,17 @@ describe('Package policy service', () => {
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
-
-      soClient.create.mockResolvedValueOnce({
+      const packagePolicySO = {
         id: 'test-package-policy',
-        attributes: {},
+        attributes: {
+          inputs: [],
+        },
         references: [],
         type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-      });
+      };
+
+      soClient.create.mockResolvedValueOnce(packagePolicySO);
+      soClient.get.mockResolvedValueOnce(packagePolicySO);
 
       mockAgentPolicyGet();
 
@@ -667,12 +671,16 @@ describe('Package policy service', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
-      soClient.create.mockResolvedValueOnce({
+      const packagePolicySO = {
         id: 'test-package-policy',
-        attributes: {},
+        attributes: {
+          inputs: [],
+        },
         references: [],
         type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-      });
+      };
+      soClient.create.mockResolvedValueOnce(packagePolicySO);
+      soClient.get.mockResolvedValueOnce(packagePolicySO);
 
       mockAgentPolicyGet();
 
@@ -1493,18 +1501,40 @@ describe('Package policy service', () => {
         saved_objects: [
           {
             id: 'test-package-policy-1',
-            attributes: {},
+            attributes: {
+              package: {
+                name: 'test',
+                title: 'Test',
+                version: '0.0.1',
+              },
+              inputs: [],
+            },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
           {
             id: 'test-package-policy-2',
-            attributes: {},
+            attributes: {
+              package: {
+                name: 'test',
+                title: 'Test',
+                version: '0.0.1',
+              },
+              inputs: [],
+            },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
         ],
       });
+      soClient.get.mockImplementation(async (_, id) => ({
+        id,
+        attributes: {
+          inputs: [],
+        },
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      }));
 
       mockAgentPolicyGet();
 
@@ -1517,6 +1547,11 @@ describe('Package policy service', () => {
           policy_id: 'test_agent_policy',
           policy_ids: ['test_agent_policy'],
           inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
         },
         {
           id: 'test-package-policy-2',
@@ -1526,6 +1561,11 @@ describe('Package policy service', () => {
           policy_id: 'test_agent_policy',
           policy_ids: ['test_agent_policy'],
           inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
         },
       ]);
 
@@ -4070,6 +4110,11 @@ describe('Package policy service', () => {
           policy_id: 'test-agent-policy',
           policy_ids: ['test-agent-policy'],
           inputs: [],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
         },
         {
           id: 'test-package-policy-2',
@@ -4079,6 +4124,11 @@ describe('Package policy service', () => {
           policy_id: 'test-agent-policy',
           policy_ids: ['test-agent-policy'],
           inputs: [],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
         },
       ]);
     });
@@ -4125,6 +4175,11 @@ describe('Package policy service', () => {
           policy_id: 'test-agent-policy',
           policy_ids: ['test-agent-policy'],
           inputs: [],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
         },
         {
           id: 'test-package-policy-2',
@@ -4134,6 +4189,11 @@ describe('Package policy service', () => {
           policy_id: 'test-agent-policy',
           policy_ids: ['test-agent-policy'],
           inputs: [],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
         },
       ]);
 
