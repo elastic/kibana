@@ -13,7 +13,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import type { StoredControlGroupInput } from '../../../dashboard_saved_object';
+import type { StoredPinnedControls } from '@kbn/controls-schemas';
 import {
   transformControlObjectToArray,
   transformControlProperties,
@@ -30,25 +30,28 @@ jest.mock('../../../kibana_services', () => ({
 describe('control_state', () => {
   const mockControls = {
     control1: {
+      id: 'control1',
       type: 'optionsListControl',
       width: 'medium',
       explicitInput: { foo: 'bar' },
       order: 0,
     },
     control2: {
+      id: 'control2',
       type: 'rangeSliderControl',
       width: 'small',
       explicitInput: { bizz: 'buzz' },
       order: 1,
     },
     control3: {
+      id: 'control3',
       type: 'esqlControl',
       grow: true,
       explicitInput: { boo: 'bear' },
       unsupportedProperty: 'unsupported',
       order: 2,
     },
-  } as StoredControlGroupInput['panels'];
+  } as StoredPinnedControls;
 
   describe('transformControlObjectToArray', () => {
     it('should transform control object to array', () => {
