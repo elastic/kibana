@@ -52,6 +52,7 @@ export const createPureCustomIntegrationsStateMachine = (
           states: {
             initialized: {
               meta: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 _DX_warning_:
                   "These inner initialized states on the top level machine exist primarily so that 'connected' components can block the reading of the state of child machines whilst undefined on the first render cycle",
               },

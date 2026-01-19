@@ -85,7 +85,6 @@ export const AnalysisFieldsTable: FC<{
           }
         ),
         id: 'name',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         render: ({ name, mapping_types }: { name: string; mapping_types: string[] }) => {
           const field: FieldForStats = {
             id: name,
@@ -125,7 +124,7 @@ export const AnalysisFieldsTable: FC<{
         id: 'is_included',
         alignment: LEFT_ALIGNMENT,
         isSortable: true,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         render: ({ is_included }: { is_included: boolean }) => (is_included ? 'Yes' : 'No'),
       },
       {
@@ -138,7 +137,7 @@ export const AnalysisFieldsTable: FC<{
         id: 'is_required',
         alignment: LEFT_ALIGNMENT,
         isSortable: true,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         render: ({ is_required }: { is_required: boolean }) => (is_required ? 'Yes' : 'No'),
       },
       {

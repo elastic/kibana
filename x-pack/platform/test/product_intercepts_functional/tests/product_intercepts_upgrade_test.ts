@@ -34,22 +34,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it("displays the upgrade intercept if it's display condition is met", async () => {
         await PageObjects.common.navigateToUrl('home');
 
-        let timingRecord: Record<string, { timerStart: Date }> = {};
-
-        await retry.waitFor('assert timing record for upgrade intercept gets set', async () => {
-          timingRecord = JSON.parse(
-            (await browser.getLocalStorageItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY)) || '{}'
-          );
-
-          return timingRecord && !!timingRecord[interceptUpgradeTriggerDefId];
-        });
-
         // adjust timing record with a value that's in the past considering the configured interval,
         // so that the intercept would be displayed to the user
         await browser.setLocalStorageItem(
           INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
           JSON.stringify({
-            ...timingRecord,
             [interceptUpgradeTriggerDefId]: {
               // set record time that's in the past considering the configured interval
               timerStart: new Date(Date.now() - CONFIGURED_UPGRADE_INTERCEPT_INTERVAL - 1000),

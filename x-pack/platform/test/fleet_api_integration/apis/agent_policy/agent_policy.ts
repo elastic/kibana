@@ -696,7 +696,7 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test',
           })
           .expect(200);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         const { id, updated_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
@@ -1205,7 +1205,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1266,7 +1266,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1427,7 +1427,7 @@ export default function (providerContext: FtrProviderContext) {
             force: true,
           })
           .expect(200);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
         createdPolicyIds.push(updatedPolicy.id);
 
@@ -1488,7 +1488,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1606,7 +1605,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({

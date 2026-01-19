@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
