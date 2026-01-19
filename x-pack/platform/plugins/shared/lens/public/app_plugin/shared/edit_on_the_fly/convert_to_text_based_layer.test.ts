@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import type {
   FormBasedPrivateState,
   TypedLensSerializedState,
   DatasourceStates,
   IndexPattern,
 } from '@kbn/lens-common';
-import { coreMock } from '@kbn/core/public/mocks';
 import { createMockFramePublicAPI } from '../../../mocks';
-import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
-import type { LensPluginStartDependencies } from '../../../plugin';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
+import type { ConvertibleLayer } from './convert_to_esql_modal';
 
 describe('convertFormBasedToTextBasedLayer', () => {
   const layerId = 'layer1';
@@ -104,36 +101,46 @@ describe('convertFormBasedToTextBasedLayer', () => {
     references: [],
   } as unknown as TypedLensSerializedState['attributes'];
 
-  let coreStart: CoreStart;
-  let startDependencies: LensPluginStartDependencies;
-
-  const defaultUiSettingsGet = (key: string) => {
-    switch (key) {
-      case 'dateFormat':
-        return 'MMM D, YYYY @ HH:mm:ss.SSS';
-      case 'dateFormat:scaled':
-        return [[]];
-      case 'dateFormat:tz':
-        return 'UTC';
-      case 'histogram:barTarget':
-        return 50;
-      case 'histogram:maxBars':
-        return 100;
-      default:
-        return undefined;
-    }
-  };
+  // Pre-computed conversion data that would normally come from useEsqlConversionCheck
+  const mockConvertibleLayers: ConvertibleLayer[] = [
+    {
+      id: layerId,
+      icon: 'layers',
+      name: '',
+      type: 'data',
+      query: `FROM test-index
+        | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend
+        | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)
+        | SORT @timestamp ASC`,
+      isConvertibleToEsql: true,
+      conversionData: {
+        esAggsIdMap: {
+          bucket_0_0: [
+            {
+              id: 'col2',
+              label: 'Count of records',
+              operationType: 'count',
+              sourceField: '___records___',
+              interval: undefined as never,
+            },
+          ],
+          '@timestamp': [
+            {
+              id: 'col1',
+              label: '@timestamp',
+              operationType: 'date_histogram',
+              sourceField: '@timestamp',
+              interval: 1800000, // 30 minutes in ms
+            },
+          ],
+        },
+        partialRows: false,
+      },
+    },
+  ];
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    coreStart = coreMock.createStart();
-    (coreStart.uiSettings.get as jest.Mock).mockImplementation(defaultUiSettingsGet);
-
-    startDependencies = createMockStartDependencies() as unknown as LensPluginStartDependencies;
-    (startDependencies.data.nowProvider.get as jest.Mock).mockReturnValue(
-      new Date('2024-01-01T00:00:00.000Z')
-    );
   });
 
   it('returns undefined when layersToConvert is empty', () => {
@@ -150,8 +157,6 @@ describe('convertFormBasedToTextBasedLayer', () => {
       visualizationState: mockVisualizationState,
       datasourceStates: mockDatasourceStates,
       framePublicAPI,
-      coreStart,
-      startDependencies,
     });
 
     expect(result).toBeUndefined();
@@ -166,13 +171,11 @@ describe('convertFormBasedToTextBasedLayer', () => {
     });
 
     const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: [layerId],
+      layersToConvert: mockConvertibleLayers,
       attributes: mockAttributes,
       visualizationState: mockVisualizationState,
       datasourceStates: {},
       framePublicAPI,
-      coreStart,
-      startDependencies,
     });
 
     expect(result).toBeUndefined();
@@ -187,40 +190,17 @@ describe('convertFormBasedToTextBasedLayer', () => {
     });
 
     const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: [layerId],
+      layersToConvert: mockConvertibleLayers,
       attributes: mockAttributes,
       visualizationState: { noLayers: true },
       datasourceStates: mockDatasourceStates,
       framePublicAPI,
-      coreStart,
-      startDependencies,
     });
 
     expect(result).toBeUndefined();
   });
 
-  it('returns undefined when index pattern is not found', () => {
-    const framePublicAPI = createMockFramePublicAPI({
-      dataViews: {
-        indexPatterns: {}, // No index patterns
-        indexPatternRefs: [],
-      },
-    });
-
-    const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: [layerId],
-      attributes: mockAttributes,
-      visualizationState: mockVisualizationState,
-      datasourceStates: mockDatasourceStates,
-      framePublicAPI,
-      coreStart,
-      startDependencies,
-    });
-
-    expect(result).toBeUndefined();
-  });
-
-  it('returns undefined when layer to convert does not exist', () => {
+  it('returns undefined when layer ID does not exist in formBased state', () => {
     const framePublicAPI = createMockFramePublicAPI({
       dataViews: {
         indexPatterns: { 'test-index-pattern': mockIndexPattern },
@@ -228,20 +208,32 @@ describe('convertFormBasedToTextBasedLayer', () => {
       },
     });
 
+    const nonExistentLayer: ConvertibleLayer = {
+      id: 'non-existent-layer',
+      icon: 'layers',
+      name: '',
+      type: 'data',
+      query: 'FROM test-index | STATS count = COUNT(*)',
+      isConvertibleToEsql: true,
+      conversionData: {
+        esAggsIdMap: {},
+        partialRows: false,
+      },
+    };
+
     const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: ['non-existent-layer'],
+      layersToConvert: [nonExistentLayer],
       attributes: mockAttributes,
       visualizationState: mockVisualizationState,
       datasourceStates: mockDatasourceStates,
       framePublicAPI,
-      coreStart,
-      startDependencies,
     });
 
+    // Returns undefined because the layer doesn't exist in formBased state
     expect(result).toBeUndefined();
   });
 
-  it('converts a form-based layer to text-based successfully', () => {
+  it('converts a form-based layer to text-based successfully using pre-computed data', () => {
     const framePublicAPI = createMockFramePublicAPI({
       dataViews: {
         indexPatterns: { 'test-index-pattern': mockIndexPattern },
@@ -254,13 +246,11 @@ describe('convertFormBasedToTextBasedLayer', () => {
     });
 
     const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: [layerId],
+      layersToConvert: mockConvertibleLayers,
       attributes: mockAttributes,
       visualizationState: mockVisualizationState,
       datasourceStates: mockDatasourceStates,
       framePublicAPI,
-      coreStart,
-      startDependencies,
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -297,9 +287,9 @@ describe('convertFormBasedToTextBasedLayer', () => {
                   "index": "test-index-pattern",
                   "query": Object {
                     "esql": "FROM test-index
-        | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend
-        | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)
-        | SORT @timestamp ASC",
+              | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend
+              | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)
+              | SORT @timestamp ASC",
                   },
                   "timeField": "@timestamp",
                 },
@@ -309,9 +299,9 @@ describe('convertFormBasedToTextBasedLayer', () => {
           "filters": Array [],
           "query": Object {
             "esql": "FROM test-index
-        | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend
-        | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)
-        | SORT @timestamp ASC",
+              | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend
+              | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)
+              | SORT @timestamp ASC",
           },
           "visualization": Object {
             "layers": Array [
@@ -332,7 +322,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
     `);
   });
 
-  it('remaps column IDs in visualization state', () => {
+  it('remaps column IDs in visualization state using pre-computed data', () => {
     const framePublicAPI = createMockFramePublicAPI({
       dataViews: {
         indexPatterns: { 'test-index-pattern': mockIndexPattern },
@@ -345,13 +335,11 @@ describe('convertFormBasedToTextBasedLayer', () => {
     });
 
     const result = convertFormBasedToTextBasedLayer({
-      layersToConvert: [layerId],
+      layersToConvert: mockConvertibleLayers,
       attributes: mockAttributes,
       visualizationState: mockVisualizationState,
       datasourceStates: mockDatasourceStates,
       framePublicAPI,
-      coreStart,
-      startDependencies,
     });
 
     // Original column IDs (col1, col2) should be remapped to ES|QL field names
@@ -369,5 +357,86 @@ describe('convertFormBasedToTextBasedLayer', () => {
         ],
       }
     `);
+  });
+
+  it('uses custom pre-computed conversion data with different column mappings', () => {
+    const framePublicAPI = createMockFramePublicAPI({
+      dataViews: {
+        indexPatterns: { 'test-index-pattern': mockIndexPattern },
+        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
+      },
+      dateRange: {
+        fromDate: '2024-01-01T00:00:00.000Z',
+        toDate: '2024-01-02T00:00:00.000Z',
+      },
+    });
+
+    // Pre-computed conversion data with custom ES|QL query and column mappings
+    const preComputedEsql =
+      'FROM test-index | STATS custom_count = COUNT(*) BY custom_timestamp = BUCKET(@timestamp, 1 hour)';
+    const customConvertibleLayers: ConvertibleLayer[] = [
+      {
+        id: layerId,
+        icon: 'layers',
+        name: '',
+        type: 'data',
+        query: preComputedEsql,
+        isConvertibleToEsql: true,
+        conversionData: {
+          esAggsIdMap: {
+            custom_count: [
+              {
+                id: 'col2',
+                label: 'Count of records',
+                operationType: 'count',
+                sourceField: '___records___',
+                interval: undefined as never,
+              },
+            ],
+            custom_timestamp: [
+              {
+                id: 'col1',
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                sourceField: '@timestamp',
+                interval: 3600000, // 1 hour in ms
+              },
+            ],
+          },
+          partialRows: true,
+        },
+      },
+    ];
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: customConvertibleLayers,
+      attributes: mockAttributes,
+      visualizationState: mockVisualizationState,
+      datasourceStates: mockDatasourceStates,
+      framePublicAPI,
+    });
+
+    // Should use the pre-computed ES|QL query
+    expect(result?.state.query).toEqual({ esql: preComputedEsql });
+
+    // Should use the pre-computed column mappings
+    expect(result?.state.visualization).toMatchInlineSnapshot(`
+      Object {
+        "layers": Array [
+          Object {
+            "accessors": Array [
+              "custom_count",
+            ],
+            "layerId": "layer1",
+            "layerType": "data",
+            "xAccessor": "custom_timestamp",
+          },
+        ],
+      }
+    `);
+
+    // Verify the text-based layer uses the pre-computed query
+    const textBasedState = result?.state.datasourceStates.textBased;
+    expect(textBasedState?.layers[layerId]?.query).toEqual({ esql: preComputedEsql });
   });
 });

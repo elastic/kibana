@@ -30,9 +30,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LensLayerType } from '@kbn/lens-common';
+import type { OriginalColumn } from '../../../../common/types';
 import { layerTypes } from '../../..';
 
 type LayerType = Exclude<LensLayerType, 'metricTrendline'>;
+
+/**
+ * Pre-computed conversion data from generateEsqlQuery.
+ * This allows the conversion to be performed without regenerating the ES|QL query.
+ */
+export interface EsqlConversionData {
+  esAggsIdMap: Record<string, OriginalColumn[]>;
+  partialRows: boolean;
+}
 
 export interface ConvertibleLayer {
   id: string;
@@ -41,6 +51,11 @@ export interface ConvertibleLayer {
   type: LayerType;
   query: string;
   isConvertibleToEsql: boolean;
+  /**
+   * Pre-computed conversion data from the initial ES|QL query generation.
+   * This data is reused during conversion to avoid duplicate query generation.
+   */
+  conversionData: EsqlConversionData;
 }
 
 const typeLabels: Record<LayerType, (count: number) => string> = {
@@ -66,9 +81,9 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   onCancel: EuiConfirmModalProps['onCancel'];
   /**
    * Callback invoked when user confirms the conversion.
-   * @param params - Object containing array of layer IDs selected for conversion
+   * @param params - Object containing array of ConvertibleLayer objects selected for conversion
    */
-  onConfirm: (params: { layersToConvert: string[] }) => void;
+  onConfirm: (params: { layersToConvert: ConvertibleLayer[] }) => void;
 }> = ({ layers, onCancel, onConfirm }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -211,11 +226,11 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         defaultMessage: 'Cancel',
       })}
       onConfirm={() => {
-        let layersToConvert: string[] = [];
+        let layersToConvert: ConvertibleLayer[] = [];
         if (layers.length === 1 && layers[0].isConvertibleToEsql) {
-          layersToConvert = [layers[0].id];
+          layersToConvert = [layers[0]];
         } else if (layers.length > 1 && selectedItems.length > 0) {
-          layersToConvert = selectedItems.map((layer) => layer.id);
+          layersToConvert = selectedItems;
         }
         onConfirm({ layersToConvert });
       }}

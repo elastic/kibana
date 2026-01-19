@@ -14,6 +14,11 @@ import userEvent from '@testing-library/user-event';
 import { IconChartBarAnnotations, IconChartBarReferenceLine } from '@kbn/chart-icons';
 import { layerTypes } from '../../..';
 
+const mockConversionData = {
+  esAggsIdMap: {},
+  partialRows: false,
+};
+
 const mockLayers: ConvertibleLayer[] = [
   {
     id: '1',
@@ -25,6 +30,7 @@ const mockLayers: ConvertibleLayer[] = [
       | STATS avg_order_value = AVG(order_total) BY customer_region
       | SORT avg_order_value DESC`,
     isConvertibleToEsql: true,
+    conversionData: mockConversionData,
   },
   {
     id: '2',
@@ -36,6 +42,7 @@ const mockLayers: ConvertibleLayer[] = [
       | SORT total_sales DESC
       | LIMIT 5`,
     isConvertibleToEsql: true,
+    conversionData: mockConversionData,
   },
   {
     id: '3',
@@ -44,6 +51,7 @@ const mockLayers: ConvertibleLayer[] = [
     type: layerTypes.ANNOTATIONS,
     query: '',
     isConvertibleToEsql: false,
+    conversionData: mockConversionData,
   },
   {
     id: '4',
@@ -52,6 +60,7 @@ const mockLayers: ConvertibleLayer[] = [
     type: layerTypes.REFERENCELINE,
     query: '',
     isConvertibleToEsql: false,
+    conversionData: mockConversionData,
   },
 ];
 
@@ -86,13 +95,13 @@ describe('ConvertToEsqlModal', () => {
       expect(screen.getByText(/FROM datacommerce/)).toBeInTheDocument();
     });
 
-    it('calls onConfirm whith the layer ID', async () => {
+    it('calls onConfirm with the layer object', async () => {
       renderComponent({ layers: [mockLayers[0]] });
 
       await userEvent.click(screen.getByRole('button', { name: /switch to query mode/i }));
 
       expect(mockOnConfirm).toHaveBeenCalledWith({
-        layersToConvert: ['1'],
+        layersToConvert: [mockLayers[0]],
       });
     });
   });
@@ -152,7 +161,7 @@ describe('ConvertToEsqlModal', () => {
       await userEvent.click(screen.getByRole('button', { name: /switch to query mode/i }));
 
       expect(mockOnConfirm).toHaveBeenCalledWith({
-        layersToConvert: ['1', '2'],
+        layersToConvert: [mockLayers[0], mockLayers[1]],
       });
     });
 

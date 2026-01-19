@@ -215,6 +215,10 @@ export const useEsqlConversionCheck = (
           type: layerTypes.DATA,
           query: esqlResult.esql,
           isConvertibleToEsql: true,
+          conversionData: {
+            esAggsIdMap: esqlResult.esAggsIdMap,
+            partialRows: esqlResult.partialRows,
+          },
         },
       ],
     };

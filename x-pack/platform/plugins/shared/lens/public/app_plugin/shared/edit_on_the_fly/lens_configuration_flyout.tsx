@@ -48,7 +48,7 @@ import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
-import { ConvertToEsqlModal } from './convert_to_esql_modal';
+import { ConvertToEsqlModal, type ConvertibleLayer } from './convert_to_esql_modal';
 import { useEsqlConversionCheck } from './use_esql_conversion_check';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 
@@ -335,15 +335,13 @@ export function LensEditConfigurationFlyout({
   const showModal = useCallback(() => setIsModalVisible(true), []);
 
   const handleConvertToEsql = useCallback(
-    ({ layersToConvert }: { layersToConvert: string[] }) => {
+    ({ layersToConvert }: { layersToConvert: ConvertibleLayer[] }) => {
       const newAttributes = convertFormBasedToTextBasedLayer({
         layersToConvert,
         attributes,
         visualizationState: visualization.state,
         datasourceStates,
         framePublicAPI,
-        coreStart,
-        startDependencies,
       });
 
       closeModal();
@@ -361,11 +359,9 @@ export function LensEditConfigurationFlyout({
     [
       attributes,
       closeModal,
-      coreStart,
       datasourceStates,
       framePublicAPI,
       setCurrentAttributes,
-      startDependencies,
       updateSuggestion,
       visualization.state,
     ]
