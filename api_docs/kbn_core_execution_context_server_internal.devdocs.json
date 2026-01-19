@@ -28,6 +28,8 @@
           ">"
         ],
         "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "any"
             ],
             "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -56,6 +60,8 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
+                "lineNumber": 73,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -75,6 +81,8 @@
               "IExecutionContext"
             ],
             "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -92,6 +100,8 @@
               "IExecutionContext"
             ],
             "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -108,6 +118,8 @@
               "() => void"
             ],
             "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -130,6 +142,8 @@
         "label": "executionContextConfig",
         "description": [],
         "path": "src/core/packages/execution-context/server-internal/src/execution_context_config.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -141,6 +155,8 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/execution-context/server-internal/src/execution_context_config.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -170,6 +186,8 @@
               "<boolean>; }>"
             ],
             "path": "src/core/packages/execution-context/server-internal/src/execution_context_config.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
