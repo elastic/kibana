@@ -9,6 +9,8 @@
 
 export { z } from 'zod/v4';
 
+export * from 'zod/v4';
+
 // Export fromJSONSchema polyfill separately
 // Temporary polyfill until Kibana upgrades to Zod v4+ where z.fromJSONSchema will be available natively.
 // When upgrading, consumers can change:
