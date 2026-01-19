@@ -39,6 +39,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/drop.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,6 +57,8 @@
               "(string | string[])[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/drop.ts",
+            "lineNumber": 18,
+            "columnNumber": 22,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,6 +89,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/eval.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,6 +107,8 @@
               "TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/eval.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -118,6 +126,8 @@
               "TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/eval.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -140,6 +150,8 @@
           "QueryPipeline"
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -154,6 +166,8 @@
               "(string | string[])[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
+            "lineNumber": 38,
+            "columnNumber": 22,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -182,6 +196,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/keep.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,6 +214,8 @@
               "(string | string[])[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/keep.ts",
+            "lineNumber": 18,
+            "columnNumber": 22,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -228,6 +246,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/limit.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -244,6 +264,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/limit.ts",
+            "lineNumber": 18,
+            "columnNumber": 23,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -274,6 +296,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/rename.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -290,6 +314,8 @@
               "TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/rename.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -307,6 +333,8 @@
               "TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/rename.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -338,6 +366,8 @@
           "<string> | undefined) => void"
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -358,6 +388,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+            "lineNumber": 15,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -374,6 +406,8 @@
               "<string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+            "lineNumber": 15,
+            "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -402,6 +436,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -416,6 +452,8 @@
               "TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -431,6 +469,8 @@
               "TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -459,6 +499,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -473,6 +515,8 @@
               "SortArgs[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 32,
+            "columnNumber": 22,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -499,6 +543,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -513,6 +559,8 @@
               "SortArgs | TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -528,6 +576,8 @@
               "SortArgs | TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -543,6 +593,8 @@
               "SortArgs[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -571,6 +623,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/stats.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -587,6 +641,8 @@
               "TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/stats.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -604,6 +660,8 @@
               "TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/stats.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -626,6 +684,8 @@
           "QueryPipeline"
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -640,6 +700,8 @@
               "(string | string[])[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
+            "lineNumber": 35,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -668,6 +730,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/where.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -684,6 +748,8 @@
               "TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/where.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -701,6 +767,8 @@
               "TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/where.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -722,6 +790,8 @@
         "label": "SortOrder",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -742,6 +812,8 @@
           "Query"
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/types.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -757,6 +829,8 @@
               "Query"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false
           }
