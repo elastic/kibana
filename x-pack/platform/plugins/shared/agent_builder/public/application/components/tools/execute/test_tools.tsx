@@ -200,6 +200,7 @@ const renderFormField = ({
             <EuiFieldNumber
               {...field}
               inputRef={ref}
+              data-test-subj={`agentBuilderToolTestInput-${name}`}
               value={(value as number) ?? ''}
               type="number"
               onChange={(e) => onChange(e.target.valueAsNumber || e.target.value)}
@@ -218,6 +219,7 @@ const renderFormField = ({
           render={({ field: { onChange, value, ref, ...field } }) => (
             <EuiSwitch
               {...field}
+              data-test-subj={`agentBuilderToolTestInput-${name}`}
               checked={Boolean(value)}
               onChange={(e) => onChange(e.target.checked)}
               label={label}
@@ -235,6 +237,7 @@ const renderFormField = ({
             <EuiFieldText
               {...field}
               inputRef={ref}
+              data-test-subj={`agentBuilderToolTestInput-${name}`}
               value={value as string}
               placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
@@ -296,7 +299,12 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose 
   if (!tool) return null;
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" css={flyoutStyles}>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="flyoutTitle"
+      css={flyoutStyles}
+      data-test-subj="agentBuilderToolTestFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>

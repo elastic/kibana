@@ -2,7 +2,70 @@
   "id": "workflowsExtensions",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-public.createPublicStepDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "createPublicStepDefinition",
+        "description": [
+          "\nHelper function to create a PublicStepDefinition with automatic type inference.\nThis ensures that the editorHandlers' types are correctly inferred\nfrom the inputSchema and configSchema without needing explicit type annotations.\n"
+        ],
+        "signature": [
+          "(definition: ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "public",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-public.PublicStepDefinition",
+            "text": "PublicStepDefinition"
+          },
+          "<Input, Output, Config>) => ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "public",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-public.PublicStepDefinition",
+            "text": "PublicStepDefinition"
+          },
+          "<Input, Output, Config>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.createPublicStepDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "definition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "public",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-public.PublicStepDefinition",
+                "text": "PublicStepDefinition"
+              },
+              "<Input, Output, Config>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "workflowsExtensions",
@@ -21,7 +84,7 @@
             "section": "def-public.PublicStepDefinition",
             "text": "PublicStepDefinition"
           },
-          "<InputSchema, OutputSchema, ConfigSchema> extends ",
+          "<Input, Output, Config> extends ",
           {
             "pluginId": "workflowsExtensions",
             "scope": "common",
@@ -29,9 +92,11 @@
             "section": "def-common.CommonStepDefinition",
             "text": "CommonStepDefinition"
           },
-          "<InputSchema, OutputSchema, ConfigSchema>"
+          "<Input, Output, Config>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,6 +110,8 @@
               "\nUser-facing label/title for this step type.\nDisplayed in the UI when selecting or viewing steps."
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -61,6 +128,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,6 +146,8 @@
               "React.ComponentType<{}> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -100,6 +171,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -123,6 +196,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -132,11 +207,16 @@
             "type": "Object",
             "tags": [],
             "label": "editorHandlers",
-            "description": [],
+            "description": [
+              "\nProperty handlers for the step."
+            ],
             "signature": [
-              "{ dynamicSchema: { getOutputSchema?: ((params: { input: z.infer<InputSchema>; config: z.infer<ConfigSchema>; }) => z.ZodType<z.infer<OutputSchema>>) | undefined; }; } | undefined"
+              "EditorHandlers",
+              "<Input, Output, Config> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -153,6 +233,8 @@
           "\nDocumentation information for a workflow step."
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -169,6 +251,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -185,6 +269,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -201,6 +287,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -219,6 +307,8 @@
           "\nThe catalog under which the step is displayed in the actions menu"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -236,6 +326,8 @@
         "\nPublic-side plugin setup contract.\nExposes methods for other plugins to register public-side step definition."
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -251,7 +343,7 @@
             "\nRegister user-facing definition for a workflow step.\nThis should be called during the plugin's setup phase.\n"
           ],
           "signature": [
-            "(definition: ",
+            "<Input extends z.ZodType = z.ZodType, Output extends z.ZodType = z.ZodType, Config extends z.ZodObject = z.ZodObject>(definition: ",
             {
               "pluginId": "workflowsExtensions",
               "scope": "public",
@@ -259,9 +351,11 @@
               "section": "def-public.PublicStepDefinition",
               "text": "PublicStepDefinition"
             },
-            "<z.ZodType, z.ZodType, z.ZodObject>) => void"
+            "<Input, Output, Config>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
+          "lineNumber": 20,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -282,9 +376,11 @@
                   "section": "def-public.PublicStepDefinition",
                   "text": "PublicStepDefinition"
                 },
-                "<z.ZodType, z.ZodType, z.ZodObject>"
+                "<Input, Output, Config>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
+              "lineNumber": 32,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -318,6 +414,8 @@
         "<z.ZodType, z.ZodType, z.ZodObject>>"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -356,6 +454,8 @@
           "<Input, Output, Config>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -377,6 +477,8 @@
               "<Input, Output, Config>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -415,6 +517,8 @@
           "<Input, Output, Config>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -447,6 +551,8 @@
               "<Output>>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -469,6 +575,8 @@
                   "<Input, Config>"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+                "lineNumber": 100,
+                "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -497,6 +605,8 @@
           "<TInput, TConfig>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -513,6 +623,8 @@
               "z.infer<TInput>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -529,6 +641,8 @@
               "z.infer<TConfig>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -545,6 +659,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -561,6 +677,8 @@
               "ContextManager"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -577,6 +695,8 @@
               "{ debug(message: string, meta?: object | undefined): void; info(message: string, meta?: object | undefined): void; warn(message: string, meta?: object | undefined): void; error(message: string, error?: Error | undefined): void; }"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -593,6 +713,8 @@
               "AbortSignal"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -606,6 +728,8 @@
               "\nCurrent step's ID"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -619,6 +743,8 @@
               "\nCurrent step's type"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -645,6 +771,8 @@
           "<TOutput>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+        "lineNumber": 181,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -661,6 +789,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -677,6 +807,8 @@
               "Error | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -693,6 +825,8 @@
           "\nDependencies for the server plugin setup phase."
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -708,6 +842,8 @@
           "\nDependencies for the server plugin start phase."
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -728,6 +864,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -748,6 +886,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -786,6 +926,8 @@
           "<Output>>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
@@ -812,6 +954,8 @@
               "<Input, Config>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -830,6 +974,8 @@
         "\nServer-side plugin setup contract.\nExposes methods for other plugins to register server-side custom workflow steps."
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -856,6 +1002,8 @@
             "<z.ZodType, z.ZodType, z.ZodObject>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+          "lineNumber": 20,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -879,6 +1027,8 @@
                 "<z.ZodType, z.ZodType, z.ZodObject>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+              "lineNumber": 27,
+              "columnNumber": 26,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -912,6 +1062,8 @@
         "<z.ZodType, z.ZodType, z.ZodObject>>"
       ],
       "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
+      "lineNumber": 30,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -942,6 +1094,8 @@
           "<InputSchema, OutputSchema, ConfigSchema>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -955,6 +1109,8 @@
               "\nUnique identifier for this step type.\nShould follow a namespaced format (e.g., \"custom.myStep\", \"plugin.feature.step\")."
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -971,6 +1127,8 @@
               "InputSchema"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -987,6 +1145,8 @@
               "OutputSchema"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1003,6 +1163,8 @@
               "ConfigSchema | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1023,6 +1185,8 @@
           "\"data.map\""
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/common/steps/data/data_map_step.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
