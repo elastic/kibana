@@ -19,10 +19,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
-  const spaces = getService('spaces');
-  const security = getService('security');
 
   describe('@ess @serverless @skipInServerlessMKI Review installation using mocked prebuilt rule assets', () => {
     beforeEach(async () => {
