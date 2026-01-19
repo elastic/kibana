@@ -18,10 +18,10 @@ describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page with single filter', () => {
     const filter = {
       title: 'test filter',
-      selectedOptions: ['test value'],
-      fieldName: 'test field',
+      selected_options: ['test value'],
+      field_name: 'test field',
       exclude: false,
-      existsSelected: false,
+      exists_selected: false,
     };
 
     const {
@@ -41,18 +41,18 @@ describe('useNavigateToAlertsPageWithFilters', () => {
     const filters = [
       {
         title: 'test filter 1',
-        selectedOptions: ['test value 1'],
-        fieldName: 'test field 1',
+        selected_options: ['test value 1'],
+        field_name: 'test field 1',
         exclude: false,
-        existsSelected: false,
+        exists_selected: false,
       },
       {
         title: 'test filter 2',
-        selectedOptions: ['test value 2'],
-        fieldName: 'test field 2',
+        selected_options: ['test value 2'],
+        field_name: 'test field 2',
         exclude: true,
-        existsSelected: true,
-        displaySettings: { hideActionBar: true },
+        exists_selected: true,
+        display_settings: { hide_action_bar: true },
       },
     ];
 
@@ -84,10 +84,10 @@ describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page in new tab', () => {
     const filter = {
       title: 'test filter',
-      selectedOptions: ['test value'],
-      fieldName: 'test field',
+      selected_options: ['test value'],
+      field_name: 'test field',
       exclude: false,
-      existsSelected: false,
+      exists_selected: false,
     };
     const openInNewTab = true;
 
@@ -107,10 +107,10 @@ describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page with timerange', () => {
     const filter = {
       title: 'test filter',
-      selectedOptions: ['test value'],
-      fieldName: 'test field',
+      selected_options: ['test value'],
+      field_name: 'test field',
       exclude: false,
-      existsSelected: false,
+      exists_selected: false,
     };
 
     const timerange =

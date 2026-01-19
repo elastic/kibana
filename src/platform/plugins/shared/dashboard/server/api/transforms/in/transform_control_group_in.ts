@@ -9,12 +9,12 @@
 
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import type { Writable } from 'utility-types';
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { ControlsGroupState, StoredPinnedControlState } from '@kbn/controls-schemas';
 
 import { prefixReferencesFromPanel } from '../../../../common';
-import type { StoredControlState } from '../../../dashboard_saved_object';
 import { embeddableService, logger } from '../../../kibana_services';
 
 export function transformControlGroupIn(controls?: ControlsGroupState) {
@@ -26,7 +26,7 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
       const { uid = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
-      const transformedControlState = { ...controlState } as Partial<StoredControlState>;
+      let transformedControlState = { ...controlState } as Partial<StoredPinnedControlState>;
       try {
         if (transforms?.transformIn) {
           const transformed = transforms.transformIn(controlState.config);
@@ -36,11 +36,16 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
             ...prefixReferencesFromPanel(uid, transformed.references ?? []),
           ];
           // update the reference names in the SO so that we can inject the references later
-          const transformedState = transformed.state as StoredControlState['explicitInput'];
-          transformedControlState.explicitInput = transformedState;
-          transformedControlState.explicitInput.dataViewRefName = `${uid}:${transformedState.dataViewRefName}`;
-        } else {
-          transformedControlState.explicitInput = controlState.config;
+          const transformedState = transformed.state as Writable<StoredPinnedControlState>;
+          if ('dataViewRefName' in transformedState) {
+            transformedControlState = {
+              ...transformedState,
+              explicitInput: {
+                ...transformedState.explicitInput,
+                dataViewRefName: `${uid}:${transformedState.dataViewRefName}`,
+              },
+            };
+          }
         }
       } catch (transformInError) {
         // do not prevent save if transformIn throws

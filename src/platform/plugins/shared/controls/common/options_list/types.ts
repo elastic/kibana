@@ -79,11 +79,12 @@ export type OptionsListRequest = Omit<
 /**
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
  */
-export interface OptionsListRequestBody
-  extends Pick<
-    OptionsListDSLControlState,
-    'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
-  > {
+export interface OptionsListRequestBody {
+  fieldName: OptionsListDSLControlState['field_name'];
+  searchTechnique?: OptionsListDSLControlState['search_technique'];
+  sort?: OptionsListDSLControlState['sort'];
+  selectedOptions?: OptionsListDSLControlState['selected_options'];
+
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   allowExpensiveQueries: boolean;
   ignoreValidations?: boolean;

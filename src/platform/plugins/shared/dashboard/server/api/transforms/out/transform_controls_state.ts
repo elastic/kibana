@@ -35,13 +35,13 @@ export const transformControlsState: (
   return injectControlReferences(state, containerReferences);
 };
 
-function transformControlObjectToArray(
+export function transformControlObjectToArray(
   controls: StoredPinnedControls
 ): Array<StoredPinnedControlState> {
   return Object.entries(controls).map(([id, control]) => ({ ...control, id }));
 }
 
-function transformControlProperties(controls: Array<StoredPinnedControlState>) {
+export function transformControlProperties(controls: Array<StoredPinnedControlState>) {
   return controls
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ explicitInput, id, type, grow, width }) => {
@@ -55,7 +55,7 @@ function transformControlProperties(controls: Array<StoredPinnedControlState>) {
     });
 }
 
-function injectControlReferences(
+export function injectControlReferences(
   controls: ControlsGroupState,
   containerReferences: Reference[]
 ): DashboardControlsState {

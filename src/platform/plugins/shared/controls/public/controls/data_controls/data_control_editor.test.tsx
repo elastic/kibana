@@ -124,10 +124,10 @@ describe('Data control editor', () => {
     return controlEditor;
   };
 
-  const selectField = async (controlEditor: RenderResult, fieldName: string) => {
-    expect(controlEditor.queryByTestId(`field-picker-select-${fieldName}`)).toBeInTheDocument();
+  const selectField = async (controlEditor: RenderResult, field_name: string) => {
+    expect(controlEditor.queryByTestId(`field-picker-select-${field_name}`)).toBeInTheDocument();
     await act(async () => {
-      fireEvent.click(controlEditor.getByTestId(`field-picker-select-${fieldName}`));
+      fireEvent.click(controlEditor.getByTestId(`field-picker-select-${field_name}`));
     });
   };
 
@@ -213,7 +213,7 @@ describe('Data control editor', () => {
       test('auto-fills input with the default title', async () => {
         const controlEditor = await mountComponent({
           initialState: {
-            fieldName: 'machine.os.raw',
+            field_name: 'machine.os.raw',
           },
           controlType: 'optionsList',
           controlId: 'testId',
@@ -227,7 +227,7 @@ describe('Data control editor', () => {
       test('auto-fills input with the custom title', async () => {
         const controlEditor = await mountComponent({
           initialState: {
-            fieldName: 'machine.os.raw',
+            field_name: 'machine.os.raw',
             title: 'Custom title',
           },
           controlType: 'optionsList',
@@ -242,7 +242,7 @@ describe('Data control editor', () => {
     test('selects the provided control type', async () => {
       const controlEditor = await mountComponent({
         initialState: {
-          fieldName: 'bytes',
+          field_name: 'bytes',
         },
         controlType: 'rangeSlider',
         controlId: 'testId',
@@ -262,7 +262,7 @@ describe('Data control editor', () => {
     test('all elements are visible when no editor config', async () => {
       const controlEditor = await mountComponent({
         initialState: {
-          fieldName: 'machine.os.raw',
+          field_name: 'machine.os.raw',
         },
         controlType: 'optionsList',
         controlId: 'testId',
@@ -283,7 +283,7 @@ describe('Data control editor', () => {
 
       const controlEditor = await mountComponent({
         initialState: {
-          fieldName: 'machine.os.raw',
+          field_name: 'machine.os.raw',
         },
         controlType: 'optionsList',
         controlId: 'testId',

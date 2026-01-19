@@ -99,8 +99,8 @@ describe('RangeSliderControlApi', () => {
     test('should not set appliedFilters$ when value is not provided', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -112,8 +112,8 @@ describe('RangeSliderControlApi', () => {
     test('should set appliedFilters$ when value is provided', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
           value: ['5', '10'],
         },
         finalizeApi,
@@ -136,7 +136,7 @@ describe('RangeSliderControlApi', () => {
             },
             query: {
               range: {
-                myFieldName: {
+                myfield_name: {
                   gte: 5,
                   lte: 10,
                 },
@@ -150,8 +150,8 @@ describe('RangeSliderControlApi', () => {
     test('should set blocking error when data view is not found', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          dataViewId: 'notGonnaFindMeDataView',
-          fieldName: 'myFieldName',
+          data_view_id: 'notGonnaFindMeDataView',
+          field_name: 'myFieldName',
           value: ['5', '10'],
         },
         finalizeApi,
@@ -172,8 +172,8 @@ describe('RangeSliderControlApi', () => {
       max = null; // simulate no results by returning max aggregation value of null
       const { Component } = await factory.buildEmbeddable({
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
           value: ['5', '10'],
         },
         finalizeApi,
@@ -191,8 +191,8 @@ describe('RangeSliderControlApi', () => {
     test('bounds inputs should display min and max placeholders when there is no selected range', async () => {
       const { Component } = await factory.buildEmbeddable({
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -212,8 +212,8 @@ describe('RangeSliderControlApi', () => {
     test('default value provided when state.step is undefined', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -226,8 +226,8 @@ describe('RangeSliderControlApi', () => {
     test('retains value from initial state', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
           step: 1024,
         },
         finalizeApi,

@@ -60,24 +60,24 @@ describe('RuleDetailsLocator', () => {
     const mockedControlConfigs = [
       {
         title: 'Status',
-        fieldName: ALERT_STATUS,
-        selectedOptions: ['untracked'],
+        field_name: ALERT_STATUS,
+        selected_options: ['untracked'],
         hideActionBar: true,
         persist: true,
-        hideExists: true,
+        hide_exists: true,
       },
       {
         title: 'Rule',
-        fieldName: ALERT_RULE_NAME,
-        hideExists: true,
+        field_name: ALERT_RULE_NAME,
+        hide_exists: true,
       },
       {
         title: 'Group',
-        fieldName: 'kibana.alert.group.value',
+        field_name: 'kibana.alert.group.value',
       },
       {
         title: 'Tags',
-        fieldName: 'tags',
+        field_name: 'tags',
       },
     ];
     const location = await locator.getLocation({

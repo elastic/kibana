@@ -146,8 +146,8 @@ export const extractEsqlVariables = (
   const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
     if (panel.type === ESQL_CONTROL) {
       const typedPanel = panel as OptionsListESQLControlState;
-      const isSingleSelect = typedPanel.singleSelect ?? true;
-      const selectedValues = typedPanel.selectedOptions || [];
+      const isSingleSelect = typedPanel.single_select ?? true;
+      const selectedValues = typedPanel.selected_options || [];
 
       let value: string | number | (string | number)[];
 
@@ -161,8 +161,8 @@ export const extractEsqlVariables = (
       }
 
       acc.push({
-        key: typedPanel.variableName,
-        type: typedPanel.variableType as ESQLVariableType,
+        key: typedPanel.variable_name,
+        type: typedPanel.variable_type as ESQLVariableType,
         value,
       });
     }

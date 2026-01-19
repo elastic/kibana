@@ -8,11 +8,9 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { LegacyIgnoreParentSettings } from '@kbn/controls-schemas';
 
-import type {
-  DashboardSavedObjectAttributes,
-  StoredControlGroupInput,
-} from '../../../dashboard_saved_object';
+import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformControlsState } from './transform_controls_state';
 import type { DashboardState } from '../../types';
 
@@ -26,12 +24,13 @@ export function transformControlGroupOut(
     : [];
 
   /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
-  const legacyControlGroupOptions: StoredControlGroupInput['ignoreParentSettings'] | undefined =
-    ignoreParentSettingsJSON ? JSON.parse(ignoreParentSettingsJSON) : undefined;
+  const legacyControlGroupOptions: LegacyIgnoreParentSettings | undefined = ignoreParentSettingsJSON
+    ? JSON.parse(ignoreParentSettingsJSON)
+    : undefined;
   if (legacyControlGroupOptions) {
     // Ignore filters if the legacy control group option is set to ignore filters, or if the legacy chaining system
     // is set to NONE. Including the chaining system check inside this if block is okay to do, because we don't expect
-    // a legacy chaining system to be defined without legacyControlGroupOptions also being defined
+    // a legacy chaining system to be defined without legacyCon4trolGroupOptions also being defined
     const ignoreFilters =
       controlGroupInput.chainingSystem === 'NONE' ||
       legacyControlGroupOptions.ignoreFilters ||

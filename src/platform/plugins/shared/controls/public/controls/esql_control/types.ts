@@ -23,11 +23,11 @@ export type ESQLControlApi = DefaultEmbeddableApi<ESQLControlState> &
   PublishesDataLoading;
 
 type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;
-type HideExistsUnusedState = Pick<OptionsListComponentState, 'existsSelected'>;
+type HideExistsUnusedState = Pick<OptionsListComponentState, 'exists_selected'>;
 type HideSortUnusedState = Pick<OptionsListComponentState, 'sort'>;
 type DisableLoadSuggestionsUnusedState = Pick<
   OptionsListComponentState,
-  'requestSize' | 'runPastTimeout'
+  'requestSize' | 'run_past_timeout'
 >;
 type DisableInvalidSelectionsUnusedState = Pick<OptionsListComponentState, 'invalidSelections'>;
 
@@ -36,10 +36,10 @@ export type OptionsListESQLUnusedState = HideExcludeUnusedState &
   HideSortUnusedState &
   DisableLoadSuggestionsUnusedState &
   DisableInvalidSelectionsUnusedState &
-  Pick<OptionsListComponentState, 'fieldName'> & {
-    useGlobalFilters?: boolean;
-    ignoreValidations?: boolean;
-    dataViewId: string;
+  Pick<OptionsListComponentState, 'field_name'> & {
+    use_global_filters?: boolean;
+    ignore_validations?: boolean;
+    data_view_id: string;
     blockingError?: Error;
     filtersLoading: boolean;
     appliedFilters: Filter[] | undefined;
