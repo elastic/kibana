@@ -123,8 +123,6 @@ export async function createDataSourceAndRelatedResources(
       const workflowBaseName = originalName.split('.').pop() || originalName;
 
       // Tool ID structure: data_source_name.type.workflow_base_name
-      // This ensures uniqueness across clones while maintaining readability
-      // e.g., "github.github.search_issues" (original), "github-clone.github.search_issues" (clone)
       const tool = await toolRegistry.create({
         id: `${slugify(name)}.${type}.${workflowBaseName}`,
         type: ToolType.workflow,
