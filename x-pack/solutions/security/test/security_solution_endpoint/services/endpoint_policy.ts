@@ -168,7 +168,6 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     }> = {}): Promise<PolicyTestResourceInfo> {
       // create Agent Policy
       let agentPolicy: CreateAgentPolicyResponse['item'];
-
       try {
         const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
           name: `East Coast ${uuidv4()}`,
@@ -192,50 +191,44 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       // create Package Policy and associated it to Agent Policy
       let packagePolicy: CreatePackagePolicyResponse['item'];
       try {
-        const { body: createResponse }: { body: CreatePackagePolicyResponse } = await retry.try(
-          async () => {
-            const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-              name: `Protect East Coast ${uuidv4()}`,
-              description: 'Protect the worlds data - but in the East Coast',
-              policy_ids: [agentPolicy!.id],
+        const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
+          name: `Protect East Coast ${uuidv4()}`,
+          description: 'Protect the worlds data - but in the East Coast',
+          policy_ids: [agentPolicy!.id],
+          enabled: true,
+          inputs: [
+            {
+              type: 'ENDPOINT_INTEGRATION_CONFIG',
               enabled: true,
-              inputs: [
-                {
-                  type: 'ENDPOINT_INTEGRATION_CONFIG',
-                  enabled: true,
-                  streams: [],
-                  config: {
-                    policy: {
-                      value: policyFactory(),
-                    },
-                    _config: {
-                      value: {
-                        type: 'endpoint',
-                        endpointConfig: {
-                          preset: 'EDRComplete',
-                        },
-                      },
+              streams: [],
+              config: {
+                policy: {
+                  value: policyFactory(),
+                },
+                _config: {
+                  value: {
+                    type: 'endpoint',
+                    endpointConfig: {
+                      preset: 'EDRComplete',
                     },
                   },
                 },
-              ],
-              namespace: 'default',
-              package: {
-                name: 'endpoint',
-                title: endpointPackageInfo?.title ?? '',
-                version: endpointPackageInfo?.version ?? '',
               },
-              ...integrationPolicyOverrides,
-            };
-
-            return await supertest
-              .post(addSpaceIdToPath('/', options?.spaceId ?? '', FLEET_API_PACKAGE_POLICIES))
-              .set('kbn-xsrf', 'xxx')
-              .send(newPackagePolicyData)
-              .expect(200);
-          }
-        );
-
+            },
+          ],
+          namespace: 'default',
+          package: {
+            name: 'endpoint',
+            title: endpointPackageInfo?.title ?? '',
+            version: endpointPackageInfo?.version ?? '',
+          },
+          ...integrationPolicyOverrides,
+        };
+        const { body: createResponse }: { body: CreatePackagePolicyResponse } = await supertest
+          .post(addSpaceIdToPath('/', options?.spaceId ?? '', FLEET_API_PACKAGE_POLICIES))
+          .set('kbn-xsrf', 'xxx')
+          .send(newPackagePolicyData)
+          .expect(200);
         packagePolicy = createResponse.item;
       } catch (error) {
         return logSupertestApiErrorAndThrow(`Unable to create Package Policy via Fleet!`, error);
