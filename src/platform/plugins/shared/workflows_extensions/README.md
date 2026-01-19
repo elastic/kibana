@@ -77,7 +77,7 @@ export const InputSchema = z.object({
 
 /**
  * Output schema for the step.
- * 
+ *
  * Defines the structure and types of data that this step will return.
  * This schema is used for validation and type checking to ensure data consistency
  * across workflow steps.
@@ -151,8 +151,8 @@ export const getMyStepDefinition = (coreSetup: CoreSetup) =>
         context.logger.error('My step execution failed', error);
         return { error };
       }
-    }
-  })
+    },
+  });
 ```
 
 ### Step 3: Implement Public-Side Definition
@@ -198,11 +198,9 @@ export const myStepDefinition: PublicStepDefinition = {
 
 **Important**: Icons must be custom components or images imported from EUI, not passed as strings. The workflows app does not fully support built-in `EuiIconType` strings (e.g., `'star'`) yet. See [EUI icon consumption guide](https://github.com/elastic/eui/blob/main/wiki/consuming-eui/README.md#failing-icon-imports) for details.
 
-
 #### Advanced Example with Dynamic Output Schema
 
 For steps that need different output schemas based on input parameters, you can use `dynamicOutputSchema`. This function is evaluated **in the workflows editor UI** to provide real-time schema validation and autocomplete based on the current step configuration. Here's an example of a data transformation step:
-
 
 ```typescript
 import React from 'react';
@@ -243,19 +241,218 @@ export const myStepDefinition: PublicStepDefinition = {
       getOutputSchema: ({ input }) => {
         if (input.mode == 'partial') {
           return z.object({
-            partialResult: z.string()
+            partialResult: z.string(),
           });
         }
 
         return z.object({
-            result: z.string()
-          });
-      }
-    }
-  }
+          result: z.string(),
+        });
+      },
+    },
+  },
 };
 ```
 
+### Custom Property Completion and Validation
+
+Custom steps can provide property-level completion and validation handlers for both config properties (step-level, outside `with`) and input properties (inside `with`). This enables:
+
+- **Autocomplete suggestions**: Dynamic options from external services (e.g., list of agents, connectors, proxies)
+- **Runtime validation with decorations**: Visual feedback in the editor showing connection status, errors, or success indicators
+
+#### Property Handler Structure
+
+Property handlers are defined in the `editorHandlers` object of the public step definition:
+
+```typescript
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+
+export const myStepDefinition = createPublicStepDefinition({
+  ...myStepCommonDefinition,
+  // ... other properties (icon, label, description, documentation)
+  editorHandlers: {
+    // Handlers for config properties (step-level, outside `with`)
+    config: {
+      'property.path': {
+        completion: {
+          /* ... */
+        },
+        validation: {
+          /* ... */
+        },
+      },
+    },
+    // Handlers for input properties (inside `with`)
+    input: {
+      property: {
+        completion: {
+          /* ... */
+        },
+        validation: {
+          /* ... */
+        },
+      },
+    },
+  },
+});
+```
+
+**Note**: Property paths support dot notation for nested objects. For example, if your `configSchema` is:
+
+```typescript
+z.object({
+  agent: z.object({
+    id: z.string(),
+  }),
+});
+```
+
+Use `'agent.id'` as the property key in `editorHandlers.config`.
+
+#### Implementing Completion
+
+The `completion.getOptions` function provides autocomplete suggestions when the user edits the property value:
+
+```typescript
+editorHandlers: {
+  config: {
+    'agent.id': {
+      completion: {
+        getOptions: async (currentValue) => {
+          // Fetch options from external service
+          const agents = await agentService.list();
+
+          // Filter based on current input (optional)
+          const filtered = agents.filter((agent) =>
+            currentValue ? agent.id.includes(currentValue) : true
+          );
+
+          return filtered.map((agent) => ({
+            // Required: the value inserted into YAML
+            value: agent.id,
+            // Required: displayed in completion popup
+            label: agent.id,
+            // Optional: brief detail shown inline
+            detail: agent.name,
+            // Optional: extended documentation in side panel
+            documentation: agent.description,
+          }));
+        },
+      },
+    },
+  },
+},
+```
+
+The `PropertyCompletionOption` interface:
+
+```typescript
+interface PropertyCompletionOption {
+  /** The value that will be stored in the YAML */
+  value: string;
+  /** The label displayed in the completion popup */
+  label: string;
+  /** Brief detail shown inline in completion popup (optional) */
+  detail?: string;
+  /** Extended documentation shown in side panel (optional) */
+  documentation?: string;
+}
+```
+
+#### Implementing Validation
+
+The `validation.validate` function provides runtime validation with visual decorations in the editor:
+
+```typescript
+editorHandlers: {
+  config: {
+    'agent.id': {
+      validation: {
+        validate: async (value, context) => {
+          // Skip validation for null/undefined values
+          if (value === null) {
+            return { severity: null };
+          }
+
+          // Type checking
+          if (typeof value !== 'string') {
+            return { severity: 'error', message: 'Agent ID must be a string' };
+          }
+
+          try {
+            // Validate against external service
+            const agent = await agentService.get(value);
+
+            // Success: show green decoration
+            return {
+              severity: null,
+              afterMessage: '✓ Agent connected',
+            };
+          } catch (error) {
+            if (error?.response?.status === 404) {
+              // Error with helpful hover message (markdown supported)
+              return {
+                severity: 'error',
+                message: `Agent ${value} not found`,
+                hoverMessage: '[Open agents management](https://example.com/agents)',
+              };
+            }
+            // Warning for network/unknown errors
+            return {
+              severity: 'warning',
+              message: 'Cannot validate agent ID',
+            };
+          }
+        },
+      },
+    },
+  },
+},
+```
+
+The `PropertyValidationResult` interface:
+
+```typescript
+interface PropertyValidationResult {
+  /** null = valid (show success decoration), 'error'|'warning'|'info' = show error */
+  severity: 'error' | 'warning' | 'info' | null;
+  /** Error message for markers panel (only when severity is not null) */
+  message?: string;
+  /** Decoration text shown after the value (e.g., "✓ Connected") */
+  afterMessage?: string;
+  /** Hover tooltip (markdown supported) */
+  hoverMessage?: string;
+}
+```
+
+The `PropertyValidationContext` provides additional context:
+
+```typescript
+interface PropertyValidationContext {
+  /** The step type ID (e.g., "oneChat.runAgent") */
+  stepType: string;
+  /** The property scope ("config" or "input") */
+  scope: 'config' | 'input';
+  /** The property key (e.g., "agent.id") */
+  propertyKey: string;
+}
+```
+
+#### Example Implementation
+
+For a complete working example of custom property completion and validation, see the `external_step` implementation in `examples/workflows_extensions_example`:
+
+- Common definition: `examples/workflows_extensions_example/common/step_types/external_step.ts`
+- Public definition with `editorHandlers`: `examples/workflows_extensions_example/public/step_types/external_step.ts`
+
+#### Performance Considerations
+
+**Important**: The `validation.validate` function is called every time the YAML document changes. For validators that check external resources:
+
+- Consider using a client-side caching solution (e.g., React Query) within your validator implementation
+- Handle cache invalidation when external data changes
+- Return early for null/undefined values to avoid unnecessary API calls
 
 ### Step 4: Register in Plugin Setup
 
@@ -268,7 +465,6 @@ import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { myStepDefinition } from './workflows/step_types/my_step';
 import { getMyStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
-
 
 export interface MyPluginServerSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -356,10 +552,12 @@ When designing a step, you need to decide which parameters should be **config** 
 
 **Config (step-level properties):**
 Use config to **control step behavior** - how/when/who the step executes:
+
 - Execution context (e.g., `connector-id: 'slack-webhook'`, `agent-id: 'agent-123'`)
 - Execution mode (e.g., `mode: 'batch'`, `strategy: 'parallel'`)
 
 **Built-in step-level config examples:**
+
 - `if`: Conditional execution (e.g., `if: '${{ steps.check.output.passed }}'`)
 - `foreach`: Iteration over collections (e.g., `foreach: '${{ steps.list.output.items }}'`)
 - `on-failure`: Error handling policy with `continue`, `retry`, or `fallback` strategies
@@ -367,6 +565,7 @@ Use config to **control step behavior** - how/when/who the step executes:
 
 **Inputs (the `with` section):**
 Use inputs for **what/where to process** - the step's payload:
+
 - Target destinations (e.g., `index`, `channel`, `namespace`, `bucket`)
 - Data to process (e.g., `document`, `message`, `query`, `payload`)
 - Processing parameters (e.g., `severity`, `priority`, `format`, `options`)
@@ -378,26 +577,26 @@ Use inputs for **what/where to process** - the step's payload:
 # Config properties (step-level) - Control step behavior
 - name: send_notification
   type: myPlugin.sendNotification
-  connector-id: slack-webhook                      # Config: which connector to use (controls behavior)
-  mode: async                                   # Config: execution mode (controls behavior)
-  timeout: 10s                                  # Config: time limit (controls behavior)
+  connector-id: slack-webhook # Config: which connector to use (controls behavior)
+  mode: async # Config: execution mode (controls behavior)
+  timeout: 10s # Config: time limit (controls behavior)
   # Inputs (with section) - What/Where to process
   with:
-    channel: "#alerts"                          # Input: WHERE - target destination
-    message: ${{ steps.process.output.alert }}  # Input: WHAT - data to send
-    priority: high                              # Input: WHAT - processing parameter
+    channel: '#alerts' # Input: WHERE - target destination
+    message: ${{ steps.process.output.alert }} # Input: WHAT - data to send
+    priority: high # Input: WHAT - processing parameter
 
 - name: process_data
   type: myPlugin.processData
-  if: steps.previous.output.data.length > 10    # Config: by which condition to run this step (control behavior)
-  agent-id: data-processor-1                     # Config: which agent to use (controls behavior)
-  strategy: parallel                            # Config: processing strategy (controls behavior)
+  if: steps.previous.output.data.length > 10 # Config: by which condition to run this step (control behavior)
+  agent-id: data-processor-1 # Config: which agent to use (controls behavior)
+  strategy: parallel # Config: processing strategy (controls behavior)
   # Inputs (with section) - What/Where to process
   with:
-    index: logs-*                               # Input: WHERE - data source
-    query: "status:error"                       # Input: WHAT - data to process
-    outputIndex: processed-*                    # Input: WHERE - output destination
-    transform:                                  # Input: WHAT - transformation logic
+    index: logs-* # Input: WHERE - data source
+    query: 'status:error' # Input: WHAT - data to process
+    outputIndex: processed-* # Input: WHERE - output destination
+    transform: # Input: WHAT - transformation logic
       field: timestamp
       format: iso8601
 ```
@@ -444,6 +643,7 @@ However, if you need to throw or return an error with a **custom error type** or
 #### Standard Error Handling (No ExecutionError Required)
 
 For most cases, you can simply throw errors or return them. When a raw error is thrown or returned, it will be automatically converted to `ExecutionError` with the following mapping:
+
 - `ExecutionError.type` = `Error.name` (e.g., `'TypeError'`, `'RangeError'`)
 - `ExecutionError.message` = `Error.message`
 - `ExecutionError.details` = `undefined` (no additional details)
@@ -455,7 +655,7 @@ const myStepHandler: StepHandler = async (context) => {
   // Option 1: Let errors propagate (recommended for simplicity)
   const result = await someOperation(); // Throws on error - automatically caught
   return { output: { result } };
-  
+
   // Option 2: Catch and return errors explicitly
   try {
     const result = await someOperation();
@@ -477,7 +677,7 @@ import { ExecutionError } from '@kbn/workflows/server';
 
 const myStepHandler: StepHandler = async (context) => {
   const { userId, action } = context.input;
-  
+
   // Option 1: Throw ExecutionError (recommended for validation errors)
   if (!userId) {
     throw new ExecutionError({
@@ -489,7 +689,7 @@ const myStepHandler: StepHandler = async (context) => {
       },
     });
   }
-  
+
   // Option 2: Return ExecutionError in result
   const user = await fetchUser(userId);
   if (!user.hasPermission(action)) {
@@ -506,7 +706,7 @@ const myStepHandler: StepHandler = async (context) => {
       }),
     };
   }
-  
+
   // Proceed with step logic
   const result = await performAction(user, action);
   return { output: { result } };
@@ -518,19 +718,19 @@ You can also wrap standard errors with additional context:
 ```typescript
 const myStepHandler: StepHandler = async (context) => {
   const { userId, action } = context.input;
-  
+
   try {
     const user = await fetchUser(userId);
     const result = await performAction(user, action);
     return { output: { result } };
   } catch (error) {
     context.logger.error('Failed to process user action', error);
-    
+
     // If already an ExecutionError, re-throw or return it
     if (error instanceof ExecutionError) {
       throw error; // or: return { error };
     }
-    
+
     // Wrap standard errors with additional context
     throw new ExecutionError({
       type: 'ProcessingError',
@@ -591,6 +791,10 @@ The public definition must include:
 - `description`: (Optional) user-facing description
 - `documentation`: (Optional) documentation with details and examples
 - `actionsMenuCatalog`: (Optional) The catalog under which the step is displayed in the actions menu. Must be one of `StepMenuCatalog.elasticsearch`, `StepMenuCatalog.external`, `StepMenuCatalog.ai`, or `StepMenuCatalog.kibana`. Defaults to `StepMenuCatalog.kibana` if not provided.
+- `editorHandlers`: (Optional) Property handlers for custom completion and validation. See [Custom Property Completion and Validation](#custom-property-completion-and-validation) for details.
+  - `config`: Handlers for config properties (step-level, outside `with`)
+  - `input`: Handlers for input properties (inside `with`)
+  - `dynamicSchema`: Dynamic schema handlers (e.g., `getOutputSchema`)
 
 ## Dependencies
 

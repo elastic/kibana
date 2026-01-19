@@ -8,7 +8,7 @@
 import { NOT_AVAILABLE_LABEL } from '../../../common';
 
 export function asNumber(value: number): string {
-  if (isNaN(value)) {
+  if (isNaN(value) || !Number.isFinite(value)) {
     return NOT_AVAILABLE_LABEL;
   }
 
