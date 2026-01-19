@@ -45,7 +45,9 @@ describe('SloInstanceSelector', () => {
     jest.useRealTimers();
   });
 
-  const renderComponent = (props: Partial<React.ComponentProps<typeof SloInstanceSelector>> = {}) => {
+  const renderComponent = (
+    props: Partial<React.ComponentProps<typeof SloInstanceSelector>> = {}
+  ) => {
     const onSelected = jest.fn();
     render(<SloInstanceSelector sloId="slo-1" onSelected={onSelected} {...props} />);
     return { onSelected };
@@ -140,8 +142,10 @@ describe('SloInstanceSelector', () => {
 
     // Reopen the combo box to access the search input
     await openComboBox(user);
-    const searchInput = within(comboContainer).getByTestId('comboBoxSearchInput') as HTMLInputElement;
-    
+    const searchInput = within(comboContainer).getByTestId(
+      'comboBoxSearchInput'
+    ) as HTMLInputElement;
+
     // Directly set the search value using fireEvent.change
     // This bypasses the issue of the input containing "alpha" and ensures
     // we set exactly "search-term" as the value
