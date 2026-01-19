@@ -71,7 +71,7 @@ exports[`IndicesList should render normally 1`] = `
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"

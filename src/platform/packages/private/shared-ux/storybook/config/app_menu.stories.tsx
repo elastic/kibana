@@ -315,7 +315,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
             order: 4,
             label: 'settings',
             testId: 'settingButton',
-            seperator: 'above',
+            separator: 'above',
           },
         ],
       },

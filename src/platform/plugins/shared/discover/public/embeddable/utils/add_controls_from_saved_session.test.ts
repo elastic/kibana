@@ -111,10 +111,8 @@ describe('addControlsFromSavedSession', () => {
         {
           panelType: ESQL_CONTROL,
           serializedState: {
-            rawState: {
-              variableName: 'nonExistentVar',
-              type: 'control',
-            },
+            variableName: 'nonExistentVar',
+            type: 'control',
           },
         },
         { beside: 'test-uuid', scrollToPanel: false }
@@ -127,7 +125,7 @@ describe('addControlsFromSavedSession', () => {
       const addedPanels = (
         mockContainer.addNewPanel as jest.MockedFunction<CanAddNewPanel['addNewPanel']>
       ).mock.calls.map(
-        (call) => (call[0]?.serializedState?.rawState as { variableName?: string })?.variableName
+        (call) => (call[0]?.serializedState as { variableName?: string })?.variableName
       );
 
       expect(addedPanels).not.toContain(['var1', 'var2']);

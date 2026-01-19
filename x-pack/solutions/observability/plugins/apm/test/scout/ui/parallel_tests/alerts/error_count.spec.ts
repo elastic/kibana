@@ -14,8 +14,7 @@ const START_DATE = 'now-15m';
 const END_DATE = 'now';
 const RULE_NAME = 'Error count threshold';
 
-// Failing: See https://github.com/elastic/kibana/issues/247467
-test.describe.skip('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
@@ -62,11 +61,14 @@ test.describe.skip('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
       });
       const alert = foundResponse.data.data.find((obj: any) => obj.name === RULE_NAME);
       expect(alert).toBeDefined();
+      const runDate = new Date();
       await apiServices.alerting.rules.runSoon(alert!.id);
-      await apiServices.alerting.waiting.waitForNextExecution(
+      await apiServices.alerting.waiting.waitForExecutionCount(
         alert!.id,
+        1,
         undefined,
-        EXTENDED_TIMEOUT
+        EXTENDED_TIMEOUT,
+        runDate
       );
     });
 

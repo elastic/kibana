@@ -1622,7 +1622,7 @@ describe('XYChart component', () => {
     expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
   });
 
-  test('legendAction is not triggering event on ES|QL charts when unified search is on KQL/Lucene mode', () => {
+  test('legendAction is triggering event on ES|QL charts when unified search is on KQL/Lucene mode', () => {
     const { args } = sampleArgs();
 
     const newArgs = {
@@ -1651,7 +1651,7 @@ describe('XYChart component', () => {
     };
     const wrapper = mountWithIntl(<XYChart {...newProps} args={newArgs} interactive={true} />);
 
-    expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
+    expect(wrapper.find(Settings).first().prop('legendAction')).toBeDefined();
   });
 
   test('legendAction is triggering event on ES|QL charts when unified search is on ES|QL mode', () => {
