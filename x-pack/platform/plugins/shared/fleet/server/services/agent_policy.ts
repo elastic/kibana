@@ -1644,7 +1644,6 @@ class AgentPolicyService {
     options?: { throwOnAgentlessError?: boolean; agentVersions?: string[] }
   ) {
     const t = apm.startTransaction('deploy-policies', 'fleet');
-    // t.addLabels({ agentPolicyIds: agentPolicyIds.join(','), agentVersions: options?.agentVersions?.join(',') });
     const logger = this.getLogger('deployPolicies');
     logger.debug(
       () =>
