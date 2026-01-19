@@ -16,7 +16,7 @@ const APM_SLO_INDICATOR_TYPES = ['sli.apm.transactionDuration', 'sli.apm.transac
 
 // SLO status priority (higher index = lower priority)
 // When determining the "most important" status, we pick the one with lowest index
-const STATUS_PRIORITY: SloStatus[] = ['violated', 'degrading', 'noData', 'stale', 'healthy'];
+const STATUS_PRIORITY: SloStatus[] = ['violated', 'degrading', 'noData', 'healthy'];
 
 export interface ServiceSloInfo {
   serviceName: string;
@@ -41,7 +41,6 @@ interface StatusBucket {
 interface ServiceBucket {
   key: string;
   doc_count: number;
-  stale: { doc_count: number };
   statuses: { buckets: StatusBucket[] };
 }
 
@@ -58,8 +57,6 @@ export async function getServicesSlos({
   maxNumServices?: number;
   serviceNames?: string[];
 }): Promise<ServiceSlosResponse> {
-  const staleThresholdHours = 2; // Default stale threshold
-
   const environmentFilter =
     environment && environment !== 'ENVIRONMENT_ALL'
       ? [{ term: { 'service.environment': environment } }]
@@ -91,15 +88,7 @@ export async function getServicesSlos({
           size: maxNumServices,
         },
         aggs: {
-          // Count stale SLOs (not updated recently)
-          stale: {
-            filter: {
-              range: {
-                summaryUpdatedAt: { lt: `now-${staleThresholdHours}h` },
-              },
-            },
-          },
-          // Group non-stale SLOs by status using terms aggregation (simpler than multiple filters)
+          // Group SLOs by status using terms aggregation
           statuses: {
             terms: {
               field: 'status',
@@ -115,14 +104,11 @@ export async function getServicesSlos({
     (result.aggregations?.services as { buckets: ServiceBucket[] })?.buckets ?? [];
 
   return serviceBuckets.map((bucket) => {
-    const staleCount = bucket.stale?.doc_count ?? 0;
-
     // Build status counts from terms aggregation
     const statusCounts: Record<SloStatus, number> = {
       violated: 0,
       degrading: 0,
       noData: 0,
-      stale: staleCount,
       healthy: 0,
     };
 

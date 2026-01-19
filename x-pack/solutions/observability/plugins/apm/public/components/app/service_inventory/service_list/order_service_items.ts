@@ -18,8 +18,8 @@ const SERVICE_HEALTH_STATUS_ORDER = [
   ServiceHealthStatus.critical,
 ];
 
-// SLO status priority order: violated (highest) -> degrading -> noData -> stale -> healthy (lowest)
-const SLO_STATUS_ORDER: SloStatus[] = ['healthy', 'stale', 'noData', 'degrading', 'violated'];
+// SLO status priority order: violated (highest) -> degrading -> noData -> healthy (lowest)
+const SLO_STATUS_ORDER: SloStatus[] = ['healthy', 'noData', 'degrading', 'violated'];
 
 // Multiplier to ensure status priority takes precedence over count
 // e.g., 2 violated (4 * 10000 + 2 = 40002) > 100 degrading (3 * 10000 + 100 = 30100)

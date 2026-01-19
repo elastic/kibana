@@ -22,6 +22,7 @@ import type { ApmRuleType } from '@kbn/rule-data-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
@@ -124,28 +125,9 @@ const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
         defaultMessage: 'View SLOs with no data for {serviceName}',
         values: { serviceName },
       }),
-    badgeLabel: (count?: number) =>
+    badgeLabel: () =>
       i18n.translate('xpack.apm.servicesTable.sloNoData', {
-        defaultMessage: '{count} No data',
-        values: { count },
-      }),
-  },
-  stale: {
-    id: 'Stale',
-    color: 'default',
-    showCount: false,
-    tooltipContent: i18n.translate('xpack.apm.servicesTable.tooltip.sloStale', {
-      defaultMessage: 'One or more SLOs are stale. Click to view SLOs.',
-    }),
-    ariaLabel: (serviceName: string) =>
-      i18n.translate('xpack.apm.servicesTable.sloStaleAriaLabel', {
-        defaultMessage: 'View stale SLOs for {serviceName}',
-        values: { serviceName },
-      }),
-    badgeLabel: (count?: number) =>
-      i18n.translate('xpack.apm.servicesTable.sloStale', {
-        defaultMessage: '{count} Stale',
-        values: { count },
+        defaultMessage: 'No data',
       }),
   },
   healthy: {
@@ -190,7 +172,7 @@ export function getServiceColumns({
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   link: any;
   serviceOverflowCount: number;
-  onSloBadgeClick?: (serviceName: string, agentName?: string) => void;
+  onSloBadgeClick?: (serviceName: string, agentName?: AgentName) => void;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -544,10 +526,10 @@ export function ApmServicesTable({
 
   const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
     serviceName: string;
-    agentName?: string;
+    agentName?: AgentName;
   } | null>(null);
 
-  const openSloOverviewFlyout = useCallback((serviceName: string, agentName?: string) => {
+  const openSloOverviewFlyout = useCallback((serviceName: string, agentName?: AgentName) => {
     setSloOverviewFlyout({ serviceName, agentName });
   }, []);
 

@@ -46,15 +46,15 @@ import {
   SLO_RULE_TYPE_IDS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
 interface Props {
   serviceName: string;
-  agentName?: string;
+  agentName?: AgentName;
   onClose: () => void;
 }
 
@@ -94,10 +94,9 @@ const statusColors: Record<string, string> = {
 
 // Status priority for sorting (higher = more important)
 const STATUS_PRIORITY: Record<string, number> = {
-  VIOLATED: 4,
-  DEGRADING: 3,
-  NO_DATA: 2,
-  STALE: 1,
+  VIOLATED: 3,
+  DEGRADING: 2,
+  NO_DATA: 1,
   HEALTHY: 0,
 };
 
@@ -173,7 +172,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
               perPage: String(perPage),
               sortBy: 'status',
               sortDirection: 'desc',
-              hideStale: 'true',
             },
           }
         );
@@ -297,7 +295,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       VIOLATED: 0,
       DEGRADING: 0,
       HEALTHY: 0,
-      STALE: 0,
       NO_DATA: 0,
     };
     sloData.forEach((sloItem) => {
@@ -579,17 +576,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                 titleColor="success"
                 description={i18n.translate('xpack.apm.sloOverviewFlyout.stats.healthy', {
                   defaultMessage: 'Healthy',
-                })}
-                isLoading={isLoading}
-                reverse
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow>
-              <EuiStat
-                title={statusCounts.STALE}
-                titleSize="s"
-                description={i18n.translate('xpack.apm.sloOverviewFlyout.stats.stale', {
-                  defaultMessage: 'Stale',
                 })}
                 isLoading={isLoading}
                 reverse

@@ -8,7 +8,7 @@
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ServiceHealthStatus } from './service_health_status';
 
-export type SloStatus = 'violated' | 'degrading' | 'noData' | 'stale' | 'healthy';
+export type SloStatus = 'violated' | 'degrading' | 'noData' | 'healthy';
 
 export interface ServiceListItem {
   serviceName: string;
