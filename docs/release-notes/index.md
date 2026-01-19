@@ -33,6 +33,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ### Features and enhancements [kibana-9.3.0-features-enhancements]
 
+**Elastic Agent Builder**:
+
+* [Elastic Agent Builder](docs-content://explore-analyze/ai-features/elastic-agent-builder.md) is now generally available. It is enabled by default in Elasticsearch solution environments, and you can opt in to **Agent Builder** and its **AI Agent** chat experience in Observability and Security solution environments. Learn how to [get started](docs-content://explore-analyze/ai-features/agent-builder/get-started.md).
+
 **Alerting**:
 
 * Supports searching for report schedules by title and creator [#243841]({{kib-pull}}243841).
@@ -153,10 +157,6 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Adds the ability to narrow down the list of anomalies that the Anomaly detection rule looks for [#240100]({{kib-pull}}240100).
 * Adds feedback button to the Anomaly Explorer and Single Metric Viewer [#239883]({{kib-pull}}239883).
 
-**Elastic Agent Builder**:
-
-* The core [Elastic Agent Builder](docs-content://explore-analyze/ai-features/elastic-agent-builder.md) features introduced in 9.2 are now generally available. Learn how to [get started](docs-content://explore-analyze/ai-features/agent-builder/get-started.md).
-
 **Search**:
 * When creating a new Elasticsearch solution project, you will now land on the **Elasticsearch home page** by default instead of the **Create index** page to get immediate access to relevant tutorials and educational content [#237612]({{kib-pull}}237612).
 * Adds a new getting started page within the Elasticsearch solution which offers hands-on feature tutorials. This page defaults as the initial destination for users creating a new Elasticsearch solution project [#245311]({{kib-pull}}245311).
@@ -258,9 +258,11 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Fixes the autocomplete of timeseries sources after a comma [#241402]({{kib-pull}}241402).
 
 **Elastic Observability solution**:
+
 For the Elastic Observability 9.3.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
 
 **Elastic Security solution**:
+
 For the Elastic Security 9.3.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
