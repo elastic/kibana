@@ -361,6 +361,18 @@ export class WorkflowsExecutionEnginePlugin
                 createdAt: workflowCreatedAt.toISOString(),
                 createdBy: '',
                 triggeredBy: 'scheduled',
+                // Store queue delay metrics for observability (only if enabled in config)
+                ...(this.config.collectQueueMetrics
+                  ? {
+                      queueMetrics: {
+                        scheduledAt: taskInstance.scheduledAt?.toString(),
+                        runAt: taskInstance.runAt?.toString(),
+                        startedAt: new Date(now).toISOString(),
+                        queueDelayMs,
+                        scheduleDelayMs,
+                      },
+                    }
+                  : {}),
               };
 
               const concurrencyGroupKey = this.getConcurrencyGroupKey(

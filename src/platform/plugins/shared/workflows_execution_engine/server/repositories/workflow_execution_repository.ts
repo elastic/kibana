@@ -178,6 +178,7 @@ export class WorkflowExecutionRepository {
    * - direct status match instead of must_not exclusion (more efficient)
    * - terminate_after: 1 to stop scanning after finding one match
    * - size: 0 to avoid fetching document source
+   * - _source: false to avoid fetching any document content
    *
    * @param workflowId - The ID of the workflow.
    * @param spaceId - The ID of the space associated with the workflow execution.
@@ -209,6 +210,7 @@ export class WorkflowExecutionRepository {
       size: 0, // Don't need the document, just checking existence
       terminate_after: 1, // Stop after finding 1 match
       track_total_hits: true,
+      _source: false, // Don't fetch document content, only check existence
       query: {
         bool: {
           filter: filterClauses, // Filter context = no scoring = faster

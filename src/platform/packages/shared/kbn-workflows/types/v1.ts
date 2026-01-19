@@ -75,6 +75,14 @@ export interface StackFrame {
   nestedScopes: ScopeEntry[];
 }
 
+export interface QueueMetrics {
+  scheduledAt?: string;
+  runAt?: string;
+  startedAt: string;
+  queueDelayMs: number | null;
+  scheduleDelayMs: number | null;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -103,6 +111,7 @@ export interface EsWorkflowExecution {
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
+  queueMetrics?: QueueMetrics; // Queue delay metrics for observability
 }
 
 export interface ProviderInput {
