@@ -296,7 +296,7 @@ export const StepsEditor = React.memo(() => {
 
     if (isNoSuggestionsFound) {
       return (
-        <NoStepsEmptyPrompt>
+        <NoStepsEmptyPrompt canUsePipelineSuggestions={!!canUsePipelineSuggestions}>
           <div css={{ maxWidth: 400, margin: '0 auto', textAlign: 'left' }}>
             <EuiCallOut
               announceOnMount
