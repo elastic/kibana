@@ -50,7 +50,7 @@ export const processConcatProcessor = (
     .map((fromValue) => {
       if (fromValue.type === 'field') {
         return `if (ctx.containsKey('${fromValue.value}') && ctx['${fromValue.value}'] != null) {
-  fromValues.add(ctx['${fromValue.value}']);
+  fromValues.add(ctx['${fromValue.value}'].toString());
 } else {
   allFieldsPresent = false;
 }
