@@ -148,7 +148,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         setExpandedDoc={setExpandedDocWithInitialTab}
         expandedDoc={expandedDoc}
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
-        isEmbedded={true}
+        allowFilteringOnComputedColumns={false}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}

@@ -138,10 +138,10 @@ export function buildCellActions(
   valueToStringConverter: ValueToStringConverter,
   onFilter?: DocViewFilterFn,
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
-  isEmbedded?: boolean
+  allowFilteringOnComputedColumns?: boolean
 ) {
   const shouldShowFilters =
-    onFilter && field.filterable && (!isEmbedded || !field.isComputedColumn);
+    onFilter && field.filterable && (allowFilteringOnComputedColumns || !field.isComputedColumn);
 
   return [
     ...(shouldShowFilters
