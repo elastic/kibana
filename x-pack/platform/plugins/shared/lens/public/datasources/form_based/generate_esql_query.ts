@@ -29,6 +29,22 @@ import { resolveTimeShift } from './time_shift_utils';
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
 
+// Used for metrics and buckets ES|QL verification
+interface EsqlResult {
+  esql: string;
+}
+
+interface EsqlError {
+  error: EsqlConversionFailureReason;
+  operationType?: string;
+}
+
+const isValidEsqlResults = (
+  metrics: Array<EsqlResult | EsqlError>
+): metrics is Array<EsqlResult> => {
+  return metrics.every((m) => typeof m === 'object' && 'esql' in m);
+};
+
 /**
  * Specific reasons why ES|QL conversion failed.
  * These are used to provide granular user feedback.
@@ -49,18 +65,23 @@ export type EsqlConversionFailureReason =
  * Either a successful conversion with the ES|QL query,
  * or a failure with a specific reason.
  */
-export type EsqlQueryResult =
-  | {
-      success: true;
-      esql: string;
-      partialRows: boolean;
-      esAggsIdMap: Record<string, OriginalColumn[]>;
-    }
-  | {
-      success: false;
-      reason: EsqlConversionFailureReason;
-      operationType?: string;
-    };
+interface EsqlQuerySuccess {
+  success: true;
+  esql: string;
+  partialRows: boolean;
+  esAggsIdMap: Record<string, OriginalColumn[]>;
+}
+
+interface EsqlQueryFailure {
+  success: false;
+  reason: EsqlConversionFailureReason;
+  operationType?: string;
+}
+
+export type EsqlQueryResult = EsqlQuerySuccess | EsqlQueryFailure;
+
+export const isEsqlQuerySuccess = (result: EsqlQueryResult): result is EsqlQuerySuccess =>
+  result.success;
 
 /**
  * Helper function to create a consistent failure result for ES|QL query generation.
@@ -74,8 +95,6 @@ function getEsqlQueryFailedResult(
   }
   return { success: false, reason };
 }
-
-// Need a more complex logic for decimals percentiles
 
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
@@ -146,7 +165,7 @@ export function generateEsqlQuery(
     ([_, col]) => !col.isBucketed
   );
 
-  const metrics = metricEsAggsEntries.map(([colId, col], index) => {
+  const metrics: Array<EsqlResult | EsqlError> = metricEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
     if (!def.toESQL)
@@ -200,7 +219,7 @@ export function generateEsqlQuery(
       },
     ];
 
-    let metricESQL = def.toESQL(
+    let esql = def.toESQL(
       {
         ...col,
         timeShift: resolveTimeShift(
@@ -217,37 +236,37 @@ export function generateEsqlQuery(
       dateRange
     );
 
-    if (!metricESQL)
+    if (!esql)
       return { error: 'function_not_supported' as const, operationType: col.operationType };
 
-    metricESQL = `${esAggsId} = ` + metricESQL;
+    esql = `${esAggsId} = ${esql}`;
 
     if (wrapInFilter) {
       if (col.filter?.language === 'kuery') {
-        metricESQL += ` WHERE KQL("""${col.filter.query.replace(/"""/g, '')}""")`;
+        esql += ` WHERE KQL("""${col.filter.query.replace(/"""/g, '')}""")`;
       } else if (col.filter?.language === 'lucene') {
-        metricESQL += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
+        esql += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
       } else {
         return { error: 'function_not_supported' as const, operationType: col.operationType };
       }
     }
 
-    return metricESQL;
+    return { esql };
   });
 
-  // Check for metric conversion errors
-  const metricError = metrics.find((m) => typeof m === 'object' && 'error' in m);
-  if (metricError && typeof metricError === 'object' && 'error' in metricError) {
-    return getEsqlQueryFailedResult(
-      metricError.error,
-      'operationType' in metricError ? metricError.operationType : undefined
-    );
-  }
-  if (metrics.some((m) => !m)) {
+  // Check for metric conversion errors with a type guard
+  if (!isValidEsqlResults(metrics)) {
+    const metricError = metrics.find((m) => typeof m === 'object' && 'error' in m);
+    if (metricError && typeof metricError === 'object' && 'error' in metricError) {
+      return getEsqlQueryFailedResult(
+        metricError.error,
+        'operationType' in metricError ? metricError.operationType : undefined
+      );
+    }
     return getEsqlQueryFailedResult('function_not_supported');
   }
 
-  const buckets = bucketEsAggsEntries.map(([colId, col], index) => {
+  const buckets: Array<EsqlResult | EsqlError> = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
     if (!def.toESQL)
@@ -339,7 +358,7 @@ export function generateEsqlQuery(
       }
     }
 
-    const bucketEsql = def.toESQL(
+    const esql = def.toESQL(
       {
         ...col,
         timeShift: resolveTimeShift(
@@ -356,34 +375,30 @@ export function generateEsqlQuery(
       dateRange
     );
 
-    if (!bucketEsql) {
+    if (!esql) {
       return { error: 'function_not_supported' as const, operationType: col.operationType };
     }
 
-    return `${esAggsId} = ` + bucketEsql;
+    return { esql: `${esAggsId} = ${esql}` };
   });
 
-  // Check for bucket conversion errors
-  const bucketError = buckets.find((b) => typeof b === 'object' && 'error' in b);
-  if (bucketError && typeof bucketError === 'object' && 'error' in bucketError) {
-    return getEsqlQueryFailedResult(
-      bucketError.error,
-      'operationType' in bucketError ? bucketError.operationType : undefined
-    );
-  }
-  if (buckets.some((m) => !m)) {
+  // Check for bucket conversion errors with type guard
+  if (!isValidEsqlResults(buckets)) {
+    const bucketError = buckets.find((b) => typeof b === 'object' && 'error' in b);
+    if (bucketError && typeof bucketError === 'object' && 'error' in bucketError) {
+      return getEsqlQueryFailedResult(
+        bucketError.error,
+        'operationType' in bucketError ? bucketError.operationType : undefined
+      );
+    }
     return getEsqlQueryFailedResult('function_not_supported');
   }
 
   // Type assertion after error checks - we know these are all strings now
-  const validMetrics = metrics as string[];
-  const validBuckets = buckets as string[];
+  const validMetrics = metrics.map((m) => m.esql);
+  const validBuckets = buckets.map((b) => b.esql);
 
   if (validBuckets.length > 0) {
-    if (validBuckets.some((b) => !b || b.includes('undefined'))) {
-      return getEsqlQueryFailedResult('function_not_supported');
-    }
-
     if (validMetrics.length > 0) {
       esqlCompose = esqlCompose.pipe(
         stats(`${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`)

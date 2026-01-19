@@ -33,7 +33,7 @@ import type {
   IndexPatternMap,
   RangeIndexPatternColumn,
 } from '@kbn/lens-common';
-import { generateEsqlQuery } from './generate_esql_query';
+import { isEsqlQuerySuccess, generateEsqlQuery } from './generate_esql_query';
 import { convertToAbsoluteDateRange } from '../../utils';
 import { operationDefinitionMap } from './operations';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
@@ -177,12 +177,17 @@ function getExpressionForLayer(
 
     // esql mode variables
     const lensESQLEnabled = featureFlags.getBooleanValue('lens.enable_esql', false);
-    const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
-    const esqlLayer =
-      canUseESQL &&
-      generateEsqlQuery(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
+    const canUseESQL: boolean = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
+    const esqlLayer = generateEsqlQuery(
+      esAggEntries,
+      layer,
+      indexPattern,
+      uiSettings,
+      dateRange,
+      nowInstant
+    );
 
-    if (!esqlLayer) {
+    if (!(canUseESQL && isEsqlQuerySuccess(esqlLayer))) {
       esAggEntries.forEach(([colId, col], index) => {
         const def = operationDefinitionMap[col.operationType];
         if (def.input !== 'fullReference' && def.input !== 'managedReference') {
@@ -361,7 +366,9 @@ function getExpressionForLayer(
 
       esAggsIdMap = updatedEsAggsIdMap;
     } else {
-      esAggsIdMap = esqlLayer.esAggsIdMap;
+      // generateEsqlQuery returns the full column data but typed with the minimal common OriginalColumn.
+      // The runtime objects have all properties needed by the local OriginalColumn type.
+      esAggsIdMap = esqlLayer.esAggsIdMap as unknown as Record<string, OriginalColumn[]>;
     }
 
     const columnsWithFormatters = columnEntries.filter(
@@ -481,7 +488,7 @@ function getExpressionForLayer(
       )
       .filter((field): field is string => Boolean(field));
 
-    const dataAST = esqlLayer
+    const dataAST = isEsqlQuerySuccess(esqlLayer)
       ? buildExpressionFunction('esql', {
           query: esqlLayer.esql,
           timeField: allDateHistogramFields[0],
@@ -513,7 +520,7 @@ function getExpressionForLayer(
           function: 'lens_map_to_columns',
           arguments: {
             idMap: [JSON.stringify(esAggsIdMap)],
-            isTextBased: [!!esqlLayer],
+            isTextBased: [isEsqlQuerySuccess(esqlLayer)],
           },
         },
         ...expressions,
