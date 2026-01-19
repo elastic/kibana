@@ -72,7 +72,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "22.21.1",
+    "node": "22.22.0",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -1609,7 +1609,7 @@
     "@parcel/watcher": "^2.5.1",
     "@playwright/test": "1.56.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.6.1",
-    "@redocly/cli": "^2.11.1",
+    "@redocly/cli": "2.14.2",
     "@statoscope/webpack-plugin": "^5.28.2",
     "@storybook/addon-a11y": "^8.6.15",
     "@storybook/addon-actions": "^8.6.15",
