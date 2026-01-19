@@ -154,8 +154,6 @@ Array [
     },
     "cellActions": Array [
       [Function],
-      [Function],
-      [Function],
     ],
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
@@ -867,8 +865,6 @@ Array [
       "showMoveRight": true,
     },
     "cellActions": Array [
-      [Function],
-      [Function],
       [Function],
     ],
     "display": <Memo(DataTableColumnHeader)
@@ -1695,8 +1691,6 @@ Array [
     },
     "cellActions": Array [
       [Function],
-      [Function],
-      [Function],
     ],
     "display": <Memo(DataTableTimeColumnHeader)
       dataView={
@@ -1999,8 +1993,6 @@ Array [
       "showMoveRight": true,
     },
     "cellActions": Array [
-      [Function],
-      [Function],
       [Function],
     ],
     "display": <Memo(DataTableColumnHeader)
