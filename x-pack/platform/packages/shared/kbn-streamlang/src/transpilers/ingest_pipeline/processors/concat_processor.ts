@@ -9,7 +9,7 @@ import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/ty
 import type { ConcatProcessor } from '../../../../types/processors';
 
 /**
- * Converts a ConcatProcessor to an Ingest Pipeline set processor.
+ * Converts a ConcatProcessor to an Ingest Pipeline script processor.
  *
  * @example
  * Input:
@@ -25,9 +25,9 @@ import type { ConcatProcessor } from '../../../../types/processors';
 
  * Output:
     {
-        set: {
-            field: 'full_name',
-            value: '{{{first_name}}} {{{last_name}}}',
+        script: {
+            source: 'ctx[\'full_name\'] = ctx[\'first_name\'] + " " + ctx[\'last_name\'];',
+            lang: 'painless',
         }
     }
  */
@@ -38,27 +38,44 @@ export const processConcatProcessor = (
     tag?: string;
   }
 ): IngestProcessorContainer => {
-  let value = '';
-  // value is the concatenation of the fields and literals in the from array
-  for (const from of processor.from) {
-    if (from.type === 'field') {
-      value += `{{{${from.value}}}}`;
-    } else {
-      value += from.value;
-    }
-  }
+  const { description, ignore_failure, tag, ignore_missing = false, from, field } = processor;
+  // Generate the script to join non-empty fields into a single string
+  // Handle `ignore_missing: false` - don't join fields if any of them are missing
 
-  const setProcessor: IngestProcessorContainer = {
-    set: {
-      field: processor.field,
-      value,
-      description: processor.description,
+  const source = `
+  def fromValues = [];
+  boolean allFieldsPresent = true;
+
+  ${from
+    .map((fromValue) => {
+      if (fromValue.type === 'field') {
+        return `if (ctx.containsKey('${fromValue.value}') && ctx['${fromValue.value}'] != null) {
+  fromValues.add(ctx['${fromValue.value}']);
+} else {
+  allFieldsPresent = false;
+}
+`;
+      } else {
+        return `fromValues.add('${fromValue.value}');`;
+      }
+    })
+    .join('')}
+
+  if (allFieldsPresent || ${ignore_missing}) {
+    ctx['${field}'] = fromValues.stream().collect(Collectors.joining(''));
+  }
+  `.trim();
+
+  const scriptProcessor: IngestProcessorContainer = {
+    script: {
+      lang: 'painless',
+      source,
       if: processor.if,
-      ignore_failure: processor.ignore_failure,
-      ignore_empty_value: processor.ignore_empty_value,
-      tag: processor.tag,
+      ignore_failure,
+      description,
+      tag,
     },
   };
 
-  return setProcessor;
+  return scriptProcessor;
 };

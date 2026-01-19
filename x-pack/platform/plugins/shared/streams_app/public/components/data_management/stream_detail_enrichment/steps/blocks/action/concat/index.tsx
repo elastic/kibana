@@ -11,7 +11,7 @@ import { ConcatTargetField } from './concat_target_field';
 import { ConcatFromBuilder } from './concat_from_builder';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { FieldsAccordion } from '../optional_fields_accordion';
-import { IgnoreEmptyValueToggle, IgnoreFailureToggle } from '../ignore_toggles';
+import { IgnoreMissingToggle, IgnoreFailureToggle } from '../ignore_toggles';
 
 export const ConcatProcessorForm = () => {
   return (
@@ -23,7 +23,7 @@ export const ConcatProcessorForm = () => {
         <ProcessorConditionEditor />
       </FieldsAccordion>
       <EuiSpacer size="m" />
-      <IgnoreEmptyValueToggle />
+      <IgnoreMissingToggle />
       <IgnoreFailureToggle />
     </>
   );
