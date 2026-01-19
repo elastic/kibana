@@ -344,6 +344,188 @@ describe('ApmServicesTable', () => {
       const hasEnvironmentColumn = columns.some((c) => c.field === 'environments');
       expect(hasEnvironmentColumn).toBe(false);
     });
+
+    describe('responsive columns', () => {
+      const serviceForColumnTest: any = {
+        serviceName: 'opbeans-python',
+        agentName: 'python',
+        transactionsPerMinute: {
+          value: 86.93333333333334,
+          timeseries: [],
+        },
+        errorsPerMinute: {
+          value: 12.6,
+          timeseries: [],
+        },
+        avgResponseTime: {
+          value: 91535.42944785276,
+          timeseries: [],
+        },
+        environments: ['test'],
+        transactionType: 'request',
+      };
+
+      describe('when small', () => {
+        it('shows environment, transaction type and sparklines', () => {
+          const renderedColumns = getServiceColumns({
+            comparisonDataLoading: false,
+            showHealthStatusColumn: true,
+            query: defaultQuery,
+            showTransactionTypeColumn: true,
+            breakpoints: {
+              isSmall: true,
+              isLarge: true,
+              isXl: true,
+            } as Breakpoints,
+            showAlertsColumn: true,
+            link: apmRouter.link,
+            serviceOverflowCount: 0,
+          }).map((c) =>
+            c.render
+              ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
+              : serviceForColumnTest[c.field!]
+          );
+          expect(renderedColumns.length).toEqual(8);
+          expect(renderedColumns[3]).toMatchInlineSnapshot(`
+            <EnvironmentBadge
+              environments={
+                Array [
+                  "test",
+                ]
+              }
+            />
+          `);
+          expect(renderedColumns[4]).toMatchInlineSnapshot(`"request"`);
+          expect(renderedColumns[5]).toMatchInlineSnapshot(`
+            <ListMetric
+              color="green"
+              comparisonSeriesColor="black"
+              hideSeries={false}
+              isLoading={false}
+              valueLabel="0 ms"
+            />
+          `);
+        });
+      });
+
+      describe('when Large', () => {
+        it('hides environment, transaction type and sparklines', () => {
+          const renderedColumns = getServiceColumns({
+            comparisonDataLoading: false,
+            showHealthStatusColumn: true,
+            query: defaultQuery,
+            showTransactionTypeColumn: true,
+            breakpoints: {
+              isSmall: false,
+              isLarge: true,
+              isXl: true,
+            } as Breakpoints,
+            showAlertsColumn: true,
+            link: apmRouter.link,
+            serviceOverflowCount: 0,
+          }).map((c) =>
+            c.render
+              ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
+              : serviceForColumnTest[c.field!]
+          );
+          expect(renderedColumns.length).toEqual(6);
+          expect(renderedColumns[3]).toMatchInlineSnapshot(`
+            <ListMetric
+              color="green"
+              comparisonSeriesColor="black"
+              hideSeries={true}
+              isLoading={false}
+              valueLabel="0 ms"
+            />
+          `);
+        });
+      });
+
+      describe('when XL', () => {
+        it('hides transaction type', () => {
+          const renderedColumns = getServiceColumns({
+            comparisonDataLoading: false,
+            showHealthStatusColumn: true,
+            query: defaultQuery,
+            showTransactionTypeColumn: true,
+            breakpoints: {
+              isSmall: false,
+              isLarge: false,
+              isXl: true,
+            } as Breakpoints,
+            showAlertsColumn: true,
+            link: apmRouter.link,
+            serviceOverflowCount: 0,
+          }).map((c) =>
+            c.render
+              ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
+              : serviceForColumnTest[c.field!]
+          );
+          expect(renderedColumns.length).toEqual(7);
+          expect(renderedColumns[3]).toMatchInlineSnapshot(`
+            <EnvironmentBadge
+              environments={
+                Array [
+                  "test",
+                ]
+              }
+            />
+          `);
+          expect(renderedColumns[4]).toMatchInlineSnapshot(`
+            <ListMetric
+              color="green"
+              comparisonSeriesColor="black"
+              hideSeries={false}
+              isLoading={false}
+              valueLabel="0 ms"
+            />
+          `);
+        });
+      });
+
+      describe('when XXL', () => {
+        it('shows all columns including transaction type', () => {
+          const renderedColumns = getServiceColumns({
+            comparisonDataLoading: false,
+            showHealthStatusColumn: true,
+            query: defaultQuery,
+            showTransactionTypeColumn: true,
+            breakpoints: {
+              isSmall: false,
+              isLarge: false,
+              isXl: false,
+            } as Breakpoints,
+            showAlertsColumn: true,
+            link: apmRouter.link,
+            serviceOverflowCount: 0,
+          }).map((c) =>
+            c.render
+              ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
+              : serviceForColumnTest[c.field!]
+          );
+          expect(renderedColumns.length).toEqual(8);
+          expect(renderedColumns[3]).toMatchInlineSnapshot(`
+            <EnvironmentBadge
+              environments={
+                Array [
+                  "test",
+                ]
+              }
+            />
+          `);
+          expect(renderedColumns[4]).toMatchInlineSnapshot(`"request"`);
+          expect(renderedColumns[5]).toMatchInlineSnapshot(`
+            <ListMetric
+              color="green"
+              comparisonSeriesColor="black"
+              hideSeries={false}
+              isLoading={false}
+              valueLabel="0 ms"
+            />
+          `);
+        });
+      });
+    });
   });
 
   describe('actions column', () => {
