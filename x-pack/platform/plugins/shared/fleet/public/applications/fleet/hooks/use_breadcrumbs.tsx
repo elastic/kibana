@@ -79,6 +79,14 @@ const breadcrumbGetters: {
       }),
     },
   ],
+  copy_integration: ({ policyName, policyId }) => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.copyPackagePolicyPageTitle', {
+        defaultMessage: 'Copy integration',
+      }),
+    },
+  ],
   edit_integration: ({ policyName, policyId }) => [
     BASE_BREADCRUMB,
     {

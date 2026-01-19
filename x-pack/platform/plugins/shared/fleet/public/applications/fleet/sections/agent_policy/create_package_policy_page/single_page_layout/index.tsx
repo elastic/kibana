@@ -116,6 +116,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   pkgLabel,
   addIntegrationFlyoutProps,
   defaultPolicyData,
+  noBreadcrumbs,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
@@ -745,7 +746,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
-            {packageInfo && !addIntegrationFlyoutProps && (
+            {packageInfo && !addIntegrationFlyoutProps && !noBreadcrumbs && (
               <IntegrationBreadcrumb
                 pkgTitle={integrationInfo?.title || packageInfo.title}
                 pkgkey={pkgKeyFromPackageInfo(packageInfo)}
