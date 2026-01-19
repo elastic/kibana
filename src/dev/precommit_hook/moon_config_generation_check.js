@@ -67,10 +67,12 @@ export class MoonConfigGenerationCheck extends PrecommitCheck {
         clear: false,
         includeDependencies: true,
         quiet: true,
+        // log: new ToolingLog({ level: 'verbose', writeTo: process.stdout }), // to debug
       });
 
-      if (results.update.length) {
-        throw new Error("Some moon.yml files aren't up to date: " + results.update.join(', '));
+      const touchedFiles = results.update.concat(results.create);
+      if (!options.fix && touchedFiles.length) {
+        throw new Error("Some moon.yml files aren't up to date: " + touchedFiles.join(', '));
       }
     } catch (e) {
       throw new Error(`Failed to regenerate moon config - ${e.stdout || e.message}`);

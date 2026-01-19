@@ -34,7 +34,7 @@ import {
 // Let's populate a global logger, so we don't need to pass it to every sub-function
 let logger: ToolingLog;
 
-const scriptName = path.relative(REPO_ROOT, process.argv[1]);
+const scriptName = 'scripts/regenerate_moon_projects.js';
 const cliOptions = {
   usage: `node ${scriptName}`,
   description: `
