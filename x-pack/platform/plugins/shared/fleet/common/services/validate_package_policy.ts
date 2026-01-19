@@ -201,15 +201,7 @@ const validatePackageRequiredVars = (
  * Get all variable names that are controlled by any var_group.
  */
 const getVarsControlledByVarGroups = (varGroups: RegistryVarGroup[]): Set<string> => {
-  const controlledVars = new Set<string>();
-  for (const group of varGroups) {
-    for (const option of group.options) {
-      for (const varName of option.vars) {
-        controlledVars.add(varName);
-      }
-    }
-  }
-  return controlledVars;
+  return new Set(varGroups.flatMap((group) => group.options.flatMap((option) => option.vars)));
 };
 
 /**

@@ -414,12 +414,16 @@ describe('VarGroupSelector', () => {
     it('should handle multiple var_groups with mixed required settings', () => {
       const selections = { auth_method: 'api_key', compression: 'gzip' };
       // Required var_group var should be required
-      expect(isVarRequiredByVarGroup('api_key', [requiredVarGroup, optionalVarGroup], selections)).toBe(
-        true
-      );
+      expect(
+        isVarRequiredByVarGroup('api_key', [requiredVarGroup, optionalVarGroup], selections)
+      ).toBe(true);
       // Optional var_group var should not be required
       expect(
-        isVarRequiredByVarGroup('compression_level', [requiredVarGroup, optionalVarGroup], selections)
+        isVarRequiredByVarGroup(
+          'compression_level',
+          [requiredVarGroup, optionalVarGroup],
+          selections
+        )
       ).toBe(false);
     });
 

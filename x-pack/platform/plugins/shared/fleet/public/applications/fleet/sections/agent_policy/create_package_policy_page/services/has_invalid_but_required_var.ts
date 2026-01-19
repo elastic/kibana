@@ -60,10 +60,11 @@ export const hasInvalidButRequiredVar = (
     }
 
     // Check if var is required (either by varDef or by var_group)
-    const requiredByVarGroup =
-      varGroups && varGroups.length > 0
-        ? isVarRequiredByVarGroup(registryVar.name, varGroups, varGroupSelections || {})
-        : false;
+    const requiredByVarGroup = isVarRequiredByVarGroup(
+      registryVar.name,
+      varGroups,
+      varGroupSelections
+    );
     const isRequired = registryVar.required || requiredByVarGroup;
 
     if (!isRequired) {

@@ -7,7 +7,6 @@
 
 import type { RegistryElasticsearch, RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
 
-// Based on https://github.com/elastic/package-spec/blob/main/spec/integration/manifest.spec.yml
 export interface RegistryVarGroupOption {
   name: string;
   title: string;

@@ -7,7 +7,6 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { EuiFormRow, EuiSelect, EuiText, EuiSpacer, EuiTitle } from '@elastic/eui';
-import ReactMarkdown from 'react-markdown';
 
 import type { RegistryVarGroup, RegistryVarGroupOption } from '../../../../../../types';
 
@@ -75,17 +74,7 @@ export function getVisibleVarsForOption(
  * These vars should only be shown when their option is selected.
  */
 export function getVarsControlledByVarGroups(varGroups: RegistryVarGroup[]): Set<string> {
-  const controlledVars = new Set<string>();
-
-  for (const group of varGroups) {
-    for (const option of group.options) {
-      for (const varName of option.vars) {
-        controlledVars.add(varName);
-      }
-    }
-  }
-
-  return controlledVars;
+  return new Set(varGroups.flatMap((group) => group.options.flatMap((option) => option.vars)));
 }
 
 /**
@@ -125,17 +114,14 @@ export function shouldShowVar(
   }
 
   // Check if this var is in the selected option for any var_group
-  for (const group of varGroups) {
-    const selectedOptionName = varGroupSelections[group.name];
-    if (!selectedOptionName) continue;
-
-    const selectedOption = group.options.find((opt) => opt.name === selectedOptionName);
-    if (selectedOption?.vars.includes(varName)) {
-      return true;
-    }
-  }
-
-  return false;
+  return varGroups
+    .filter((group) => varGroupSelections[group.name])
+    .some((group) => {
+      const selectedOption = group.options.find(
+        (opt) => opt.name === varGroupSelections[group.name]
+      );
+      return selectedOption?.vars.includes(varName);
+    });
 }
 
 /**
@@ -144,22 +130,21 @@ export function shouldShowVar(
  */
 export function isVarRequiredByVarGroup(
   varName: string,
-  varGroups: RegistryVarGroup[],
-  varGroupSelections: VarGroupSelection
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: VarGroupSelection | undefined
 ): boolean {
-  for (const group of varGroups) {
-    // Skip if var_group is not marked as required
-    if (!group.required) continue;
-
-    const selectedOptionName = varGroupSelections[group.name];
-    if (!selectedOptionName) continue;
-
-    const selectedOption = group.options.find((opt) => opt.name === selectedOptionName);
-    if (selectedOption?.vars.includes(varName)) {
-      return true;
-    }
+  if (!varGroups || varGroups.length === 0 || !varGroupSelections) {
+    return false;
   }
-  return false;
+
+  return varGroups
+    .filter((group) => group.required && varGroupSelections[group.name])
+    .some((group) => {
+      const selectedOption = group.options.find(
+        (opt) => opt.name === varGroupSelections[group.name]
+      );
+      return selectedOption?.vars.includes(varName);
+    });
 }
 
 /**
@@ -222,10 +207,18 @@ export const VarGroupSelector: React.FC<VarGroupSelectorProps> = ({
     return null;
   }
 
+  // eslint-disable-next-line no-console
+  console.log(
+    'varGroup.description:',
+    varGroup.description,
+    'selectedOptionName:',
+    selectedOptionName
+  );
+
   return (
     <>
       {/* Section title */}
-      <EuiTitle size="xs">
+      <EuiTitle size="s">
         <h4>{varGroup.title}</h4>
       </EuiTitle>
 
@@ -234,7 +227,7 @@ export const VarGroupSelector: React.FC<VarGroupSelectorProps> = ({
         <>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            <ReactMarkdown>{varGroup.description}</ReactMarkdown>
+            {varGroup.description}
           </EuiText>
         </>
       )}
@@ -242,13 +235,7 @@ export const VarGroupSelector: React.FC<VarGroupSelectorProps> = ({
       <EuiSpacer size="m" />
 
       {/* Selector dropdown */}
-      <EuiFormRow
-        label={varGroup.selector_title}
-        helpText={
-          selectedOption?.description && <ReactMarkdown>{selectedOption.description}</ReactMarkdown>
-        }
-        fullWidth
-      >
+      <EuiFormRow label={varGroup.selector_title} helpText={selectedOption?.description} fullWidth>
         <EuiSelect
           data-test-subj={`varGroupSelector-${varGroup.name}`}
           options={selectOptions}
