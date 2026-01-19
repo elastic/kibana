@@ -13,10 +13,14 @@ import { NdjsonReader } from '@kbn/file-upload-common';
 import type { ImportFailure } from '@kbn/file-upload-common';
 import { ShapefileEditor } from './shapefile_editor';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
+import type { GeoFileImporterWithSidecarFiles } from '../types';
 
 export const SHAPEFILE_TYPES = ['.shp'];
 
-export class ShapefileImporter extends AbstractGeoFileImporter {
+export class ShapefileImporter
+  extends AbstractGeoFileImporter
+  implements GeoFileImporterWithSidecarFiles
+{
   private _tableRowCount: number | null = null;
   private _dbfFile: File | null = null;
   private _prjFile: File | null = null;
@@ -31,6 +35,20 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
 
   public canPreview() {
     return this._dbfFile !== null && this._prjFile !== null && this._shxFile !== null;
+  }
+
+  public getSidecarFiles(): File[] {
+    const sidecarFiles: File[] = [];
+    if (this._dbfFile) {
+      sidecarFiles.push(this._dbfFile);
+    }
+    if (this._prjFile) {
+      sidecarFiles.push(this._prjFile);
+    }
+    if (this._shxFile) {
+      sidecarFiles.push(this._shxFile);
+    }
+    return sidecarFiles;
   }
 
   public renderEditor(onChange: () => void) {
@@ -93,16 +111,7 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
     };
 
     if (this._iterator === undefined) {
-      const sideCarFiles: File[] = [];
-      if (this._dbfFile) {
-        sideCarFiles.push(this._dbfFile);
-      }
-      if (this._prjFile) {
-        sideCarFiles.push(this._prjFile);
-      }
-      if (this._shxFile) {
-        sideCarFiles.push(this._shxFile);
-      }
+      const sideCarFiles: File[] = this.getSidecarFiles();
       const fileSystem = new BrowserFileSystem([this._getFile(), ...sideCarFiles]);
       this._iterator = (await loadInBatches(this._getFile().name, ShapefileLoader, {
         fetch: fileSystem.fetch,

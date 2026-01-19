@@ -27,3 +27,7 @@ export interface GeoFileImporter extends IImporter {
   setGeoFieldType(geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE): void;
   setSmallChunks(smallChunks: boolean): void;
 }
+
+export interface GeoFileImporterWithSidecarFiles extends GeoFileImporter {
+  getSidecarFiles(): File[];
+}

@@ -18,7 +18,7 @@ import { ImportCompleteView } from './import_complete_view';
 import type { GeoUploadWizardProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import type { GeoFileImporter } from '../importer/geo';
 import { hasImportPermission } from '../api';
-import { getPartialImportMessage } from './utils';
+import { getPartialImportMessage, hasSidecarFiles } from './utils';
 
 enum PHASE {
   CONFIGURE = 'CONFIGURE',
@@ -55,6 +55,8 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
   private _sessionStartTime: number = 0;
   private _file?: File;
   private _sessionTelemetryTracked: boolean = false;
+  private _getFilesTelemetry?: () => { total_files: number; total_size_bytes: number };
+  private _sidecarFiles: Array<{ file: File; fileId: string }> = [];
 
   state: State = {
     failedPermissionCheck: false,
@@ -119,10 +121,15 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
 
     this._sessionTelemetryTracked = true;
 
-    this._telemetryService.trackUploadSession({
-      upload_session_id: this._uploadSessionId,
+    const filesTelemetry = this._getFilesTelemetry?.() ?? {
       total_files: 1,
       total_size_bytes: this._file.size,
+    };
+
+    this._telemetryService.trackUploadSession({
+      upload_session_id: this._uploadSessionId,
+      total_files: filesTelemetry.total_files,
+      total_size_bytes: filesTelemetry.total_size_bytes,
       session_success: sessionSuccess,
       session_cancelled: cancelled,
       session_time_ms: sessionTimeMs,
@@ -252,6 +259,24 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
       });
     }
 
+    // Track telemetry for each sidecar file
+    if (this._telemetryService && this._sidecarFiles.length > 0) {
+      this._sidecarFiles.forEach(({ file: sidecarFile, fileId: sidecarFileId }) => {
+        this._telemetryService!.trackUploadFile({
+          upload_session_id: this._uploadSessionId,
+          file_id: sidecarFileId,
+          mapping_clash_new_fields: 0, // Sidecar files don't have mapping clashes
+          mapping_clash_missing_fields: 0,
+          file_size_bytes: sidecarFile.size,
+          documents_success: 0, // Sidecar files don't produce documents
+          documents_failed: 0,
+          upload_success: importResults.success, // Same success status as main file
+          upload_cancelled: false,
+          upload_time_ms: 0, // Sidecar files don't have upload time
+        });
+      });
+    }
+
     if (!importResults.success) {
       this._trackUploadSession(false, false, uploadTimeMs);
       this.setState({
@@ -361,9 +386,21 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
     indexName,
     previewCoverage,
     file,
+    getFilesTelemetry,
   }: OnFileSelectParameters) => {
     this._geoFileImporter = importer;
     this._file = file;
+    this._getFilesTelemetry = getFilesTelemetry;
+
+    // Generate file IDs for sidecar files
+    this._sidecarFiles = [];
+    if (hasSidecarFiles(this._geoFileImporter)) {
+      const sidecarFiles = this._geoFileImporter.getSidecarFiles();
+      this._sidecarFiles = sidecarFiles.map((sidecarFile: File) => ({
+        file: sidecarFile,
+        fileId: FileUploadTelemetryService.generateId(),
+      }));
+    }
 
     this.props.onFileSelect(
       {
@@ -381,6 +418,7 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
       this._geoFileImporter = undefined;
     }
     this._file = undefined;
+    this._sidecarFiles = [];
 
     this.props.onFileClear();
   };
