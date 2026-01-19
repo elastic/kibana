@@ -57,6 +57,7 @@ const createMockGenAiConnectors = (
 });
 
 const createMockAIFeatures = (overrides: Partial<AIFeatures> = {}): AIFeatures => ({
+  loading: false,
   enabled: true,
   couldBeEnabled: true,
   genAiConnectors: createMockGenAiConnectors(),
