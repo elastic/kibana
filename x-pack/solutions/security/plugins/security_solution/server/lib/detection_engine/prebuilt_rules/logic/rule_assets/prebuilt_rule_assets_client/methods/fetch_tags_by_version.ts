@@ -6,12 +6,13 @@
  */
 
 import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
-import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
-import { getPrebuiltRuleAssetSoId, getPrebuiltRuleAssetsSearchNamespace } from '../utils';
+import { createChunkedFilters, chunkedFetch, RULE_ASSET_ATTRIBUTES } from '../utils';
 import { EXPECTED_MAX_TAGS } from '../../../../../rule_management/constants';
+import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
 
 /**
  * Fetches unique tags from prebuilt rule assets for specified rule versions.
@@ -24,39 +25,46 @@ export async function fetchTagsByVersion(
   savedObjectsClient: SavedObjectsClientContract,
   versions: RuleVersionSpecifier[]
 ): Promise<string[]> {
-  const soIds = versions.map((version) =>
-    getPrebuiltRuleAssetSoId(version.rule_id, version.version)
-  );
+  if (versions.length === 0) {
+    return [];
+  }
 
-  const searchResult = await savedObjectsClient.search<
-    SavedObjectsRawDocSource,
-    { unique_tags: AggregationsTermsAggregateBase<{ key: string; doc_count: number }> }
-  >({
-    type: PREBUILT_RULE_ASSETS_SO_TYPE,
-    namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
-    _source: false,
-    size: 0,
-    query: {
-      terms: {
-        _id: soIds,
-      },
-    },
-    aggs: {
-      unique_tags: {
-        terms: {
-          field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags`,
-          // "size" parameter is the maximum number of terms returned by the aggregation, default is 10.
-          // Setting it to a large number to ensure we get all tags.
-          size: EXPECTED_MAX_TAGS,
-          order: { _key: 'asc' },
+  const fetchTags = async (kqlFilter?: string) => {
+    const findResult = await savedObjectsClient.find<
+      PrebuiltRuleAsset,
+      { unique_tags: AggregationsTermsAggregateBase<{ key: string; doc_count: number }> }
+    >({
+      type: PREBUILT_RULE_ASSETS_SO_TYPE,
+      filter: kqlFilter,
+      perPage: 0,
+      aggs: {
+        unique_tags: {
+          terms: {
+            field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.tags`,
+            // "size" parameter is the maximum number of terms returned by the aggregation, default is 10.
+            // Setting it to a large number to ensure we get all tags.
+            size: EXPECTED_MAX_TAGS,
+            order: { _key: 'asc' },
+          },
         },
       },
-    },
+    });
+
+    const buckets = findResult.aggregations?.unique_tags?.buckets || [];
+    invariant(Array.isArray(buckets), 'fetchTagsByVersion: expected buckets to be an array');
+    return buckets;
+  };
+
+  const filters = createChunkedFilters({
+    items: versions,
+    mapperFn: (versionSpecifier) =>
+      `(${RULE_ASSET_ATTRIBUTES}.rule_id: ${versionSpecifier.rule_id} AND ${RULE_ASSET_ATTRIBUTES}.version: ${versionSpecifier.version})`,
+    clausesPerItem: 4,
   });
 
-  const buckets = searchResult.aggregations?.unique_tags?.buckets || [];
-  invariant(Array.isArray(buckets), 'fetchTagsByVersion: expected buckets to be an array');
+  const buckets = await chunkedFetch(fetchTags, filters);
+  const tags = new Set<string>();
+  buckets.forEach((bucket) => tags.add(bucket.key));
 
-  const tags = buckets.map((bucket) => bucket.key);
-  return tags;
+  return Array.from(tags).sort();
 }

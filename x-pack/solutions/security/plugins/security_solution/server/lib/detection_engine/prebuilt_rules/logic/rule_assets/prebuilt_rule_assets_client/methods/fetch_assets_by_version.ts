@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
-import { invariant } from '../../../../../../../../common/utils/invariant';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
-import { getPrebuiltRuleAssetSoId, getPrebuiltRuleAssetsSearchNamespace } from '../utils';
+import { createChunkedFilters, chunkedFetch, RULE_ASSET_ATTRIBUTES } from '../utils';
 
 /**
  * Fetches prebuilt rule assets for specified rule versions.
@@ -33,42 +32,34 @@ export async function fetchAssetsByVersion(
     return [];
   }
 
-  const soIds = versions.map((version) =>
-    getPrebuiltRuleAssetSoId(version.rule_id, version.version)
-  );
-
-  const searchResult = await savedObjectsClient.search<
-    SavedObjectsRawDocSource & {
-      [PREBUILT_RULE_ASSETS_SO_TYPE]: PrebuiltRuleAsset;
-    }
-  >({
-    type: PREBUILT_RULE_ASSETS_SO_TYPE,
-    namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
-    size: MAX_PREBUILT_RULES_COUNT,
-    query: {
-      terms: {
-        _id: soIds,
-      },
-    },
+  const filters = createChunkedFilters({
+    items: versions,
+    mapperFn: (versionSpecifier) =>
+      `(${RULE_ASSET_ATTRIBUTES}.rule_id: ${versionSpecifier.rule_id} AND ${RULE_ASSET_ATTRIBUTES}.version: ${versionSpecifier.version})`,
+    clausesPerItem: 4,
   });
 
-  const ruleAssets = searchResult.hits.hits.map((hit) => {
-    const hitSource = hit?._source;
-    invariant(hitSource, 'Expected hit source to be defined');
+  const ruleAssets = await chunkedFetch(async (filter) => {
+    // Usage of savedObjectsClient.bulkGet() is ~25% more performant and
+    // simplifies deduplication but too many tests get broken.
+    // See https://github.com/elastic/kibana/issues/218198
+    const findResult = await savedObjectsClient.find<PrebuiltRuleAsset>({
+      type: PREBUILT_RULE_ASSETS_SO_TYPE,
+      filter,
+      perPage: MAX_PREBUILT_RULES_COUNT,
+    });
 
-    const savedObject = hitSource[PREBUILT_RULE_ASSETS_SO_TYPE];
-    return savedObject;
-  });
+    return findResult.saved_objects.map((so) => so.attributes);
+  }, filters);
 
   // Ensure the order of the returned assets matches the order of the "versions" argument.
   const ruleAssetsMap = new Map<string, PrebuiltRuleAsset>();
   for (const asset of ruleAssets) {
-    const key = getPrebuiltRuleAssetSoId(asset.rule_id, asset.version);
-    ruleAssetsMap.set(key, asset);
+    ruleAssetsMap.set(asset.rule_id, asset);
   }
 
-  const orderedRuleAssets = soIds
-    .map((soId) => ruleAssetsMap.get(soId))
+  const orderedRuleAssets = versions
+    .map((version) => ruleAssetsMap.get(version.rule_id))
     .filter((asset) => asset !== undefined);
 
   return validatePrebuiltRuleAssets(orderedRuleAssets);
