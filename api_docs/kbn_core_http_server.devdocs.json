@@ -4331,20 +4331,20 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
               },
               {
-                "plugin": "dataSourcesRegistry",
-                "path": "x-pack/platform/plugins/shared/data_sources_registry/server/routes.ts"
+                "plugin": "dataCatalog",
+                "path": "x-pack/platform/plugins/shared/data_catalog/server/routes.ts"
               },
               {
-                "plugin": "dataSourcesRegistry",
-                "path": "x-pack/platform/plugins/shared/data_sources_registry/server/routes.ts"
+                "plugin": "dataCatalog",
+                "path": "x-pack/platform/plugins/shared/data_catalog/server/routes.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -5331,20 +5331,20 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_state.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "features",
@@ -7291,8 +7291,8 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -8147,16 +8147,16 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -9383,8 +9383,8 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -10203,12 +10203,12 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -10343,28 +10343,28 @@
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "globalSearch",
