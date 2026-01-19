@@ -51,7 +51,6 @@ export class TaskClient<TaskType extends string> {
           status: TaskStatus.NotStarted,
           created_at: '',
           space: '',
-          stream: '',
           type: '',
           task: {
             params: {} as TParams,
