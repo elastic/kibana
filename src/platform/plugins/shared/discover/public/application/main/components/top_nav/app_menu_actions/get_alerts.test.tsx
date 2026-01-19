@@ -20,6 +20,12 @@ import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_
 import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
 
+const mockGetIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
+  getIsExperimentalFeatureEnabled: mockGetIsExperimentalFeatureEnabled,
+}));
+
 const mount = (
   dataView = dataViewMock,
   isEsqlMode = false,
@@ -107,6 +113,28 @@ describe('OpenAlertsPopover', () => {
     it('should render the manage rules and connectors link', () => {
       const component = mount();
       expect(findTestSubject(component, 'discoverManageAlertsButton').exists()).toBeTruthy();
+    });
+  });
+
+  describe('Manage rules and connectors link', () => {
+    beforeEach(() => {
+      mockGetIsExperimentalFeatureEnabled.mockClear();
+    });
+
+    it('should link to the unified rules page when unifiedRulesPage feature flag is enabled', () => {
+      mockGetIsExperimentalFeatureEnabled.mockReturnValue(true);
+      const component = mount();
+      const manageButton = findTestSubject(component, 'discoverManageAlertsButton');
+      expect(manageButton.prop('href')).toContain('/app/rules');
+    });
+
+    it('should link to the management page when unifiedRulesPage feature flag is disabled', () => {
+      mockGetIsExperimentalFeatureEnabled.mockReturnValue(false);
+      const component = mount();
+      const manageButton = findTestSubject(component, 'discoverManageAlertsButton');
+      expect(manageButton.prop('href')).toContain(
+        '/app/management/insightsAndAlerting/triggersActions/rules'
+      );
     });
   });
 });
