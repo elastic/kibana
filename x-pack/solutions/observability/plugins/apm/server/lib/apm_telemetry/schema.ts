@@ -752,6 +752,57 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       description: 'Indicates whether any service is being monitored within the last day.',
     },
   },
+  otel_total_docs: {
+    type: 'long',
+    _meta: {
+      description: 'Total number of documents in OTel indices overall',
+    },
+  },
+  otel_total_size_bytes: {
+    type: 'long',
+    _meta: {
+      description: 'Total size in bytes of all OTel indices overall',
+    },
+  },
+  otel_1d_docs: {
+    type: 'long',
+    _meta: {
+      description: 'Total number of OTel documents within the last day',
+    },
+  },
+  otel_1d_size_bytes: {
+    type: 'long',
+    _meta: {
+      description: 'Estimated size in bytes of OTel documents within the last day',
+    },
+  },
+  otel_services_per_agent: {
+    DYNAMIC_KEY: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of services per OTel agent name within the last day (from native OTel indices using resource.attributes.agent.name field)',
+      },
+    },
+  },
+  otel_docs_per_agent: {
+    DYNAMIC_KEY: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of documents per OTel agent name within the last day (from native OTel indices using resource.attributes.agent.name field)',
+      },
+    },
+  },
+  otel_size_per_agent: {
+    DYNAMIC_KEY: {
+      type: 'long',
+      _meta: {
+        description:
+          'Estimated size in bytes per OTel agent name within the last day (calculated from doc count × average doc size)',
+      },
+    },
+  },
   version: {
     apm_server: {
       major: {
@@ -1472,6 +1523,16 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           type: 'long',
           _meta: {
             description: 'Execution time in milliseconds for the "top_traces" task',
+          },
+        },
+      },
+    },
+    otel_agents: {
+      took: {
+        ms: {
+          type: 'long',
+          _meta: {
+            description: 'Execution time in milliseconds for the "otel_agents" task',
           },
         },
       },

@@ -1863,4 +1863,107 @@ export const tasks: TelemetryTask[] = [
       };
     },
   },
+  {
+    name: 'otel_agents',
+    executor: async ({ indices, telemetryClient }) => {
+      // Use configured indices (includes both APM and OTel patterns)
+      // The exists filter on resource.attributes.agent.name will filter out APM docs
+      const otelIndices = [indices.transaction, indices.span, indices.error, indices.metric];
+
+      // OTel field paths (different from APM, unprocessed data doesn't go through APM pipeline)
+      const OTEL_AGENT_NAME = 'resource.attributes.agent.name';
+      const OTEL_SERVICE_NAME = 'resource.attributes.service.name';
+
+      // the agent name (Exists) filter and aggregations
+      const response = await telemetryClient.search({
+        index: otelIndices,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: 0,
+        track_total_hits: true,
+        timeout,
+        query: {
+          bool: {
+            filter: [
+              {
+                exists: {
+                  field: OTEL_AGENT_NAME,
+                },
+              },
+              range1d,
+            ],
+          },
+        },
+        aggs: {
+          agents: {
+            terms: {
+              field: OTEL_AGENT_NAME,
+              size: 1000,
+            },
+            aggs: {
+              services: {
+                cardinality: {
+                  field: OTEL_SERVICE_NAME,
+                },
+              },
+            },
+          },
+        },
+      });
+
+
+      
+
+      const otelServicesPerAgent: Record<string, number> = {};
+      const otelDocsPerAgent: Record<string, number> = {};
+
+      const buckets = (response.aggregations?.agents as { buckets?: Array<{ key: string; doc_count: number; services: { value: number } }> })?.buckets ?? [];
+
+      // exclude no-agent and unknown agents
+      for (const bucket of buckets) {
+        const agentName = bucket.key;
+        if (!agentName || agentName === 'unknown' || agentName === '') {
+          continue;
+        }
+        otelServicesPerAgent[agentName] = bucket.services?.value ?? 0;
+        otelDocsPerAgent[agentName] = bucket.doc_count ?? 0;
+      }
+
+      // get index stats (OTel-only patterns, excludes APM indices)
+      const otelOnlyPatterns = [
+        'traces-*.otel-*',
+        'logs-*.otel-*',
+        'metrics-*.otel-*',
+      ];
+      
+      const otelStatsResponse = await telemetryClient.indicesStats({
+        index: otelOnlyPatterns,
+        metric: ['store', 'docs'],
+      });
+
+      const allTimeDocs = otelStatsResponse._all?.total?.docs?.count ?? 0;
+      const allTimeSizeBytes = otelStatsResponse._all?.total?.store?.size_in_bytes ?? 0;
+      const docsIn1d = (response.hits.total as { value: number })?.value ?? 0;
+
+      const avgDocSizeBytes = allTimeDocs > 0 ? allTimeSizeBytes / allTimeDocs : 0;
+      const estimatedSize1dBytes =
+        allTimeDocs >= docsIn1d ? Math.round(docsIn1d * avgDocSizeBytes) : 0;
+
+      // estimate size per agent based on doc count and average doc size
+      const otelSizePerAgent: Record<string, number> = {};
+      for (const [agentName, docCount] of Object.entries(otelDocsPerAgent)) {
+        otelSizePerAgent[agentName] = Math.round(docCount * avgDocSizeBytes);
+      }
+
+      return {
+        otel_services_per_agent: otelServicesPerAgent,
+        otel_docs_per_agent: otelDocsPerAgent,
+        otel_size_per_agent: otelSizePerAgent,
+        otel_total_size_bytes: allTimeSizeBytes,
+        otel_total_docs: allTimeDocs,
+        otel_1d_docs: docsIn1d,
+        otel_1d_size_bytes: estimatedSize1dBytes,
+      };
+    },
+  },
 ];
