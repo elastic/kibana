@@ -54,6 +54,8 @@ export async function getServicesAlerts({
           ...wildcardQuery(SERVICE_NAME, searchQuery),
           ...environmentQuery(environment),
         ],
+        // This is to prevent an empty service named * appearing when an SLO is created for all services
+        must_not: [{ term: { [SERVICE_NAME]: '*' } }],
       },
     },
     aggs: {
