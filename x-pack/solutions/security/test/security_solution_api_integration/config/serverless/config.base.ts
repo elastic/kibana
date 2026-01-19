@@ -48,7 +48,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'bulkEditAlertSuppressionEnabled',
-            'doesNotMatchForIndicatorMatchRuleEnabled',
             'endpointExceptionsMovedUnderManagement',
           ])}`,
           ...(options.kbnTestServerArgs || []),

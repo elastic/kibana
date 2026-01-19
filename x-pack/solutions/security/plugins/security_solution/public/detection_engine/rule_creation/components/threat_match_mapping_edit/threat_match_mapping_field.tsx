@@ -63,24 +63,16 @@ export function ThreatMatchMappingField({
     [setValue]
   );
 
-  const isDoesNotMatchForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
-    'doesNotMatchForIndicatorMatchRuleEnabled'
-  );
-
   return (
     <EuiFormRow
       label={
-        isDoesNotMatchForIndicatorMatchRuleEnabled ? (
-          <div>
-            <EuiFlexGroup gutterSize="s">
-              <label>{field.label}</label>
-            </EuiFlexGroup>
-            <EuiSpacer size="xs" />
-            <EuiText size="xs">{i18n.THREAT_FIELD_LABEL_HELP_TEXT}</EuiText>
-          </div>
-        ) : (
-          field.label
-        )
+        <div>
+          <EuiFlexGroup gutterSize="s">
+            <label>{field.label}</label>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs">{i18n.THREAT_FIELD_LABEL_HELP_TEXT}</EuiText>
+        </div>
       }
       labelAppend={field.labelAppend}
       helpText={field.helpText}
