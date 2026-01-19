@@ -37,6 +37,9 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     case 'console':
       iconType = 'console';
       break;
+    case 'data.set':
+      iconType = 'tableOfContents';
+      break;
 
     // flow control nodes
     case 'wait':
@@ -71,18 +74,18 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     case 'inference':
       iconType = 'sparkles';
       break;
-    case 'elasticsearch':
-      iconType = 'logoElasticsearch';
-      break;
-    case 'kibana':
-      iconType = 'logoKibana';
-      break;
 
     // other connectors
     // will be handled by in getStackConnectorIcon
 
     default:
-      iconType = 'plugs';
+      if (typeToMatch.startsWith('elasticsearch')) {
+        iconType = 'logoElasticsearch';
+      } else if (typeToMatch.startsWith('kibana')) {
+        iconType = 'logoKibana';
+      } else {
+        iconType = 'plugs';
+      }
       break;
   }
   return iconType;

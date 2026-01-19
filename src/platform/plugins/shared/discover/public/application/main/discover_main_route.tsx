@@ -9,7 +9,7 @@
 
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useState } from 'react';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -25,7 +25,6 @@ import {
   internalStateActions,
   useInternalStateDispatch,
   useInternalStateSelector,
-  selectTabRuntimeState,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -74,7 +73,6 @@ export const DiscoverMainRoute = ({
         useHash: services.uiSettings.get('state:storeInSessionStorage'),
         history,
         useHashQuery: customizationContext.displayMode !== 'embedded',
-        ...withNotifyOnErrors(services.core.notifications.toasts),
       })
   );
   const { internalState, runtimeStateManager, searchSessionManager } = useStateManagers({
@@ -102,11 +100,10 @@ export const DiscoverMainRoute = ({
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome, data, discoverFeatureFlags } = services;
+  const { core, dataViews, chrome, data } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
-  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
@@ -161,10 +158,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
           shouldClearAllTabs: isSwitchingSession,
         });
       } else {
-        const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
-        const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
-
-        currentTabStateContainer?.appState.updateUrlWithCurrentState();
+        dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId: currentTabId }));
       }
     }
   );
@@ -266,7 +260,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
                     defaultMessage: 'Discover - Session not yet saved',
                   })}
             </h1>
-            {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
+            {customizationContext.displayMode !== 'embedded' ? (
               <TabsView {...props} />
             ) : (
               <SingleTabView {...props} />

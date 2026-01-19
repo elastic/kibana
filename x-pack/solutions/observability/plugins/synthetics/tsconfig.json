@@ -18,6 +18,7 @@
     "@kbn/observability-plugin",
     "@kbn/fleet-plugin",
     "@kbn/unified-search-plugin",
+    "@kbn/kql",
     "@kbn/i18n",
     "@kbn/core",
     "@kbn/config-schema",
@@ -121,7 +122,10 @@
     "@kbn/licensing-types",
     "@kbn/observability-synthetics-test-data",
     "@kbn/connector-schemas",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/content-management-utils",
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/maintenance-windows-plugin"
   ],
   "exclude": ["target/**/*"]
 }

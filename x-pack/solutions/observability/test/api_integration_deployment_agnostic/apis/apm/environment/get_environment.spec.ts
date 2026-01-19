@@ -5,8 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 async function generateData({

@@ -10,6 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { CloudProvider } from '@kbn/fleet-plugin/public';
+import { AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import { AzureReusableConnectorForm } from './azure_reusable_connector_form';
 import type { AzureCloudConnectorCredentials } from '../types';
 
@@ -90,17 +91,17 @@ describe('AzureReusableConnectorForm', () => {
       expect(screen.getByText(/To streamline your Azure integration process/i)).toBeInTheDocument();
 
       // Verify the combo box label is present
-      expect(screen.getByText('Azure Cloud Connector')).toBeInTheDocument();
+      expect(screen.getByText('Cloud Connector Name')).toBeInTheDocument();
 
       // Verify combo box is rendered
-      const comboBox = screen.getByRole('combobox');
+      const comboBox = screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       expect(comboBox).toBeInTheDocument();
     });
 
     it('renders combo box with available connectors as options', async () => {
       renderWithIntl(<AzureReusableConnectorForm {...defaultProps} />);
 
-      const comboBox = screen.getByRole('combobox');
+      const comboBox = screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
 
       // Click to open options
       await userEvent.click(comboBox);
@@ -121,7 +122,7 @@ describe('AzureReusableConnectorForm', () => {
       renderWithIntl(<AzureReusableConnectorForm {...defaultProps} />);
 
       // Combo box should still render
-      expect(screen.getByRole('combobox')).toBeInTheDocument();
+      expect(screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ)).toBeInTheDocument();
     });
 
     it('renders with selected connector when cloudConnectorId is provided', async () => {
@@ -160,7 +161,7 @@ describe('AzureReusableConnectorForm', () => {
     it('calls setCredentials with correct values when a connector is selected', async () => {
       renderWithIntl(<AzureReusableConnectorForm {...defaultProps} />);
 
-      const comboBox = screen.getByRole('combobox');
+      const comboBox = screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await userEvent.click(comboBox);
 
       // Select first connector
@@ -182,7 +183,7 @@ describe('AzureReusableConnectorForm', () => {
     it('calls setCredentials with second connector values when selected', async () => {
       renderWithIntl(<AzureReusableConnectorForm {...defaultProps} />);
 
-      const comboBox = screen.getByRole('combobox');
+      const comboBox = screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await userEvent.click(comboBox);
 
       // Select second connector
@@ -198,32 +199,6 @@ describe('AzureReusableConnectorForm', () => {
         clientId: 'client-def',
         azure_credentials_cloud_connector_id: 'azure-cc-ghi',
         cloudConnectorId: 'connector-2',
-      });
-    });
-
-    it('clears credentials when selection is removed', async () => {
-      const propsWithSelection = {
-        ...defaultProps,
-        cloudConnectorId: 'connector-1',
-      };
-
-      renderWithIntl(<AzureReusableConnectorForm {...propsWithSelection} />);
-
-      // Wait for initial selection to render
-      await waitFor(() => {
-        expect(screen.getByText('Azure Connector 1')).toBeInTheDocument();
-      });
-
-      // Find and click the clear button (close icon)
-      const clearButton = screen.getByRole('button', { name: /clear/i });
-      await userEvent.click(clearButton);
-
-      // Verify setCredentials was called to clear values
-      expect(mockSetCredentials).toHaveBeenCalledWith({
-        tenantId: undefined,
-        clientId: undefined,
-        azure_credentials_cloud_connector_id: undefined,
-        cloudConnectorId: undefined,
       });
     });
   });
@@ -244,7 +219,7 @@ describe('AzureReusableConnectorForm', () => {
 
       renderWithIntl(<AzureReusableConnectorForm {...defaultProps} />);
 
-      const comboBox = screen.getByRole('combobox');
+      const comboBox = screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await userEvent.click(comboBox);
 
       // Should show "No options found" or similar empty state

@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-ftr-e2e'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-infra_services-team'
+  defaultOwner: '@elastic/obs-presentation-team'
 toolchain:
   default: node
 language: typescript
@@ -14,13 +14,13 @@ project:
   name: '@kbn/apm-ftr-e2e'
   description: Moon project for @kbn/apm-ftr-e2e
   channel: ''
-  owner: '@elastic/obs-ux-infra_services-team'
+  owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/apm/ftr_e2e
 dependsOn:
   - '@kbn/test'
-  - '@kbn/apm-synthtrace'
-  - '@kbn/apm-synthtrace-client'
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/axe-config'
   - '@kbn/cypress-config'
   - '@kbn/apm-plugin'

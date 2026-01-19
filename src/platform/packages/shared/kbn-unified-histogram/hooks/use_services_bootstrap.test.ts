@@ -9,20 +9,19 @@
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { useServicesBootstrap } from './use_services_bootstrap';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { getBreakdownField } from '../utils/local_storage_utils';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
-import { useRequestParams } from './use_request_params';
+import type { UnifiedHistogramFetchParamsExternal } from '../types';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
-jest.mock('./use_request_params');
 jest.mock('../utils/local_storage_utils');
 
 const createStateServiceMock = createStateService as jest.MockedFunction<typeof createStateService>;
 const useStatePropsMock = useStateProps as jest.MockedFunction<typeof useStateProps>;
-const useRequestParamsMock = useRequestParams as jest.MockedFunction<typeof useRequestParams>;
 const getBreakdownFieldMock = getBreakdownField as jest.MockedFunction<typeof getBreakdownField>;
 
 describe('useServicesBootstrap', () => {
@@ -38,34 +37,64 @@ describe('useServicesBootstrap', () => {
         timeInterval: 'auto',
       },
     } as ReturnType<typeof useStateProps>);
-
-    useRequestParamsMock.mockReturnValue({
-      query,
-    } as ReturnType<typeof useRequestParams>);
   });
 
   it('should initialize', async () => {
     const hook = renderHook(() =>
-      useServicesBootstrap({
-        services: unifiedHistogramServicesMock,
-        dataView: dataViewWithTimefieldMock,
-        localStorageKeyPrefix,
-        query,
-      })
+      useServicesBootstrap(
+        {
+          services: unifiedHistogramServicesMock,
+          localStorageKeyPrefix,
+        },
+        { enableLensVisService: true }
+      )
     );
 
     expect(createStateServiceMock).toBeCalledTimes(1);
     expect(getBreakdownFieldMock).toBeCalledTimes(1);
     expect(useStatePropsMock).toBeCalledTimes(1);
-    expect(useRequestParamsMock).toBeCalledTimes(1);
 
     expect(hook.result.current.api).not.toBeUndefined();
-    expect(hook.result.current.input$).not.toBeUndefined();
-    expect(hook.result.current.requestParams).toEqual({
-      query,
-    });
+    expect(hook.result.current.fetch$).not.toBeUndefined();
+    expect(hook.result.current.fetchParams).toBeUndefined();
+    expect(hook.result.current.hasValidFetchParams).toBe(false);
     expect(hook.result.current.stateProps).toEqual({
       chart: { hidden: false, timeInterval: 'auto' },
+    });
+
+    const subscriber = jest.fn();
+    hook.result.current.fetch$.subscribe(subscriber);
+
+    expect(subscriber).toBeCalledTimes(0);
+
+    const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
+      searchSessionId: 'test-session',
+      dataView: dataViewWithTimefieldMock,
+      query,
+      relativeTimeRange: { from: 'now-15m', to: 'now' },
+      requestAdapter: new RequestAdapter(),
+    };
+
+    act(() => {
+      hook.result.current.api.fetch(fetchParamsExternal);
+    });
+
+    await waitFor(() => {
+      expect(hook.result.current.hasValidFetchParams).toBe(true);
+    });
+    expect(hook.result.current.fetchParams).toEqual(
+      expect.objectContaining({
+        searchSessionId: 'test-session',
+        dataView: dataViewWithTimefieldMock,
+        query,
+      })
+    );
+    expect(hook.result.current.lensVisService).toBeDefined();
+    expect(hook.result.current.lensVisServiceState).toBeDefined();
+    expect(subscriber).toBeCalledTimes(1);
+    expect(subscriber).toBeCalledWith({
+      fetchParams: hook.result.current.fetchParams,
+      lensVisServiceState: hook.result.current.lensVisServiceState,
     });
   });
 });

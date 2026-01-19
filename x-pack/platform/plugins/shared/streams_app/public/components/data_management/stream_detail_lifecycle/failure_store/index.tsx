@@ -9,6 +9,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import type { FailureStoreFormData } from '@kbn/failure-store-modal';
 import { NoFailureStorePanel } from './no_failure_store_panel';
 import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
@@ -60,24 +61,18 @@ export const StreamDetailFailureStore = ({
     defaultRetentionPeriod,
     customRetentionPeriod,
     inheritOptions,
-    refreshDefaultRetention,
+    retentionDisabled,
   } = failureStoreConfig;
 
   const closeModal = () => {
     setIsFailureStoreModalOpen(false);
   };
 
-  const handleSaveModal = async (update: {
-    failureStoreEnabled?: boolean;
-    customRetentionPeriod?: string;
-    inherit?: boolean;
-    retentionDisabled?: boolean;
-  }) => {
+  const handleSaveModal = async (update: FailureStoreFormData) => {
     try {
       await updateFailureStore(definition.stream.name, transformFailureStoreConfig(update));
 
       refreshDefinition();
-      refreshDefaultRetention();
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailFailureStore.updateFailureStoreSuccess', {
@@ -110,9 +105,17 @@ export const StreamDetailFailureStore = ({
                   failureStoreEnabled,
                   defaultRetentionPeriod,
                   customRetentionPeriod,
+                  retentionDisabled,
                 }}
                 inheritOptions={inheritOptions}
-                showIlmDescription={isServerless}
+                showIlmDescription={!isServerless}
+                canShowDisableLifecycle={!isServerless}
+                disableButtonLabel={i18n.translate(
+                  'xpack.streams.dataManagement.streamDetailLifecycle.indefinite',
+                  {
+                    defaultMessage: 'Indefinite',
+                  }
+                )}
               />
             )}
             {data.isLoading || failureStoreEnabled ? (

@@ -15,13 +15,6 @@ import type { FindAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistan
 jest.mock('../api');
 jest.mock('../../../../../common/hooks/use_app_toasts');
 
-const mockUseKibanaFeatureFlags = jest
-  .fn()
-  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-jest.mock('../../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
-
 const findAttackDiscoveryScheduleMock = findAttackDiscoverySchedule as jest.MockedFunction<
   typeof findAttackDiscoverySchedule
 >;
@@ -69,7 +62,6 @@ describe('useFindAttackDiscoverySchedules', () => {
     await renderQuery(() => useFindAttackDiscoverySchedules({ page: 1 }), 'isSuccess');
 
     expect(findAttackDiscoveryScheduleMock).toHaveBeenCalledWith({
-      attackDiscoveryPublicApiEnabled: false,
       page: 1,
       signal: expect.anything(),
     });

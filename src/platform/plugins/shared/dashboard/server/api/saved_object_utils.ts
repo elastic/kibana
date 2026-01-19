@@ -9,10 +9,9 @@
 
 import Boom from '@hapi/boom';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
-import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { DashboardState } from './types';
-import { transformDashboardOut, transformReferencesOut } from './transforms';
+import { transformDashboardOut } from './transforms';
 
 export function getDashboardMeta(
   savedObject:
@@ -23,12 +22,12 @@ export function getDashboardMeta(
   return {
     error: savedObject.error,
     managed: savedObject.managed,
-    updatedAt: savedObject.updated_at,
-    updatedBy: savedObject.updated_by,
+    updated_at: savedObject.updated_at,
+    updated_by: savedObject.updated_by,
     version: savedObject.version ?? '',
     ...(['create', 'read', 'search'].includes(operation) && {
-      createdAt: savedObject.created_at,
-      createdBy: savedObject.created_by,
+      created_at: savedObject.created_at,
+      created_by: savedObject.created_by,
     }),
   };
 }
@@ -41,13 +40,11 @@ export function getDashboardCRUResponseBody(
   operation: 'create' | 'read' | 'update' | 'search'
 ) {
   let dashboardState: DashboardState;
-  let references: Reference[];
   try {
     dashboardState = transformDashboardOut(
       savedObject.attributes,
       savedObject.references
     ) as DashboardState;
-    references = transformReferencesOut(savedObject.references ?? [], dashboardState.panels);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   }
@@ -56,7 +53,12 @@ export function getDashboardCRUResponseBody(
     id: savedObject.id,
     data: {
       ...dashboardState,
-      references,
+      ...(savedObject?.accessControl && {
+        access_control: {
+          access_mode: savedObject.accessControl.accessMode,
+          owner: savedObject.accessControl.owner,
+        },
+      }),
     },
     meta: getDashboardMeta(savedObject, operation),
     spaces: savedObject.namespaces,

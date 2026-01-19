@@ -9,18 +9,19 @@
 
 import axios from 'axios';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import { HttpStepImpl } from './http_step_impl';
 import { UrlValidator } from '../../lib/url_validator';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock the isAxiosError static method
-(axios as any).isAxiosError = jest.fn();
+jest.spyOn(axios, 'isAxiosError');
 
 describe('HttpStepImpl', () => {
   let httpStep: HttpStepImpl;
@@ -63,6 +64,7 @@ describe('HttpStepImpl', () => {
       setCurrentStepState: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       abortController: stepContextAbortController,
+      flushEventLogs: jest.fn().mockResolvedValue(undefined),
     } as any;
 
     mockWorkflowRuntime = {
@@ -110,7 +112,10 @@ describe('HttpStepImpl', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => (mockedAxios as unknown as jest.Mock).mockReset());
+  afterEach(() => {
+    (mockedAxios as unknown as jest.Mock).mockReset();
+    (axios.isAxiosError as unknown as jest.Mock).mockReset();
+  });
 
   describe('getInput', () => {
     it('should render http step context', () => {
@@ -374,7 +379,12 @@ describe('HttpStepImpl', () => {
       const result = await (httpStep as any)._run(input);
 
       expect((mockedAxios as any).isAxiosError).toHaveBeenCalledWith(axiosError);
-      expect(result.error).toBe('HTTP request was cancelled');
+      expect(result.error).toEqual(
+        new ExecutionError({
+          type: 'HttpRequestCancelledError',
+          message: 'HTTP request was cancelled',
+        })
+      );
     });
 
     it('should fail the step and continue workflow when template rendering fails', async () => {
@@ -402,7 +412,12 @@ describe('HttpStepImpl', () => {
       expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
 
       // Should fail the step with a clear error message
-      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith('Template rendering failed');
+      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
+        new ExecutionError({
+          message: 'Template rendering failed',
+          type: 'Error',
+        })
+      );
 
       // Should navigate to next node (workflow continues)
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
@@ -479,7 +494,11 @@ describe('HttpStepImpl', () => {
       // Should start the step, fail the step, and navigate to next node
       expect(mockStepExecutionRuntime.startStep).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
-        'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts'
+        new ExecutionError({
+          message:
+            'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts',
+          type: 'Error',
+        })
       );
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });

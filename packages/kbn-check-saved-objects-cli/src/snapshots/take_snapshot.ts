@@ -10,22 +10,15 @@
 import * as cp from 'child_process';
 
 import { extractMigrationInfo, getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
-import type {
-  MigrationInfoRecord,
-  MigrationSnapshot,
-  MigrationSnapshotMeta,
-  ServerHandles,
-} from '../types';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { MigrationInfoRecord, MigrationSnapshot, MigrationSnapshotMeta } from '../types';
 
 /**
  * Extracts plugin migration information using provided server handles.
- * @param serverHandles Handles for running ES & Kibana servers
+ * @param typeRegistry The typeRegistry holding the definitions of the snapshot to extract
  */
-export async function takeSnapshot(serverHandles: ServerHandles): Promise<MigrationSnapshot> {
-  const { typeRegistry } = serverHandles;
-  const allTypes = typeRegistry.getAllTypes();
-
-  const migrationInfoMap = allTypes.reduce<Record<string, MigrationInfoRecord>>((map, type) => {
+export async function takeSnapshot(types: SavedObjectsType<any>[]): Promise<MigrationSnapshot> {
+  const migrationInfoMap = types.reduce<Record<string, MigrationInfoRecord>>((map, type) => {
     const migrationInfo = extractMigrationInfo(type);
     map[type.name] = {
       name: migrationInfo.name,

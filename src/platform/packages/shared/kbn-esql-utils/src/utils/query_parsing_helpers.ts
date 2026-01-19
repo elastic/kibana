@@ -15,7 +15,8 @@ import {
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
-} from '@kbn/esql-ast';
+  esqlCommandRegistry,
+} from '@kbn/esql-language';
 
 import type {
   ESQLSource,
@@ -25,7 +26,7 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
   ESQLAstForkCommand,
-} from '@kbn/esql-ast';
+} from '@kbn/esql-language';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
@@ -590,4 +591,69 @@ export const missingSortBeforeLimit = (esql: string): boolean => {
     }
   }
   return false;
+};
+
+/**
+ * Checks if the ESQL query contains a timeseries bucket aggregation.
+ * @param esql: string - The ESQL query string
+ * @param columns: DatatableColumn[] - The columns of the datatable
+ * @returns true if the query contains a timeseries bucket aggregation, false otherwise
+ */
+export function hasDateBreakdown(esql: string, columns: DatatableColumn[] = []): boolean {
+  const { root } = Parser.parse(esql);
+
+  const normalize = (name: string) => name.toLowerCase().replace(/\s+/g, '');
+  const dateColumnNames = new Set(
+    columns.filter((col) => col.meta.type === 'date').map((col) => normalize(col.name))
+  );
+  if (dateColumnNames.size === 0) {
+    return false;
+  }
+
+  const commands = Walker.commands(root);
+  if (!commands.some((cmd) => cmd.name === 'ts')) {
+    return false;
+  }
+
+  const statsCommands = commands.filter((cmd) => cmd.name === 'stats');
+  if (statsCommands.length === 0) {
+    return false;
+  }
+
+  const statsByCommands = Walker.matchAll(statsCommands, { type: 'option', name: 'by' });
+  if (statsByCommands.length === 0) {
+    return false;
+  }
+
+  const lastByCommand = statsByCommands[statsByCommands.length - 1];
+
+  let foundDateField = false;
+  walk(lastByCommand, {
+    visitColumn: (node) => {
+      if (!foundDateField && dateColumnNames.has(normalize(node.name))) {
+        foundDateField = true;
+      }
+    },
+    visitFunction: (node) => {
+      if (!foundDateField && dateColumnNames.has(normalize(node.text))) {
+        foundDateField = true;
+      }
+    },
+  });
+
+  return foundDateField;
+}
+
+/**
+ * Checks if the ESQL query contains only source commands (e.g., FROM, TS).
+ * @param esql: string - The ESQL query string
+ * @returns true if the query contains only source commands, false otherwise
+ */
+export const hasOnlySourceCommand = (query: string): boolean => {
+  const { root } = Parser.parse(query);
+  const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+  return (
+    root.commands.length > 0 &&
+    root.commands.every((command) => sourceCommands.includes(command.name))
+  );
 };

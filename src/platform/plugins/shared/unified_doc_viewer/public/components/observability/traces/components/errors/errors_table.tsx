@@ -23,8 +23,8 @@ import React, { forwardRef, useMemo } from 'react';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
 import { getColumns } from './get_columns';
 import { useFetchErrorsByTraceId } from './use_fetch_errors_by_trace_id';
-import { useDataSourcesContext } from '../../hooks/use_data_sources';
-import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
+import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
 import { createTraceContextWhereClauseForErrors } from '../../common/create_trace_context_where_clause';
 import {

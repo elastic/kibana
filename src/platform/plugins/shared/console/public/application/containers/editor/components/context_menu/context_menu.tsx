@@ -10,13 +10,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   EuiButtonIcon,
+  EuiCode,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiLoadingSpinner,
+  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { NotificationsStart } from '@kbn/core/public';
@@ -33,6 +34,7 @@ import {
   AVAILABLE_LANGUAGES,
   KIBANA_API_PREFIX,
 } from '../../../../../../common/constants';
+import { KEYS } from '../../../../components/shortcuts_popover/keys';
 
 interface Props {
   getRequests: () => Promise<EditorRequest[]>;
@@ -236,61 +238,54 @@ export const ContextMenu = ({
     ...(!isPackagedEnvironment
       ? [
           <EuiContextMenuItem
-            key="Copy as"
+            key="Copy to"
             data-test-subj="consoleMenuCopyAsButton"
             id="copyAs"
             disabled={!window.navigator?.clipboard}
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault();
-              const target = e.target as HTMLButtonElement;
-
-              if (target.dataset.name === 'changeLanguage') {
-                setLanguageSelectorVisibility(true);
-                return;
-              }
-
-              onCopyAsSubmit();
-            }}
+            onClick={() => onCopyAsSubmit()}
             icon="copyClipboard"
             css={styles.button}
           >
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  className="consoleEditorContextMenu__languageSelector"
-                  data-test-subj="language-selector"
-                >
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      tagName="span"
-                      id="console.monaco.requestOptions.copyAsUrlButtonLabel"
-                      defaultMessage="Copy as"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <strong>{getLanguageLabelByValue(currentLanguage)}</strong>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+            <EuiFlexGroup
+              gutterSize="xs"
+              alignItems="center"
+              className="consoleEditorContextMenu__languageSelector"
+              data-test-subj="language-selector"
+            >
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  tagName="span"
+                  id="console.monaco.requestOptions.copyAsUrlButtonLabel"
+                  defaultMessage="Copy to"
+                />
               </EuiFlexItem>
-              {!isKbnRequestSelected && (
+              <EuiFlexItem grow={false}>
+                <strong>{getLanguageLabelByValue(currentLanguage)}</strong>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(!isPackagedEnvironment && !isKbnRequestSelected
+      ? [
+          <EuiContextMenuItem
+            key="Select language"
+            data-test-subj="consoleMenuSelectLanguage"
+            id="selectLanguage"
+            onClick={() => setLanguageSelectorVisibility(true)}
+            icon="editorCodeBlock"
+            disabled={isRequestConverterLoading}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={true}>
+                <FormattedMessage
+                  id="console.monaco.requestOptions.selectLanguageButtonLabel"
+                  defaultMessage="Select language"
+                />
+              </EuiFlexItem>
+              {isRequestConverterLoading && (
                 <EuiFlexItem grow={false}>
-                  {isRequestConverterLoading ? (
-                    <EuiLoadingSpinner size="s" />
-                  ) : (
-                    // The EuiContextMenuItem renders itself as a button already, so we need to
-                    // force the link to not be a button in order to prevent A11Y issues.
-                    <EuiLink
-                      href=""
-                      data-name="changeLanguage"
-                      data-test-subj="changeLanguageButton"
-                    >
-                      {i18n.translate('console.consoleMenu.changeLanguageButtonLabel', {
-                        defaultMessage: 'Change',
-                      })}
-                    </EuiLink>
-                  )}
+                  <EuiLoadingSpinner size="s" />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
@@ -303,10 +298,19 @@ export const ContextMenu = ({
       onClick={handleAutoIndent}
       icon="kqlFunction"
     >
-      <FormattedMessage
-        id="console.monaco.requestOptions.autoIndentButtonLabel"
-        defaultMessage="Auto indent"
-      />
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={true}>
+          <FormattedMessage
+            id="console.monaco.requestOptions.autoIndentButtonLabel"
+            defaultMessage="Auto indent"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} data-test-subj="consoleMenuAutoIndentShortcut">
+          <EuiText size="xs">
+            <EuiCode>{KEYS.keyCtrlCmd}</EuiCode> + <EuiCode>{KEYS.keyI}</EuiCode>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="Open documentation"
@@ -314,10 +318,19 @@ export const ContextMenu = ({
       onClick={openDocs}
       icon="documentation"
     >
-      <FormattedMessage
-        id="console.monaco.requestOptions.openDocumentationButtonLabel"
-        defaultMessage="Open API reference"
-      />
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={true}>
+          <FormattedMessage
+            id="console.monaco.requestOptions.openDocumentationButtonLabel"
+            defaultMessage="Open API reference"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} data-test-subj="consoleMenuOpenDocsShortcut">
+          <EuiText size="xs">
+            <EuiCode>{KEYS.keyCtrlCmd}</EuiCode> + <EuiCode>{KEYS.keySlash}</EuiCode>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiContextMenuItem>,
   ];
 

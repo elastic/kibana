@@ -101,7 +101,6 @@ async function getSpacesUsage(
   }, {});
 
   const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     (acc, { key, doc_count }) => {
       acc[key] = doc_count;
       return acc;
@@ -109,14 +108,10 @@ async function getSpacesUsage(
     initialCounts
   );
 
-  const solutions = solutionBuckets.reduce<Record<string, number>>(
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    (acc, { key, doc_count }) => {
-      acc[key] = doc_count;
-      return acc;
-    },
-    initialSolutionCounts
-  );
+  const solutions = solutionBuckets.reduce<Record<string, number>>((acc, { key, doc_count }) => {
+    acc[key] = doc_count;
+    return acc;
+  }, initialSolutionCounts);
 
   const usesFeatureControls = Object.values(disabledFeatures).some(
     (disabledSpaceCount) => disabledSpaceCount > 0

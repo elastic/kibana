@@ -36,7 +36,7 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     try {
       const { id: paramId } = request.params;
 
-      if (await isAnAdminUser(routeContext)) {
+      if (await canReadDecryptedParams(routeContext)) {
         return getDecryptedParams(routeContext, paramId);
       } else {
         if (paramId) {
@@ -59,21 +59,14 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   },
 });
 
-const isAnAdminUser = async (routeContext: RouteContext) => {
+const canReadDecryptedParams = async (routeContext: RouteContext) => {
   const { request, server } = routeContext;
-  const user = server.coreStart.security.authc.getCurrentUser(request);
 
-  const isSuperUser = user?.roles.includes('superuser');
-  const isAdmin = user?.roles.includes('kibana_admin');
+  const capabilities = await server.coreStart.capabilities.resolveCapabilities(request, {
+    capabilityPath: 'uptime.*',
+  });
 
-  const canSave =
-    (
-      await server.coreStart?.capabilities.resolveCapabilities(request, {
-        capabilityPath: 'uptime.*',
-      })
-    ).uptime.save ?? false;
-
-  return (isSuperUser || isAdmin) && canSave;
+  return capabilities.uptime?.canReadParamValues ?? false;
 };
 
 const getDecryptedParams = async ({ server, spaceId }: RouteContext, paramId?: string) => {

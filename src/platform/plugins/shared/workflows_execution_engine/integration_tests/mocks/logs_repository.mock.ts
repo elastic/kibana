@@ -11,6 +11,7 @@ import { v4 as generateUuid } from 'uuid';
 import type {
   LogSearchResult,
   LogsRepository,
+  SearchLogsParams,
   WorkflowLogEvent,
 } from '../../server/repositories/logs_repository';
 
@@ -27,24 +28,6 @@ export class LogsRepositoryMock implements Required<LogsRepository> {
     return Promise.resolve();
   }
 
-  public getExecutionLogs(executionId: string): Promise<LogSearchResult> {
-    const logs = Array.from(this.logs.values()).filter((log) => log.executionId === executionId);
-    return Promise.resolve({
-      total: logs.length,
-      logs: logs as any[],
-    });
-  }
-
-  public getLogsByLevel(level: string, executionId?: string | undefined): Promise<LogSearchResult> {
-    const logs = Array.from(this.logs.values()).filter((log) =>
-      executionId ? log.level === level && log.executionId === executionId : log.level === level
-    );
-    return Promise.resolve({
-      total: logs.length,
-      logs: logs as any[],
-    });
-  }
-
   public getRecentLogs(limit?: number): Promise<LogSearchResult> {
     const logs = Array.from(this.logs.values()).slice(0, limit);
     return Promise.resolve({
@@ -53,10 +36,10 @@ export class LogsRepositoryMock implements Required<LogsRepository> {
     });
   }
 
-  public getStepLogs(executionId: string, stepId: string): Promise<LogSearchResult> {
-    const logs = Array.from(this.logs.values()).filter(
-      (log) => log.executionId === executionId && log.stepId === stepId
-    );
+  public searchLogs(params: SearchLogsParams): Promise<LogSearchResult> {
+    const logs = Array.from(this.logs.values()).filter((log) => {
+      return true;
+    });
     return Promise.resolve({
       total: logs.length,
       logs: logs as any[],

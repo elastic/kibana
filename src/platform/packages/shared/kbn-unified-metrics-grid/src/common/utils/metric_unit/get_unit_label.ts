@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricUnit } from '../../../types';
 
 const unitToLabel: Record<MetricUnit, string> = {
   ns: i18n.translate('metricsExperience.metricUnit.label.nanoseconds', {

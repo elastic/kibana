@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-data-view'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-infra_services-team'
+  defaultOwner: '@elastic/obs-presentation-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/apm-data-view'
   description: Moon project for @kbn/apm-data-view
   channel: ''
-  owner: '@elastic/obs-ux-infra_services-team'
+  owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-apm-data-view
 tags:

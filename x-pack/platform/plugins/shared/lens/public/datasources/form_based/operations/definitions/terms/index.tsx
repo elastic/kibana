@@ -234,10 +234,6 @@ export const termsOperation: OperationDefinition<
       .filter(([columnId]) => isSortableByColumn(layer, columnId))
       .map(([id]) => id)[0];
 
-    const previousBucketsLength = Object.values(layer.columns).filter(
-      (col) => col && col.isBucketed
-    ).length;
-
     return {
       label: ofName(field.displayName),
       dataType: field.type as DataType,
@@ -245,7 +241,7 @@ export const termsOperation: OperationDefinition<
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: columnParams?.size ?? (previousBucketsLength === 0 ? 5 : DEFAULT_SIZE),
+        size: columnParams?.size ?? DEFAULT_SIZE,
         orderBy:
           columnParams?.orderBy ??
           (existingMetricColumn
@@ -503,6 +499,7 @@ export const termsOperation: OperationDefinition<
                 layer,
                 columnId,
                 indexPattern,
+                // @ts-expect-error upgrade typescript v5.9.3
                 op: newFieldOp,
                 field: mainField,
                 visualizationGroups: dimensionGroups,

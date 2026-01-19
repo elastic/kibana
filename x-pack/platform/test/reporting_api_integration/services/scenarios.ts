@@ -218,6 +218,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       password: REPORTING_USER_PASSWORD,
       roles: [REPORTING_ROLE],
       full_name: 'Reporting User',
+      email: 'reportinguser@example.com',
     });
   };
 
@@ -345,12 +346,14 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const listScheduledReports = async (
     username = 'elastic',
-    password = process.env.TEST_KIBANA_PASS || 'changeme'
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    search?: string
   ) => {
     const res = await supertestWithoutAuth
       .get(INTERNAL_ROUTES.SCHEDULED.LIST)
       .auth(username, password)
-      .set('kbn-xsrf', 'xxx');
+      .set('kbn-xsrf', 'xxx')
+      .query({ ...(search ? { search } : {}) });
 
     return res.body;
   };
@@ -362,6 +365,20 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   ) => {
     const { body } = await supertestWithoutAuth
       .patch(INTERNAL_ROUTES.SCHEDULED.BULK_DISABLE)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ ids })
+      .expect(200);
+    return body;
+  };
+
+  const enableReportSchedules = async (
+    ids: string[],
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .patch(INTERNAL_ROUTES.SCHEDULED.BULK_ENABLE)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ ids })
@@ -414,9 +431,17 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return body.path;
   };
 
-  const postJobJSON = async (apiPath: string, jobJSON: object = {}): Promise<string> => {
+  const postJobJSON = async (
+    apiPath: string,
+    jobJSON: object = {},
+    statusCode: number = 200
+  ): Promise<string> => {
     log.debug(`ReportingAPI.postJobJSON((${apiPath}): ${JSON.stringify(jobJSON)})`);
-    const { body } = await supertest.post(apiPath).set('kbn-xsrf', 'xxx').send(jobJSON).expect(200);
+    const { body } = await supertest
+      .post(apiPath)
+      .set('kbn-xsrf', 'xxx')
+      .send(jobJSON)
+      .expect(statusCode);
     return body.path;
   };
 
@@ -580,6 +605,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     deleteTasks,
     listScheduledReports,
     disableReportSchedules,
+    enableReportSchedules,
     deleteReportSchedules,
     runTelemetryTask,
     updateScheduledReport,

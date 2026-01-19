@@ -208,6 +208,9 @@ components:
         last_execution:
           description: The last execution of the migration task.
           $ref: '#/components/schemas/MigrationLastExecution'
+        vendor:
+          description: The migration vendor.
+          $ref: '#/components/schemas/SiemMigrationVendor'
 
     MigrationTaskItemsStats:
       type: object

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getPreviousVersionTypes } from './previous_version_types';
+export { getPreviousVersionType } from './previous_version_type';

@@ -11,7 +11,7 @@ import type { GetDashboardMigrationResponse } from '../../../../../common/siem_m
 import { GetDashboardMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from '../../common/api/util/authz';
+import { authz } from './util/authz';
 import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { withLicense } from '../../common/api/util/with_license';
 import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';

@@ -46,8 +46,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   const formTypeSelected = useCallback(
     (searchType: SearchType | null) => {
       if (!searchType) {
-        // @ts-expect-error Reset rule params regardless of their type
-        setRuleProperty('params', {});
+        setRuleProperty('params', {} as EsQueryRuleParams);
         return;
       }
       setRuleParams('searchType', searchType);
@@ -94,6 +93,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   );
 
   return (
+    // @ts-expect-error upgrade typescript v5.9.3
     <>
       {expressionError}
 

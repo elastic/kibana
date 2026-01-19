@@ -12,7 +12,6 @@ import type {
   PluginInitializerContext,
   LoggerFactory,
 } from '@kbn/core/server';
-import { registerWorkplaceAIApiKeysRoutes } from '@kbn/workplaceai-api-keys-server';
 import { registerRoutes } from './routes';
 import { registerFeatures } from './features';
 import type { InternalServices } from './services/types';
@@ -63,12 +62,10 @@ export class WorkplaceAIAppPlugin
       },
     });
 
-    registerWorkplaceAIApiKeysRoutes(router, this.loggerFactory.get('api-keys'));
-
     registerFeatures({ features: setupDeps.features });
 
     // Register custom data types with the data sources registry
-    registerWorkplaceAIDataTypes({ dataSourcesRegistry: setupDeps.dataSourcesRegistry });
+    registerWorkplaceAIDataTypes({ dataCatalog: setupDeps.dataCatalog });
 
     return {};
   }

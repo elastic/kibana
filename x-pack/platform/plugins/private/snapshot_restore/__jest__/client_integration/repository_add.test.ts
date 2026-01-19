@@ -5,95 +5,123 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import './helpers/mocks';
+
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { INVALID_NAME_CHARS } from '../../public/application/services/validation/validate_repository';
 import { API_BASE_PATH } from '../../common';
 import { getRepository } from '../../test/fixtures';
 import type { RepositoryType } from '../../common/types';
-import { setupEnvironment, pageHelpers } from './helpers';
-import type { RepositoryAddTestBed } from './helpers/repository_add.helpers';
+import { setupEnvironment } from './helpers/setup_environment';
+import { renderApp } from './helpers/render_app';
 
-const { setup } = pageHelpers.repositoryAdd;
 const repositoryTypes = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
 
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (reason?: unknown) => void;
+}
+
+const createDeferred = <T>(): Deferred<T> => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+};
+
+const waitForRepositoryTypesToLoad = async () => {
+  await waitFor(() => {
+    expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
+  });
+  await screen.findByTestId(`${repositoryTypes[0]}RepositoryType`);
+};
+
+const waitForNoRepositoryTypesError = async () => {
+  await waitFor(() => {
+    expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
+  });
+  await screen.findByTestId('noRepositoryTypesError');
+};
+
 describe('<RepositoryAdd />', () => {
-  let testBed: RepositoryAddTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('on component mount', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
-
-      testBed = await setup(httpSetup);
+      renderApp(httpSetup, { initialEntries: ['/add_repository'] });
+      await waitForRepositoryTypesToLoad();
     });
 
-    test('should set the correct page title', () => {
-      const { exists, find } = testBed;
-      expect(exists('pageTitle')).toBe(true);
-      expect(find('pageTitle').text()).toEqual('Register repository');
+    test('should set the correct page title', async () => {
+      const pageTitle = await screen.findByTestId('pageTitle');
+      expect(pageTitle).toHaveTextContent('Register repository');
     });
 
-    /**
-     * TODO: investigate why we need to skip this test.
-     * My guess is a change in the useRequest() hook and maybe a setTimout() that hasn't been
-     * mocked with jest.useFakeTimers({ legacyFakeTimers: true });
-     * I tested locally and the loading spinner is present in the UI so skipping this test for now.
-     */
-    test.skip('should indicate that the repository types are loading', () => {
-      const { exists, find } = testBed;
-      expect(exists('sectionLoading')).toBe(true);
-      expect(find('sectionLoading').text()).toBe('Loading repository types…');
+    test('should not let the user go to the next step if some fields are missing', async () => {
+      await screen.findByTestId('nextButton');
+      fireEvent.click(screen.getByTestId('nextButton'));
+
+      // Error text can appear both in the form-wide error summary and the field-level error.
+      expect(screen.getAllByText('Repository name is required.').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Type is required.').length).toBeGreaterThan(0);
     });
+  });
 
-    test('should not let the user go to the next step if some fields are missing', () => {
-      const { form, actions } = testBed;
+  describe('loading states', () => {
+    test('should indicate that the repository types are loading', async () => {
+      const typesDeferred = createDeferred<string[]>();
+      // Promise cast needed: mock helper signature doesn't explicitly allow Promise for loading-state tests
+      httpRequestsMockHelpers.setLoadRepositoryTypesResponse(
+        typesDeferred.promise as unknown as string[]
+      );
 
-      actions.clickNextButton();
+      renderApp(httpSetup, { initialEntries: ['/add_repository'] });
 
-      expect(form.getErrorsMessages()).toEqual([
-        'Repository name is required.',
-        'Type is required.',
-      ]);
+      const loading = await screen.findByTestId('sectionLoading');
+      expect(loading).toHaveTextContent('Loading repository types…');
+
+      // Resolve to avoid leaving a dangling request.
+      typesDeferred.resolve(repositoryTypes);
+      await waitForRepositoryTypesToLoad();
     });
   });
 
   describe('when no repository types are not found', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse([]);
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      testBed.component.update();
+      renderApp(httpSetup, { initialEntries: ['/add_repository'] });
+      await waitForNoRepositoryTypesError();
     });
 
     test('should show an error callout  ', async () => {
-      const { find, exists } = testBed;
-
-      expect(exists('noRepositoryTypesError')).toBe(true);
-      expect(find('noRepositoryTypesError').text()).toContain('No repository types available');
+      const callout = screen.getByTestId('noRepositoryTypesError');
+      expect(callout).toHaveTextContent('No repository types available');
     });
   });
 
   describe('when repository types are found', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      testBed.component.update();
+      renderApp(httpSetup, { initialEntries: ['/add_repository'] });
+      await waitForRepositoryTypesToLoad();
     });
 
-    test('should have 1 card for each repository type', () => {
-      const { exists } = testBed;
-
+    test('should have 1 card for each repository type', async () => {
       repositoryTypes.forEach((type) => {
-        const testSubject: any = `${type}RepositoryType`;
-        try {
-          expect(exists(testSubject)).toBe(true);
-        } catch {
-          throw new Error(`Repository type "${type}" was not found.`);
-        }
+        expect(screen.getByTestId(`${type}RepositoryType`)).toBeInTheDocument();
       });
     });
   });
@@ -101,37 +129,33 @@ describe('<RepositoryAdd />', () => {
   describe('form validations', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
-
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      testBed.component.update();
+      renderApp(httpSetup, { initialEntries: ['/add_repository'] });
+      await waitForRepositoryTypesToLoad();
     });
 
     describe('name (step 1)', () => {
-      it('should not allow spaces in the name', () => {
-        const { form, actions } = testBed;
-        form.setInputValue('nameInput', 'with space');
+      it('should not allow spaces in the name', async () => {
+        await screen.findByTestId('nameInput');
+        fireEvent.change(screen.getByTestId('nameInput'), { target: { value: 'with space' } });
+        fireEvent.click(screen.getByTestId('nextButton'));
 
-        actions.clickNextButton();
-
-        expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
+        // Error text can appear both in the form-wide error summary and the field-level error.
+        expect(screen.getAllByText('Spaces are not allowed in the name.').length).toBeGreaterThan(
+          0
+        );
       });
 
-      it('should not allow invalid characters', () => {
-        const { form, actions } = testBed;
+      it('should not allow invalid characters', async () => {
+        await screen.findByTestId('nameInput');
 
         const expectErrorForChar = (char: string) => {
-          form.setInputValue('nameInput', `with${char}`);
-          actions.clickNextButton();
+          fireEvent.change(screen.getByTestId('nameInput'), { target: { value: `with${char}` } });
+          fireEvent.click(screen.getByTestId('nextButton'));
 
-          try {
-            expect(form.getErrorsMessages()).toContain(
-              `Character "${char}" is not allowed in the name.`
-            );
-          } catch {
-            throw new Error(`Invalid character ${char} did not display an error.`);
-          }
+          // Error text can appear both in the form-wide error summary and the field-level error.
+          expect(
+            screen.getAllByText(`Character "${char}" is not allowed in the name.`).length
+          ).toBeGreaterThan(0);
         };
 
         INVALID_NAME_CHARS.forEach(expectErrorForChar);
@@ -148,36 +172,27 @@ describe('<RepositoryAdd />', () => {
       };
 
       test('should validate required repository settings', async () => {
-        const { component, actions, form } = testBed;
-
-        form.setInputValue('nameInput', 'my-repo');
+        const user = userEvent.setup();
+        await screen.findByTestId('nameInput');
+        fireEvent.change(screen.getByTestId('nameInput'), { target: { value: 'my-repo' } });
 
         const selectRepoTypeAndExpectErrors = async (type: RepositoryType) => {
-          actions.selectRepositoryType(type);
-          actions.clickNextButton();
+          await user.click(screen.getByTestId(`${type}RepositoryType`));
+          await user.click(screen.getByTestId('nextButton'));
+          await screen.findByTestId('stepTwo');
 
-          await act(async () => {
-            actions.clickSubmitButton();
-          });
-          component.update();
+          await user.click(screen.getByTestId('submitButton'));
 
           const expectedErrors = typeToErrorMessagesMap[type];
-          const errorsFound = form.getErrorsMessages();
-
           expectedErrors.forEach((error) => {
-            try {
-              expect(errorsFound).toContain(error);
-            } catch {
-              throw new Error(
-                `Expected "${error}" not found in form. Got "${JSON.stringify(errorsFound)}"`
-              );
-            }
+            // Error text can appear both in the form-wide error summary and the field-level error.
+            expect(screen.getAllByText(error).length).toBeGreaterThan(0);
           });
 
-          await act(async () => {
-            actions.clickBackButton();
-          });
-          component.update();
+          await user.click(screen.getByTestId('backButton'));
+          // Navigating back remounts step 1 and triggers repository types loading again.
+          // Ensure the async request resolves inside RTL's async act wrapper.
+          await waitForRepositoryTypesToLoad();
         };
 
         await selectRepoTypeAndExpectErrors('fs');
@@ -201,50 +216,57 @@ describe('<RepositoryAdd />', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
-
-      testBed = await setup(httpSetup);
+      renderApp(httpSetup, { initialEntries: ['/add_repository'] });
+      await waitForRepositoryTypesToLoad();
     });
 
     describe('not source only', () => {
       test('should send the correct payload for FS repository', async () => {
-        const { form, actions, component } = testBed;
+        await screen.findByTestId('nameInput');
 
         // Fill step 1 required fields and go to step 2
-        form.setInputValue('nameInput', fsRepository.name);
-        actions.selectRepositoryType(fsRepository.type);
-        actions.clickNextButton();
+        fireEvent.change(screen.getByTestId('nameInput'), { target: { value: fsRepository.name } });
+        fireEvent.click(screen.getByTestId(`${fsRepository.type}RepositoryType`));
+        fireEvent.click(screen.getByTestId('nextButton'));
+        await screen.findByTestId('stepTwo');
 
         // Fill step 2
-        form.setInputValue('locationInput', fsRepository.settings.location);
-        form.toggleEuiSwitch('compressToggle');
-        form.setInputValue('chunkSizeInput', fsRepository.settings.chunkSize);
-        form.setInputValue('maxSnapshotBytesInput', fsRepository.settings.maxSnapshotBytesPerSec);
-        form.setInputValue('maxRestoreBytesInput', fsRepository.settings.maxRestoreBytesPerSec);
-        form.toggleEuiSwitch('readOnlyToggle');
-
-        await act(async () => {
-          actions.clickSubmitButton();
+        fireEvent.change(screen.getByTestId('locationInput'), {
+          target: { value: fsRepository.settings.location },
         });
+        fireEvent.click(screen.getByTestId('compressToggle'));
+        fireEvent.change(screen.getByTestId('chunkSizeInput'), {
+          target: { value: fsRepository.settings.chunkSize },
+        });
+        fireEvent.change(screen.getByTestId('maxSnapshotBytesInput'), {
+          target: { value: fsRepository.settings.maxSnapshotBytesPerSec },
+        });
+        fireEvent.change(screen.getByTestId('maxRestoreBytesInput'), {
+          target: { value: fsRepository.settings.maxRestoreBytesPerSec },
+        });
+        fireEvent.click(screen.getByTestId('readOnlyToggle'));
 
-        component.update();
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}repositories`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: fsRepository.name,
-              type: fsRepository.type,
-              settings: {
-                location: fsRepository.settings.location,
-                compress: false,
-                chunkSize: fsRepository.settings.chunkSize,
-                maxSnapshotBytesPerSec: fsRepository.settings.maxSnapshotBytesPerSec,
-                maxRestoreBytesPerSec: fsRepository.settings.maxRestoreBytesPerSec,
-                readonly: true,
-              },
-            }),
-          })
-        );
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}repositories`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                name: fsRepository.name,
+                type: fsRepository.type,
+                settings: {
+                  location: fsRepository.settings.location,
+                  compress: false,
+                  chunkSize: fsRepository.settings.chunkSize,
+                  maxSnapshotBytesPerSec: fsRepository.settings.maxSnapshotBytesPerSec,
+                  maxRestoreBytesPerSec: fsRepository.settings.maxRestoreBytesPerSec,
+                  readonly: true,
+                },
+              }),
+            })
+          );
+        });
       });
 
       test('should send the correct payload for Azure repository', async () => {
@@ -260,51 +282,61 @@ describe('<RepositoryAdd />', () => {
           },
         });
 
-        const { form, actions, component } = testBed;
+        await screen.findByTestId('nameInput');
 
         // Fill step 1 required fields and go to step 2
-        form.setInputValue('nameInput', azureRepository.name);
-        actions.selectRepositoryType(azureRepository.type);
-        actions.clickNextButton();
+        fireEvent.change(screen.getByTestId('nameInput'), {
+          target: { value: azureRepository.name },
+        });
+        fireEvent.click(screen.getByTestId(`${azureRepository.type}RepositoryType`));
+        fireEvent.click(screen.getByTestId('nextButton'));
+        await screen.findByTestId('stepTwo');
 
         // Fill step 2
-        form.setInputValue('clientInput', azureRepository.settings.client);
-        form.setInputValue('containerInput', azureRepository.settings.container);
-        form.setInputValue('basePathInput', azureRepository.settings.basePath);
-        form.toggleEuiSwitch('compressToggle');
-        form.setInputValue('chunkSizeInput', azureRepository.settings.chunkSize);
-        form.setInputValue(
-          'maxSnapshotBytesInput',
-          azureRepository.settings.maxSnapshotBytesPerSec
-        );
-        form.setInputValue('maxRestoreBytesInput', azureRepository.settings.maxRestoreBytesPerSec);
-        form.toggleEuiSwitch('readOnlyToggle');
-
-        await act(async () => {
-          actions.clickSubmitButton();
+        fireEvent.change(screen.getByTestId('clientInput'), {
+          target: { value: azureRepository.settings.client },
         });
+        fireEvent.change(screen.getByTestId('containerInput'), {
+          target: { value: azureRepository.settings.container },
+        });
+        fireEvent.change(screen.getByTestId('basePathInput'), {
+          target: { value: azureRepository.settings.basePath },
+        });
+        fireEvent.click(screen.getByTestId('compressToggle'));
+        fireEvent.change(screen.getByTestId('chunkSizeInput'), {
+          target: { value: azureRepository.settings.chunkSize },
+        });
+        fireEvent.change(screen.getByTestId('maxSnapshotBytesInput'), {
+          target: { value: azureRepository.settings.maxSnapshotBytesPerSec },
+        });
+        fireEvent.change(screen.getByTestId('maxRestoreBytesInput'), {
+          target: { value: azureRepository.settings.maxRestoreBytesPerSec },
+        });
+        fireEvent.click(screen.getByTestId('readOnlyToggle'));
 
-        component.update();
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}repositories`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: azureRepository.name,
-              type: azureRepository.type,
-              settings: {
-                client: azureRepository.settings.client,
-                container: azureRepository.settings.container,
-                basePath: azureRepository.settings.basePath,
-                compress: false,
-                chunkSize: azureRepository.settings.chunkSize,
-                maxSnapshotBytesPerSec: azureRepository.settings.maxSnapshotBytesPerSec,
-                maxRestoreBytesPerSec: azureRepository.settings.maxRestoreBytesPerSec,
-                readonly: true,
-              },
-            }),
-          })
-        );
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}repositories`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                name: azureRepository.name,
+                type: azureRepository.type,
+                settings: {
+                  client: azureRepository.settings.client,
+                  container: azureRepository.settings.container,
+                  basePath: azureRepository.settings.basePath,
+                  compress: false,
+                  chunkSize: azureRepository.settings.chunkSize,
+                  maxSnapshotBytesPerSec: azureRepository.settings.maxSnapshotBytesPerSec,
+                  maxRestoreBytesPerSec: azureRepository.settings.maxRestoreBytesPerSec,
+                  readonly: true,
+                },
+              }),
+            })
+          );
+        });
       });
 
       test('should send the correct payload for GCS repository', async () => {
@@ -320,48 +352,61 @@ describe('<RepositoryAdd />', () => {
           },
         });
 
-        const { form, actions, component } = testBed;
+        await screen.findByTestId('nameInput');
 
         // Fill step 1 required fields and go to step 2
-        form.setInputValue('nameInput', gcsRepository.name);
-        actions.selectRepositoryType(gcsRepository.type);
-        actions.clickNextButton();
+        fireEvent.change(screen.getByTestId('nameInput'), {
+          target: { value: gcsRepository.name },
+        });
+        fireEvent.click(screen.getByTestId(`${gcsRepository.type}RepositoryType`));
+        fireEvent.click(screen.getByTestId('nextButton'));
+        await screen.findByTestId('stepTwo');
 
         // Fill step 2
-        form.setInputValue('clientInput', gcsRepository.settings.client);
-        form.setInputValue('bucketInput', gcsRepository.settings.bucket);
-        form.setInputValue('basePathInput', gcsRepository.settings.basePath);
-        form.toggleEuiSwitch('compressToggle');
-        form.setInputValue('chunkSizeInput', gcsRepository.settings.chunkSize);
-        form.setInputValue('maxSnapshotBytesInput', gcsRepository.settings.maxSnapshotBytesPerSec);
-        form.setInputValue('maxRestoreBytesInput', gcsRepository.settings.maxRestoreBytesPerSec);
-        form.toggleEuiSwitch('readOnlyToggle');
-
-        await act(async () => {
-          actions.clickSubmitButton();
+        fireEvent.change(screen.getByTestId('clientInput'), {
+          target: { value: gcsRepository.settings.client },
         });
+        fireEvent.change(screen.getByTestId('bucketInput'), {
+          target: { value: gcsRepository.settings.bucket },
+        });
+        fireEvent.change(screen.getByTestId('basePathInput'), {
+          target: { value: gcsRepository.settings.basePath },
+        });
+        fireEvent.click(screen.getByTestId('compressToggle'));
+        fireEvent.change(screen.getByTestId('chunkSizeInput'), {
+          target: { value: gcsRepository.settings.chunkSize },
+        });
+        fireEvent.change(screen.getByTestId('maxSnapshotBytesInput'), {
+          target: { value: gcsRepository.settings.maxSnapshotBytesPerSec },
+        });
+        fireEvent.change(screen.getByTestId('maxRestoreBytesInput'), {
+          target: { value: gcsRepository.settings.maxRestoreBytesPerSec },
+        });
+        fireEvent.click(screen.getByTestId('readOnlyToggle'));
 
-        component.update();
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}repositories`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: gcsRepository.name,
-              type: gcsRepository.type,
-              settings: {
-                client: gcsRepository.settings.client,
-                bucket: gcsRepository.settings.bucket,
-                basePath: gcsRepository.settings.basePath,
-                compress: false,
-                chunkSize: gcsRepository.settings.chunkSize,
-                maxSnapshotBytesPerSec: gcsRepository.settings.maxSnapshotBytesPerSec,
-                maxRestoreBytesPerSec: gcsRepository.settings.maxRestoreBytesPerSec,
-                readonly: true,
-              },
-            }),
-          })
-        );
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}repositories`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                name: gcsRepository.name,
+                type: gcsRepository.type,
+                settings: {
+                  client: gcsRepository.settings.client,
+                  bucket: gcsRepository.settings.bucket,
+                  basePath: gcsRepository.settings.basePath,
+                  compress: false,
+                  chunkSize: gcsRepository.settings.chunkSize,
+                  maxSnapshotBytesPerSec: gcsRepository.settings.maxSnapshotBytesPerSec,
+                  maxRestoreBytesPerSec: gcsRepository.settings.maxRestoreBytesPerSec,
+                  readonly: true,
+                },
+              }),
+            })
+          );
+        });
       });
 
       test('should send the correct payload for HDFS repository', async () => {
@@ -376,50 +421,61 @@ describe('<RepositoryAdd />', () => {
           },
         });
 
-        const { form, actions, component } = testBed;
+        await screen.findByTestId('nameInput');
 
         // Fill step 1 required fields and go to step 2
-        form.setInputValue('nameInput', hdfsRepository.name);
-        actions.selectRepositoryType(hdfsRepository.type);
-        actions.clickNextButton();
+        fireEvent.change(screen.getByTestId('nameInput'), {
+          target: { value: hdfsRepository.name },
+        });
+        fireEvent.click(screen.getByTestId(`${hdfsRepository.type}RepositoryType`));
+        fireEvent.click(screen.getByTestId('nextButton'));
+        await screen.findByTestId('stepTwo');
 
         // Fill step 2
-        form.setInputValue('uriInput', hdfsRepository.settings.uri);
-        form.setInputValue('pathInput', hdfsRepository.settings.path);
-        form.toggleEuiSwitch('compressToggle');
-        form.setInputValue('chunkSizeInput', hdfsRepository.settings.chunkSize);
-        form.setInputValue('maxSnapshotBytesInput', hdfsRepository.settings.maxSnapshotBytesPerSec);
-        form.setInputValue('maxRestoreBytesInput', hdfsRepository.settings.maxRestoreBytesPerSec);
-        form.toggleEuiSwitch('readOnlyToggle');
-
-        await act(async () => {
-          actions.clickSubmitButton();
+        fireEvent.change(screen.getByTestId('uriInput'), {
+          target: { value: hdfsRepository.settings.uri },
         });
+        fireEvent.change(screen.getByTestId('pathInput'), {
+          target: { value: hdfsRepository.settings.path },
+        });
+        fireEvent.click(screen.getByTestId('compressToggle'));
+        fireEvent.change(screen.getByTestId('chunkSizeInput'), {
+          target: { value: hdfsRepository.settings.chunkSize },
+        });
+        fireEvent.change(screen.getByTestId('maxSnapshotBytesInput'), {
+          target: { value: hdfsRepository.settings.maxSnapshotBytesPerSec },
+        });
+        fireEvent.change(screen.getByTestId('maxRestoreBytesInput'), {
+          target: { value: hdfsRepository.settings.maxRestoreBytesPerSec },
+        });
+        fireEvent.click(screen.getByTestId('readOnlyToggle'));
 
-        component.update();
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}repositories`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: hdfsRepository.name,
-              type: hdfsRepository.type,
-              settings: {
-                uri: `hdfs://${hdfsRepository.settings.uri}`,
-                path: hdfsRepository.settings.path,
-                compress: false,
-                chunkSize: hdfsRepository.settings.chunkSize,
-                maxSnapshotBytesPerSec: hdfsRepository.settings.maxSnapshotBytesPerSec,
-                maxRestoreBytesPerSec: hdfsRepository.settings.maxRestoreBytesPerSec,
-                readonly: true,
-              },
-            }),
-          })
-        );
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}repositories`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                name: hdfsRepository.name,
+                type: hdfsRepository.type,
+                settings: {
+                  uri: `hdfs://${hdfsRepository.settings.uri}`,
+                  path: hdfsRepository.settings.path,
+                  compress: false,
+                  chunkSize: hdfsRepository.settings.chunkSize,
+                  maxSnapshotBytesPerSec: hdfsRepository.settings.maxSnapshotBytesPerSec,
+                  maxRestoreBytesPerSec: hdfsRepository.settings.maxRestoreBytesPerSec,
+                  readonly: true,
+                },
+              }),
+            })
+          );
+        });
       });
 
       test('should send the correct payload for S3 repository', async () => {
-        const { form, actions, component } = testBed;
+        await screen.findByTestId('nameInput');
 
         const s3Repository = getRepository({
           type: 's3',
@@ -435,60 +491,76 @@ describe('<RepositoryAdd />', () => {
         });
 
         // Fill step 1 required fields and go to step 2
-        form.setInputValue('nameInput', s3Repository.name);
-        actions.selectRepositoryType(s3Repository.type);
-        actions.clickNextButton();
+        fireEvent.change(screen.getByTestId('nameInput'), { target: { value: s3Repository.name } });
+        fireEvent.click(screen.getByTestId(`${s3Repository.type}RepositoryType`));
+        fireEvent.click(screen.getByTestId('nextButton'));
+        await screen.findByTestId('stepTwo');
 
         // Fill step 2
-        form.setInputValue('bucketInput', s3Repository.settings.bucket);
-        form.setInputValue('clientInput', s3Repository.settings.client);
-        form.setInputValue('basePathInput', s3Repository.settings.basePath);
-        form.setInputValue('bufferSizeInput', s3Repository.settings.bufferSize);
-        form.toggleEuiSwitch('compressToggle');
-        form.setInputValue('chunkSizeInput', s3Repository.settings.chunkSize);
-        form.setInputValue('maxSnapshotBytesInput', s3Repository.settings.maxSnapshotBytesPerSec);
-        form.setInputValue('maxRestoreBytesInput', s3Repository.settings.maxRestoreBytesPerSec);
-        form.toggleEuiSwitch('readOnlyToggle');
-
-        await act(async () => {
-          actions.clickSubmitButton();
+        fireEvent.change(screen.getByTestId('bucketInput'), {
+          target: { value: s3Repository.settings.bucket },
         });
+        fireEvent.change(screen.getByTestId('clientInput'), {
+          target: { value: s3Repository.settings.client },
+        });
+        fireEvent.change(screen.getByTestId('basePathInput'), {
+          target: { value: s3Repository.settings.basePath },
+        });
+        fireEvent.change(screen.getByTestId('bufferSizeInput'), {
+          target: { value: s3Repository.settings.bufferSize },
+        });
+        fireEvent.click(screen.getByTestId('compressToggle'));
+        fireEvent.change(screen.getByTestId('chunkSizeInput'), {
+          target: { value: s3Repository.settings.chunkSize },
+        });
+        fireEvent.change(screen.getByTestId('maxSnapshotBytesInput'), {
+          target: { value: s3Repository.settings.maxSnapshotBytesPerSec },
+        });
+        fireEvent.change(screen.getByTestId('maxRestoreBytesInput'), {
+          target: { value: s3Repository.settings.maxRestoreBytesPerSec },
+        });
+        fireEvent.click(screen.getByTestId('readOnlyToggle'));
 
-        component.update();
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}repositories`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: s3Repository.name,
-              type: s3Repository.type,
-              settings: {
-                bucket: s3Repository.settings.bucket,
-                client: s3Repository.settings.client,
-                basePath: s3Repository.settings.basePath,
-                bufferSize: s3Repository.settings.bufferSize,
-                compress: false,
-                chunkSize: s3Repository.settings.chunkSize,
-                maxSnapshotBytesPerSec: s3Repository.settings.maxSnapshotBytesPerSec,
-                maxRestoreBytesPerSec: s3Repository.settings.maxRestoreBytesPerSec,
-                readonly: true,
-              },
-            }),
-          })
-        );
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}repositories`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                name: s3Repository.name,
+                type: s3Repository.type,
+                settings: {
+                  bucket: s3Repository.settings.bucket,
+                  client: s3Repository.settings.client,
+                  basePath: s3Repository.settings.basePath,
+                  bufferSize: s3Repository.settings.bufferSize,
+                  compress: false,
+                  chunkSize: s3Repository.settings.chunkSize,
+                  maxSnapshotBytesPerSec: s3Repository.settings.maxSnapshotBytesPerSec,
+                  maxRestoreBytesPerSec: s3Repository.settings.maxRestoreBytesPerSec,
+                  readonly: true,
+                },
+              }),
+            })
+          );
+        });
       });
 
       test('should surface the API errors from the "save" HTTP request', async () => {
-        const { component, form, actions, find, exists } = testBed;
+        await screen.findByTestId('nameInput');
 
         // Fill step 1 required fields and go to step 2
-        form.setInputValue('nameInput', fsRepository.name);
-        actions.selectRepositoryType(fsRepository.type);
-        actions.clickNextButton();
+        fireEvent.change(screen.getByTestId('nameInput'), { target: { value: fsRepository.name } });
+        fireEvent.click(screen.getByTestId(`${fsRepository.type}RepositoryType`));
+        fireEvent.click(screen.getByTestId('nextButton'));
+        await screen.findByTestId('stepTwo');
 
         // Fill step 2
-        form.setInputValue('locationInput', fsRepository.settings.location);
-        form.toggleEuiSwitch('compressToggle');
+        fireEvent.change(screen.getByTestId('locationInput'), {
+          target: { value: fsRepository.settings.location },
+        });
+        fireEvent.click(screen.getByTestId('compressToggle'));
 
         const error = {
           statusCode: 400,
@@ -498,51 +570,47 @@ describe('<RepositoryAdd />', () => {
 
         httpRequestsMockHelpers.setSaveRepositoryResponse(undefined, error);
 
-        await act(async () => {
-          actions.clickSubmitButton();
-        });
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        component.update();
-
-        expect(exists('saveRepositoryApiError')).toBe(true);
-        expect(find('saveRepositoryApiError').text()).toContain(error.message);
+        const errorCallout = await screen.findByTestId('saveRepositoryApiError');
+        expect(errorCallout).toHaveTextContent(error.message);
       });
     });
 
     describe('source only', () => {
       beforeEach(() => {
         // Fill step 1 required fields and go to step 2
-        testBed.form.setInputValue('nameInput', fsRepository.name);
-        testBed.actions.selectRepositoryType(fsRepository.type);
-        testBed.form.toggleEuiSwitch('sourceOnlyToggle'); // toggle source
-        testBed.actions.clickNextButton();
+        fireEvent.change(screen.getByTestId('nameInput'), { target: { value: fsRepository.name } });
+        fireEvent.click(screen.getByTestId(`${fsRepository.type}RepositoryType`));
+        fireEvent.click(screen.getByTestId('sourceOnlyToggle')); // toggle source
+        fireEvent.click(screen.getByTestId('nextButton'));
       });
 
       test('should send the correct payload', async () => {
-        const { form, actions, component } = testBed;
+        await screen.findByTestId('stepTwo');
 
         // Fill step 2
-        form.setInputValue('locationInput', fsRepository.settings.location);
-
-        await act(async () => {
-          actions.clickSubmitButton();
+        fireEvent.change(screen.getByTestId('locationInput'), {
+          target: { value: fsRepository.settings.location },
         });
 
-        component.update();
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}repositories`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: fsRepository.name,
-              type: 'source',
-              settings: {
-                delegateType: fsRepository.type,
-                location: fsRepository.settings.location,
-              },
-            }),
-          })
-        );
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}repositories`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                name: fsRepository.name,
+                type: 'source',
+                settings: {
+                  delegateType: fsRepository.type,
+                  location: fsRepository.settings.location,
+                },
+              }),
+            })
+          );
+        });
       });
     });
   });
@@ -550,13 +618,11 @@ describe('<RepositoryAdd />', () => {
   describe('settings for s3 repository', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
-
-      testBed = await setup(httpSetup);
+      renderApp(httpSetup, { initialEntries: ['/add_repository'] });
+      await waitForRepositoryTypesToLoad();
     });
 
     test('should correctly set the intelligent_tiering storage class', async () => {
-      const { form, actions, component } = testBed;
-
       const s3Repository = getRepository({
         type: 's3',
         settings: {
@@ -565,39 +631,42 @@ describe('<RepositoryAdd />', () => {
         },
       });
 
+      await screen.findByTestId('nameInput');
+
       // Fill step 1 required fields and go to step 2
-      form.setInputValue('nameInput', s3Repository.name);
-      actions.selectRepositoryType(s3Repository.type);
-      actions.clickNextButton();
+      fireEvent.change(screen.getByTestId('nameInput'), { target: { value: s3Repository.name } });
+      fireEvent.click(screen.getByTestId(`${s3Repository.type}RepositoryType`));
+      fireEvent.click(screen.getByTestId('nextButton'));
+      await screen.findByTestId('stepTwo');
 
       // Fill step 2
-      form.setInputValue('bucketInput', s3Repository.settings.bucket);
-      form.setSelectValue('storageClassSelect', s3Repository.settings.storageClass);
-
-      await act(async () => {
-        actions.clickSubmitButton();
+      fireEvent.change(screen.getByTestId('bucketInput'), {
+        target: { value: s3Repository.settings.bucket },
+      });
+      fireEvent.change(screen.getByTestId('storageClassSelect'), {
+        target: { value: s3Repository.settings.storageClass },
       });
 
-      component.update();
+      fireEvent.click(screen.getByTestId('submitButton'));
 
-      expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}repositories`,
-        expect.objectContaining({
-          body: JSON.stringify({
-            name: s3Repository.name,
-            type: s3Repository.type,
-            settings: {
-              bucket: s3Repository.settings.bucket,
-              storageClass: s3Repository.settings.storageClass,
-            },
-          }),
-        })
-      );
+      await waitFor(() => {
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}repositories`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: s3Repository.name,
+              type: s3Repository.type,
+              settings: {
+                bucket: s3Repository.settings.bucket,
+                storageClass: s3Repository.settings.storageClass,
+              },
+            }),
+          })
+        );
+      });
     });
 
     test('should correctly set the onezone_ia storage class', async () => {
-      const { form, actions, component } = testBed;
-
       const s3Repository = getRepository({
         type: 's3',
         settings: {
@@ -606,34 +675,39 @@ describe('<RepositoryAdd />', () => {
         },
       });
 
+      await screen.findByTestId('nameInput');
+
       // Fill step 1 required fields and go to step 2
-      form.setInputValue('nameInput', s3Repository.name);
-      actions.selectRepositoryType(s3Repository.type);
-      actions.clickNextButton();
+      fireEvent.change(screen.getByTestId('nameInput'), { target: { value: s3Repository.name } });
+      fireEvent.click(screen.getByTestId(`${s3Repository.type}RepositoryType`));
+      fireEvent.click(screen.getByTestId('nextButton'));
+      await screen.findByTestId('stepTwo');
 
       // Fill step 2
-      form.setInputValue('bucketInput', s3Repository.settings.bucket);
-      form.setSelectValue('storageClassSelect', s3Repository.settings.storageClass);
-
-      await act(async () => {
-        actions.clickSubmitButton();
+      fireEvent.change(screen.getByTestId('bucketInput'), {
+        target: { value: s3Repository.settings.bucket },
+      });
+      fireEvent.change(screen.getByTestId('storageClassSelect'), {
+        target: { value: s3Repository.settings.storageClass },
       });
 
-      component.update();
+      fireEvent.click(screen.getByTestId('submitButton'));
 
-      expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}repositories`,
-        expect.objectContaining({
-          body: JSON.stringify({
-            name: s3Repository.name,
-            type: s3Repository.type,
-            settings: {
-              bucket: s3Repository.settings.bucket,
-              storageClass: s3Repository.settings.storageClass,
-            },
-          }),
-        })
-      );
+      await waitFor(() => {
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}repositories`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: s3Repository.name,
+              type: s3Repository.type,
+              settings: {
+                bucket: s3Repository.settings.bucket,
+                storageClass: s3Repository.settings.storageClass,
+              },
+            }),
+          })
+        );
+      });
     });
   });
 });

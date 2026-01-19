@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
+import { EuiBadge, EuiFlyout, EuiLink } from '@elastic/eui';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { capitalize } from 'lodash';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
-import { useExampleContext } from '../example_context';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { useExampleContext } from '../example_context';
+import { ChartWithCustomButtons } from './components';
+import { CustomDocView } from './components/custom_doc_view';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -76,8 +78,10 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
     getDocViewer:
       (prev, { context }) =>
       (params) => {
+        const { openInNewTab, updateESQLQuery } = params.actions;
         const recordId = params.record.id;
         const prevValue = prev(params);
+
         return {
           title: `Record #${recordId}`,
           docViewsRegistry: (registry) => {
@@ -85,13 +89,12 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               id: 'doc_view_example',
               title: 'Example',
               order: 0,
-              component: () => (
-                <EuiPanel color="transparent" hasShadow={false}>
-                  <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
-                  <pre data-test-subj="exampleDataSourceProfileDocViewRecord">
-                    {context.formatRecord(params.record.flattened)}
-                  </pre>
-                </EuiPanel>
+              render: () => (
+                <CustomDocView
+                  formattedRecord={context.formatRecord(params.record.flattened)}
+                  openInNewTab={openInNewTab}
+                  updateESQLQuery={updateESQLQuery}
+                />
               ),
             });
 
@@ -264,8 +267,6 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
      * @param prev
      */
     getRecommendedFields: (prev) => () => {
-      const prevValue = prev ? prev() : {};
-
       // Define example recommended field names for the example logs data source
       const exampleRecommendedFieldNames: Array<DataViewField['name']> = [
         'log.level',
@@ -275,8 +276,18 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ];
 
       return {
-        ...prevValue,
+        ...prev(),
         recommendedFields: exampleRecommendedFieldNames,
+      };
+    },
+    getChartSectionConfiguration: (prev) => (params) => {
+      return {
+        ...prev(params),
+        renderChartSection: (props) => (
+          <ChartWithCustomButtons {...props} actions={params.actions} />
+        ),
+        localStorageKeyPrefix: 'discover:exampleDataSource',
+        replaceDefaultChart: true,
       };
     },
   },

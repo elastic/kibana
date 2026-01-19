@@ -73,6 +73,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
         .sort(([, aCount], [, bCount]) => bCount - aCount)
         .map(([producer, count]) => (
           <EuiFacetButton
+            data-test-subj={`${producer}-LeftSidebarSelectOption`}
             key={producer}
             fullWidth
             quantity={count}
@@ -126,6 +127,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
         >
           <EuiFacetGroup>
             <EuiFacetButton
+              data-test-subj="allRuleTypesButton"
               fullWidth
               quantity={ruleTypeCountsByProducer.total}
               onClick={onClickAll}

@@ -241,7 +241,7 @@ export const useAddBulkToTimelineAction = ({
        * */
       const onResponseHandler = (localResponse: TimelineArgs) => {
         sendBulkEventsToTimelineHandler(localResponse.events);
-        if (tableId === TableId.alertsOnAlertsPage) {
+        if (tableId === TableId.alertsOnAlertsPage || tableId === TableId.alertsOnAttacksPage) {
           setLoading(false);
           clearSelection();
         } else {
@@ -256,7 +256,7 @@ export const useAddBulkToTimelineAction = ({
       };
 
       if (isAllSelected || selectAll) {
-        if (tableId === TableId.alertsOnAlertsPage) {
+        if (tableId === TableId.alertsOnAlertsPage || tableId === TableId.alertsOnAttacksPage) {
           setLoading(true);
         } else {
           dispatch(

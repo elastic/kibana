@@ -186,7 +186,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
       data-test-subj="paginated-basic-table"
     >
       <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         id="__table_generated-id"
         tabindex="-1"
       >
@@ -306,6 +306,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
                 <button
                   class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
@@ -756,7 +757,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
       </table>
     </div>
     <div
-      class="euiFlexGroup c5 emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup c5 emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"

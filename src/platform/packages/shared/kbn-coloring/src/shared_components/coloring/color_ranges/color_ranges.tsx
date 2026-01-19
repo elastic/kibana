@@ -55,6 +55,7 @@ export function ColorRanges({
       gutterSize="s"
     >
       {colorRanges.map((colorRange, index) => (
+        // @ts-expect-error upgrade typescript v5.9.3
         <EuiFlexItem grow={false} key={`${colorRange.end ?? 0 + colorRange.start ?? 0}${index}`}>
           <ColorRangeItem
             colorRange={colorRange}

@@ -148,3 +148,10 @@ export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'ti
 export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
+
+export interface ScheduledReportTemplateVariables {
+  title: string;
+  filename: string;
+  objectType: string;
+  date?: string;
+}

@@ -176,41 +176,15 @@ export {
   parseRuleCircuitBreakerErrorMessage,
 } from './rule_circuit_breaker_error_message';
 export {
-  getScopedQueryErrorMessage,
-  isScopedQueryError,
-} from './maintenance_window_scoped_query_error_message';
-export {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from './action_ref_prefix';
-export { gapStatus } from './constants';
-
-export type {
-  MaintenanceWindowModificationMetadata,
-  DateRange,
-  MaintenanceWindowSOProperties,
-  MaintenanceWindowSOAttributes,
-  MaintenanceWindow,
-  MaintenanceWindowCreateBody,
-  MaintenanceWindowClientContext,
-  MaintenanceWindowDeepLinkIds,
-  ScopedQueryAttributes,
-} from './maintenance_window';
-
-export {
-  MaintenanceWindowStatus,
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-  MAINTENANCE_WINDOW_FEATURE_ID,
-  MAINTENANCE_WINDOW_API_PRIVILEGES,
-  MAINTENANCE_WINDOWS_APP_ID,
-  MANAGEMENT_APP_ID,
-  MAINTENANCE_WINDOW_PATHS,
-  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
-  MAINTENANCE_WINDOW_DATE_FORMAT,
-  MAINTENANCE_WINDOW_DEFAULT_PER_PAGE,
-  MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
-} from './maintenance_window';
-
+export { gapStatus, gapFillStatus } from './constants';
+export type { GapStatus, GapFillStatus } from './constants';
+export { GAP_AUTO_FILL_STATUS } from './constants';
+export type { GapAutoFillStatus } from './constants';
+export { backfillInitiator } from './constants';
+export type { BackfillInitiator } from './constants';
 export {
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,
@@ -218,10 +192,13 @@ export {
 } from './alert_schema';
 
 export { getMaxAlertLimit, ALLOWED_MAX_ALERTS } from './max_alert_limit';
+export interface DateRange {
+  gte: string;
+  lte: string;
+}
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
-export const BASE_MAINTENANCE_WINDOW_API_PATH = '/api/maintenance_window';
 
 // Internal
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
@@ -229,11 +206,6 @@ export const INTERNAL_ALERTING_SNOOZE_RULE =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_snooze` as const;
 export const INTERNAL_ALERTING_API_FIND_RULES_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find` as const;
-
-export const INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH =
-  `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window` as const;
-export const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH =
-  `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_active` as const;
 
 export const INTERNAL_ALERTING_BACKFILL_API_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill` as const;
@@ -257,17 +229,11 @@ export const INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH =
 export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
   `${INTERNAL_ALERTING_GAPS_API_PATH}/_fill_by_id` as const;
 
+export const INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/auto_fill_scheduler` as const;
+
 export const INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_summary` as const;
-
-// External
-export const ARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_archive`;
-export const UNARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_unarchive`;
-export const CREATE_MAINTENANCE_WINDOW_API_PATH = BASE_MAINTENANCE_WINDOW_API_PATH;
-export const GET_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
-export const UPDATE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
-export const DELETE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
-export const FIND_MAINTENANCE_WINDOWS_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/_find`;
 
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;

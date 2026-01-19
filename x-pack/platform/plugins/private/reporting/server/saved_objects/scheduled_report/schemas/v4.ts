@@ -15,10 +15,13 @@ export * from './v3';
 
 export const rawNotificationSchema = rawNotificationSchemaV1.extends({
   email: schema.maybe(
-    rawEmailNotificationSchemaV1.extends({
-      subject: schema.maybe(schema.string({ maxLength: 1000 })),
-      message: schema.maybe(schema.string({ maxLength: 10000 })),
-    })
+    // This is now nullable to allow removing the email notification altogether
+    schema.nullable(
+      rawEmailNotificationSchemaV1.extends({
+        subject: schema.maybe(schema.string({ maxLength: 1000 })),
+        message: schema.maybe(schema.string({ maxLength: 10000 })),
+      })
+    )
   ),
 });
 

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { isObject } from 'lodash';
 import type { Condition, ManualIngestPipelineProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { ALWAYS_CONDITION, conditionToPainless } from '@kbn/streamlang';
+import type { ConditionWithSteps, StreamlangStep } from '@kbn/streamlang/types/streamlang';
 
 export const migrateRoutingIfConditionToStreamlang = (definition: Record<string, unknown>) => {
   const routingArr = (definition.ingest as { wired: { routing: OldRoutingDefinition[] } }).wired
@@ -208,3 +210,72 @@ type OldProcessorDefinition = Record<string, OldProcessorConfig>;
 type OldRoutingDefinition = Record<string, unknown> & {
   if: OldCondition;
 };
+
+/**
+ * Legacy where block format (before condition property rename)
+ * @deprecated Use StreamlangConditionBlock with 'condition' property instead
+ */
+export interface LegacyWhereBlock {
+  customIdentifier?: string;
+  where: ConditionWithSteps;
+}
+
+/**
+ * Type guard for legacy where blocks
+ */
+function isLegacyWhereBlock(step: unknown): step is LegacyWhereBlock {
+  return (
+    isObject(step) &&
+    'where' in step &&
+    !('action' in step) &&
+    isObject(step.where) &&
+    'steps' in step.where &&
+    Array.isArray((step.where as any).steps)
+  );
+}
+
+/**
+ * Migrates old where blocks that use 'where' property to new format using 'condition' property.
+ * This provides natural discrimination between where blocks and action steps with where clauses.
+ */
+export function migrateWhereBlocksToCondition(steps: unknown[]): {
+  steps: StreamlangStep[];
+  migrated: boolean;
+} {
+  let migrated = false;
+
+  const migrateStep = (step: unknown): StreamlangStep => {
+    // Check if this is a legacy where block
+    if (isLegacyWhereBlock(step)) {
+      migrated = true;
+      const { where, customIdentifier } = step;
+      const { steps: nestedSteps, ...conditionWithoutSteps } = where;
+
+      // Recursively migrate nested steps
+      const nestedResult = migrateWhereBlocksToCondition(nestedSteps);
+
+      // Return new format with 'condition' property
+      const migratedBlock: StreamlangStep = {
+        condition: {
+          ...conditionWithoutSteps,
+          steps: nestedResult.steps,
+        },
+      };
+
+      // Preserve customIdentifier if it exists
+      if (customIdentifier) {
+        (migratedBlock as any).customIdentifier = customIdentifier;
+      }
+
+      return migratedBlock;
+    }
+
+    // For action steps (or already-migrated where blocks), return as-is
+    // Action steps may have 'where' clauses, but those are conditions, not where blocks
+    return step as StreamlangStep;
+  };
+
+  const migratedSteps = steps.map(migrateStep);
+
+  return { steps: migratedSteps, migrated };
+}

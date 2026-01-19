@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@kbn/esql-language';
 import type { RemoveProcessor } from '../../../../types/processors';
 import { buildIgnoreMissingFilter } from './common';
 import { conditionToESQLAst } from '../condition_to_esql';
@@ -62,7 +62,6 @@ import { conditionToESQLAst } from '../condition_to_esql';
 export function convertRemoveProcessorToESQL(processor: RemoveProcessor): ESQLAstCommand[] {
   const {
     from,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     ignore_missing = false, // default: false (field must exist)
   } = processor;
 

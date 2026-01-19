@@ -23,6 +23,7 @@ export enum ServiceProviderKeys {
   elasticsearch = 'elasticsearch',
   googleaistudio = 'googleaistudio',
   googlevertexai = 'googlevertexai',
+  groq = 'groq',
   hugging_face = 'hugging_face',
   jinaai = 'jinaai',
   mistral = 'mistral',

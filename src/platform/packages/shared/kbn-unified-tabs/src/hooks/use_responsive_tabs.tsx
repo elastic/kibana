@@ -38,11 +38,16 @@ export const useResponsiveTabs = ({
 }: UseResponsiveTabsProps) => {
   const { euiTheme } = useEuiTheme();
   const dimensions = useResizeObserver(tabsContainerWithPlusElement);
-  const tabsSizeConfig = useMemo(
-    () =>
-      calculateResponsiveTabs({ items, containerWidth: dimensions.width, hasReachedMaxItemsCount }),
-    [items, dimensions.width, hasReachedMaxItemsCount]
-  );
+  const horizontalGap = parseInt(euiTheme.size.s, 10); // matches gap between tabs
+
+  const tabsSizeConfig = useMemo(() => {
+    return calculateResponsiveTabs({
+      items,
+      containerWidth: dimensions.width,
+      hasReachedMaxItemsCount,
+      horizontalGap,
+    });
+  }, [items, dimensions.width, hasReachedMaxItemsCount, horizontalGap]);
 
   const [scrollState, setScrollState] = useState<ScrollState>();
 
@@ -66,9 +71,9 @@ export const useResponsiveTabs = ({
   useEvent('scroll', onScrollThrottled, tabsContainerElement);
 
   useEffect(() => {
-    onScrollThrottled();
-    // `isScrollable` added here to trigger in cases when the container width changes
-  }, [tabsContainerElement, onScrollThrottled, tabsSizeConfig.isScrollable]);
+    onScroll();
+    // `dimensions.width` added here to trigger in cases when the container width changes
+  }, [onScroll, dimensions.width]);
 
   const scrollLeft = useCallback(() => {
     if (tabsContainerElement) {
@@ -160,13 +165,14 @@ export const useResponsiveTabs = ({
       user-select: none;
       scrollbar-width: none; // hide the scrollbar
       scroll-behavior: smooth;
+      padding-inline: ${euiTheme.size.xs}; // space for curved notch
       &::-webkit-scrollbar {
         display: none;
       }
       transform: translateZ(0);
       ${overflowGradient}
     `;
-  }, [scrollState, euiTheme.size.s]);
+  }, [scrollState, euiTheme.size.s, euiTheme.size.xs]);
 
   return {
     tabsSizeConfig,

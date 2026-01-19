@@ -6,12 +6,12 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import type { AxiosInstance } from 'axios';
+import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '../../types';
-import type { ExecutorParams } from '../../sub_action_framework/types';
+import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 
 type RecordUnknown = Record<string, unknown>;
 
@@ -20,16 +20,28 @@ export const generateExecutorFunction = ({
   getAxiosInstanceWithAuth,
 }: {
   actions: ConnectorSpec['actions'];
-  getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
+  getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
-  ): Promise<ConnectorTypeExecutorResult<RecordUnknown | {}>> {
-    const { actionId, params, secrets, logger } = execOptions;
+  ): Promise<ConnectorTypeExecutorResult<unknown>> {
+    const {
+      actionId: connectorId,
+      config,
+      connectorTokenClient,
+      globalAuthHeaders,
+      params,
+      secrets,
+      logger,
+    } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
-    let data = null;
 
-    const axiosInstance = await getAxiosInstanceWithAuth({ ...secrets });
+    const axiosInstance = await getAxiosInstanceWithAuth({
+      connectorId,
+      connectorTokenClient,
+      additionalHeaders: globalAuthHeaders,
+      secrets,
+    });
 
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
@@ -37,19 +49,29 @@ export const generateExecutorFunction = ({
       throw new Error(errorMessage);
     }
 
-    // TODO - we need to update ActionContext in the spec
     const actionContext = {
       log: logger,
       client: axiosInstance,
       secrets,
+      config,
     };
 
-    // @ts-ignore
-    const res = await actions[subAction].handler(actionContext, subActionParams);
+    try {
+      let data = {};
+      const res = await actions[subAction].handler(actionContext, subActionParams);
 
-    if (res != null) {
-      data = res;
+      if (res != null) {
+        data = res;
+      }
+
+      return { status: 'ok', data, actionId: connectorId };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`error on ${connectorId} event: ${errorMessage}`);
+      return {
+        status: 'error',
+        message: errorMessage,
+        actionId: connectorId,
+      };
     }
-
-    return { status: 'ok', data: data ?? {}, actionId };
   };

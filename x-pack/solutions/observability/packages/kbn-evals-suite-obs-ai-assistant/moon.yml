@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-obs-ai-assistant'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ai-assistant'
+  defaultOwner: '@elastic/obs-ai-team'
 toolchain:
   default: node
 language: typescript
@@ -14,11 +14,11 @@ project:
   name: '@kbn/evals-suite-obs-ai-assistant'
   description: Moon project for @kbn/evals-suite-obs-ai-assistant
   channel: ''
-  owner: '@elastic/obs-ai-assistant'
+  owner: '@elastic/obs-ai-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
 dependsOn:
-  - '@kbn/apm-synthtrace-client'
+  - '@kbn/synthtrace-client'
   - '@kbn/evals'
   - '@kbn/observability-ai-assistant-plugin'
   - '@kbn/tooling-log'
@@ -34,8 +34,9 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/scout'
   - '@kbn/some-dev-log'
-  - '@kbn/apm-synthtrace'
-  - '@kbn/onechat-common'
+  - '@kbn/synthtrace'
+  - '@kbn/agent-builder-common'
+  - '@kbn/es-snapshot-loader'
 tags:
   - functional-tests
   - package

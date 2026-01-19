@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query } from '@kbn/es-query';
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import type { ISearchOptions } from '@kbn/search-types';
@@ -123,6 +123,11 @@ export interface SearchSourceFields {
    * Allow querying to use a point-in-time ID for paging results
    */
   pit?: estypes.SearchPointInTimeReference;
+  /**
+   * {@link ProjectRouting}
+   */
+  projectRouting?: ProjectRouting;
+  timezone?: string;
 
   parent?: SearchSourceFields;
 }
@@ -178,6 +183,11 @@ export type SerializedSearchSourceFields = {
   searchAfter?: estypes.SortResults;
   timeout?: string;
   terminate_after?: number;
+  /**
+   * {@link ProjectRouting}
+   */
+  projectRouting?: ProjectRouting;
+  timezone?: string;
 
   parent?: SerializedSearchSourceFields;
 };

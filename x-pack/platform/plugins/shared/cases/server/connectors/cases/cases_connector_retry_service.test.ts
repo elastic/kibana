@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 
-import type { BackoffFactory } from '../../common/retry_service/types';
+import type { BackoffFactory } from '@kbn/response-ops-retry-service';
 import { CasesConnectorError } from './cases_connector_error';
 import { CasesConnectorRetryService } from './cases_connector_retry_service';
 

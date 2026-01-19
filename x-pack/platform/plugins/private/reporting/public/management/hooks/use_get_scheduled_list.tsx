@@ -15,15 +15,16 @@ export const getKey = queryKeys.getScheduledList;
 interface GetScheduledListQueryProps {
   page?: number;
   perPage?: number;
+  search?: string;
 }
 
 export const useGetScheduledList = (props: GetScheduledListQueryProps) => {
   const { http } = useKibana().services;
 
-  const { page = 1, perPage = 50 } = props;
+  const { page = 1, perPage = 50, search } = props;
   return useQuery({
-    queryKey: getKey({ page, perPage }),
-    queryFn: () => getScheduledReportsList({ http, page, perPage }),
+    queryKey: getKey({ page, perPage, search }),
+    queryFn: () => getScheduledReportsList({ http, page, perPage, search }),
     keepPreviousData: true,
   });
 };

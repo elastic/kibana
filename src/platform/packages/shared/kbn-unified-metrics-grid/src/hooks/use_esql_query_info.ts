@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser, Walker } from '@kbn/esql-ast';
+import { Parser, Walker } from '@kbn/esql-language';
 import { useMemo } from 'react';
 import { extractFilters } from '../utils/extract_filters';
 

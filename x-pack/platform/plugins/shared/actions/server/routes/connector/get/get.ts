@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { GetConnectorParamsV1 } from '../../../../common/routes/connector/apis/get';
 import { getConnectorParamsSchemaV1 } from '../../../../common/routes/connector/apis/get';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
-import { transformConnectorResponseV2 } from '../common_transforms';
+import { transformConnectorResponseV1 } from '../common_transforms';
 import type { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import type { ActionsRequestHandlerContext } from '../../../types';
@@ -38,6 +38,9 @@ export const getConnectorRoute = (
             body: () => connectorResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
         },
       },
     },
@@ -46,7 +49,7 @@ export const getConnectorRoute = (
         const actionsClient = (await context.actions).getActionsClient();
         const { id }: GetConnectorParamsV1 = req.params;
         return res.ok({
-          body: transformConnectorResponseV2(await actionsClient.get({ id })),
+          body: transformConnectorResponseV1(await actionsClient.get({ id })),
         });
       })
     )

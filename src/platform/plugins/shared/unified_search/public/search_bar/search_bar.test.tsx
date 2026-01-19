@@ -23,6 +23,7 @@ import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
 import { createMockStorage, createMockTimeHistory } from './mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 const startMock = coreMock.createStart();
 
@@ -74,6 +75,7 @@ function wrapSearchBarInContext(
       ...startMock.chrome,
       getActiveSolutionNavId$: jest.fn().mockReturnValue(new BehaviorSubject('oblt')),
     },
+    kql: kqlPluginMock.createStartContract(),
     uiSettings: startMock.uiSettings,
     settings: startMock.settings,
     notifications: startMock.notifications,
@@ -410,6 +412,14 @@ describe('SearchBar', () => {
   });
 
   describe('draft', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
     it('should prefill with the draft query if provided', async () => {
       const draft = {
         query: { language: 'kuery', query: 'test_draft' },
@@ -428,12 +438,13 @@ describe('SearchBar', () => {
         })
       );
 
-      expect(onDraftChange).toHaveBeenCalledWith(draft);
-
       await waitFor(() => {
         const textarea = document.querySelector('textarea');
         expect(textarea).toHaveValue(draft.query.query);
       });
+
+      jest.advanceTimersByTime(500);
+      expect(onDraftChange).not.toHaveBeenCalled(); // no change to draft
     });
 
     it('should check for query type mismatch', async () => {
@@ -454,12 +465,13 @@ describe('SearchBar', () => {
         })
       );
 
-      expect(onDraftChange).toHaveBeenCalledWith(undefined);
-
       await waitFor(() => {
         const textarea = document.querySelector('textarea');
         expect(textarea).toHaveValue(kqlQuery.query);
       });
+
+      jest.advanceTimersByTime(500);
+      expect(onDraftChange).toHaveBeenCalledWith(undefined);
     });
   });
 

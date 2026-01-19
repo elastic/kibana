@@ -50,12 +50,11 @@ export const useTabs = ({ path }: UseTabsParams): UseTabsResult => {
     }
 
     // we check the tab saved in local storage and use it if it exists in the list of tabs to display
-    const tabSavedInlocalStorage = storage.get(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS);
-    if (
-      tabSavedInlocalStorage &&
-      tabsDisplayed.map((tab) => tab.id).includes(tabSavedInlocalStorage)
-    ) {
-      return tabSavedInlocalStorage;
+    const tabSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS);
+    const savedTabExists =
+      tabSavedInLocalStorage && tabsDisplayed.map((tab) => tab.id).includes(tabSavedInLocalStorage);
+    if (savedTabExists) {
+      return tabSavedInLocalStorage;
     }
 
     const defaultTab = tabsDisplayed[0].id;

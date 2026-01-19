@@ -27,7 +27,6 @@ describe('buildStateSubscribe', () => {
 
   const getSubscribeFn = () => {
     return buildStateSubscribe({
-      appState: stateContainer.appState,
       savedSearchState: stateContainer.savedSearchState,
       dataState: stateContainer.dataState,
       internalState: stateContainer.internalState,
@@ -53,14 +52,14 @@ describe('buildStateSubscribe', () => {
   });
 
   it('should not call refetch$ if nothing changes', async () => {
-    await getSubscribeFn()(stateContainer.appState.get());
+    await getSubscribeFn()(stateContainer.getCurrentTab().appState);
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if viewMode changes', async () => {
     await getSubscribeFn()({
-      ...stateContainer.appState.get(),
+      ...stateContainer.getCurrentTab().appState,
       dataSource: {
         type: DataSourceType.Esql,
       },
@@ -86,6 +85,12 @@ describe('buildStateSubscribe', () => {
 
   it('should call refetch$ if breakdownField has changed', async () => {
     await getSubscribeFn()({ breakdownField: '💣' });
+
+    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+  });
+
+  it('should call refetch$ if interval has changed', async () => {
+    await getSubscribeFn()({ interval: 'm' });
 
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
   });

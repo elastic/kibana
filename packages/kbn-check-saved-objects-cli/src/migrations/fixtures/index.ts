@@ -8,4 +8,5 @@
  */
 
 export type { FixtureTemplate, ModelVersionFixtures, ModelVersionSchemaProperty } from './types';
+export { getFixturesBasePath } from './get_type_fixtures';
 export { getLatestTypeFixtures } from './get_latest_type_fixtures';

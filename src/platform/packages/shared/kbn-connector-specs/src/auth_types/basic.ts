@@ -9,12 +9,21 @@
 
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
-import type { AuthTypeSpec } from '../connector_spec';
+import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import * as i18n from './translations';
 
-const authSchema = z.object({
-  username: z.string().meta({ sensitive: true }).describe('Username'),
-  password: z.string().meta({ sensitive: true }).describe('Password'),
-});
+const authSchema = z
+  .object({
+    username: z
+      .string()
+      .min(1, { message: i18n.BASIC_AUTH_USERNAME_REQUIRED_MESSAGE })
+      .meta({ label: i18n.BASIC_AUTH_USERNAME_LABEL }),
+    password: z
+      .string()
+      .min(1, { message: i18n.BASIC_AUTH_PASSWORD_REQUIRED_MESSAGE })
+      .meta({ sensitive: true, label: i18n.BASIC_AUTH_PASSWORD_LABEL }),
+  })
+  .meta({ label: i18n.BASIC_AUTH_LABEL });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
@@ -25,7 +34,11 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const BasicAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'basic',
   schema: authSchema,
-  configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
+  configure: async (
+    _: AuthContext,
+    axiosInstance: AxiosInstance,
+    secret: AuthSchemaType
+  ): Promise<AxiosInstance> => {
     // set global defaults
     axiosInstance.defaults.auth = {
       username: secret.username,

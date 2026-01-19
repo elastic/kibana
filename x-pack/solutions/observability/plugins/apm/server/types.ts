@@ -52,7 +52,14 @@ import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
-import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server/types';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server/types';
+import type {
+  ObservabilityAgentBuilderPluginSetup,
+  ObservabilityAgentBuilderPluginStart,
+} from '@kbn/observability-agent-builder-plugin/server';
 import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
@@ -76,8 +83,9 @@ export interface APMPluginSetupDependencies {
   share: SharePluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
   // optional dependencies
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
-  onechat?: OnechatPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
   actions?: ActionsPlugin['setup'];
   alerting?: AlertingServerSetup;
   cloud?: CloudSetup;
@@ -104,8 +112,9 @@ export interface APMPluginStartDependencies {
   share: undefined;
   logsDataAccess: LogsDataAccessPluginStart;
   // optional dependencies
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
-  onechat?: OnechatPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
   actions?: ActionsPlugin['start'];
   alerting?: AlertingServerStart;
   cloud?: undefined;

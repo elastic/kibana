@@ -19,8 +19,8 @@
     "@kbn/std",
     "@kbn/test-subj-selector",
     "@kbn/core-http-common",
-    "@kbn/apm-synthtrace-client",
-    "@kbn/apm-synthtrace",
+    "@kbn/synthtrace-client",
+    "@kbn/synthtrace"
   ],
   "exclude": [
     "target/**/*",

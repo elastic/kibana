@@ -8,8 +8,9 @@
  */
 
 import _ from 'lodash';
-import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { Filter } from '@kbn/es-query';
 import {
   compareFilters,
@@ -21,8 +22,11 @@ import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
 } from '@kbn/es-query/src/filters/build_filters';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getIndexPatterns, getSearchService } from '../../services';
 import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
@@ -135,6 +139,34 @@ export const createFilter = async (
   return filter;
 };
 
+const createFilterFromRawColumnsESQL = async (
+  column: DatatableColumn,
+  value: string | number | boolean
+) => {
+  const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
+  if (!indexPattern) {
+    return [];
+  }
+
+  const dataView = await getESQLAdHocDataview({
+    query: 'FROM ' + indexPattern,
+    dataViewsService: getIndexPatterns() as DataViewsPublicPluginStart,
+  });
+  const field = dataView.getFieldByName(column.name);
+
+  // Field should be present in the data view and filterable
+  if (!field || !field.filterable) {
+    return [];
+  }
+  // Match phrase or phrases filter based on whether value is an array
+  // The advantage of match_phrase is that you get a term query when it's not a text and
+  // match phrase if it is a text. So you don't have to worry about the field type.
+  if (Array.isArray(value)) {
+    return [buildPhrasesFilter({ name: column.name, type: column.meta?.type }, value, dataView)];
+  }
+  return [buildPhraseFilter({ name: column.name, type: column.meta?.type }, value, dataView)];
+};
+
 export const createFilterESQL = async (
   table: Pick<Datatable, 'rows' | 'columns'>,
   columnIndex: number,
@@ -160,7 +192,10 @@ export const createFilterESQL = async (
 
   const filters: Filter[] = [];
 
-  if (['date_histogram', 'histogram'].includes(operationType)) {
+  if (
+    typeof operationType === 'string' &&
+    ['date_histogram', 'histogram'].includes(operationType)
+  ) {
     filters.push(
       buildSimpleNumberRangeFilter(
         sourceField,
@@ -174,6 +209,8 @@ export const createFilterESQL = async (
         indexPattern
       )
     );
+  } else if (!operationType) {
+    filters.push(...(await createFilterFromRawColumnsESQL(column, value)));
   } else {
     filters.push(buildSimpleExistFilter(sourceField, indexPattern));
   }
@@ -187,7 +224,6 @@ export const createFiltersFromValueClickAction = async ({
   negate,
 }: ValueClickDataContext) => {
   const filters: Filter[] = [];
-
   for (const value of data) {
     if (!value) {
       continue;
@@ -209,6 +245,13 @@ export const createFiltersFromValueClickAction = async ({
     compareFilters(a, b, COMPARE_ALL_OPTIONS)
   );
 };
+
+function getOperationForWhere(value: unknown, negate: boolean) {
+  if (value == null) {
+    return negate ? 'is_not_null' : 'is_null';
+  }
+  return negate ? '-' : '+';
+}
 
 /** @public */
 export const appendFilterToESQLQueryFromValueClickAction = ({
@@ -241,7 +284,7 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
           queryString,
           column.name,
           value,
-          value == null ? 'is_null' : negate ? '-' : '+',
+          getOperationForWhere(value, negate || false),
           column.meta?.type
         );
 

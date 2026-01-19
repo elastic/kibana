@@ -12,12 +12,15 @@ import { render } from '@testing-library/react';
 import type { MetricsExperienceGridContentProps } from './metrics_experience_grid_content';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import * as hooks from '../hooks';
-import type { UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import type {
+  UnifiedHistogramFetch$,
+  UnifiedHistogramFetchParams,
+} from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Subject } from 'rxjs';
-import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField, Dimension } from '../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from '../context/metrics_experience_state_provider';
+import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 
 jest.mock('../context/metrics_experience_state_provider');
 jest.mock('../hooks');
@@ -40,10 +43,6 @@ const useMetricsExperienceStateMock =
   metricsExperienceStateProvider.useMetricsExperienceState as jest.MockedFunction<
     typeof metricsExperienceStateProvider.useMetricsExperienceState
   >;
-
-const useFilteredMetricFieldsMock = hooks.useFilteredMetricFields as jest.MockedFunction<
-  typeof hooks.useFilteredMetricFields
->;
 
 const usePaginationMock = hooks.usePagination as jest.MockedFunction<typeof hooks.usePagination>;
 
@@ -68,52 +67,47 @@ const allFields: MetricField[] = [
 ];
 
 describe('MetricsExperienceGridContent', () => {
-  let input$: Subject<UnifiedHistogramInputMessage>;
+  let fetch$: UnifiedHistogramFetch$;
+  let fetchParams: UnifiedHistogramFetchParams;
   let defaultProps: MetricsExperienceGridContentProps;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    fetchParams = getFetchParamsMock({
+      dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
+      filters: [],
+      query: { esql: 'FROM metrics-*' },
+      esqlVariables: [],
+      relativeTimeRange: { from: 'now-15m', to: 'now' },
+    });
+
     // Create new Subject for each test to prevent memory leaks
-    input$ = new Subject<UnifiedHistogramInputMessage>();
+    fetch$ = getFetch$Mock(fetchParams);
 
     defaultProps = {
       fields: allFields,
-      timeRange: { from: 'now-15m', to: 'now' },
       services: {} as any,
-      input$,
-      requestParams: {
-        getTimeRange: () => ({ from: 'now-15m', to: 'now' }),
-        filters: [],
-        query: { esql: 'FROM metrics-*' },
-        esqlVariables: [],
-        relativeTimeRange: { from: 'now-15m', to: 'now' },
-        updateTimeRange: () => {},
-      },
+      discoverFetch$: fetch$,
+      fetchParams,
       onBrushEnd: jest.fn(),
       onFilter: jest.fn(),
-      searchSessionId: 'test-session-id',
-      abortController: new AbortController(),
+      actions: {
+        openInNewTab: jest.fn(),
+        updateESQLQuery: jest.fn(),
+      },
       histogramCss: { name: '', styles: '' },
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
-      dimensions: [],
-      valueFilters: [],
+      selectedDimensions: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onValuesChange: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
-    });
-
-    useFilteredMetricFieldsMock.mockReturnValue({
-      fields: allFields,
-      filters: {},
-      isLoading: false,
     });
 
     usePaginationMock.mockReturnValue({
@@ -125,7 +119,7 @@ describe('MetricsExperienceGridContent', () => {
 
   afterEach(() => {
     // Complete the Subject to prevent memory leaks and hanging tests
-    input$.complete();
+    fetch$.complete();
   });
 
   it('renders the grid with paginated fields', () => {
@@ -137,19 +131,13 @@ describe('MetricsExperienceGridContent', () => {
   });
 
   it('renders the no data state when filtered/paginated fields returns no fields', () => {
-    useFilteredMetricFieldsMock.mockReturnValue({
-      fields: [],
-      filters: {},
-      isLoading: false,
-    });
-
     usePaginationMock.mockReturnValue({
       currentPageItems: [],
       totalPages: 0,
       totalCount: 0,
     });
 
-    const { getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} />, {
+    const { getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} fields={[]} />, {
       wrapper: IntlProvider,
     });
 
@@ -167,11 +155,9 @@ describe('MetricsExperienceGridContent', () => {
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
-      dimensions: [],
-      valueFilters: [],
+      selectedDimensions: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onValuesChange: jest.fn(),
       isFullscreen: false,
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
@@ -179,12 +165,6 @@ describe('MetricsExperienceGridContent', () => {
     });
 
     const cpuFields = allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu'));
-
-    useFilteredMetricFieldsMock.mockReturnValue({
-      fields: cpuFields,
-      filters: {},
-      isLoading: false,
-    });
 
     usePaginationMock.mockReturnValue({
       currentPageItems: cpuFields.slice(0, 5),
@@ -200,21 +180,6 @@ describe('MetricsExperienceGridContent', () => {
     );
 
     expect(getByText('10 metrics')).toBeInTheDocument();
-  });
-
-  it('displays loading state when filtering is in progress', () => {
-    useFilteredMetricFieldsMock.mockReturnValue({
-      fields: allFields,
-      filters: {},
-      isLoading: true,
-    });
-
-    const { getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    // Should still render the grid but show loading indicator
-    expect(getByTestId('metricsExperienceRendered')).toBeInTheDocument();
   });
 
   it('renders the <MetricsGrid />', () => {

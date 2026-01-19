@@ -15,20 +15,25 @@ import { type IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { EsError, type IEsError } from '@kbn/search-errors';
-import type { ISessionService } from '..';
+import type { ISessionService, SearchInterceptorDeps } from '..';
 import { SearchSessionState } from '..';
-
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';
 import { BehaviorSubject } from 'rxjs';
 import { dataPluginMock } from '../../mocks';
-import { UI_SETTINGS } from '../../../common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  UI_SETTINGS,
+} from '../../../common';
 import type { SearchServiceStartDependencies } from '../search_service';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
-
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
+import type { ICPSManager } from '@kbn/cps-utils';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 
 jest.mock('./create_request_hash', () => {
   const originalModule = jest.requireActual('./create_request_hash');
@@ -145,9 +150,9 @@ describe('SearchInterceptor', () => {
       }
     });
 
-    next.mockClear();
-    error.mockClear();
-    complete.mockClear();
+    next.mockReset();
+    error.mockReset();
+    complete.mockReset();
     jest.clearAllTimers();
     jest.clearAllMocks();
 
@@ -292,7 +297,207 @@ describe('SearchInterceptor', () => {
       expect(error).not.toHaveBeenCalled();
     });
 
-    test('should make secondary request if first call returns partial result', async () => {
+    test('should make secondary request if first call returns partial result (ES|QL)', async () => {
+      const responses = [
+        {
+          time: 10,
+          value: {
+            body: {
+              id: '1',
+              is_running: true,
+              documents_found: 0,
+              values_loaded: 0,
+              all_columns: [],
+              columns: [],
+              values: [],
+              _clusters: {},
+            },
+          },
+        },
+        {
+          time: 20,
+          value: {
+            body: {
+              id: '1',
+              is_running: false,
+              took: 8,
+              is_partial: false,
+              documents_found: 5,
+              values_loaded: 5,
+              all_columns: [
+                {
+                  name: 'results',
+                  type: 'long',
+                },
+                {
+                  name: 'timestamp',
+                  type: 'date',
+                },
+              ],
+              columns: [
+                {
+                  name: 'results',
+                  type: 'long',
+                },
+                {
+                  name: 'timestamp',
+                  type: 'date',
+                },
+              ],
+              values: [
+                [1, '2025-11-17T11:00:00.000Z'],
+                [1, '2025-11-17T09:30:00.000Z'],
+                [1, '2025-11-17T12:00:00.000Z'],
+                [1, '2025-11-17T11:30:00.000Z'],
+                [1, '2025-11-17T16:30:00.000Z'],
+              ],
+            },
+          },
+        },
+      ];
+
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+      const response = searchInterceptor.search(
+        {
+          params: {
+            query:
+              'FROM kibana_sample_data_logs | LIMIT 5 |EVAL DELAY(1s)\n| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)',
+            locale: 'en',
+            include_execution_metadata: true,
+            filter: {
+              bool: {
+                must: [],
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        format: 'strict_date_optional_time',
+                        gte: '2025-11-17T07:00:00.000Z',
+                        lte: '2025-11-18T06:59:59.999Z',
+                      },
+                    },
+                  },
+                ],
+                should: [],
+                must_not: [],
+              },
+            },
+            dropNullColumns: true,
+          },
+        },
+        { pollInterval: 0, strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+      );
+      response.subscribe({ next, error, complete });
+
+      await timeTravel(10);
+
+      expect(next).toHaveBeenCalled();
+      expect(next.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "id": "1",
+          "isPartial": undefined,
+          "isRestored": false,
+          "isRunning": true,
+          "rawResponse": Object {
+            "_clusters": Object {},
+            "all_columns": Array [],
+            "columns": Array [],
+            "documents_found": 0,
+            "id": "1",
+            "is_running": true,
+            "values": Array [],
+            "values_loaded": 0,
+          },
+          "requestParams": Object {},
+          "warning": undefined,
+        }
+      `);
+      expect(complete).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+
+      await timeTravel(20);
+
+      expect(next).toHaveBeenCalledTimes(2);
+      expect(next.mock.calls[1][0]).toMatchInlineSnapshot(`
+        Object {
+          "id": "1",
+          "isPartial": false,
+          "isRestored": false,
+          "isRunning": false,
+          "rawResponse": Object {
+            "all_columns": Array [
+              Object {
+                "name": "results",
+                "type": "long",
+              },
+              Object {
+                "name": "timestamp",
+                "type": "date",
+              },
+            ],
+            "columns": Array [
+              Object {
+                "name": "results",
+                "type": "long",
+              },
+              Object {
+                "name": "timestamp",
+                "type": "date",
+              },
+            ],
+            "documents_found": 5,
+            "id": "1",
+            "is_partial": false,
+            "is_running": false,
+            "took": 8,
+            "values": Array [
+              Array [
+                1,
+                "2025-11-17T11:00:00.000Z",
+              ],
+              Array [
+                1,
+                "2025-11-17T09:30:00.000Z",
+              ],
+              Array [
+                1,
+                "2025-11-17T12:00:00.000Z",
+              ],
+              Array [
+                1,
+                "2025-11-17T11:30:00.000Z",
+              ],
+              Array [
+                1,
+                "2025-11-17T16:30:00.000Z",
+              ],
+            ],
+            "values_loaded": 5,
+          },
+          "requestParams": Object {},
+          "warning": undefined,
+        }
+      `);
+      expect(complete).toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+
+      // check that the query and filter weren't included in the polling request
+      expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+      const firstRequest = (
+        mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+      )[1];
+      expect(JSON.parse(firstRequest?.body as string).params?.query).toBeDefined();
+
+      const secondRequest = (
+        mockCoreSetup.http.post.mock.calls[1] as unknown as [string, HttpFetchOptions]
+      )[1];
+      expect(JSON.parse(secondRequest?.body as string).params?.query).not.toBeDefined();
+      // FIXME: should be removed after https://github.com/elastic/elasticsearch/issues/138439
+      expect(JSON.parse(secondRequest?.body as string).params?.dropNullColumns).toBeDefined();
+    });
+
+    test('should make secondary request if first call returns partial result (DSL)', async () => {
       const responses = [
         {
           time: 10,
@@ -850,7 +1055,6 @@ describe('SearchInterceptor', () => {
       afterEach(() => {
         const sessionServiceMock = sessionService as jest.Mocked<ISessionService>;
         sessionServiceMock.getSearchOptions.mockReset();
-        mockCoreSetup.http.post.mockReset();
       });
 
       test('gets session search options from session service', async () => {
@@ -1159,7 +1363,7 @@ describe('SearchInterceptor', () => {
         const abort = sessionService.trackSearch.mock.calls[0][0].abort;
         expect(abort).toBeInstanceOf(Function);
 
-        abort();
+        abort(AbortReason.REPLACED);
 
         await timeTravel(10);
 
@@ -1927,6 +2131,363 @@ describe('SearchInterceptor', () => {
         });
 
         response.subscribe({ error });
+      });
+    });
+
+    describe('partial results', () => {
+      beforeEach(() => {
+        mockCoreSetup.http.post.mockResolvedValue(
+          getMockSearchResponse({
+            id: '1',
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+          })
+        );
+      });
+
+      test('should request partial results and throw error if timed out', async () => {
+        const abortController = new AbortController();
+        setTimeout(() => {
+          abortController.abort(AbortReason.TIMEOUT);
+        }, 50);
+
+        const response = searchInterceptor.search(
+          {},
+          { abortSignal: abortController.signal, pollInterval: 100 }
+        );
+        response.subscribe({ next, error });
+
+        await timeTravel(); // Run first request/response
+
+        expect(next).toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+
+        await timeTravel(50); // Run until abort
+
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+        expect(mockCoreSetup.http.post.mock.calls[1]).toMatchInlineSnapshot(`
+          Array [
+            "/internal/search/ese/1",
+            Object {
+              "asResponse": true,
+              "body": "{\\"id\\":\\"1\\",\\"params\\":{},\\"retrieveResults\\":true,\\"stream\\":true}",
+              "context": undefined,
+              "signal": AbortSignal {},
+              "version": "1",
+            },
+          ]
+        `);
+        expect(error).toHaveBeenCalled();
+      });
+
+      test('should request partial results and not throw error if canceled', async () => {
+        const abortController = new AbortController();
+        setTimeout(() => {
+          abortController.abort(AbortReason.CANCELED);
+        }, 50);
+
+        const response = searchInterceptor.search(
+          {},
+          { abortSignal: abortController.signal, pollInterval: 100 }
+        );
+        response.subscribe({ next, error });
+
+        await timeTravel(); // Run first request/response
+
+        expect(next).toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+
+        await timeTravel(50); // Run until abort
+
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+        expect(mockCoreSetup.http.post.mock.calls[1]).toMatchInlineSnapshot(`
+          Array [
+            "/internal/search/ese/1",
+            Object {
+              "asResponse": true,
+              "body": "{\\"id\\":\\"1\\",\\"params\\":{},\\"retrieveResults\\":true,\\"stream\\":true}",
+              "context": undefined,
+              "signal": AbortSignal {},
+              "version": "1",
+            },
+          ]
+        `);
+        expect(error).not.toHaveBeenCalled();
+      });
+
+      test('should not request partial results and throw error if canceled for a reason other than CANCELED/TIMEOUT', async () => {
+        const abortController = new AbortController();
+        setTimeout(() => {
+          abortController.abort(AbortReason.CLEANUP);
+        }, 50);
+
+        const response = searchInterceptor.search(
+          {},
+          { abortSignal: abortController.signal, pollInterval: 100 }
+        );
+        response.subscribe({ next, error });
+
+        await timeTravel(); // Run first request/response
+
+        expect(next).toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+
+        await timeTravel(50); // Run until abort
+
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
+        expect(error).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('project_routing parameter handling', () => {
+    const createMockCPSManager = (
+      projectRouting: string | undefined,
+      access: ProjectRoutingAccess = ProjectRoutingAccess.EDITABLE
+    ): ICPSManager =>
+      ({
+        getProjectRouting: jest.fn().mockReturnValue(projectRouting),
+        getProjectPickerAccess: jest.fn().mockReturnValue(access),
+      } as unknown as ICPSManager);
+
+    const getSearchInterceptor = (overrides?: Partial<SearchInterceptorDeps>) => {
+      return new SearchInterceptor({
+        toasts: mockCoreSetup.notifications.toasts,
+        startServices: new Promise((resolve) => {
+          resolve([
+            mockCoreStart,
+            {
+              inspector: {} as unknown as InspectorStart,
+            } as unknown as SearchServiceStartDependencies,
+            {},
+          ]);
+        }),
+        uiSettings: mockCoreSetup.uiSettings,
+        http: mockCoreSetup.http,
+        executionContext: mockCoreSetup.executionContext,
+        session: sessionService,
+        searchConfig: getMockSearchConfig({}),
+        ...overrides,
+      });
+    };
+    beforeEach(() => {
+      mockCoreSetup.http.post.mockResolvedValue(getMockSearchResponse());
+    });
+
+    describe('ESQL_ASYNC_SEARCH_STRATEGY', () => {
+      test('User passes "_alias:*" with global "_alias:_origin" - does not send to ES', async () => {
+        searchInterceptor = getSearchInterceptor({
+          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
+        });
+
+        await searchInterceptor
+          .search(
+            { params: {} },
+            { projectRouting: '_alias:*', strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+          )
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBeUndefined();
+      });
+
+      test('User passes "_alias:*" with global "_alias:*" - does not send to ES', async () => {
+        searchInterceptor = getSearchInterceptor({
+          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:*')),
+        });
+
+        await searchInterceptor
+          .search(
+            { params: {} },
+            { projectRouting: '_alias:*', strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+          )
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBeUndefined();
+      });
+
+      test('User passes "_alias:_origin" with global "_alias:_origin" - sends to ES', async () => {
+        searchInterceptor = getSearchInterceptor({
+          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
+        });
+
+        await searchInterceptor
+          .search(
+            { params: {} },
+            { projectRouting: '_alias:_origin', strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+          )
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBe('_alias:_origin');
+      });
+
+      test('User passes "_alias:_origin" with global "_alias:*" - sends to ES', async () => {
+        searchInterceptor = getSearchInterceptor({
+          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:*')),
+        });
+
+        await searchInterceptor
+          .search(
+            { params: {} },
+            { projectRouting: '_alias:_origin', strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+          )
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBe('_alias:_origin');
+      });
+
+      test('User passes nothing with global "_alias:_origin" - sends global to ES', async () => {
+        searchInterceptor = getSearchInterceptor({
+          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
+        });
+
+        await searchInterceptor
+          .search({ params: {} }, { strategy: ESQL_ASYNC_SEARCH_STRATEGY })
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBe('_alias:_origin');
+      });
+
+      test('User passes nothing with global "_alias:*" - does not send to ES', async () => {
+        searchInterceptor = getSearchInterceptor({
+          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:*')),
+        });
+
+        await searchInterceptor
+          .search({ params: {} }, { strategy: ESQL_ASYNC_SEARCH_STRATEGY })
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBeUndefined();
+      });
+
+      test('User passes nothing with global undefined - does not send to ES', async () => {
+        searchInterceptor = getSearchInterceptor({
+          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager(undefined)),
+        });
+
+        await searchInterceptor
+          .search({ params: {} }, { strategy: ESQL_ASYNC_SEARCH_STRATEGY })
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBeUndefined();
+      });
+
+      test('CPS unavailable - does not send to ES', async () => {
+        searchInterceptor = getSearchInterceptor({ getCPSManager: undefined });
+
+        await searchInterceptor
+          .search(
+            { params: {} },
+            { projectRouting: '_alias:_origin', strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+          )
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBeUndefined();
+      });
+    });
+
+    describe('ENHANCED_ES_SEARCH_STRATEGY', () => {
+      test('User passes "_alias:*" with global "_alias:_origin" - does not send to ES', async () => {
+        searchInterceptor = getSearchInterceptor({
+          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
+        });
+
+        await searchInterceptor
+          .search(
+            { params: { body: {} } },
+            { projectRouting: '_alias:*', strategy: ENHANCED_ES_SEARCH_STRATEGY }
+          )
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBeUndefined();
+      });
+
+      test('User passes "_alias:_origin" with global "_alias:*" - sends to ES', async () => {
+        searchInterceptor = getSearchInterceptor({
+          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:*')),
+        });
+
+        await searchInterceptor
+          .search(
+            { params: { body: {} } },
+            { projectRouting: '_alias:_origin', strategy: ENHANCED_ES_SEARCH_STRATEGY }
+          )
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBe('_alias:_origin');
+      });
+
+      test('User passes nothing with global "_alias:_origin" - sends global to ES', async () => {
+        searchInterceptor = getSearchInterceptor({
+          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
+        });
+
+        await searchInterceptor
+          .search({ params: { body: {} } }, { strategy: ENHANCED_ES_SEARCH_STRATEGY })
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBe('_alias:_origin');
+      });
+
+      test('CPS unavailable - does not send to ES', async () => {
+        searchInterceptor = getSearchInterceptor({ getCPSManager: undefined });
+
+        await searchInterceptor
+          .search(
+            { params: { body: {} } },
+            { projectRouting: '_alias:_origin', strategy: ENHANCED_ES_SEARCH_STRATEGY }
+          )
+          .toPromise();
+
+        const requestOptions = (
+          mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+        )[1];
+        const requestBody = JSON.parse(requestOptions.body as string);
+        expect(requestBody.projectRouting).toBeUndefined();
       });
     });
   });

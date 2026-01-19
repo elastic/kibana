@@ -13,10 +13,9 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
-import type { TabState } from './types';
+import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
-import type { DiscoverAppState } from '../discover_app_state_container';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -45,6 +44,7 @@ export const fromSavedObjectTabToTabState = ({
     rowsPerPage: tab.rowsPerPage,
     sampleSize: tab.sampleSize,
     breakdownField: tab.breakdownField,
+    interval: tab.chartInterval,
     density: tab.density,
   };
 
@@ -102,6 +102,7 @@ export const fromSavedObjectTabToSavedSearch = async ({
   rowsPerPage: tab.rowsPerPage,
   sampleSize: tab.sampleSize,
   breakdownField: tab.breakdownField,
+  chartInterval: tab.chartInterval,
   density: tab.density,
   visContext: tab.visContext,
   controlGroupJson: tab.controlGroupJson,
@@ -141,6 +142,7 @@ export const fromTabStateToSavedObjectTab = ({
         ? tab.appState.sampleSize
         : undefined,
     breakdownField: tab.appState.breakdownField,
+    chartInterval: tab.appState.interval,
     density: tab.appState.density,
     visContext: tab.initialInternalState?.visContext,
     controlGroupJson: tab.initialInternalState?.controlGroupJson,
@@ -181,6 +183,7 @@ export const fromSavedSearchToSavedObjectTab = ({
         ? savedSearch.sampleSize
         : undefined,
     breakdownField: savedSearch.breakdownField,
+    chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
     visContext: savedSearch.visContext,
     controlGroupJson: savedSearch.controlGroupJson,

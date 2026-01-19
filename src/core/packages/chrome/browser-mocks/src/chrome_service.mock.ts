@@ -11,8 +11,16 @@ import { BehaviorSubject, of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import type { ChromeService, InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type {
+  ChromeService,
+  InternalChromeSetup,
+  InternalChromeStart,
+} from '@kbn/core-chrome-browser-internal';
 import { lazyObject } from '@kbn/lazy-object';
+
+const createSetupContractMock = (): InternalChromeSetup => {
+  return {};
+};
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
@@ -93,10 +101,12 @@ const createStartContractMock = () => {
       getNavigationTreeUi$: jest.fn(),
       changeActiveSolutionNavigation: jest.fn(),
       updateSolutionNavigations: jest.fn(),
-      navigationTourManager: {} as any,
     }),
     setGlobalFooter: jest.fn(),
-    getGlobalFooter$: jest.fn(),
+    getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
+    getAppMenu$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+    setAppMenu: jest.fn(),
+    setBreadcrumbsBadges: jest.fn(),
   });
 
   return startContract;
@@ -105,7 +115,7 @@ const createStartContractMock = () => {
 type ChromeServiceContract = PublicMethodsOf<ChromeService>;
 const createMock = () => {
   const mocked: jest.Mocked<ChromeServiceContract> = lazyObject({
-    setup: jest.fn(),
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn().mockResolvedValue(createStartContractMock()),
     stop: jest.fn(),
   });
@@ -115,5 +125,6 @@ const createMock = () => {
 
 export const chromeServiceMock = {
   create: createMock,
+  createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };

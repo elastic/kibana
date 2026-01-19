@@ -43,23 +43,14 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/rrule",
-    "@kbn/shared-ux-router",
-    "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
-    "@kbn/es-ui-shared-plugin",
-    "@kbn/core-doc-links-server-mocks",
-    "@kbn/doc-links",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/core-ui-settings-common",
-    "@kbn/core-capabilities-common",
-    "@kbn/unified-search-plugin",
+    "@kbn/kql",
     "@kbn/core-http-server-mocks",
     "@kbn/serverless",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/alerts-ui-shared",
-    "@kbn/core-http-browser",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/core-test-helpers-kbn-server",
@@ -76,14 +67,13 @@
     "@kbn/response-ops-rule-params",
     "@kbn/datemath",
     "@kbn/elastic-assistant-common",
-    "@kbn/response-ops-recurring-schedule-form",
     "@kbn/licensing-types",
     "@kbn/core-elasticsearch-server-utils",
     "@kbn/es-types",
     "@kbn/lazy-object",
-    "@kbn/react-query"
+    "@kbn/maintenance-windows-plugin",
+    "@kbn/config",
+    "@kbn/expect",
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

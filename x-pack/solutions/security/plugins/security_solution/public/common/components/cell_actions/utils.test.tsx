@@ -21,6 +21,7 @@ const scopeIdsWithHoverActions = [
   TableId.alternateTest,
   TimelineId.casePage,
   TableId.alertsOnAlertsPage,
+  TableId.alertsOnAttacksPage,
   TableId.alertsOnRuleDetailsPage,
   TableId.hostsPageEvents,
   TableId.hostsPageSessions,

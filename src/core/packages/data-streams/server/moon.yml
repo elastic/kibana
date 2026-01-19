@@ -19,6 +19,7 @@ project:
     sourceRoot: src/core/packages/data-streams/server
 dependsOn:
   - '@kbn/data-streams'
+  - '@kbn/es-mappings'
 tags:
   - shared-server
   - package

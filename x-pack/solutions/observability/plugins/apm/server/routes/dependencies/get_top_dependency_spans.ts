@@ -8,7 +8,7 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
@@ -111,9 +111,11 @@ export async function getTopDependencySpans({
       },
       fields: topDedsRequiredFields,
     })
-  ).hits.hits.map((hit) => unflattenKnownApmEventFields(hit.fields, topDedsRequiredFields));
+  ).hits.hits.map((hit) =>
+    accessKnownApmEventFields(hit.fields).requireFields(topDedsRequiredFields)
+  );
 
-  const traceIds = spans.map((span) => span.trace.id);
+  const traceIds = spans.map((span) => span[TRACE_ID]);
 
   const txRequiredFields = asMutableArray([
     TRACE_ID,
@@ -139,25 +141,26 @@ export async function getTopDependencySpans({
         '@timestamp': 'desc',
       },
     })
-  ).hits.hits.map((hit) => unflattenKnownApmEventFields(hit.fields, txRequiredFields));
+  ).hits.hits.map((hit) => accessKnownApmEventFields(hit.fields).requireFields(txRequiredFields));
 
-  const transactionsByTraceId = keyBy(transactions, (transaction) => transaction.trace.id);
+  const transactionsByTraceId = keyBy(transactions, (transaction) => transaction[TRACE_ID]);
 
   return spans.map((span): DependencySpan => {
-    const transaction = maybe(transactionsByTraceId[span.trace!.id]);
+    const traceId = span[TRACE_ID];
+    const transaction = maybe(transactionsByTraceId[traceId]);
 
     return {
-      '@timestamp': new Date(span['@timestamp']).getTime(),
-      spanId: span.span.id,
-      spanName: span.span.name,
-      serviceName: span.service.name,
-      agentName: span.agent.name,
-      duration: span.span.duration.us,
-      traceId: span.trace.id,
-      outcome: (span.event?.outcome || EventOutcome.unknown) as EventOutcome,
-      transactionId: transaction?.transaction.id,
-      transactionType: transaction?.transaction.type,
-      transactionName: transaction?.transaction.name,
+      [AT_TIMESTAMP]: new Date(span[AT_TIMESTAMP]).getTime(),
+      spanId: span[SPAN_ID],
+      spanName: span[SPAN_NAME],
+      serviceName: span[SERVICE_NAME],
+      agentName: span[AGENT_NAME],
+      duration: span[SPAN_DURATION],
+      traceId,
+      outcome: (span[EVENT_OUTCOME] || EventOutcome.unknown) as EventOutcome,
+      transactionId: transaction?.[TRANSACTION_ID],
+      transactionType: transaction?.[TRANSACTION_TYPE],
+      transactionName: transaction?.[TRANSACTION_NAME],
     };
   });
 }

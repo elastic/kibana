@@ -18,7 +18,10 @@ import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { EventFiltersApiClient } from '../service/api_client';
 import { EventFiltersForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
-import { EventFiltersProcessDescendantIndicator } from '../../../components/artifact_entry_card/components/card_decorators/event_filters_process_descendant_indicator';
+import { ProcessDescendantsIndicator } from '../../../components/artifact_entry_card/components/card_decorators/process_descendants_indicator';
+import type { ArtifactEntryCardDecoratorProps } from '../../../components/artifact_entry_card/artifact_entry_card';
+import { EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS } from './translations';
+import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../../common/endpoint/service/artifacts';
 
 export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
   defaultMessage:
@@ -140,6 +143,20 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
 };
 
+export const EventFiltersCardDecorator = memo<ArtifactEntryCardDecoratorProps>(
+  ({ item, 'data-test-subj': dataTestSubj }) => {
+    return (
+      <ProcessDescendantsIndicator
+        item={item}
+        data-test-subj={dataTestSubj}
+        labels={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS}
+        processDescendantsTag={FILTER_PROCESS_DESCENDANTS_TAG}
+      />
+    );
+  }
+);
+EventFiltersCardDecorator.displayName = 'EventFiltersCardDecorator';
+
 export const EventFiltersList = memo(() => {
   const { canWriteEventFilters } = useUserPrivileges().endpointPrivileges;
   const http = useHttp();
@@ -156,7 +173,7 @@ export const EventFiltersList = memo(() => {
       allowCardCreateAction={canWriteEventFilters}
       allowCardEditAction={canWriteEventFilters}
       allowCardDeleteAction={canWriteEventFilters}
-      CardDecorator={EventFiltersProcessDescendantIndicator}
+      CardDecorator={EventFiltersCardDecorator}
     />
   );
 });

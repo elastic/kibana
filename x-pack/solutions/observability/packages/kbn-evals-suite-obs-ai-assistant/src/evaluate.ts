@@ -67,13 +67,13 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   reportModelScore: [
-    async ({}, use) => {
+    async ({ reportDisplayOptions }, use) => {
       const useScenarioReporting = process.env.SCENARIO_REPORTING === 'true';
 
       if (useScenarioReporting) {
-        await use(createScenarioSummaryReporter());
+        await use(createScenarioSummaryReporter({ reportDisplayOptions }));
       } else {
-        await use(createDefaultTerminalReporter());
+        await use(createDefaultTerminalReporter({ reportDisplayOptions }));
       }
     },
     { scope: 'worker' },

@@ -16,6 +16,7 @@ export const LOOKUP_INDEX_CREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/create`;
 export const LOOKUP_INDEX_UPDATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/update`;
 export const LOOKUP_INDEX_RECREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/recreate`;
 export const LOOKUP_INDEX_PRIVILEGES_ROUTE = `${LOOKUP_INDEX_ROUTE}/privileges`;
+export const LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE = `${LOOKUP_INDEX_ROUTE}/update_mappings`;
 
 export enum SOURCES_TYPES {
   INDEX = 'Index',

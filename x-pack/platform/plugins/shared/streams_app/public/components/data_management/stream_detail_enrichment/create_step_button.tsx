@@ -18,9 +18,11 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
 import {
+  useInteractiveModeSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { selectStreamType } from './state_management/stream_enrichment_state_machine/selectors';
 
 const createConditionText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.createConditionButtonText',
@@ -63,9 +65,11 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
 }) => {
   const { addProcessor, addCondition } = useStreamEnrichmentEvents();
 
-  const canAddStep = useStreamEnrichmentSelector(
+  const canAddStep = useInteractiveModeSelector(
     (state) => state.can({ type: 'step.addProcessor' }) || state.can({ type: 'step.addCondition' })
   );
+
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
@@ -76,6 +80,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
   const items = [
     <EuiContextMenuItem
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition"
+      data-stream-type={streamType}
       key="addCondition"
       icon="timeline"
       disabled={nestingDisabled}
@@ -88,6 +93,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor"
+      data-stream-type={streamType}
       key="addProcessor"
       icon="compute"
       onClick={() => {
@@ -99,12 +105,12 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
     </EuiContextMenuItem>,
   ];
 
-  const button = (
+  const button = canAddStep && (
     <EuiButton
       size="s"
       onClick={togglePopover}
-      disabled={!canAddStep}
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButton"
+      data-stream-type={streamType}
     >
       {mode === 'prominent' ? createTextProminent : createText}
       {mode === 'prominent' || mode === 'subdued' ? <EuiIcon type="arrowDown" /> : null}
@@ -114,6 +120,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
   const inlineButton = (
     <EuiButtonIcon
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonInline"
+      data-stream-type={streamType}
       size="xs"
       iconType="plusInCircle"
       onClick={togglePopover}

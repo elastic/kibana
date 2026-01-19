@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 
 const mockMaintenanceWindow = {
   id: 'test-mw-id-1',

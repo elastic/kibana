@@ -106,10 +106,4 @@ describe('useUnifiedHistogramCommon', () => {
     const clonedElement = hook.result.current.renderCustomChartToggleActions();
     expect(clonedElement?.props.renderedFor).toBe('histogram');
   });
-
-  it('should return the isEsqlMode value from the useIsEsqlMode hook', () => {
-    const { hook } = renderUseUnifiedHistogramCommon();
-
-    expect(hook.result.current.isEsqlMode).toBe(false);
-  });
 });

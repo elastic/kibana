@@ -16,7 +16,7 @@ export const ENDPOINT_EXCEPTIONS_LIST_DEFINITION: CreateExceptionListSchema = {
   type: ExceptionListTypeEnum.ENDPOINT,
 };
 
-export const SEARCHABLE_FIELDS: Readonly<string[]> = [
+export const ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS: Readonly<string[]> = [
   'name',
   'description',
   'item_id',

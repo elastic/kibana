@@ -18,7 +18,10 @@ import type { RuleMigrationRule } from '../../../../../common/siem_migrations/mo
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { StoredRuleMigrationRule } from '../types';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../common/constants';
-import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
+import {
+  SiemMigrationsDataItemClient,
+  type CreateMigrationItemInput,
+} from '../../common/data/siem_migrations_data_item_client';
 import { dsl } from './dsl_queries';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 
@@ -693,6 +696,29 @@ describe('RuleMigrationsDataRulesClient', () => {
 
       esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
 
+      // calls to get vendor for the migration
+      jest.spyOn(SiemMigrationsDataItemClient.prototype, 'get').mockResolvedValue({
+        total: 1,
+        data: [
+          {
+            migration_id: 'migration1',
+            original_rule: {
+              id: 'rule1',
+              vendor: 'splunk',
+              title: 'Sample Rule 1',
+              description: 'Test description 1',
+              data: 'test data 1',
+              format: 'json',
+            },
+            elastic_dashboard: {
+              id: 'elastic_rule_1',
+              title: 'Elastic Rule 1',
+              data: 'elastic data 1',
+            },
+          },
+        ],
+      });
+
       const result = await ruleMigrationsDataRulesClient.getAllStats();
 
       expect(result).toEqual([
@@ -705,6 +731,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             [SiemMigrationStatus.COMPLETED]: 3,
             [SiemMigrationStatus.FAILED]: 2,
           },
+          vendor: 'splunk',
           created_at: '2025-08-04T00:00:00.000Z',
           last_updated_at: '2025-08-04T00:00:00.000Z',
         },

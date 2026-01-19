@@ -15,8 +15,12 @@ import type { CoreId } from '@kbn/core-base-common-internal';
 export interface CoreContext {
   coreId: CoreId;
   logger: LoggerFactory;
-  env: {
-    mode: Readonly<EnvironmentMode>;
-    packageInfo: Readonly<PackageInfo>;
-  };
+  env: CoreEnv;
+}
+
+/** @internal */
+export interface CoreEnv {
+  mode: Readonly<EnvironmentMode>;
+  packageInfo: Readonly<PackageInfo>;
+  airgapped: boolean;
 }

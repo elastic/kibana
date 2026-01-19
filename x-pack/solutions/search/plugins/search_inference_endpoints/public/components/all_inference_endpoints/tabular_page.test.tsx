@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, screen } from '@testing-library/react';
 import { render } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
@@ -131,9 +132,43 @@ jest.mock('../../hooks/use_delete_endpoint', () => ({
   }),
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useKibana: jest.fn(() => ({
+      services: {
+        cloud: {
+          isCloudEnabled: false,
+        },
+        application: {
+          capabilities: {
+            cloudConnect: {
+              show: true,
+              configure: true,
+            },
+          },
+          navigateToApp: jest.fn(),
+        },
+        uiSettings: {
+          get: jest.fn().mockReturnValue(true),
+        },
+      },
+    })),
+  };
+});
+
+const renderTabularPageWithProviders = () => {
+  return render(
+    <EuiThemeProvider>
+      <TabularPage inferenceEndpoints={inferenceEndpoints} />
+    </EuiThemeProvider>
+  );
+};
+
 describe('When the tabular page is loaded', () => {
   it('should display all inference ids in the table', () => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+    renderTabularPageWithProviders();
 
     const rows = screen.getAllByRole('row');
     expect(rows[1]).toHaveTextContent('.elser-2-elastic');
@@ -151,7 +186,7 @@ describe('When the tabular page is loaded', () => {
 
   // Caveat: preconfigured endpoints display a description instead of model id
   it('should display all service and model ids or descriptions in the table', () => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+    renderTabularPageWithProviders();
 
     const rows = screen.getAllByRole('row');
     expect(rows[1]).toHaveTextContent('Elastic');
@@ -191,7 +226,7 @@ describe('When the tabular page is loaded', () => {
   });
 
   it('should only disable delete action for preconfigured endpoints', () => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+    renderTabularPageWithProviders();
 
     act(() => {
       screen.getAllByTestId('euiCollapsedItemActionsButton')[0].click();
@@ -203,7 +238,7 @@ describe('When the tabular page is loaded', () => {
   });
 
   it('should not disable delete action for other endpoints', () => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+    renderTabularPageWithProviders();
 
     act(() => {
       screen.getAllByTestId('euiCollapsedItemActionsButton')[6].click();
@@ -215,7 +250,7 @@ describe('When the tabular page is loaded', () => {
   });
 
   it('should show preconfigured badge only for preconfigured endpoints', () => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+    renderTabularPageWithProviders();
 
     const preconfigured = 'PRECONFIGURED';
 
@@ -233,8 +268,8 @@ describe('When the tabular page is loaded', () => {
     expect(rows[11]).not.toHaveTextContent(preconfigured);
   });
 
-  it('should show tech preview badge only for reranker-v1 model, rainbow-sprinkles, multilingual-embed-v1, rerank-v1, and preconfigured elser_model_2', () => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+  it('should show tech preview badge only for reranker-v1 model, multilingual-embed-v1, rerank-v1, and preconfigured elser_model_2', () => {
+    renderTabularPageWithProviders();
 
     const techPreview = 'TECH PREVIEW';
 
@@ -244,7 +279,7 @@ describe('When the tabular page is loaded', () => {
     expect(rows[3]).not.toHaveTextContent(techPreview);
     expect(rows[4]).toHaveTextContent(techPreview);
     expect(rows[5]).toHaveTextContent(techPreview);
-    expect(rows[6]).toHaveTextContent(techPreview);
+    expect(rows[6]).not.toHaveTextContent(techPreview);
     expect(rows[7]).not.toHaveTextContent(techPreview);
     expect(rows[8]).toHaveTextContent(techPreview);
     expect(rows[9]).not.toHaveTextContent(techPreview);

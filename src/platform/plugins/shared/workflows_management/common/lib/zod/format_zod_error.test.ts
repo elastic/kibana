@@ -8,7 +8,7 @@
  */
 
 import { parseDocument } from 'yaml';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { formatZodError } from './format_zod_error';
 
 describe('formatZodError', () => {
@@ -123,7 +123,7 @@ describe('Dynamic validation system behavior', () => {
       const yamlDocument = parseDocument(`
   steps:
     - name: createCase
-      type: kibana.createCaseDefaultSpace
+      type: kibana.createCase
       with:
         title: "Test Case"
         description: "Test Description"
@@ -157,7 +157,7 @@ describe('Dynamic validation system behavior', () => {
       const yamlDocument = parseDocument(`
   steps:
     - name: createCase
-      type: kibana.createCaseDefaultSpace
+      type: kibana.createCase
       with:
         title: "Test Case"
         description: "Test Description"

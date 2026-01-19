@@ -46,6 +46,8 @@ dependsOn:
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/object-utils'
   - '@kbn/react-query'
+  - '@kbn/search-api-panels'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { meanBy, sumBy } from 'lodash';

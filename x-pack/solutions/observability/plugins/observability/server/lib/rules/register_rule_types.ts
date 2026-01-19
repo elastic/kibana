@@ -18,5 +18,6 @@ export function registerRuleTypes(
   logger: Logger,
   locators: CustomThresholdLocators
 ) {
+  // @ts-expect-error upgrade typescript v5.9.3
   alertingPlugin.registerType(thresholdRuleType(basePath, config, logger, locators));
 }

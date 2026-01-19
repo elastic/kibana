@@ -33,9 +33,10 @@ describe('EditLifecycleModal', () => {
       stream: {
         name: streamName,
         description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: ingestLifecycle,
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           wired: { fields: {}, routing: [] },
           failure_store: { inherit: {} },
@@ -58,7 +59,7 @@ describe('EditLifecycleModal', () => {
         view_index_metadata: true,
       },
       effective_failure_store: {
-        lifecycle: { enabled: {} },
+        lifecycle: { enabled: { is_default_retention: true } },
         from: streamName,
       },
     };

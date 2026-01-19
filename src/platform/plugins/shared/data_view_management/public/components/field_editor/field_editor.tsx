@@ -831,7 +831,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     const { redirectAway, indexPatternService } = this.props.services;
 
-    let oldField: DataViewField['spec'];
     indexPattern.upsertScriptedField(field);
 
     if (fieldFormatId) {
@@ -856,11 +855,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         redirectAway();
       })
       .catch(() => {
-        if (oldField) {
-          indexPattern.fields.update(oldField);
-        } else {
-          indexPattern.fields.remove(field);
-        }
+        indexPattern.fields.remove(field);
       });
   };
 

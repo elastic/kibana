@@ -1,0 +1,19 @@
+import { z } from '@kbn/zod/v4';
+import type { ConnectorSpec } from '../../connector_spec';
+
+export const <%= connector.className %>: ConnectorSpec = {
+  metadata: {
+    id: '<%= connector.id %>',
+    displayName: '<%= connector.displayName %>',
+    description: '',
+    minimumLicense: 'basic',
+    supportedFeatureIds: ['workflows'],
+  },
+  schema: z.object({}),
+  actions: {},
+  test: {
+    handler: async () => ({ ok: true }),
+  },
+};
+
+

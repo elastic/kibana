@@ -13,7 +13,7 @@ import type { NodeImplementation } from '../../node_implementation';
 export class EnterFallbackPathNodeImpl implements NodeImplementation {
   constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     this.wfExecutionRuntimeManager.enterScope('fallback');
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }

@@ -13,6 +13,7 @@ exports[`cell actions renderer rendering it renders theCellActionsRenderer 1`] =
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span>
           A child of this

@@ -12,42 +12,25 @@ import { flattenKeyPaths } from './flatten_key_paths';
 
 describe('kibanaFlatten', () => {
   it('should flatten simple object', () => {
-    const obj: JsonObject = {
-      a: 1,
-      b: { c: 2 },
-    };
+    const obj: JsonObject = { a: 1, b: { c: 2 } };
     const flattened = flattenKeyPaths(obj);
     expect(flattened).toEqual({ a: 1, 'b.c': 2 });
   });
 
   it('should flatten deeply nested objects', () => {
-    const obj: JsonObject = {
-      a: {
-        b: {
-          c: {
-            d: 42,
-          },
-        },
-      },
-    };
+    const obj: JsonObject = { a: { b: { c: { d: 42 } } } };
     const flattened = flattenKeyPaths(obj);
     expect(flattened).toEqual({ 'a.b.c.d': 42 });
   });
 
   it('should flatten arrays by index', () => {
-    const obj: JsonObject = {
-      a: 1,
-      b: [10, 20, 30],
-    };
+    const obj: JsonObject = { a: 1, b: [10, 20, 30] };
     const flattened = flattenKeyPaths(obj);
     expect(flattened).toEqual({ a: 1, 'b[0]': 10, 'b[1]': 20, 'b[2]': 30 });
   });
 
   it('should flatten arrays of objects by index', () => {
-    const obj: JsonObject = {
-      a: 1,
-      b: [{ c: 2 }, { c: 3 }],
-    };
+    const obj: JsonObject = { a: 1, b: [{ c: 2 }, { c: 3 }] };
     const flattened = flattenKeyPaths(obj);
     expect(flattened).toEqual({ a: 1, 'b[0].c': 2, 'b[1].c': 3 });
   });
@@ -90,11 +73,7 @@ describe('kibanaFlatten', () => {
   it('should flatten an array as root', () => {
     const arr = [1, 2, { a: 3 }];
     const flattened = flattenKeyPaths(arr);
-    expect(flattened).toEqual({
-      '[0]': 1,
-      '[1]': 2,
-      '[2].a': 3,
-    });
+    expect(flattened).toEqual({ '[0]': 1, '[1]': 2, '[2].a': 3 });
   });
 
   it('should handle empty objects and arrays', () => {
@@ -103,7 +82,26 @@ describe('kibanaFlatten', () => {
       emptyArray: [],
     };
     const flattened = flattenKeyPaths(obj);
-    expect(flattened).toEqual({});
+    expect(flattened).toEqual({
+      emptyObj: null,
+      emptyArray: null,
+    });
+  });
+
+  it('should handle empty array', () => {
+    const obj: JsonObject = {
+      emptyArray: [],
+    };
+    const flattened = flattenKeyPaths(obj);
+    expect(flattened).toEqual({ emptyArray: null });
+  });
+
+  it('should handle empty object', () => {
+    const obj: JsonObject = {
+      emptyObj: {},
+    };
+    const flattened = flattenKeyPaths(obj);
+    expect(flattened).toEqual({ emptyObj: null });
   });
 
   it('should handle complex real-world nested structure without crashing', () => {

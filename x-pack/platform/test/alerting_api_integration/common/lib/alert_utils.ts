@@ -202,7 +202,11 @@ export class AlertUtils {
 
   public getMuteInstanceRequest(alertId: string, instanceId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/alert/${instanceId}/_mute`)
+      .post(
+        `${getUrlPrefix(
+          this.space.id
+        )}/api/alerting/rule/${alertId}/alert/${instanceId}/_mute?validate_alerts_existence=false`
+      )
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);

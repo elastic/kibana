@@ -23,12 +23,45 @@ export const CreateAgentlessPolicyRequestSchema = {
   }),
   body: SimplifiedCreatePackagePolicyRequestBodySchema.extends({
     // Remove all properties that are not relevant for agentless policies
-    cloud_connector_id: undefined,
-    supports_cloud_connector: undefined,
     policy_id: undefined,
     policy_ids: undefined,
     supports_agentless: undefined,
     output_id: undefined,
+    policy_template: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'The policy template to use for the agentless package policy. If not provided, the default policy template will be used.',
+        },
+      })
+    ),
+    // Cloud connector configuration - all connector settings go here
+    cloud_connector: schema.maybe(
+      schema.object({
+        enabled: schema.boolean({
+          defaultValue: false,
+          meta: { description: 'Whether cloud connectors are enabled for this policy.' },
+        }),
+        cloud_connector_id: schema.maybe(
+          schema.string({
+            meta: {
+              description:
+                'ID of an existing cloud connector to reuse. If not provided, a new connector will be created.',
+            },
+          })
+        ),
+        name: schema.maybe(
+          schema.string({
+            minLength: 1,
+            maxLength: 255,
+            meta: {
+              description:
+                'Optional name for the cloud connector. If not provided, will be auto-generated from credentials.',
+            },
+          })
+        ),
+      })
+    ),
   }),
 };
 

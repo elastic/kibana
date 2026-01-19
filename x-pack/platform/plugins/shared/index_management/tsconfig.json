@@ -5,6 +5,7 @@
   },
   "include": [
     "__jest__/**/*",
+    "__mocks__/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
@@ -65,7 +66,11 @@
     "@kbn/inference-common",
     "@kbn/upgrade-assistant-pkg-common",
     "@kbn/failure-store-modal",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/scout",
+    "@kbn/deeplinks-management",
+    "@kbn/test-eui-helpers",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": ["target/**/*"]
 }

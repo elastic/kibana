@@ -127,7 +127,7 @@ steps:
       expect(lastStepExecution).toBeDefined();
 
       const waitStepStartTime = new Date(waitStepExecution!.startedAt).getTime();
-      const waitStepEndTime = new Date(waitStepExecution!.completedAt!).getTime();
+      const waitStepEndTime = new Date(waitStepExecution!.finishedAt!).getTime();
       const lastStepStartTime = new Date(lastStepExecution!.startedAt).getTime();
 
       // Wait step execution time should be at least 2s

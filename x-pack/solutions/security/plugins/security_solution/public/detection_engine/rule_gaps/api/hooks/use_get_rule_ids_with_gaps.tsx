@@ -27,13 +27,13 @@ export const useInvalidateGetRuleIdsWithGapsQuery = () => {
 export const useGetRuleIdsWithGaps = (
   {
     gapRange,
-    statuses,
+    gapFillStatuses,
     hasUnfilledIntervals,
     hasInProgressIntervals,
     hasFilledIntervals,
   }: {
     gapRange: GapRangeValue;
-    statuses: string[];
+    gapFillStatuses: string[];
     hasUnfilledIntervals?: boolean;
     hasInProgressIntervals?: boolean;
     hasFilledIntervals?: boolean;
@@ -44,7 +44,7 @@ export const useGetRuleIdsWithGaps = (
     [
       GET_RULE_IDS_WITH_GAPS,
       gapRange,
-      ...statuses,
+      ...gapFillStatuses,
       hasUnfilledIntervals,
       hasInProgressIntervals,
       hasFilledIntervals,
@@ -55,7 +55,7 @@ export const useGetRuleIdsWithGaps = (
         signal,
         start,
         end,
-        statuses,
+        gapFillStatuses,
         hasUnfilledIntervals,
         hasInProgressIntervals,
         hasFilledIntervals,

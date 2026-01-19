@@ -48,6 +48,7 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
   const ForwardRefWrappedComponent = forwardRef(WrappedComponent);
 
   ForwardRefWrappedComponent.propTypes = {
+    // @ts-expect-error upgrade typescript v5.9.3
     renderError: PropTypes.func,
   };
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { kqlQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { ALERT_RULE_PRODUCER, ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import { kqlQuery, termQuery, existsQuery } from '@kbn/observability-plugin/server';
+import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
-import { observabilityFeatureId } from '@kbn/observability-shared-plugin/common';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { SavedServiceGroup } from '../../../common/service_groups';
 import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
 
 export async function getServiceGroupAlerts({
   serviceGroups,
@@ -42,10 +42,7 @@ export async function getServiceGroupAlerts({
     track_total_hits: false,
     query: {
       bool: {
-        filter: [
-          ...termsQuery(ALERT_RULE_PRODUCER, 'apm', observabilityFeatureId),
-          ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-        ],
+        filter: [...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE), ...existsQuery(SERVICE_NAME)],
       },
     },
     aggs: {

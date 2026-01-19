@@ -301,9 +301,12 @@ export const isInTableScope = (scopeId: string) =>
   Object.values(TableId).includes(scopeId as unknown as TableId);
 
 export const isAlertsPageScope = (scopeId: string) =>
-  [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage, TableId.alertsOnCasePage].includes(
-    scopeId as TableId
-  );
+  [
+    TableId.alertsOnAlertsPage,
+    TableId.alertsOnRuleDetailsPage,
+    TableId.alertsOnCasePage,
+    TableId.alertsOnAttacksPage,
+  ].includes(scopeId as TableId);
 
 export const getScopedActions = (scopeId: string) => {
   if (isTimelineScope(scopeId)) {

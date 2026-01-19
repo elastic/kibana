@@ -1,0 +1,26 @@
+{
+  "name": "@kbn/esql-language",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "scripts": {
+    "prebuild:antlr4": "brew bundle --file=./scripts/antlr4_tools/brewfile",
+    "build:antlr4": "npm run build:antlr4:esql && npm run build:antlr4:promql",
+    "build:antlr4:esql": "npm run build:antlr4:esql:lexer && npm run build:antlr4:esql:parser",
+    "postbuild:antlr4:esql": "./scripts/postbuild.sh esql",
+    "build:antlr4:esql:parser": "antlr -Dlanguage=TypeScript -lib src/parser/antlr/parser src/parser/antlr/esql_parser.g4",
+    "build:antlr4:esql:lexer": "antlr -Dlanguage=TypeScript -lib src/parser/antlr/lexer src/parser/antlr/esql_lexer.g4",
+    "build:antlr4:promql": "npm run build:antlr4:promql:lexer && npm run build:antlr4:promql:parser",
+    "postbuild:antlr4:promql": "./scripts/postbuild.sh promql",
+    "build:antlr4:promql:parser": "antlr -Dlanguage=TypeScript src/parser/antlr/promql_parser.g4",
+    "build:antlr4:promql:lexer": "antlr -Dlanguage=TypeScript src/parser/antlr/promql_lexer.g4",
+    "make:defs": "./scripts/make_defs.sh",
+    "postmake:defs": "yarn run lint:fix:generated",
+    "lint:fix:generated": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated",
+    "test:validation": "cd ../../../../.. && yarn test:jest ./src/platform/packages/shared/kbn-esql-language/src/language/validation/validation.test.ts"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
+}

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { ProductLine, ProductTier } from '../../common/product';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import { registerSolutionNavigation } from './navigation';
@@ -29,6 +31,8 @@ describe('Security Side Nav', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     initNavigationSpy.mockReset();
+    // Mock settings.client.get$ to return Classic chat experience by default
+    services.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
   });
 
   it('registers the navigation tree definition for serverless security', async () => {
@@ -37,7 +41,7 @@ describe('Security Side Nav', () => {
     await registerSolutionNavigation(services, []);
 
     expect(initNavigationSpy).toHaveBeenCalled();
-    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services);
+    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services, AIChatExperience.Classic);
     expect(mockedCreateAiNavigationTree).not.toHaveBeenCalled();
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];
@@ -60,7 +64,7 @@ describe('Security Side Nav', () => {
     ]);
 
     expect(initNavigationSpy).toHaveBeenCalled();
-    expect(mockedCreateAiNavigationTree).toHaveBeenCalled();
+    expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(AIChatExperience.Classic);
     expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
 
     const [, navigationTree$] = initNavigationSpy.mock.calls[0];
@@ -70,5 +74,13 @@ describe('Security Side Nav', () => {
         expect(value).toBe(mockedAiNavTree);
       },
     });
+  });
+
+  it('passes Agent chat experience when settings return Agent', async () => {
+    services.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Agent));
+
+    await registerSolutionNavigation(services, []);
+
+    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services, AIChatExperience.Agent);
   });
 });

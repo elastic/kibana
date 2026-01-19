@@ -188,7 +188,13 @@ describe('#importSavedObjectsFromStream', () => {
       await resolveSavedObjectsImportErrors(options);
       expect(typeRegistry.getImportableAndExportableTypes).toHaveBeenCalled();
       const filter = mockCreateObjectsFilter.mock.results[0].value;
-      const mockCollectSavedObjectsOptions = { readStream, objectLimit, filter, supportedTypes };
+      const mockCollectSavedObjectsOptions = {
+        readStream,
+        objectLimit,
+        filter,
+        supportedTypes,
+        typeRegistry,
+      };
       expect(mockCollectSavedObjects).toHaveBeenCalledWith(mockCollectSavedObjectsOptions);
     });
 

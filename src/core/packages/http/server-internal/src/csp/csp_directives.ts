@@ -23,13 +23,37 @@ export type CspDirectiveName =
   | 'report-uri'
   | 'report-to'
   | 'form-action'
-  | 'object-src';
+  | 'object-src'
+  | 'child-src'
+  | 'manifest-src'
+  | 'media-src'
+  | 'object-src'
+  | 'prefetch-src'
+  | 'script-src-elem'
+  | 'script-src-attr'
+  | 'style-src-elem'
+  | 'style-src-attr';
 
 /**
  * The default report only directives rules
  */
 export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>> = {
   'form-action': [`'report-sample'`, `'self'`],
+  'default-src': [`'report-sample'`, `'none'`],
+  'font-src': [`'report-sample'`, `'self'`],
+  'img-src': [`'report-sample'`, `'self'`, 'data:', 'tiles.maps.elastic.co'], // Same as below for tiles.maps.elastic.co
+  'connect-src': [
+    `'report-sample'`,
+    `'self'`,
+    // TODO: Ideally, Core would not know about these endpoints, as they are governed by the Telemetry plugin.
+    // This can be improved once https://github.com/elastic/kibana/issues/181812 is implemented.
+    'telemetry.elastic.co',
+    'telemetry-staging.elastic.co',
+    // Same as above, but these endpoints are related to maps
+    'feeds.elastic.co',
+    'tiles.maps.elastic.co',
+    'vector.maps.elastic.co',
+  ],
 };
 
 /**
@@ -54,6 +78,29 @@ export const additionalRules: Partial<Record<CspDirectiveName, string[]>> = {
   'frame-ancestors': [`'self'`],
   'frame-src': [`'self'`],
 };
+
+/**
+ * Child directives that should inherit from `default-src` if not explicitly set.
+ * Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/default-src
+ */
+export const defaultSrcChildDirectives: CspDirectiveName[] = [
+  'child-src',
+  'connect-src',
+  'font-src',
+  'frame-src',
+  'img-src',
+  'manifest-src',
+  'media-src',
+  'object-src',
+  'prefetch-src',
+  'script-src',
+  'script-src-elem',
+  'script-src-attr',
+  'style-src',
+  'style-src-elem',
+  'style-src-attr',
+  'worker-src',
+];
 
 interface CspConfigDirectives {
   enforceDirectives: Map<CspDirectiveName, string[]>;
@@ -80,6 +127,14 @@ export class CspDirectives {
       directive.delete(`'none'`);
     }
     directive.add(normalizedDirectiveValue);
+
+    // If we are testing default-src 'none', then we need to add all expected child directives to the report-only policy
+    // to prevent reports from being generated for those child directives.
+    const enforcingDefaultSrcChildDirective =
+      enforce && defaultSrcChildDirectives.includes(directiveName);
+    if (this.isTestingDefaultSrc() && enforcingDefaultSrcChildDirective) {
+      this.addDirectiveValue(directiveName, directiveValue, false);
+    }
   }
 
   clearDirectiveValues(directiveName: CspDirectiveName) {
@@ -106,6 +161,17 @@ export class CspDirectives {
       .join('; ');
   }
 
+  /**
+   * Determines if we are currently testing the default-src 'none' configuration.
+   * @returns True if we are testing default-src 'none', false otherwise.
+   */
+  private isTestingDefaultSrc(): boolean {
+    return this.reportOnlyDirectives.has('default-src') &&
+      this.reportOnlyDirectives.get('default-src')?.has(`'none'`)
+      ? true
+      : false;
+  }
+
   static fromConfig(
     firstConfig: CspConfigType,
     ...otherConfigs: Array<Partial<CspConfigType>>
@@ -116,17 +182,19 @@ export class CspDirectives {
     );
     const cspDirectives = new CspDirectives();
 
+    // combining `default` report only directive configurations
+    // it's important to add these before the enforced directives below so that we can handle report-only updates
+    // in response to enforced directives (e.g., default-src 'none' testing)
+    Object.entries(defaultReportOnlyRules).forEach(([key, values]) => {
+      values?.forEach((value) => {
+        cspDirectives.addDirectiveValue(key as CspDirectiveName, value, false);
+      });
+    });
+
     // combining `default` directive configurations
     Object.entries(defaultRules).forEach(([key, values]) => {
       values?.forEach((value) => {
         cspDirectives.addDirectiveValue(key as CspDirectiveName, value);
-      });
-    });
-
-    // combining `default` report only directive configurations
-    Object.entries(defaultReportOnlyRules).forEach(([key, values]) => {
-      values?.forEach((value) => {
-        cspDirectives.addDirectiveValue(key as CspDirectiveName, value, false);
       });
     });
 

@@ -18,6 +18,8 @@ describe('Schema', () => {
     'tags',
     'assignees',
     'category',
+    'from',
+    'to',
   ]);
 
   const defaultState = {
@@ -42,6 +44,8 @@ describe('Schema', () => {
         search: 'My title',
         severity: ['high'],
         customFields: { my_field: ['one', 'two'] },
+        from: 'now-30d',
+        to: 'now',
         sortOrder: 'asc',
         sortField: 'updatedAt',
         page: 5,

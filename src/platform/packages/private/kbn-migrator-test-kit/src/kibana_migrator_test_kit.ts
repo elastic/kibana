@@ -26,6 +26,7 @@ import {
   type IKibanaMigrator,
   type MigrationResult,
   type IndexTypesMap,
+  type ISavedObjectTypeRegistryInternal,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
@@ -193,7 +194,12 @@ export const getKibanaMigratorTestKit = async ({
     typeRegistry,
     kibanaIndex,
     client,
-    loggerFactory.get('saved_objects')
+    loggerFactory.get('saved_objects'),
+    // the toolkit's SavedObjectsRepository must allow testing hidden types
+    typeRegistry
+      .getAllTypes()
+      .filter(({ hidden }) => hidden)
+      .map(({ name }) => name)
   );
 
   return {
@@ -281,7 +287,7 @@ interface GetMigratorParams {
   configService: ConfigService;
   client: ElasticsearchClient;
   kibanaIndex: string;
-  typeRegistry: ISavedObjectTypeRegistry;
+  typeRegistry: ISavedObjectTypeRegistryInternal;
   defaultIndexTypesMap: IndexTypesMap;
   hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;

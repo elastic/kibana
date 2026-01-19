@@ -38,13 +38,11 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
         const result = fromBasicMetricAPItoLensState(input);
         expect(result).toEqual({
           customLabel: false,
-          filter: undefined,
           operationType: operation,
           sourceField: 'price',
           label: '',
           isBucketed: false,
           dataType: 'number',
-          params: {},
         });
       }
     );

@@ -131,11 +131,15 @@ export const getExceptionsPreUpdateItemHandler = (
         currentSavedItem
       );
 
-      // If artifact does not have an assignment tag, then add it now. This is in preparation for
-      // adding per-policy support to Endpoint Exceptions as well as to support space awareness
-      if (!hasGlobalOrPerPolicyTag(validatedItem)) {
-        validatedItem.tags = validatedItem.tags ?? [];
-        validatedItem.tags.push(GLOBAL_ARTIFACT_TAG);
+      if (!endpointAppContextService.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+        // If artifact does not have an assignment tag, then add it now. This is in preparation for
+        // adding per-policy support to Endpoint Exceptions as well as to support space awareness
+        //
+        // Only added when the FF is disabled, as its enabled state indicates per-policy support.
+        if (!hasGlobalOrPerPolicyTag(validatedItem)) {
+          validatedItem.tags = validatedItem.tags ?? [];
+          validatedItem.tags.push(GLOBAL_ARTIFACT_TAG);
+        }
       }
 
       endpointExceptionValidator.notifyFeatureUsage(

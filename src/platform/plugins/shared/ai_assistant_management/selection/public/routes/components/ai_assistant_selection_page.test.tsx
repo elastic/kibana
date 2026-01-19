@@ -10,6 +10,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
+import { of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AiAssistantSelectionPage } from './ai_assistant_selection_page';
 import { useAppContext } from '../../app_context';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -46,6 +48,7 @@ describe('AiAssistantSelectionPage', () => {
       kibanaBranch: 'main',
       buildFlavor: 'ess',
       securityAIAssistantEnabled,
+      chatExperience$: of(AIChatExperience.Classic),
     });
     render(<AiAssistantSelectionPage />, {
       wrapper: I18nProvider,

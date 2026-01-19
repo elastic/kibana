@@ -204,7 +204,10 @@ async function unmuteAll(success: boolean) {
 
 async function muteInstance(success: boolean) {
   try {
-    await rulesClient.muteInstance({ alertId: MockRuleId, alertInstanceId: 'instance-id' });
+    await rulesClient.muteInstance({
+      params: { alertId: MockRuleId, alertInstanceId: 'instance-id' },
+      query: { validateAlertsExistence: false },
+    });
   } catch (err) {
     return expectConflict(success, err);
   }

@@ -10,7 +10,6 @@ export { IngestBase } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
-export { Group } from './src/models/group';
 
 export {
   type RoutingDefinition,
@@ -20,8 +19,15 @@ export {
   routingDefinitionListSchema,
 } from './src/models/ingest/routing';
 
+export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
+export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root';
+export { isOtelStream } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export {
+  convertUpsertRequestIntoDefinition,
+  convertGetResponseIntoUpsertRequest,
+} from './src/helpers/converters';
 
 export {
   keepFields,
@@ -80,6 +86,8 @@ export {
   effectiveToIngestLifecycle,
 } from './src/helpers/lifecycle';
 
+export { findInheritedFailureStore } from './src/helpers/failure_store';
+
 export { streamObjectNameSchema } from './src/shared/stream_object_name';
 
 export {
@@ -115,6 +123,8 @@ export {
   type FailureStoreStatsResponse,
   isEnabledFailureStore,
   isInheritFailureStore,
+  isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
 } from './src/models/ingest/failure_store';
 
 export type {
@@ -123,17 +133,36 @@ export type {
   SignificantEventsPreviewResponse,
   SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
 
 export {
   type Feature,
-  type SystemFeature,
-  type FeatureWithFilter,
-  type FeatureType,
+  type BaseFeature,
+  type FeatureStatus,
+  isFeature,
   featureSchema,
-  featureTypeSchema,
-  featureWithFilterSchema,
-  isFeatureWithFilter,
+  baseFeatureSchema,
+  featureStatusSchema,
 } from './src/feature';
+
+export { type System, systemSchema, isSystem } from './src/system';
+
+export {
+  type BaseSimulationError,
+  type SimulationError,
+  type DocSimulationStatus,
+  type SimulationDocReport,
+  type ProcessorMetrics,
+  type DetectedField,
+  type WithNameAndEsType,
+  type DocumentsMetrics,
+  type ProcessingSimulationResponse,
+} from './src/models/processing_simulation';
+
+export { type IngestStreamProcessing } from './src/models/ingest/processing';
+
+export { TaskStatus } from './src/tasks/types';

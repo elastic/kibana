@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardState, DashboardPanel } from '../server';
+import type { DashboardSection, DashboardPanel } from '../server';
 
+/**
+ * Type guard that checks if a widget is a {@link DashboardPanel}.
+ *
+ * @param widget - The widget to check, which can be either a {@link DashboardPanel} or {@link DashboardSection}.
+ * @returns `true` if the widget is a {@link DashboardPanel}, `false` otherwise.
+ */
 export const isDashboardPanel = (
-  widget: DashboardState['panels'][number]
+  widget: DashboardPanel | DashboardSection
 ): widget is DashboardPanel => {
   return 'config' in widget;
 };

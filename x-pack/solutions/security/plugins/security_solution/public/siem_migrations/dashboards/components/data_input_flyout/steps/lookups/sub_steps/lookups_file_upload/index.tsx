@@ -7,12 +7,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import type { AddUploadedLookups } from '../../../../../../../common/components/migration_steps/types';
+import { type AddUploadedLookups } from '../../../../../../../common/components/migration_steps/types';
 import { LookupsFileUpload } from '../../../../../../../common/components/migration_steps';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import * as i18n from './translations';
+import { MigrationSource } from '../../../../../../../common/types';
 
 export interface DashboardsFileUploadStepProps {
   status: EuiStepStatus;
@@ -32,7 +33,11 @@ export const useLookupsFileUploadStep = ({
       if (lookupsFromFile.length === 0) {
         return; // No lookups provided
       }
-      upsertResources(migrationStats.id, lookupsFromFile);
+      upsertResources({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+        data: lookupsFromFile,
+      });
     },
     [upsertResources, migrationStats]
   );
@@ -55,6 +60,7 @@ export const useLookupsFileUploadStep = ({
         createResources={upsertMigrationResources}
         isLoading={isLoading}
         apiError={error?.message}
+        migrationSource={MigrationSource.SPLUNK}
       />
     ),
   };

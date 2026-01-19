@@ -95,18 +95,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
   })),
 }));
 
-// Mock Monaco handlers
-jest.mock('../lib/monaco_connectors', () => ({
-  ElasticsearchMonacoConnectorHandler: jest.fn(),
-  GenericMonacoConnectorHandler: jest.fn(),
-  KibanaMonacoConnectorHandler: jest.fn(),
-}));
-
-jest.mock('../lib/monaco_providers', () => ({
-  registerMonacoConnectorHandler: jest.fn(),
-  registerUnifiedHoverProvider: jest.fn(() => jest.fn()),
-}));
-
 const mockRegisterKeyboardCommands = jest.fn();
 const mockUnregisterKeyboardCommands = jest.fn();
 let capturedKeyboardHandlers: {

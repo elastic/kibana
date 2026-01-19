@@ -247,6 +247,9 @@ describe('mappingFromFieldMap', () => {
                 maintenance_window_ids: {
                   type: 'keyword',
                 },
+                maintenance_window_names: {
+                  type: 'keyword',
+                },
                 instance: {
                   properties: {
                     id: {
@@ -256,6 +259,9 @@ describe('mappingFromFieldMap', () => {
                 },
                 last_detected: {
                   type: 'date',
+                },
+                muted: {
+                  type: 'boolean',
                 },
                 pending_recovered_count: {
                   type: 'long',

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { infra, timerange } from '@kbn/apm-synthtrace-client';
+import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
+import { infra, timerange } from '@kbn/synthtrace-client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SupertestWithRoleScopeType } from '../../services';
 

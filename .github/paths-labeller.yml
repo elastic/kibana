@@ -8,11 +8,11 @@
 - 'Feature:ExpressionLanguage':
     - 'src/platform/plugins/shared/expressions/**/*.*'
     - 'src/plugins/bfetch/**/*.*'
-- 'Team:obs-ux-infra_services':
+- 'Team:obs-presentation':
     - 'x-pack/solutions/observability/plugins/apm/**/*.*'
     - 'x-pack/solutions/observability/test/apm_api_integration/**/*.*'
-    - 'src/platform/packages/shared/kbn-apm-synthtrace/**/*.*'
-    - 'src/platform/packages/shared/kbn-apm-synthtrace-client/**/*.*'
+    - 'src/platform/packages/shared/kbn-synthtrace/**/*.*'
+    - 'src/platform/packages/shared/kbn-synthtrace-client/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-utils/**/*.*'
     - 'x-pack/solutions/observability/plugins/ux/**/*.*'
 - 'Team:Fleet':
@@ -23,7 +23,7 @@
     - 'x-pack/solutions/observability/plugins/slo/**/*.*'
     - 'x-pack/solutions/observability/plugins/synthetics/**/*.*'
     - 'x-pack/solutions/observability/plugins/exploratory_view/**/*.*'
-- 'Team:Obs AI Assistant':
+- 'Team:obs-ai':
     - 'x-pack/platform/plugins/shared/observability_ai_assistant/**/*.*'
     - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'
     - 'x-pack/solutions/observability/test/observability_ai_assistant_functional/**/*.*'

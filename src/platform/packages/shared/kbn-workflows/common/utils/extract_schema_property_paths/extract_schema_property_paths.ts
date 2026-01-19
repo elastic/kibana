@@ -7,25 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ZodFirstPartyTypeKind } from '@kbn/zod';
+import { isZod } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
+import { getZodSchemaType as getSchemaType, type ZodTypeKind } from '../zod/get_zod_schema_type';
 
 export interface ExtractedSchemaPropertyPath {
   path: string;
-  type: ZodFirstPartyTypeKind;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getSchemaType(schema: any): ZodFirstPartyTypeKind {
-  if (!schema || !schema._def) {
-    return ZodFirstPartyTypeKind.ZodUnknown;
-  }
-
-  return schema._def.typeName;
+  type: ZodTypeKind;
 }
 
 function extractSchemaPropertyPathsRecursive(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  zodSchema: any,
+  zodSchema: ZodType,
   prefix = ''
 ): ExtractedSchemaPropertyPath[] {
   const paths: ExtractedSchemaPropertyPath[] = [];
@@ -35,11 +28,11 @@ function extractSchemaPropertyPathsRecursive(
   }
 
   // Handle ZodObject
-  if (zodSchema._def && zodSchema._def.typeName === ZodFirstPartyTypeKind.ZodObject) {
-    const shape = zodSchema._def.shape();
+  if (zodSchema instanceof z.ZodObject) {
+    const shape = zodSchema.def.shape;
     for (const [key, value] of Object.entries(shape)) {
       const currentPath = prefix ? `${prefix}.${key}` : key;
-      const type = getSchemaType(value);
+      const type = getSchemaType(value as ZodType);
 
       paths.push({
         path: currentPath,
@@ -47,14 +40,14 @@ function extractSchemaPropertyPathsRecursive(
       });
 
       // Recursively extract nested paths
-      const nestedPaths = extractSchemaPropertyPathsRecursive(value, currentPath);
+      const nestedPaths = extractSchemaPropertyPathsRecursive(value as ZodType, currentPath);
       paths.push(...nestedPaths);
     }
   }
 
   // Handle ZodRecord (for dynamic keys like steps)
-  else if (zodSchema._def && zodSchema._def.typeName === ZodFirstPartyTypeKind.ZodRecord) {
-    const valueType = zodSchema._def.valueType;
+  else if (zodSchema.def && zodSchema.def.type === 'record') {
+    const valueType = (zodSchema as z.ZodRecord).valueType as ZodType;
     if (valueType) {
       // For records, we can't know the exact keys, but we can extract the value structure
       const nestedPaths = extractSchemaPropertyPathsRecursive(valueType, prefix);
@@ -64,17 +57,16 @@ function extractSchemaPropertyPathsRecursive(
 
   // Handle ZodOptional and ZodNullable
   else if (
-    zodSchema._def &&
-    (zodSchema._def.typeName === ZodFirstPartyTypeKind.ZodOptional ||
-      zodSchema._def.typeName === ZodFirstPartyTypeKind.ZodNullable)
+    zodSchema.def &&
+    (zodSchema.def.type === 'optional' || zodSchema.def.type === 'nullable')
   ) {
-    const innerType = zodSchema._def.innerType;
+    const innerType = (zodSchema as z.ZodOptional<z.ZodType>).unwrap();
     const nestedPaths = extractSchemaPropertyPathsRecursive(innerType, prefix);
     paths.push(...nestedPaths);
   }
 
   // Handle ZodArray
-  else if (zodSchema._def && zodSchema._def.typeName === ZodFirstPartyTypeKind.ZodArray) {
+  else if (zodSchema.def && zodSchema.def.type === 'array') {
     // Arrays don't add to property paths in our context
     return paths;
   }
@@ -82,7 +74,9 @@ function extractSchemaPropertyPathsRecursive(
   return paths;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function extractSchemaPropertyPaths(zodSchema: any): ExtractedSchemaPropertyPath[] {
-  return extractSchemaPropertyPathsRecursive(zodSchema);
+export function extractSchemaPropertyPaths(zodSchema: unknown): ExtractedSchemaPropertyPath[] {
+  if (isZod(zodSchema)) {
+    return extractSchemaPropertyPathsRecursive(zodSchema as ZodType);
+  }
+  return [];
 }

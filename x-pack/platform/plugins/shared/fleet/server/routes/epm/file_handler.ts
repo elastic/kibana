@@ -10,6 +10,7 @@ import path from 'path';
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
+import { sanitizeSvg } from '@kbn/fs';
 
 import type { GetFileRequestSchema, FleetRequestHandler } from '../../types';
 import { getFile, getInstallation } from '../../services/epm/packages';
@@ -41,6 +42,14 @@ function validateContentTypeIsAllowed(contentType: string) {
   }
 }
 
+function sanitize(contentType: string, buffer: Buffer) {
+  if (contentType === 'image/svg+xml') {
+    return sanitizeSvg(buffer);
+  }
+
+  return buffer;
+}
+
 export const getFileHandler: FleetRequestHandler<
   TypeOf<typeof GetFileRequestSchema.params>
 > = async (context, request, response) => {
@@ -63,7 +72,7 @@ export const getFileHandler: FleetRequestHandler<
 
     const contentType = storedAsset.media_type;
     validateContentTypeIsAllowed(contentType);
-    const buffer = storedAsset.data_utf8
+    let buffer = storedAsset.data_utf8
       ? Buffer.from(storedAsset.data_utf8, 'utf8')
       : Buffer.from(storedAsset.data_base64, 'base64');
 
@@ -73,6 +82,9 @@ export const getFileHandler: FleetRequestHandler<
         statusCode: 400,
       });
     }
+
+    // @ts-expect-error upgrade typescript v5.9.3
+    buffer = sanitize(contentType, buffer);
 
     return response.custom({
       body: buffer,
@@ -104,10 +116,8 @@ export const getFileHandler: FleetRequestHandler<
 
     // if storedAsset is not available, fileBuffer *must* be
     // b/c we error if we don't have at least one, and storedAsset is the least likely
-    const { buffer, contentType } = {
-      contentType: mime.contentType(path.extname(assetPath)),
-      buffer: fileBuffer,
-    };
+    let buffer = fileBuffer;
+    const contentType = mime.contentType(path.extname(assetPath));
 
     if (!contentType) {
       return response.custom({
@@ -116,6 +126,7 @@ export const getFileHandler: FleetRequestHandler<
       });
     }
     validateContentTypeIsAllowed(contentType);
+    buffer = sanitize(contentType, buffer);
 
     return response.custom({
       body: buffer,

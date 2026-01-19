@@ -16,10 +16,10 @@ import type {
   ResultLinks,
 } from '@kbn/file-upload-common';
 
-import { FileUploadManager, useFileUpload, FileUploadContext } from '../..';
-
 import { FileUploadView } from './new/file_upload_view';
 import type { FileUploadStartDependencies } from './kibana_context';
+import { FileUploadManager } from '../../file_upload_manager';
+import { useFileUpload, FileUploadContext } from '../use_file_upload';
 
 export interface Props {
   dependencies: FileUploadStartDependencies;
@@ -70,20 +70,22 @@ export const FileDataVisualizer: FC<Props> = ({
     createFileUploadManager()
   );
 
+  const reset = useCallback(
+    (existingIndex?: string) => {
+      setFileUploadManager(createFileUploadManager(existingIndex));
+    },
+    [createFileUploadManager]
+  );
+
   const fileUploadContextValue = useFileUpload(
     fileUploadManager,
     data,
     application,
     http,
     notifications,
-    getFieldsStatsGrid
-  );
-
-  const reset = useCallback(
-    (existingIndex?: string) => {
-      setFileUploadManager(createFileUploadManager(existingIndex));
-    },
-    [createFileUploadManager]
+    getFieldsStatsGrid,
+    undefined,
+    reset
   );
 
   return (
@@ -94,9 +96,6 @@ export const FileDataVisualizer: FC<Props> = ({
             getAdditionalLinks={getAdditionalLinks}
             resultLinks={resultLinks}
             setUploadResults={setUploadResults}
-            reset={(existingIndex?: string) => {
-              reset(existingIndex);
-            }}
           />
         </FileUploadContext.Provider>
       </KibanaContextProvider>

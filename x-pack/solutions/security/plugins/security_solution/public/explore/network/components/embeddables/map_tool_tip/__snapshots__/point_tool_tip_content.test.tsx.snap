@@ -40,6 +40,7 @@ exports[`PointToolTipContent renders correctly against snapshot 1`] = `
                     >
                       <span
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id-wrapper"
                       >
                         <button
                           class="euiLink emotion-euiLink-primary"

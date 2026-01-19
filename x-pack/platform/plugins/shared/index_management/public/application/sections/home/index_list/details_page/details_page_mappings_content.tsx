@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiButtonProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,
@@ -15,16 +14,12 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useGeneratedHtmlId,
   useEuiBreakpoint,
-  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +30,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import {
   getStateWithCopyToFields,
+  hasSemanticTextField,
   isSemanticTextField,
 } from '../../../../components/mappings_editor/lib/utils';
 import type { Index } from '../../../../../../common';
@@ -59,14 +55,14 @@ import type { NormalizedFields, State } from '../../../../components/mappings_ed
 import { MappingsFilter } from './details_page_filter_fields';
 
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
-import { documentationService } from '../../../../services';
-import { updateIndexMappings } from '../../../../services/api';
+import { updateIndexMappings, useUserPrivileges } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
 import { EmptyMappingsContent } from './details_page_empty_mappings';
-
+import { AddFieldButton } from './details_page_mappings_content/add_field_button';
+import { MappingsInformationPanels } from './details_page_mappings_content/mappings_information_panels';
 const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
 
 export const DetailsPageMappingsContent: FunctionComponent<{
@@ -75,8 +71,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   showAboutMappings: boolean;
   jsonData: any;
   refetchMapping: () => void;
-  hasUpdateMappingsPrivilege?: boolean;
-}> = ({ index, data, jsonData, refetchMapping, showAboutMappings, hasUpdateMappingsPrivilege }) => {
+}> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
   const {
     core: {
       application: { capabilities, navigateToUrl },
@@ -87,44 +82,55 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     overlays,
     history,
   } = useAppContext();
+  const { data: userPrivilege } = useUserPrivileges(index.name);
+  const hasUpdateMappingsPrivilege = userPrivilege?.privileges?.canManageIndex === true;
+
   const pendingFieldsRef = useRef<HTMLDivElement>(null);
+  const state = useMappingsState();
+  const dispatch = useDispatch();
+  const { fetchInferenceToModelIdMap } = useDetailsPageMappingsModelManagement();
 
   const [isPlatinumLicense, setIsPlatinumLicense] = useState<boolean>(false);
-  useEffect(() => {
-    const subscription = licensing?.license$.subscribe((license: ILicense) => {
-      setIsPlatinumLicense(license.isActive && license.hasAtLeast('platinum'));
-    });
-
-    return () => subscription?.unsubscribe();
-  }, [licensing]);
-
-  const { enableSemanticText: isSemanticTextEnabled } = config;
   const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<
     Record<string, string | undefined>
   >({});
+  const [hasSavedFields, setHasSavedFields] = useState<boolean>(false);
+  const [isAddingFields, setAddingFields] = useState<boolean>(false);
+  const [previousState, setPreviousState] = useState<State>(state);
+  const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
+  const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
+  const [isUpdatingMappings, setIsUpdatingMappings] = useState<boolean>(false);
 
+  const { enableSemanticText: isSemanticTextEnabled } = config;
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
-
   const semanticTextInfo = {
     isSemanticTextEnabled: isSemanticTextEnabled && hasMLPermissions && isPlatinumLicense,
     indexName: index.name,
     ml,
     setErrorsInTrainedModelDeployment,
   };
-
-  const state = useMappingsState();
   const hasMappings = state.mappingViewFields.rootLevelFields.length > 0;
-  const dispatch = useDispatch();
-
   const indexName = index.name;
-
   const pendingFieldListId = useGeneratedHtmlId({
     prefix: 'pendingFieldListId',
   });
-
   const hasSemanticText = hasSemanticTextField(state.fields);
+  const searchTerm = isAddingFields ? previousState.search.term.trim() : state.search.term.trim();
 
-  const [isAddingFields, setAddingFields] = useState<boolean>(false);
+  const newFieldsLength = useMemo(() => {
+    return Object.keys(state.fields.byId).length;
+  }, [state.fields.byId]);
+
+  const previousStateSelectedDataTypes: string[] = useMemo(() => {
+    return previousState.filter.selectedOptions
+      .filter((option) => option.checked === 'on')
+      .map((option) => option.label);
+  }, [previousState.filter.selectedOptions]);
+
+  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<MappingsEditorParsedMetadata>(
+    () => parseMappings(jsonData),
+    [jsonData]
+  );
 
   useUnsavedChangesPrompt({
     titleText: i18n.translate('xpack.idxMgmt.indexDetails.mappings.unsavedChangesPromptTitle', {
@@ -141,34 +147,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     navigateToUrl,
   });
 
-  const newFieldsLength = useMemo(() => {
-    return Object.keys(state.fields.byId).length;
-  }, [state.fields.byId]);
+  useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
 
-  const [previousState, setPreviousState] = useState<State>(state);
-
-  const previousStateSelectedDataTypes: string[] = useMemo(() => {
-    return previousState.filter.selectedOptions
-      .filter((option) => option.checked === 'on')
-      .map((option) => option.label);
-  }, [previousState.filter.selectedOptions]);
-
-  const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
-  const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
   const onToggleChange = () => {
     setIsJSONVisible(!isJSONVisible);
   };
-
-  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<MappingsEditorParsedMetadata>(
-    () => parseMappings(jsonData),
-    [jsonData]
-  );
-
-  const [hasSavedFields, setHasSavedFields] = useState<boolean>(false);
-  const [isUpdatingMappings, setIsUpdatingMappings] = useState<boolean>(false);
-
-  useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
-  const { fetchInferenceToModelIdMap } = useDetailsPageMappingsModelManagement();
 
   const onCancelAddingNewFields = useCallback(() => {
     setAddingFields(!isAddingFields);
@@ -211,26 +194,13 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     });
   }, [dispatch, isAddingFields, state]);
 
-  useEffect(() => {
-    if (!isSemanticTextEnabled || !hasMLPermissions) {
-      return;
-    }
-
-    const fetchData = async () => {
-      await fetchInferenceToModelIdMap();
-    };
-
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSemanticTextEnabled, hasMLPermissions]);
-
   const updateMappings = useCallback(
     async (forceSaveMappings?: boolean) => {
       let inferenceToModelIdMap = state.inferenceToModelIdMap;
       setIsUpdatingMappings(true);
       try {
-        await ml?.mlApi?.savedObjects.syncSavedObjects();
         if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
+          await ml?.mlApi?.savedObjects.syncSavedObjects();
           inferenceToModelIdMap = await fetchInferenceToModelIdMap();
         }
         const fields = hasSemanticText ? getStateWithCopyToFields(state).fields : state.fields;
@@ -315,8 +285,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     });
   }, [previousState]);
 
-  const searchTerm = isAddingFields ? previousState.search.term.trim() : state.search.term.trim();
-
   const jsonBlock = (
     <EuiCodeBlock
       language="json"
@@ -361,19 +329,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       isAddingFields={isAddingFields}
     />
   );
-  const fieldSearchComponent = isAddingFields ? (
-    <DocumentFieldsSearch
-      searchValue={previousState.search.term}
-      onSearchChange={onSearchChange}
-      disabled={isJSONVisible}
-    />
-  ) : (
-    <DocumentFieldsSearch
-      searchValue={state.search.term}
-      onSearchChange={onSearchChange}
-      disabled={isJSONVisible}
-    />
-  );
+
   const treeViewBlock = (
     <>
       {multipleMappingsDeclared ? (
@@ -409,12 +365,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     </EuiFlexItem>
   );
 
-  const showAboutMappingsStyles = css`
-    ${useEuiBreakpoint(['xl'])} {
-      max-width: 480px;
-    }
-  `;
-
   const mappingsWrapperStyles = css`
     height: 100%;
     ${useEuiBreakpoint(['xl'])} {
@@ -437,126 +387,37 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     </EuiButton>
   );
 
-  const AddFieldButton: React.FC<EuiButtonProps> = ({ color }) => {
-    const isDisabled = hasUpdateMappingsPrivilege === false;
-    return (
-      <EuiToolTip
-        position="bottom"
-        data-test-subj="indexDetailsMappingsAddFieldTooltip"
-        content={
-          isDisabled
-            ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {
-                defaultMessage: 'You do not have permission to add fields in an Index',
-              })
-            : undefined
-        }
-      >
-        <EuiButton
-          onClick={addFieldButtonOnClick}
-          iconType="plusInCircle"
-          color={color}
-          size="m"
-          data-test-subj="indexDetailsMappingsAddField"
-          isDisabled={isDisabled}
-        >
-          <FormattedMessage
-            id="xpack.idxMgmt.indexDetails.mappings.addNewField"
-            defaultMessage="Add field"
-          />
-        </EuiButton>
-      </EuiToolTip>
-    );
-  };
+  useEffect(() => {
+    const subscription = licensing?.license$.subscribe((license: ILicense) => {
+      setIsPlatinumLicense(license.isActive && license.hasAtLeast('platinum'));
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [licensing]);
+
+  useEffect(() => {
+    if (!isSemanticTextEnabled || !hasMLPermissions) {
+      return;
+    }
+
+    const fetchData = async () => {
+      await fetchInferenceToModelIdMap();
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSemanticTextEnabled, hasMLPermissions]);
 
   return (
-    // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
+      {/* using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen */}
       <EuiFlexGroup wrap direction="rowReverse" css={mappingsWrapperStyles}>
         {showAboutMappings && hasMappings && (
-          <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
-            <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="info" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.idxMgmt.indexDetails.mappings.docsCardTitle"
-                        defaultMessage="About index mappings"
-                      />
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.docsCardDescription"
-                    defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type
-                      (such as keyword, number, or date) and additional subfields. These index mappings determine the functions
-                      available in your relevance tuning and search experience."
-                  />
-                </p>
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiLink
-                data-test-subj="indexDetailsMappingsDocsLink"
-                href={documentationService.getMappingDocumentationLink()}
-                target="_blank"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexDetails.mappings.docsCardLink"
-                  defaultMessage="Learn more about mappings"
-                />
-              </EuiLink>
-            </EuiPanel>
-            <EuiSpacer size="l" />
-            <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="info" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h3>
-                      <FormattedMessage
-                        id="xpack.idxMgmt.indexDetails.mappings.transform.title"
-                        defaultMessage="Transform your searchable content"
-                      />
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
-              <EuiSpacer size="s" />
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.transform.description"
-                    defaultMessage="Want to add custom fields, or use trained ML models 
-            to analyze and enrich your indexed documents? Use index-specific ingest pipelines 
-            to customize documents to your needs."
-                  />
-                </p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiLink
-                data-test-subj="indexDetailsMappingsLearnMoreLink"
-                href={documentationService.docLinks.enterpriseSearch.ingestPipelines}
-                target="_blank"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexDetails.mappings.transform.docLink"
-                  defaultMessage="Learn more"
-                />
-              </EuiLink>
-            </EuiPanel>
-          </EuiFlexItem>
+          <MappingsInformationPanels
+            indexName={indexName}
+            refetchMapping={refetchMapping}
+            hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
+          />
         )}
         <EuiFlexGroup direction="column" gutterSize="s">
           {hasMLPermissions && !hasSemanticText && (
@@ -570,7 +431,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           {!hasMappings &&
             (!isAddingFields ? (
               <EuiFlexItem grow={false}>
-                <EmptyMappingsContent addFieldButton={AddFieldButton} />
+                <EmptyMappingsContent
+                  addFieldButton={
+                    <AddFieldButton
+                      hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
+                      addFieldButtonOnClick={addFieldButtonOnClick}
+                    />
+                  }
+                />
               </EuiFlexItem>
             ) : (
               <EuiFlexItem grow={false}>
@@ -588,10 +456,24 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                   state={state}
                 />
               </EuiFlexItem>
-              <EuiFlexItem>{fieldSearchComponent}</EuiFlexItem>
+              <EuiFlexItem>
+                <DocumentFieldsSearch
+                  searchValue={isAddingFields ? previousState.search.term : state.search.term}
+                  onSearchChange={onSearchChange}
+                  disabled={isJSONVisible}
+                />
+              </EuiFlexItem>
               {!index.hidden && (
                 <EuiFlexItem grow={false}>
-                  {!isAddingFields ? <AddFieldButton color={'text'} /> : saveMappingsButton}
+                  {!isAddingFields ? (
+                    <AddFieldButton
+                      color={'text'}
+                      hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
+                      addFieldButtonOnClick={addFieldButtonOnClick}
+                    />
+                  ) : (
+                    saveMappingsButton
+                  )}
                 </EuiFlexItem>
               )}
 
@@ -666,20 +548,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                   }
                 >
                   <EuiPanel hasShadow={false} paddingSize="s">
-                    {newFieldsLength <= 0 ? (
-                      <DocumentFields
-                        onCancelAddingNewFields={onCancelAddingNewFields}
-                        isAddingFields={isAddingFields}
-                        semanticTextInfo={semanticTextInfo}
-                        pendingFieldsRef={pendingFieldsRef}
-                      />
-                    ) : (
-                      <DocumentFields
-                        isAddingFields={isAddingFields}
-                        semanticTextInfo={semanticTextInfo}
-                        pendingFieldsRef={pendingFieldsRef}
-                      />
-                    )}
+                    <DocumentFields
+                      onCancelAddingNewFields={
+                        newFieldsLength <= 0 ? onCancelAddingNewFields : undefined
+                      }
+                      isAddingFields={isAddingFields}
+                      semanticTextInfo={semanticTextInfo}
+                      pendingFieldsRef={pendingFieldsRef}
+                    />
                   </EuiPanel>
                 </EuiAccordion>
               </EuiPanel>
@@ -712,7 +588,3 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     </>
   );
 };
-
-function hasSemanticTextField(fields: NormalizedFields): boolean {
-  return Object.values(fields.byId).some((field) => field.source.type === 'semantic_text');
-}

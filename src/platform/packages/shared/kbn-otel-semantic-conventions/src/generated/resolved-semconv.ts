@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 136
- * Metric groups: 486
+ * Registry groups: 140
+ * Metric groups: 497
  * Hardcoded fields: 34
- * Total fields: 1177
+ * Total fields: 1186
  *
  * @internal
  *
- * WARNING: This object contains 1177+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1186+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1113,7 +1113,7 @@ export const semconvFlat = {
   'container.image.tags': {
     name: 'container.image.tags',
     description:
-      'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
+      'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
     type: 'keyword',
     example: 'v1.27.1,3.5.7-0',
   },
@@ -1390,7 +1390,7 @@ export const semconvFlat = {
     name: 'error.type',
     description: 'Describes a class of error the operation ended with.',
     type: 'keyword',
-    example: 'timeout',
+    example: 'DEADLINE_EXCEEDED',
   },
   event_name: {
     name: 'event_name',
@@ -1883,8 +1883,9 @@ export const semconvFlat = {
   },
   'gen_ai.operation.name': {
     name: 'gen_ai.operation.name',
-    description: 'The name of the operation being performed.',
+    description: 'The name of the GenAI operation being performed.',
     type: 'keyword',
+    example: 'execute_tool',
   },
   'gen_ai.output.messages': {
     name: 'gen_ai.output.messages',
@@ -1898,6 +1899,12 @@ export const semconvFlat = {
     name: 'gen_ai.output.type',
     description: 'Represents the content type requested by the client.',
     type: 'keyword',
+  },
+  'gen_ai.prompt.name': {
+    name: 'gen_ai.prompt.name',
+    description: 'The name of the prompt or prompt template provided in the request or response.',
+    type: 'keyword',
+    example: 'analyze-code',
   },
   'gen_ai.provider.name': {
     name: 'gen_ai.provider.name',
@@ -2484,6 +2491,20 @@ export const semconvFlat = {
     description: 'This attribute represents the state of the application.',
     type: 'keyword',
   },
+  'jsonrpc.protocol.version': {
+    name: 'jsonrpc.protocol.version',
+    description:
+      'Protocol version, as specified in the `jsonrpc` property of the request and its corresponding response.',
+    type: 'keyword',
+    example: '2',
+  },
+  'jsonrpc.request.id': {
+    name: 'jsonrpc.request.id',
+    description:
+      'A string representation of the `id` property of the request and its corresponding response.',
+    type: 'keyword',
+    example: '10',
+  },
   'jvm.buffer.pool.name': {
     name: 'jvm.buffer.pool.name',
     description: 'Name of the buffer pool.',
@@ -2793,6 +2814,18 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'true',
   },
+  'k8s.pod.hostname': {
+    name: 'k8s.pod.hostname',
+    description: 'Specifies the hostname of the Pod.',
+    type: 'keyword',
+    example: 'collector-gateway',
+  },
+  'k8s.pod.ip': {
+    name: 'k8s.pod.ip',
+    description: 'IP address allocated to the Pod.',
+    type: 'keyword',
+    example: '172.18.0.2',
+  },
   'k8s.pod.label': {
     name: 'k8s.pod.label',
     description:
@@ -2805,6 +2838,12 @@ export const semconvFlat = {
     description: 'The name of the Pod.',
     type: 'keyword',
     example: 'opentelemetry-pod-autoconf',
+  },
+  'k8s.pod.start_time': {
+    name: 'k8s.pod.start_time',
+    description: 'The start timestamp of the Pod.',
+    type: 'keyword',
+    example: 'Thu Dec 04 2025 08:41:03 GMT+0000 (Coordinated Universal Time)',
   },
   'k8s.pod.status.phase': {
     name: 'k8s.pod.status.phase',
@@ -2962,12 +3001,6 @@ export const semconvFlat = {
     description: 'Tracestate of the linked span.',
     type: 'keyword',
   },
-  'linux.memory.slab.state': {
-    name: 'linux.memory.slab.state',
-    description: 'The Linux Slab memory state',
-    type: 'keyword',
-    example: 'reclaimable',
-  },
   'log.file.name': {
     name: 'log.file.name',
     description: 'The basename of the file.',
@@ -3015,6 +3048,31 @@ export const semconvFlat = {
       'Name of the logical partition that hosts a systems with a mainframe operating system.',
     type: 'keyword',
     example: 'LPAR01',
+  },
+  'mcp.method.name': {
+    name: 'mcp.method.name',
+    description: 'The name of the request or notification method.',
+    type: 'keyword',
+  },
+  'mcp.protocol.version': {
+    name: 'mcp.protocol.version',
+    description:
+      'The [version](https://modelcontextprotocol.io/specification/versioning) of the Model Context Protocol used.',
+    type: 'keyword',
+    example: 'Wed Jun 18 2025 00:00:00 GMT+0000 (Coordinated Universal Time)',
+  },
+  'mcp.resource.uri': {
+    name: 'mcp.resource.uri',
+    description: 'The value of the resource uri.',
+    type: 'keyword',
+    example: 'postgres://database/customers/schema',
+  },
+  'mcp.session.id': {
+    name: 'mcp.session.id',
+    description:
+      'Identifies [MCP session](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management).',
+    type: 'keyword',
+    example: '191c4850af6c49e08843a3f6c80e5046',
   },
   'messaging.batch.message_count': {
     name: 'messaging.batch.message_count',
@@ -3587,7 +3645,7 @@ export const semconvFlat = {
   'metrics.dotnet.gc.heap.total_allocated': {
     name: 'metrics.dotnet.gc.heap.total_allocated',
     description:
-      'The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
+      'The _approximate_ number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
     type: 'double',
   },
   'metrics.dotnet.gc.last_collection.heap.fragmentation.size': {
@@ -4735,6 +4793,28 @@ export const semconvFlat = {
     description: 'Number of connections that are currently upgraded (WebSockets). .',
     type: 'double',
   },
+  'metrics.mcp.client.operation.duration': {
+    name: 'metrics.mcp.client.operation.duration',
+    description:
+      'The duration of the MCP request or notification as observed on the sender from the time it was sent until the response or ack is received.',
+    type: 'double',
+  },
+  'metrics.mcp.client.session.duration': {
+    name: 'metrics.mcp.client.session.duration',
+    description: 'The duration of the MCP session as observed on the MCP client.',
+    type: 'double',
+  },
+  'metrics.mcp.server.operation.duration': {
+    name: 'metrics.mcp.server.operation.duration',
+    description:
+      'MCP request or notification duration as observed on the receiver from the time it was received until the result or ack is sent.',
+    type: 'double',
+  },
+  'metrics.mcp.server.session.duration': {
+    name: 'metrics.mcp.server.session.duration',
+    description: 'The duration of the MCP session as observed on the MCP server.',
+    type: 'double',
+  },
   'metrics.messaging.attributes': {
     name: 'metrics.messaging.attributes',
     description: 'Common messaging metrics attributes.',
@@ -5125,11 +5205,6 @@ export const semconvFlat = {
     description: 'Network bytes transferred.',
     type: 'double',
   },
-  'metrics.process.open_file_descriptor.count': {
-    name: 'metrics.process.open_file_descriptor.count',
-    description: 'Number of file descriptors in use by the process.',
-    type: 'double',
-  },
   'metrics.process.paging.faults': {
     name: 'metrics.process.paging.faults',
     description: 'Number of page faults the process has made.',
@@ -5140,39 +5215,29 @@ export const semconvFlat = {
     description: 'Process threads count.',
     type: 'double',
   },
+  'metrics.process.unix.file_descriptor.count': {
+    name: 'metrics.process.unix.file_descriptor.count',
+    description: 'Number of unix file descriptors in use by the process.',
+    type: 'double',
+  },
   'metrics.process.uptime': {
     name: 'metrics.process.uptime',
     description: 'The time the process has been running.',
     type: 'double',
   },
-  'metrics.rpc.client.duration': {
-    name: 'metrics.rpc.client.duration',
-    description: 'Measures the duration of outbound RPC.',
+  'metrics.process.windows.handle.count': {
+    name: 'metrics.process.windows.handle.count',
+    description: 'Number of handles held by the process.',
     type: 'double',
   },
-  'metrics.rpc.client.request.size': {
-    name: 'metrics.rpc.client.request.size',
-    description: 'Measures the size of RPC request messages (uncompressed).',
+  'metrics.rpc.client.call.duration': {
+    name: 'metrics.rpc.client.call.duration',
+    description: 'Measures the duration of outbound remote procedure calls (RPC).',
     type: 'double',
   },
-  'metrics.rpc.client.response.size': {
-    name: 'metrics.rpc.client.response.size',
-    description: 'Measures the size of RPC response messages (uncompressed).',
-    type: 'double',
-  },
-  'metrics.rpc.server.duration': {
-    name: 'metrics.rpc.server.duration',
-    description: 'Measures the duration of inbound RPC.',
-    type: 'double',
-  },
-  'metrics.rpc.server.request.size': {
-    name: 'metrics.rpc.server.request.size',
-    description: 'Measures the size of RPC request messages (uncompressed).',
-    type: 'double',
-  },
-  'metrics.rpc.server.response.size': {
-    name: 'metrics.rpc.server.response.size',
-    description: 'Measures the size of RPC response messages (uncompressed).',
+  'metrics.rpc.server.call.duration': {
+    name: 'metrics.rpc.server.call.duration',
+    description: 'Measures the duration of inbound remote procedure calls (RPC).',
     type: 'double',
   },
   'metrics.signalr.server.active_connections': {
@@ -5258,26 +5323,26 @@ export const semconvFlat = {
     description: 'Fraction of filesystem bytes used.',
     type: 'double',
   },
-  'metrics.system.linux.memory.available': {
-    name: 'metrics.system.linux.memory.available',
-    description:
-      'An estimate of how much memory is available for starting new applications, without causing swapping.',
-    type: 'double',
-  },
-  'metrics.system.linux.memory.slab.usage': {
-    name: 'metrics.system.linux.memory.slab.usage',
-    description:
-      'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
-    type: 'double',
-  },
   'metrics.system.memory.limit': {
     name: 'metrics.system.memory.limit',
     description: 'Total virtual memory available in the system.',
     type: 'double',
   },
-  'metrics.system.memory.shared': {
-    name: 'metrics.system.memory.shared',
+  'metrics.system.memory.linux.available': {
+    name: 'metrics.system.memory.linux.available',
+    description:
+      'An estimate of how much memory is available for starting new applications, without causing swapping.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.shared': {
+    name: 'metrics.system.memory.linux.shared',
     description: 'Shared memory used (mostly by tmpfs).',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.slab.usage': {
+    name: 'metrics.system.memory.linux.slab.usage',
+    description:
+      'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
     type: 'double',
   },
   'metrics.system.memory.usage': {
@@ -5675,6 +5740,12 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'batching_span_processor',
   },
+  'otel.event.name': {
+    name: 'otel.event.name',
+    description: 'Identifies the class / type of event.',
+    type: 'keyword',
+    example: 'browser.mouse.click',
+  },
   'otel.scope.name': {
     name: 'otel.scope.name',
     description: 'The name of the instrumentation scope - (`InstrumentationScope.Name` in OTLP).',
@@ -5722,13 +5793,6 @@ export const semconvFlat = {
     description: "The span_id of this span's parent span.",
     type: 'keyword',
   },
-  'peer.service': {
-    name: 'peer.service',
-    description:
-      'The [`service.name`](/docs/resource/README.md#service) of the remote service. SHOULD be equal to the actual `service.name` resource attribute of the remote service if any.',
-    type: 'keyword',
-    example: 'A',
-  },
   'pprof.location.is_folded': {
     name: 'pprof.location.is_folded',
     description:
@@ -5761,6 +5825,26 @@ export const semconvFlat = {
       'Free-form text associated with the profile. This field should not be used to store any machine-readable information, it is only for human-friendly content.',
     type: 'keyword',
     example: 'hello world,bazinga',
+  },
+  'pprof.profile.doc_url': {
+    name: 'pprof.profile.doc_url',
+    description: 'Documentation link for this profile type.',
+    type: 'keyword',
+    example: 'http://pprof.example.com/cpu-profile.html',
+  },
+  'pprof.profile.drop_frames': {
+    name: 'pprof.profile.drop_frames',
+    description:
+      'Frames with Function.function_name fully matching the regexp will be dropped from the samples, along with their successors.',
+    type: 'keyword',
+    example: '/foobar/',
+  },
+  'pprof.profile.keep_frames': {
+    name: 'pprof.profile.keep_frames',
+    description:
+      'Frames with Function.function_name fully matching the regexp will be kept, even if it matches drop_frames.',
+    type: 'keyword',
+    example: '/bazinga/',
   },
   'process.args_count': {
     name: 'process.args_count',
@@ -5993,72 +6077,6 @@ export const semconvFlat = {
     description: 'The Schema URL for the resource.',
     type: 'keyword',
   },
-  'rpc.connect_rpc.error_code': {
-    name: 'rpc.connect_rpc.error_code',
-    description:
-      'The [error codes](https://connectrpc.com//docs/protocol/#error-codes) of the Connect request. Error codes are always string values.',
-    type: 'keyword',
-  },
-  'rpc.connect_rpc.request.metadata': {
-    name: 'rpc.connect_rpc.request.metadata',
-    description:
-      'Connect request metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
-    type: 'keyword',
-    example: '1.2.3.4,1.2.3.5',
-  },
-  'rpc.connect_rpc.response.metadata': {
-    name: 'rpc.connect_rpc.response.metadata',
-    description:
-      'Connect response metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
-    type: 'keyword',
-    example: 'attribute_value',
-  },
-  'rpc.grpc.request.metadata': {
-    name: 'rpc.grpc.request.metadata',
-    description:
-      'gRPC request metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
-    type: 'keyword',
-    example: '1.2.3.4,1.2.3.5',
-  },
-  'rpc.grpc.response.metadata': {
-    name: 'rpc.grpc.response.metadata',
-    description:
-      'gRPC response metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
-    type: 'keyword',
-    example: 'attribute_value',
-  },
-  'rpc.grpc.status_code': {
-    name: 'rpc.grpc.status_code',
-    description:
-      'The gRPC status code of the last gRPC requests performed in scope of this export call.',
-    type: 'keyword',
-  },
-  'rpc.jsonrpc.error_code': {
-    name: 'rpc.jsonrpc.error_code',
-    description: '`error.code` property of response if it is an error response.',
-    type: 'long',
-    example: '-32700',
-  },
-  'rpc.jsonrpc.error_message': {
-    name: 'rpc.jsonrpc.error_message',
-    description: '`error.message` property of response if it is an error response.',
-    type: 'keyword',
-    example: 'Parse error',
-  },
-  'rpc.jsonrpc.request_id': {
-    name: 'rpc.jsonrpc.request_id',
-    description:
-      '`id` property of request or response. Since protocol allows id to be int, string, `null` or missing (for notifications), value is expected to be cast to string for simplicity. Use empty string in case of `null` value. Omit entirely if this is a notification.',
-    type: 'keyword',
-    example: '10',
-  },
-  'rpc.jsonrpc.version': {
-    name: 'rpc.jsonrpc.version',
-    description:
-      "Protocol version as in `jsonrpc` property of request/response. Since JSON-RPC 1.0 doesn't specify this, the value can be omitted.",
-    type: 'keyword',
-    example: '2',
-  },
   'rpc.message.compressed_size': {
     name: 'rpc.message.compressed_size',
     description: 'Compressed size of the message in bytes.',
@@ -6082,21 +6100,40 @@ export const semconvFlat = {
   },
   'rpc.method': {
     name: 'rpc.method',
-    description: 'This is the logical name of the method from the RPC interface perspective.',
-    type: 'keyword',
-    example: 'e',
-  },
-  'rpc.service': {
-    name: 'rpc.service',
     description:
-      'The full (logical) name of the service being called, including its package name, if applicable.',
+      'The fully-qualified logical name of the method from the RPC interface perspective.',
     type: 'keyword',
-    example: 'm',
+    example: 'com.example.ExampleService/exampleMethod',
   },
-  'rpc.system': {
-    name: 'rpc.system',
+  'rpc.method_original': {
+    name: 'rpc.method_original',
+    description: 'The original name of the method used by the client.',
+    type: 'keyword',
+    example: 'com.myservice.EchoService/catchAll',
+  },
+  'rpc.request.metadata': {
+    name: 'rpc.request.metadata',
     description:
-      'A string identifying the remoting system. See below for a list of well-known identifiers.',
+      'RPC request metadata, `<key>` being the normalized RPC metadata key (lowercase), the value being the metadata values.',
+    type: 'keyword',
+    example: '1.2.3.4,1.2.3.5',
+  },
+  'rpc.response.metadata': {
+    name: 'rpc.response.metadata',
+    description:
+      'RPC response metadata, `<key>` being the normalized RPC metadata key (lowercase), the value being the metadata values.',
+    type: 'keyword',
+    example: 'attribute_value',
+  },
+  'rpc.response.status_code': {
+    name: 'rpc.response.status_code',
+    description: 'Status code of the RPC returned by the RPC server or generated by the client',
+    type: 'keyword',
+    example: 'OK',
+  },
+  'rpc.system.name': {
+    name: 'rpc.system.name',
+    description: 'The Remote Procedure Call (RPC) system.',
     type: 'keyword',
   },
   'scope.dropped_attributes_count': {
@@ -6174,8 +6211,7 @@ export const semconvFlat = {
   },
   'server.address': {
     name: 'server.address',
-    description:
-      'Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    description: 'RPC server [host name](https://grpc.github.io/grpc/core/md_doc_naming.html).',
     type: 'keyword',
     example: 'example.com',
   },
@@ -6203,10 +6239,24 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'Shop',
   },
+  'service.peer.name': {
+    name: 'service.peer.name',
+    description:
+      'Logical name of the service on the other side of the connection. SHOULD be equal to the actual [`service.name`](/docs/resource/README.md#service) resource attribute of the remote service if any.',
+    type: 'keyword',
+    example: 'shoppingcart',
+  },
+  'service.peer.namespace': {
+    name: 'service.peer.namespace',
+    description:
+      'Logical namespace of the service on the other side of the connection. SHOULD be equal to the actual [`service.namespace`](/docs/resource/README.md#service) resource attribute of the remote service if any.',
+    type: 'keyword',
+    example: 'Shop',
+  },
   'service.version': {
     name: 'service.version',
     description:
-      'The version string of the service API or implementation. The format is not defined by these conventions.',
+      'The version string of the service component. The format is not defined by these conventions.',
     type: 'keyword',
     example: '2.0.0',
   },
@@ -6312,6 +6362,12 @@ export const semconvFlat = {
     description: 'The filesystem type',
     type: 'keyword',
     example: 'ext4',
+  },
+  'system.memory.linux.slab.state': {
+    name: 'system.memory.linux.slab.state',
+    description: 'The Linux Slab memory state',
+    type: 'keyword',
+    example: 'reclaimable',
   },
   'system.memory.state': {
     name: 'system.memory.state',

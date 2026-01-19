@@ -56,7 +56,7 @@ describe(
       interceptFindBackfills();
       goToExecutionLogTab();
 
-      cy.get(RULE_BACKFILLS_INFO_HEADEAR).contains('Manual runs');
+      cy.get(RULE_BACKFILLS_INFO_HEADEAR).contains('Manual/Gap fill tasks');
       getBackfillsTableRows().should('have.length', 2);
       getBackfillsTableRows().eq(0).contains('Pending');
       getBackfillsTableRows().eq(0).find(RULE_BACKFILLS_COLUMN_ERROR).contains('1');

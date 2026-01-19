@@ -297,14 +297,12 @@ export class TaskRunner<
 
     const ruleFlappingSettings = rule.flapping
       ? {
-          enabled: true,
+          enabled: true, // default to true if flapping.enabled is undefined
           ...rule.flapping,
         }
       : null;
 
-    const flappingSettings = spaceFlappingSettings.enabled
-      ? ruleFlappingSettings || spaceFlappingSettings
-      : spaceFlappingSettings;
+    const flappingSettings = ruleFlappingSettings || spaceFlappingSettings;
 
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
@@ -342,6 +340,8 @@ export class TaskRunner<
           revision: rule.revision,
           alertDelay: rule.alertDelay,
           params: rule.params,
+          muteAll: rule.muteAll,
+          mutedInstanceIds: rule.mutedInstanceIds,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,

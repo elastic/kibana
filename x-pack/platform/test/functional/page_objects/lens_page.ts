@@ -195,10 +195,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       disableEmptyRows?: boolean;
     }) {
       await retry.try(async () => {
-        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+        if (
+          !(await testSubjects.exists('lns-indexPattern-dimensionContainerClose', {
+            timeout: 1000,
+          }))
+        ) {
           await testSubjects.click(opts.dimension);
         }
-        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose', {
+          timeout: 1000,
+        });
       });
 
       if (opts.operation === 'formula') {
@@ -579,7 +585,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openDimensionEditor(dimension: string, layerIndex = 0, dimensionIndex = 0) {
       await retry.try(async () => {
         const dimensionEditor = (
-          await testSubjects.findAll(`lns-layerPanel-${layerIndex} > ${dimension}`)
+          await testSubjects.findAll(`lns-layerPanel-${layerIndex} > ${dimension}`, 1000)
         )[dimensionIndex];
         await dimensionEditor.click();
       });
@@ -591,7 +597,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async performLayerAction(testSubject: string, layerIndex = 0) {
       await retry.try(async () => {
         // Hover over the tab to make the layer actions button visible
-        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
         if (tabs[layerIndex]) {
           await tabs[layerIndex].moveMouseTo();
         }
@@ -1120,12 +1126,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       seriesType = 'bar'
     ) {
       await testSubjects.click('lnsLayerAddButton');
-      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
       const layerCount = tabs.length;
 
       await retry.waitFor('check for layer type support', async () => {
         const fasterChecks = await Promise.all([
-          (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length > layerCount,
+          (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`, 1000)).length >
+            layerCount,
           testSubjects.exists(`lnsLayerAddButton-${layerType}`),
         ]);
         return fasterChecks.filter(Boolean).length > 0;
@@ -1152,7 +1159,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async duplicateLayer(index: number = 0) {
       await retry.try(async () => {
         // Hover over the tab to make the layer actions button visible
-        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
@@ -1238,9 +1245,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Gets text of the specified datatable header cell
      *
      * @param index - index of th element in datatable
+     * @param addRowNumberColumn - when true, increments the column number to ignore row number column
      */
-    async getDatatableHeaderText(index = 0) {
-      const el = await this.getDatatableHeader(index);
+    async getDatatableHeaderText(index = 0, addRowNumberColumn?: boolean) {
+      const el = await this.getDatatableHeader(index, addRowNumberColumn);
       return el.getVisibleText();
     },
 
@@ -1254,9 +1262,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param rowIndex - index of row of the cell
      * @param colIndex - index of column of the cell
+     * @param addRowNumberColumn - when true, increments the column number to ignore row number column
      */
-    async getDatatableCellText(rowIndex = 0, colIndex = 0) {
-      const el = await this.getDatatableCell(rowIndex, colIndex);
+    async getDatatableCellText(rowIndex = 0, colIndex = 0, addRowNumberColumn?: boolean) {
+      const el = await this.getDatatableCell(rowIndex, colIndex, addRowNumberColumn);
       return el.getVisibleText();
     },
 
@@ -1294,28 +1303,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return (await $('.euiDataGridHeaderCell__content')).length;
     },
 
-    async getDatatableHeader(index = 0) {
+    async getDatatableHeader(index = 0, addRowNumberColumn: boolean = true) {
       log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
-          index + 1
+          index + 1 + (addRowNumberColumn ? 1 : 0)
         })`
       );
     },
 
-    async getDatatableCell(rowIndex = 0, colIndex = 0) {
+    async getDatatableCell(rowIndex = 0, colIndex = 0, addRowNumberColumn: boolean = true) {
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${
+          colIndex + (addRowNumberColumn ? 1 : 0)
+        }"][data-gridcell-visible-row-index="${rowIndex}"]`
       );
     },
 
-    async getDatatableCellsByColumn(colIndex = 0) {
+    async getDatatableCellsByColumn(colIndex = 1) {
       return await find.allByCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"]`
       );
     },
 
-    async isDatatableHeaderSorted(index = 0) {
+    async isDatatableHeaderSorted(index = 1) {
       return find.existsByCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
           index + 1
@@ -1419,7 +1430,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async openLayerContextMenu(index: number = 0) {
       // Hover over the tab to make the layer actions button visible
-      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
       if (tabs[index]) {
         await tabs[index].moveMouseTo();
       }
@@ -1675,7 +1686,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async removeLayer(index: number = 0) {
       await retry.try(async () => {
         // Hover over the tab to make the layer actions button visible
-        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
@@ -1691,25 +1702,44 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async ensureLayerTabIsActive(index: number = 0) {
-      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+
       if (tabs[index]) {
-        await tabs[index].click(); // Click to make it active
+        // Check if the tab is already active
+        const isActive = await tabs[index].getAttribute('aria-selected');
+        if (isActive === 'true') {
+          await testSubjects.exists(`lns-layerPanel-${index}`);
+          return;
+        }
+
+        // Click to make it active
+        await tabs[index].click();
+
         // Wait for the layer panel to render
         await retry.waitFor('layer panel to be visible', async () => {
-          return await testSubjects.exists(`lns-layerPanel-${index}`);
+          return await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 1000 });
         });
       }
     },
 
     async ensureLayerTabWithNameIsActive(name: string) {
-      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
       for (let i = 0; i < tabs.length; i++) {
         const tabText = await tabs[i].getVisibleText();
         if (tabText === name) {
-          await tabs[i].click(); // Click to make it active
+          // Check if the tab is already active
+          const isActive = await tabs[i].getAttribute('aria-selected');
+          if (isActive === 'true') {
+            await testSubjects.exists(`lns-layerPanel-${i}`);
+            return;
+          }
+
+          // Click to make it active
+          await tabs[i].click();
+
           // Wait for the layer panel to render
           await retry.waitFor('layer panel to be visible', async () => {
-            return await testSubjects.exists(`lns-layerPanel-${i}`);
+            return await testSubjects.exists(`lns-layerPanel-${i}`, { timeout: 1000 });
           });
           return;
         }
@@ -1719,10 +1749,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async assertLayerCount(expectedCount: number) {
       // Inside the tab content there should be one panel
-      const layerPanels = await find.allByCssSelector('[data-test-subj^="lns-layerPanel-"]');
+      const layerPanels = await find.allByCssSelector('[data-test-subj^="lns-layerPanel-"]', 1000);
       expect(layerPanels.length).to.eql(1);
 
-      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
 
       // tabs will hidden if there's just one layer
       if (expectedCount <= 1) {
@@ -2202,6 +2232,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const settings = await testSubjects.find('lnsDensitySettings');
       const option = await settings.findByTestSubject(value);
       await option.click();
+    },
+
+    async toggleShowRowNumbers() {
+      const rowNumberSwitch = await testSubjects.find('lens-table-row-numbers-switch');
+      await rowNumberSwitch.click();
+    },
+
+    async findRowNumberColumn() {
+      return await testSubjects.exists('lnsDataTable-rowNumber');
     },
 
     async checkDataTableDensity(size: 'l' | 'm' | 's') {

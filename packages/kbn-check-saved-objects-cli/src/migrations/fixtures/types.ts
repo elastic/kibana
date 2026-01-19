@@ -15,6 +15,12 @@ export interface FixtureTemplate {
   [propName: string]: PropValue | PropValue[] | FixtureTemplate;
 }
 
+export interface TypeVersionFixtures {
+  relativePath: string; // e.g. 'relative path to the fixture file'
+  version: string; // e.g. 10.2.0
+  documents: FixtureTemplate[];
+}
+
 export type PropValue = string | boolean | number;
 
 export interface ModelVersionSchemaProperty {

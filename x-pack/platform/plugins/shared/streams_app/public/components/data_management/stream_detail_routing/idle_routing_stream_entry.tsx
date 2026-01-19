@@ -137,7 +137,11 @@ export function IdleRoutingStreamEntry({
                     }
                   )}
                 >
-                  <EuiBadge color="hollow" tabIndex={0}>{`+${childrenCount}`}</EuiBadge>
+                  <EuiBadge
+                    color="hollow"
+                    tabIndex={0}
+                    data-test-subj="streamsAppRoutingRuleChildCountBadge"
+                  >{`+${childrenCount}`}</EuiBadge>
                 </EuiToolTip>
                 <VerticalRule />
               </>
@@ -155,6 +159,7 @@ export function IdleRoutingStreamEntry({
         </EuiFlexGroup>
         <EuiFlexItem
           grow={false}
+          data-test-subj={`streamDetailRoutingItem-${routingRule.destination}`}
           className={css`
             overflow: hidden;
             padding: ${euiTheme.size.xs} 0px;

@@ -66,3 +66,17 @@ export const INFO_BUTTON_TEXT = i18n.translate(
     defaultMessage: 'How is risk score calculated?',
   }
 );
+
+export const CRITICALITY_LEVEL_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.riskInformation.criticalityLevelTableCaption',
+  {
+    defaultMessage: 'Asset criticality level modifiers',
+  }
+);
+
+export const ENTITY_RISK_LEVELS = i18n.translate(
+  'xpack.securitySolution.riskInformation.riskLevelTableCaption',
+  {
+    defaultMessage: 'Entity risk levels',
+  }
+);

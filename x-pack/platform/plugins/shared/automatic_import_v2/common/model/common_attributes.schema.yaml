@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Automatic Import Common Attributes Model
-  version: 'not applicable'
+  version: "not applicable"
 paths: {}
 components:
   x-codegen-enabled: true
@@ -12,47 +12,72 @@ components:
         - type: object
           additionalProperties: false
           required:
-            - integration_id
+            - integrationId
+            - title
+            - description
           properties:
-            integration_id:
-              description: The integration id
-              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+            integrationId:
+              description: The ID of the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
             dataStreams:
               type: array
               description: The data streams of the integration
               items:
-                $ref: '#/components/schemas/DataStream'
+                $ref: "#/components/schemas/DataStream"
             logo:
               description: The logo of the integration
               type: string
               format: binary
             description:
               description: The description of the integration
-              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
             title:
               description: The title of the integration
-              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
     DataStream:
       description: The data stream object with its settings.
       allOf:
         - type: object
+          required:
+            - dataStreamId
+            - title
+            - description
+            - inputTypes
           properties:
+            dataStreamId:
+              description: The ID of the data stream
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
             title:
               description: The title of the data stream
-              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
             description:
               description: The description of the data stream
-              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
             inputTypes:
               type: array
               description: The input types of the data stream
               items:
-                $ref: '#/components/schemas/InputType'
-            rawSamples:
-              type: array
-              description: The raw samples of the data stream
-              items:
-                type: string
+                $ref: "#/components/schemas/InputType"
+    OriginalSourceType:
+      description: The type of the original source.
+      type: string
+      enum:
+        - index
+        - file
+    OriginalSource:
+      description: The original source of the samples.
+      allOf:
+        - type: object
+          required:
+            - sourceType
+            - sourceValue
+          properties:
+            sourceType:
+              description: The type of the original source
+              $ref: "#/components/schemas/OriginalSourceType"
+            sourceValue:
+              description: The value of the original source (e.g. index name or filename)
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
     InputType:
       description: The input type object with its settings.
       allOf:
@@ -77,3 +102,98 @@ components:
                 - kafka
                 - tcp
                 - udp
+    TaskStatus:
+      description: The status of the task
+      type: string
+      enum:
+        - pending
+        - processing
+        - completed
+        - failed
+        - cancelled
+    DataStreamResponse:
+      description: The data stream response object with its settings.
+      allOf:
+        - type: object
+          required:
+            - dataStreamId
+            - title
+            - description
+            - inputTypes
+            - status
+          properties:
+            dataStreamId:
+              description: The ID of the data stream
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            title:
+              description: The title of the data stream
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            description:
+              description: The description of the data stream
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            inputTypes:
+              type: array
+              description: The input types of the data stream
+              items:
+                $ref: "#/components/schemas/InputType"
+            status:
+              description: The status of the data stream
+              $ref: "#/components/schemas/TaskStatus"
+    IntegrationResponse:
+      description: The integration response object with its settings.
+      allOf:
+        - type: object
+          required:
+            - integrationId
+            - title
+            - description
+            - dataStreams
+            - status
+          properties:
+            integrationId:
+              description: The ID of the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            title:
+              description: The title of the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            logo:
+              description: The logo of the integration
+              type: string
+              format: binary
+            description:
+              description: The description of the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            dataStreams:
+              type: array
+              description: The data streams of the integration
+              items:
+                $ref: "#/components/schemas/DataStreamResponse"
+            status:
+              description: The status of the integration
+              $ref: "#/components/schemas/TaskStatus"
+    AllIntegrationsResponseIntegration:
+      description: The integration object with its settings.
+      allOf:
+        - type: object
+          required:
+            - integrationId
+            - title
+            - totalDataStreamCount
+            - successfulDataStreamCount
+            - status
+          properties:
+            integrationId:
+              description: The ID of the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            title:
+              description: The title of the integration
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            totalDataStreamCount:
+              description: The number of data streams of the integration
+              type: integer
+            successfulDataStreamCount:
+              description: The number of successful data streams of the integration
+              type: integer
+            status:
+              description: The status of the integration
+              $ref: "#/components/schemas/TaskStatus"

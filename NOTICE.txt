@@ -1,5 +1,5 @@
 Kibana source code with Kibana X-Pack source code
-Copyright 2012-2025 Elasticsearch B.V.
+Copyright 2012-2026 Elasticsearch B.V.
 
 ---
 Adapted from remote-web-worker, which was available under a "MIT" license.

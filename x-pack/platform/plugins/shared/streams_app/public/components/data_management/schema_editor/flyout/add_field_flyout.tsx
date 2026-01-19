@@ -252,6 +252,7 @@ export const FieldNameSelector = () => {
 };
 
 export const FieldTypeSelector = () => {
+  const { stream } = useSchemaEditorContext();
   const { field, fieldState } = useController<SchemaField, 'type'>({
     name: 'type',
     rules: {
@@ -260,6 +261,8 @@ export const FieldTypeSelector = () => {
       }),
     },
   });
+
+  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
 
   return (
     <EuiFormRow
@@ -273,7 +276,11 @@ export const FieldTypeSelector = () => {
       isInvalid={fieldState.invalid}
       error={fieldState.error?.message}
     >
-      <FieldTypeSelectorComponent value={field.value} onChange={field.onChange} />
+      <FieldTypeSelectorComponent
+        value={field.value}
+        onChange={field.onChange}
+        streamType={streamType}
+      />
     </EuiFormRow>
   );
 };

@@ -19,5 +19,8 @@
     "@kbn/core-data-streams-server",
     "@kbn/data-streams",
     "@kbn/core-elasticsearch-server-internal",
+    "@kbn/es-mappings",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/config-schema",
   ]
 }

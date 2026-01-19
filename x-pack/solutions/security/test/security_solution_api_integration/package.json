@@ -78,6 +78,20 @@
     "genai_evals:server:ess": "npm run initialize-server:genai:trial_complete evaluations ess",
     "genai_evals:runner:ess": "npm run run-tests:genai:trial_complete evaluations ess essEnv",
 
+    "genai_ad_privileges:server:serverless": "npm run initialize-server:genai:trial_complete attack_discovery/privileges serverless",
+    "genai_ad_privileges:runner:serverless": "npm run run-tests:genai:trial_complete attack_discovery/privileges serverless serverlessEnv",
+    "genai_ad_privileges:qa:serverless": "npm run run-tests:genai:trial_complete attack_discovery/privileges serverless qaPeriodicEnv",
+    "genai_ad_privileges:qa:serverless:release": "npm run run-tests:genai:trial_complete attack_discovery/privileges serverless qaEnv",
+    "genai_ad_privileges:server:ess": "npm run initialize-server:genai:trial_complete attack_discovery/privileges ess",
+    "genai_ad_privileges:runner:ess": "npm run run-tests:genai:trial_complete attack_discovery/privileges ess essEnv",
+
+    "genai_ad_privileges:essentials:server:serverless": "npm run initialize-server:genai:basic_essentials attack_discovery/privileges serverless",
+    "genai_ad_privileges:essentials:runner:serverless": "npm run run-tests:genai:basic_essentials attack_discovery/privileges serverless serverlessEnv",
+    "genai_ad_privileges:essentials:qa:serverless": "npm run run-tests:genai:basic_essentials attack_discovery/privileges serverless qaPeriodicEnv",
+    "genai_ad_privileges:essentials:qa:serverless:release": "npm run run-tests:genai:basic_essentials attack_discovery/privileges serverless qaEnv",
+    "genai_ad_privileges:basic:server:ess": "npm run initialize-server:genai:basic_essentials attack_discovery/privileges ess",
+    "genai_ad_privileges:basic:runner:ess": "npm run run-tests:genai:basic_essentials attack_discovery/privileges ess essEnv",
+
     "genai_ad_schedules:server:serverless": "npm run initialize-server:genai:trial_complete attack_discovery/schedules serverless",
     "genai_ad_schedules:runner:serverless": "npm run run-tests:genai:trial_complete attack_discovery/schedules serverless serverlessEnv",
     "genai_ad_schedules:qa:serverless": "npm run run-tests:genai:trial_complete attack_discovery/schedules serverless qaPeriodicEnv",
@@ -319,6 +333,13 @@
     "alerts:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials alerts serverless qaEnv",
     "alerts:basic:server:ess": "npm run initialize-server:de:basic_essentials alerts ess",
     "alerts:basic:runner:ess": "npm run run-tests:de:basic_essentials alerts ess essEnv",
+
+    "unified_alerts:essentials:server:serverless": "npm run initialize-server:de:basic_essentials unified_alerts serverless",
+    "unified_alerts:essentials:runner:serverless": "npm run run-tests:de:basic_essentials unified_alerts serverless serverlessEnv",
+    "unified_alerts:essentials:qa:serverless": "npm run run-tests:de:basic_essentials unified_alerts serverless qaPeriodicEnv",
+    "unified_alerts:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials unified_alerts serverless qaEnv",
+    "unified_alerts:basic:server:ess": "npm run initialize-server:de:basic_essentials unified_alerts ess",
+    "unified_alerts:basic:runner:ess": "npm run run-tests:de:basic_essentials unified_alerts ess essEnv",
 
     "rule_execution_logic:eql:server:serverless": "npm run initialize-server:de rule_execution_logic/eql serverless",
     "rule_execution_logic:eql:runner:serverless": "npm run run-tests:de rule_execution_logic/eql serverless serverlessEnv",

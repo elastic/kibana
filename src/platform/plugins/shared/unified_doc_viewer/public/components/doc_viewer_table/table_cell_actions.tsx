@@ -19,6 +19,7 @@ interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];
   row: FieldRow | undefined; // as we pass `rows[rowIndex]` it's safer to assume that `row` prop can be undefined
   isEsqlMode: boolean | undefined;
+  columns?: string[];
 }
 
 function isFilterInOutPairDisabled(
@@ -275,11 +276,19 @@ const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | un
   );
 };
 
+// Toggle column
+const toggleColumnLabel = i18n.translate(
+  'unifiedDocViewer.docViews.table.toggleColumnTableButtonTooltip',
+  {
+    defaultMessage: 'Toggle column in table',
+  }
+);
+
 const ToggleColumn: React.FC<
   TableActionsProps & {
     onToggleColumn: ((field: string) => void) | undefined;
   }
-> = ({ Component, row, onToggleColumn }) => {
+> = ({ Component, columns, row, onToggleColumn }) => {
   if (!row) {
     return null;
   }
@@ -290,18 +299,12 @@ const ToggleColumn: React.FC<
     return null;
   }
 
-  // Toggle column
-  const toggleColumnLabel = i18n.translate(
-    'unifiedDocViewer.docViews.table.toggleColumnTableButtonTooltip',
-    {
-      defaultMessage: 'Toggle column in table',
-    }
-  );
+  const isColumnAdded = columns?.includes(name);
 
   return (
     <Component
       data-test-subj={`toggleColumnButton-${name}`}
-      iconType="listAdd"
+      iconType={isColumnAdded ? 'cross' : 'plusInCircle'}
       title={toggleColumnLabel}
       flush="left"
       onClick={() => onToggleColumn(name)}
@@ -313,11 +316,13 @@ const ToggleColumn: React.FC<
 
 export function getFieldCellActions({
   rows,
+  columns,
   isEsqlMode,
   onFilter,
   onToggleColumn,
 }: {
   rows: FieldRow[];
+  columns?: string[];
   isEsqlMode: boolean | undefined;
   onFilter?: DocViewFilterFn;
   onToggleColumn: ((field: string) => void) | undefined;
@@ -343,6 +348,7 @@ export function getFieldCellActions({
             return (
               <ToggleColumn
                 row={rows[rowIndex]}
+                columns={columns}
                 Component={Component}
                 isEsqlMode={isEsqlMode}
                 onToggleColumn={onToggleColumn}

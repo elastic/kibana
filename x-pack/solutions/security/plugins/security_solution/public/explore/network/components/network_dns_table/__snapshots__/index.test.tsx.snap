@@ -118,6 +118,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       </span>
                       <span
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id-wrapper"
                       >
                         <span
                           color="subdued"
@@ -219,7 +220,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     data-test-subj="paginated-basic-table"
   >
     <table
-      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -237,6 +238,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -270,6 +272,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
@@ -302,6 +305,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -335,6 +339,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -368,6 +373,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -891,7 +897,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     </table>
   </div>
   <div
-    class="euiFlexGroup c3 emotion-euiFlexGroup-l-spaceBetween-center-row"
+    class="euiFlexGroup c3 emotion-euiFlexGroup-m-spaceBetween-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"

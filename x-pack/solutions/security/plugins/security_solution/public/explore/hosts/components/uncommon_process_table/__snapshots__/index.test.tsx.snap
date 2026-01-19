@@ -169,7 +169,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
     data-test-subj="paginated-basic-table"
   >
     <table
-      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -807,7 +807,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
     </table>
   </div>
   <div
-    class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+    class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"

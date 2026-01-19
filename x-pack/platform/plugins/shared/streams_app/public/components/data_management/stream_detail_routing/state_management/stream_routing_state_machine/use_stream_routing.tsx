@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { createActorContext, useSelector } from '@xstate5/react';
-import { createConsoleInspector } from '@kbn/xstate-utils';
-import { waitFor } from 'xstate5';
-import type { RoutingDefinition } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
-import {
-  streamRoutingMachine,
-  createStreamRoutingMachineImplementations,
-} from './stream_routing_state_machine';
-import type { StreamRoutingInput, StreamRoutingServiceDependencies } from './types';
+import type { RoutingDefinition } from '@kbn/streams-schema';
+import { createConsoleInspector } from '@kbn/xstate-utils';
+import { createActorContext, useSelector } from '@xstate5/react';
+import { debounce } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
+import { waitFor } from 'xstate5';
+import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type {
   DocumentMatchFilterOptions,
   RoutingSamplesActorRef,
   RoutingSamplesActorSnapshot,
 } from './routing_samples_state_machine';
-import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
+import {
+  createStreamRoutingMachineImplementations,
+  streamRoutingMachine,
+} from './stream_routing_state_machine';
+import type { StreamRoutingInput, StreamRoutingServiceDependencies } from './types';
 
 const consoleInspector = createConsoleInspector();
 
@@ -33,17 +34,39 @@ export const useStreamsRoutingActorRef = StreamRoutingContext.useActorRef;
 
 export type StreamRoutingEvents = ReturnType<typeof useStreamRoutingEvents>;
 
+const DEBOUNCE_DELAY = 300;
+
 export const useStreamRoutingEvents = () => {
   const service = StreamRoutingContext.useActorRef();
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    // Create debounced versions for text input handlers to prevent expensive re-renders
+    const debouncedChangeRule = debounce(
+      (routingRule: Partial<RoutingDefinitionWithUIAttributes>) => {
+        service.send({ type: 'routingRule.change', routingRule });
+      },
+      DEBOUNCE_DELAY
+    );
+
+    const debouncedChangeSuggestionName = debounce((name: string) => {
+      service.send({ type: 'suggestion.changeName', name });
+    }, DEBOUNCE_DELAY);
+
+    return {
       cancelChanges: () => {
+        debouncedChangeRule.cancel();
+        debouncedChangeSuggestionName.cancel();
         service.send({ type: 'routingRule.cancel' });
       },
       changeRule: (routingRule: Partial<RoutingDefinitionWithUIAttributes>) => {
         service.send({ type: 'routingRule.change', routingRule });
       },
+      /**
+       * Debounced version of changeRule for text input handlers.
+       * Use this when the onChange is called frequently (e.g., on every keystroke)
+       * to prevent expensive state machine updates and re-renders.
+       */
+      changeRuleDebounced: debouncedChangeRule,
       createNewRule: () => {
         service.send({ type: 'routingRule.create' });
       },
@@ -87,15 +110,20 @@ export const useStreamRoutingEvents = () => {
       changeSuggestionName: (name: string) => {
         service.send({ type: 'suggestion.changeName', name });
       },
+      /**
+       * Debounced version of changeSuggestionName for text input handlers.
+       * Use this when the onChange is called frequently (e.g., on every keystroke)
+       * to prevent expensive state machine updates and re-renders.
+       */
+      changeSuggestionNameDebounced: debouncedChangeSuggestionName,
       changeSuggestionCondition: (condition: Condition) => {
         service.send({ type: 'suggestion.changeCondition', condition });
       },
       saveEditedSuggestion: () => {
         service.send({ type: 'suggestion.saveSuggestion' });
       },
-    }),
-    [service]
-  );
+    };
+  }, [service]);
 };
 
 export const StreamRoutingContextProvider = ({

@@ -1,0 +1,13 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/synthtrace",
+  "owner": [
+    "@elastic/obs-presentation-team",
+    "@elastic/obs-onboarding-team",
+    "@elastic/obs-exploration-team",
+    "@elastic/obs-ai-team"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

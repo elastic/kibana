@@ -91,6 +91,7 @@ export const esqlAsyncSearchStrategyProvider = (
       {
         method: 'GET',
         path: `/_query/async/${id}`,
+        // FIXME: the drop_null_columns param shouldn't be needed here once https://github.com/elastic/elasticsearch/issues/138439 is resolved
         querystring: { ...params, drop_null_columns: request.params?.dropNullColumns },
       },
       {

@@ -19,6 +19,7 @@ import { AlertProcessing } from './alert_processing';
 import { CostSavingsTrend } from './cost_savings_trend';
 import { ValueReportSettings } from './value_report_settings';
 import type { StartServices } from '../../../types';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 // Mock dependencies
 jest.mock('../../../common/lib/kibana', () => ({
@@ -45,8 +46,13 @@ jest.mock('./value_report_settings', () => ({
   ValueReportSettings: jest.fn(() => <div data-test-subj="mock-value-report-settings" />),
 }));
 
+jest.mock('../../providers/ai_value/export_provider', () => ({
+  useAIValueExportContext: jest.fn(),
+}));
+
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseValueMetrics = useValueMetrics as jest.MockedFunction<typeof useValueMetrics>;
+const useAIValueExportContextMock = useAIValueExportContext as jest.Mock;
 
 const defaultProps = {
   setHasAttackDiscoveries: jest.fn(),
@@ -90,7 +96,8 @@ describe('AIValueMetrics', () => {
     } as Partial<StartServices>);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+    useAIValueExportContextMock.mockReturnValue(undefined);
     mockUseKibana.mockReturnValue(createMockKibanaServices());
 
     mockUseValueMetrics.mockReturnValue({
@@ -193,6 +200,77 @@ describe('AIValueMetrics', () => {
       to: defaultProps.to,
       minutesPerAlert: 10,
       analystHourlyRate: 50,
+    });
+  });
+
+  it('uses the specified timerange when exporting the report', () => {
+    const timeRange = {
+      to: '2025-11-18T13:18:59.691Z',
+      from: '2025-10-18T12:18:59.691Z',
+    };
+    useAIValueExportContextMock.mockReturnValue({
+      forwardedState: {
+        timeRange: { kind: 'absolute', ...timeRange },
+      },
+    });
+
+    render(<AIValueMetrics {...defaultProps} />);
+
+    expect(mockUseValueMetrics).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ...timeRange,
+      })
+    );
+  });
+
+  describe('when exporting with a relative time range', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    beforeEach(() => {
+      jest.setSystemTime(new Date('2025-12-19T00:00:00.000Z'));
+      useAIValueExportContextMock.mockReturnValue({
+        forwardedState: {
+          timeRange: {
+            kind: 'relative',
+            fromStr: 'now-7d',
+            toStr: 'now',
+          },
+        },
+      });
+    });
+
+    it('returns an absolute time range for useValueMetrics', () => {
+      render(<AIValueMetrics {...defaultProps} />);
+
+      expect(mockUseValueMetrics).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: '2025-12-12T00:00:00.000Z',
+          to: '2025-12-19T00:00:00.000Z',
+        })
+      );
+    });
+  });
+
+  it('should set the report input in the export context when the data is loaded', () => {
+    const setReportInputMock = jest.fn();
+    useAIValueExportContextMock.mockReturnValue({
+      setReportInput: setReportInputMock,
+    });
+
+    render(<AIValueMetrics {...defaultProps} />);
+
+    expect(setReportInputMock).toHaveBeenCalledWith({
+      attackAlertIds: ['alert-1', 'alert-2'],
+      analystHourlyRate: 50,
+      minutesPerAlert: 10,
+      valueMetrics: mockValueMetrics,
+      valueMetricsCompare: mockValueMetricsCompare,
     });
   });
 

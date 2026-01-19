@@ -184,6 +184,7 @@ export function ReducedTimeRange({
                   setLocalValue(choice);
                 }
               }}
+              aria-label={label}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

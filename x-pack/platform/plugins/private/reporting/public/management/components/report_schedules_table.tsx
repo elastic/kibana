@@ -7,9 +7,11 @@
 
 import { Fragment, default as React, useCallback, useMemo, useState } from 'react';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButton, logicalCSS, useEuiTheme } from '@elastic/eui';
 import {
   EuiAvatar,
   EuiBasicTable,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -24,8 +26,9 @@ import { orderBy } from 'lodash';
 import { stringify } from 'query-string';
 import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
 import type { ScheduledReportApiJSON, BaseParamsV2 } from '@kbn/reporting-common/types';
-import type { ReportingAPIClient } from '@kbn/reporting-public';
 import { useKibana } from '@kbn/reporting-public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
   guessAppIconTypeFromObjectType,
   getDisplayNameFromObjectType,
@@ -42,18 +45,21 @@ import { useBulkDelete } from '../hooks/use_bulk_delete';
 import { EditScheduledReportFlyout } from './edit_scheduled_report_flyout';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { ViewScheduledReportFlyout } from './view_scheduled_report_flyout';
+import { useBulkEnable } from '../hooks/use_bulk_enable';
 
 interface QueryParams {
   page: number;
   perPage: number;
+  search: string;
 }
 
-export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) => {
+export const ReportSchedulesTable = () => {
   const {
     application: { capabilities },
     http,
     userProfile: userProfileService,
   } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   const { data: userProfile } = useGetUserProfileQuery({
     userProfileService,
@@ -66,7 +72,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     return capabilities.manageReporting.show === true;
   }, [capabilities]);
 
-  const canEditSchedule = useCallback(
+  const canManageSchedule = useCallback(
     (item: ScheduledReportApiJSON) => {
       if (hasManageReportingPrivilege) return true;
 
@@ -84,13 +90,19 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
   const [queryParams, setQueryParams] = useState<QueryParams>({
     page: 1,
     perPage: 50,
+    search: '',
   });
-  const { data: scheduledList, isLoading } = useGetScheduledList({
+  const {
+    data: scheduledList,
+    isLoading,
+    refetch: refreshScheduledReports,
+  } = useGetScheduledList({
     ...queryParams,
   });
 
   const { mutateAsync: bulkDisableScheduledReports } = useBulkDisable();
   const { mutateAsync: bulkDeleteScheduledReports } = useBulkDelete();
+  const { mutateAsync: bulkEnableScheduledReports } = useBulkEnable();
 
   const sortedList = orderBy(scheduledList?.data || [], ['created_at'], ['desc']);
 
@@ -228,7 +240,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           'data-test-subj': (item) => `reportEditConfig-${item.id}`,
           type: 'icon',
           icon: 'calendar',
-          available: (item) => canEditSchedule(item),
+          available: (item) => canManageSchedule(item),
           onClick: (item) => setReportAndOpenConfigFlyout(item),
         },
         {
@@ -241,7 +253,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           'data-test-subj': (item) => `reportViewConfig-${item.id}`,
           type: 'icon',
           icon: 'calendar',
-          available: (item) => !canEditSchedule(item),
+          available: (item) => !canManageSchedule(item),
           onClick: (item) => setReportAndOpenConfigFlyout(item),
         },
         {
@@ -288,10 +300,28 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
             }
           ),
           'data-test-subj': (item) => `reportDisableSchedule-${item.id}`,
-          enabled: (item) => item.enabled,
+          available: (item) => item.enabled && canManageSchedule(item),
           type: 'icon',
           icon: 'cross',
           onClick: (item) => setReportAndOpenDisableModal(item),
+        },
+        {
+          name: i18n.translate('xpack.reporting.schedules.table.enableSchedule.title', {
+            defaultMessage: 'Enable schedule',
+          }),
+          description: i18n.translate(
+            'xpack.reporting.schedules.table.enableSchedule.description',
+            {
+              defaultMessage: 'Enable report schedule',
+            }
+          ),
+          'data-test-subj': (item) => `reportEnableSchedule-${item.id}`,
+          available: (item) => !item.enabled && canManageSchedule(item),
+          type: 'icon',
+          icon: 'check',
+          onClick: (item) => {
+            onEnable(item);
+          },
         },
         {
           name: i18n.translate('xpack.reporting.schedules.table.deleteSchedule.title', {
@@ -303,6 +333,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
               defaultMessage: 'Delete report schedule',
             }
           ),
+          available: (item) => canManageSchedule(item),
           'data-test-subj': (item) => `reportDeleteSchedule-${item.id}`,
           type: 'icon',
           icon: 'trash',
@@ -365,6 +396,13 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     unSetReportAndCloseDeleteModal();
   }, [selectedReport, unSetReportAndCloseDeleteModal, bulkDeleteScheduledReports]);
 
+  const onEnable = useCallback(
+    (item: ScheduledReportApiJSON) => {
+      bulkEnableScheduledReports({ ids: [item.id] });
+    },
+    [bulkEnableScheduledReports]
+  );
+
   const onCancelDestructiveAction = useCallback(
     () => unSetReportAndCloseDisableModal(),
     [unSetReportAndCloseDisableModal]
@@ -382,26 +420,79 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     [setQueryParams]
   );
 
+  const updateSearch = useCallback((searchText: string) => {
+    setQueryParams((oldParams) => ({ ...oldParams, search: searchText, page: 1 }));
+  }, []);
+
+  const refresh = useCallback(() => {
+    refreshScheduledReports();
+  }, [refreshScheduledReports]);
+
   return (
     <Fragment>
-      <EuiSpacer size={'l'} />
-      <EuiBasicTable
-        data-test-subj="reportSchedulesTable"
-        items={sortedList}
-        columns={tableColumns}
-        loading={isLoading}
-        pagination={{
-          pageIndex: queryParams.page - 1,
-          pageSize: queryParams.perPage,
-          totalItemCount: scheduledList?.total ?? 0,
-        }}
-        noItemsMessage={NO_CREATED_REPORTS_DESCRIPTION}
-        onChange={tableOnChangeCallback}
-        rowProps={() => ({ 'data-test-subj': 'scheduledReportRow' })}
-      />
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          gutterSize="s"
+          css={css`
+            ${logicalCSS('padding-vertical', euiTheme.size.s)}
+          `}
+        >
+          <EuiFlexItem grow>
+            <EuiFieldSearch
+              data-test-subj="scheduledReportsSearchField"
+              fullWidth
+              isClearable
+              placeholder={i18n.translate(
+                'xpack.reporting.schedules.table.searchPlaceholderTitle',
+                {
+                  defaultMessage: 'Search scheduled reports',
+                }
+              )}
+              onSearch={updateSearch}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="refreshScheduledReportsButton"
+              iconType="refresh"
+              onClick={refresh}
+              name="refresh"
+              color="primary"
+            >
+              <FormattedMessage
+                id="xpack.reporting.schedules.table.refreshScheduledReportsButtonLabel"
+                defaultMessage="Refresh"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiSpacer size={'s'} />
+      <EuiFlexItem grow>
+        <EuiBasicTable
+          data-test-subj="reportSchedulesTable"
+          items={sortedList}
+          columns={tableColumns}
+          loading={isLoading}
+          pagination={{
+            pageIndex: queryParams.page - 1,
+            pageSize: queryParams.perPage,
+            totalItemCount: scheduledList?.total ?? 0,
+          }}
+          noItemsMessage={NO_CREATED_REPORTS_DESCRIPTION}
+          onChange={tableOnChangeCallback}
+          rowProps={() => ({ 'data-test-subj': 'scheduledReportRow' })}
+          tableCaption={i18n.translate(
+            'xpack.reporting.schedules.table.reportSchedulesTableCaption',
+            {
+              defaultMessage: 'Report schedules table',
+            }
+          )}
+        />
+      </EuiFlexItem>
       {selectedReport &&
         isConfigFlyOutOpen &&
-        (canEditSchedule(selectedReport) ? (
+        (canManageSchedule(selectedReport) ? (
           <EditScheduledReportFlyout
             onClose={() => {
               unSetReportAndCloseConfigFlyout();
@@ -434,8 +525,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
             defaultMessage: 'Disable schedule',
           })}
           message={i18n.translate('xpack.reporting.schedules.table.disableSchedule.modalMessage', {
-            defaultMessage:
-              'Disabling this schedule will stop the generation of future exports. You will not be able to enable this schedule again.',
+            defaultMessage: 'Disabling this schedule will stop the generation of future exports.',
           })}
           onCancel={onCancelDestructiveAction}
           onConfirm={onDisableConfirm}

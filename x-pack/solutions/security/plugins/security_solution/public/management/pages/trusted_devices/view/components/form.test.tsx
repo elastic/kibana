@@ -407,6 +407,25 @@ describe('Trusted devices form', () => {
       expect(lastCall?.item.entries?.[0]?.type).toBe('wildcard');
     });
 
+    it('should clear value field when field selection changes', async () => {
+      const valueField = getConditionsValueField();
+      await setTextFieldValue(valueField, 'device-123');
+
+      const fieldSelect = getConditionsFieldSelect();
+      await userEvent.click(fieldSelect);
+      await userEvent.click(
+        screen.getByRole('option', {
+          name: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+        })
+      );
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.PRODUCT_ID);
+      expect(lastCall?.item.entries?.[0]?.value).toBe('');
+
+      expect(renderResult.container.querySelectorAll('.euiFormErrorText').length).toBe(0);
+    });
+
     it('should show value required error after blur when empty', async () => {
       await setTextFieldValue(getNameField(), 'some name');
 

@@ -74,6 +74,7 @@ describe('requestOAuthToken', () => {
               "list": Array [],
               "map": Object {},
             },
+            "agentKeepAliveTimeoutBuffer": 1000,
             "defaultPort": 443,
             "freeSockets": Object {},
             "keepAlive": false,
@@ -83,8 +84,10 @@ describe('requestOAuthToken', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "defaultPort": 443,
               "noDelay": true,
               "path": null,
+              "protocol": "https:",
               "rejectUnauthorized": true,
             },
             "protocol": "https:",

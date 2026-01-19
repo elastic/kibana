@@ -43,14 +43,14 @@ describe('toNavigationItems', () => {
     navItems: { footerItems, primaryItems },
   } = createNavigationItems();
 
-  it('should return missing logo from navigation tree', () => {
+  it('should return logo node from navigation tree', () => {
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
-        "data-test-subj": undefined,
-        "href": "/missing-href-😭",
-        "iconType": "broom",
-        "id": "kibana",
-        "label": "Kibana",
+        "data-test-subj": "nav-item nav-item-security_solution_home nav-item-deepLinkId-undefined nav-item-id-security_solution_home nav-item-home",
+        "href": "/jom/app/security/get_started",
+        "iconType": "logoSecurity",
+        "id": "security_solution_home",
+        "label": "Security",
       }
     `);
   });
@@ -71,32 +71,10 @@ describe('toNavigationItems', () => {
     expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
       "
       === Navigation Warnings ===
-      • No \\"home\\" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: \\"home\\" is expected.
-      • Navigation item is missing. Using fallback value: \\"/missing-href-😭\\".
-      • No icon found for node \\"undefined\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • Navigation item is missing. Using fallback value: \\"kibana\\".
-      • Navigation item is missing. Using fallback value: \\"Kibana\\".
-      • Navigation node \\"node-2\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:rules, alerts, attack_discovery, cloud_security_posture-findings, cases.
-      • No icon found for node \\"securityGroup:rules\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • No icon found for node \\"alerts\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • No icon found for node \\"attack_discovery\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • No icon found for node \\"cloud_security_posture-findings\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • No icon found for node \\"cases\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • Navigation node \\"node-3\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:entityAnalytics, securityGroup:explore, securityGroup:investigations, threat_intelligence.
-      • Panel opener node \\"securityGroup:entityAnalytics\\" has no children. Ignoring it.
+      • Panel opener node \\"securityGroup:entityAnalytics\\" should contain panel sections, not direct links. Flattening links \\"entity_analytics-overview, entity_analytics-privileged_user_monitoring\\" into secondary items and creating a placeholder section for these links.
       • Panel opener node \\"securityGroup:explore\\" should contain panel sections, not direct links. Flattening links \\"hosts, network, users\\" into secondary items and creating a placeholder section for these links.
-      • No icon found for node \\"securityGroup:explore\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • Panel opener node \\"securityGroup:investigations\\" should contain panel sections, not direct links. Flattening links \\"timelines, notes, osquery\\" into secondary items and creating a placeholder section for these links.
-      • No icon found for node \\"securityGroup:investigations\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • No icon found for node \\"threat_intelligence\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • Navigation node \\"node-4\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:assets.
-      • Secondary menu item node \\"fleet\\" has a href \\"/tzo/s/sec/app/fleet\\", but it should not. We're using it as a section title that doesn't have a link.
-      • Navigation item \\"node-0\\" is missing a \\"title\\". Using fallback value: \\"Missing Title 😭\\".
-      • Navigation item \\"node-0\\" is missing a \\"href\\". Using fallback value: \\"Missing Href 😭\\".
-      • No icon found for node \\"securityGroup:assets\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • No icon found for node \\"securityGroup:machineLearning\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • No icon found for node \\"stack_management\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\".
+      • Secondary menu item node \\"fleet\\" has a href \\"/jom/app/fleet\\", but it should not. We're using it as a section title that doesn't have a link.
       • ID \\"endpoints\\" is used 2 times in navigation items. Each navigation item must have a unique ID."
     `);
   });
@@ -109,119 +87,100 @@ describe('isActive', () => {
   });
 
   it('should return primary menu node as active item', () => {
-    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
-    const primaryNode = logoNode.children![0]! as ChromeProjectNavigationNode;
+    const primaryNode1 = navigationTree.body[0];
 
-    const { activeItemId } = createNavigationItems(navigationTree, [[logoNode, primaryNode]]);
-    expect(activeItemId).toBe(primaryNode.id);
+    const { activeItemId } = createNavigationItems(navigationTree, [[primaryNode1]]);
+    expect(activeItemId).toBe(primaryNode1.id);
   });
 
   it('should return 1st primary menu node as active item if multiple matching', () => {
-    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
-    const primaryNode1 = logoNode.children![0]! as ChromeProjectNavigationNode;
-    const primaryNode2 = logoNode.children![1]! as ChromeProjectNavigationNode;
+    const primaryNode1 = navigationTree.body[0];
+    const primaryNode2 = navigationTree.body[0];
 
     const { activeItemId } = createNavigationItems(navigationTree, [
-      [logoNode, primaryNode1],
-      [logoNode, primaryNode2],
+      [primaryNode1],
+      [primaryNode2],
     ]);
     expect(activeItemId).toBe(primaryNode1.id);
   });
 
   it('should return secondary node as active item', () => {
-    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
-    const primaryNode = logoNode.children![2]! as ChromeProjectNavigationNode;
-    const secondaryNode = primaryNode.children![1]! as ChromeProjectNavigationNode;
+    const primaryNode = navigationTree.body[3];
+    const sectionNode = primaryNode.children![1]!;
+    const secondaryNode = primaryNode.children![1]!.children![0]!;
 
     const { activeItemId } = createNavigationItems(navigationTree, [
-      [logoNode, primaryNode, secondaryNode],
+      [primaryNode, sectionNode, secondaryNode],
     ]);
     expect(activeItemId).toBe(secondaryNode.id);
   });
 
-  it('should return secondary node as active item if active path is beyond navigation', () => {
-    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
-    const primaryNode = logoNode.children![2]! as ChromeProjectNavigationNode;
-    const secondaryNode = primaryNode.children![0]! as ChromeProjectNavigationNode;
-    const beyondNavNode = secondaryNode.children![0]! as ChromeProjectNavigationNode;
+  it('should return primary node as active item if active path is beyond navigation', () => {
+    const primaryNode = navigationTree.body![2]!;
+    const beyondNavNode = primaryNode.children![0]!;
 
-    const { activeItemId } = createNavigationItems(navigationTree, [
-      [logoNode, primaryNode, secondaryNode, beyondNavNode],
-    ]);
-    expect(activeItemId).toBe(secondaryNode.id);
+    const { activeItemId } = createNavigationItems(navigationTree, [[primaryNode, beyondNavNode]]);
+    expect(activeItemId).toBe(primaryNode.id);
   });
 
-  it('out of two matching paths should pick the deepest', () => {
-    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
-    const primaryNode = logoNode.children![2]! as ChromeProjectNavigationNode;
-    const secondaryNode = primaryNode.children![0]! as ChromeProjectNavigationNode;
-    const beyondNavNode = secondaryNode.children![0]! as ChromeProjectNavigationNode;
+  it('logo node active state should be less priority for active state', () => {
+    const logoNode = navigationTree.body[0];
+    const deeperNode = navigationTree.footer![0]!;
+
+    const { activeItemId } = createNavigationItems(navigationTree, [[logoNode], [deeperNode]]);
+    expect(activeItemId).toBe(deeperNode.id);
+  });
+
+  it('same level nodes, earliest take priority', () => {
+    const primaryNode1 = navigationTree.body[1];
+    const primaryNode2 = navigationTree.body[2];
 
     const { activeItemId } = createNavigationItems(navigationTree, [
-      [logoNode, primaryNode, secondaryNode, beyondNavNode],
-      [logoNode, primaryNode],
+      [primaryNode1],
+      [primaryNode2],
     ]);
-    expect(activeItemId).toBe(secondaryNode.id);
+    expect(activeItemId).toBe(primaryNode1.id);
+  });
+
+  it('deeper level nodes, deeper takes priority', () => {
+    const primaryNode = navigationTree.body[1];
+    const deepNode = navigationTree.body[3]!.children![0]!.children![0]!;
+
+    const { activeItemId } = createNavigationItems(navigationTree, [
+      [primaryNode],
+      [navigationTree.body[3], navigationTree.body[3]!.children![0]!, deepNode],
+    ]);
+    expect(activeItemId).toBe(deepNode.id);
   });
 
   it('should support footer items as active', () => {
-    const footerRootNode = navigationTree.footer![0]! as ChromeProjectNavigationNode;
-    const managementAccordion = footerRootNode.children![2]! as ChromeProjectNavigationNode;
-    const managementPrimary = managementAccordion.children![0]! as ChromeProjectNavigationNode;
-    const managementSecondarySection =
-      managementPrimary.children![0]! as ChromeProjectNavigationNode;
-    const managementSecondaryItem =
-      managementSecondarySection.children![0]! as ChromeProjectNavigationNode;
+    const footerNode = navigationTree.footer![0]!;
 
     const { activeItemId } = createNavigationItems(navigationTree, [
-      [
-        footerRootNode,
-        managementAccordion,
-        managementPrimary,
-        managementSecondarySection,
-        managementSecondaryItem,
-      ],
+      [footerNode, footerNode.children![0]!, footerNode.children![0]!.children![0]!],
     ]);
 
-    expect(activeItemId).toBe(managementSecondaryItem.id);
+    expect(activeItemId).toBe(footerNode.children![0]!.children![0]!.id);
   });
 });
 
 describe('logo node', () => {
-  const treeWithLogo = structuredClone(navigationTree);
-  const homeNode: ChromeProjectNavigationNode = {
-    id: 'securityHome',
-    icon: 'launch',
-    href: '/tzo/s/sec/app/security/get_started',
-    path: 'security_solution_nav.get_started',
-    title: 'Security',
-    deepLink: {} as any,
-    isExternalLink: false,
-    sideNavStatus: 'visible',
-    renderAs: 'home',
-  };
-
-  (treeWithLogo.body[0] as ChromeProjectNavigationNode).children = [
-    homeNode,
-    ...(treeWithLogo.body[0] as ChromeProjectNavigationNode).children!,
-  ];
-
   test('should return logo node with correct properties', () => {
-    const { logoItem } = createNavigationItems(treeWithLogo);
+    const { logoItem } = createNavigationItems(navigationTree);
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
-        "data-test-subj": "nav-item nav-item-security_solution_nav.get_started nav-item-deepLinkId-undefined nav-item-id-securityHome nav-item-home",
-        "href": "/tzo/s/sec/app/security/get_started",
-        "iconType": "launch",
-        "id": "securityHome",
+        "data-test-subj": "nav-item nav-item-security_solution_home nav-item-deepLinkId-undefined nav-item-id-security_solution_home nav-item-home",
+        "href": "/jom/app/security/get_started",
+        "iconType": "logoSecurity",
+        "id": "security_solution_home",
         "label": "Security",
       }
     `);
   });
 
   test('Logo node can be active', () => {
-    const { activeItemId } = createNavigationItems(treeWithLogo, [[homeNode]]);
-    expect(activeItemId).toBe(homeNode.id);
+    const { activeItemId } = createNavigationItems(navigationTree, [[navigationTree.body[0]]]);
+    expect(activeItemId).toBe(navigationTree.body[0].id);
   });
 });
 
@@ -234,13 +193,13 @@ describe('panel opener href', () => {
     // Find a panel opener from the existing mock tree - 'securityGroup:rules' is a panel opener
     const rulesPanel = primaryItems.find((item) => item.id === 'securityGroup:rules');
     expect(rulesPanel).toBeDefined();
-    expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/rules');
+    expect(rulesPanel?.href).toBe('/jom/app/security/rules');
   });
 
   it('should ignore external urls', () => {
     const tree = structuredClone(navigationTree);
     // @ts-expect-error to avoid excess type checking for test
-    tree.body[0]!.children![2].children[0].children[0].children[0].isExternalLink = true; // 'securityGroup:rules' first child is now external
+    tree.body[3].children[0].children[0].isExternalLink = true; // 'securityGroup:rules' first child is now external
 
     const {
       navItems: { primaryItems },
@@ -249,7 +208,7 @@ describe('panel opener href', () => {
     // Find a panel opener from the existing mock tree - 'securityGroup:rules' is a panel opener
     const rulesPanel = primaryItems.find((item) => item.id === 'securityGroup:rules');
     expect(rulesPanel).toBeDefined();
-    expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/cloud_security_posture/benchmarks');
+    expect(rulesPanel?.href).toBe('/jom/app/security/cloud_security_posture/benchmarks');
   });
 
   it('should return panel opener href as last active child href', () => {
@@ -266,15 +225,14 @@ describe('panel opener href', () => {
     // Find the panel opener and verify it uses the last active item's href
     const rulesPanel = primaryItems.find((item) => item.id === 'securityGroup:rules');
     expect(rulesPanel).toBeDefined();
-    expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/cloud_security_posture/benchmarks');
+    expect(rulesPanel?.href).toBe('/jom/app/security/cloud_security_posture/benchmarks');
   });
 });
 
 describe('empty panel opener', () => {
   it('should not return panel opener if it has no children', () => {
     const tree = structuredClone(navigationTree);
-    // @ts-expect-error to avoid excess type checking for test
-    tree.body[0]!.children![2].children = []; // 'securityGroup:rules' panel opener has no children now
+    tree.body![3].children = []; // 'securityGroup:rules' panel opener has no children now
     const {
       navItems: { primaryItems },
     } = createNavigationItems(tree);
@@ -288,34 +246,40 @@ describe('hidden panel link', () => {
   it('should remove panel links marked as hidden, but should keep opener active', () => {
     const tree = structuredClone(navigationTree);
     // @ts-expect-error to avoid excess type checking for test
-    const stackManagementNode = tree.footer[0].children[2].children[0];
-    stackManagementNode.children.push({
-      link: 'management',
+    const stackManagementNode = tree.footer[3];
+    stackManagementNode.children!.push({
+      deepLink: {
+        id: 'stack_management',
+        title: 'Stack Management',
+        baseUrl: '/',
+        href: '/app/management',
+        url: '/app/management',
+        visibleIn: ['sideNav'],
+      },
       sideNavStatus: 'hidden',
+      id: 'stack_management',
+      path: 'footer.stack_management.stack_management',
     });
 
-    // Add management link under stack management section
     const {
       navItems: { footerItems },
       activeItemId,
     } = createNavigationItems(tree, [
       [
-        // @ts-expect-error to avoid excess type checking for test
-        tree.footer[0],
-        // @ts-expect-error to avoid excess type checking for test
-        tree.footer[0].children[2],
         stackManagementNode,
-        stackManagementNode.children[stackManagementNode.children.length - 1],
+        stackManagementNode.children![stackManagementNode.children!.length - 1],
       ],
     ]);
 
     // No management link under Stack Management
-    expect(footerItems[2]!.sections!.map((s) => s.label)).toMatchInlineSnapshot(`
+    expect(footerItems[3]!.sections!.map((s) => s.label)).toMatchInlineSnapshot(`
       Array [
-        "Ingest",
-        "Data",
+        undefined,
         "Alerts and Insights",
+        "Machine Learning",
+        "AI",
         "Security",
+        "Data",
         "Kibana",
         "Stack",
       ]

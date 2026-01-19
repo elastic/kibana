@@ -5,49 +5,49 @@
  * 2.0.
  */
 
-import { conditionSchema, isCondition, type Condition } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
-import { streamObjectNameSchema } from './shared/stream_object_name';
 
-const featureTypes = ['system'] as const;
-export type FeatureType = (typeof featureTypes)[number];
+const featureStatus = ['active', 'stale', 'expired'] as const;
+export type FeatureStatus = (typeof featureStatus)[number];
 
-export const featureTypeSchema = z.enum(featureTypes);
+export const featureStatusSchema = z.enum(featureStatus);
 
-export interface BaseFeature<T extends FeatureType = FeatureType> {
-  type: T;
+export interface BaseFeature {
+  type: string;
   name: string;
   description: string;
+  value: Record<string, any>;
+  confidence: number;
+  evidence: string[];
+  tags: string[];
+  meta: Record<string, any>;
+}
+
+export interface Feature extends BaseFeature {
+  id: string;
+  status: FeatureStatus;
+  last_seen: string;
 }
 
 export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
-  type: featureTypeSchema,
-  name: streamObjectNameSchema,
+  type: z.string(),
+  name: z.string(),
   description: z.string(),
+  value: z.record(z.string(), z.any()),
+  confidence: z.number().min(0).max(100),
+  evidence: z.array(z.string()),
+  tags: z.array(z.string()),
+  meta: z.record(z.string(), z.any()),
 });
 
-export type FeatureWithFilter<T extends FeatureType = FeatureType> = BaseFeature<T> & {
-  filter: Condition;
-};
-
-export const featureWithFilterSchema: z.Schema<FeatureWithFilter> = baseFeatureSchema.and(
+export const featureSchema: z.Schema<Feature> = baseFeatureSchema.and(
   z.object({
-    filter: conditionSchema,
+    id: z.string(),
+    status: featureStatusSchema,
+    last_seen: z.string(),
   })
 );
 
-export type SystemFeature = FeatureWithFilter<'system'>;
-
-export const systemFeatureSchema: z.Schema<SystemFeature> = featureWithFilterSchema.and(
-  z.object({
-    type: z.literal('system'),
-  })
-);
-
-export type Feature = SystemFeature;
-
-export const featureSchema: z.Schema<Feature> = systemFeatureSchema;
-
-export function isFeatureWithFilter(feature: Feature): feature is SystemFeature {
-  return 'filter' in feature && isCondition(feature.filter);
+export function isFeature(feature: any): feature is Feature {
+  return featureSchema.safeParse(feature).success;
 }

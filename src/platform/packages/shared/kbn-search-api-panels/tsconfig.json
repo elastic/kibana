@@ -5,7 +5,9 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@kbn/ambient-ui-types",
+      "../../../../../typings/emotion.d.ts"
     ]
   },
   "include": [
@@ -20,6 +22,10 @@
     "@kbn/core-application-browser",
     "@kbn/share-plugin",
     "@kbn/console-plugin",
-    "@kbn/try-in-console"
+    "@kbn/try-in-console",
+    "@kbn/test-jest-helpers",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core",
+    "@kbn/i18n-react"
   ]
 }

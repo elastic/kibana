@@ -31,8 +31,26 @@ describe('AlertDetails', () => {
     jest.clearAllMocks();
   });
 
+  it('calls getAllDocumentsAttachedToCase with alerts attachments filter', async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
+      return [];
+    });
+
+    const handler = new AlertDetails({
+      caseId: '',
+      casesClient: client,
+      clientArgs: { services: {} } as CasesClientArgs,
+    });
+    await handler.compute();
+
+    expect(jest.mocked(client.attachments.getAllDocumentsAttachedToCase)).toHaveBeenCalledWith({
+      attachmentTypes: ['alert'],
+      caseId: '',
+    });
+  });
+
   it('returns empty alert details metrics when there are no alerts', async () => {
-    client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
       return [];
     });
 
@@ -45,7 +63,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns the default zero values when there are no alerts but features are requested', async () => {
-    client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
       return [];
     });
 
@@ -131,7 +149,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns empty alert details metrics when no features were setup', async () => {
-    client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
       return [{ id: '1', index: '2', attached_at: '3' }];
     });
 
@@ -144,7 +162,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns empty alert details metrics when no features were setup when called twice', async () => {
-    client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
       return [{ id: '1', index: '2', attached_at: '3' }];
     });
 
@@ -210,7 +228,7 @@ describe('AlertDetails', () => {
 
 function createMockClient() {
   const client = createCasesClientMock();
-  client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+  client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
     return [{ id: '1', index: '2', attached_at: '3' }];
   });
 

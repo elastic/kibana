@@ -33,6 +33,8 @@ const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvail
   defaultMessage: 'Selected schema is not available for this query.',
 });
 
+const SCHEMA_DOCUMENTATION_LINK = 'https://ela.st/docs-otel-schema-selector-hosts';
+
 const PrependLabel = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -73,9 +75,7 @@ const PrependLabel = () => {
               documentation: (
                 <EuiLink
                   data-test-subj="infraSchemaSelectorDocumentationLink"
-                  href={
-                    'https://www.elastic.co/docs/solutions/observability/infra-and-hosts/analyze-compare-hosts#select-data-collection-schema'
-                  }
+                  href={SCHEMA_DOCUMENTATION_LINK}
                   target="_blank"
                 >
                   {i18n.translate('xpack.infra.schemaSelector.documentation', {

@@ -49,21 +49,21 @@ export const InputType = z.object({
 export type DataStream = z.infer<typeof DataStream>;
 export const DataStream = z.object({
   /**
+   * The ID of the data stream
+   */
+  dataStreamId: NonEmptyString,
+  /**
    * The title of the data stream
    */
-  title: NonEmptyString.optional(),
+  title: NonEmptyString,
   /**
    * The description of the data stream
    */
-  description: NonEmptyString.optional(),
+  description: NonEmptyString,
   /**
    * The input types of the data stream
    */
-  inputTypes: z.array(InputType).optional(),
-  /**
-   * The raw samples of the data stream
-   */
-  rawSamples: z.array(z.string()).optional(),
+  inputTypes: z.array(InputType),
 });
 
 /**
@@ -73,9 +73,9 @@ export type Integration = z.infer<typeof Integration>;
 export const Integration = z
   .object({
     /**
-     * The integration id
+     * The ID of the integration
      */
-    integration_id: NonEmptyString,
+    integrationId: NonEmptyString,
     /**
      * The data streams of the integration
      */
@@ -87,10 +87,126 @@ export const Integration = z
     /**
      * The description of the integration
      */
-    description: NonEmptyString.optional(),
+    description: NonEmptyString,
     /**
      * The title of the integration
      */
-    title: NonEmptyString.optional(),
+    title: NonEmptyString,
   })
   .strict();
+
+/**
+ * The type of the original source.
+ */
+export type OriginalSourceType = z.infer<typeof OriginalSourceType>;
+export const OriginalSourceType = z.enum(['index', 'file']);
+export type OriginalSourceTypeEnum = typeof OriginalSourceType.enum;
+export const OriginalSourceTypeEnum = OriginalSourceType.enum;
+
+/**
+ * The original source of the samples.
+ */
+export type OriginalSource = z.infer<typeof OriginalSource>;
+export const OriginalSource = z.object({
+  /**
+   * The type of the original source
+   */
+  sourceType: OriginalSourceType,
+  /**
+   * The value of the original source (e.g. index name or filename)
+   */
+  sourceValue: NonEmptyString,
+});
+
+/**
+ * The status of the task
+ */
+export type TaskStatus = z.infer<typeof TaskStatus>;
+export const TaskStatus = z.enum(['pending', 'processing', 'completed', 'failed', 'cancelled']);
+export type TaskStatusEnum = typeof TaskStatus.enum;
+export const TaskStatusEnum = TaskStatus.enum;
+
+/**
+ * The data stream response object with its settings.
+ */
+export type DataStreamResponse = z.infer<typeof DataStreamResponse>;
+export const DataStreamResponse = z.object({
+  /**
+   * The ID of the data stream
+   */
+  dataStreamId: NonEmptyString,
+  /**
+   * The title of the data stream
+   */
+  title: NonEmptyString,
+  /**
+   * The description of the data stream
+   */
+  description: NonEmptyString,
+  /**
+   * The input types of the data stream
+   */
+  inputTypes: z.array(InputType),
+  /**
+   * The status of the data stream
+   */
+  status: TaskStatus,
+});
+
+/**
+ * The integration response object with its settings.
+ */
+export type IntegrationResponse = z.infer<typeof IntegrationResponse>;
+export const IntegrationResponse = z.object({
+  /**
+   * The ID of the integration
+   */
+  integrationId: NonEmptyString,
+  /**
+   * The title of the integration
+   */
+  title: NonEmptyString,
+  /**
+   * The logo of the integration
+   */
+  logo: z.string().optional(),
+  /**
+   * The description of the integration
+   */
+  description: NonEmptyString,
+  /**
+   * The data streams of the integration
+   */
+  dataStreams: z.array(DataStreamResponse),
+  /**
+   * The status of the integration
+   */
+  status: TaskStatus,
+});
+
+/**
+ * The integration object with its settings.
+ */
+export type AllIntegrationsResponseIntegration = z.infer<typeof AllIntegrationsResponseIntegration>;
+export const AllIntegrationsResponseIntegration = z.object({
+  /**
+   * The ID of the integration
+   */
+  integrationId: NonEmptyString,
+  /**
+   * The title of the integration
+   */
+  title: NonEmptyString,
+  /**
+   * The number of data streams of the integration
+   */
+  totalDataStreamCount: z.number().int(),
+  /**
+   * The number of successful data streams of the integration
+   */
+  successfulDataStreamCount: z.number().int(),
+  /**
+   * The status of the integration
+   */
+  status: TaskStatus,
+});

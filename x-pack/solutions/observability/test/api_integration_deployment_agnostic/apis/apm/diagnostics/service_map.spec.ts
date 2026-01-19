@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from 'expect';
 import { Readable } from 'node:stream';
-import type { ApmFields, Serializable } from '@kbn/apm-synthtrace-client';
-import { serviceMap, timerange, apm, httpExitSpan } from '@kbn/apm-synthtrace-client';
+import type { ApmFields, Serializable } from '@kbn/synthtrace-client';
+import { serviceMap, timerange, apm, httpExitSpan } from '@kbn/synthtrace-client';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 

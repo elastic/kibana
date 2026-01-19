@@ -76,11 +76,7 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
               login(ROLE.endpoint_policy_manager);
             } else {
               login.withCustomKibanaPrivileges({
-                [siemVersion]: [
-                  'read',
-                  `${privilegePrefix}all`,
-                  'global_artifact_management_all', // todo: remove when Endpoint exceptions per-policy assignment is implemented
-                ],
+                [siemVersion]: ['read', `${privilegePrefix}all`],
               });
             }
           };

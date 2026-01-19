@@ -8,6 +8,7 @@ import { useCallback } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
 import type { Streams } from '@kbn/streams-schema';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { omit } from 'lodash';
 import { useKibana } from './use_kibana';
 
 export function useUpdateFailureStore(definition: Streams.ingest.all.Definition) {
@@ -30,6 +31,7 @@ export function useUpdateFailureStore(definition: Streams.ingest.all.Definition)
             body: {
               ingest: {
                 ...definition.ingest,
+                processing: omit(definition.ingest.processing, ['updated_at']),
                 failure_store: failureStore,
               },
             },

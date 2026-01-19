@@ -14,6 +14,40 @@ import { ConversationalChain, contextLimitCheck } from './conversational_chain';
 import type { ChatMessage } from '../types';
 import { MessageRole } from '../types';
 import { ContextModelLimitError } from '../../common';
+import type { UIMessageChunk } from 'ai';
+
+const readSseChunks = async (stream: ReadableStream<string>): Promise<UIMessageChunk[]> => {
+  const reader = stream.getReader();
+  const chunks: UIMessageChunk[] = [];
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (value) {
+      buffer += value;
+      let separatorIndex = buffer.indexOf('\n\n');
+      while (separatorIndex !== -1) {
+        const event = buffer.slice(0, separatorIndex);
+        buffer = buffer.slice(separatorIndex + 2);
+        separatorIndex = buffer.indexOf('\n\n');
+        if (!event.startsWith('data: ')) {
+          continue;
+        }
+        const payload = event.slice(6);
+        if (payload === '[DONE]') {
+          continue;
+        }
+        chunks.push(JSON.parse(payload));
+      }
+    }
+
+    if (done) {
+      break;
+    }
+  }
+
+  return chunks;
+};
 
 describe('conversational chain', () => {
   beforeEach(() => {
@@ -108,52 +142,33 @@ describe('conversational chain', () => {
       questionRewritePrompt: 'rewrite question {question} using {context}"',
     });
 
-    try {
-      const stream = await conversationalChain.stream(aiClient, chat);
+    const stream = await conversationalChain.stream(aiClient, chat);
+    const chunks = await readSseChunks(stream);
 
-      const streamToValue: string[] = await new Promise((resolve, reject) => {
-        const reader = stream.getReader();
-        const chunks: string[] = [];
+    const textValue =
+      chunks
+        .filter((chunk) => chunk.type === 'text-delta')
+        .map((chunk) => ('delta' in chunk ? chunk.delta : ''))
+        .join('') || '';
+    expect(textValue).toEqual(expectedFinalAnswer || '');
 
-        const read = () => {
-          reader.read().then(({ done, value }) => {
-            if (done) {
-              resolve(chunks);
-            } else {
-              chunks.push(value);
-              read();
-            }
-          }, reject);
-        };
-        read();
-      });
+    const annotations = chunks
+      .filter((chunk) => chunk.type === 'data-message_annotations')
+      .flatMap((chunk) =>
+        'data' in chunk && Array.isArray(chunk.data) ? chunk.data : []
+      ) as Array<{ type: string }>;
 
-      const textValue =
-        streamToValue
-          .filter((v) => v[0] === '0')
-          .reduce((acc, v) => acc + v.replace(/0:"(.*)"\n/, '$1'), '') || '';
-      expect(textValue).toEqual(expectedFinalAnswer || '');
-
-      const annotations = streamToValue
-        .filter((v) => v[0] === '8')
-        .map((entry) => entry.replace(/8:(.*)\n/, '$1'), '')
-        .map((entry) => JSON.parse(entry))
-        .reduce((acc, v) => acc.concat(v), []);
-
-      const error =
-        streamToValue
-          .filter((v) => v[0] === '3')
-          .reduce((acc, v) => acc + v.replace(/3:"(.*)"\n/, '$1'), '') || '';
-
-      const docValues = annotations.filter((v: { type: string }) => v.type === 'retrieved_docs');
-      const tokens = annotations.filter((v: { type: string }) => v.type.endsWith('_token_count'));
-      expect(docValues).toEqual(expectedDocs);
-      expect(tokens).toEqual(expectedTokens);
-      if (expectedErrorMessage) expect(error).toEqual(expectedErrorMessage);
-      expect(searchMock.mock.calls[0]).toEqual(expectedSearchRequest);
-    } catch (error) {
-      throw error;
+    const errorChunk = chunks.find((chunk) => chunk.type === 'error');
+    const docValues = annotations.filter((v) => v.type === 'retrieved_docs');
+    const tokens = annotations.filter((v) => v.type.endsWith('_token_count'));
+    expect(docValues).toEqual(expectedDocs);
+    expect(tokens).toEqual(expectedTokens);
+    if (expectedErrorMessage) {
+      expect(errorChunk && 'errorText' in errorChunk ? errorChunk.errorText : '').toEqual(
+        expectedErrorMessage
+      );
     }
+    expect(searchMock.mock.calls[0]).toEqual(expectedSearchRequest);
   };
 
   it('should be able to create a conversational chain', async () => {

@@ -54,8 +54,8 @@ export async function analyzeFile(
       const pipeline = cloneDeep(results.ingest_pipeline);
       updatePipelineTimezone(pipeline);
       const reader = getReader(results);
-      const arrayBuffer = new Uint8Array(Buffer.from(data));
-      const docs = reader.read(arrayBuffer).slice(0, PREVIEW_DOC_LIMIT);
+      const buffer = Buffer.from(data);
+      const docs = reader.read(buffer.buffer).slice(0, PREVIEW_DOC_LIMIT);
       if (results.format === FILE_FORMATS.NDJSON) {
         previewDocs = {
           docs: docs.map((doc: any) => ({

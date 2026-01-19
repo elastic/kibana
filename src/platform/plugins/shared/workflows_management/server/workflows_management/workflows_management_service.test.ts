@@ -10,9 +10,11 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, SecurityServiceStart } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
+import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { WorkflowsService } from './workflows_management_service';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
@@ -80,12 +82,12 @@ describe('WorkflowsService', () => {
       index: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       update: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       delete: jest.fn().mockResolvedValue({ _id: 'test-id' }),
+      bulk: jest.fn().mockResolvedValue({ items: [] }),
     } as any;
 
     mockLogger = loggerMock.create();
     mockLogger.error = jest.fn();
 
-    const mockEsClientPromise = Promise.resolve(mockEsClient);
     const mockGetActionsClient = jest.fn().mockResolvedValue({
       getAll: jest.fn().mockResolvedValue([]),
       execute: jest.fn(),
@@ -96,12 +98,24 @@ describe('WorkflowsService', () => {
       getAll: jest.fn().mockResolvedValue({ data: [] }),
     } as unknown as PublicMethodsOf<ActionsClient>);
 
-    const mockGetActionsStart = jest.fn().mockResolvedValue({
-      getUnsecuredActionsClient: mockGetActionsClient,
-      getActionsClientWithRequest: mockGetActionsClientWithRequest,
+    const getCoreStart = jest.fn().mockResolvedValue({
+      ...coreMock.createStart(),
+      elasticsearch: {
+        client: {
+          asInternalUser: mockEsClient,
+        },
+      },
     });
 
-    service = new WorkflowsService(mockEsClientPromise, mockLogger, false, mockGetActionsStart);
+    const getPluginsStart = jest.fn().mockResolvedValue({
+      workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
+      actions: {
+        getUnsecuredActionsClient: mockGetActionsClient,
+        getActionsClientWithRequest: mockGetActionsClientWithRequest,
+      },
+    });
+
+    service = new WorkflowsService(mockLogger, getCoreStart, getPluginsStart);
 
     mockSecurity = {
       authc: {
@@ -1180,14 +1194,27 @@ steps:
           total: { value: 1 },
         },
       } as any);
-      mockEsClient.index.mockResolvedValue({ _id: 'test-workflow-id' } as any);
+      mockEsClient.bulk.mockResolvedValue({
+        items: [
+          {
+            index: {
+              _id: 'test-workflow-id',
+              status: 200,
+            },
+          },
+        ],
+      } as any);
 
-      await service.deleteWorkflows(['test-workflow-id'], 'default');
+      const result = await service.deleteWorkflows(['test-workflow-id'], 'default');
+
+      expect(result).toEqual({
+        total: 1,
+        deleted: 1,
+        failures: [],
+      });
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: '.workflows-workflows',
-          allow_no_indices: true,
           query: {
             bool: {
               must: [{ ids: { values: ['test-workflow-id'] } }, { term: { spaceId: 'default' } }],
@@ -1196,18 +1223,16 @@ steps:
           size: 1,
         })
       );
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'test-workflow-id',
-          index: '.workflows-workflows',
-          document: expect.objectContaining({
-            enabled: false,
-            deleted_at: expect.any(Date),
-          }),
-          refresh: 'wait_for',
-          require_alias: true,
-        })
-      );
+      // Verify bulk was called with correct structure
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('.workflows-workflows');
+      expect(bulkCall.operations).toBeDefined();
+      expect(bulkCall.operations).toHaveLength(2); // metadata + document
+      expect(bulkCall.operations![0]).toEqual({ index: { _id: 'test-workflow-id' } });
+      expect(bulkCall.operations![1]).toMatchObject({
+        enabled: false,
+        deleted_at: expect.any(Date),
+      });
     });
 
     it('should handle not found workflows gracefully', async () => {
@@ -1218,7 +1243,60 @@ steps:
         },
       } as any);
 
-      await expect(service.deleteWorkflows(['non-existent-id'], 'default')).resolves.not.toThrow();
+      const result = await service.deleteWorkflows(['non-existent-id'], 'default');
+
+      expect(result).toEqual({
+        total: 1,
+        deleted: 1,
+        failures: [],
+      });
+    });
+
+    it('should handle partial failures when deleting multiple workflows', async () => {
+      const mockWorkflowDocument2 = {
+        _id: 'workflow-2',
+        _source: {
+          ...mockWorkflowDocument._source,
+          name: 'Test Workflow 2',
+        },
+      };
+
+      // Mock search to return both workflows
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [{ ...mockWorkflowDocument, _id: 'workflow-1' }, mockWorkflowDocument2],
+          total: { value: 2 },
+        },
+      } as any);
+
+      // Mock bulk operation where one succeeds and one fails
+      mockEsClient.bulk.mockResolvedValue({
+        items: [
+          {
+            index: {
+              _id: 'workflow-1',
+              status: 200,
+            },
+          },
+          {
+            index: {
+              _id: 'workflow-2',
+              status: 500,
+              error: {
+                reason: 'Database error',
+              },
+            },
+          },
+        ],
+      } as any);
+
+      const result = await service.deleteWorkflows(['workflow-1', 'workflow-2'], 'default');
+
+      expect(result).toEqual({
+        total: 2,
+        deleted: 1,
+        failures: [{ id: 'workflow-2', error: 'Database error' }],
+      });
     });
   });
 
@@ -1359,6 +1437,7 @@ steps:
                 spaceId: 'default',
                 status: 'completed',
                 startedAt: '2023-01-01T00:00:00Z',
+                error: { type: 'SomeError', message: 'An error occurred' },
                 finishedAt: '2023-01-01T00:05:00Z',
                 duration: 300000,
                 workflowId: 'workflow-1',
@@ -1389,6 +1468,7 @@ steps:
             isTestRun: false,
             startedAt: '2023-01-01T00:00:00Z',
             finishedAt: '2023-01-01T00:05:00Z',
+            error: { type: 'SomeError', message: 'An error occurred' },
             duration: 300000,
             workflowId: 'workflow-1',
             triggeredBy: 'manual',
@@ -1839,14 +1919,24 @@ steps:
         .fn()
         .mockResolvedValue(mockActionsClientWithRequest);
 
-      const mockGetActionsStart = jest.fn().mockResolvedValue({
-        getUnsecuredActionsClient: mockGetActionsClient,
-        getActionsClientWithRequest: mockGetActionsClientWithRequest,
+      // Re-initialize service with new mocks
+      const getCoreStart = jest.fn().mockResolvedValue({
+        ...coreMock.createStart(),
+        elasticsearch: {
+          client: {
+            asInternalUser: mockEsClient,
+          },
+        },
+      });
+      const getPluginsStart = jest.fn().mockResolvedValue({
+        workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
+        actions: {
+          getUnsecuredActionsClient: mockGetActionsClient,
+          getActionsClientWithRequest: mockGetActionsClientWithRequest,
+        },
       });
 
-      // Re-initialize service with new mocks
-      const mockEsClientPromise = Promise.resolve(mockEsClient);
-      service = new WorkflowsService(mockEsClientPromise, mockLogger, false, mockGetActionsStart);
+      service = new WorkflowsService(mockLogger, getCoreStart, getPluginsStart);
       service.setSecurityService(mockSecurity);
 
       // Wait for initialization to complete

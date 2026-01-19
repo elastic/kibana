@@ -25,6 +25,7 @@ import {
 
 import { RemoteClusterList as RemoteClusterListView } from './remote_cluster_list';
 
+/** @type {import('react-redux').MapStateToProps<any, any, any>} */
 const mapStateToProps = (state) => {
   return {
     clusters: getClustersList(state),
@@ -36,6 +37,7 @@ const mapStateToProps = (state) => {
   };
 };
 
+/** @type {import('react-redux').MapDispatchToProps<any, any>} */
 const mapDispatchToProps = (dispatch) => {
   return {
     loadClusters: () => {
@@ -53,6 +55,9 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
+/**
+ * @type {import('react-redux').ConnectedComponent<typeof RemoteClusterListView, {}>}
+ */
 export const RemoteClusterList = connect(
   mapStateToProps,
   mapDispatchToProps

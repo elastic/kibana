@@ -20,6 +20,7 @@ import type { DiscoverCustomization, DiscoverCustomizationId } from './customiza
 import { createCustomizationService } from './customization_service';
 import type { CustomizationCallback } from './types';
 import { DiscoverTestProvider } from '../__mocks__/test_provider';
+import { createDiscoverServicesMock } from '../__mocks__/services';
 
 describe('getConnectedCustomizationService', () => {
   it('should provide customization service', async () => {
@@ -35,6 +36,7 @@ describe('getConnectedCustomizationService', () => {
     const servicePromise = getConnectedCustomizationService({
       stateContainer,
       customizationCallbacks,
+      services: createDiscoverServicesMock(),
     });
     let service: ConnectedCustomizationService | undefined;
     expect(callback).toHaveBeenCalledTimes(1);

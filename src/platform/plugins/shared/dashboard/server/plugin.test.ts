@@ -119,7 +119,6 @@ describe('DashboardPlugin', () => {
         attributes: {
           title: 'Test Dashboard',
           description: 'Test Description',
-          panels: [],
         },
         references: [],
       };
@@ -130,7 +129,6 @@ describe('DashboardPlugin', () => {
         data: {
           title: 'Test Dashboard',
           description: 'Test Description',
-          panels: [],
         },
       };
 
@@ -180,7 +178,6 @@ describe('DashboardPlugin', () => {
         data: {
           title: 'Updated Dashboard',
           description: 'Updated Description',
-          panels: [],
         },
       };
 

@@ -5,56 +5,41 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { HealthCallout } from './health_callout';
+import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { cloneDeep } from 'lodash';
+import React from 'react';
+import { baseSlo } from '../../../../data/slo';
+import {
+  aHealthyTransformHealth,
+  aMissingTransformHealth,
+  anUnhealthyTransformHealth,
+} from '../../../../data/slo/health';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
+import { HealthCallout } from './health_callout';
 
 jest.mock('../../../../hooks/use_fetch_slo_health');
 
 const mockUseFetchSloHealth = useFetchSloHealth as jest.Mock;
 
-const mockSlo1: SLOWithSummaryResponse = {
-  id: '1',
-  name: 'Test SLO 1',
-  revision: 1,
-  budgetingMethod: 'occurrences',
-  objective: { target: 0.99 },
-  timeWindow: { duration: '30d', type: 'rolling' },
-  indicator: {
-    type: 'sli.kql.custom',
-    params: {
-      index: 'test-index',
-      good: 'status: 200',
-      total: '*',
-    },
-  },
-  summary: {
-    sliValue: 0.95,
-    errorBudget: {
-      initial: 0.01,
-      consumed: 0.5,
-      remaining: 0.5,
-    },
-    status: 'HEALTHY',
-  },
-} as SLOWithSummaryResponse;
-
-const mockSlo2: SLOWithSummaryResponse = {
-  ...mockSlo1,
-  id: '2',
-  name: 'Test SLO 2',
-} as SLOWithSummaryResponse;
+const mockSlo1: SLOWithSummaryResponse = cloneDeep({ ...baseSlo, id: '1', name: 'Test SLO 1' });
+const mockSlo2: SLOWithSummaryResponse = cloneDeep({ ...baseSlo, id: '2', name: 'Test SLO 2' });
 
 describe('HealthCallout', () => {
   it('should render unhealthy message when an unhealthy rollup transform is present', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'unhealthy', summary: 'healthy' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: true,
+            rollup: anUnhealthyTransformHealth,
+            summary: aHealthyTransformHealth,
+          },
         },
       ],
     });
@@ -66,7 +51,7 @@ describe('HealthCallout', () => {
     );
     fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
+      'The following SLO might have some operational problems. You can inspect it here:'
     );
   });
 
@@ -74,8 +59,15 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'healthy', summary: 'unhealthy' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: true,
+            rollup: aHealthyTransformHealth,
+            summary: anUnhealthyTransformHealth,
+          },
         },
       ],
     });
@@ -87,7 +79,7 @@ describe('HealthCallout', () => {
     );
     fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
+      'The following SLO might have some operational problems. You can inspect it here:'
     );
   });
 
@@ -95,8 +87,15 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'missing', summary: 'healthy' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: true,
+            rollup: aMissingTransformHealth,
+            summary: aHealthyTransformHealth,
+          },
         },
       ],
     });
@@ -108,7 +107,7 @@ describe('HealthCallout', () => {
     );
     fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
+      'The following SLO might have some operational problems. You can inspect it here:'
     );
   });
 
@@ -116,8 +115,15 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'healthy', summary: 'missing' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: true,
+            rollup: aHealthyTransformHealth,
+            summary: aMissingTransformHealth,
+          },
         },
       ],
     });
@@ -129,7 +135,7 @@ describe('HealthCallout', () => {
     );
     fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
+      'The following SLO might have some operational problems. You can inspect it here:'
     );
   });
 
@@ -137,8 +143,15 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'healthy', rollup: 'healthy', summary: 'healthy' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: false,
+            rollup: aHealthyTransformHealth,
+            summary: aHealthyTransformHealth,
+          },
         },
       ],
     });
@@ -156,12 +169,26 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'healthy', summary: 'unhealthy' },
+          id: '1',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 1',
+          health: {
+            isProblematic: true,
+            rollup: anUnhealthyTransformHealth,
+            summary: aHealthyTransformHealth,
+          },
         },
         {
-          sloId: '2',
-          health: { overall: 'unhealthy', rollup: 'unhealthy', summary: 'healthy' },
+          id: '2',
+          instanceId: ALL_VALUE,
+          revision: 1,
+          name: 'Test SLO 2',
+          health: {
+            isProblematic: true,
+            rollup: aHealthyTransformHealth,
+            summary: aMissingTransformHealth,
+          },
         },
       ],
     });
@@ -174,7 +201,7 @@ describe('HealthCallout', () => {
 
     fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLOs are in an unhealthy state. Data may be missing or incomplete. You can inspect each one here:'
+      'The following SLOs might have some operational problems. You can inspect each one here:'
     );
   });
 });

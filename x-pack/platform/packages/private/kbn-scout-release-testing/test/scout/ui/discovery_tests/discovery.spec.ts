@@ -6,6 +6,9 @@
  */
 
 import { expect, test } from '@kbn/scout';
+import fs from 'fs';
+import os from 'os';
+import Papa from 'papaparse';
 
 const defaultSettings = {
   defaultIndex: 'logstash-*',
@@ -16,6 +19,9 @@ const defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
 const endTimeNoResults = 'Sep 19, 2015 @ 18:45:00.000';
 const queryName1 = 'Query # 1';
 const queryName2 = 'Query # 2';
+const queryName3 = 'CSV Export Test';
+const totalHitCount = 14004;
+let downloadedFilePath: string | null = null;
 
 test.describe('Discover app', { tag: ['@ess'] }, () => {
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
@@ -35,6 +41,13 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
       to: defaultEndTime,
     });
     await pageObjects.discover.goto();
+  });
+
+  test.afterEach(async () => {
+    if (downloadedFilePath && fs.existsSync(downloadedFilePath)) {
+      fs.unlinkSync(downloadedFilePath);
+      downloadedFilePath = null;
+    }
   });
 
   test.afterAll(async ({ kbnClient }) => {
@@ -94,8 +107,7 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
   });
 
   test('should show the correct hit count', async ({ pageObjects }) => {
-    const expectedHitCount = 14004;
-    expect(await pageObjects.discover.getHitCountInt()).toBe(expectedHitCount);
+    expect(await pageObjects.discover.getHitCountInt()).toBe(totalHitCount);
   });
 
   test('should show correct time range string in chart', async ({ pageObjects }) => {
@@ -162,4 +174,91 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await expect(page.testSubj.locator('discoverNoResultsTimefilter')).toBeHidden();
     await expect.poll(async () => await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
   });
+
+  test('should hide and show the histogram chart when toggle is clicked', async ({
+    page,
+    pageObjects,
+  }) => {
+    // Verify chart is initially visible
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    // Hide the chart
+    await pageObjects.discover.hideChart();
+    // Verify chart is now hidden
+    await expect(page.testSubj.locator('xyVisChart')).toBeHidden();
+    // Show the chart again for other tests
+    await pageObjects.discover.showChart();
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+  });
+
+  test('should navigate to Lens editor when edit visualization is clicked', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.discover.navigateToLensEditor();
+    // Verify we're now on the Lens page
+    expect(page.url()).toContain('/app/lens');
+    await expect(page.testSubj.locator('lnsApp')).toBeVisible();
+  });
+
+  test('drag and drop fields to grid', async ({ page, pageObjects }) => {
+    // Verify chart is initially visible
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    const fields = ['@message', '@tags'];
+    // Drag the @message and @tags fields to the data grid
+    await pageObjects.discover.dragFieldToGrid(fields);
+    // Verify the field was added to the grid
+    const columnTextArray = await pageObjects.discover.getTheColumnFromGrid();
+    expect(columnTextArray).toStrictEqual(fields);
+    // Move @message field to the right
+    await pageObjects.discover.moveColumn('@message', 'right');
+    const updatedColumnTextArray = await pageObjects.discover.getTheColumnFromGrid();
+    // Verify the columns were reordered
+    expect(updatedColumnTextArray).toStrictEqual(fields.reverse());
+  });
+
+  test('type a search query and execute a search', async ({ pageObjects }) => {
+    const filteredHitCount = 12891;
+    await pageObjects.discover.writeSearchQuery('response:200');
+    await expect
+      .poll(async () => await pageObjects.discover.getHitCountInt())
+      .toBe(filteredHitCount);
+  });
+
+  test('click Field Stats button and validate Document Stats is present', async ({ page }) => {
+    await page.testSubj.click('dscViewModeFieldStatsButton');
+    await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
+    await page.testSubj.click('dataVisualizerDetailsToggle-@message.raw-arrowRight');
+    await expect(page.testSubj.locator('dataVisualizerDocumentStatsContent')).toBeVisible();
+  });
+
+  test('navigate to Lens from field statistics', async ({ page, pageObjects }) => {
+    await page.testSubj.click('dscViewModeFieldStatsButton');
+    await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
+    const viewLensButton = await pageObjects.discover.getFirstViewLensButtonFromFieldStatistics();
+    await viewLensButton.click();
+    // Verify we're now on the Lens page
+    expect(page.url()).toContain('/app/lens');
+    await expect(page.testSubj.locator('lnsApp')).toBeVisible();
+  });
+
+  test('download CSV report and validate row length', async ({ pageObjects }) => {
+    // Can download saved searches only, so save first
+    await pageObjects.discover.saveSearch(queryName3);
+    await pageObjects.toasts.closeAll(); // close toast to avoid obstruction
+    // Wait for download
+    const download = await pageObjects.discover.exportAsCsv();
+    downloadedFilePath = `${os.tmpdir()}/${download.suggestedFilename()}`;
+    await download.saveAs(downloadedFilePath);
+
+    // Validate
+    const content = fs.readFileSync(downloadedFilePath, 'utf-8');
+    // Parse CSV using papaparse
+    const parseResult = Papa.parse(content, {
+      header: false,
+      skipEmptyLines: true,
+    });
+    const rows = parseResult.data as string[][];
+    expect(rows).toHaveLength(totalHitCount + 1); // +1 for header row
+  });
+  // Click on Patterns works with sample data, tbd once pipeline is in place
 });

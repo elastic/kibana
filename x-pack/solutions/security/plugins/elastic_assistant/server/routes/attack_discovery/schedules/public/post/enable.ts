@@ -22,7 +22,6 @@ import {
 import { buildResponse } from '../../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../../types';
 import { performChecks } from '../../../../helpers';
-import { throwIfPublicApiDisabled } from '../../../helpers/throw_if_public_api_disabled';
 
 export const enableAttackDiscoverySchedulesRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -80,8 +79,6 @@ export const enableAttackDiscoverySchedulesRoute = (
         const { id } = request.params;
 
         try {
-          await throwIfPublicApiDisabled(context);
-
           const dataClient = await assistantContext.getAttackDiscoverySchedulingDataClient();
           if (!dataClient) {
             return resp.error({
