@@ -9,7 +9,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import {
   EuiPageTemplate,
   EuiPageSection,
@@ -20,7 +20,7 @@ import {
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RandomNumberRouteExample } from './random_number_example';
 import { RandomNumberBetweenRouteExample } from './random_number_between_example';
-import { Services } from './services';
+import type { Services } from './services';
 import { PostMessageRouteExample } from './post_message_example';
 import { GetMessageRouteExample } from './get_message_example';
 

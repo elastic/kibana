@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SocTrendsDatePickerLock } from './date_picker_lock';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
@@ -44,9 +44,9 @@ interface Props {
 const getListItem = (stat: StatState) => ({
   title: (
     <EuiToolTip content={stat.description}>
-      <EuiText>
+      <EuiText tabIndex={0}>
         <h6>
-          {stat.title} <EuiIcon type="questionInCircle" />
+          {stat.title} <EuiIcon type="question" />
         </h6>
       </EuiText>
     </EuiToolTip>
@@ -57,7 +57,7 @@ const getListItem = (stat: StatState) => ({
     <>
       {stat.stat}{' '}
       <EuiToolTip content={stat.percentage.note}>
-        <EuiBadge color={stat.percentage.color}>
+        <EuiBadge tabIndex={0} color={stat.percentage.color}>
           {stat.percentage.percent != null ? stat.percentage.percent : '-'}
         </EuiBadge>
       </EuiToolTip>

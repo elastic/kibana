@@ -44,6 +44,7 @@ describe('utils', () => {
           customFields: [],
           settings: {
             syncAlerts: false,
+            extractObservables: false,
           },
         },
         description: undefined,
@@ -72,6 +73,7 @@ describe('utils', () => {
           customFields: [],
           settings: {
             syncAlerts: false,
+            extractObservables: false,
           },
         },
         description: undefined,
@@ -102,6 +104,7 @@ describe('utils', () => {
           customFields: [],
           settings: {
             syncAlerts: false,
+            extractObservables: false,
           },
         },
         description: 'description 1',
@@ -138,6 +141,7 @@ describe('utils', () => {
           ],
           settings: {
             syncAlerts: false,
+            extractObservables: false,
           },
         },
         description: undefined,
@@ -172,6 +176,7 @@ describe('utils', () => {
           customFields: [],
           settings: {
             syncAlerts: false,
+            extractObservables: false,
           },
         },
         description: undefined,

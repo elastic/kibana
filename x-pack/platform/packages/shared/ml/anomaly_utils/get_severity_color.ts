@@ -9,9 +9,9 @@ import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { ML_SEVERITY_COLORS } from './severity_colors';
 
 /**
- * Returns a severity RGB color (one of critical, major, minor, warning, low or unknown)
- * for the supplied normalized anomaly score (a value between 0 and 100).
- * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
+ * @deprecated Prefer using the `useSeverityColor` hook for functional components
+ * or ensure `EuiTheme` is passed to `getThemeResolvedSeverityColor` for class components
+ * to get theme-aware colors. This function uses a fixed set of legacy colors.
  */
 export function getSeverityColor(normalizedScore: number): string {
   if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {

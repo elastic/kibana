@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { ImportQuerySchema, importQuerySchema } from '.';
+import { left } from 'fp-ts/Either';
+import type { ImportQuerySchema } from '.';
+import { importQuerySchema } from '.';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('importQuerySchema', () => {

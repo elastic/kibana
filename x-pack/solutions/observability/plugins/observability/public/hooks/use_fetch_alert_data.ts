@@ -8,8 +8,8 @@
 import { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { HttpSetup } from '@kbn/core/public';
+import type { estypes } from '@elastic/elasticsearch';
+import type { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { useDataFetcher } from './use_data_fetcher';
 

@@ -17,10 +17,6 @@ export const OsqueryResponseActionsUpsellingSectionLazy = withSuspenseUpsell(
   lazy(() => import('./pages/osquery_automated_response_actions'))
 );
 
-export const EndpointExceptionsDetailsUpsellingLazy = withSuspenseUpsell(
-  lazy(() => import('./pages/endpoint_management/endpoint_exceptions_details'))
-);
-
 export const EntityAnalyticsUpsellingPageLazy = withSuspenseUpsell(
   lazy(() =>
     import('@kbn/security-solution-upselling/pages/entity_analytics').then(
@@ -36,6 +32,24 @@ export const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
     import('@kbn/security-solution-upselling/sections/entity_analytics').then(
       ({ EntityAnalyticsUpsellingSection }) => ({
         default: EntityAnalyticsUpsellingSection,
+      })
+    )
+  )
+);
+
+export const SiemMigrationsStartUpsellSectionLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./sections/siem_migrations/siem_migrations_start').then(
+      ({ SiemMigrationStartUpsellSection }) => ({ default: SiemMigrationStartUpsellSection })
+    )
+  )
+);
+
+export const SiemMigrationsTranslatedRulesUpsellPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/siem_migrations_translated_rules').then(
+      ({ SiemMigrationsTranslatedRulesUpsellPage }) => ({
+        default: SiemMigrationsTranslatedRulesUpsellPage,
       })
     )
   )

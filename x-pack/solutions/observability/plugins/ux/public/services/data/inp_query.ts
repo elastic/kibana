@@ -6,10 +6,10 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
-import { UXMetrics } from '@kbn/observability-shared-plugin/public/types';
+import type { UXMetrics } from '@kbn/observability-shared-plugin/public/types';
 import { DEFAULT_RANKS, getRanksPercentages } from './core_web_vitals_query';
 import { INP_FIELD } from '../../../common/elasticsearch_fieldnames';
-import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { getRumPageExitTransactionsProjection } from './projections';
 
@@ -49,27 +49,25 @@ export function inpQuery(
     end,
   });
   return mergeProjection(projection, {
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [...projection.body.query.bool.filter],
+    size: 0,
+    query: {
+      bool: {
+        filter: [...projection.query.bool.filter],
+      },
+    },
+    aggs: {
+      inp: {
+        percentiles: {
+          field: INP_FIELD,
+          percents: [percentile],
         },
       },
-      aggs: {
-        inp: {
-          percentiles: {
-            field: INP_FIELD,
-            percents: [percentile],
-          },
-        },
 
-        inpRanks: {
-          percentile_ranks: {
-            field: INP_FIELD,
-            values: [200, 500],
-            keyed: false,
-          },
+      inpRanks: {
+        percentile_ranks: {
+          field: INP_FIELD,
+          values: [200, 500],
+          keyed: false,
         },
       },
     },

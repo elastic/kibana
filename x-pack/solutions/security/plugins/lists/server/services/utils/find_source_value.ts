@@ -6,9 +6,10 @@
  */
 
 import Mustache from 'mustache';
-import { DeserializerOrUndefined, type } from '@kbn/securitysolution-io-ts-list-types';
+import type { DeserializerOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import { type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SearchEsListItemSchema } from '../../schemas/elastic_response';
+import type { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { esDataTypeGeoPointRange, esDataTypeRange } from '../../schemas/common/schemas';
 
 export const DEFAULT_GEO_POINT = '{{{lat}}},{{{lon}}}';
@@ -79,7 +80,7 @@ export const deserializeValue = ({
   deserializer: DeserializerOrUndefined;
   defaultValueDeserializer: string;
   defaultDeserializer: string;
-  value: string | object | undefined;
+  value: string | object | number | undefined;
 }): string | null => {
   if (esDataTypeRange.is(value)) {
     const template =

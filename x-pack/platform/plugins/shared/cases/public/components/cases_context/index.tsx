@@ -13,8 +13,8 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
-import type { QueryClient } from '@tanstack/react-query';
-import { QueryClientProvider } from '@tanstack/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
@@ -100,6 +100,7 @@ export const CasesProvider: FC<
         update: permissions.update,
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
+        assign: permissions.assign,
       },
       basePath,
       /**
@@ -131,6 +132,7 @@ export const CasesProvider: FC<
       permissions.update,
       permissions.reopenCase,
       permissions.createComment,
+      permissions.assign,
     ]
   );
 

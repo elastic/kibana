@@ -14,7 +14,9 @@
         "tags": [],
         "label": "overlayServiceMock",
         "description": [],
-        "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+        "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +40,9 @@
               "OverlayService",
               ">>"
             ],
-            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+            "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -64,7 +68,9 @@
               "OverlayStart",
               ">"
             ],
-            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+            "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { kvState } from '../../../__jest__/fixtures/kv';
 import type { KVState } from '../../types';
 import { handleHeader } from './header';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const exampleAnswer = {
   rfc: 'RFC2454',
@@ -24,7 +21,7 @@ const exampleAnswer = {
 
 const model = new FakeLLM({
   response: JSON.stringify(exampleAnswer),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 const state: KVState = kvState;
 

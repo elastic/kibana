@@ -6,7 +6,7 @@
  */
 
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
-import { GenericMetric } from './rule_condition_chart';
+import type { GenericMetric } from './rule_condition_chart';
 
 export interface LensOperation {
   operation: string;
@@ -23,8 +23,8 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   if (aggType === Aggregators.RATE) {
     return {
       operation: 'counter_rate',
-      operationWithField: `counter_rate(max(${field}), kql='${escapedFilter}')`,
-      sourceField: field || '',
+      operationWithField: `counter_rate(max("${field}"), kql='${escapedFilter}')`,
+      sourceField: `"${field}"` || '',
     };
   }
 
@@ -34,7 +34,7 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   if (aggType === Aggregators.COUNT) operation = 'count';
 
   if (field) {
-    operationArgs.push(field);
+    operationArgs.push(`"${field}"`);
   }
 
   if (aggType === Aggregators.P95) {
@@ -49,7 +49,7 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   return {
     operation,
     operationWithField: `${operation}(${operationArgs.join(', ')})`,
-    sourceField: field || '',
+    sourceField: `"${field}"` || '',
   };
 };
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
-import { ISource } from './source';
+import type { SourceDescriptor } from '../../../common/descriptor_types';
+import type { ISource } from './source';
 import { getSourceByType } from './source_registry';
 import { setupSources } from './setup_sources';
 
 setupSources();
 
-export function createSourceInstance(sourceDescriptor: AbstractSourceDescriptor | null): ISource {
+export function createSourceInstance(sourceDescriptor: SourceDescriptor | null): ISource {
   if (sourceDescriptor === null) {
     throw new Error('Source-descriptor should be initialized');
   }

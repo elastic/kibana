@@ -8,11 +8,9 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import userEvent from '@testing-library/user-event';
 import { FilesUtilityBar } from './files_utility_bar';
+import { renderWithTestingProviders } from '../../common/mock';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_create_attachments');
@@ -27,28 +25,16 @@ useCreateAttachmentsMock.mockReturnValue({
 
 const defaultProps = {
   caseId: 'foobar',
-  onSearch: jest.fn(),
 };
 
 describe('FilesUtilityBar', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(<FilesUtilityBar {...defaultProps} />);
+    renderWithTestingProviders(<FilesUtilityBar {...defaultProps} />);
 
-    expect(await screen.findByTestId('cases-files-search')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
-  });
-
-  it('search text passed correctly to callback', async () => {
-    appMockRender.render(<FilesUtilityBar {...defaultProps} />);
-
-    await userEvent.type(await screen.findByTestId('cases-files-search'), 'My search{enter}');
-    expect(defaultProps.onSearch).toBeCalledWith('My search');
   });
 });

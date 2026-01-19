@@ -7,35 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types-jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
-import type { NotificationsServiceContract } from '@kbn/core-notifications-browser-internal';
 import { toastsServiceMock } from './toasts_service.mock';
+import { createNotificationCoordinatorMock } from './notification_coordinator.mock';
+
+import { lazyObject } from '@kbn/lazy-object';
 
 const createSetupContractMock = () => {
-  const setupContract: MockedKeys<NotificationsSetup> = {
+  const setupContract: DeeplyMockedKeys<NotificationsSetup> = lazyObject({
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createSetupContract(),
-  };
+    coordinator: createNotificationCoordinatorMock(),
+  });
   return setupContract;
 };
 
 const createStartContractMock = () => {
-  const startContract: DeeplyMockedKeys<NotificationsStart> = {
+  const startContract: DeeplyMockedKeys<NotificationsStart> = lazyObject({
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createStartContract(),
     showErrorDialog: jest.fn(),
-  };
+  });
   return startContract;
 };
 
+/**
+ * This is declared internally to avoid a circular dependency issue
+ */
+export interface NotificationsServiceContract {
+  setup: typeof createSetupContractMock;
+  start: ({ targetDomElement }: { targetDomElement: HTMLElement }) => void;
+  stop: () => void;
+}
+
 const createMock = () => {
-  const mocked: jest.Mocked<NotificationsServiceContract> = {
-    setup: jest.fn(),
+  const mocked: jest.Mocked<NotificationsServiceContract> = lazyObject({
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn(),
     stop: jest.fn(),
-  };
-  mocked.setup.mockReturnValue(createSetupContractMock());
+  });
+
   return mocked;
 };
 

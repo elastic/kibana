@@ -7,8 +7,8 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-
 import {
+  htmlIdGenerator,
   EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -36,38 +36,44 @@ import { checkPermission } from '../../../../../capabilities/check_capabilities'
 
 const MAX_FORECASTS = 500;
 
-const DeleteForecastConfirm = ({ onCancel, onConfirm }) => (
-  <EuiConfirmModal
-    title={i18n.translate(
-      'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.title',
-      {
-        defaultMessage: 'Delete the selected forecast?',
-      }
-    )}
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText={i18n.translate(
-      'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.cancelButton',
-      {
-        defaultMessage: 'Cancel',
-      }
-    )}
-    confirmButtonText={i18n.translate(
-      'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.confirmButton',
-      {
-        defaultMessage: 'Confirm',
-      }
-    )}
-    defaultFocusedButton="confirm"
-  >
-    <p>
-      <FormattedMessage
-        id="xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.text"
-        defaultMessage="This will permanently delete the forecast from the job."
-      />
-    </p>
-  </EuiConfirmModal>
-);
+const DeleteForecastConfirm = ({ onCancel, onConfirm }) => {
+  const modalTitleId = htmlIdGenerator()('confirmModalTitle');
+
+  return (
+    <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      title={i18n.translate(
+        'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.title',
+        {
+          defaultMessage: 'Delete the selected forecast?',
+        }
+      )}
+      titleProps={{ id: modalTitleId }}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={i18n.translate(
+        'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.cancelButton',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
+      confirmButtonText={i18n.translate(
+        'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.confirmButton',
+        {
+          defaultMessage: 'Confirm',
+        }
+      )}
+      defaultFocusedButton="confirm"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.text"
+          defaultMessage="This will permanently delete the forecast from the job."
+        />
+      </p>
+    </EuiConfirmModal>
+  );
+};
 
 /**
  * Table component for rendering the lists of forecasts run on an ML job.
@@ -245,7 +251,14 @@ export class ForecastsTable extends Component {
     }
 
     if (this.state.errorMessage !== undefined) {
-      return <EuiCallOut title={this.state.errorMessage} color="danger" iconType="cross" />;
+      return (
+        <EuiCallOut
+          announceOnMount
+          title={this.state.errorMessage}
+          color="danger"
+          iconType="cross"
+        />
+      );
     }
 
     const forecasts = this.state.forecasts;
@@ -253,13 +266,14 @@ export class ForecastsTable extends Component {
     if (forecasts.length === 0) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsTitle"
               defaultMessage="No forecasts have been run for this job"
             />
           }
-          iconType="iInCircle"
+          iconType="info"
           role="alert"
         >
           {isTimeSeriesViewJob(this.props.job) && (

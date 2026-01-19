@@ -27,10 +27,12 @@
         "label": "getPaddedAlertTimeRange",
         "description": [],
         "signature": [
-          "(alertStart: string, alertEnd?: string | undefined, lookBackWindow?: { size: number; unit: \"m\" | \"s\" | \"d\" | \"h\"; } | undefined) => ",
+          "(alertStart: string, alertEnd?: string | undefined, lookBackWindow?: { size: number; unit: \"m\" | \"d\" | \"s\" | \"h\"; } | undefined) => ",
           "TimeRange"
         ],
-        "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+        "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +46,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+            "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -59,7 +63,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+            "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -71,7 +77,9 @@
             "tags": [],
             "label": "lookBackWindow",
             "description": [],
-            "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+            "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+            "lineNumber": 18,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -82,7 +90,9 @@
                 "tags": [],
                 "label": "size",
                 "description": [],
-                "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+                "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+                "lineNumber": 19,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -94,9 +104,11 @@
                 "label": "unit",
                 "description": [],
                 "signature": [
-                  "\"m\" | \"s\" | \"d\" | \"h\""
+                  "\"m\" | \"d\" | \"s\" | \"h\""
                 ],
-                "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+                "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }

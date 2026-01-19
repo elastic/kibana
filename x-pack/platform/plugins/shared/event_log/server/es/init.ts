@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { asyncForEach } from '@kbn/std';
 import { groupBy } from 'lodash';
-import pRetry, { FailedAttemptError } from 'p-retry';
+import type { FailedAttemptError } from 'p-retry';
+import pRetry from 'p-retry';
 import { getIndexTemplate } from './documents';
-import { EsContext } from './context';
+import type { EsContext } from './context';
 
 const MAX_RETRY_DELAY = 30000;
 

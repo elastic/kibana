@@ -6,18 +6,9 @@
  */
 
 import { updateSLOParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
-import {
-  DefaultSummaryTransformManager,
-  DefaultTransformManager,
-  KibanaSavedObjectsSLORepository,
-  UpdateSLO,
-} from '../../services';
-import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
-import { createTransformGenerators } from '../../services/transform_generators';
+import { UpdateSLO } from '../../services';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
-import { getSpaceId } from './utils/get_space_id';
 
 export const updateSLORoute = createSloServerRoute({
   endpoint: 'PUT /api/observability/slos/{id} 2023-10-31',
@@ -28,44 +19,20 @@ export const updateSLORoute = createSloServerRoute({
     },
   },
   params: updateSLOParamsSchema,
-  handler: async ({ context, request, params, logger, plugins, corePlugins }) => {
+  handler: async ({ context, params, logger, request, plugins, corePlugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(plugins, request);
-    const dataViews = await plugins.dataViews.start();
+    const { scopedClusterClient, spaceId, repository, transformManager, summaryTransformManager } =
+      await getScopedClients({ request, logger });
 
-    const sloContext = await context.slo;
-    const basePath = corePlugins.http.basePath;
     const core = await context.core;
-    const scopedClusterClient = core.elasticsearch.client;
-    const esClient = core.elasticsearch.client.asCurrentUser;
+    const basePath = corePlugins.http.basePath;
     const userId = core.security.authc.getCurrentUser()?.username!;
-
-    const soClient = core.savedObjects.client;
-    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
-    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-
-    const transformGenerators = createTransformGenerators(
-      spaceId,
-      dataViewsService,
-      sloContext.isServerless
-    );
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      scopedClusterClient,
-      logger
-    );
-    const summaryTransformManager = new DefaultSummaryTransformManager(
-      new DefaultSummaryTransformGenerator(),
-      scopedClusterClient,
-      logger
-    );
 
     const updateSLO = new UpdateSLO(
       repository,
       transformManager,
       summaryTransformManager,
-      esClient,
       scopedClusterClient,
       logger,
       spaceId,
@@ -73,6 +40,6 @@ export const updateSLORoute = createSloServerRoute({
       userId
     );
 
-    return await executeWithErrorHandler(() => updateSLO.execute(params.path.id, params.body));
+    return await updateSLO.execute(params.path.id, params.body);
   },
 });

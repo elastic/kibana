@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+
 import type {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -13,6 +14,7 @@ import type {
   UPDATE_CASES_CAPABILITY,
   CREATE_COMMENT_CAPABILITY,
   CASES_REOPEN_CAPABILITY,
+  ASSIGN_CASE_CAPABILITY,
 } from '..';
 import type {
   CASES_CONNECTORS_CAPABILITY,
@@ -33,6 +35,7 @@ import type {
   PersistableStateAttachment,
   Configuration,
   CustomFieldTypes,
+  EventAttachment,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -53,6 +56,8 @@ type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 export interface CasesContextFeatures {
   alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
   metrics: SingleCaseMetricsFeature[];
+  observables?: { enabled: boolean; autoExtract?: boolean };
+  events?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -68,6 +73,9 @@ export interface CasesUiConfigType {
     allowedMimeTypes: string[];
   };
   stack: {
+    enabled: boolean;
+  };
+  incrementalId: {
     enabled: boolean;
   };
 }
@@ -97,6 +105,7 @@ export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: UserActionUI[];
 };
+export type EventAttachmentUI = SnakeToCamelCase<EventAttachment>;
 
 export interface InternalFindCaseUserActions extends FindCaseUserActions {
   latestAttachments: AttachmentUI[];
@@ -123,9 +132,9 @@ export type SimilarCasesUI = SimilarCaseUI[];
 
 export interface ResolvedCase {
   case: CaseUI;
-  outcome: ResolvedSimpleSavedObject['outcome'];
-  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export type CasesConfigurationUI = Pick<
@@ -177,6 +186,8 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  from: string;
+  to: string;
 }
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
@@ -325,6 +336,7 @@ export interface CasesPermissions {
   settings: boolean;
   reopenCase: boolean;
   createComment: boolean;
+  assign: boolean;
 }
 
 export interface CasesCapabilities {
@@ -337,4 +349,9 @@ export interface CasesCapabilities {
   [CASES_SETTINGS_CAPABILITY]: boolean;
   [CREATE_COMMENT_CAPABILITY]: boolean;
   [CASES_REOPEN_CAPABILITY]: boolean;
+  [ASSIGN_CASE_CAPABILITY]: boolean;
+}
+
+export interface CaseViewEventsTableProps {
+  events: { eventId: string | string[]; index: string | string[] }[];
 }

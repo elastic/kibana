@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import type { FieldsObject } from '../../../../../../common/endpoint/types';
@@ -13,6 +13,7 @@ import type { NodeID } from '../utils';
 import { validIDs } from '../utils';
 import type { ResolverQueryParams } from './base';
 import { BaseResolverQuery } from './base';
+import { createEventKindFilter } from '../../utils/event_kind_filters';
 
 /**
  * Builds a query for retrieving descendants of a node.
@@ -78,9 +79,7 @@ export class DescendantsQuery extends BaseResolverQuery {
             {
               terms: { 'event.category': ['process'] },
             },
-            {
-              terms: { 'event.kind': ['event', 'alert'] },
-            },
+            createEventKindFilter(),
           ],
         },
       },
@@ -137,6 +136,7 @@ export class DescendantsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: {
                 [ancestryField]: nodes,
@@ -170,9 +170,7 @@ export class DescendantsQuery extends BaseResolverQuery {
             {
               term: { 'event.category': 'process' },
             },
-            {
-              term: { 'event.kind': 'event' },
-            },
+            createEventKindFilter(),
           ],
         },
       },

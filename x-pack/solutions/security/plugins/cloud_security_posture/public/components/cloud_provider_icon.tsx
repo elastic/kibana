@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiToolTip, IconSize } from '@elastic/eui';
-import { CSSInterpolation } from '@emotion/serialize';
+import type { IconSize } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
+import type { CSSInterpolation } from '@emotion/serialize';
 import { getCloudProviderNameFromAbbreviation } from '../../common/utils/helpers';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
@@ -39,9 +40,5 @@ export const CloudProviderIcon = ({ cloudProvider, size, style }: Props) => {
 
   const name = getCloudProviderNameFromAbbreviation(cloudProvider);
 
-  return (
-    <EuiToolTip content={name}>
-      <EuiIcon type={iconType} size={size || 'xl'} css={style} />
-    </EuiToolTip>
-  );
+  return <EuiIconTip content={name} type={iconType} size={size || 'xl'} css={style} />;
 };

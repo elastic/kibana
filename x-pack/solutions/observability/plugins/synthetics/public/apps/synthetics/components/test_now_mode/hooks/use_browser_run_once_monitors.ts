@@ -9,7 +9,7 @@ import { createEsParams, useEsSearch, useFetcher } from '@kbn/observability-shar
 import { useTickTick } from './use_tick_tick';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { fetchBrowserJourney } from '../../../state';
 
 export interface CheckGroupResult {
@@ -32,28 +32,26 @@ export const useBrowserEsResults = ({
   return useEsSearch(
     createEsParams({
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        sort: [
-          {
-            '@timestamp': 'desc',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'synthetics.type': ['heartbeat/summary', 'journey/start'],
-                },
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'synthetics.type': ['heartbeat/summary', 'journey/start'],
               },
+            },
 
-              {
-                term: {
-                  test_run_id: testRunId,
-                },
+            {
+              term: {
+                test_run_id: testRunId,
               },
-            ],
-          },
+            },
+          ],
         },
       },
       size: 1000,
@@ -277,9 +275,10 @@ function mergeCheckGroups(prev: CheckGroupResult, curr: Partial<CheckGroupResult
 function getCheckGroupChecksum(checkGroupResults: CheckGroupResult[]) {
   return checkGroupResults.reduce((acc, cur) => {
     return (
-      acc + cur?.journeyDoc?._id ??
-      '' + cur?.summaryDoc?._id ??
-      '' + (cur?.steps ?? []).reduce((stepAcc, { _id }) => stepAcc + _id, '')
+      acc +
+      (cur?.journeyDoc?._id ?? '') +
+      (cur?.summaryDoc?._id ?? '') +
+      (cur?.steps ?? []).reduce((stepAcc, { _id }) => stepAcc + _id, '')
     );
   }, '');
 }

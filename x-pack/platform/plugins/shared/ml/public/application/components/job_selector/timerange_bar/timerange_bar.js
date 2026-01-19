@@ -8,22 +8,26 @@
 import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 import { EuiToolTip } from '@elastic/eui';
-
+import { useTimerangeBarStyles } from './timerange_bar_styles';
 export function TimeRangeBar({ isRunning, timerange, ganttBarWidth }) {
+  const styles = useTimerangeBarStyles();
+
   const style = {
     width: timerange.widthPx,
     marginLeft: timerange.fromPx,
   };
 
-  const className = `mlJobSelector__ganttBar${isRunning ? ' mlJobSelector__ganttBarRunning' : ''}`;
-
   return (
     <EuiToolTip position="top" content={timerange.label}>
       <Fragment>
-        <div className="mlJobSelector__ganttBarBackEdge">
-          <div className="mlJobSelector__ganttBarDashed" style={{ width: `${ganttBarWidth}px` }} />
+        <div css={styles.ganttBarBackEdge}>
+          <div css={styles.ganttBarDashed} style={{ width: `${ganttBarWidth}px` }} />
         </div>
-        <div style={style} className={className} />
+        <div
+          css={[styles.ganttBar, ...(isRunning ? [styles.ganttBarRunning] : [])]}
+          style={style}
+          data-test-subj={`mlJobSelectorGanttBar${isRunning ? 'Running' : ''}`}
+        />
       </Fragment>
     </EuiToolTip>
   );

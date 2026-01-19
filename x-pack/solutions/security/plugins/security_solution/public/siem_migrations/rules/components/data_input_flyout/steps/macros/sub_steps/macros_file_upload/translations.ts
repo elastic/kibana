@@ -9,9 +9,13 @@ import { i18n } from '@kbn/i18n';
 
 export const MACROS_DATA_INPUT_FILE_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.macrosFileUpload.title',
-  { defaultMessage: 'Update your macros export' }
+  { defaultMessage: 'Upload exported macros' }
 );
 export const MACROS_DATA_INPUT_FILE_UPLOAD_PROMPT = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.macrosFileUpload.prompt',
   { defaultMessage: 'Select or drag and drop the exported JSON file' }
+);
+export const NO_MISSING_MACROS_PROVIDED = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.noMissingMacros.title',
+  { defaultMessage: 'No relevant macros found.' }
 );

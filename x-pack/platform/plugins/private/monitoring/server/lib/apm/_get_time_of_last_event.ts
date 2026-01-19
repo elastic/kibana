@@ -7,8 +7,8 @@
 
 import { createApmQuery } from './create_apm_query';
 import { ApmClusterMetric } from '../metrics';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 
 export async function getTimeOfLastEvent({
   req,
@@ -29,32 +29,30 @@ export async function getTimeOfLastEvent({
     index: apmIndexPattern,
     size: 1,
     ignore_unavailable: true,
-    body: {
-      _source: ['beats_stats.timestamp', '@timestamp'],
-      sort: [
+    _source: ['beats_stats.timestamp', '@timestamp'],
+    sort: [
+      {
+        timestamp: {
+          order: 'desc',
+          unmapped_type: 'long',
+        },
+      },
+    ],
+    query: createApmQuery({
+      start,
+      end,
+      clusterUuid,
+      metric: ApmClusterMetric.getMetricFields(),
+      filters: [
         {
-          timestamp: {
-            order: 'desc',
-            unmapped_type: 'long',
+          range: {
+            'beats_stats.metrics.libbeat.output.events.acked': {
+              gt: 0,
+            },
           },
         },
       ],
-      query: createApmQuery({
-        start,
-        end,
-        clusterUuid,
-        metric: ApmClusterMetric.getMetricFields(),
-        filters: [
-          {
-            range: {
-              'beats_stats.metrics.libbeat.output.events.acked': {
-                gt: 0,
-              },
-            },
-          },
-        ],
-      }),
-    },
+    }),
   };
 
   const response = await callWithRequest(req, 'search', params);

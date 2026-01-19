@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../adapters';
-import { RefResult, FullScreenshot } from '../../../../common/runtime_types/ping/synthetics';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { UMElasticsearchQueryFn } from '../adapters';
+import type { RefResult, FullScreenshot } from '../../../../common/runtime_types/ping/synthetics';
 
 interface ResultType {
   _source: RefResult | FullScreenshot;
@@ -58,7 +58,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
     },
   };
 
-  const result = await uptimeEsClient.search({ body });
+  const result = await uptimeEsClient.search(body);
 
   const screenshotsOrRefs =
     (result.body.aggregations?.step.image.hits.hits as ResultType[]) ?? null;

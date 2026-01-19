@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import moment from 'moment';
-import { DateRange, SLODefinition } from '../domain/models';
+import type { DateRange, SLODefinition } from '../domain/models';
 import { oneMinute, oneMonth, sevenDays, thirtyDays } from './fixtures/duration';
 import { createSLO } from './fixtures/slo';
 import {
-  DefaultHistoricalSummaryClient,
+  HistoricalSummaryClient,
   getFixedIntervalAndBucketsPerDay,
 } from './historical_summary_client';
 
@@ -168,7 +169,7 @@ describe('FetchHistoricalSummary', () => {
         groupBy: ALL_VALUE,
       });
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      const client = new HistoricalSummaryClient(esClientMock);
 
       const results = await client.fetch({
         list: [
@@ -185,7 +186,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
     });
 
@@ -201,7 +202,7 @@ describe('FetchHistoricalSummary', () => {
       };
 
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo, range));
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      const client = new HistoricalSummaryClient(esClientMock);
 
       const results = await client.fetch({
         list: [
@@ -219,7 +220,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
     });
   });
@@ -233,7 +234,7 @@ describe('FetchHistoricalSummary', () => {
         groupBy: ALL_VALUE,
       });
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      const client = new HistoricalSummaryClient(esClientMock);
 
       const results = await client.fetch({
         list: [
@@ -250,7 +251,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
       expect(results[0].data).toHaveLength(180);
     });
@@ -267,7 +268,7 @@ describe('FetchHistoricalSummary', () => {
         to: new Date('2023-01-13T15:00:00.000Z'),
       };
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo, range));
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      const client = new HistoricalSummaryClient(esClientMock);
 
       const results = await client.fetch({
         list: [
@@ -285,7 +286,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
     });
   });
@@ -301,7 +302,7 @@ describe('FetchHistoricalSummary', () => {
         objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
       });
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForMonthlyCalendarAlignedSLO());
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      const client = new HistoricalSummaryClient(esClientMock);
 
       const results = await client.fetch({
         list: [
@@ -318,7 +319,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
       expect(results[0].data).toHaveLength(108);
     });
@@ -335,7 +336,7 @@ describe('FetchHistoricalSummary', () => {
         objective: { target: 0.95 },
       });
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForMonthlyCalendarAlignedSLO());
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      const client = new HistoricalSummaryClient(esClientMock);
 
       const results = await client.fetch({
         list: [
@@ -352,7 +353,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
 
       expect(results[0].data).toHaveLength(108);
@@ -366,7 +367,7 @@ describe('FetchHistoricalSummary', () => {
       groupBy: 'host',
     });
     esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
-    const client = new DefaultHistoricalSummaryClient(esClientMock);
+    const client = new HistoricalSummaryClient(esClientMock);
 
     const results = await client.fetch({
       list: [
@@ -388,7 +389,7 @@ describe('FetchHistoricalSummary', () => {
     ).toEqual({ term: { 'slo.instanceId': 'host-abc' } });
 
     results[0].data.forEach((dailyResult) =>
-      expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+      expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
     );
     expect(results[0].data).toHaveLength(180);
   });

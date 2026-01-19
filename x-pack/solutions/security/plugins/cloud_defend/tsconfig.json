@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -32,11 +32,14 @@
     "@kbn/es-types",
     "@kbn/data-views-plugin",
     "@kbn/utility-types",
+    "@kbn/kubernetes-security-plugin",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-server",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
-    "@kbn/core-security-common"
+    "@kbn/core-security-common",
+    "@kbn/react-query",
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*"]
 }

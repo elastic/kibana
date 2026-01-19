@@ -8,7 +8,8 @@
 import { EuiButtonEmpty, EuiCard, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import type { SetupStatus } from '../../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { CreateJobButton, RecreateJobButton } from '../create_job_button';
@@ -35,22 +36,34 @@ export const LogAnalysisModuleListCard: React.FC<{
       notifications: { toasts },
     },
   } = useKibanaContextForPlugin();
-
+  const isComponentMounted = useMountedState();
   const [viewInMlLink, setViewInMlLink] = useState<string>('');
-
-  const getMlUrl = async () => {
-    if (!ml?.locator) {
+  const getMlUrl = useCallback(async () => {
+    if (!ml?.managementLocator) {
       toasts.addWarning({
         title: mlNotAvailableMessage,
       });
       return;
     }
-    setViewInMlLink(await ml.locator.getUrl({ page: 'jobs', pageState: { jobId } }));
-  };
 
-  useEffect(() => {
-    getMlUrl();
-  });
+    // Get link to ML anomaly detection management job list
+    // with filter to jobId
+    const link = await ml.managementLocator.getUrl(
+      { page: '', pageState: { jobId } },
+      'anomaly_detection'
+    );
+
+    if (link?.url && isComponentMounted()) {
+      setViewInMlLink(link.url);
+    }
+  }, [jobId, ml?.managementLocator, toasts, isComponentMounted]);
+
+  useEffect(
+    function getMlAnomalyDetectionJobLink() {
+      getMlUrl();
+    },
+    [getMlUrl]
+  );
 
   const navigateToMlApp = async () => {
     await navigateToUrl(viewInMlLink);

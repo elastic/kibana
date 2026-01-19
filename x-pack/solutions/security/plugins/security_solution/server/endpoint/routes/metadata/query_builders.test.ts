@@ -27,7 +27,7 @@ describe('query builder', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
       const query = getESQueryHostMetadataByID(mockID);
 
-      expect(get(query, 'body.query.bool.filter.0.bool.should')).toContainEqual({
+      expect(get(query, 'query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'agent.id': mockID },
       });
     });
@@ -36,7 +36,7 @@ describe('query builder', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
       const query = getESQueryHostMetadataByID(mockID);
 
-      expect(get(query, 'body.query.bool.filter.0.bool.should')).toContainEqual({
+      expect(get(query, 'query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'HostDetails.agent.id': mockID },
       });
     });
@@ -78,11 +78,6 @@ describe('query builder', () => {
           },
           filter: [
             {
-              terms: {
-                'united.agent.policy_id': [],
-              },
-            },
-            {
               exists: {
                 field: 'united.endpoint.agent.id',
               },
@@ -99,10 +94,15 @@ describe('query builder', () => {
                 },
               },
             },
+            {
+              terms: {
+                'united.agent.policy_id': [],
+              },
+            },
           ],
         },
       };
-      expect(query.body.query).toEqual(expected);
+      expect(query.query).toEqual(expected);
     });
 
     it('adds `status` runtime field', async () => {
@@ -112,7 +112,7 @@ describe('query builder', () => {
         []
       );
 
-      expect(query.body.runtime_mappings).toHaveProperty('status');
+      expect(query.runtime_mappings).toHaveProperty('status');
     });
 
     it('adds `last_checkin` runtime field', async () => {
@@ -122,7 +122,7 @@ describe('query builder', () => {
         []
       );
 
-      expect(query.body.runtime_mappings).toHaveProperty('last_checkin');
+      expect(query.runtime_mappings).toHaveProperty('last_checkin');
     });
 
     it('correctly builds query', async () => {
@@ -137,7 +137,7 @@ describe('query builder', () => {
         ['test-endpoint-policy-id']
       );
       const expected = expectedCompleteUnitedIndexQuery;
-      expect(query.body.query).toEqual(expected);
+      expect(query.query).toEqual(expected);
     });
 
     describe('sorting', () => {
@@ -147,7 +147,7 @@ describe('query builder', () => {
           pageSize: 10,
         });
 
-        expect(query.body.sort).toEqual([
+        expect(query.sort).toEqual([
           { 'united.agent.enrolled_at': { order: 'desc', unmapped_type: 'date' } },
         ]);
       });
@@ -165,7 +165,7 @@ describe('query builder', () => {
           sortDirection: 'asc',
         });
 
-        expect(query.body.sort).toEqual([{ [mappedField]: 'asc' }]);
+        expect(query.sort).toEqual([{ [mappedField]: 'asc' }]);
       });
 
       it.each`
@@ -180,9 +180,7 @@ describe('query builder', () => {
           sortDirection: 'asc',
         });
 
-        expect(query.body.sort).toEqual([
-          { [mappedField]: { order: 'asc', unmapped_type: 'date' } },
-        ]);
+        expect(query.sort).toEqual([{ [mappedField]: { order: 'asc', unmapped_type: 'date' } }]);
       });
     });
   });

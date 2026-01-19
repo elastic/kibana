@@ -6,13 +6,12 @@
  */
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
-import fastIsEqual from 'fast-deep-equal';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type {
   SingleMetricViewerEmbeddableState,
   SingleMetricViewerEmbeddableUserInput,
-} from '../types';
+} from './types';
 
 export type AnomalySwimLaneControlsState = Pick<
   SingleMetricViewerEmbeddableState,
@@ -24,17 +23,29 @@ export type SingleMetricViewerControlsState = Pick<
   'jobIds' | 'selectedDetectorIndex' | 'selectedEntities' | 'functionDescription' | 'forecastId'
 >;
 
+export const singleMetricViewerComparators: StateComparators<SingleMetricViewerControlsState> = {
+  jobIds: 'deepEquality',
+  forecastId: 'referenceEquality',
+  selectedDetectorIndex: 'referenceEquality',
+  selectedEntities: 'deepEquality',
+  functionDescription: 'referenceEquality',
+};
+
 export const initializeSingleMetricViewerControls = (
-  rawState: SingleMetricViewerEmbeddableState,
+  initialState: SingleMetricViewerEmbeddableState,
   titlesApi: TitlesApi
 ) => {
-  const functionDescription = new BehaviorSubject<string | undefined>(rawState.functionDescription);
-  const jobIds = new BehaviorSubject<JobId[]>(rawState.jobIds);
-  const selectedDetectorIndex = new BehaviorSubject<number>(rawState.selectedDetectorIndex ?? 0);
-  const selectedEntities = new BehaviorSubject<Record<string, any> | undefined>(
-    rawState.selectedEntities
+  const functionDescription = new BehaviorSubject<string | undefined>(
+    initialState.functionDescription
   );
-  const forecastId = new BehaviorSubject<string | undefined>(rawState.forecastId);
+  const jobIds = new BehaviorSubject<JobId[]>(initialState.jobIds);
+  const selectedDetectorIndex = new BehaviorSubject<number>(
+    initialState.selectedDetectorIndex ?? 0
+  );
+  const selectedEntities = new BehaviorSubject<Record<string, any> | undefined>(
+    initialState.selectedEntities
+  );
+  const forecastId = new BehaviorSubject<string | undefined>(initialState.forecastId);
 
   const updateUserInput = (update: SingleMetricViewerEmbeddableUserInput) => {
     jobIds.next(update.jobIds);
@@ -48,7 +59,7 @@ export const initializeSingleMetricViewerControls = (
     forecastId.next(id);
   };
 
-  const serializeSingleMetricViewerState = (): SingleMetricViewerControlsState => {
+  const getLatestState = (): SingleMetricViewerControlsState => {
     return {
       jobIds: jobIds.getValue(),
       forecastId: forecastId.getValue(),
@@ -58,19 +69,8 @@ export const initializeSingleMetricViewerControls = (
     };
   };
 
-  const singleMetricViewerComparators: StateComparators<SingleMetricViewerControlsState> = {
-    jobIds: [jobIds, (ids) => jobIds.next(ids), fastIsEqual],
-    forecastId: [forecastId, (id) => forecastId.next(id)],
-    selectedDetectorIndex: [selectedDetectorIndex, (index) => selectedDetectorIndex.next(index)],
-    selectedEntities: [selectedEntities, (items) => selectedEntities.next(items), fastIsEqual],
-    functionDescription: [
-      functionDescription,
-      (description) => functionDescription.next(description),
-    ],
-  };
-
   return {
-    singleMetricViewerControlsApi: {
+    api: {
       jobIds,
       forecastId,
       selectedDetectorIndex,
@@ -79,9 +79,22 @@ export const initializeSingleMetricViewerControls = (
       updateForecastId,
       updateUserInput,
     },
-    serializeSingleMetricViewerState,
-    singleMetricViewerComparators,
-    onSingleMetricViewerDestroy: () => {
+    anyStateChange$: merge(
+      jobIds,
+      forecastId,
+      selectedDetectorIndex,
+      selectedEntities,
+      functionDescription
+    ).pipe(map(() => undefined)),
+    getLatestState,
+    reinitializeState: (lastSavedState: SingleMetricViewerControlsState) => {
+      jobIds.next(lastSavedState.jobIds);
+      forecastId.next(lastSavedState.forecastId);
+      selectedDetectorIndex.next(lastSavedState.selectedDetectorIndex);
+      selectedEntities.next(lastSavedState.selectedEntities);
+      functionDescription.next(lastSavedState.functionDescription);
+    },
+    cleanup: () => {
       forecastId.complete();
       jobIds.complete();
       selectedDetectorIndex.complete();

@@ -8,10 +8,10 @@
  */
 
 import type { Observable } from 'rxjs';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RouteAuthz, StartServicesAccessor } from '@kbn/core/server';
-import { VersionedRouteValidation } from '@kbn/core-http-server';
+import type { VersionedRouteValidation } from '@kbn/core-http-server';
 import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
@@ -250,26 +250,23 @@ export const registerFieldForWildcard = (
   const authz: RouteAuthz = { enabled: false, reason: 'Authorization provided by Elasticsearch' };
 
   // handler
-  router.versioned.put({ path, access }).addVersion(
+  router.versioned.put({ path, access, security: { authz } }).addVersion(
     {
       version,
-      security: { authz },
       validate,
     },
     configuredHandler
   );
-  router.versioned.post({ path, access }).addVersion(
+  router.versioned.post({ path, access, security: { authz } }).addVersion(
     {
       version,
-      security: { authz },
       validate,
     },
     configuredHandler
   );
-  router.versioned.get({ path, access }).addVersion(
+  router.versioned.get({ path, access, security: { authz } }).addVersion(
     {
       version,
-      security: { authz },
       validate: { request: { query: querySchema }, response: validate.response },
     },
     configuredHandler

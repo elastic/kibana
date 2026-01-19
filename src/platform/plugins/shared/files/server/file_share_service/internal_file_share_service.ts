@@ -8,14 +8,14 @@
  */
 
 import moment from 'moment';
-import {
+import type {
   SavedObjectsClientContract,
   SavedObject,
   ISavedObjectsRepository,
-  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   Pagination,
   FileShareJSON,
@@ -26,9 +26,10 @@ import type {
 import { FILE_SO_TYPE } from '../../common/constants';
 import type { File } from '../../common/types';
 import { fileShareObjectType } from '../saved_objects';
-import { getCounters, Counters } from '../usage';
+import type { Counters } from '../usage';
+import { getCounters } from '../usage';
 import { generateShareToken } from './generate_share_token';
-import { FileShareServiceStart } from './types';
+import type { FileShareServiceStart } from './types';
 import {
   ExpiryDateInThePastError,
   FileShareNotFoundError,

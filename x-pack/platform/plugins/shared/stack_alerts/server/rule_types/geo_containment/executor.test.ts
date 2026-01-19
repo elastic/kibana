@@ -6,7 +6,8 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import sampleAggsJsonResponse from './tests/es_sample_response.json';
 import sampleShapesJsonResponse from './tests/es_sample_response_shapes.json';
 import { executor } from './executor';

@@ -38,7 +38,6 @@ export const COMMON_EXPRESSION_ERRORS = {
   groupBy: new Array<string>(),
   termSize: new Array<string>(),
   termField: new Array<string>(),
-  sourceFields: new Array<string>(),
 };
 
 export const SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS = {
@@ -57,6 +56,7 @@ export const ONLY_ESQL_QUERY_EXPRESSION_ERRORS = {
   timeField: new Array<string>(),
   thresholdComparator: new Array<string>(),
   threshold0: new Array<string>(),
+  groupBy: new Array<string>(),
 };
 
 const ALL_EXPRESSION_ERROR_ENTRIES = {

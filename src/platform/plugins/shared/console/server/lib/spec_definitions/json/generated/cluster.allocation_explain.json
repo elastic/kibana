@@ -5,6 +5,10 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
+      "index": "",
+      "shard": "",
+      "primary": "__flag__",
+      "current_node": "",
       "include_disk_info": "__flag__",
       "include_yes_decisions": "__flag__",
       "master_timeout": [
@@ -20,7 +24,7 @@
     "patterns": [
       "_cluster/allocation/explain"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-allocation-explain.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-allocation-explain",
     "availability": {
       "stack": true,
       "serverless": false

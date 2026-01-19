@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { register } from './delete_route';
 import { API_BASE_PATH } from '../../../common/constants';
 
@@ -15,7 +16,7 @@ import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mock
 
 import { handleEsError } from '../../shared_imports';
 
-import { ScopedClusterClientMock } from './types';
+import type { ScopedClusterClientMock } from './types';
 
 // Re-implement the mock that was imported directly from `x-pack/mocks`
 function createCoreRequestHandlerContextMock() {
@@ -132,19 +133,17 @@ describe('DELETE remote clusters', () => {
       expect(getSettingsMockFn).toHaveBeenCalledWith();
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: null,
-                  skip_unavailable: null,
-                  mode: null,
-                  proxy_address: null,
-                  proxy_socket_connections: null,
-                  server_name: null,
-                  node_connections: null,
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                seeds: null,
+                skip_unavailable: null,
+                mode: null,
+                proxy_address: null,
+                proxy_socket_connections: null,
+                server_name: null,
+                node_connections: null,
               },
             },
           },
@@ -279,19 +278,17 @@ describe('DELETE remote clusters', () => {
       expect(getSettingsMockFn).toHaveBeenCalledWith();
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: null,
-                  skip_unavailable: null,
-                  mode: null,
-                  node_connections: null,
-                  proxy_address: null,
-                  proxy_socket_connections: null,
-                  server_name: null,
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                seeds: null,
+                skip_unavailable: null,
+                mode: null,
+                node_connections: null,
+                proxy_address: null,
+                proxy_socket_connections: null,
+                server_name: null,
               },
             },
           },

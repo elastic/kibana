@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
-import { SortOptions } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortOptions } from '@elastic/elasticsearch/lib/api/types';
 
 import { bucketAggsSchemas, metricsAggsSchemas } from '../../common/types';
-import { RacRequestHandlerContext } from '../types';
+import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 
@@ -55,11 +55,9 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           consumers,
           index,
           query,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           search_after,
           size,
           sort,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           track_total_hits,
           _source,
         } = request.body;

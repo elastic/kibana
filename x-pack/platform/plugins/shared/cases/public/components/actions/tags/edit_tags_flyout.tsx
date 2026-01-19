@@ -27,11 +27,13 @@ import { useGetTags } from '../../../containers/use_get_tags';
 import { EditTagsSelectable } from './edit_tags_selectable';
 import * as i18n from './translations';
 import type { ItemsSelectionState } from '../types';
+import { useFocusButtonTrap } from '../../use_focus_button';
 
 interface Props {
   selectedCases: CasesUI;
   onClose: () => void;
   onSaveTags: (args: ItemsSelectionState) => void;
+  focusButtonRef?: React.Ref<HTMLButtonElement>;
 }
 
 const FlyoutBodyCss = css`
@@ -42,7 +44,12 @@ const FlyoutBodyCss = css`
   }
 `;
 
-const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSaveTags }) => {
+const EditTagsFlyoutComponent: React.FC<Props> = ({
+  selectedCases,
+  onClose,
+  onSaveTags,
+  focusButtonRef,
+}) => {
   const { data: tags, isLoading } = useGetTags();
 
   const [tagsSelection, setTagsSelection] = useState<ItemsSelectionState>({
@@ -51,6 +58,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
   });
 
   const onSave = useCallback(() => onSaveTags(tagsSelection), [onSaveTags, tagsSelection]);
+  const focusTrapProps = useFocusButtonTrap(focusButtonRef);
 
   const headerSubtitle =
     selectedCases.length > 1 ? i18n.SELECTED_CASES(selectedCases.length) : selectedCases[0].title;
@@ -63,6 +71,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
       data-test-subj="cases-edit-tags-flyout"
       size="s"
       paddingSize="m"
+      focusTrapProps={focusTrapProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

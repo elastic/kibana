@@ -10,30 +10,48 @@
 export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
 export {
-  getInitialValuesFromComparators,
-  getUnchangingComparator,
-  runComparators,
-  type ComparatorDefinition,
   type ComparatorFunction,
   type StateComparators,
-} from './comparators';
+  type WithAllKeys,
+  runComparator,
+  areComparatorsEqual,
+  diffComparators,
+  initializeStateManager,
+  shouldLogStateDiff,
+  logStateDiff,
+} from './state_manager';
 export {
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
-  useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
 export {
   apiCanLockHoverActions,
   type CanLockHoverActions,
 } from './interfaces/can_lock_hover_actions';
-export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
+export { fetch$, useFetchContext } from './interfaces/fetch/fetch';
+export type { FetchContext } from './interfaces/fetch/fetch_context';
 export {
-  initializeTimeRange,
+  type PublishesPauseFetch,
+  apiPublishesPauseFetch,
+  type PublishesEditablePauseFetch,
+  apiPublishesEditablePauseFetch,
+} from './interfaces/fetch/publishes_pause_fetch';
+export {
+  initializeTimeRangeManager,
+  timeRangeComparators,
   type SerializedTimeRange,
-} from './interfaces/fetch/initialize_time_range';
+} from './interfaces/fetch/time_range_manager';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
+export {
+  apiAppliesFilters,
+  type AppliesFilters,
+  apiAppliesTimeslice,
+  type AppliesTimeslice,
+  apiHasUseGlobalFiltersSetting,
+  type HasUseGlobalFiltersSetting,
+} from './interfaces/fetch/applies_filters';
 export {
   apiPublishesFilters,
   apiPublishesPartialUnifiedSearch,
@@ -49,6 +67,13 @@ export {
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
 export {
+  apiPublishesProjectRouting,
+  type PublishesProjectRouting,
+  apiPublishesProjectRoutingOverrides,
+  type ProjectRoutingOverrides,
+  type PublishesProjectRoutingOverrides,
+} from './interfaces/fetch/publishes_project_routing';
+export {
   apiHasAppContext,
   type EmbeddableAppContext,
   type HasAppContext,
@@ -60,6 +85,14 @@ export {
 } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
+  canOverrideHoverActions,
+  type CanOverrideHoverActions,
+} from './interfaces/can_override_hover_actions';
+export {
+  hasReadOnlyCapabilities,
+  type HasReadOnlyCapabilities,
+} from './interfaces/has_read_only_capabilities';
+export {
   apiHasExecutionContext,
   type HasExecutionContext,
 } from './interfaces/has_execution_context';
@@ -70,10 +103,7 @@ export {
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
   apiHasSerializableState,
-  apiHasSnapshottableState,
   type HasSerializableState,
-  type HasSnapshottableState,
-  type SerializedPanelState,
 } from './interfaces/has_serializable_state';
 export {
   apiHasSupportedTriggers,
@@ -143,6 +173,7 @@ export {
 export {
   initializeTitleManager,
   stateHasTitles,
+  titleComparators,
   type TitlesApi,
   type SerializedTitles,
 } from './interfaces/titles/title_manager';
@@ -153,3 +184,4 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
+export { SAVED_OBJECT_REF_NAME, findSavedObjectRef } from './saved_object_ref';

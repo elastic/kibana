@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { createTracedEsClient } from '@kbn/traced-es-client';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export async function createObservabilityAIAssistantAppEsClient({
   client,
@@ -15,7 +15,7 @@ export async function createObservabilityAIAssistantAppEsClient({
   client: ElasticsearchClient;
   logger: Logger;
 }) {
-  const esClient = createObservabilityEsClient({
+  const esClient = createTracedEsClient({
     client,
     logger,
     plugin: 'observabilityAIAssistantApp',

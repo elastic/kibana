@@ -7,41 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesDataViews } from '@kbn/presentation-publishing';
-import { Observable, combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import type { estypes } from '@elastic/elasticsearch';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { FetchContext } from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
+import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
-import { ControlGroupApi } from '../../../control_group/types';
-import { DataControlApi } from '../types';
+import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
+import type { DataControlStateManager } from '../data_control_manager';
 
 export function hasNoResults$({
+  api,
   controlFetch$,
-  dataViews$,
-  rangeFilters$,
-  ignoreParentSettings$,
   setIsLoading,
 }: {
-  controlFetch$: Observable<ControlFetchContext>;
-  dataViews$?: PublishesDataViews['dataViews$'];
-  rangeFilters$: DataControlApi['filters$'];
-  ignoreParentSettings$: ControlGroupApi['ignoreParentSettings$'];
+  api: DataControlStateManager['api'];
+  controlFetch$: Observable<FetchContext>;
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([controlFetch$, rangeFilters$, ignoreParentSettings$]).pipe(
+  return combineLatest([
+    controlFetch$,
+    api.appliedFilters$,
+    api.useGlobalFilters$,
+    api.ignoreValidations$,
+  ]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([controlFetchContext, rangeFilters, ignoreParentSettings]) => {
-      const dataView = dataViews$?.value?.[0];
+    switchMap(async ([controlFetchContext, rangeFilters, useGlobalFilters, ignoreValidations]) => {
+      const dataView = api.dataViews$?.value?.[0];
       const rangeFilter = rangeFilters?.[0];
-      if (!dataView || !rangeFilter || ignoreParentSettings?.ignoreValidations) {
+      if (!dataView || !rangeFilter || ignoreValidations) {
         return false;
       }
 
@@ -54,6 +55,8 @@ export function hasNoResults$({
           dataView,
           rangeFilter,
           ...controlFetchContext,
+          timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
+          filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
         });
       } catch (error) {
         // Ignore error, validation is not required for control to function properly

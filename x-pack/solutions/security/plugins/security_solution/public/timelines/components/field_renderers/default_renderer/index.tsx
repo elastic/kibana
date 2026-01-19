@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Spacer } from '../../../../common/components/page';
-import { DefaultDraggable } from '../../../../common/components/draggables';
+import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { MoreContainer } from '../more_container';
@@ -18,14 +18,11 @@ interface DefaultFieldRendererProps {
   attrName: string;
   displayCount?: number;
   idPrefix: string;
-  isDraggable?: boolean;
   moreMaxHeight?: string;
   render?: (item: string) => React.ReactNode;
   rowItems: string[] | null | undefined;
   scopeId?: string;
 }
-
-export const IpOverviewId = 'ip-overview';
 
 /** The default max-height of the popover used to show "+n More" items (e.g. `+9 More`) */
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
@@ -34,7 +31,6 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
   attrName,
   displayCount = 1,
   idPrefix,
-  isDraggable = false,
   moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
   render,
   rowItems,
@@ -54,17 +50,9 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             </>
           )}
           {typeof rowItem === 'string' && (
-            <DefaultDraggable
-              id={id}
-              isDraggable={isDraggable}
-              field={attrName}
-              value={rowItem}
-              isAggregatable={true}
-              scopeId={scopeId}
-              fieldType={'keyword'}
-            >
+            <CellActionsRenderer field={attrName} value={rowItem} scopeId={scopeId}>
               {render ? render(rowItem) : rowItem}
-            </DefaultDraggable>
+            </CellActionsRenderer>
           )}
         </EuiFlexItem>
       );

@@ -13,6 +13,7 @@ export const ReadOnlyCallout = ({ projectId }: { projectId?: string }) => {
     return (
       <>
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.synthetics.project.readOnly.callout.title"

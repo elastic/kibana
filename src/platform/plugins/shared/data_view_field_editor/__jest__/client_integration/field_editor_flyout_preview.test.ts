@@ -9,19 +9,19 @@
 
 import { act } from 'react-dom/test-utils';
 
+import type { EsDoc } from './helpers';
 import {
   setupEnvironment,
   fieldFormatsOptions,
   indexPatternNameForTest,
-  EsDoc,
   setSearchResponseLatency,
 } from './helpers';
+import type { FieldEditorFlyoutContentTestBed } from './field_editor_flyout_preview.helpers';
 import {
   setup,
   setIndexPatternFields,
   getSearchCallMeta,
   setSearchResponse,
-  FieldEditorFlyoutContentTestBed,
 } from './field_editor_flyout_preview.helpers';
 import { spyGetFieldsForWildcard } from './helpers/setup_environment';
 import { mockDocuments, createPreviewError } from './helpers/mocks';
@@ -754,10 +754,8 @@ describe('Field editor Preview panel', () => {
       const expectedParamsToFetchClusterData = {
         params: {
           index: indexPatternNameForTest,
-          body: {
-            fields: ['*'],
-            size: 50,
-          },
+          fields: ['*'],
+          size: 50,
         },
       };
 
@@ -782,15 +780,13 @@ describe('Field editor Preview panel', () => {
       expect(searchMeta.totalCalls).toBe(initialCount + 1);
       expect(searchMeta.lastCallParams).toEqual({
         params: {
-          body: {
-            fields: ['*'],
-            query: {
-              ids: {
-                values: [nextId],
-              },
+          fields: ['*'],
+          query: {
+            ids: {
+              values: [nextId],
             },
-            size: 1,
           },
+          size: 1,
           index: indexPatternNameForTest,
         },
       });

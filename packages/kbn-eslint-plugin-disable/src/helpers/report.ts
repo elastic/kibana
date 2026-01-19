@@ -8,7 +8,8 @@
  */
 
 import type { AST } from 'eslint';
-import { ESLINT_DISABLE_VALUE, ParsedEslintDisableComment } from './regex';
+import type { ParsedEslintDisableComment } from './regex';
+import { ESLINT_DISABLE_VALUE } from './regex';
 
 export function getReportLocFromComment(
   comment: ParsedEslintDisableComment

@@ -7,20 +7,38 @@
 
 import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
-import { CoreStart, DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
-import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import type { CoreStart } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
+import { AIAssistantType, AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
+import type { Space } from '@kbn/spaces-plugin/common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 interface UseIsNavControlVisibleProps {
   coreStart: CoreStart;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+  isServerless?: boolean;
 }
 
 function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
-  preferredAssistantType: AIAssistantType
+  preferredAssistantType: AIAssistantType,
+  chatExperience: AIChatExperience,
+  space: Space,
+  isServerless?: boolean
 ) {
+  // If AI Agents are enabled, hide the nav control
+  // AgentBuilderNavControl will be used instead
+  if (chatExperience === AIChatExperience.Agent) {
+    return false;
+  }
+
+  // If the app itself is enabled, always show the control in the solution view or serverless.
+  if (space.solution === 'es' || space.solution === 'oblt' || isServerless) {
+    return true;
+  }
+
   if (preferredAssistantType === AIAssistantType.Never) {
     return false;
   }
@@ -38,25 +56,52 @@ function getVisibility(
   ].includes(categoryId);
 }
 
-export function useIsNavControlVisible({ coreStart, pluginsStart }: UseIsNavControlVisibleProps) {
+export function useIsNavControlVisible({
+  coreStart,
+  pluginsStart,
+  isServerless,
+}: UseIsNavControlVisibleProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   const { currentAppId$, applications$ } = coreStart.application;
-  const { aiAssistantManagementSelection } = pluginsStart;
+  const { aiAssistantManagementSelection, spaces } = pluginsStart;
+
+  const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
+    const chatExperience$ =
+      coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+
     const appSubscription = combineLatest([
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
+      chatExperience$,
+      space$,
     ]).subscribe({
-      next: ([appId, applications, preferredAssistantType]) => {
-        setIsVisible(getVisibility(appId, applications, preferredAssistantType));
+      next: ([appId, applications, preferredAssistantType, chatExperience, space]) => {
+        setIsVisible(
+          getVisibility(
+            appId,
+            applications,
+            preferredAssistantType,
+            chatExperience,
+            space,
+            isServerless
+          )
+        );
       },
     });
 
-    return appSubscription.unsubscribe;
-  }, [currentAppId$, applications$, aiAssistantManagementSelection.aiAssistantType$]);
+    return () => appSubscription.unsubscribe();
+  }, [
+    currentAppId$,
+    applications$,
+    aiAssistantManagementSelection.aiAssistantType$,
+    coreStart.settings.client,
+    space$,
+    isServerless,
+  ]);
 
   return {
     isVisible,

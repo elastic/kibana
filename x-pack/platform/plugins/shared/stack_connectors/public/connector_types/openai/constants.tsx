@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink } from '@elastic/eui';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
+import { EuiLink, EuiText } from '@elastic/eui';
+import { DEFAULT_MODEL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
+import { contextWindowLengthField, temperatureField } from '../../common/genai_connectors';
+import * as commonI18n from '../../common/genai_connectors/translations';
 import * as i18n from './translations';
-import { Config } from './types';
+import type { Config } from './types';
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
 export const DEFAULT_URL_AZURE =
@@ -60,6 +62,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
     label: i18n.API_URL_LABEL,
     isUrlField: true,
     defaultValue: DEFAULT_URL,
+    requireTld: false,
     helpText: (
       <FormattedMessage
         defaultMessage="The OpenAI API endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
@@ -87,7 +90,50 @@ export const openAiConfig: ConfigFieldSchema[] = [
         id="xpack.stackConnectors.components.genAi.openAiDocumentationModel"
       />
     ),
-    defaultValue: DEFAULT_OPENAI_MODEL,
+    defaultValue: DEFAULT_MODEL,
+  },
+  contextWindowLengthField,
+  temperatureField,
+  {
+    id: 'organizationId',
+    label: i18n.ORG_ID_LABEL,
+    isRequired: false,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="For users who belong to multiple organizations. Organization IDs can be found on your Organization settings page."
+        id="xpack.stackConnectors.components.genAi.openAiOrgId"
+      />
+    ),
+    euiFieldProps: {
+      append: (
+        <EuiText size="xs" color="subdued">
+          {commonI18n.OPTIONAL_LABEL}
+        </EuiText>
+      ),
+    },
+  },
+  {
+    id: 'projectId',
+    label: i18n.PROJECT_ID_LABEL,
+    isRequired: false,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="For users who are accessing their projects through their legacy user API key. Project IDs can be found on your General settings page by selecting the specific project."
+        id="xpack.stackConnectors.components.genAi.openAiProjectId"
+      />
+    ),
+    euiFieldProps: {
+      autocomplete: 'new-password',
+      autoComplete: 'new-password',
+      onFocus: (event: React.FocusEvent<HTMLInputElement>) => {
+        event.target.setAttribute('autocomplete', 'new-password');
+      },
+      append: (
+        <EuiText size="xs" color="subdued">
+          {commonI18n.OPTIONAL_LABEL}
+        </EuiText>
+      ),
+    },
   },
 ];
 
@@ -96,6 +142,7 @@ export const azureAiConfig: ConfigFieldSchema[] = [
     id: 'apiUrl',
     label: i18n.API_URL_LABEL,
     isUrlField: true,
+    requireTld: false,
     defaultValue: DEFAULT_URL_AZURE,
     helpText: (
       <FormattedMessage
@@ -115,6 +162,8 @@ export const azureAiConfig: ConfigFieldSchema[] = [
       />
     ),
   },
+  contextWindowLengthField,
+  temperatureField,
 ];
 
 export const otherOpenAiConfig: ConfigFieldSchema[] = [
@@ -122,6 +171,7 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
     id: 'apiUrl',
     label: i18n.API_URL_LABEL,
     isUrlField: true,
+    requireTld: false,
     helpText: (
       <FormattedMessage
         defaultMessage="The Other (OpenAI Compatible Service) endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
@@ -150,6 +200,8 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
       />
     ),
   },
+  contextWindowLengthField,
+  temperatureField,
 ];
 
 export const openAiSecrets: SecretsFieldSchema[] = [
@@ -202,11 +254,12 @@ export const azureAiSecrets: SecretsFieldSchema[] = [
   },
 ];
 
-export const otherOpenAiSecrets: SecretsFieldSchema[] = [
+export const getOtherOpenAiSecrets = (isRequired = true): SecretsFieldSchema[] => [
   {
     id: 'apiKey',
     label: i18n.API_KEY_LABEL,
     isPasswordField: true,
+    isRequired,
     helpText: (
       <FormattedMessage
         defaultMessage="The Other (OpenAI Compatible Service) API key for HTTP Basic authentication. For more details about generating Other model API keys, refer to the {genAiAPIKeyDocs}."

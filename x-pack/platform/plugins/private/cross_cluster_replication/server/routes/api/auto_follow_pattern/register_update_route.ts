@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { serializeAutoFollowPattern } from '../../../../common/services/auto_follow_pattern_serialization';
-import { AutoFollowPattern } from '../../../../common/types';
+import type { AutoFollowPattern } from '../../../../common/types';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Update an auto-follow pattern
@@ -52,7 +52,7 @@ export const registerUpdateRoute = ({
       try {
         const responseBody = await client.asCurrentUser.ccr.putAutoFollowPattern({
           name: id,
-          body,
+          ...body,
         });
 
         return response.ok({

@@ -7,30 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { SavedSearch, SavedSearchAttributes } from '.';
-import { SerializableSavedSearch } from './types';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { SavedSearch, SavedSearchAttributes } from '.';
+import type { SerializableSavedSearch } from './types';
 
 export const fromSavedSearchAttributes = <
   Serialized extends boolean = false,
   ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
 >(
   id: string | undefined,
-  attributes: SavedSearchAttributes,
+  { title, description, tabs }: SavedSearchAttributes,
   tags: string[] | undefined,
   searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
   managed: boolean,
   serialized: Serialized = false as Serialized
-) =>
-  ({
+) => {
+  const [{ attributes }] = tabs;
+  return {
     id,
     ...(serialized
       ? { serializedSearchSource: searchSource as SerializedSearchSourceFields }
       : { searchSource }),
-    title: attributes.title,
+    title,
     sort: attributes.sort,
     columns: attributes.columns,
-    description: attributes.description,
+    description,
     tags,
     grid: attributes.grid,
     hideChart: attributes.hideChart,
@@ -46,7 +47,11 @@ export const fromSavedSearchAttributes = <
     rowsPerPage: attributes.rowsPerPage,
     sampleSize: attributes.sampleSize,
     breakdownField: attributes.breakdownField,
+    chartInterval: attributes.chartInterval,
     visContext: attributes.visContext,
+    controlGroupJson: attributes.controlGroupJson,
     density: attributes.density,
+    tabs,
     managed,
-  } as ReturnType);
+  } as ReturnType;
+};

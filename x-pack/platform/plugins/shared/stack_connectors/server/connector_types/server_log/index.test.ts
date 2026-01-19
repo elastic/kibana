@@ -7,10 +7,11 @@
 
 import { validateParams } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { getConnectorType, ServerLogConnectorType, ServerLogConnectorTypeExecutorOptions } from '.';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ServerLogConnectorType, ServerLogConnectorTypeExecutorOptions } from '.';
+import { getConnectorType } from '.';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -62,38 +63,26 @@ describe('validateParams()', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
+      `"error validating action params: Field \\"message\\": Required"`
     );
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [number]"`
+      `"error validating action params: Field \\"message\\": Expected string, received number"`
     );
 
     expect(() => {
       validateParams(connectorType, { message: 'x', level: 2 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action params: [level]: types that failed validation:
-- [level.0]: expected value to equal [trace]
-- [level.1]: expected value to equal [debug]
-- [level.2]: expected value to equal [info]
-- [level.3]: expected value to equal [warn]
-- [level.4]: expected value to equal [error]
-- [level.5]: expected value to equal [fatal]"
-`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"level\\": Expected 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal', received number"`
+    );
 
     expect(() => {
       validateParams(connectorType, { message: 'x', level: 'foo' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action params: [level]: types that failed validation:
-- [level.0]: expected value to equal [trace]
-- [level.1]: expected value to equal [debug]
-- [level.2]: expected value to equal [info]
-- [level.3]: expected value to equal [warn]
-- [level.4]: expected value to equal [error]
-- [level.5]: expected value to equal [fatal]"
-`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"level\\": Invalid enum value. Expected 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal', received 'foo'"`
+    );
   });
 });
 

@@ -9,20 +9,22 @@
     "server": true,
     "browser": true,
     "optionalPlugins": [
-      "indexManagement",
       "fieldsMetadata",
-      "usageCollection"
+      "usageCollection",
+      "licensing"
     ],
     "requiredPlugins": [
       "data",
-      "expressions",
       "dataViews",
       "uiActions",
       "contentManagement",
+      "share",
+      "fileUpload",
+      "fieldFormats"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils",
+      "kibanaUtils"
     ]
   }
 }

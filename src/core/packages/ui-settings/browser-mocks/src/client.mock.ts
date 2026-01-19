@@ -7,27 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { Subject } from 'rxjs';
+import { lazyObject } from '@kbn/lazy-object';
 
 export const clientMock = () => {
-  const mock: jest.Mocked<IUiSettingsClient> = {
-    getAll: jest.fn(),
+  const mock: jest.Mocked<IUiSettingsClient> = lazyObject({
+    getAll: jest.fn().mockReturnValue({}),
     get: jest.fn(),
-    get$: jest.fn(),
+    get$: jest.fn().mockReturnValue(new Subject<any>()),
     set: jest.fn(),
     remove: jest.fn(),
     isDeclared: jest.fn(),
     isDefault: jest.fn(),
     isCustom: jest.fn(),
     isOverridden: jest.fn(),
-    getUpdate$: jest.fn(),
-    getUpdateErrors$: jest.fn(),
+    getUpdate$: jest.fn().mockReturnValue(new Subject<any>()),
+    getUpdateErrors$: jest.fn().mockReturnValue(new Subject<any>()),
     validateValue: jest.fn(),
-  };
-  mock.get$.mockReturnValue(new Subject<any>());
-  mock.getUpdate$.mockReturnValue(new Subject<any>());
-  mock.getUpdateErrors$.mockReturnValue(new Subject<any>());
-  mock.getAll.mockReturnValue({});
+  });
+
   return mock;
 };

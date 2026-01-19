@@ -10,16 +10,17 @@
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { PersistenceAPI } from '../types';
+import type { PersistenceAPI } from '../types';
 import { DataViewLazy } from './data_view_lazy';
 import { DEFAULT_DATA_VIEW_ID } from '../constants';
-import { AbstractDataView } from './abstract_data_views';
+import type { AbstractDataView } from './abstract_data_views';
 
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
 import { DataView } from './data_view';
-import {
+import type {
   OnNotification,
   OnError,
   UiSettingsCommon,
@@ -34,7 +35,8 @@ import {
   TypeMeta,
 } from '../types';
 
-import { META_FIELDS, SavedObject } from '..';
+import type { SavedObject } from '..';
+import { META_FIELDS } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByName } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
@@ -53,12 +55,7 @@ const createFetchFieldErrorTitle = ({ id, title }: { id?: string; title?: string
  */
 export type DataViewSavedObjectAttrs = Pick<
   DataViewAttributes,
-  'title' | 'type' | 'typeMeta' | 'name'
->;
-
-export type IndexPatternListSavedObjectAttrs = Pick<
-  DataViewAttributes,
-  'title' | 'type' | 'typeMeta' | 'name'
+  'title' | 'type' | 'typeMeta' | 'name' | 'timeFieldName'
 >;
 
 /**
@@ -85,7 +82,18 @@ export interface DataViewListItem {
    * Data view type meta
    */
   typeMeta?: TypeMeta;
+  /**
+   * Human-readable name
+   */
   name?: string;
+  /**
+   * Time field name if applicable
+   */
+  timeFieldName?: string;
+  /**
+   * Whether the data view is managed by the application.
+   */
+  managed?: boolean;
 }
 
 /**
@@ -146,6 +154,11 @@ export interface DataViewsServicePublicMethods {
    * Clear the cache of data view instances.
    */
   clearInstanceCache: (id?: string) => void;
+
+  /**
+   * Clear the cache of lazy data view instances.
+   */
+  clearDataViewLazyCache: (id: string) => void;
 
   /**
    * Create data view based on the provided spec.
@@ -397,7 +410,7 @@ export class DataViewsService {
    */
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find({
-      fields: ['title', 'type', 'typeMeta', 'name'],
+      fields: ['title', 'type', 'typeMeta', 'name', 'timeFieldName'],
       perPage: 10000,
     });
     this.savedObjectsCache = so;
@@ -487,6 +500,8 @@ export class DataViewsService {
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
       name: obj?.attributes?.name,
+      timeFieldName: obj?.attributes?.timeFieldName,
+      managed: obj?.managed,
     }));
   };
 
@@ -521,6 +536,13 @@ export class DataViewsService {
       this.dataViewLazyCache.clear();
       this.dataViewCache.clear();
     }
+  };
+
+  /**
+   * Clear instance in data view lazy cache
+   */
+  clearDataViewLazyCache = (id: string) => {
+    this.dataViewLazyCache.delete(id);
   };
 
   /**
@@ -810,6 +832,7 @@ export class DataViewsService {
         name,
         allowHidden,
       },
+      managed,
     } = savedObject;
 
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
@@ -820,6 +843,16 @@ export class DataViewsService {
     const parsedRuntimeFieldMap: Record<string, RuntimeField> = runtimeFieldMap
       ? JSON.parse(runtimeFieldMap)
       : {};
+
+    if (parsedFieldAttrs) {
+      Object.keys(parsedFieldAttrs).forEach((fieldName) => {
+        const parsedFieldAttr = parsedFieldAttrs?.[fieldName];
+        // Because of https://github.com/elastic/kibana/issues/211109 bug, the persisted "count" data can be polluted and have string type.
+        if (parsedFieldAttr && typeof parsedFieldAttr.count === 'string') {
+          parsedFieldAttr.count = Number(parsedFieldAttr.count) || 0;
+        }
+      });
+    }
 
     return {
       id,
@@ -837,6 +870,7 @@ export class DataViewsService {
       runtimeFieldMap: parsedRuntimeFieldMap,
       name,
       allowHidden,
+      managed,
     };
   };
 
@@ -893,9 +927,6 @@ export class DataViewsService {
     refreshFields: boolean = false
   ): Promise<DataView> => {
     const spec = this.savedObjectToSpec(savedObject);
-    spec.fieldAttrs = savedObject.attributes.fieldAttrs
-      ? JSON.parse(savedObject.attributes.fieldAttrs)
-      : {};
 
     let fields: Record<string, FieldSpec> = {};
     let indices: string[] = [];
@@ -1115,25 +1146,17 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ): Promise<DataView> {
-    const doCreate = () => this.createFromSpec(spec, skipFetchFields, displayErrors);
-
-    if (spec.id) {
-      const cachedDataView = this.dataViewCache.get(spec.id);
-
-      if (cachedDataView) {
-        return cachedDataView;
+    if (spec.id && this.dataViewCache.has(spec.id)) {
+      try {
+        return await this.dataViewCache.get(spec.id)!;
+      } catch (e) {
+        // The cached promise failed, so we need to create a new data view
       }
-
-      const dataViewPromise = doCreate();
-
-      this.dataViewCache.set(spec.id, dataViewPromise);
-
-      return dataViewPromise;
     }
 
-    const dataView = await doCreate();
-    this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
-    return dataView;
+    const dataViewPromise = this.createFromSpec(spec, skipFetchFields, displayErrors);
+    this.dataViewCache.set(spec.id ?? (await dataViewPromise).id!, dataViewPromise);
+    return dataViewPromise;
   }
 
   /**
@@ -1246,17 +1269,17 @@ export class DataViewsService {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
     }
-
     const body = dataView.getAsSavedObjectBody();
 
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
       id: dataView.id,
       initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
       overwrite,
+      managed: dataView.managed,
     })) as SavedObject<DataViewAttributes>;
 
     if (this.savedObjectsCache) {
-      this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
+      this.savedObjectsCache.push(response);
     }
     dataView.version = response.version;
     dataView.namespaces = response.namespaces || [];

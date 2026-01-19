@@ -43,7 +43,19 @@ jest.mock('../app_context', () => ({
       new Proxy(
         {},
         {
-          get() {
+          get(_, property) {
+            if (property === 'get') {
+              return () =>
+                new Proxy(
+                  {},
+                  {
+                    get() {
+                      return jest.fn();
+                    },
+                  }
+                );
+            }
+
             return jest.fn();
           },
         }

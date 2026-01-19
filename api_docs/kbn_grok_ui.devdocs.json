@@ -1,0 +1,1580 @@
+{
+  "id": "@kbn/grok-ui",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.DraftGrokExpression",
+        "type": "Class",
+        "tags": [],
+        "label": "DraftGrokExpression",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.DraftGrokExpression.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.DraftGrokExpression.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "collection",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.GrokCollection",
+                    "text": "GrokCollection"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+                "lineNumber": 21,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.DraftGrokExpression.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "initialExpression",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+                "lineNumber": 21,
+                "columnNumber": 43,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.DraftGrokExpression.updateExpression",
+            "type": "Function",
+            "tags": [],
+            "label": "updateExpression",
+            "description": [],
+            "signature": [
+              "(expression: string) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.DraftGrokExpression.updateExpression.$1",
+                "type": "string",
+                "tags": [],
+                "label": "expression",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+                "lineNumber": 33,
+                "columnNumber": 30,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.DraftGrokExpression.parse",
+            "type": "Function",
+            "tags": [],
+            "label": "parse",
+            "description": [],
+            "signature": [
+              "(samples: string[]) => Record<string, string | number>[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.DraftGrokExpression.parse.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "samples",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+                "lineNumber": 40,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.DraftGrokExpression.getRegex",
+            "type": "Function",
+            "tags": [],
+            "label": "getRegex",
+            "description": [],
+            "signature": [
+              "() => RegExp | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.DraftGrokExpression.getRegexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "getRegexPattern",
+            "description": [],
+            "signature": [
+              "() => string | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.DraftGrokExpression.getFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getFields",
+            "description": [],
+            "signature": [
+              "() => Map<string, ",
+              {
+                "pluginId": "@kbn/grok-ui",
+                "scope": "common",
+                "docId": "kibKbnGrokUiPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.DraftGrokExpression.getExpression",
+            "type": "Function",
+            "tags": [],
+            "label": "getExpression",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.DraftGrokExpression.getExpression$",
+            "type": "Function",
+            "tags": [],
+            "label": "getExpression$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "BehaviorSubject",
+              "<string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.DraftGrokExpression.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/draft_grok_expression.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.GrokCollection",
+        "type": "Class",
+        "tags": [],
+        "label": "GrokCollection",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollection.customPatternsChanged$",
+            "type": "Object",
+            "tags": [],
+            "label": "customPatternsChanged$",
+            "description": [],
+            "signature": [
+              "Subject",
+              "<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollection.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollection.getPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "getPattern",
+            "description": [],
+            "signature": [
+              "(id: string) => ",
+              {
+                "pluginId": "@kbn/grok-ui",
+                "scope": "common",
+                "docId": "kibKbnGrokUiPluginApi",
+                "section": "def-common.GrokPattern",
+                "text": "GrokPattern"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokCollection.getPattern.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 75,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollection.addPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "addPattern",
+            "description": [],
+            "signature": [
+              "(id: string, rawPattern: string, destination: Map<string, ",
+              {
+                "pluginId": "@kbn/grok-ui",
+                "scope": "common",
+                "docId": "kibKbnGrokUiPluginApi",
+                "section": "def-common.GrokPattern",
+                "text": "GrokPattern"
+              },
+              ">) => ",
+              {
+                "pluginId": "@kbn/grok-ui",
+                "scope": "common",
+                "docId": "kibKbnGrokUiPluginApi",
+                "section": "def-common.GrokPattern",
+                "text": "GrokPattern"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokCollection.addPattern.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 84,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokCollection.addPattern.$2",
+                "type": "string",
+                "tags": [],
+                "label": "rawPattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 84,
+                "columnNumber": 33,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokCollection.addPattern.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "destination",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.GrokPattern",
+                    "text": "GrokPattern"
+                  },
+                  ">"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 84,
+                "columnNumber": 53,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollection.setCustomPatterns",
+            "type": "Function",
+            "tags": [],
+            "label": "setCustomPatterns",
+            "description": [],
+            "signature": [
+              "(patterns: Record<string, string>) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokCollection.setCustomPatterns.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "patterns",
+                "description": [],
+                "signature": [
+                  "Record<string, string>"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 96,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollection.resolvePatterns",
+            "type": "Function",
+            "tags": [],
+            "label": "resolvePatterns",
+            "description": [],
+            "signature": [
+              "(source?: Map<string, ",
+              {
+                "pluginId": "@kbn/grok-ui",
+                "scope": "common",
+                "docId": "kibKbnGrokUiPluginApi",
+                "section": "def-common.GrokPattern",
+                "text": "GrokPattern"
+              },
+              ">) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokCollection.resolvePatterns.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "source",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.GrokPattern",
+                    "text": "GrokPattern"
+                  },
+                  ">"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 105,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollection.getSuggestionProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "getSuggestionProvider",
+            "description": [],
+            "signature": [
+              "() => ",
+              "languages",
+              ".CompletionItemProvider"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollection.getColour",
+            "type": "Function",
+            "tags": [],
+            "label": "getColour",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollection.getColourPaletteStyles",
+            "type": "Function",
+            "tags": [],
+            "label": "getColourPaletteStyles",
+            "description": [],
+            "signature": [
+              "(euiTheme: ",
+              "EuiThemeComputed",
+              "<{}>) => Record<string, { backgroundColor: string; color: string; cursor: string; }>"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokCollection.getColourPaletteStyles.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "euiTheme",
+                "description": [],
+                "signature": [
+                  "EuiThemeComputed",
+                  "<{}>"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 170,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollection.resetColourIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "resetColourIndex",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.GrokPattern",
+        "type": "Class",
+        "tags": [],
+        "label": "GrokPattern",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+        "lineNumber": 189,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokPattern.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokPattern.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "rawPattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 202,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokPattern.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 202,
+                "columnNumber": 35,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokPattern.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "collection",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.GrokCollection",
+                    "text": "GrokCollection"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 202,
+                "columnNumber": 47,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokPattern.isResolved",
+            "type": "Function",
+            "tags": [],
+            "label": "isResolved",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 209,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokPattern.resolvePattern",
+            "type": "Function",
+            "tags": [],
+            "label": "resolvePattern",
+            "description": [],
+            "signature": [
+              "(forceResolve?: boolean) => string | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 213,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokPattern.resolvePattern.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "forceResolve",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 213,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokPattern.parse",
+            "type": "Function",
+            "tags": [],
+            "label": "parse",
+            "description": [],
+            "signature": [
+              "(samples: string[], regenerateRegex?: boolean) => Record<string, string | number>[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 367,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokPattern.parse.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "samples",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 367,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokPattern.parse.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "regenerateRegex",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 367,
+                "columnNumber": 38,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokPattern.getRegex",
+            "type": "Function",
+            "tags": [],
+            "label": "getRegex",
+            "description": [],
+            "signature": [
+              "() => RegExp | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 408,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokPattern.getRegexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "getRegexPattern",
+            "description": [],
+            "signature": [
+              "() => string | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 422,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokPattern.updatePattern",
+            "type": "Function",
+            "tags": [],
+            "label": "updatePattern",
+            "description": [],
+            "signature": [
+              "(rawPattern: string) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 435,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.GrokPattern.updatePattern.$1",
+                "type": "string",
+                "tags": [],
+                "label": "rawPattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+                "lineNumber": 435,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokPattern.getFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getFields",
+            "description": [],
+            "signature": [
+              "() => Map<string, ",
+              {
+                "pluginId": "@kbn/grok-ui",
+                "scope": "common",
+                "docId": "kibKbnGrokUiPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/grok_collection_and_pattern.ts",
+            "lineNumber": 441,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.Expression",
+        "type": "Function",
+        "tags": [],
+        "label": "Expression",
+        "description": [],
+        "signature": [
+          "({ grokCollection, draftGrokExpression, onChange, height, dataTestSubj, }: { grokCollection: ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.GrokCollection",
+            "text": "GrokCollection"
+          },
+          "; draftGrokExpression: ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.DraftGrokExpression",
+            "text": "DraftGrokExpression"
+          },
+          "; onChange?: ((expression: ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.DraftGrokExpression",
+            "text": "DraftGrokExpression"
+          },
+          ") => void) | undefined; height?: string | number | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.Expression.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  grokCollection,\n  draftGrokExpression,\n  onChange,\n  height = '100px',\n  dataTestSubj,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+            "lineNumber": 23,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Expression.$1.grokCollection",
+                "type": "Object",
+                "tags": [],
+                "label": "grokCollection",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.GrokCollection",
+                    "text": "GrokCollection"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "lineNumber": 24,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Expression.$1.draftGrokExpression",
+                "type": "Object",
+                "tags": [],
+                "label": "draftGrokExpression",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.DraftGrokExpression",
+                    "text": "DraftGrokExpression"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "lineNumber": 25,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Expression.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "((expression: ",
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.DraftGrokExpression",
+                    "text": "DraftGrokExpression"
+                  },
+                  ") => void) | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "lineNumber": 26,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/grok-ui",
+                    "id": "def-common.Expression.$1.onChange.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "expression",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/grok-ui",
+                        "scope": "common",
+                        "docId": "kibKbnGrokUiPluginApi",
+                        "section": "def-common.DraftGrokExpression",
+                        "text": "DraftGrokExpression"
+                      }
+                    ],
+                    "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                    "lineNumber": 26,
+                    "columnNumber": 15,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Expression.$1.height",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "height",
+                "description": [],
+                "signature": [
+                  "string | number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "lineNumber": 27,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Expression.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "lineNumber": 28,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.Sample",
+        "type": "Function",
+        "tags": [],
+        "label": "Sample",
+        "description": [],
+        "signature": [
+          "({ grokCollection, draftGrokExpressions, sample, }: { grokCollection: ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.GrokCollection",
+            "text": "GrokCollection"
+          },
+          "; draftGrokExpressions: ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.DraftGrokExpression",
+            "text": "DraftGrokExpression"
+          },
+          "[]; sample: string; onChangeSample?: ((sample: string) => void) | undefined; height?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.Sample.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  grokCollection,\n  draftGrokExpressions,\n  sample = '',\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+            "lineNumber": 24,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Sample.$1.grokCollection",
+                "type": "Object",
+                "tags": [],
+                "label": "grokCollection",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.GrokCollection",
+                    "text": "GrokCollection"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                "lineNumber": 25,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Sample.$1.draftGrokExpressions",
+                "type": "Array",
+                "tags": [],
+                "label": "draftGrokExpressions",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.DraftGrokExpression",
+                    "text": "DraftGrokExpression"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                "lineNumber": 26,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Sample.$1.sample",
+                "type": "string",
+                "tags": [],
+                "label": "sample",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                "lineNumber": 27,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Sample.$1.onChangeSample",
+                "type": "Function",
+                "tags": [],
+                "label": "onChangeSample",
+                "description": [],
+                "signature": [
+                  "((sample: string) => void) | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                "lineNumber": 28,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/grok-ui",
+                    "id": "def-common.Sample.$1.onChangeSample.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "sample",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                    "lineNumber": 28,
+                    "columnNumber": 21,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Sample.$1.height",
+                "type": "string",
+                "tags": [],
+                "label": "height",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_read_only.tsx",
+                "lineNumber": 29,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.SampleInput",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleInput",
+        "description": [],
+        "signature": [
+          "({ grokCollection, draftGrokExpressions, sample, readOnly, onChangeSample, height, }: { grokCollection: ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.GrokCollection",
+            "text": "GrokCollection"
+          },
+          "; draftGrokExpressions: ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.DraftGrokExpression",
+            "text": "DraftGrokExpression"
+          },
+          "[]; sample: string; readOnly?: boolean | undefined; onChangeSample?: ((sample: string) => void) | undefined; height?: string | number | undefined; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.SampleInput.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  grokCollection,\n  draftGrokExpressions,\n  sample = '',\n  readOnly = false,\n  onChangeSample,\n  height = '150px',\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+            "lineNumber": 30,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.SampleInput.$1.grokCollection",
+                "type": "Object",
+                "tags": [],
+                "label": "grokCollection",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.GrokCollection",
+                    "text": "GrokCollection"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 31,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.SampleInput.$1.draftGrokExpressions",
+                "type": "Array",
+                "tags": [],
+                "label": "draftGrokExpressions",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/grok-ui",
+                    "scope": "common",
+                    "docId": "kibKbnGrokUiPluginApi",
+                    "section": "def-common.DraftGrokExpression",
+                    "text": "DraftGrokExpression"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 32,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.SampleInput.$1.sample",
+                "type": "string",
+                "tags": [],
+                "label": "sample",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 33,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.SampleInput.$1.readOnly",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "readOnly",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 34,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.SampleInput.$1.onChangeSample",
+                "type": "Function",
+                "tags": [],
+                "label": "onChangeSample",
+                "description": [],
+                "signature": [
+                  "((sample: string) => void) | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 35,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/grok-ui",
+                    "id": "def-common.SampleInput.$1.onChangeSample.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "sample",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                    "lineNumber": 35,
+                    "columnNumber": 21,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.SampleInput.$1.height",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "height",
+                "description": [],
+                "signature": [
+                  "string | number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/sample_input.tsx",
+                "lineNumber": 36,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.FieldDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldDefinition",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.FieldDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.FieldDefinition.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/grok-ui",
+                "scope": "common",
+                "docId": "kibKbnGrokUiPluginApi",
+                "section": "def-common.SupportedTypeConversion",
+                "text": "SupportedTypeConversion"
+              },
+              " | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.FieldDefinition.colour",
+            "type": "string",
+            "tags": [],
+            "label": "colour",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.FieldDefinition.pattern",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.SupportedTypeConversion",
+        "type": "Enum",
+        "tags": [],
+        "label": "SupportedTypeConversion",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-grok-ui/models/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
-import { TransformMatrix3d } from '../../lib/aeroelastic';
+import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
 interface Props {
   height: number;
@@ -33,6 +34,7 @@ export const AlignmentGuide: FC<Props> = ({ transformMatrix, width, height }) =>
 
 AlignmentGuide.propTypes = {
   height: PropTypes.number.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   width: PropTypes.number.isRequired,
 };

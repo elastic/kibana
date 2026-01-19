@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -20,11 +20,16 @@
     "@kbn/config-schema",
     "@kbn/product-doc-common",
     "@kbn/core-saved-objects-server",
-    "@kbn/utils",
     "@kbn/core-http-browser",
     "@kbn/logging-mocks",
     "@kbn/licensing-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/inference-common",
+    "@kbn/core-security-server",
+    "@kbn/ml-is-populated-object",
+    "@kbn/i18n",
+    "@kbn/licensing-types",
+    "@kbn/fs",
+    "@kbn/react-query"
   ]
 }

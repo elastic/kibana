@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -15,29 +16,34 @@ import {
   EuiText,
   EuiLoadingSpinner,
   EuiSelectableTemplateSitewide,
-  EuiSelectableTemplateSitewideOption,
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
+  useEuiBreakpoint,
+  mathWithUnits,
+  useEuiMinBreakpoint,
 } from '@elastic/eui';
-import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
+import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { apm } from '@elastic/apm-rum';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
-import { Subscription } from 'rxjs';
-import { blurEvent, isMac, sort } from '.';
+import type { Subscription } from 'rxjs';
+import { isMac } from '@kbn/shared-ux-utility';
+import { blurEvent, sort } from '.';
 import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
-import { getSuggestions, SearchSuggestion } from '../suggestions';
+import type { SearchSuggestion } from '../suggestions';
+import { getSuggestions } from '../suggestions';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
-import './search_bar.scss';
-import { SearchBarProps } from './types';
+import type { SearchBarProps } from './types';
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (
@@ -65,7 +71,13 @@ const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
 };
 
 const EmptyMessage = () => (
-  <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
+  <EuiFlexGroup
+    direction="column"
+    justifyContent="center"
+    css={css`
+      min-height: 300px;
+    `}
+  >
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="xl" />
     </EuiFlexItem>
@@ -96,6 +108,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
 
+  const styles = css({
+    [useEuiBreakpoint(['m', 'l'])]: {
+      width: mathWithUnits(euiTheme.size.xxl, (x) => x * 10),
+    },
+    [useEuiMinBreakpoint('xl')]: {
+      width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
+    },
+  });
   // Initialize searchableTypes data
   useEffect(() => {
     if (initialLoad) {
@@ -202,9 +222,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           },
           error: (err) => {
             setIsLoading(false);
+
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
-            reportEvent.error({ message: err, searchValue });
+            apm.captureError(err, {
+              labels: {
+                SearchValue: searchValue,
+              },
+            });
           },
           complete: () => {
             setIsLoading(false);
@@ -280,7 +305,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           });
         }
       } catch (err) {
-        reportEvent.error({ message: err, searchValue });
+        apm.captureError(err, {
+          labels: {
+            SearchValue: searchValue,
+          },
+        });
         // eslint-disable-next-line no-console
         console.log('Error trying to track searchbar metrics', err);
       }
@@ -360,10 +389,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       isPreFiltered
       onChange={onChange}
       options={options}
-      className="kbnSearchBar"
+      css={styles}
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
+      colorModes={chromeStyle !== 'project' ? { search: 'dark', popover: 'global' } : undefined}
       listProps={{
         className: 'eui-yScroll',
         css: css`
@@ -407,7 +437,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           <EuiIcon type="search" size="m" />
         </EuiHeaderSectionItemButton>
       }
-      popoverFooter={<PopoverFooter isMac={isMac} />}
+      popoverFooter={<PopoverFooter />}
     />
   );
 };

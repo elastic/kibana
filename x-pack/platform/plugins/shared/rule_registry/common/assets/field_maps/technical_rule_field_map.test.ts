@@ -75,6 +75,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "boolean",
       },
+      "kibana.alert.index_pattern": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.instance.id": Object {
         "array": false,
         "required": true,
@@ -94,6 +99,21 @@ it('matches snapshot', () => {
         "array": true,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.maintenance_window_names": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.muted": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
+      },
+      "kibana.alert.pending_recovered_count": Object {
+        "array": false,
+        "required": false,
+        "type": "long",
       },
       "kibana.alert.previous_action_group": Object {
         "array": false,
@@ -263,6 +283,20 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.scheduled_action.date": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.scheduled_action.group": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.scheduled_action.throttling": Object {
+        "required": false,
+        "type": "unmapped",
+      },
       "kibana.alert.severity": Object {
         "array": false,
         "required": false,
@@ -277,6 +311,11 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "date",
+      },
+      "kibana.alert.state": Object {
+        "array": false,
+        "required": false,
+        "type": "unmapped",
       },
       "kibana.alert.status": Object {
         "array": false,
@@ -318,6 +357,21 @@ it('matches snapshot', () => {
         "format": "epoch_millis||strict_date_optional_time",
         "required": false,
         "type": "date_range",
+      },
+      "kibana.alert.updated_at": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
+      "kibana.alert.updated_by.user.id": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.updated_by.user.name": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
       },
       "kibana.alert.url": Object {
         "array": false,

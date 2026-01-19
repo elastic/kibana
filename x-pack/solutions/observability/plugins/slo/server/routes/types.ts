@@ -4,9 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type {
+  CoreSetup,
+  IScopedClusterClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common/data_views';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
+import type { SLODefinitionRepository, TransformManager } from '../services';
+import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
+import type { SLOSettingsRepository } from '../services/slo_settings_repository';
+import type { SLOTemplateRepository } from '../services/slo_template_repository';
+
+export type GetScopedClients = ({
+  request,
+  logger,
+}: {
+  request: KibanaRequest;
+  logger: Logger;
+}) => Promise<RouteHandlerScopedClients>;
+
+export interface RouteHandlerScopedClients {
+  scopedClusterClient: IScopedClusterClient;
+  soClient: SavedObjectsClientContract;
+  internalSoClient: SavedObjectsClientContract;
+  spaceId: string;
+  dataViewsService: DataViewsService;
+  rulesClient: RulesClientApi;
+  racClient: AlertsClient;
+  repository: SLODefinitionRepository;
+  settingsRepository: SLOSettingsRepository;
+  templateRepository: SLOTemplateRepository;
+  transformManager: TransformManager;
+  summaryTransformManager: TransformManager;
+}
 
 export interface SLORoutesDependencies {
   plugins: {
@@ -19,17 +54,10 @@ export interface SLORoutesDependencies {
     };
   };
   corePlugins: CoreSetup;
-}
-
-export type SLORouteHandlerResources = SLORoutesDependencies &
-  DefaultRouteHandlerResources & {
-    context: SLORequestHandlerContext;
+  getScopedClients: GetScopedClients;
+  config: {
+    isServerless: boolean;
   };
-
-export interface SLORouteContext {
-  isServerless: boolean;
 }
 
-export type SLORequestHandlerContext = CustomRequestHandlerContext<{
-  slo: Promise<SLORouteContext>;
-}>;
+export type SLORouteHandlerResources = SLORoutesDependencies & DefaultRouteHandlerResources;

@@ -6,82 +6,89 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../shared/mocks';
-import { mockManagedUserData, mockObservedUser } from './mocks';
+import { mockObservedUser } from './mocks';
 import { UserPanelContent } from './content';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
-storiesOf('Components/UserPanelContent', module)
-  .addDecorator((storyFn) => (
-    <StorybookProviders>
-      <TestProvider>
-        <EuiFlyout size="m" onClose={() => {}}>
-          {storyFn()}
-        </EuiFlyout>
-      </TestProvider>
-    </StorybookProviders>
-  ))
-  .add('default', () => (
+export default {
+  title: 'Components/UserPanelContent',
+
+  decorators: [
+    (storyFn) => (
+      <StorybookProviders>
+        <TestProvider>
+          <EuiFlyout size="m" onClose={() => {}}>
+            {storyFn()}
+          </EuiFlyout>
+        </TestProvider>
+      </StorybookProviders>
+    ),
+  ],
+} as Meta;
+
+export const Default = {
+  render: () => (
     <UserPanelContent
-      managedUser={mockManagedUserData}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ))
-  .add('integration disabled', () => (
+  ),
+
+  name: 'default',
+};
+
+export const IntegrationDisabled = {
+  render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: false,
-        isIntegrationEnabled: false,
-      }}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ))
-  .add('no managed data', () => (
+  ),
+
+  name: 'integration disabled',
+};
+
+export const NoManagedData = {
+  render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: false,
-        isIntegrationEnabled: true,
-      }}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ))
-  .add('no observed data', () => (
+  ),
+
+  name: 'no managed data',
+};
+
+export const NoObservedData = {
+  render: () => (
     <UserPanelContent
-      managedUser={mockManagedUserData}
       observedUser={{
         details: {
           user: {
@@ -110,21 +117,20 @@ storiesOf('Components/UserPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ))
-  .add('loading', () => (
+  ),
+
+  name: 'no observed data',
+};
+
+export const Loading = {
+  render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: true,
-        isIntegrationEnabled: true,
-      }}
       observedUser={{
         details: {
           user: {
@@ -153,11 +159,13 @@ storiesOf('Components/UserPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ));
+  ),
+
+  name: 'loading',
+};

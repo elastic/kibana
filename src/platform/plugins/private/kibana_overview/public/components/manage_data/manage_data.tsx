@@ -7,14 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiTitle,
+  useEuiMinBreakpoint,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
+import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
 import { Synopsis } from '../synopsis';
 import { METRIC_TYPE, trackUiMetric } from '../../lib/ui_metric';
 
@@ -24,9 +31,7 @@ interface Props {
 }
 
 export const ManageData: FC<Props> = ({ addBasePath, features }) => {
-  const {
-    services: { application },
-  } = useKibana<CoreStart>();
+  const minBreakpointM = useEuiMinBreakpoint('m');
   return (
     <>
       {features.length > 1 ? <EuiHorizontalRule margin="xl" aria-hidden="true" /> : null}
@@ -47,26 +52,31 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
 
           <EuiSpacer size="m" />
 
-          <EuiFlexGroup className="kbnOverviewDataManage__content" wrap>
+          <EuiFlexGroup wrap>
             {features.map((feature) => (
-              <EuiFlexItem className="kbnOverviewDataManage__item" key={feature.id}>
-                <RedirectAppLinks
-                  coreStart={{
-                    application,
+              <EuiFlexItem
+                key={feature.id}
+                css={({ euiTheme }: UseEuiTheme) =>
+                  css({
+                    ':not(:only-child)': {
+                      [minBreakpointM]: {
+                        flex: `0 0 calc(50% - ${euiTheme.size.l})`,
+                      },
+                    },
+                  })
+                }
+              >
+                <Synopsis
+                  id={feature.id}
+                  description={feature.description}
+                  iconType={feature.icon}
+                  title={feature.title}
+                  url={addBasePath(feature.path)}
+                  wrapInPanel
+                  onClick={() => {
+                    trackUiMetric(METRIC_TYPE.CLICK, `ingest_data_card_${feature.id}`);
                   }}
-                >
-                  <Synopsis
-                    id={feature.id}
-                    description={feature.description}
-                    iconType={feature.icon}
-                    title={feature.title}
-                    url={addBasePath(feature.path)}
-                    wrapInPanel
-                    onClick={() => {
-                      trackUiMetric(METRIC_TYPE.CLICK, `ingest_data_card_${feature.id}`);
-                    }}
-                  />
-                </RedirectAppLinks>
+                />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
@@ -77,6 +87,7 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
 };
 
 ManageData.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   features: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

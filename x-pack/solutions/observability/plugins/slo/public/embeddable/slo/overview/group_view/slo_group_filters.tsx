@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSelect, EuiText } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSelect, EuiText } from '@elastic/eui';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
@@ -18,7 +19,6 @@ import { SLI_OPTIONS } from '../../../../pages/slo_edit/constants';
 import { useGetSettings } from '../../../../pages/slo_settings/hooks/use_get_settings';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { GroupBy, GroupFilters } from '../types';
-import './slo_group_filters.scss';
 
 interface Option {
   value: string;

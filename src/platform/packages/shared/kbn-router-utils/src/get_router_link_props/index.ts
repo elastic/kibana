@@ -9,19 +9,18 @@
 
 export interface RouterLinkProps {
   href: string | undefined;
-  onClick: (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => void;
+  onClick: (event: React.MouseEvent<Element, MouseEvent>) => void;
 }
 
 interface GetRouterLinkPropsDeps {
   href?: string;
-  onClick(): void;
+  onClick(event: React.MouseEvent<Element, MouseEvent>): void;
 }
 
-const isModifiedEvent = (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) =>
+const isModifiedEvent = (event: React.MouseEvent<Element, MouseEvent>) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
-const isLeftClickEvent = (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) =>
-  event.button === 0;
+const isLeftClickEvent = (event: React.MouseEvent<Element, MouseEvent>) => event.button === 0;
 
 /**
  *
@@ -36,7 +35,7 @@ const isLeftClickEvent = (event: React.MouseEvent<HTMLAnchorElement | HTMLButton
  * manage behaviours such as leftClickEvent and event with modifiers (Ctrl, Shift, etc)
  */
 export const getRouterLinkProps = ({ href, onClick }: GetRouterLinkPropsDeps): RouterLinkProps => {
-  const guardedClickHandler = (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+  const guardedClickHandler = (event: React.MouseEvent<Element, MouseEvent>) => {
     if (event.defaultPrevented) {
       return;
     }
@@ -48,7 +47,7 @@ export const getRouterLinkProps = ({ href, onClick }: GetRouterLinkPropsDeps): R
     // Prevent regular link behavior, which causes a browser refresh.
     event.preventDefault();
 
-    onClick();
+    onClick(event);
   };
 
   return { href, onClick: guardedClickHandler };

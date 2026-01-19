@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios, { AxiosError, AxiosResponse, AxiosInstance } from 'axios';
+import type { AxiosError, AxiosResponse, AxiosInstance } from 'axios';
+import axios from 'axios';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 
@@ -29,6 +30,7 @@ export class GithubApi {
   constructor(private accessToken?: string) {
     this.api = axios.create({
       baseURL: 'https://api.github.com/',
+      allowAbsoluteUrls: false,
       headers: {
         Accept: 'application/vnd.github.v3+json',
         'User-Agent': 'kibana/update_prs_cli',

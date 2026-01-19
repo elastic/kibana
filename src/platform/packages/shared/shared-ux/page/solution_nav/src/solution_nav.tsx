@@ -9,17 +9,20 @@
 
 import { css } from '@emotion/react';
 import classNames from 'classnames';
-import React, { FC, useState, useMemo, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
-import {
+import type {
   EuiAvatarProps,
-  EuiCollapsibleNavGroup,
-  EuiFlyout,
   EuiFlyoutProps,
-  EuiPanel,
-  EuiSideNav,
   EuiSideNavItemType,
   EuiSideNavProps,
+} from '@elastic/eui';
+import {
+  EuiCollapsibleNavGroup,
+  EuiFlyout,
+  EuiPanel,
+  EuiSideNav,
   EuiSpacer,
   EuiTitle,
   htmlIdGenerator,
@@ -29,7 +32,7 @@ import {
   useEuiThemeCSSVariables,
   EuiPageSidebar,
   useEuiOverflowScroll,
-  useEuiBreakpoint,
+  useEuiMinBreakpoint,
   euiCanAnimate,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -222,7 +225,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
 
       ${useEuiOverflowScroll('y')};
 
-      ${useEuiBreakpoint(['m', 'l', 'xl'])} {
+      ${useEuiMinBreakpoint('m')} {
         width: ${FLYOUT_SIZE_CSS};
         padding: ${euiTheme.size.l};
       }
@@ -274,6 +277,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
                 }
               `}
               hideCloseButton={!canBeCollapsed}
+              session="never"
             >
               <EuiPageSidebar
                 className={sideNavClasses}

@@ -30,14 +30,15 @@ import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_
 import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
 import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
 import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/read_privileges_route';
+import { searchUnifiedAlertsRoute } from '../lib/detection_engine/routes/unified_alerts/search_route';
+import { setUnifiedAlertsWorkflowStatusRoute } from '../lib/detection_engine/routes/unified_alerts/set_workflow_status_route';
+import { setUnifiedAlertsTagsRoute } from '../lib/detection_engine/routes/unified_alerts/set_alert_tags_route';
+import { setUnifiedAlertsAssigneesRoute } from '../lib/detection_engine/routes/unified_alerts/set_alert_assignees_route';
 
 import type { SetupPlugins, StartPlugins } from '../plugin';
 import type { ConfigType } from '../config';
 import type { ITelemetryEventsSender } from '../lib/telemetry/sender';
-import type {
-  CreateRuleOptions,
-  CreateSecurityRuleTypeWrapperProps,
-} from '../lib/detection_engine/rule_types/types';
+import type { CreateSecurityRuleTypeWrapperProps } from '../lib/detection_engine/rule_types/types';
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
@@ -54,6 +55,7 @@ import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
+import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -65,7 +67,6 @@ export const initRoutes = (
   ruleDataService: RuleDataPluginService,
   logger: Logger,
   ruleDataClient: IRuleDataClient | null,
-  ruleOptions: CreateRuleOptions,
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
@@ -74,9 +75,9 @@ export const initRoutes = (
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext
 ) => {
-  registerFleetIntegrationsRoutes(router);
+  registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
-  registerPrebuiltRulesRoutes(router);
+  registerPrebuiltRulesRoutes(router, logger);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
@@ -86,7 +87,6 @@ export const initRoutes = (
     config,
     ml,
     security,
-    ruleOptions,
     securityRuleTypeOptions,
     previewRuleDataClient,
     getStartServices,
@@ -111,6 +111,12 @@ export const initRoutes = (
   deleteSignalsMigrationRoute(router, docLinks);
   suggestUserProfilesRoute(router, getStartServices);
 
+  // Detection Engine Extended Alerts routes that have the REST endpoints of /internal/detection_engine/unified_alerts
+  searchUnifiedAlertsRoute(router, ruleDataClient);
+  setUnifiedAlertsWorkflowStatusRoute(router, ruleDataClient);
+  setUnifiedAlertsTagsRoute(router, ruleDataClient);
+  setUnifiedAlertsAssigneesRoute(router, ruleDataClient);
+
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
   createIndexRoute(router);
@@ -132,7 +138,7 @@ export const initRoutes = (
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
+  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger, telemetrySender, ml });
   registerSiemMigrationsRoutes(router, config, logger);
 
   // Security Integrations
@@ -140,5 +146,7 @@ export const initRoutes = (
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
 
-  registerAssetInventoryRoutes({ router, config, logger });
+  registerAssetInventoryRoutes({ router, logger });
+
+  registerSiemReadinessRoutes({ router, logger });
 };

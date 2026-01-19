@@ -6,18 +6,10 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { AnalyticsServiceStart } from '@kbn/core/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import {
-  ClickMetric,
-  CountMetric,
-  EventMetric,
-  FieldType,
-  TrackedApplicationClick,
-  TrackedError,
-  TrackedSavedObjectClick,
-  TrackUiMetricFn,
-} from '../types';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { TrackedApplicationClick, TrackedSavedObjectClick, TrackUiMetricFn } from '../types';
+import { ClickMetric, CountMetric, EventMetric, FieldType } from '../types';
 
 export class EventReporter {
   private reportEvent: AnalyticsServiceStart['reportEvent'];
@@ -121,20 +113,6 @@ export class EventReporter {
       [FieldType.SAVED_OBJECT_TYPE]: type,
       [FieldType.SELECTED_RANK]: context.selectedRank,
       [FieldType.SELECTED_LABEL]: context.selectedLabel,
-    });
-  }
-
-  /**
-   * Called from error handlers
-   */
-  public error(context: TrackedError | undefined) {
-    this.trackUiMetric(METRIC_TYPE.COUNT, CountMetric.UNHANDLED_ERROR);
-
-    const message = context?.message.toString() ?? 'unknown';
-    const terms = context?.searchValue ?? '';
-    this.reportEvent(EventMetric.ERROR, {
-      [FieldType.TERMS]: terms,
-      [FieldType.ERROR_MESSAGE]: message,
     });
   }
 }

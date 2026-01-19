@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PresentationContainer } from '@kbn/presentation-containers';
-import {
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import type {
   CanAccessViewMode,
   EmbeddableApiContext,
   HasLibraryTransforms,
@@ -16,6 +16,8 @@ import {
   HasType,
   HasUniqueId,
   PublishesTitle,
+} from '@kbn/presentation-publishing';
+import {
   apiCanAccessViewMode,
   apiHasLibraryTransforms,
   apiHasParentApi,
@@ -24,7 +26,8 @@ import {
   getInheritedViewMode,
   getTitle,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
@@ -75,10 +78,10 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     const title = getTitle(embeddable);
     try {
-      const { references, rawState } = embeddable.getSerializedStateByValue();
+      const byValueState = embeddable.getSerializedStateByValue();
       await embeddable.parentApi.replacePanel(embeddable.uuid, {
         panelType: embeddable.type,
-        serializedState: { rawState: { ...rawState, title }, references },
+        serializedState: { ...byValueState, title },
       });
       coreServices.notifications.toasts.addSuccess({
         title: dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),

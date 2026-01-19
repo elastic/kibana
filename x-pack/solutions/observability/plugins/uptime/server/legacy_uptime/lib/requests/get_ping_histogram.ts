@@ -7,9 +7,9 @@
 
 import { getQueryStringFilter } from './search/get_query_string_filter';
 import { getFilterClause } from '../helper';
-import { GetPingHistogramParams, HistogramResult } from '../../../../common/runtime_types';
+import type { GetPingHistogramParams, HistogramResult } from '../../../../common/runtime_types';
 import { QUERY } from '../../../../common/constants';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
+import type { UMElasticsearchQueryFn } from '../adapters/framework';
 import { createEsQuery } from '../../../../common/utils/es_search';
 import { getHistogramInterval } from '../../../../common/lib/get_histogram_interval';
 import {
@@ -47,31 +47,29 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   }
 
   const params = createEsQuery({
-    body: {
-      query: {
-        bool: {
-          filter: [...filter, SUMMARY_FILTER, EXCLUDE_RUN_ONCE_FILTER],
-        },
+    query: {
+      bool: {
+        filter: [...filter, SUMMARY_FILTER, EXCLUDE_RUN_ONCE_FILTER],
       },
-      size: 0,
-      aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: bucketSize || minInterval + 'ms',
-            missing: '0',
-            time_zone: timeZone,
-          },
-          aggs: {
-            down: {
-              sum: {
-                field: 'summary.down',
-              },
+    },
+    size: 0,
+    aggs: {
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: bucketSize || minInterval + 'ms',
+          missing: '0',
+          time_zone: timeZone,
+        },
+        aggs: {
+          down: {
+            sum: {
+              field: 'summary.down',
             },
-            up: {
-              sum: {
-                field: 'summary.up',
-              },
+          },
+          up: {
+            sum: {
+              field: 'summary.up',
             },
           },
         },

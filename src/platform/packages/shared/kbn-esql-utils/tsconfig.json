@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -19,7 +19,8 @@
     "@kbn/data-views-plugin",
     "@kbn/crypto-browser",
     "@kbn/data-view-utils",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
+    "@kbn/esql-types",
     "@kbn/search-types",
     "@kbn/expressions-plugin",
     "@kbn/field-types",
@@ -27,6 +28,10 @@
     "@kbn/i18n",
     "@kbn/datemath",
     "@kbn/es-query",
-    "@kbn/esql-validation-autocomplete"
+    "@kbn/monaco",
+    "@kbn/core",
+    "@kbn/projects-solutions-groups",
+    "@kbn/index-management-shared-types",
+    "@kbn/licensing-types",
   ]
 }

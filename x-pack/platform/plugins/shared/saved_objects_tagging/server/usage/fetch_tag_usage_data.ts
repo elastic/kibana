@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { TaggingUsageData, ByTypeTaggingUsageData } from './types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { TaggingUsageData, ByTypeTaggingUsageData } from './types';
 
 /**
  * Manual type reflection of the `tagDataAggregations` resulting payload
@@ -40,15 +40,13 @@ export const fetchTagUsageData = async ({
     index: kibanaIndices,
     ignore_unavailable: true,
     filter_path: 'aggregations',
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          must: [hasTagReferenceClause],
-        },
+    size: 0,
+    query: {
+      bool: {
+        must: [hasTagReferenceClause],
       },
-      aggs: tagDataAggregations,
     },
+    aggs: tagDataAggregations,
   });
 
   const byTypeUsages: Record<string, ByTypeTaggingUsageData> = {};

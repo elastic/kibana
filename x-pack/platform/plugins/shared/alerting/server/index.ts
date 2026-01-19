@@ -5,9 +5,10 @@
  * 2.0.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { RulesClient as RulesClientClass } from './rules_client';
-import { AlertingConfig, configSchema } from './config';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { RulesClient as RulesClientClass } from './rules_client';
+import type { AlertingConfig } from './config';
+import { configSchema } from './config';
 
 export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
@@ -50,6 +51,7 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   DEFAULT_ALERTS_ILM_POLICY,
@@ -69,7 +71,11 @@ export {
   isValidAlertIndexName,
   InstallShutdownError,
 } from './alerts_service';
-export { sanitizeBulkErrorResponse, AlertsClientError } from './alerts_client';
+export {
+  sanitizeBulkErrorResponse,
+  AlertsClientError,
+  shouldCreateAlertsInAllSpaces,
+} from './alerts_client';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 export type { ConnectorAdapter } from './connector_adapters/types';
 
@@ -82,11 +88,9 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
   schema: configSchema,
   exposeToBrowser: {
     rules: { run: { alerts: { max: true } } },
+    rulesSettings: { enabled: true },
+    disabledRuleTypes: true,
+    enabledRuleTypes: true,
   },
-  deprecations: ({ renameFromRoot, deprecate }) => [
-    deprecate('maxEphemeralActionsPerAlert', '9.0.0', {
-      level: 'warning',
-      message: `The setting "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and currently ignored by the system. Please remove this setting.`,
-    }),
-  ],
+  deprecations: autocompleteConfigDeprecationProvider,
 };

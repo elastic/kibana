@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertingAuthorization } from './alerting_authorization';
+import type { AlertingAuthorization } from './alerting_authorization';
 
 type Schema = PublicMethodsOf<AlertingAuthorization>;
 export type AlertingAuthorizationMock = jest.Mocked<Schema>;
@@ -14,6 +14,7 @@ export type AlertingAuthorizationMock = jest.Mocked<Schema>;
 const createAlertingAuthorizationMock = () => {
   const mocked: AlertingAuthorizationMock = {
     ensureAuthorized: jest.fn(),
+    bulkEnsureAuthorized: jest.fn(),
     getAuthorizedRuleTypes: jest.fn().mockResolvedValue(new Map()),
     getFindAuthorizationFilter: jest.fn().mockResolvedValue({
       filter: undefined,

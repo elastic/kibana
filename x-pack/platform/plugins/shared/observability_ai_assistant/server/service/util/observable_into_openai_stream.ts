@@ -5,30 +5,20 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import OpenAI from 'openai';
-import {
-  catchError,
-  concatMap,
-  endWith,
-  filter,
-  from,
-  ignoreElements,
-  map,
-  Observable,
-  of,
-} from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type OpenAI from 'openai';
+import type { Observable } from 'rxjs';
+import { catchError, concatMap, endWith, filter, from, ignoreElements, map, of } from 'rxjs';
 import { PassThrough } from 'stream';
-import {
+import type {
   BufferFlushEvent,
   ChatCompletionChunkEvent,
-  StreamingChatResponseEventType,
   StreamingChatResponseEventWithoutError,
-  TokenCountEvent,
 } from '../../../common/conversation_complete';
+import { StreamingChatResponseEventType } from '../../../common/conversation_complete';
 
 export function observableIntoOpenAIStream(
-  source: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent | TokenCountEvent>,
+  source: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent>,
   logger: Logger
 ) {
   const stream = new PassThrough();

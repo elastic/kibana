@@ -5,28 +5,31 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Connector, IngestionMethod, IngestPipelineParams } from '@kbn/search-connectors';
+import type { Connector, IngestionMethod, IngestPipelineParams } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
-import {
-  CachedFetchConnectorByIdApiLogic,
+import type {
   CachedFetchConnectorByIdApiLogicActions,
   CachedFetchConnectorByIdApiLogicValues,
 } from '../../api/connector/cached_fetch_connector_by_id_api_logic';
+import { CachedFetchConnectorByIdApiLogic } from '../../api/connector/cached_fetch_connector_by_id_api_logic';
 
-import {
-  GenerateConnectorApiKeyApiLogicActions,
-  GenerateConnectorApiKeyApiLogic,
-} from '../../api/connector/generate_connector_api_key_api_logic';
-import {
-  ConnectorConfigurationApiLogic,
-  PostConnectorConfigurationActions,
-} from '../../api/connector/update_connector_configuration_api_logic';
-import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
-import { ElasticsearchViewIndex } from '../../types';
+import type { GenerateConnectorApiKeyApiLogicActions } from '../../api/connector/generate_connector_api_key_api_logic';
+import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
+import type {
+  GetConnectorAgentlessPolicyApiLogicActions,
+  GetConnectorAgentlessPolicyApiResponse,
+} from '../../api/connector/get_connector_agentless_policy_api_logic';
+import { GetConnectorAgentlessPolicyApiLogic } from '../../api/connector/get_connector_agentless_policy_api_logic';
+import type { PostConnectorConfigurationActions } from '../../api/connector/update_connector_configuration_api_logic';
+import { ConnectorConfigurationApiLogic } from '../../api/connector/update_connector_configuration_api_logic';
+import type { FetchIndexActions } from '../../api/index/fetch_index_api_logic';
+import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
+import type { ElasticsearchViewIndex } from '../../types';
 
 import {
   hasAdvancedFilteringFeature,
@@ -34,17 +37,12 @@ import {
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,
 } from '../../utils/connector_helpers';
-import {
-  getConnectorLastSeenError,
-  hasConnectorBeenSeenRecently,
-  isLastSeenOld,
-} from '../../utils/connector_status_helpers';
+import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
 
-import {
-  ConnectorNameAndDescriptionActions,
-  ConnectorNameAndDescriptionLogic,
-} from './connector_name_and_description_logic';
-import { DeploymentLogic, DeploymentLogicActions } from './deployment_logic';
+import type { ConnectorNameAndDescriptionActions } from './connector_name_and_description_logic';
+import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
+import type { DeploymentLogicActions } from './deployment_logic';
+import { DeploymentLogic } from './deployment_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];
@@ -57,6 +55,8 @@ export interface ConnectorViewActions {
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
   generateApiKeySuccess: GenerateConnectorApiKeyApiLogicActions['apiSuccess'];
   generateConfigurationSuccess: DeploymentLogicActions['generateConfigurationSuccess'];
+  getConnectorAgentlessPolicy: GetConnectorAgentlessPolicyApiLogicActions['makeRequest'];
+  getConnectorAgentlessPolicyApiSuccess: GetConnectorAgentlessPolicyApiLogicActions['apiSuccess'];
   nameAndDescriptionApiError: ConnectorNameAndDescriptionActions['apiError'];
   nameAndDescriptionApiSuccess: ConnectorNameAndDescriptionActions['apiSuccess'];
   startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
@@ -71,9 +71,11 @@ export interface ConnectorViewValues {
   connectorError: string | undefined;
   connectorId: string | null;
   connectorName: string | null;
+  connectorAgentlessPolicy: GetConnectorAgentlessPolicyApiResponse;
   error: string | undefined;
   fetchConnectorApiStatus: Status;
   fetchIndexApiStatus: Status;
+  getConnectorAgentlessPolicyStatus: Status;
   hasAdvancedFilteringFeature: boolean;
   hasBasicFilteringFeature: boolean;
   hasDocumentLevelSecurityFeature: boolean;
@@ -125,6 +127,11 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ['generateConfigurationSuccess'],
       GenerateConnectorApiKeyApiLogic,
       ['apiSuccess as generateApiKeySuccess'],
+      GetConnectorAgentlessPolicyApiLogic,
+      [
+        'makeRequest as getConnectorAgentlessPolicy',
+        'apiSuccess as getConnectorAgentlessPolicySuccess',
+      ],
     ],
     values: [
       CachedFetchConnectorByIdApiLogic,
@@ -133,6 +140,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ['data as index', 'status as fetchIndexApiStatus'],
       ConnectorConfigurationApiLogic,
       ['status as updateConnectorConfigurationStatus'],
+      GetConnectorAgentlessPolicyApiLogic,
+      ['data as connectorAgentlessPolicy', 'status as getConnectorAgentlessPolicyStatus'],
     ],
   },
   events: ({ actions }) => ({
@@ -145,6 +154,9 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     fetchConnectorApiSuccess: ({ connector }) => {
       if (!values.index && connector?.index_name) {
         actions.fetchIndex({ indexName: connector.index_name });
+      }
+      if (connector?.id && connector.is_native) {
+        actions.getConnectorAgentlessPolicy({ connectorId: connector.id });
       }
     },
     generateApiKeySuccess: () => {
@@ -242,7 +254,9 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       (connector: Connector) => {
         if (!connector || !connector.is_native) return false;
 
-        return !hasConnectorBeenSeenRecently(connector);
+        const connectorNotCheckedInYet = connector.last_seen == null;
+
+        return connectorNotCheckedInYet;
       },
     ],
     pipelineData: [

@@ -23,7 +23,7 @@ export const ConnectorUnconfigured: React.FC<ConnectorUnconfiguredProps> = ({
     <>
       <EuiSpacer />
       <EuiCallOut
-        iconType="iInCircle"
+        iconType="info"
         title={i18n.translate(
           'searchConnectors.content.indices.connectorScheduling.notConnected.title',
           {

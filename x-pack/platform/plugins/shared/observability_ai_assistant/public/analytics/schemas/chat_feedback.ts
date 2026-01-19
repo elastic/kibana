@@ -9,10 +9,16 @@ import type { EventTypeOpts } from '@kbn/core/public';
 import type { Conversation } from '../../../common';
 import type { Feedback } from '../../components/buttons/feedback_buttons';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
+import {
+  type Connector,
+  type Scope,
+  connectorSchema,
+  scopeSchema,
+} from '../../../common/analytics';
 
-export interface ChatFeedback {
+export interface ChatFeedback extends Connector, Scope {
   feedback: Feedback;
-  conversation: Omit<Omit<Conversation, 'messages'>, 'conversation'> & {
+  conversation: Omit<Omit<Conversation, 'messages' | 'systemMessage'>, 'conversation'> & {
     conversation: Omit<Conversation['conversation'], 'title'>;
   };
 }
@@ -65,28 +71,6 @@ export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
                 description: 'The timestamp of the last message in the conversation.',
               },
             },
-            token_count: {
-              properties: {
-                completion: {
-                  type: 'long',
-                  _meta: {
-                    description: 'The number of tokens in the completion.',
-                  },
-                },
-                prompt: {
-                  type: 'long',
-                  _meta: {
-                    description: 'The number of tokens in the prompt.',
-                  },
-                },
-                total: {
-                  type: 'long',
-                  _meta: {
-                    description: 'The total number of tokens in the conversation.',
-                  },
-                },
-              },
-            },
           },
         },
         labels: {
@@ -113,7 +97,18 @@ export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
             description: 'Whether the conversation is public or not.',
           },
         },
+        archived: {
+          type: 'boolean',
+          _meta: {
+            description: 'Whether the conversation is archived or not.',
+            optional: true,
+          },
+        },
       },
     },
+    connector: {
+      properties: connectorSchema,
+    },
+    scopes: scopeSchema,
   },
 };

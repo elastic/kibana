@@ -49,6 +49,10 @@ import {
   SecurityServiceConstructor,
   MockUserProfileService,
   UserProfileServiceConstructor,
+  MockPricingService,
+  PricingServiceConstructor,
+  MockCoreInjectionService,
+  CoreInjectionServiceConstructor,
 } from './core_system.test.mocks';
 import type { EnvironmentMode } from '@kbn/config';
 import { CoreSystem } from './core_system';
@@ -157,6 +161,8 @@ describe('constructor', () => {
     expect(CustomBrandingServiceConstructor).toHaveBeenCalledTimes(1);
     expect(SecurityServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UserProfileServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(PricingServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(CoreInjectionServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -326,6 +332,11 @@ describe('#setup()', () => {
     await setupCore();
     expect(MockUserProfileService.setup).toHaveBeenCalledTimes(1);
   });
+
+  it('calls injection#setup()', async () => {
+    await setupCore();
+    expect(MockCoreInjectionService.setup).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('#start()', () => {
@@ -466,12 +477,10 @@ describe('#start()', () => {
     await startCore();
     expect(MockNotificationsService.start).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService.start).toHaveBeenCalledWith({
-      i18n: expect.any(Object),
       overlays: expect.any(Object),
-      theme: expect.any(Object),
-      userProfile: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
       analytics: expect.any(Object),
+      rendering: expect.any(Object),
     });
   });
 
@@ -485,19 +494,18 @@ describe('#start()', () => {
     expect(MockOverlayService.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls rendering#start()', async () => {
+  it('calls rendering#renderCore()', async () => {
     await startCore();
-    expect(MockRenderingService.start).toHaveBeenCalledTimes(1);
-    expect(MockRenderingService.start).toHaveBeenCalledWith({
-      analytics: expect.any(Object),
-      application: expect.any(Object),
-      chrome: expect.any(Object),
-      overlays: expect.any(Object),
-      i18n: expect.any(Object),
-      theme: expect.any(Object),
-      userProfile: expect.any(Object),
-      targetDomElement: expect.any(HTMLElement),
-    });
+    expect(MockRenderingService.renderCore).toHaveBeenCalledTimes(1);
+    expect(MockRenderingService.renderCore).toHaveBeenCalledWith(
+      {
+        application: expect.any(Object),
+        chrome: expect.any(Object),
+        overlays: expect.any(Object),
+        featureFlags: expect.any(Object),
+      },
+      expect.any(HTMLElement)
+    );
   });
 
   it('calls integrations#start()', async () => {
@@ -523,6 +531,16 @@ describe('#start()', () => {
   it('calls userProfile#start()', async () => {
     await startCore();
     expect(MockUserProfileService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls pricing#start()', async () => {
+    await startCore();
+    expect(MockPricingService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls injection#start()', async () => {
+    await startCore();
+    expect(MockCoreInjectionService.start).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -599,7 +617,7 @@ describe('#stop()', () => {
     await coreSystem.setup();
     await coreSystem.start();
     expect(rootDomElement.innerHTML).not.toBe('');
-    await coreSystem.stop();
+    coreSystem.stop();
     expect(rootDomElement.innerHTML).toBe('');
   });
 });
@@ -611,15 +629,15 @@ describe('RenderingService targetDomElement', () => {
       rootDomElement,
     });
 
-    let targetDomElementParentInStart: HTMLElement | null;
-    MockRenderingService.start.mockImplementation(({ targetDomElement }) => {
-      targetDomElementParentInStart = targetDomElement.parentElement;
+    let targetDomElementParentInRenderCore: HTMLElement | null;
+    MockRenderingService.renderCore.mockImplementation((_deps, targetDomElement) => {
+      targetDomElementParentInRenderCore = targetDomElement.parentElement;
     });
 
     // Starting the core system should pass the targetDomElement as a child of the rootDomElement
     await core.setup();
     await core.start();
-    expect(targetDomElementParentInStart!).toBe(rootDomElement);
+    expect(targetDomElementParentInRenderCore!).toBe(rootDomElement);
   });
 });
 
@@ -631,7 +649,7 @@ describe('Notifications targetDomElement', () => {
     });
 
     let targetDomElementInStart: HTMLElement | null;
-    MockNotificationsService.start.mockImplementation(({ targetDomElement }): any => {
+    MockNotificationsService.start.mockImplementation(({ targetDomElement }): void => {
       targetDomElementInStart = targetDomElement;
     });
 

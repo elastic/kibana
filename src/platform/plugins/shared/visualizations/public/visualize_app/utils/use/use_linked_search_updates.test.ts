@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react';
 import { EventEmitter } from 'events';
 
 import { useLinkedSearchUpdates } from './use_linked_search_updates';
-import { VisualizeServices, SavedVisInstance, VisualizeAppStateContainer } from '../../types';
+import type { VisualizeServices, SavedVisInstance, VisualizeAppStateContainer } from '../../types';
 import { createVisualizeServicesMock } from '../mocks';
 
 describe('useLinkedSearchUpdates', () => {

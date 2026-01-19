@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
@@ -48,6 +48,8 @@ const TOTAL_ACTIONS_TRIGGERED_FIELD =
 const GAP_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.execution_gap_duration_s';
 const INDEXING_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms';
 const SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_search_duration_ms';
+const FROZEN_INDICES_COUNT_FIELD =
+  'kibana.alert.rule.execution.metrics.frozen_indices_queried_count';
 const STATUS_FIELD = 'kibana.alert.rule.execution.status';
 const BACKFILL_FIELD = 'kibana.alert.rule.execution.backfill';
 
@@ -210,6 +212,11 @@ export const getExecutionEventAggregation = ({
                 field: SEARCH_DURATION_FIELD,
               },
             },
+            frozenIndicesQueriedCount: {
+              min: {
+                field: FROZEN_INDICES_COUNT_FIELD,
+              },
+            },
           },
         },
         // Filter by securitySolution ruleExecution doc to retrieve status and message
@@ -298,6 +305,24 @@ const getBackfill = (bucket: ExecutionUuidAggBucket) => {
   return backfill;
 };
 
+const mapSecurityFieldsFromExecutionBucket = (bucket: ExecutionUuidAggBucket) => ({
+  indexing_duration_ms: bucket?.securityMetrics?.indexDuration?.value ?? 0,
+  search_duration_ms: bucket?.securityMetrics?.searchDuration?.value ?? 0,
+  gap_duration_s: bucket?.securityMetrics?.gapDuration?.value ?? 0,
+  frozen_indices_queried_count: bucket?.securityMetrics?.frozenIndicesQueriedCount.value ?? 0,
+  // If security_status isn't available, use platform status from `event.outcome`, but translate to RuleExecutionStatus
+  security_status:
+    bucket?.securityStatus?.status?.hits?.hits[0]?._source?.kibana?.alert?.rule?.execution
+      ?.status ??
+    mapPlatformStatusToRuleExecutionStatus(
+      bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome
+    ),
+  // If security_message isn't available, use `error.message` instead for platform errors since it is more descriptive than `message`
+  security_message:
+    bucket?.securityStatus?.message?.hits?.hits[0]?._source?.message ??
+    bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.error?.message,
+});
+
 /**
  * Formats aggregate execution event from bucket response
  * @param bucket
@@ -315,7 +340,7 @@ export const formatAggExecutionEventFromBucket = (
   const backfill = getBackfill(bucket);
 
   return {
-    execution_uuid: bucket?.key ?? '',
+    execution_uuid: bucket?.key ? `${bucket.key}` : '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / ONE_MILLISECOND_AS_NANOSECONDS,
     status: bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome,
@@ -330,21 +355,7 @@ export const formatAggExecutionEventFromBucket = (
     es_search_duration_ms: bucket?.ruleExecution?.esSearchDuration?.value ?? 0,
     schedule_delay_ms: scheduleDelayUs / ONE_MILLISECOND_AS_NANOSECONDS,
     timed_out: timedOut,
-    // security fields
-    indexing_duration_ms: bucket?.securityMetrics?.indexDuration?.value ?? 0,
-    search_duration_ms: bucket?.securityMetrics?.searchDuration?.value ?? 0,
-    gap_duration_s: bucket?.securityMetrics?.gapDuration?.value ?? 0,
-    // If security_status isn't available, use platform status from `event.outcome`, but translate to RuleExecutionStatus
-    security_status:
-      bucket?.securityStatus?.status?.hits?.hits[0]?._source?.kibana?.alert?.rule?.execution
-        ?.status ??
-      mapPlatformStatusToRuleExecutionStatus(
-        bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome
-      ),
-    // If security_message isn't available, use `error.message` instead for platform errors since it is more descriptive than `message`
-    security_message:
-      bucket?.securityStatus?.message?.hits?.hits[0]?._source?.message ??
-      bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.error?.message,
+    ...mapSecurityFieldsFromExecutionBucket(bucket),
     backfill,
   };
 };

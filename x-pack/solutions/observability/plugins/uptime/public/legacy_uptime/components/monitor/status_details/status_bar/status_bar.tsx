@@ -29,7 +29,7 @@ import {
   TAGS_LABEL,
   URL_LABEL,
 } from '../../../../../../common/translations/translations';
-import { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
+import type { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
 import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
 import { MonitorRedirects } from './monitor_redirects';
 import { MonitorTags } from '../../../common/monitor_tags';
@@ -133,7 +133,9 @@ export const MonitorStatusBar: React.FC = () => {
         <MonitorRedirects monitorStatus={monitorStatus} />
         <EuiDescriptionListTitle>{ENABLE_STATUS_ALERT}</EuiDescriptionListTitle>
         {selectedMonitor && (
-          <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor} />
+          <dd>
+            <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor} />
+          </dd>
         )}
       </EuiDescriptionList>
     </>

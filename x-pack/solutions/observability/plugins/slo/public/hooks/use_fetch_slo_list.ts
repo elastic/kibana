@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { FindSLOResponse } from '@kbn/slo-schema';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { FindSLOResponse } from '@kbn/slo-schema';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { DEFAULT_SLO_PAGE_SIZE, SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { SearchState } from '../pages/slos/hooks/use_url_search_state';
+import type { SearchState } from '../pages/slos/hooks/use_url_search_state';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
 import { useCreateDataView } from './use_create_data_view';

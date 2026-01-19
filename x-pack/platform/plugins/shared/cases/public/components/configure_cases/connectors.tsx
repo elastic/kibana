@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiText,
   EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { ConnectorsDropdown } from './connectors_dropdown';
@@ -91,7 +92,7 @@ const ConnectorsComponent: React.FC<Props> = ({
     <>
       <EuiDescribedFormGroup
         fullWidth
-        title={<h3>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h3>}
+        title={<h2>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h2>}
         description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
         data-test-subj="case-connectors-form-group"
       >
@@ -111,40 +112,37 @@ const ConnectorsComponent: React.FC<Props> = ({
             ) : null
           }
         >
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              {canUseConnectors ? (
-                <ConnectorsDropdown
-                  connectors={connectors}
-                  disabled={disabled}
-                  selectedConnector={selectedConnector.id}
-                  isLoading={isLoading}
-                  onChange={onChangeConnector}
-                  data-test-subj="case-connectors-dropdown"
-                />
-              ) : (
-                <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">
-                  <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
-                </EuiText>
-              )}
-            </EuiFlexItem>
-            {selectedConnector.type !== ConnectorTypes.none && isDeprecatedConnector(connector) && (
-              <EuiFlexItem grow={false}>
-                <DeprecatedCallout />
-              </EuiFlexItem>
-            )}
-            {selectedConnector.type !== ConnectorTypes.none ? (
-              <EuiFlexItem grow={false}>
-                <Mapping
-                  actionTypeName={actionTypeName}
-                  connectorType={selectedConnector.type}
-                  isLoading={isLoading}
-                  mappings={mappings}
-                />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+          {canUseConnectors ? (
+            <ConnectorsDropdown
+              connectors={connectors}
+              disabled={disabled}
+              selectedConnector={selectedConnector.id}
+              isLoading={isLoading}
+              onChange={onChangeConnector}
+            />
+          ) : (
+            <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">
+              <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
+            </EuiText>
+          )}
         </EuiFormRow>
+        {selectedConnector.type !== ConnectorTypes.none && isDeprecatedConnector(connector) && (
+          <>
+            <EuiSpacer size="m" />
+            <DeprecatedCallout />
+          </>
+        )}
+        {selectedConnector.type !== ConnectorTypes.none && (
+          <>
+            <EuiSpacer size="m" />
+            <Mapping
+              actionTypeName={actionTypeName}
+              connectorType={selectedConnector.type}
+              isLoading={isLoading}
+              mappings={mappings}
+            />
+          </>
+        )}
       </EuiDescribedFormGroup>
     </>
   );

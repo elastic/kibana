@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Cluster, LegacyRequest } from '../../../types';
+import type { Cluster, LegacyRequest } from '../../../types';
 import { getIndexPatterns, getKibanaDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 import { createQuery } from '../../create_query';
@@ -36,37 +36,35 @@ export async function getInstanceRuleDataForClusters(
         index: indexPatterns,
         size: 0,
         ignore_unavailable: true,
-        body: {
-          query: createQuery({
-            type,
-            dsDataset: getKibanaDataset(dataset),
-            metricset: dataset,
-            start,
-            end,
-            clusterUuid,
-            metric,
-          }),
-          aggs: {
-            indices: {
-              terms: {
-                field: '_index',
-                size: 1,
-              },
+        query: createQuery({
+          type,
+          dsDataset: getKibanaDataset(dataset),
+          metricset: dataset,
+          start,
+          end,
+          clusterUuid,
+          metric,
+        }),
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: 1,
             },
-            executions: {
-              max: {
-                field: 'kibana.node_rules.executions',
-              },
+          },
+          executions: {
+            max: {
+              field: 'kibana.node_rules.executions',
             },
-            failures: {
-              max: {
-                field: 'kibana.node_rules.failures',
-              },
+          },
+          failures: {
+            max: {
+              field: 'kibana.node_rules.failures',
             },
-            timeouts: {
-              max: {
-                field: 'kibana.node_rules.timeouts',
-              },
+          },
+          timeouts: {
+            max: {
+              field: 'kibana.node_rules.timeouts',
             },
           },
         },

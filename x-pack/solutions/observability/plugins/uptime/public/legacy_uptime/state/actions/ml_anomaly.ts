@@ -9,7 +9,7 @@ import { createAction } from 'redux-actions';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import type { MlCapabilitiesResponse, JobExistResult } from '@kbn/ml-plugin/public';
 import { createAsyncAction } from './utils';
-import {
+import type {
   CreateMLJobSuccess,
   DeleteJobResults,
   MonitorIdParam,

@@ -7,7 +7,7 @@
 
 import rison from '@kbn/rison';
 
-import { Workspace } from '../types';
+import type { Workspace } from '../types';
 
 function escapeQuotes(str: string) {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');

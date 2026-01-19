@@ -37,8 +37,9 @@ describe('EventLoopDelaysMonitor', () => {
     expect(eventLoopDelaysMonitor['loopMonitor'].enable).toBeCalledTimes(2);
     expect(eventLoopDelaysMonitor['loopMonitor'].percentile).toHaveBeenNthCalledWith(1, 50);
     expect(eventLoopDelaysMonitor['loopMonitor'].percentile).toHaveBeenNthCalledWith(2, 75);
-    expect(eventLoopDelaysMonitor['loopMonitor'].percentile).toHaveBeenNthCalledWith(3, 95);
-    expect(eventLoopDelaysMonitor['loopMonitor'].percentile).toHaveBeenNthCalledWith(4, 99);
+    expect(eventLoopDelaysMonitor['loopMonitor'].percentile).toHaveBeenNthCalledWith(3, 90);
+    expect(eventLoopDelaysMonitor['loopMonitor'].percentile).toHaveBeenNthCalledWith(4, 95);
+    expect(eventLoopDelaysMonitor['loopMonitor'].percentile).toHaveBeenNthCalledWith(5, 99);
 
     // mocked perf_hook returns `mocked.createNsHistogram()` that returns data in ns.
     // The `collect` function returns the data in ms.
@@ -52,6 +53,7 @@ describe('EventLoopDelaysMonitor', () => {
     expect(histogramData.exceeds).toEqual(nsToMs(mockedHistogram.exceeds));
     expect(histogramData.percentiles['50']).toEqual(nsToMs(mockedHistogram.percentiles['50']));
     expect(histogramData.percentiles['75']).toEqual(nsToMs(mockedHistogram.percentiles['75']));
+    expect(histogramData.percentiles['90']).toEqual(nsToMs(mockedHistogram.percentiles['90']));
     expect(histogramData.percentiles['95']).toEqual(nsToMs(mockedHistogram.percentiles['95']));
     expect(histogramData.percentiles['99']).toEqual(nsToMs(mockedHistogram.percentiles['99']));
   });

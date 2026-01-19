@@ -8,29 +8,22 @@
  */
 
 import React from 'react';
-import { ColorStop } from '@kbn/coloring';
+import type { ColorStop } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { DatatableColumn, DatatableColumnMeta, DatatableRow } from '@kbn/expressions-plugin/common';
+import type {
+  DatatableColumn,
+  DatatableColumnMeta,
+  DatatableRow,
+} from '@kbn/expressions-plugin/common';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import {
-  GaugeRenderProps,
-  GaugeArguments,
-  GaugeLabelMajorModes,
-  GaugeTicksPositions,
-  GaugeColorModes,
-} from '../../common';
+import type { GaugeRenderProps, GaugeArguments } from '../../common';
+import { GaugeLabelMajorModes, GaugeTicksPositions, GaugeColorModes } from '../../common';
 import GaugeComponent from './gauge_component';
-import {
-  Chart,
-  Bullet,
-  Settings,
-  BulletProps,
-  ColorBandSimpleConfig,
-  Color,
-} from '@elastic/charts';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { BulletProps, ColorBandSimpleConfig, Color } from '@elastic/charts';
+import { Chart, Bullet, Settings } from '@elastic/charts';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 
 const numberColumn = (id = 'metric-accessor'): DatatableColumn => ({
   id,
@@ -240,7 +233,7 @@ describe('GaugeComponent', function () {
       const datum = bullet.prop<BulletProps['data']>('data')[0]?.[0];
       expect((datum?.ticks as () => number[])?.()).toEqual([0, 1, 2, 3, 4, 10]);
       const colorBands = bullet.prop<Color[]>('colorBands');
-      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
+      expect(colorBands).toEqual(['#CAD3E2', '#CAD3E2']);
     });
     it('sets proper color bands if palette steps are smaller than minimum', () => {
       const palette = {
@@ -268,7 +261,7 @@ describe('GaugeComponent', function () {
       } as GaugeRenderProps;
       const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
       const colorBands = bullet.prop<Color[]>('colorBands');
-      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
+      expect(colorBands).toEqual(['#CAD3E2', '#CAD3E2']);
     });
     it('sets proper color bands if percent palette steps are smaller than 0', () => {
       const palette = {
@@ -296,7 +289,7 @@ describe('GaugeComponent', function () {
       } as GaugeRenderProps;
       const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
       const colorBands = bullet.prop<Color[]>('colorBands');
-      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
+      expect(colorBands).toEqual(['#CAD3E2', '#CAD3E2']);
     });
     it('doesnt set bands for values differing <10%', () => {
       const palette = {
@@ -324,7 +317,7 @@ describe('GaugeComponent', function () {
       } as GaugeRenderProps;
       const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
       const colorBands = bullet.prop<Color[]>('colorBands');
-      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
+      expect(colorBands).toEqual(['#CAD3E2', '#CAD3E2']);
     });
     it('sets proper color bands for values greater than maximum', () => {
       const palette = {
@@ -352,7 +345,7 @@ describe('GaugeComponent', function () {
       } as GaugeRenderProps;
       const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
       const colorBands = bullet.prop<Color[]>('colorBands');
-      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
+      expect(colorBands).toEqual(['#CAD3E2', '#CAD3E2']);
     });
     it('passes number bands from color palette with no stops defined', () => {
       const palette = {

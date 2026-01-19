@@ -10,3 +10,17 @@ import { i18n } from '@kbn/i18n';
 export const PREVIEW = i18n.translate('xpack.cases.markdownEditor.preview', {
   defaultMessage: 'Preview',
 });
+
+export const NO_SIMULTANEOUS_UPLOADS_MESSAGE = i18n.translate(
+  'xpack.cases.markdownEditor.noSimultaneousUploads.message',
+  {
+    defaultMessage: 'Simultaneous file uploads are not supported.',
+  }
+);
+
+export const UNSUPPORTED_MIME_TYPE_MESSAGE = i18n.translate(
+  'xpack.cases.markdownEditor.unsupportedMimeType.message',
+  {
+    defaultMessage: 'Only PNG and JPG images are supported.',
+  }
+);

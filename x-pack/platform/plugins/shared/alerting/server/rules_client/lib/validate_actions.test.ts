@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { validateActions, ValidateActionsData } from './validate_actions';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { AlertsFilter, RecoveredActionGroup, RuleAction, RuleNotifyWhen } from '../../../common';
-import { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '..';
+import type { ValidateActionsData } from './validate_actions';
+import { validateActions } from './validate_actions';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { AlertsFilter, RuleAction } from '../../../common';
+import { RecoveredActionGroup, RuleNotifyWhen } from '../../../common';
+import type { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '..';
 
 describe('validateActions', () => {
   const loggerErrorMock = jest.fn();
@@ -24,6 +26,7 @@ describe('validateActions', () => {
     recoveryActionGroup: RecoveredActionGroup,
     executor: jest.fn(),
     producer: 'alerts',
+    solution: 'stack',
     cancelAlertsOnRuleTimeout: true,
     ruleTaskTimeout: '5m',
     validate: {
@@ -329,6 +332,24 @@ describe('validateActions', () => {
       validateActions(context as unknown as RulesClientContext, ruleType, data, false)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"Failed to validate actions due to the following error: Endpoint security connectors cannot be used as alerting actions"'
+    );
+  });
+
+  it('should return error message if the action is configured only for workflows', async () => {
+    getBulkMock.mockResolvedValueOnce([
+      { actionTypeId: 'test.workflowsConnector', name: 'test name' },
+    ]);
+    listTypesMock.mockResolvedValueOnce([
+      {
+        id: 'test.workflowsConnector',
+        name: 'Foobar',
+        supportedFeatureIds: ['workflows'],
+      },
+    ]);
+    await expect(
+      validateActions(context as unknown as RulesClientContext, ruleType, data, false)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Failed to validate actions due to the following error: This type of connector cannot be used as alerting actions"'
     );
   });
 });

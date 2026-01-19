@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiIconTip } from '@elastic/eui';
 import type { AuditMessageBase } from '../../../common/types/messages';
 
 interface Props {
@@ -26,7 +26,7 @@ export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
   let icon = 'warning';
 
   if (message.level === INFO) {
-    icon = 'iInCircle';
+    icon = 'info';
   } else if (message.level === WARNING) {
     color = 'warning';
   } else if (message.level === ERROR) {
@@ -34,11 +34,7 @@ export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
   }
 
   if (showTooltip) {
-    return (
-      <EuiToolTip position="bottom" content={message.text}>
-        <EuiIcon type={icon} color={color} />
-      </EuiToolTip>
-    );
+    return <EuiIconTip position="bottom" content={message.text} type={icon} color={color} />;
   } else {
     return <EuiIcon type={icon} color={color} />;
   }

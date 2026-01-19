@@ -6,7 +6,7 @@
  */
 
 import { mergeProjection } from '../../../common/utils/merge_projection';
-import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { PERCENTILE_DEFAULT } from './core_web_vitals_query';
 import { getRumPageLoadTransactionsProjection } from './projections';
 
@@ -30,34 +30,32 @@ export function longTaskMetricsQuery(
   });
 
   const params = mergeProjection(projection, {
-    body: {
-      size: 0,
-      aggs: {
-        longTaskSum: {
-          percentiles: {
-            field: LONG_TASK_SUM_FIELD,
-            percents: [percentile],
-            hdr: {
-              number_of_significant_value_digits: 3,
-            },
+    size: 0,
+    aggs: {
+      longTaskSum: {
+        percentiles: {
+          field: LONG_TASK_SUM_FIELD,
+          percents: [percentile],
+          hdr: {
+            number_of_significant_value_digits: 3,
           },
         },
-        longTaskCount: {
-          percentiles: {
-            field: LONG_TASK_COUNT_FIELD,
-            percents: [percentile],
-            hdr: {
-              number_of_significant_value_digits: 3,
-            },
+      },
+      longTaskCount: {
+        percentiles: {
+          field: LONG_TASK_COUNT_FIELD,
+          percents: [percentile],
+          hdr: {
+            number_of_significant_value_digits: 3,
           },
         },
-        longTaskMax: {
-          percentiles: {
-            field: LONG_TASK_MAX_FIELD,
-            percents: [percentile],
-            hdr: {
-              number_of_significant_value_digits: 3,
-            },
+      },
+      longTaskMax: {
+        percentiles: {
+          field: LONG_TASK_MAX_FIELD,
+          percents: [percentile],
+          hdr: {
+            number_of_significant_value_digits: 3,
           },
         },
       },

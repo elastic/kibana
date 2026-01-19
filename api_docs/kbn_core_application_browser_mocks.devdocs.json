@@ -38,7 +38,9 @@
           "ScopedHistory",
           "<unknown>"
         ],
-        "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
+        "path": "src/core/packages/application/browser-mocks/src/scoped_history.mock.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52,7 +54,9 @@
         "tags": [],
         "label": "applicationServiceMock",
         "description": [],
-        "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+        "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts",
+        "lineNumber": 126,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +70,9 @@
             "signature": [
               "() => jest.Mocked<ApplicationServiceContract>"
             ],
-            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -84,7 +90,9 @@
               "ApplicationSetup",
               ">"
             ],
-            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -102,7 +110,9 @@
               "ApplicationStart",
               ">"
             ],
-            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -120,7 +130,9 @@
               "InternalApplicationSetup",
               ">"
             ],
-            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -138,7 +150,9 @@
               "InternalApplicationStart",
               ">"
             ],
-            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -153,7 +167,9 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+                "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts",
+                "lineNumber": 84,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -173,7 +189,9 @@
               "AppMountParameters",
               "<unknown>"
             ],
-            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -198,7 +216,9 @@
                   "CoreTheme",
                   "> | undefined; }"
                 ],
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+                "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts",
+                "lineNumber": 106,
+                "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -214,7 +234,9 @@
         "tags": [],
         "label": "scopedHistoryMock",
         "description": [],
-        "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
+        "path": "src/core/packages/application/browser-mocks/src/scoped_history.mock.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -229,15 +251,11 @@
               "({ pathname, search, hash, key, state, }?: Partial<",
               "Location",
               "<unknown>>) => ",
-              {
-                "pluginId": "@kbn/core-application-browser-mocks",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserMocksPluginApi",
-                "section": "def-public.ScopedHistoryMock",
-                "text": "ScopedHistoryMock"
-              }
+              "ScopedHistoryMock"
             ],
-            "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
+            "path": "src/core/packages/application/browser-mocks/src/scoped_history.mock.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -252,7 +270,9 @@
                 "signature": [
                   "{ pathname?: string | undefined; search?: string | undefined; state?: unknown; hash?: string | undefined; key?: string | undefined; }"
                 ],
-                "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
+                "path": "src/core/packages/application/browser-mocks/src/scoped_history.mock.ts",
+                "lineNumber": 16,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false
               }

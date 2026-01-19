@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
+import type { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
 
 type MockInstances<T extends Record<string, any>> = {
   [K in keyof T]: T[K] extends (...args: infer TArgs) => infer TReturn
@@ -31,7 +31,7 @@ export const createRuleDataClientMock = (
     indexName,
     kibanaVersion: '7.16.0',
     isWriteEnabled: jest.fn(() => true),
-    indexNameWithNamespace: jest.fn((namespace: string) => indexName + namespace),
+    indexNameWithNamespace: jest.fn((namespace: string) => `${indexName}-${namespace}`),
 
     // @ts-ignore 4.3.5 upgrade
     getReader: jest.fn((_options?: { namespace?: string }) => ({

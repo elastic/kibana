@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, ElasticsearchServiceStart } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { UpgradeAssistantTelemetry } from '../../../common/types';
+import type { ElasticsearchClient, ElasticsearchServiceStart } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UpgradeAssistantTelemetry } from '../../../common/types';
 import {
   isDeprecationLogIndexingEnabled,
   isDeprecationLoggingEnabled,

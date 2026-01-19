@@ -6,24 +6,29 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest } from '@kbn/core/server';
-import { JsonObject } from '@kbn/utility-types';
-import { KueryNode } from '@kbn/es-query';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { Space } from '@kbn/spaces-plugin/server';
-import { RegistryRuleType } from '../rule_type_registry';
-import { RuleTypeRegistry } from '../types';
-import {
-  asFiltersByRuleTypeAndConsumer,
-  asFiltersBySpaceId,
-  AlertingAuthorizationFilterOpts,
-} from './alerting_authorization_kuery';
-import { ReadOperations, WriteOperations, AlertingAuthorizationEntity } from './types';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { JsonObject } from '@kbn/utility-types';
+import type { KueryNode } from '@kbn/es-query';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { Space } from '@kbn/spaces-plugin/server';
+import type { RegistryRuleType } from '../rule_type_registry';
+import type { RuleTypeRegistry } from '../types';
+import type { AlertingAuthorizationFilterOpts } from './alerting_authorization_kuery';
+import { asFiltersByRuleTypeAndConsumer, asFiltersBySpaceId } from './alerting_authorization_kuery';
+import type { AlertingAuthorizationEntity } from './types';
+import { ReadOperations, WriteOperations } from './types';
 
 export interface EnsureAuthorizedOpts {
   ruleTypeId: string;
   consumer: string;
+  operation: ReadOperations | WriteOperations;
+  entity: AlertingAuthorizationEntity;
+  additionalPrivileges?: string[];
+}
+
+export interface BulkEnsureAuthorizedOpts {
+  ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>;
   operation: ReadOperations | WriteOperations;
   entity: AlertingAuthorizationEntity;
   additionalPrivileges?: string[];
@@ -238,20 +243,56 @@ export class AlertingAuthorization {
     entity,
     additionalPrivileges = [],
   }: EnsureAuthorizedOpts) {
+    return this._ensureAuthorized({
+      ruleTypeIdConsumersPairs: [{ ruleTypeId, consumers: [consumer] }],
+      operation,
+      entity,
+      additionalPrivileges,
+    });
+  }
+
+  public async bulkEnsureAuthorized({
+    ruleTypeIdConsumersPairs,
+    operation,
+    entity,
+    additionalPrivileges = [],
+  }: BulkEnsureAuthorizedOpts) {
+    return this._ensureAuthorized({
+      ruleTypeIdConsumersPairs,
+      operation,
+      entity,
+      additionalPrivileges,
+    });
+  }
+
+  private async _ensureAuthorized({
+    ruleTypeIdConsumersPairs,
+    operation,
+    entity,
+    additionalPrivileges = [],
+  }: BulkEnsureAuthorizedOpts) {
     const { authorization } = this;
 
-    const isAvailableConsumer = this.allRegisteredConsumers.has(consumer);
+    const areAllConsumersAvailable = ruleTypeIdConsumersPairs.every(({ consumers }) =>
+      consumers.every((consumer) => this.allRegisteredConsumers.has(consumer))
+    );
+
     if (authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
 
-      const { hasAllRequested } = await checkPrivileges({
-        kibana: [
-          authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation),
-          ...additionalPrivileges,
-        ],
+      const privileges = ruleTypeIdConsumersPairs.flatMap(({ ruleTypeId, consumers }) =>
+        consumers.map((consumer) =>
+          authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation)
+        )
+      );
+
+      const res = await checkPrivileges({
+        kibana: [...privileges, ...additionalPrivileges],
       });
 
-      if (!isAvailableConsumer) {
+      const { hasAllRequested } = res;
+
+      if (!areAllConsumersAvailable) {
         /**
          * Under most circumstances this would have been caught by `checkPrivileges` as
          * a user can't have Privileges to an unknown consumer, but super users
@@ -259,14 +300,14 @@ export class AlertingAuthorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
+        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeIdConsumersPairs, operation, entity));
       }
 
       if (!hasAllRequested) {
-        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
+        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeIdConsumersPairs, operation, entity));
       }
-    } else if (!isAvailableConsumer) {
-      throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
+    } else if (!areAllConsumersAvailable) {
+      throw Boom.forbidden(getUnauthorizedMessage(ruleTypeIdConsumersPairs, operation, entity));
     }
   }
 
@@ -318,7 +359,11 @@ export class AlertingAuthorization {
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypes.has(ruleTypeId) || authType !== params.authorizationEntity) {
             throw Boom.forbidden(
-              getUnauthorizedMessage(ruleTypeId, consumer, params.operation, authType)
+              getUnauthorizedMessage(
+                [{ ruleTypeId, consumers: [consumer] }],
+                params.operation,
+                authType
+              )
             );
           }
 
@@ -328,8 +373,7 @@ export class AlertingAuthorization {
           if (!authorizedConsumers[consumer]) {
             throw Boom.forbidden(
               getUnauthorizedMessage(
-                ruleTypeId,
-                consumer,
+                [{ ruleTypeId, consumers: [consumer] }],
                 params.operation,
                 params.authorizationEntity
               )
@@ -498,10 +542,15 @@ function getConsumersWithPrivileges(
 }
 
 function getUnauthorizedMessage(
-  ruleTypeId: string,
-  scope: string,
+  ruleTypeIdConsumersPairs: BulkEnsureAuthorizedOpts['ruleTypeIdConsumersPairs'],
   operation: string,
   entity: string
 ): string {
-  return `Unauthorized by "${scope}" to ${operation} "${ruleTypeId}" ${entity}`;
+  const allConsumers = ruleTypeIdConsumersPairs.flatMap(({ consumers }) => consumers);
+  const allRuleTypeIds = ruleTypeIdConsumersPairs.map(({ ruleTypeId }) => ruleTypeId);
+
+  const ruleTypeIdsMessage = allRuleTypeIds.length <= 0 ? 'any' : `${allRuleTypeIds.join(', ')}`;
+  const consumersMessage = allConsumers.length <= 0 ? 'any consumer' : `${allConsumers.join(', ')}`;
+
+  return `Unauthorized by "${consumersMessage}" to ${operation} "${ruleTypeIdsMessage}" ${entity}`;
 }

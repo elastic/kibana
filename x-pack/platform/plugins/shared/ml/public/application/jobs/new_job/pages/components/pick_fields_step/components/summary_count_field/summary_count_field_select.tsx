@@ -21,9 +21,15 @@ interface Props {
   fields: Field[];
   changeHandler(i: string | null): void;
   selectedField: string | null;
+  titleId: string;
 }
 
-export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const SummaryCountFieldSelect: FC<Props> = ({
+  fields,
+  changeHandler,
+  selectedField,
+  titleId,
+}) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const { optionCss } = useFieldStatsTrigger();
 
@@ -54,6 +60,7 @@ export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, sele
       onChange={onChange}
       isClearable={true}
       data-test-subj="mlSummaryCountFieldNameSelect"
+      titleId={titleId}
     />
   );
 };

@@ -8,15 +8,15 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { AsyncStatus } from '../../../hooks/use_async';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
@@ -27,9 +27,10 @@ import { HostBreakdownChart } from './host_breakdown_chart';
 
 interface Props {
   hasDistinctProbabilisticValues: boolean;
+  onReady: () => void;
 }
 
-export function HostBreakdown({ hasDistinctProbabilisticValues }: Props) {
+export function HostBreakdown({ hasDistinctProbabilisticValues, onReady }: Props) {
   const { query } = useProfilingParams('/storage-explorer');
   const { rangeFrom, rangeTo, kuery, indexLifecyclePhase } = query;
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -56,6 +57,12 @@ export function HostBreakdown({ hasDistinctProbabilisticValues }: Props) {
     ]
   );
 
+  useEffect(() => {
+    if (storageExplorerHostDetailsState.status === AsyncStatus.Settled) {
+      onReady();
+    }
+  }, [storageExplorerHostDetailsState.status, onReady]);
+
   return (
     <>
       <EuiTitle>
@@ -63,14 +70,16 @@ export function HostBreakdown({ hasDistinctProbabilisticValues }: Props) {
           {i18n.translate('xpack.profiling.storageExplorer.hostBreakdown.title', {
             defaultMessage: 'Host agent breakdown',
           })}
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate('xpack.profiling.storageExplorer.hostBreakdown.title.hint', {
               defaultMessage:
                 'This graph shows the combined values of Universal Profiling samples and metrics. host.name[host.id].',
             })}
-          >
-            <EuiIcon type="questionInCircle" style={{ marginLeft: 4 }} />
-          </EuiToolTip>
+            type="question"
+            iconProps={{
+              style: { marginLeft: 4 },
+            }}
+          />
         </EuiText>
       </EuiTitle>
       <EuiSpacer />

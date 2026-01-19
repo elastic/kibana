@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import { isEmpty, without } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -227,7 +227,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
             <EuiFlexItem grow={false}>
               <EuiButton
                 className="eui-textTruncate"
-                style={{ maxWidth: '300px' }}
+                css={{ maxWidth: '300px' }}
                 data-test-subj="artifacts-assign-confirm-button"
                 fill
                 onClick={handleOnConfirmAction}

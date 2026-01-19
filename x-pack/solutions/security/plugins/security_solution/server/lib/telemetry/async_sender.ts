@@ -21,7 +21,7 @@ import { type Nullable, TelemetryChannel, TelemetryCounter } from './types';
 import * as collections from './collections_helpers';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
-import { copyLicenseFields, newTelemetryLogger } from './helpers';
+import { copyLicenseFields, newTelemetryLogger, withErrorMessage } from './helpers';
 import { type TelemetryLogger } from './telemetry_logger';
 
 export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
@@ -69,7 +69,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
     telemetryUsageCounter?: IUsageCounter,
     analytics?: AnalyticsServiceSetup
   ): void {
-    this.logger.l(`Setting up ${AsyncTelemetryEventsSender.name}`);
+    this.logger.debug('Setting up service');
 
     this.ensureStatus(ServiceStatus.CREATED);
 
@@ -86,7 +86,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   }
 
   public start(telemetryStart?: TelemetryPluginStart): void {
-    this.logger.l(`Starting ${AsyncTelemetryEventsSender.name}`);
+    this.logger.debug('Starting service');
 
     this.ensureStatus(ServiceStatus.CONFIGURED);
 
@@ -113,7 +113,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
             this.logger.warn('Failure! Unable to send events to channel', {
               events: result.events,
               channel: result.channel,
-              error: result.message,
+              error_message: result.message,
             } as LogMeta);
             this.senderUtils?.incrementCounter(
               TelemetryCounter.DOCS_LOST,
@@ -132,13 +132,11 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
             );
           }
         },
-        error: (err) => {
-          this.logger.warn('Unexpected error sending events to channel', {
-            error: JSON.stringify(err),
-          } as LogMeta);
+        error: (error) => {
+          this.logger.warn('Unexpected error sending events to channel', withErrorMessage(error));
         },
         complete: () => {
-          this.logger.l('Shutting down');
+          this.logger.debug('Shutting down');
           this.finished$.next();
         },
       });
@@ -148,7 +146,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   }
 
   public async stop(): Promise<void> {
-    this.logger.l(`Stopping ${AsyncTelemetryEventsSender.name}`);
+    this.logger.debug('Stopping service');
 
     this.ensureStatus(ServiceStatus.CONFIGURED, ServiceStatus.STARTED);
 
@@ -231,9 +229,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
         if (inflightEventsCounter < this.getConfigFor(channel).inflightEventsThreshold) {
           return rx.of(event);
         }
-        this.logger.l(
-          `>> Dropping event ${event} (channel: ${channel}, inflightEventsCounter: ${inflightEventsCounter})`
-        );
+        this.logger.debug('Dropping event', { event, channel, inflightEventsCounter } as LogMeta);
         this.senderUtils?.incrementCounter(TelemetryCounter.DOCS_DROPPED, 1, channel);
 
         return rx.EMPTY;
@@ -370,23 +366,21 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           if (r.status < 400) {
             return { events: events.length, channel };
           } else {
-            this.logger.l('Unexpected response', {
+            this.logger.warn('Unexpected response', {
               status: r.status,
             } as LogMeta);
             throw newFailure(`Got ${r.status}`, channel, events.length);
           }
         })
-        .catch((err) => {
+        .catch((error) => {
           this.senderUtils?.incrementCounter(
             TelemetryCounter.RUNTIME_ERROR,
             events.length,
             channel
           );
 
-          this.logger.warn('Runtime error', {
-            error: err.message,
-          } as LogMeta);
-          throw newFailure(`Error posting events: ${err}`, channel, events.length);
+          this.logger.warn('Runtime error', withErrorMessage(error));
+          throw newFailure(`Error posting events: ${error}`, channel, events.length);
         });
     } catch (err: unknown) {
       if (isFailure(err)) {

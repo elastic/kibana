@@ -13,3 +13,17 @@ export const ATTACK_DISCOVERY_SETTINGS = i18n.translate(
     defaultMessage: 'Attack discovery settings',
   }
 );
+
+export const ATTACK_DISCOVERY_SCHEDULE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.attackDiscoveryScheduleTitle',
+  {
+    defaultMessage: 'Attack discovery schedule',
+  }
+);
+
+export const CANCEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.cancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);

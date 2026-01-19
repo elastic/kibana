@@ -3,7 +3,6 @@
 exports[`FeedItem render 1`] = `
 <section
   aria-labelledby="kbnOverviewNews__title"
-  className="kbnOverviewNews"
 >
   <EuiTitle
     size="s"
@@ -21,7 +20,7 @@ exports[`FeedItem render 1`] = `
     size="m"
   />
   <div
-    className="kbnOverviewNews__content"
+    css="unknown styles"
   >
     <article
       aria-labelledby="kbnOverviewNews__title0"

@@ -18,9 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { isNil } from 'lodash';
-import { Comparator } from '@kbn/alerting-comparators';
+import type { Comparator } from '@kbn/alerting-comparators';
 import { builtInComparators } from '../constants';
-import { IErrorObject } from '../../types';
+import type { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 
 export interface ThresholdExpressionProps {
@@ -138,6 +138,10 @@ export const ThresholdExpression = ({
               options={Object.values(comparators).map(({ text, value }) => {
                 return { text, value };
               })}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.common.expressionItems.threshold.comparatorAriaLabel',
+                { defaultMessage: 'Threshold comparator' }
+              )}
             />
           </EuiFlexItem>
           {Array.from(Array(numRequiredThresholds)).map((_notUsed, i) => {

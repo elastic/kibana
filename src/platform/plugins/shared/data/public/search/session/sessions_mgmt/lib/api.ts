@@ -8,116 +8,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import type { ApplicationStart, FeatureFlagsStart, NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
-import { ACTION } from '../components/actions';
-import {
-  PersistedSearchSessionSavedObjectAttributes,
-  UISearchSessionState,
-  UISession,
-} from '../types';
-import { ISessionsClient } from '../../sessions_client';
-import { SearchUsageCollector } from '../../../collectors';
-import { SearchSessionsFindResponse, SearchSessionStatus } from '../../../../../common';
+import type { SearchSessionStatusResponse } from '../../../../../common';
+import type { SearchSessionSavedObject } from '../types';
+import type { ISessionsClient } from '../../sessions_client';
+import type { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
-type LocatorsStart = SharePluginStart['url']['locators'];
-
-interface SearchSessionSavedObject {
-  id: string;
-  attributes: PersistedSearchSessionSavedObjectAttributes;
-}
-
-function getActions(status: UISearchSessionState) {
-  const actions: ACTION[] = [];
-  actions.push(ACTION.INSPECT);
-  actions.push(ACTION.RENAME);
-  if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
-    actions.push(ACTION.EXTEND);
-    actions.push(ACTION.DELETE);
-  }
-
-  if (
-    status === SearchSessionStatus.EXPIRED ||
-    status === SearchSessionStatus.ERROR ||
-    status === SearchSessionStatus.CANCELLED
-  ) {
-    actions.push(ACTION.DELETE);
-  }
-
-  return actions;
-}
-
-function getUrlFromState(locators: LocatorsStart, locatorId: string, state: SerializableRecord) {
-  try {
-    const locator = locators.get(locatorId);
-    return locator?.getRedirectUrl(state);
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('Could not create URL from restoreState');
-    // eslint-disable-next-line no-console
-    console.error(err);
-  }
-}
-
-// Helper: factory for a function to map server objects to UI objects
-const mapToUISession =
-  (
-    locators: LocatorsStart,
-    config: SearchSessionsConfigSchema,
-    sessionStatuses: SearchSessionsFindResponse['statuses']
-  ) =>
-  async (savedObject: SearchSessionSavedObject): Promise<UISession> => {
-    const {
-      name,
-      appId,
-      created,
-      expires,
-      locatorId,
-      initialState,
-      restoreState,
-      idMapping,
-      version,
-    } = savedObject.attributes;
-
-    const status = sessionStatuses[savedObject.id]?.status;
-    const errors = sessionStatuses[savedObject.id]?.errors;
-    const actions = getActions(status);
-
-    // TODO: initialState should be saved without the searchSessionID
-    if (initialState) delete initialState.searchSessionId;
-    // derive the URL and add it in
-    const reloadUrl = await getUrlFromState(locators, locatorId, initialState);
-    const restoreUrl = await getUrlFromState(locators, locatorId, restoreState);
-
-    return {
-      id: savedObject.id,
-      name,
-      appId,
-      created,
-      expires,
-      status,
-      actions,
-      restoreUrl: restoreUrl!,
-      reloadUrl: reloadUrl!,
-      initialState,
-      restoreState,
-      idMapping,
-      numSearches: Object.keys(idMapping).length,
-      version,
-      errors,
-    };
-  };
-
 interface SearchSessionManagementDeps {
-  locators: LocatorsStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
   usageCollector?: SearchUsageCollector;
+  featureFlags: FeatureFlagsStart;
+}
+
+interface FetchReturn {
+  savedObjects: SearchSessionSavedObject[];
+  statuses: Record<string, SearchSessionStatusResponse>;
 }
 
 export class SearchSessionsMgmtAPI {
@@ -127,7 +37,7 @@ export class SearchSessionsMgmtAPI {
     private deps: SearchSessionManagementDeps
   ) {}
 
-  public async fetchTableData(): Promise<UISession[]> {
+  public async fetchTableData({ appId }: { appId?: string } = {}): Promise<FetchReturn> {
     const mgmtConfig = this.config.management;
 
     const refreshTimeout = moment.duration(mgmtConfig.refreshTimeout);
@@ -143,8 +53,8 @@ export class SearchSessionsMgmtAPI {
     const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(
       tap(() => {
         this.deps.notifications.toasts.addDanger(
-          i18n.translate('data.mgmt.searchSessions.api.fetchTimeout', {
-            defaultMessage: 'Fetching the Search Session info timed out after {timeout} seconds',
+          i18n.translate('data.mgmt.searchSessions.api.backgroundSearchFetchTimeout', {
+            defaultMessage: 'Fetching the Background Search info timed out after {timeout} seconds',
             values: { timeout: refreshTimeout.asSeconds() },
           })
         );
@@ -156,10 +66,13 @@ export class SearchSessionsMgmtAPI {
     try {
       const result = await race(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
-        const savedObjects = result.saved_objects as SearchSessionSavedObject[];
-        return await Promise.all(
-          savedObjects.map(mapToUISession(this.deps.locators, this.config, result.statuses))
-        );
+        return {
+          savedObjects: result.saved_objects.filter((object) => {
+            if (!appId) return true;
+            return object.attributes.appId === appId;
+          }) as SearchSessionSavedObject[],
+          statuses: result.statuses,
+        };
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -171,7 +84,10 @@ export class SearchSessionsMgmtAPI {
       });
     }
 
-    return [];
+    return {
+      savedObjects: [],
+      statuses: {},
+    };
   }
 
   public getExtendByDuration() {
@@ -185,14 +101,14 @@ export class SearchSessionsMgmtAPI {
       await this.sessionsClient.delete(id);
 
       this.deps.notifications.toasts.addSuccess({
-        title: i18n.translate('data.mgmt.searchSessions.api.deleted', {
-          defaultMessage: 'The search session was deleted.',
+        title: i18n.translate('data.mgmt.searchSessions.api.backgroundSearchDeleted', {
+          defaultMessage: 'The background search was deleted.',
         }),
       });
     } catch (err) {
       this.deps.notifications.toasts.addError(err, {
-        title: i18n.translate('data.mgmt.searchSessions.api.deletedError', {
-          defaultMessage: 'Failed to delete the search session!',
+        title: i18n.translate('data.mgmt.searchSessions.api.backgroundSearchDeletedError', {
+          defaultMessage: 'Failed to delete the background search!',
         }),
       });
     }
@@ -205,14 +121,14 @@ export class SearchSessionsMgmtAPI {
       await this.sessionsClient.extend(id, expires);
 
       this.deps.notifications.toasts.addSuccess({
-        title: i18n.translate('data.mgmt.searchSessions.api.extended', {
-          defaultMessage: 'The search session was extended.',
+        title: i18n.translate('data.mgmt.searchSessions.api.backgroundSearchExtended', {
+          defaultMessage: 'The background search was extended.',
         }),
       });
     } catch (err) {
       this.deps.notifications.toasts.addError(err, {
-        title: i18n.translate('data.mgmt.searchSessions.api.extendError', {
-          defaultMessage: 'Failed to extend the search session!',
+        title: i18n.translate('data.mgmt.searchSessions.api.backgroundSearchExtendError', {
+          defaultMessage: 'Failed to extend the background search!',
         }),
       });
     }
@@ -224,14 +140,14 @@ export class SearchSessionsMgmtAPI {
       await this.sessionsClient.rename(id, newName);
 
       this.deps.notifications.toasts.addSuccess({
-        title: i18n.translate('data.mgmt.searchSessions.api.rename', {
-          defaultMessage: 'The search session was renamed',
+        title: i18n.translate('data.mgmt.searchSessions.api.backgroundSearchRename', {
+          defaultMessage: 'The background search was renamed',
         }),
       });
     } catch (err) {
       this.deps.notifications.toasts.addError(err, {
-        title: i18n.translate('data.mgmt.searchSessions.api.renameError', {
-          defaultMessage: 'Failed to rename the search session',
+        title: i18n.translate('data.mgmt.searchSessions.api.backgroundSearchRenameError', {
+          defaultMessage: 'Failed to rename the background search',
         }),
       });
     }

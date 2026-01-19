@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Index } from '../../../public';
+import type { Index } from '../../../public';
 
 export const testIndexName = 'test_index';
 export const testIndexMock: Index = {
@@ -115,5 +115,11 @@ export const testIndexStats = {
         deleted: 0,
       },
     },
+  },
+};
+
+export const testUserStartPrivilegesResponse = {
+  privileges: {
+    canManageIndex: true,
   },
 };

@@ -37,7 +37,9 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "lineNumber": 140,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -64,7 +66,9 @@
           },
           ">"
         ],
-        "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "lineNumber": 136,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -80,7 +84,9 @@
         "tags": [],
         "label": "AvailableConnector",
         "description": [],
-        "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,7 +97,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -102,7 +110,9 @@
             "tags": [],
             "label": "actionTypeId",
             "description": [],
-            "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -116,7 +126,9 @@
             "signature": [
               "{ [x: string]: unknown; }"
             ],
-            "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -128,9 +140,11 @@
             "label": "secrets",
             "description": [],
             "signature": [
-              "{ [x: string]: unknown; }"
+              "Record<string, unknown> | undefined"
             ],
-            "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -161,7 +175,9 @@
             "text": "AvailableConnector"
           }
         ],
-        "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -172,7 +188,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -194,7 +212,9 @@
         "signature": [
           "\"KIBANA_TESTING_AI_CONNECTORS\""
         ],
-        "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

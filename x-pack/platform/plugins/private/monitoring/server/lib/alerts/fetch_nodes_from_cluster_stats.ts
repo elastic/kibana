@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from '@kbn/core/server';
-import { AlertCluster, AlertClusterStatsNodes } from '../../../common/types/alerts';
-import { ElasticsearchSource } from '../../../common/types/es';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AlertCluster, AlertClusterStatsNodes } from '../../../common/types/alerts';
+import type { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
@@ -41,56 +41,54 @@ export async function fetchNodesFromClusterStats(
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations.clusters.buckets'],
-    body: {
-      size: 0,
-      sort: [
-        {
-          timestamp: {
-            order: 'desc' as const,
-            unmapped_type: 'long' as const,
-          },
-        },
-      ],
-      query: {
-        bool: {
-          filter: [
-            createDatasetFilter(
-              'cluster_stats',
-              'cluster_stats',
-              getElasticsearchDataset('cluster_stats')
-            ),
-            {
-              range: {
-                timestamp: {
-                  gte: 'now-2m',
-                },
-              },
-            },
-          ],
+    size: 0,
+    sort: [
+      {
+        timestamp: {
+          order: 'desc' as const,
+          unmapped_type: 'long' as const,
         },
       },
-      aggs: {
-        clusters: {
-          terms: {
-            include: clusters.map((cluster) => cluster.clusterUuid),
-            field: 'cluster_uuid',
-          },
-          aggs: {
-            top: {
-              top_hits: {
-                sort: [
-                  {
-                    timestamp: {
-                      order: 'desc' as const,
-                      unmapped_type: 'long' as const,
-                    },
-                  },
-                ],
-                _source: {
-                  includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.state.nodes'],
-                },
-                size: 2,
+    ],
+    query: {
+      bool: {
+        filter: [
+          createDatasetFilter(
+            'cluster_stats',
+            'cluster_stats',
+            getElasticsearchDataset('cluster_stats')
+          ),
+          {
+            range: {
+              timestamp: {
+                gte: 'now-2m',
               },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      clusters: {
+        terms: {
+          include: clusters.map((cluster) => cluster.clusterUuid),
+          field: 'cluster_uuid',
+        },
+        aggs: {
+          top: {
+            top_hits: {
+              sort: [
+                {
+                  timestamp: {
+                    order: 'desc' as const,
+                    unmapped_type: 'long' as const,
+                  },
+                },
+              ],
+              _source: {
+                includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.state.nodes'],
+              },
+              size: 2,
             },
           },
         },
@@ -101,7 +99,7 @@ export async function fetchNodesFromClusterStats(
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

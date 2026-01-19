@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { toElasticsearchQuery as astToElasticsearchQuery } from './ast';
 
 /**
@@ -29,5 +29,7 @@ export {
   escapeQuotes,
   getKqlFieldNames,
   getKqlFieldNamesFromExpression,
+  getIsKqlFreeText,
+  getIsKqlFreeTextExpression,
 } from './utils';
 export type { DslQuery, KueryNode, KueryQueryOptions, KueryParseOptions } from './types';

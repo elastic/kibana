@@ -6,7 +6,6 @@
  */
 
 import { EuiHorizontalRule } from '@elastic/eui';
-
 import React from 'react';
 import type { ServiceItem } from '../../../../common/search_strategy';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -29,11 +28,8 @@ interface ServicePanelContentProps {
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
-  isDraggable: boolean;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isPreviewMode?: boolean;
-  isLinkEnabled: boolean;
 }
 
 export const ServicePanelContent = ({
@@ -43,11 +39,8 @@ export const ServicePanelContent = ({
   recalculatingScore,
   contextID,
   scopeId,
-  isDraggable,
   openDetailsPanel,
   onAssetCriticalityChange,
-  isPreviewMode,
-  isLinkEnabled,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
 
@@ -60,8 +53,7 @@ export const ServicePanelContent = ({
             recalculatingScore={recalculatingScore}
             queryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
-            isLinkEnabled={isLinkEnabled}
+            isPreviewMode={false}
             entityType={EntityType.service}
           />
           <EuiHorizontalRule />
@@ -75,7 +67,6 @@ export const ServicePanelContent = ({
         observedData={observedService}
         contextID={contextID}
         scopeId={scopeId}
-        isDraggable={isDraggable}
         observedFields={observedFields}
         queryId={OBSERVED_SERVICE_QUERY_ID}
       />

@@ -19,6 +19,7 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,7 +44,10 @@ import { SearchBox } from './search_box';
 
 const StickySidebar = styled(EuiFlexItem)`
   position: sticky;
-  top: 120px;
+  top: calc(
+    var(--kbn-application--sticky-headers-offset, 96px) +
+      ${(props) => props.theme.eui.euiSizeL /* 24px */}
+  );
 `;
 
 export interface PackageListGridProps {
@@ -75,6 +79,7 @@ export interface PackageListGridProps {
   spacer?: boolean;
   // Security Solution sends the id to determine which element to scroll when the user interacting with the package list
   scrollElementId?: string;
+  onlyAgentlessFilter?: boolean;
 }
 
 export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
@@ -94,6 +99,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   setUrlandReplaceHistory,
   setUrlandPushHistory,
   showMissingIntegrationMessage = false,
+  onlyAgentlessFilter = false,
   sortByFeaturedIntegrations = true,
   callout,
   calloutTopSpacerSize = 'l', // Default EUI spacer size
@@ -103,7 +109,8 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   spacer = true,
   scrollElementId,
 }) => {
-  const localSearchRef = useLocalSearch(list, !!isLoading);
+  const euiTheme = useEuiTheme();
+  const localSearch = useLocalSearch(list, !!isLoading);
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -119,7 +126,12 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
 
   const resetQuery = () => {
     setSearchTerm('');
-    setUrlandReplaceHistory({ searchString: '', categoryId: '', subCategoryId: '' });
+    setUrlandReplaceHistory({
+      searchString: '',
+      categoryId: '',
+      subCategoryId: '',
+      onlyAgentless: onlyAgentlessFilter,
+    });
   };
 
   const onSubCategoryClick = useCallback(
@@ -128,25 +140,28 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
       setUrlandPushHistory({
         categoryId: selectedCategory,
         subCategoryId: subCategory,
+        onlyAgentless: onlyAgentlessFilter,
       });
     },
-    [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
+    [selectedCategory, setSelectedSubCategory, setUrlandPushHistory, onlyAgentlessFilter]
   );
 
-  const filteredPromotedList = useMemo(() => {
+  const filteredPromotedList: IntegrationCardItem[] = useMemo(() => {
     if (isLoading) return [];
+
+    const searchResults =
+      (localSearch?.search(searchTerm) as IntegrationCardItem[]).map(
+        (match) => match[searchIdField]
+      ) ?? [];
+
     const filteredList = searchTerm
-      ? list.filter((item) =>
-          (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
-            .map((match) => match[searchIdField])
-            .includes(item[searchIdField])
-        )
+      ? list.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : list;
 
     return sortByFeaturedIntegrations
       ? promoteFeaturedIntegrations(filteredList, selectedCategory)
       : filteredList;
-  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
+  }, [isLoading, list, localSearch, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
   const splitSubcategories = (
     subcategories: CategoryFacet[] | undefined
   ): { visibleSubCategories?: CategoryFacet[]; hiddenSubCategories?: CategoryFacet[] } => {
@@ -194,7 +209,15 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
         </StickySidebar>
       )}
 
-      <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn" style={{ alignSelf: 'stretch' }}>
+      <EuiFlexItem
+        grow={5}
+        data-test-subj="epmList.mainColumn"
+        style={{
+          position: 'relative',
+          backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
+          alignSelf: 'stretch',
+        }}
+      >
         {showSearchTools && (
           <EuiFlexItem grow={false}>
             <SearchBox
@@ -207,11 +230,12 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
               setSelectedSubCategory={setSelectedSubCategory}
               selectedSubCategory={selectedSubCategory}
               setUrlandReplaceHistory={setUrlandReplaceHistory}
+              onlyAgentlessFilter={onlyAgentlessFilter}
             />
           </EuiFlexItem>
         )}
 
-        {availableSubCategories?.length ? <EuiSpacer /> : null}
+        {availableSubCategories?.length ? <EuiSpacer size="m" /> : null}
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
@@ -220,7 +244,8 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             direction="row"
             gutterSize="s"
             style={{
-              maxWidth: 943,
+              maxWidth: '100%',
+              flexWrap: 'wrap',
             }}
           >
             {visibleSubCategories?.map((subCategory) => {
@@ -233,6 +258,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                     fill={isSelected}
                     aria-label={subCategory?.title}
                     onClick={() => onSubCategoryClick(subCategory.id)}
+                    size="s"
                   >
                     <FormattedMessage
                       id="xpack.fleet.epmList.subcategoriesButton"
@@ -256,7 +282,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                       onClick={onButtonClick}
                       iconType="boxesHorizontal"
                       aria-label="Show more subcategories"
-                      size="m"
+                      size="s"
                     />
                   }
                   isOpen={isPopoverOpen}
@@ -276,7 +302,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {callout}
           </>
         ) : null}
-        {spacer && <EuiSpacer size="s" />}
+        {spacer && <EuiSpacer size="m" />}
         <EuiFlexItem>
           <GridColumn
             emptyStateStyles={emptyStateStyles}

@@ -13,7 +13,7 @@ import {
   getSampleDataCardMockDataSet,
 } from '@kbn/home-sample-data-card';
 
-import { SampleDataTabServices } from './services';
+import type { SampleDataTabServices } from './services';
 
 /**
  * Parameters drawn from the Storybook arguments collection that customize a component story.

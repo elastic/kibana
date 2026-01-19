@@ -14,20 +14,25 @@ import {
   openZipArchiveMock,
   validateArtifactArchiveMock,
   fetchArtifactVersionsMock,
+  fetchSecurityLabsVersionsMock,
   ensureDefaultElserDeployedMock,
 } from './package_installer.test.mocks';
-
+import { cloneDeep } from 'lodash';
+import type { ProductName } from '@kbn/product-doc-common';
 import {
   getArtifactName,
   getProductDocIndexName,
+  getSecurityLabsArtifactName,
+  getSecurityLabsIndexName,
   DocumentationProduct,
-  ProductName,
 } from '@kbn/product-doc-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { installClientMock } from '../doc_install_status/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
 import { PackageInstaller } from './package_installer';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 const artifactsFolder = '/lost';
 const artifactRepositoryUrl = 'https://repository.com';
@@ -75,6 +80,7 @@ describe('PackageInstaller', () => {
     openZipArchiveMock.mockReset();
     validateArtifactArchiveMock.mockReset();
     fetchArtifactVersionsMock.mockReset();
+    fetchSecurityLabsVersionsMock.mockReset();
     ensureDefaultElserDeployedMock.mockReset();
   });
 
@@ -85,16 +91,28 @@ describe('PackageInstaller', () => {
       };
       openZipArchiveMock.mockResolvedValue(zipArchive);
 
-      const mappings = Symbol('mappings');
-      loadMappingFileMock.mockResolvedValue(mappings);
-
-      await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
-
       const artifactName = getArtifactName({
         productName: 'kibana',
         productVersion: '8.16',
       });
+
+      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/${artifactName}`);
+
+      const mappings = {
+        properties: {
+          semantic: {
+            inference_id: '.elser',
+            type: 'semantic_text',
+            model_settings: {},
+          },
+        },
+      };
+      loadMappingFileMock.mockResolvedValue(mappings);
+
+      await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
+
       const indexName = getProductDocIndexName('kibana');
+
       expect(ensureDefaultElserDeployedMock).toHaveBeenCalledTimes(1);
 
       expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
@@ -113,9 +131,11 @@ describe('PackageInstaller', () => {
       expect(loadManifestFileMock).toHaveBeenCalledWith(zipArchive);
 
       expect(createIndexMock).toHaveBeenCalledTimes(1);
+      const modifiedMappings = cloneDeep(mappings);
+      modifiedMappings.properties.semantic.inference_id = defaultInferenceEndpoints.ELSER;
       expect(createIndexMock).toHaveBeenCalledWith({
         indexName,
-        mappings,
+        mappings: modifiedMappings,
         manifestVersion: TEST_FORMAT_VERSION,
         esClient,
         log: logger,
@@ -126,12 +146,17 @@ describe('PackageInstaller', () => {
         indexName,
         archive: zipArchive,
         manifestVersion: TEST_FORMAT_VERSION,
+        inferenceId: defaultInferenceEndpoints.ELSER,
         esClient,
         log: logger,
       });
 
       expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledTimes(1);
-      expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledWith('kibana', indexName);
+      expect(productDocClient.setInstallationSuccessful).toHaveBeenCalledWith(
+        'kibana',
+        indexName,
+        defaultInferenceEndpoints.ELSER
+      );
 
       expect(zipArchive.close).toHaveBeenCalledTimes(1);
 
@@ -163,7 +188,16 @@ describe('PackageInstaller', () => {
       });
 
       await expect(
-        packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' })
+        packageInstaller.installPackage({
+          productName: 'kibana',
+          productVersion: '8.16',
+          customInference: {
+            inference_id: defaultInferenceEndpoints.ELSER,
+            task_type: 'text_embedding' as InferenceTaskType,
+            service: 'elser',
+            service_settings: {},
+          },
+        })
       ).rejects.toThrowError();
 
       expect(productDocClient.setInstallationSuccessful).not.toHaveBeenCalled();
@@ -178,7 +212,8 @@ describe('PackageInstaller', () => {
       expect(productDocClient.setInstallationFailed).toHaveBeenCalledTimes(1);
       expect(productDocClient.setInstallationFailed).toHaveBeenCalledWith(
         'kibana',
-        'something bad'
+        'something bad',
+        defaultInferenceEndpoints.ELSER
       );
     });
   });
@@ -192,7 +227,7 @@ describe('PackageInstaller', () => {
         elasticsearch: ['8.15'],
       });
 
-      await packageInstaller.installAll({});
+      await packageInstaller.installAll({ inferenceId: defaultInferenceEndpoints.ELSER });
 
       expect(packageInstaller.installPackage).toHaveBeenCalledTimes(2);
 
@@ -223,7 +258,7 @@ describe('PackageInstaller', () => {
 
       jest.spyOn(packageInstaller, 'installPackage');
 
-      await packageInstaller.ensureUpToDate({});
+      await packageInstaller.ensureUpToDate({ inferenceId: defaultInferenceEndpoints.ELSER });
 
       expect(packageInstaller.installPackage).toHaveBeenCalledTimes(1);
       expect(packageInstaller.installPackage).toHaveBeenCalledWith({
@@ -246,22 +281,128 @@ describe('PackageInstaller', () => {
       );
 
       expect(productDocClient.setUninstalled).toHaveBeenCalledTimes(1);
-      expect(productDocClient.setUninstalled).toHaveBeenCalledWith('kibana');
+      expect(productDocClient.setUninstalled).toHaveBeenCalledWith('kibana', undefined);
     });
   });
 
   describe('uninstallAll', () => {
     it('calls uninstall for all packages', async () => {
       jest.spyOn(packageInstaller, 'uninstallPackage');
-
+      const totalProducts = Object.keys(DocumentationProduct).length;
       await packageInstaller.uninstallAll();
 
-      expect(packageInstaller.uninstallPackage).toHaveBeenCalledTimes(
-        Object.keys(DocumentationProduct).length
-      );
+      expect(productDocClient.setUninstallationStarted).toHaveBeenCalledTimes(totalProducts);
+
+      expect(packageInstaller.uninstallPackage).toHaveBeenCalledTimes(totalProducts);
       Object.values(DocumentationProduct).forEach((productName) => {
         expect(packageInstaller.uninstallPackage).toHaveBeenCalledWith({ productName });
       });
+      expect(productDocClient.setUninstalled).toHaveBeenCalledTimes(totalProducts);
+    });
+  });
+
+  describe('installSecurityLabs', () => {
+    const VERSION_OLD = '2025.12.01';
+    const VERSION_NEW = '2025.12.12';
+
+    it('downloads and installs the latest version when no version is provided', async () => {
+      const zipArchive = { close: jest.fn() };
+      openZipArchiveMock.mockResolvedValue(zipArchive);
+      fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_OLD, VERSION_NEW]);
+      downloadToDiskMock.mockResolvedValue(
+        `${artifactsFolder}/${getSecurityLabsArtifactName({ version: VERSION_NEW })}`
+      );
+
+      const mappings = {
+        properties: {
+          semantic: {
+            inference_id: '.elser',
+            type: 'semantic_text',
+            model_settings: {},
+          },
+        },
+      };
+      loadMappingFileMock.mockResolvedValue(mappings);
+      loadManifestFileMock.mockResolvedValue({ formatVersion: TEST_FORMAT_VERSION } as any);
+
+      await packageInstaller.installSecurityLabs({ inferenceId: defaultInferenceEndpoints.ELSER });
+
+      const artifactName = getSecurityLabsArtifactName({
+        version: VERSION_NEW,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+      const indexName = getSecurityLabsIndexName(defaultInferenceEndpoints.ELSER);
+
+      expect(ensureDefaultElserDeployedMock).toHaveBeenCalledTimes(1);
+
+      expect(fetchSecurityLabsVersionsMock).toHaveBeenCalledTimes(1);
+      expect(downloadToDiskMock).toHaveBeenCalledWith(
+        `${artifactRepositoryUrl}/${artifactName}`,
+        `${artifactsFolder}/${artifactName}`
+      );
+
+      // Critical: openZipArchive must use the full path returned by downloadToDisk.
+      expect(openZipArchiveMock).toHaveBeenCalledWith(`${artifactsFolder}/${artifactName}`);
+
+      expect(createIndexMock).toHaveBeenCalledTimes(1);
+      const modifiedMappings = cloneDeep(mappings);
+      modifiedMappings.properties.semantic.inference_id = defaultInferenceEndpoints.ELSER;
+      expect(createIndexMock).toHaveBeenCalledWith({
+        indexName,
+        mappings: modifiedMappings,
+        manifestVersion: TEST_FORMAT_VERSION,
+        esClient,
+        log: logger,
+      });
+
+      expect(populateIndexMock).toHaveBeenCalledTimes(1);
+      expect(populateIndexMock).toHaveBeenCalledWith({
+        indexName,
+        archive: zipArchive,
+        manifestVersion: TEST_FORMAT_VERSION,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+        esClient,
+        log: logger,
+      });
+
+      expect(productDocClient.setSecurityLabsInstallationStarted).toHaveBeenCalledWith({
+        version: VERSION_NEW,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+      expect(productDocClient.setSecurityLabsInstallationSuccessful).toHaveBeenCalledWith({
+        version: VERSION_NEW,
+        indexName,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(zipArchive.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls setSecurityLabsInstallationFailed if installation fails', async () => {
+      const zipArchive = { close: jest.fn() };
+      openZipArchiveMock.mockResolvedValue(zipArchive);
+      fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_NEW]);
+      const artifactName = getSecurityLabsArtifactName({
+        version: VERSION_NEW,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/${artifactName}`);
+
+      populateIndexMock.mockImplementation(async () => {
+        throw new Error('something bad');
+      });
+
+      await expect(
+        packageInstaller.installSecurityLabs({ inferenceId: defaultInferenceEndpoints.ELSER })
+      ).rejects.toThrowError();
+
+      expect(productDocClient.setSecurityLabsInstallationFailed).toHaveBeenCalledWith({
+        version: VERSION_NEW,
+        failureReason: 'something bad',
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(zipArchive.close).toHaveBeenCalledTimes(1);
     });
   });
 });

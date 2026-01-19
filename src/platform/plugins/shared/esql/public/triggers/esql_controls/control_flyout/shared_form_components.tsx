@@ -10,12 +10,15 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/esql-types';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   EuiFieldText,
   EuiFormRow,
   EuiComboBox,
+  EuiRadioGroup,
   type EuiComboBoxOptionOption,
   EuiButtonGroup,
   EuiSpacer,
@@ -26,14 +29,20 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiLink,
   EuiFlyoutHeader,
   EuiTitle,
   EuiBetaBadge,
   EuiToolTip,
   EuiText,
   EuiTextColor,
+  EuiCode,
+  EuiCallOut,
+  useEuiTheme,
 } from '@elastic/eui';
-import { EsqlControlType } from '../types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ServiceDeps } from '../../../kibana_services';
+import { checkVariableExistence } from './helpers';
 
 const controlTypeOptions = [
   {
@@ -69,6 +78,21 @@ const minimumWidthButtonGroup = [
     id: `large`,
     label: i18n.translate('esql.flyout.minimumWidth.large', {
       defaultMessage: 'Large',
+    }),
+  },
+];
+
+const selectionTypeOptions = [
+  {
+    id: 'single',
+    label: i18n.translate('esql.flyout.selectionType.single', {
+      defaultMessage: 'Only allow a single selection',
+    }),
+  },
+  {
+    id: 'multi',
+    label: i18n.translate('esql.flyout.selectionType.multi', {
+      defaultMessage: 'Allow multiple selections',
     }),
   },
 ];
@@ -128,6 +152,7 @@ export function ControlType({
             fullWidth
             isDisabled={isDisabled}
             compressed
+            isClearable={false}
             data-test-subj="esqlControlTypeDropdown"
             inputPopoverProps={{
               'data-test-subj': 'esqlControlTypeInputPopover',
@@ -151,40 +176,52 @@ export function VariableName({
   esqlVariables?: ESQLControlVariable[];
   onVariableNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
-  const genericContent = i18n.translate('esql.flyout.variableName.helpText', {
-    defaultMessage: 'This name will be prefaced with a "?" in the editor',
+  const tooltipContent = i18n.translate('esql.flyout.variableName.tooltipText', {
+    defaultMessage:
+      'Start your control name with ? to replace values or with ?? to replace field names or functions.',
   });
+
+  const helpText = (
+    <FormattedMessage
+      id="esql.flyout.variableName.helpText"
+      defaultMessage="Start your control name with {valuesPrefix} to replace {valuesBold} or with {fieldsPrefix} to replace {fieldsBold} or {functionsBold}."
+      values={{
+        valuesPrefix: <EuiCode>?</EuiCode>,
+        fieldsPrefix: <EuiCode>??</EuiCode>,
+        valuesBold: <strong>values</strong>,
+        fieldsBold: <strong>fields</strong>,
+        functionsBold: <strong>functions</strong>,
+      }}
+    />
+  );
   const isDisabledTooltipText = i18n.translate('esql.flyout.variableName.disabledTooltip', {
     defaultMessage: 'You can’t edit a control name after it’s been created.',
   });
+  const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
   const variableExists =
-    esqlVariables.some((variable) => variable.key === variableName.replace('?', '')) &&
-    !isControlInEditMode;
+    checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
+  const errorMessage = !variableNameWithoutQuestionmark
+    ? i18n.translate('esql.flyout.variableName.error', {
+        defaultMessage: 'Variable name is required',
+      })
+    : variableExists
+    ? i18n.translate('esql.flyout.variableNameExists.error', {
+        defaultMessage: 'Variable name already exists',
+      })
+    : undefined;
   return (
     <EuiFormRow
       label={i18n.translate('esql.flyout.variableName.label', {
         defaultMessage: 'Name',
       })}
-      helpText={i18n.translate('esql.flyout.variableName.helpText', {
-        defaultMessage: 'This name will be prefaced with a "?" in the editor',
-      })}
+      helpText={helpText}
       fullWidth
       autoFocus
-      isInvalid={!variableName || variableExists}
-      error={
-        !variableName
-          ? i18n.translate('esql.flyout.variableName.error', {
-              defaultMessage: 'Variable name is required',
-            })
-          : variableExists
-          ? i18n.translate('esql.flyout.variableNameExists.error', {
-              defaultMessage: 'Variable name already exists',
-            })
-          : undefined
-      }
+      isInvalid={!variableNameWithoutQuestionmark || variableExists}
+      error={errorMessage}
     >
       <EuiToolTip
-        content={isControlInEditMode ? isDisabledTooltipText : genericContent}
+        content={isControlInEditMode ? isDisabledTooltipText : tooltipContent}
         css={css`
           width: 100%;
         `}
@@ -194,6 +231,7 @@ export function VariableName({
           placeholder={i18n.translate('esql.flyout.variableName.placeholder', {
             defaultMessage: 'Set a variable name',
           })}
+          disabled={isControlInEditMode}
           value={variableName}
           onChange={onVariableNameChange}
           aria-label={i18n.translate('esql.flyout.variableName.placeholder', {
@@ -201,8 +239,8 @@ export function VariableName({
           })}
           data-test-subj="esqlVariableName"
           fullWidth
-          disabled={isControlInEditMode}
           compressed
+          tabIndex={0}
         />
       </EuiToolTip>
     </EuiFormRow>
@@ -216,6 +254,8 @@ export function ControlLabel({
   label: string;
   onLabelChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
+  const theme = useEuiTheme();
+
   return (
     <EuiFormRow
       label={i18n.translate('esql.flyout.label.label', {
@@ -231,6 +271,9 @@ export function ControlLabel({
         </EuiText>
       }
       fullWidth
+      css={css`
+        margin-block-start: ${theme.euiTheme.size.base};
+      `}
     >
       <EuiFieldText
         placeholder={i18n.translate('esql.flyout.label.placeholder', {
@@ -252,11 +295,13 @@ export function ControlLabel({
 export function ControlWidth({
   minimumWidth,
   grow,
+  hideFitToSpace,
   onMinimumSizeChange,
   onGrowChange,
 }: {
   minimumWidth: string;
   grow: boolean;
+  hideFitToSpace: boolean;
   onMinimumSizeChange: (id: string) => void;
   onGrowChange: (e: EuiSwitchEvent) => void;
 }) {
@@ -280,34 +325,111 @@ export function ControlWidth({
           data-test-subj="esqlControlMinimumWidth"
         />
       </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        compressed
-        label={i18n.translate('esql.flyout.grow.label', {
-          defaultMessage: 'Expand width to fit available space',
-        })}
-        color="primary"
-        checked={grow ?? false}
-        onChange={(e) => onGrowChange(e)}
-        data-test-subj="esqlControlGrow"
-      />
+      {!hideFitToSpace && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiSwitch
+            compressed
+            label={i18n.translate('esql.flyout.grow.label', {
+              defaultMessage: 'Expand width to fit available space',
+            })}
+            color="primary"
+            checked={grow ?? false}
+            onChange={(e) => onGrowChange(e)}
+            data-test-subj="esqlControlGrow"
+          />
+        </>
+      )}
     </>
   );
 }
 
-export function Header({ isInEditMode }: { isInEditMode: boolean }) {
+export function ControlSelectionType({
+  singleSelect,
+  onSelectionTypeChange,
+}: {
+  singleSelect: boolean;
+  onSelectionTypeChange: (isSingleSelect: boolean) => void;
+}) {
+  const theme = useEuiTheme();
+  const {
+    services: { docLinks },
+  } = useKibana<ServiceDeps>();
+  const multiValuesGuideLink = docLinks?.links.query.queryESQLMultiValueControls ?? '';
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={i18n.translate('esql.flyout.selectionType.label', {
+          defaultMessage: 'Selections',
+        })}
+        fullWidth
+      >
+        <EuiRadioGroup
+          compressed
+          options={selectionTypeOptions}
+          idSelected={singleSelect ? 'single' : 'multi'}
+          onChange={(id) => {
+            const newSingleSelect = id === 'single';
+            onSelectionTypeChange(newSingleSelect);
+          }}
+          name="selectionType"
+          data-test-subj="esqlControlSelectionType"
+        />
+      </EuiFormRow>
+      {!singleSelect ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="primary"
+            iconType="info"
+            css={css`
+              .euiText {
+                color: ${theme.euiTheme.colors.textPrimary} !important;
+              }
+            `}
+          >
+            <EuiText size="s">
+              <FormattedMessage
+                id="esql.flyout.selectionType.callout"
+                defaultMessage="You must use {mvContainsLink} in your ES|QL query for multi-select controls to work."
+                values={{
+                  mvContainsLink: (
+                    <EuiLink href={multiValuesGuideLink} target="_blank">
+                      MV_CONTAINS
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiCallOut>
+        </>
+      ) : null}
+    </>
+  );
+}
+
+export function Header({
+  isInEditMode,
+  ariaLabelledBy,
+}: {
+  isInEditMode: boolean;
+  ariaLabelledBy: string;
+}) {
   return (
     <EuiFlyoutHeader hasBorder>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h2>
+            <h2 id={ariaLabelledBy}>
               {isInEditMode
                 ? i18n.translate('esql.flyout.editTitle', {
-                    defaultMessage: 'Edit ES|QL control',
+                    defaultMessage: 'Edit variable control',
                   })
                 : i18n.translate('esql.flyout.title', {
-                    defaultMessage: 'Create ES|QL control',
+                    defaultMessage: 'Create variable control',
                   })}
             </h2>
           </EuiTitle>
@@ -325,6 +447,7 @@ export function Header({ isInEditMode }: { isInEditMode: boolean }) {
               label=""
               iconType="beaker"
               size="s"
+              tabIndex={0}
               css={css`
                 vertical-align: middle;
               `}
@@ -337,15 +460,11 @@ export function Header({ isInEditMode }: { isInEditMode: boolean }) {
 }
 
 export function Footer({
-  isControlInEditMode,
-  variableName,
   onCancelControl,
   isSaveDisabled,
   closeFlyout,
   onCreateControl,
 }: {
-  isControlInEditMode: boolean;
-  variableName: string;
   isSaveDisabled: boolean;
   closeFlyout: () => void;
   onCreateControl: () => void;

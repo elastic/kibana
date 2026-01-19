@@ -79,7 +79,7 @@ export const PROVIDER_REQUIRED = i18n.translate(
 );
 
 export const DOCUMENTATION = i18n.translate(
-  'xpack.inferenceEndpointUICommon.components.documentation',
+  'xpack.inferenceEndpointUICommon.components.inferenceDocumentation',
   {
     defaultMessage: 'Inference API documentation',
   }
@@ -120,10 +120,17 @@ export const OPTIONALTEXT = i18n.translate(
   }
 );
 
+export const LEARN_MORE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.learnMoreText',
+  {
+    defaultMessage: 'Learn more.',
+  }
+);
+
 export const RE_ENTER_SECRETS = (label: string) => {
   return i18n.translate('xpack.inferenceEndpointUICommon.components.requiredGenericTextField', {
     defaultMessage:
-      'You will need to reenter your ${label} each time you edit the inference endpoint',
+      'You will need to re-enter your {label} each time you edit the inference endpoint',
     values: { label },
   });
 };
@@ -175,5 +182,111 @@ export const ENDPOINT_UPDATE_FAILED = i18n.translate(
   'xpack.inferenceEndpointUICommon.components.endpointUpdateFailure',
   {
     defaultMessage: 'Inference endpoint update failed',
+  }
+);
+
+export const SOLUTION_FILTER = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.solutionFilterText',
+  {
+    defaultMessage: 'Solution filter.',
+  }
+);
+
+export const GEMINI = i18n.translate('xpack.inferenceEndpointUICommon.components.gemini.title', {
+  defaultMessage: 'Google Gemini',
+});
+
+export const DOCUMENTATION_BASE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.documentation',
+  {
+    defaultMessage: 'documentation',
+  }
+);
+
+export const CONTEXT_WINDOW_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.contextWindowLengthTextFieldLabel',
+  {
+    defaultMessage: 'Context window length',
+  }
+);
+
+export const CONTEXT_WINDOW_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.contextWindowLengthValidationMessage',
+  {
+    defaultMessage: 'Context window length must be an integer.',
+  }
+);
+
+export const CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.contextWindowLengthTaskTypeValidationMessage',
+  {
+    defaultMessage: 'Context window length is only applicable for chat completion tasks.',
+  }
+);
+
+export const ADD_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.addHeadersLabel',
+  {
+    defaultMessage: 'Add HTTP headers',
+  }
+);
+
+export const VIEW_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.viewHeadersLabel',
+  {
+    defaultMessage: 'View HTTP headers',
+  }
+);
+
+export const HIDE_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.hideHeadersLabel',
+  {
+    defaultMessage: 'Hide HTTP headers',
+  }
+);
+
+export const ADD_LABEL = i18n.translate('xpack.inferenceEndpointUICommon.components.addLabel', {
+  defaultMessage: 'Add',
+});
+
+export const DELETE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.deleteLabel',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const HEADERS_KEY_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersKeyLabel',
+  {
+    defaultMessage: 'Key',
+  }
+);
+
+export const HEADERS_VALUE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersValueLabel',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const HEADERS_DUPLICATE_KEY_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersDuplicateKeyMessage',
+  {
+    defaultMessage: 'Header keys must be unique.',
+  }
+);
+
+export const TEMPERATURE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.temperatureTextFieldLabel',
+  {
+    defaultMessage: 'Temperature',
+  }
+);
+
+export const TEMPERATURE_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.temperatureValidationMessage',
+  {
+    defaultMessage: 'Temperature must be a number between 0 and 1.',
   }
 );

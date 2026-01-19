@@ -102,3 +102,5 @@ export const QuestionRewritePrompt = (options: QuestionRewritePromptOptions): st
     gemini: GeminiPrompt,
   }[options.type || 'openai'](systemInstructions, true);
 };
+
+export const DEFAULT_LLM_PROMPT = 'You are an assistant for question-answering tasks.';

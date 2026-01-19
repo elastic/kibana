@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   EndpointActionResponse,
   LogsEndpointActionResponse,
@@ -17,7 +17,7 @@ import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
 import { catchAndWrapError } from '../../../utils';
 import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 
-/** @private */
+/** @internal */
 const buildSearchQuery = (
   actionIds: string[] = [],
   agentIds: string[] = []

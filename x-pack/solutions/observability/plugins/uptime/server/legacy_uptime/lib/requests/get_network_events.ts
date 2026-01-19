@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { NetworkEvent } from '../../../../common/runtime_types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { UMElasticsearchQueryFn } from '../adapters/framework';
+import type { NetworkEvent } from '../../../../common/runtime_types';
 
 export interface GetNetworkEventsParams {
   checkGroup: string;
@@ -44,7 +44,7 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
     size: 1000,
   };
 
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search(params);
   let isWaterfallSupported = false;
   let hasNavigationRequest = false;
 

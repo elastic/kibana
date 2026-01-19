@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { useSloFormattedSummary } from '../hooks/use_slo_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';

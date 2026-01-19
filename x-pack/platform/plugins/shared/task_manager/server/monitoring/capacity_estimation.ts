@@ -7,12 +7,14 @@
 
 import { mapValues } from 'lodash';
 import stats from 'stats-lite';
-import { JsonObject } from '@kbn/utility-types';
-import { Logger } from '@kbn/core/server';
-import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
-import { AveragedStat } from './task_run_calculators';
-import { TaskPersistenceTypes } from './task_run_statistics';
-import { asErr, asOk, map, Result } from '../lib/result_type';
+import type { JsonObject } from '@kbn/utility-types';
+import type { Logger } from '@kbn/core/server';
+import type { RawMonitoringStats, RawMonitoredStat } from './monitoring_stats_stream';
+import { HealthStatus } from './monitoring_stats_stream';
+import type { AveragedStat } from './task_run_calculators';
+import type { TaskPersistenceTypes } from './task_run_statistics';
+import type { Result } from '../lib/result_type';
+import { asErr, asOk, map } from '../lib/result_type';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {
@@ -65,6 +67,11 @@ export function estimateCapacity(
     capacity: { config: configuredCapacity },
   } = capacityStats.configuration.value;
 
+  if (!averageLoadPercentage) {
+    throw new Error(
+      `Task manager had an issue calculating capacity estimation. averageLoadPercentage: ${averageLoadPercentage}`
+    );
+  }
   /**
    * On average, how many polling cycles does it take to execute a task?
    * If this is higher than the polling cycle, then a whole cycle is wasted as
@@ -265,10 +272,15 @@ export function withCapacityEstimate(
   assumedKibanaInstances: number
 ): RawMonitoringStats['stats'] {
   if (isCapacityEstimationParams(monitoredStats)) {
-    return {
-      ...monitoredStats,
-      capacity_estimation: estimateCapacity(logger, monitoredStats, assumedKibanaInstances),
-    };
+    try {
+      return {
+        ...monitoredStats,
+        capacity_estimation: estimateCapacity(logger, monitoredStats, assumedKibanaInstances),
+      };
+    } catch (e) {
+      // Return monitoredStats with out capacity estimation
+      logger.debug(e.message);
+    }
   }
   return monitoredStats;
 }

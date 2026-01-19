@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ResourceInstaller } from '../resource_installer';
-import { BurnRatesClient } from '../burn_rates_client';
-import { SLORepository } from '../slo_repository';
-import { SummaryClient } from '../summary_client';
-import { SummarySearchClient } from '../summary_search_client/types';
-import { TransformManager } from '../transform_manager';
+import type { ResourceInstaller } from '../resource_installer';
+import type { BurnRatesClient } from '../burn_rates_client';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
+import type { SummaryClient } from '../summary_client';
+import type { SummarySearchClient } from '../summary_search_client/types';
+import type { TransformManager } from '../transform_manager';
 
 const createResourceInstallerMock = (): jest.Mocked<ResourceInstaller> => {
   return {
@@ -42,7 +42,7 @@ const createSummaryTransformManagerMock = (): jest.Mocked<TransformManager> => {
   };
 };
 
-const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
+const createSLODefinitionRepositoryMock = (): jest.Mocked<SLODefinitionRepository> => {
   return {
     create: jest.fn(),
     update: jest.fn(),
@@ -50,7 +50,6 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
     findAllByIds: jest.fn(),
     deleteById: jest.fn(),
     search: jest.fn(),
-    exists: jest.fn(),
   };
 };
 
@@ -76,7 +75,7 @@ export {
   createResourceInstallerMock,
   createTransformManagerMock,
   createSummaryTransformManagerMock,
-  createSLORepositoryMock,
+  createSLODefinitionRepositoryMock as createSLORepositoryMock,
   createSummaryClientMock,
   createSummarySearchClientMock,
   createBurnRatesClientMock,

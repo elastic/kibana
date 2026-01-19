@@ -22,7 +22,7 @@ import {
   NUMERICAL_COLOR_PALETTES,
   CATEGORICAL_COLOR_PALETTES,
 } from '../color_palettes';
-import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
+import type { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
 import { getIsDarkMode } from '../../../kibana_services';
 
 export const MIN_SIZE = 1;
@@ -51,7 +51,7 @@ export const POLYGON_STYLES = [
 
 export function getDefaultStaticProperties(
   mapColors: string[] = []
-): VectorStylePropertiesDescriptor {
+): Required<VectorStylePropertiesDescriptor> {
   let nextColorIndex = 0;
   if (mapColors.length) {
     const lastColor = mapColors[mapColors.length - 1];
@@ -150,7 +150,7 @@ export function getDefaultStaticProperties(
   };
 }
 
-export function getDefaultDynamicProperties(): VectorStylePropertiesDescriptor {
+export function getDefaultDynamicProperties(): Required<VectorStylePropertiesDescriptor> {
   return {
     [VECTOR_STYLES.ICON]: {
       type: STYLE_TYPE.DYNAMIC,

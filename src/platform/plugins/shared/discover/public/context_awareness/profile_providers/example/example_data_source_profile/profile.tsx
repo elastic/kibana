@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
-import {
-  AppMenuActionId,
-  AppMenuActionType,
-  getFieldValue,
-  RowControlColumn,
-} from '@kbn/discover-utils';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { EuiBadge, EuiFlyout, EuiLink } from '@elastic/eui';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
 import { capitalize } from 'lodash';
 import React from 'react';
-import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import type { DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory } from '../../../profiles';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { useExampleContext } from '../example_context';
+import { ChartWithCustomButtons } from './components';
+import { CustomDocView } from './components/custom_doc_view';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -80,8 +78,10 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
     getDocViewer:
       (prev, { context }) =>
       (params) => {
+        const { openInNewTab, updateESQLQuery } = params.actions;
         const recordId = params.record.id;
         const prevValue = prev(params);
+
         return {
           title: `Record #${recordId}`,
           docViewsRegistry: (registry) => {
@@ -89,13 +89,12 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               id: 'doc_view_example',
               title: 'Example',
               order: 0,
-              component: () => (
-                <EuiPanel color="transparent" hasShadow={false}>
-                  <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
-                  <pre data-test-subj="exampleDataSourceProfileDocViewRecord">
-                    {context.formatRecord(params.record.flattened)}
-                  </pre>
-                </EuiPanel>
+              render: () => (
+                <CustomDocView
+                  formattedRecord={context.formatRecord(params.record.flattened)}
+                  openInNewTab={openInNewTab}
+                  updateESQLQuery={updateESQLQuery}
+                />
               ),
             });
 
@@ -114,7 +113,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       const prevValue = prev(params);
 
       // This is what is available via params:
-      // const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = params;
+      // const { dataView, services, isEsqlMode, adHocDataViews, actions } = params;
 
       return {
         appMenuRegistry: (registry) => {
@@ -200,10 +199,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       return [
         ...additionalControls,
         ...['visBarVerticalStacked', 'heart', 'inspect'].map(
-          (iconType, index): RowControlColumn => ({
+          (iconType): RowControlColumn => ({
             id: `exampleControl_${iconType}`,
-            headerAriaLabel: `Example Row Control ${iconType}`,
-            renderControl: (Control, rowProps) => {
+            render: (Control, rowProps) => {
               return (
                 <Control
                   data-test-subj={`exampleLogsControl_${iconType}`}
@@ -258,21 +256,45 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           isCompatible: ({ field }) => field.name !== 'message',
         },
       ],
+    getPaginationConfig: (prev) => () => ({
+      ...prev(),
+      paginationMode: 'singlePage',
+    }),
+    /**
+     * The `getRecommendedFields` extension point allows profiles to define fields that should be surfaced
+     * as recommended in the field list sidebar. These fields appear in a dedicated "Recommended Fields" section.
+     * This is useful for highlighting important fields for specific data source types.
+     * @param prev
+     */
+    getRecommendedFields: (prev) => () => {
+      // Define example recommended field names for the example logs data source
+      const exampleRecommendedFieldNames: Array<DataViewField['name']> = [
+        'log.level',
+        'message',
+        'service.name',
+        'host.name',
+      ];
+
+      return {
+        ...prev(),
+        recommendedFields: exampleRecommendedFieldNames,
+      };
+    },
+    getChartSectionConfiguration: (prev) => (params) => {
+      return {
+        ...prev(params),
+        renderChartSection: (props) => (
+          <ChartWithCustomButtons {...props} actions={params.actions} />
+        ),
+        localStorageKeyPrefix: 'discover:exampleDataSource',
+        replaceDefaultChart: true,
+      };
+    },
   },
   resolve: (params) => {
-    let indexPattern: string | undefined;
+    const indexPattern = extractIndexPatternFrom(params);
 
-    if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
-      if (!isOfAggregateQueryType(params.query)) {
-        return { isMatch: false };
-      }
-
-      indexPattern = getIndexPatternFromESQLQuery(params.query.esql);
-    } else if (isDataSourceType(params.dataSource, DataSourceType.DataView) && params.dataView) {
-      indexPattern = params.dataView.getIndexPattern();
-    }
-
-    if (indexPattern !== 'my-example-logs') {
+    if (indexPattern !== 'my-example-logs' && indexPattern !== 'my-example-logs,logstash*') {
       return { isMatch: false };
     }
 

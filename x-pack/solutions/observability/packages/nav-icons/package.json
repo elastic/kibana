@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/observability-nav-icons",
+  "description": "Shared nav icons for Observability",
+  "author": "UX Management",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.ts",
+  "license": "Elastic License 2.0"
+}

@@ -7,12 +7,13 @@
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { renderHook, act, type RenderHookResult } from '@testing-library/react';
 import { merge } from 'lodash';
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import type { StreamingChatResponseEventWithoutError } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   MessageRole,
   StreamingChatResponseEventType,
-  StreamingChatResponseEventWithoutError,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import type { AIAssistantAppService } from '../service/create_app_service';
@@ -26,7 +27,7 @@ import { createMockChatService } from '../utils/create_mock_chat_service';
 import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat';
 import type { NotificationsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 
 let hookResult: RenderHookResult<UseConversationResult, UseConversationProps>;
 
@@ -98,6 +99,7 @@ describe('useConversation', () => {
               },
             ],
             initialConversationId: 'foo',
+            onConversationDuplicate: jest.fn(),
           },
           wrapper,
         })
@@ -107,25 +109,19 @@ describe('useConversation', () => {
 
   describe('without initial messages and a conversation id', () => {
     beforeEach(() => {
+      // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
         initialProps: {
           chatService: mockChatService,
           connectorId: 'my-connector',
+          onConversationDuplicate: jest.fn(),
         },
         wrapper,
       });
     });
 
-    it('returns only the system message', () => {
-      expect(hookResult.result.current.messages).toEqual([
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            content: '',
-            role: MessageRole.System,
-          },
-        },
-      ]);
+    it('returns empty messages', () => {
+      expect(hookResult.result.current.messages).toEqual([]);
     });
 
     it('returns a ready state', () => {
@@ -139,6 +135,7 @@ describe('useConversation', () => {
 
   describe('with initial messages', () => {
     beforeEach(() => {
+      // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
         initialProps: {
           chatService: mockChatService,
@@ -152,20 +149,14 @@ describe('useConversation', () => {
               },
             },
           ],
+          onConversationDuplicate: jest.fn(),
         },
         wrapper,
       });
     });
 
-    it('returns the system message and the initial messages', () => {
+    it('returns the initial messages', () => {
       expect(hookResult.result.current.messages).toEqual([
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            content: '',
-            role: MessageRole.System,
-          },
-        },
         {
           '@timestamp': expect.any(String),
           message: {
@@ -183,14 +174,8 @@ describe('useConversation', () => {
         conversation: {
           id: 'my-conversation-id',
         },
+        systemMessage: 'System',
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -201,11 +186,13 @@ describe('useConversation', () => {
         ],
       });
 
+      // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
         initialProps: {
           chatService: mockChatService,
           connectorId: 'my-connector',
           initialConversationId: 'my-conversation-id',
+          onConversationDuplicate: jest.fn(),
         },
         wrapper,
       });
@@ -218,14 +205,8 @@ describe('useConversation', () => {
         conversation: {
           id: 'my-conversation-id',
         },
+        systemMessage: 'System',
         messages: [
-          {
-            '@timestamp': expect.any(String),
-            message: {
-              content: 'System',
-              role: MessageRole.System,
-            },
-          },
           {
             '@timestamp': expect.any(String),
             message: {
@@ -242,22 +223,11 @@ describe('useConversation', () => {
         {
           '@timestamp': expect.any(String),
           message: {
-            content: expect.any(String),
-            role: MessageRole.System,
-          },
-        },
-        {
-          '@timestamp': expect.any(String),
-          message: {
             content: 'User',
             role: MessageRole.User,
           },
         },
       ]);
-    });
-
-    it('overrides the system message', () => {
-      expect(hookResult.result.current.messages[0].message.content).toBe('');
     });
   });
 
@@ -265,11 +235,13 @@ describe('useConversation', () => {
     beforeEach(async () => {
       mockService.callApi.mockRejectedValueOnce(new Error('failed to load'));
 
+      // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
         initialProps: {
           chatService: mockChatService,
           connectorId: 'my-connector',
           initialConversationId: 'my-conversation-id',
+          onConversationDuplicate: jest.fn(),
         },
         wrapper,
       });
@@ -282,7 +254,7 @@ describe('useConversation', () => {
     });
 
     it('resets the messages', () => {
-      expect(hookResult.result.current.messages.length).toBe(1);
+      expect(hookResult.result.current.messages.length).toBe(0);
     });
   });
 
@@ -290,13 +262,6 @@ describe('useConversation', () => {
     const subject: Subject<StreamingChatResponseEventWithoutError> = new Subject();
     let onConversationUpdate: jest.Mock;
     const expectedMessages = [
-      {
-        '@timestamp': expect.any(String),
-        message: {
-          role: MessageRole.System,
-          content: '',
-        },
-      },
       {
         '@timestamp': expect.any(String),
         message: {
@@ -333,6 +298,7 @@ describe('useConversation', () => {
             conversation: {
               id: 'my-conversation-id',
             },
+            systemMessage: '',
             messages: expectedMessages,
           },
           (request as any).params.body
@@ -341,6 +307,7 @@ describe('useConversation', () => {
 
       onConversationUpdate = jest.fn();
 
+      // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
         initialProps: {
           chatService: mockChatService,
@@ -362,6 +329,7 @@ describe('useConversation', () => {
             },
           ],
           onConversationUpdate,
+          onConversationDuplicate: jest.fn(),
         },
         wrapper,
       });
@@ -440,6 +408,7 @@ describe('useConversation', () => {
                 },
               ],
               initialConversationId: 'foo',
+              onConversationDuplicate: jest.fn(),
             },
             wrapper,
           });
@@ -478,11 +447,13 @@ describe('useConversation', () => {
         });
 
         await act(async () => {
+          // @ts-expect-error upgrade typescript v5.9.3
           hookResult = renderHook(useConversation, {
             initialProps: {
               chatService: mockChatService,
               connectorId: 'my-connector',
               initialConversationId: 'my-conversation-id',
+              onConversationDuplicate: jest.fn(),
             },
             wrapper,
           });

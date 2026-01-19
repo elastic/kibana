@@ -7,6 +7,7 @@
 
 export const ROOT_PATH = '/';
 
+export const OLD_PLAYGROUND_PATH = `${ROOT_PATH}playground`;
 export const SEARCH_APPLICATIONS_PATH = `${ROOT_PATH}search_applications`;
 
 export enum SearchApplicationViewTabs {

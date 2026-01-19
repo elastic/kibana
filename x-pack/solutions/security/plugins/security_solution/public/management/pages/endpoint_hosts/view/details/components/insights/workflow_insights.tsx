@@ -5,68 +5,97 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiSpacer,
-  EuiText,
-  EuiBetaBadge,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import type { Moment } from 'moment';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
-import {
-  TECHNICAL_PREVIEW_TOOLTIP,
-  TECHNICAL_PREVIEW,
-} from '../../../../../../../common/translations';
+import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { useKnowledgeBaseStatus } from '@kbn/elastic-assistant/impl/assistant/api/knowledge_base/use_knowledge_base_status';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
+
+import { ActionType } from '../../../../../../../../common/endpoint/types/workflow_insights';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
-import { useFetchOngoingScans } from '../../../hooks/insights/use_fetch_ongoing_tasks';
+import { useFetchLatestScan } from '../../../hooks/insights/use_fetch_ongoing_tasks';
+import { WORKFLOW_INSIGHTS } from '../../../translations';
 import { WorkflowInsightsResults } from './workflow_insights_results';
 import { WorkflowInsightsScanSection } from './workflow_insights_scan';
-import { WORKFLOW_INSIGHTS } from '../../../translations';
 
 interface WorkflowInsightsProps {
   endpointId: string;
 }
 
 export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProps) => {
-  const [isScanButtonDisabled, setIsScanButtonDisabled] = useState(true);
-  const [scanCompleted, setIsScanCompleted] = useState(false);
+  const [isScanRunning, setIsScanRunning] = useState(true);
   const [userTriggeredScan, setUserTriggeredScan] = useState(false);
+  const [insightGenerationFailures, setInsightGenerationFailures] = useState(false);
+  const [expectedCount, setExpectedCount] = useState<number | null>(null);
+  const [expectedTimestamp, setExpectedTimestamp] = useState<Moment | null>(null);
 
-  const disableScanButton = () => {
-    setIsScanButtonDisabled(true);
+  const onLatestScanSuccess = useCallback((count: number, timestamp: Moment | null) => {
+    if (count === 0) {
+      setIsScanRunning(false);
+    }
+
+    setExpectedCount(count);
+    setExpectedTimestamp(timestamp);
+  }, []);
+
+  const defendInsightsPolicyResponseFailureEnabled = useIsExperimentalFeatureEnabled(
+    'defendInsightsPolicyResponseFailure'
+  );
+  const {
+    inferenceEnabled,
+    http,
+    assistantAvailability: { isAssistantEnabled },
+  } = useAssistantContext();
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
+
+  const onInsightGenerationFailure = () => {
+    setInsightGenerationFailures(true);
   };
 
-  const [setScanOngoing, setScanCompleted] = [
-    () => setIsScanCompleted(false),
-    () => setIsScanCompleted(true),
-  ];
+  const insightTypes = useMemo<DefendInsightType[]>(() => {
+    const typesToQuery: DefendInsightType[] = [DefendInsightType.Enum.incompatible_antivirus];
+    if (
+      defendInsightsPolicyResponseFailureEnabled &&
+      // we only want to run `policy_response_failure` type with KB
+      (kbStatus?.defend_insights_exists || kbStatus?.is_setup_in_progress)
+    ) {
+      typesToQuery.push(DefendInsightType.Enum.policy_response_failure);
+    }
+    return typesToQuery;
+  }, [defendInsightsPolicyResponseFailureEnabled, kbStatus]);
 
-  const { data: insights, refetch: refetchInsights } = useFetchInsights({
+  // refetch is automatically triggered when expectedCount changes
+  const { data: insights } = useFetchInsights({
     endpointId,
-    onSuccess: setScanCompleted,
+    onSuccess: () => setIsScanRunning(false),
+    scanCompleted: !isScanRunning,
+    expectedCount,
+    expectedTimestamp,
+    insightTypes,
   });
 
-  const {
-    data: ongoingScans,
-    isLoading: isLoadingOngoingScans,
-    refetch: refetchOngoingScans,
-  } = useFetchOngoingScans({
+  const { refetch: refetchLatestScan } = useFetchLatestScan({
     endpointId,
-    isPolling: isScanButtonDisabled,
-    onSuccess: refetchInsights,
+    insightTypes,
+    isPolling: isScanRunning,
+    onSuccess: onLatestScanSuccess,
+    onInsightGenerationFailure,
   });
 
   const { mutate: triggerScan } = useTriggerScan({
-    onSuccess: refetchOngoingScans,
-    onMutate: disableScanButton,
+    onSuccess: refetchLatestScan,
   });
 
   useEffect(() => {
-    setIsScanButtonDisabled(!!ongoingScans?.length || isLoadingOngoingScans);
-  }, [ongoingScans, isLoadingOngoingScans]);
+    setExpectedCount(null);
+    setExpectedTimestamp(null);
+    setIsScanRunning(true);
+    setUserTriggeredScan(false);
+  }, [endpointId]);
 
   const lastResultCaption = useMemo(() => {
     if (!insights?.length) {
@@ -84,58 +113,70 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     );
   }, [insights]);
 
+  const activeInsights = useMemo(() => {
+    if (isScanRunning) {
+      return [];
+    }
+
+    const insightTypesSet = new Set(insightTypes);
+    return (insights ?? []).filter(
+      (insight) => insightTypesSet.has(insight.type) && insight.action.type === ActionType.Refreshed
+    );
+  }, [isScanRunning, insights, insightTypes]);
+
   const onScanButtonClick = useCallback(
     ({ actionTypeId, connectorId }: { actionTypeId: string; connectorId: string }) => {
-      setScanOngoing();
+      if (insightGenerationFailures) {
+        setInsightGenerationFailures(false);
+      }
+
+      setIsScanRunning(true);
+      setExpectedCount(null);
+      setExpectedTimestamp(moment());
       if (!userTriggeredScan) {
         setUserTriggeredScan(true);
       }
-      triggerScan({ endpointId, actionTypeId, connectorId });
+      triggerScan({
+        endpointId,
+        actionTypeId,
+        connectorId,
+        insightTypes,
+      });
     },
-    [setScanOngoing, userTriggeredScan, triggerScan, endpointId]
+    [insightGenerationFailures, userTriggeredScan, triggerScan, endpointId, insightTypes]
   );
 
   return (
     <>
-      <EuiAccordion
-        data-test-subj={'endpointDetailsInsightsWrapper'}
-        id={'workflow-insights-wrapper'}
-        buttonContent={
-          <EuiFlexGroup gutterSize={'s'}>
-            <EuiFlexItem grow={false}>
-              <EuiText size={'m'}>
-                <h4>{WORKFLOW_INSIGHTS.title}</h4>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                alignment={'middle'}
-                label={TECHNICAL_PREVIEW}
-                tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
-                size="s"
-                iconType={'beaker'}
-                data-test-subj={'workflow-insights-tech-preview-badge'}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        initialIsOpen
-        extraAction={lastResultCaption}
-        paddingSize={'none'}
+      <EuiFlexGroup
+        data-test-subj="endpointDetailsInsightsWrapper"
+        gutterSize={'s'}
+        justifyContent="spaceBetween"
+        alignItems="center"
       >
-        <EuiSpacer size={'m'} />
-        <WorkflowInsightsScanSection
-          isScanButtonDisabled={isScanButtonDisabled}
-          onScanButtonClick={onScanButtonClick}
-        />
-        <EuiSpacer size={'m'} />
-        <WorkflowInsightsResults
-          results={insights}
-          scanCompleted={scanCompleted && userTriggeredScan}
-          endpointId={endpointId}
-        />
-      </EuiAccordion>
-      <EuiSpacer size="l" />
+        <EuiFlexItem grow={false}>
+          <EuiText size={'m'}>
+            <h4>{WORKFLOW_INSIGHTS.title}</h4>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size={'s'}>{lastResultCaption}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size={'m'} />
+      <WorkflowInsightsScanSection
+        isScanButtonDisabled={isScanRunning}
+        onScanButtonClick={onScanButtonClick}
+        inferenceEnabled={inferenceEnabled}
+        kbStatus={kbStatus}
+        defendInsightsPolicyResponseFailureEnabled={defendInsightsPolicyResponseFailureEnabled}
+      />
+      <EuiSpacer size={'m'} />
+      <WorkflowInsightsResults
+        results={activeInsights}
+        scanCompleted={!isScanRunning && !insightGenerationFailures && userTriggeredScan}
+        endpointId={endpointId}
+      />
     </>
   );
 });

@@ -20,9 +20,16 @@ export const registerBootstrapRoute = ({
   router.get(
     {
       path: '/bootstrap.js',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is only used for serving the bootstrap script.',
+        },
+      },
       options: {
         tags: ['api'],
         access: 'public',
+        excludeFromRateLimiter: true,
       },
       validate: false,
     },
@@ -43,10 +50,17 @@ export const registerBootstrapRoute = ({
   router.get(
     {
       path: '/bootstrap-anonymous.js',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is only used for serving the bootstrap script.',
+        },
+      },
       options: {
         authRequired: 'optional',
         tags: ['api'],
         access: 'public',
+        excludeFromRateLimiter: true,
       },
       validate: false,
     },

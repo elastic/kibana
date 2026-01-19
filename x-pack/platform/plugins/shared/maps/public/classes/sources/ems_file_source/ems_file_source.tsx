@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Feature, GeoJsonProperties } from 'geojson';
-import { FileLayer } from '@elastic/ems-client';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
+import type { Feature, GeoJsonProperties } from 'geojson';
+import type { FileLayer } from '@elastic/ems-client';
+import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import type { GeoJsonWithMeta, IVectorSource } from '../vector_source';
+import { AbstractVectorSource } from '../vector_source';
 import { SOURCE_TYPES, FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getEmsFileLayers } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
-import { IField } from '../../fields/field';
-import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
-import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import type { IField } from '../../fields/field';
+import type { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { getEMSSettings } from '../../../kibana_services';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 import { LICENSED_FEATURES } from '../../../licensed_features';
@@ -56,7 +58,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
       type: SOURCE_TYPES.EMS_FILE,
       id: id!,
       tooltipProperties,
-    };
+    } as EMSFileSourceDescriptor;
   }
 
   private readonly _tooltipFields: IField[];
@@ -65,7 +67,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   constructor(descriptor: Partial<EMSFileSourceDescriptor>) {
     super(EMSFileSource.createDescriptor(descriptor));
     this._descriptor = EMSFileSource.createDescriptor(descriptor);
-    this._tooltipFields = this._descriptor.tooltipProperties.map((propertyKey) =>
+    this._tooltipFields = (this._descriptor.tooltipProperties ?? []).map((propertyKey) =>
       this.getFieldByName(propertyKey)
     );
   }

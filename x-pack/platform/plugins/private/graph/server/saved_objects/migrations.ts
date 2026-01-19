@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
 export const graphMigrations = {
   '7.0.0': (doc: SavedObjectUnsanitizedDoc<any>) => {

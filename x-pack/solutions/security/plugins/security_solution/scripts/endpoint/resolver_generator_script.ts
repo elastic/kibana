@@ -8,7 +8,7 @@
 /* eslint-disable no-console,max-classes-per-file */
 import yargs from 'yargs';
 import fs from 'fs';
-import { Client, errors } from '@elastic/elasticsearch';
+import { Client, errors, HttpConnection } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -22,7 +22,11 @@ import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion } from './common/stack_services';
-import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
+import {
+  ENDPOINT_ALERTS_INDEX,
+  ENDPOINT_EVENTS_INDEX,
+  ENDPOINT_DEVICE_INDEX,
+} from './common/constants';
 
 main();
 
@@ -147,6 +151,12 @@ async function main() {
       default: ENDPOINT_ALERTS_INDEX,
       type: 'string',
     },
+    deviceIndex: {
+      alias: 'di',
+      describe: 'index to store device events in',
+      default: ENDPOINT_DEVICE_INDEX,
+      type: 'string',
+    },
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
@@ -232,6 +242,12 @@ async function main() {
       type: 'number',
       default: 1,
     },
+    deviceEvents: {
+      alias: 'dev',
+      describe: 'number of device events to create per host',
+      type: 'number',
+      default: 5,
+    },
     delete: {
       alias: 'd',
       describe: 'delete indices and remake them',
@@ -276,7 +292,10 @@ async function main() {
   }).argv;
 
   let ca: Buffer;
-  let clientOptions: ClientOptions;
+  let clientOptions: ClientOptions = {
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
+  };
   let url: string;
   let node: string;
   const logger = createToolingLogger();
@@ -297,9 +316,9 @@ async function main() {
       certificateAuthorities: [ca],
     };
 
-    clientOptions = { node, tls: { ca: [ca] } };
+    clientOptions = { ...clientOptions, node, tls: { ca: [ca] } };
   } else {
-    clientOptions = { node: argv.node };
+    clientOptions = { ...clientOptions, node: argv.node };
   }
   let client = new Client(clientOptions);
   let kbnClient = new KbnClient({ ...kbnClientOptions });
@@ -410,6 +429,7 @@ async function main() {
     argv.policyIndex,
     argv.eventIndex,
     argv.alertIndex,
+    argv.deviceIndex,
     argv.alertsPerHost,
     argv.fleet,
     {
@@ -424,6 +444,7 @@ async function main() {
       ancestryArraySize: argv.ancestryArraySize,
       eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.eventIndex),
       alertsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.alertIndex),
+      deviceEvents: argv.deviceEvents,
     },
     DocGenerator
   );

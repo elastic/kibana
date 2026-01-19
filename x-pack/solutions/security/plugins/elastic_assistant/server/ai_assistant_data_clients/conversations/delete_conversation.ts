@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export interface DeleteConversationParams {
   esClient: ElasticsearchClient;
@@ -21,11 +21,9 @@ export const deleteConversation = async ({
 }: DeleteConversationParams): Promise<number | undefined> => {
   try {
     const response = await esClient.deleteByQuery({
-      body: {
-        query: {
-          ids: {
-            values: [id],
-          },
+      query: {
+        ids: {
+          values: [id],
         },
       },
       conflicts: 'proceed',

@@ -31,10 +31,10 @@ jest.mock('./add_percentage_column', () => ({
   })),
 }));
 
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { AggTypes } from '../../common';
-import { TableGroup, TableVisConfig } from '../types';
+import type { TableGroup, TableVisConfig } from '../types';
 import { addPercentageColumn } from './add_percentage_column';
 import { createFormattedTable } from './create_formatted_table';
 import { tableVisResponseHandler } from './table_vis_response_handler';

@@ -22,7 +22,6 @@ describe('getInstallPkgRouteOptions', () => {
       integration: 'myintegration',
       pkgkey: 'myintegration-1.0.0',
       isFirstTimeAgentUser: false,
-      isGuidedOnboardingActive: false,
       isCloud: false,
       isExperimentalAddIntegrationPageEnabled: false,
     };
@@ -52,7 +51,6 @@ describe('getInstallPkgRouteOptions', () => {
       pkgkey: 'myintegration-1.0.0',
       agentPolicyId: '12345',
       isFirstTimeAgentUser: false,
-      isGuidedOnboardingActive: false,
       isCloud: false,
       isExperimentalAddIntegrationPageEnabled: false,
     };
@@ -74,13 +72,13 @@ describe('getInstallPkgRouteOptions', () => {
 
     expect(getInstallPkgRouteOptions(opts)).toEqual(['fleet', expectedOptions]);
   });
+
   it('should navigate to steps app if isCloud and page enabled and first time agent user', () => {
     const opts = {
       currentPath: 'currentPath',
       integration: 'myintegration',
       pkgkey: 'myintegration-1.0.0',
       isFirstTimeAgentUser: true,
-      isGuidedOnboardingActive: false,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };
@@ -102,13 +100,13 @@ describe('getInstallPkgRouteOptions', () => {
 
     expect(getInstallPkgRouteOptions(opts)).toEqual(['fleet', expectedOptions]);
   });
+
   it('should not navigate to steps app for apm', () => {
     const opts = {
       currentPath: 'currentPath',
       integration: 'myintegration',
       pkgkey: 'apm-1.0.0',
       isFirstTimeAgentUser: true,
-      isGuidedOnboardingActive: false,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };
@@ -135,13 +133,13 @@ describe('getInstallPkgRouteOptions', () => {
 
     expect(getInstallPkgRouteOptions(opts)).toEqual(['fleet', expectedOptions]);
   });
+
   it('should navigate to steps app for endpoint', () => {
     const opts = {
       currentPath: 'currentPath',
       integration: 'myintegration',
       pkgkey: 'endpoint-1.0.0',
       isFirstTimeAgentUser: true,
-      isGuidedOnboardingActive: false,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };
@@ -167,5 +165,80 @@ describe('getInstallPkgRouteOptions', () => {
     };
 
     expect(getInstallPkgRouteOptions(opts)).toEqual(['fleet', expectedOptions]);
+  });
+
+  describe('useMultiPageLayout logic', () => {
+    it('should use multi-page layout if isCloud, first time agent user, and package is not exempt', () => {
+      const opts = {
+        currentPath: 'currentPath',
+        integration: 'myintegration',
+        pkgkey: 'myintegration-1.0.0',
+        isFirstTimeAgentUser: true,
+        isCloud: true,
+        isExperimentalAddIntegrationPageEnabled: true,
+      };
+
+      const expectedOptions = {
+        path: '/integrations/myintegration-1.0.0/add-integration/myintegration?useMultiPageLayout',
+        state: expect.any(Object),
+      };
+
+      expect(getInstallPkgRouteOptions(opts)[1]).toMatchObject(expectedOptions);
+    });
+
+    it('should not use multi-page layout if package is exempt', () => {
+      const opts = {
+        currentPath: 'currentPath',
+        integration: 'myintegration',
+        pkgkey: 'apm-1.0.0',
+        isFirstTimeAgentUser: true,
+        isCloud: true,
+        isExperimentalAddIntegrationPageEnabled: true,
+      };
+
+      const expectedOptions = {
+        path: '/integrations/apm-1.0.0/add-integration/myintegration',
+        state: expect.any(Object),
+      };
+
+      expect(getInstallPkgRouteOptions(opts)[1]).toMatchObject(expectedOptions);
+    });
+
+    it('should not use multi-page layout if isCloud is false', () => {
+      const opts = {
+        currentPath: 'currentPath',
+        integration: 'myintegration',
+        pkgkey: 'myintegration-1.0.0',
+        isFirstTimeAgentUser: true,
+        isCloud: false,
+        isExperimentalAddIntegrationPageEnabled: true,
+      };
+
+      const expectedOptions = {
+        path: '/integrations/myintegration-1.0.0/add-integration/myintegration',
+        state: expect.any(Object),
+      };
+
+      expect(getInstallPkgRouteOptions(opts)[1]).toMatchObject(expectedOptions);
+    });
+
+    it('should not use multi-page layout if isAgentlessDefault is true', () => {
+      const opts = {
+        currentPath: 'currentPath',
+        integration: 'myintegration',
+        pkgkey: 'myintegration-1.0.0',
+        isFirstTimeAgentUser: true,
+        isCloud: true,
+        isExperimentalAddIntegrationPageEnabled: true,
+        isAgentlessDefault: true,
+      };
+
+      const expectedOptions = {
+        path: '/integrations/myintegration-1.0.0/add-integration/myintegration',
+        state: expect.any(Object),
+      };
+
+      expect(getInstallPkgRouteOptions(opts)[1]).toMatchObject(expectedOptions);
+    });
   });
 });

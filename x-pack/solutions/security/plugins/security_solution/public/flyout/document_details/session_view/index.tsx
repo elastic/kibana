@@ -7,8 +7,11 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { type PanelPath, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  type PanelPath,
+  type FlyoutPanelProps,
+  useExpandableFlyoutApi,
+} from '@kbn/expandable-flyout';
 import { PanelContent } from './content';
 import { PanelHeader } from './header';
 import type { CustomProcess } from './context';
@@ -16,6 +19,7 @@ import { useSessionViewPanelContext } from './context';
 import type { SessionViewPanelTabType } from './tabs';
 import * as tabs from './tabs';
 import { DocumentDetailsSessionViewPanelKey } from '../shared/constants/panel_keys';
+import { SESSION_VIEWER_BANNER } from '../left/components/session_view';
 
 export const allTabs = [tabs.processTab, tabs.metadataTab, tabs.alertsTab];
 export type SessionViewPanelPaths = 'process' | 'metadata' | 'alerts';
@@ -80,6 +84,7 @@ export const SessionViewPanel: FC<Partial<SessionViewPanelProps>> = memo(({ path
           sessionStartTime,
           scopeId,
           investigatedAlertId,
+          banner: SESSION_VIEWER_BANNER,
         },
       });
     },

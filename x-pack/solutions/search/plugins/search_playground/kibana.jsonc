@@ -26,12 +26,16 @@
       "security",
       "stackConnectors",
       "triggersActionsUi",
+      "uiActions",
+      "inference"
     ],
     "optionalPlugins": [
       "cloud",
       "console",
+      "licenseManagement",
       "usageCollection",
       "searchNavigation",
+      "spaces",
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UrlDrilldownConfig, UrlDrilldownScope } from './types';
+import type { UrlDrilldownConfig, UrlDrilldownScope } from './types';
 import { compile } from './url_template';
 
 const generalFormatError = i18n.translate(

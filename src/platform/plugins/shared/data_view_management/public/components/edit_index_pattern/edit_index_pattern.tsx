@@ -8,11 +8,11 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiBadge,
   EuiCallOut,
@@ -21,16 +21,16 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataViewType, RuntimeField, DataView } from '@kbn/data-views-plugin/public';
+import type { RuntimeField, DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
 import type * as CSS from 'csstype';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
-import { IndexPatternManagmentContext } from '../../types';
+import type { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
-import { removeDataView, RemoveDataViewProps } from './remove_data_view';
 
 import { useStateSelector } from '../../management_app/state_utils';
 
@@ -57,7 +57,7 @@ const mappingConflictHeader = i18n.translate(
 const securityDataView = i18n.translate(
   'indexPatternManagement.editIndexPattern.badge.securityDataViewTitle',
   {
-    defaultMessage: 'Security Data View',
+    defaultMessage: 'Security Solution',
   }
 );
 
@@ -75,21 +75,15 @@ import {
   defaultIndexSelector,
   fieldsSelector,
 } from '../../management_app/data_view_mgmt_selectors';
-import { deleteModalMsg } from '../index_pattern_table/delete_modal_msg';
+import {
+  DeleteDataViewFlyout,
+  type RemoveDataViewProps,
+} from '../delete_data_view_flyout/delete_data_view_flyout';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const {
-      uiSettings,
-      overlays,
-      chrome,
-      dataViews,
-      IndexPatternEditor,
-      savedObjectsManagement,
-      application,
-      dataViewMgmtService,
-      ...startServices
-    } = useKibana<IndexPatternManagmentContext>().services;
+    const { chrome, dataViews, IndexPatternEditor, dataViewMgmtService } =
+      useKibana<IndexPatternManagmentContext>().services;
     const dataView = useStateSelector(dataViewMgmtService.state$, dataViewSelector);
     const allowedTypes = useStateSelector(dataViewMgmtService.state$, allowedTypesSelector);
     const relationships = useStateSelector(dataViewMgmtService.state$, relationshipsSelector);
@@ -111,6 +105,7 @@ export const EditIndexPattern = withRouter(
     >(() => getCompositeRuntimeFields(indexPattern));
 
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
+    const [flyoutOpen, setFlyoutOpen] = React.useState(false);
 
     // subscribe and unsubscribe to hash change events
     useEffect(() => {
@@ -124,16 +119,6 @@ export const EditIndexPattern = withRouter(
         unlistenParentHistory();
       };
     }, [history]);
-
-    const removeHandler = removeDataView({
-      dataViews,
-      uiSettings,
-      overlays,
-      onDelete: () => {
-        history.push('');
-      },
-      startServices,
-    });
 
     const isRollup =
       new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
@@ -189,20 +174,17 @@ export const EditIndexPattern = withRouter(
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         {dataView && (
-          <IndexHeader
-            indexPattern={dataView}
-            setDefault={() => dataViewMgmtService.setDefaultDataView()}
-            editIndexPatternClick={editPattern}
-            deleteIndexPatternClick={() =>
-              removeHandler(
-                [dataView as RemoveDataViewProps],
-                deleteModalMsg([dataView as RemoveDataViewProps], Boolean(dataView.namespaces))
-              )
-            }
-            defaultIndex={defaultIndex}
-            canSave={userEditPermission}
-          >
-            <EuiHorizontalRule margin="none" />
+          <>
+            <IndexHeader
+              indexPattern={dataView}
+              setDefault={() => dataViewMgmtService.setDefaultDataView()}
+              editIndexPatternClick={editPattern}
+              deleteIndexPatternClick={() => {
+                setFlyoutOpen(true);
+              }}
+              defaultIndex={defaultIndex}
+              canSave={userEditPermission}
+            />
             <EuiSpacer size="l" />
             <EuiFlexGroup wrap gutterSize="l" alignItems="center">
               {Boolean(indexPattern.title) && (
@@ -227,7 +209,7 @@ export const EditIndexPattern = withRouter(
               )}
               {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge>{securityDataView}</EuiBadge>
+                  <EuiBadge color="accent">{securityDataView}</EuiBadge>
                 </EuiFlexItem>
               )}
               {tags.map((tag) => (
@@ -242,10 +224,14 @@ export const EditIndexPattern = withRouter(
                     </EuiBadge>
                   ) : tag.key === 'rollup' ? (
                     <RollupDeprecationTooltip>
-                      <EuiBadge color="warning">{tag.name}</EuiBadge>
+                      <EuiBadge color="warning" data-test-subj={tag['data-test-subj']}>
+                        {tag.name}
+                      </EuiBadge>
                     </RollupDeprecationTooltip>
                   ) : (
-                    <EuiBadge color="hollow">{tag.name}</EuiBadge>
+                    <EuiBadge color="hollow" data-test-subj={tag['data-test-subj']}>
+                      {tag.name}
+                    </EuiBadge>
                   )}
                 </EuiFlexItem>
               ))}
@@ -254,6 +240,7 @@ export const EditIndexPattern = withRouter(
               <>
                 <EuiSpacer />
                 <EuiCallOut
+                  announceOnMount={false}
                   title={mappingConflictHeader}
                   color="warning"
                   iconType="warning"
@@ -274,9 +261,10 @@ export const EditIndexPattern = withRouter(
                 </EuiCallOut>
               </>
             )}
-          </IndexHeader>
+          </>
         )}
         <EuiSpacer size="xl" />
+
         {dataView && (
           <Tabs
             indexPattern={dataView}
@@ -293,6 +281,22 @@ export const EditIndexPattern = withRouter(
             }}
             refreshIndexPatternClick={() => dataViewMgmtService.refreshFields()}
             isRefreshing={isRefreshing}
+          />
+        )}
+        {flyoutOpen && dataView && (
+          <DeleteDataViewFlyout
+            dataViews={dataViews}
+            dataViewArray={[dataView as RemoveDataViewProps]}
+            selectedRelationships={{
+              [dataView.id as RemoveDataViewProps['id']]: relationships,
+            }}
+            hasSpaces={Boolean(dataView.namespaces)}
+            onDelete={() => {
+              history.push('');
+            }}
+            onClose={() => {
+              setFlyoutOpen(false);
+            }}
           />
         )}
         {displayIndexPatternEditor}

@@ -34,6 +34,7 @@ describe('http auth', () => {
     router.get(
       {
         path: '/route',
+        security: { authz: { enabled: false, reason: '' } },
         validate: false,
         options: {
           authRequired,

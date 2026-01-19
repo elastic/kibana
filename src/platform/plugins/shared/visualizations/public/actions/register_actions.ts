@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ACTION_EDIT_IN_LENS, ADD_AGG_VIS_ACTION_ID } from './constants';
-import { TypesStart } from '../vis_types/types_service';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ACTION_EDIT_IN_LENS } from './constants';
+import type { TypesStart } from '../vis_types/types_service';
 
 export function registerActions(
   uiActions: UiActionsStart,
@@ -21,10 +21,5 @@ export function registerActions(
   uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, ACTION_EDIT_IN_LENS, async () => {
     const { EditInLensAction } = await import('./edit_in_lens_action');
     return new EditInLensAction(data.query.timefilter.timefilter);
-  });
-
-  uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_AGG_VIS_ACTION_ID, async () => {
-    const { AddAggVisualizationPanelAction } = await import('./add_agg_vis_action');
-    return new AddAggVisualizationPanelAction(types);
   });
 }

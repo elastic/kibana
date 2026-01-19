@@ -10,9 +10,9 @@
 import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ExecutionContext } from '@kbn/expressions-plugin/server';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   AggsCommonStart,
   ISearchStartSearchSource,
@@ -71,7 +71,7 @@ describe('esaggs expression function - server', () => {
       aggs: {
         createAggConfigs: jest.fn().mockReturnValue({ foo: 'bar' }),
       } as unknown as jest.Mocked<AggsCommonStart>,
-      indexPatterns: {
+      dataViews: {
         create: jest.fn().mockResolvedValue({}),
       } as unknown as jest.Mocked<DataViewsContract>,
       searchSource: {} as unknown as jest.Mocked<ISearchStartSearchSource>,
@@ -86,10 +86,10 @@ describe('esaggs expression function - server', () => {
     expect(getStartDependencies).toHaveBeenCalledWith({ id: 'hi' });
   });
 
-  test('calls indexPatterns.create with the values provided by the subexpression arg', async () => {
+  test('calls dataViews.create with the values provided by the subexpression arg', async () => {
     await definition().fn(null, args, mockHandlers).toPromise();
 
-    expect(startDependencies.indexPatterns.create).toHaveBeenCalledWith(args.index.value, true);
+    expect(startDependencies.dataViews.create).toHaveBeenCalledWith(args.index.value, true);
   });
 
   test('calls aggs.createAggConfigs with the values provided by the subexpression arg', async () => {

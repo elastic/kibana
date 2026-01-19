@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types';
+import type { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types';
 import { buildkite, octokit, SELECTED_COMMIT_META_KEY, CURRENT_COMMIT_META_KEY } from '../shared';
 
 export type GithubCommitType = RestEndpointMethodTypes['repos']['getCommit']['response']['data'];

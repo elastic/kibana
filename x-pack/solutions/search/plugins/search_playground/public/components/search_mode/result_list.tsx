@@ -14,11 +14,12 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { IndicesGetMappingResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
-import { Pagination as PaginationTypeEui } from '@elastic/eui';
+import type { Pagination as PaginationTypeEui } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
-import { Pagination } from '../../types';
+import type { Pagination } from '../../types';
 
 export interface ResultListArgs {
+  executionTime: number;
   searchResults: SearchHit[];
   mappings?: IndicesGetMappingResponse;
   pagination: Pagination;
@@ -26,6 +27,7 @@ export interface ResultListArgs {
 }
 
 export const ResultList: React.FC<ResultListArgs> = ({
+  executionTime,
   searchResults,
   mappings,
   pagination,
@@ -46,6 +48,7 @@ export const ResultList: React.FC<ResultListArgs> = ({
   return (
     <>
       <DocumentList
+        executionTime={executionTime}
         dataTelemetryIdPrefix="result-list"
         docs={searchResults}
         docsPerPage={10}

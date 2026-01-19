@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import {
   copyToClipboard,
   EuiButton,
@@ -15,9 +16,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
+import type { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { useTestQuery } from './use_test_query';
 import { TestQueryRowTable } from './test_query_row_table';
 
@@ -42,9 +44,9 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
     onTestQuery,
     testQueryResult,
     testQueryError,
+    testQueryWarning,
     testQueryLoading,
-    testQueryRawResults,
-    testQueryAlerts,
+    testQueryPreview,
   } = useTestQuery(fetch);
 
   const [copiedMessage, setCopiedMessage] = useState<ReactNode | null>(null);
@@ -136,10 +138,21 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
           </EuiText>
         </EuiFormRow>
       )}
-      {showTable && testQueryRawResults && (
+      {testQueryWarning && (
+        <EuiFormRow fullWidth>
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            size="s"
+            title={testQueryWarning}
+            iconType="warning"
+          />
+        </EuiFormRow>
+      )}
+      {showTable && testQueryPreview && (
         <>
           <EuiSpacer size="s" />
-          <TestQueryRowTable rawResults={testQueryRawResults} alerts={testQueryAlerts} />
+          <TestQueryRowTable preview={testQueryPreview} />
         </>
       )}
     </>

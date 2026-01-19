@@ -9,7 +9,7 @@
 
 import { DataViewPersistableStateService } from './persistable_state';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { DataViewSpec } from '../types';
+import type { DataViewSpec } from '../types';
 const { inject, extract } = DataViewPersistableStateService;
 
 describe('data view persistable state tests', () => {

@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import type { useHistory } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { StepRunDate } from './step_page_nav';
 import { StepDetailPageStepNav } from './step_number_nav';
 import { StepDetailsStatus } from './step_details_status';
 import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
 import { StepDetailPage } from './step_detail_page';
-import { RouteProps } from '../../routes';
+import type { RouteProps } from '../../routes';
 import { SYNTHETICS_STEP_DETAIL_ROUTE } from '../../../../../common/constants';
 import { MonitorDetailsLinkPortalNode } from '../monitor_add_edit/portals';
 import { StepTitle } from './step_title';

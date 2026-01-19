@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export const checkAnnotationsPermissions = async ({
   index,
@@ -16,13 +16,11 @@ export const checkAnnotationsPermissions = async ({
   esClient: ElasticsearchClient;
 }) => {
   return esClient.security.hasPrivileges({
-    body: {
-      index: [
-        {
-          names: [index],
-          privileges: ['read', 'write'] as SecurityIndexPrivilege[],
-        },
-      ],
-    },
+    index: [
+      {
+        names: [index],
+        privileges: ['read', 'write'] as SecurityIndexPrivilege[],
+      },
+    ],
   });
 };

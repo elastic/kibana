@@ -5,16 +5,15 @@
  * 2.0.
  */
 import rison from '@kbn/rison';
+import type { PhraseFilter, ExistsFilter } from '@kbn/es-query';
 import {
   buildQueryFilter,
-  PhraseFilter,
-  ExistsFilter,
   buildPhraseFilter as esBuildPhraseFilter,
   buildPhrasesFilter as esBuildPhrasesFilter,
   buildExistsFilter as esBuildExistsFilter,
 } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { PersistableFilter } from '@kbn/lens-plugin/common';
+import type { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { ReportViewType, UrlFilter } from '../types';
 import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
 import { convertToShortUrl, encodeUriIfNeeded } from './exploratory_view_url';

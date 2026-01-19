@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, from, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom, from } from 'rxjs';
 import type { ConnectionRequestParams } from '@elastic/transport';
 import { tap } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { shimHitsTotal, getTotalLoaded } from '../../../../common';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
@@ -56,7 +57,7 @@ export const esSearchStrategyProvider = (
       throw new KbnSearchError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
-    const isPit = request.params?.body?.pit != null;
+    const isPit = request.params?.pit != null;
 
     const search = async () => {
       try {
@@ -69,6 +70,7 @@ export const esSearchStrategyProvider = (
           ...defaults,
           ...getShardTimeout(config),
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
+          ...(options.projectRouting !== undefined && { project_routing: options.projectRouting }),
           ...requestParams,
         };
         const { body, meta } = await esClient.asCurrentUser.search(params, {

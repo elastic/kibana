@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -8,6 +8,7 @@
       "react",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
@@ -15,11 +16,10 @@
     "**/*.tsx"
   ],
   "kbn_references": [
-    "@kbn/i18n-react",
-    "@kbn/test-jest-helpers",
     "@kbn/shared-ux-prompt-no-data-views-types",
     "@kbn/shared-ux-prompt-no-data-views-mocks",
     "@kbn/deeplinks-analytics",
+    "@kbn/i18n",
   ],
   "exclude": [
     "target/**/*",

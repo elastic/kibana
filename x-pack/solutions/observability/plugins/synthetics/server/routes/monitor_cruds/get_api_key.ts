@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IKibanaResponse } from '@kbn/core-http-server';
+import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monitor_project';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { generateProjectAPIKey } from '../../synthetics_service/get_api_key';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
@@ -21,6 +21,7 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY,
   validate: {
     query: schema.object({
+      spaces: schema.maybe(schema.arrayOf(schema.string())),
       accessToElasticManagedLocations: schema.maybe(schema.boolean()),
     }),
   },
@@ -29,7 +30,7 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
     server,
     response,
   }): Promise<ProjectAPIKeyResponse | IKibanaResponse> => {
-    const { accessToElasticManagedLocations } = request.query;
+    const { accessToElasticManagedLocations, spaces } = request.query;
 
     if (accessToElasticManagedLocations) {
       const elasticManagedLocationsEnabled =
@@ -52,6 +53,7 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
       request,
       server,
       accessToElasticManagedLocations,
+      spaces,
     });
 
     return { apiKey };

@@ -322,7 +322,10 @@ describe('When using the artifacts services', () => {
     it('should return error if one is encountered', async () => {
       esClientMock.bulk.mockResolvedValue({
         errors: true,
-        items: [{ create: { status: 400, error: { reason: 'error' } } as any }],
+        items: [
+          { create: { status: 200 } as any },
+          { create: { status: 400, error: { reason: 'error' } } as any },
+        ],
       } as any);
       const { artifacts, errors: responseErrors } = await bulkCreateArtifacts(esClientMock, [
         newArtifact,
@@ -437,9 +440,7 @@ describe('When using the artifacts services', () => {
         size: 20,
         track_total_hits: true,
         rest_total_hits_as_int: true,
-        body: {
-          sort: [{ created: { order: 'asc' } }],
-        },
+        sort: [{ created: { order: 'asc' } }],
       });
 
       expect(results).toEqual({
@@ -473,9 +474,7 @@ describe('When using the artifacts services', () => {
         size: 50,
         track_total_hits: true,
         rest_total_hits_as_int: true,
-        body: {
-          sort: [{ identifier: { order: 'desc' } }],
-        },
+        sort: [{ identifier: { order: 'desc' } }],
       });
 
       expect(listMeta).toEqual({

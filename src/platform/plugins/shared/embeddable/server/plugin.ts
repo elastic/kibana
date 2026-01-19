@@ -7,121 +7,100 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { identity } from 'lodash';
-import {
+import type {
   PersistableStateService,
   PersistableStateMigrateFn,
   MigrateFunctionsObject,
+  PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import {
-  EmbeddableFactoryRegistry,
-  EnhancementsRegistry,
-  EnhancementRegistryDefinition,
-  EnhancementRegistryItem,
-} from './types';
+import type { ObjectType } from '@kbn/config-schema';
+import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
+import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
   getExtractFunction,
   getInjectFunction,
   getMigrateFunction,
   getTelemetryFunction,
-} from '../common/lib';
-import {
-  EmbeddableStateWithType,
-  CommonEmbeddableStartContract,
-  EmbeddableRegistryDefinition,
-} from '../common/types';
-import { getAllMigrations } from '../common/lib/get_all_migrations';
+} from './persistable_state';
+import { getAllMigrations } from './persistable_state/get_all_migrations';
+import type {
+  EmbeddableTransforms,
+  TransformEnhancementsIn,
+  TransformEnhancementsOut,
+} from '../common';
+import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
-  registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  /*
+   * Use registerTransforms to register transforms and schema for an embeddable type.
+   * Transforms decouple REST API state from stored state,
+   * allowing embeddables to have one shape for REST APIs and another for storage.
+   * Embeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.
+   * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
+   * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
+   */
+  registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   getAllMigrations: () => MigrateFunctionsObject;
+  transformEnhancementsIn: TransformEnhancementsIn;
+  transformEnhancementsOut: TransformEnhancementsOut;
 }
 
-export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
+export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
+  /**
+   * Returns all embeddable schemas registered with registerTransforms.
+   */
+  getEmbeddableSchemas: () => ObjectType[];
+
+  getTransforms: (type: string) => EmbeddableTransforms | undefined;
+};
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private readonly enhancements: EnhancementsRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
+  private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
 
   public setup(core: CoreSetup) {
-    const commonContract: CommonEmbeddableStartContract = {
-      getEmbeddableFactory: this
-        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
-      getEnhancement: this.getEnhancement,
-    };
-
-    this.migrateFn = getMigrateFunction(commonContract);
+    this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
-      registerEnhancement: this.registerEnhancement,
-      telemetry: getTelemetryFunction(commonContract),
-      extract: getExtractFunction(commonContract),
-      inject: getInjectFunction(commonContract),
+      registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
+        if (this.transformsRegistry[type]) {
+          throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
+        }
+
+        this.transformsRegistry[type] = transforms;
+      },
+      transformEnhancementsIn: enhancementsPersistableState.extract,
+      transformEnhancementsOut: enhancementsPersistableState.inject,
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory),
+      extract: getExtractFunction(this.getEmbeddableFactory),
+      inject: getInjectFunction(this.getEmbeddableFactory),
       getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          Array.from(this.enhancements.values()),
-          this.migrateFn!
-        ),
+        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 
   public start(core: CoreStart) {
-    const commonContract: CommonEmbeddableStartContract = {
-      getEmbeddableFactory: this
-        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
-      getEnhancement: this.getEnhancement,
-    };
-
     return {
-      telemetry: getTelemetryFunction(commonContract),
-      extract: getExtractFunction(commonContract),
-      inject: getInjectFunction(commonContract),
+      getEmbeddableSchemas: () =>
+        Object.values(this.transformsRegistry)
+          .map((transforms) => transforms.schema)
+          .filter((schema) => Boolean(schema)) as ObjectType[],
+      getTransforms: (type: string) => {
+        return this.transformsRegistry[type];
+      },
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory),
+      extract: getExtractFunction(this.getEmbeddableFactory),
+      inject: getInjectFunction(this.getEmbeddableFactory),
       getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          Array.from(this.enhancements.values()),
-          this.migrateFn!
-        ),
+        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 
   public stop() {}
-
-  private registerEnhancement = (enhancement: EnhancementRegistryDefinition) => {
-    if (this.enhancements.has(enhancement.id)) {
-      throw new Error(`enhancement with id ${enhancement.id} already exists in the registry`);
-    }
-    this.enhancements.set(enhancement.id, {
-      id: enhancement.id,
-      telemetry: enhancement.telemetry || ((state, stats) => stats),
-      inject: enhancement.inject || identity,
-      extract:
-        enhancement.extract ||
-        ((state: SerializableRecord) => {
-          return { state, references: [] };
-        }),
-      migrations: enhancement.migrations || {},
-    });
-  };
-
-  private getEnhancement = (id: string): EnhancementRegistryItem => {
-    return (
-      this.enhancements.get(id) || {
-        id: 'unknown',
-        telemetry: (state, stats) => stats,
-        inject: identity,
-        extract: (state: SerializableRecord) => {
-          return { state, references: [] };
-        },
-        migrations: {},
-      }
-    );
-  };
 
   private registerEmbeddableFactory = (factory: EmbeddableRegistryDefinition) => {
     if (this.embeddableFactories.has(factory.id)) {
@@ -138,11 +117,15 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     });
   };
 
-  private getEmbeddableFactory = (embeddableFactoryId: string) => {
+  private getEmbeddableFactory = (
+    embeddableFactoryId: string
+  ): PersistableState<EmbeddableStateWithType> => {
     return (
       this.embeddableFactories.get(embeddableFactoryId) || {
-        id: 'unknown',
-        telemetry: (state, stats) => stats,
+        telemetry: (
+          state: EmbeddableStateWithType,
+          stats: Record<string, string | number | boolean>
+        ) => stats,
         inject: (state: EmbeddableStateWithType) => state,
         extract: (state: EmbeddableStateWithType) => {
           return { state, references: [] };

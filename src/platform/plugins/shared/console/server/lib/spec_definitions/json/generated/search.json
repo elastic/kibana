@@ -37,7 +37,7 @@
       "preference": "",
       "pre_filter_shard_size": "",
       "request_cache": "__flag__",
-      "routing": "",
+      "routing": [],
       "scroll": [
         "-1",
         "0"
@@ -72,6 +72,7 @@
       "version": "__flag__",
       "_source": "__flag__",
       "_source_excludes": [],
+      "_source_exclude_vectors": "__flag__",
       "_source_includes": [],
       "seq_no_primary_term": "__flag__",
       "q": "",
@@ -90,7 +91,7 @@
       "_search",
       "{index}/_search"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search",
     "availability": {
       "stack": true,
       "serverless": true

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { type TypeOf, schema } from '@kbn/config-schema';
+
 import type {
   AgentPolicy,
   NewAgentPolicy,
@@ -37,8 +39,53 @@ export interface GetOneAgentPolicyResponse {
   item: AgentPolicy;
 }
 
+export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
+  currentVersions: schema.arrayOf(
+    schema.object({
+      version: schema.string({
+        meta: { description: 'Agent version' },
+      }),
+      agents: schema.number({
+        meta: { description: 'Number of agents that upgraded to this version' },
+      }),
+      failedUpgradeAgents: schema.number({
+        meta: { description: 'Number of agents that failed to upgrade to this version' },
+      }),
+      failedUpgradeActionIds: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          meta: { description: 'List of action IDs related to failed upgrades' },
+          maxSize: 1000,
+        })
+      ),
+      inProgressUpgradeAgents: schema.number({
+        meta: { description: 'Number of agents that are upgrading to this version' },
+      }),
+      inProgressUpgradeActionIds: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          meta: { description: 'List of action IDs related to in-progress upgrades' },
+          maxSize: 1000,
+        })
+      ),
+    }),
+    { maxSize: 10000 }
+  ),
+  totalAgents: schema.number(),
+});
+
+export type GetAutoUpgradeAgentsStatusResponse = TypeOf<
+  typeof GetAutoUpgradeAgentsStatusResponseSchema
+>;
+
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+export type CurrentVersionCount = Writeable<
+  GetAutoUpgradeAgentsStatusResponse['currentVersions'][number]
+>;
+
 export interface CreateAgentPolicyRequest {
   body: NewAgentPolicy;
+  query: {
+    sys_monitoring?: boolean;
+  };
 }
 
 export interface CreateAgentPolicyResponse {
@@ -46,7 +93,9 @@ export interface CreateAgentPolicyResponse {
 }
 
 export type UpdateAgentPolicyRequest = GetOneAgentPolicyRequest & {
-  body: NewAgentPolicy;
+  body: NewAgentPolicy & {
+    bumpRevision?: boolean;
+  };
 };
 
 export interface UpdateAgentPolicyResponse {
@@ -93,7 +142,7 @@ export interface GetFullAgentManifestResponse {
 export type FetchAllAgentPoliciesOptions = Pick<
   ListWithKuery,
   'perPage' | 'kuery' | 'sortField' | 'sortOrder'
-> & { fields?: string[] };
+> & { fields?: string[]; spaceId?: string };
 
 export type FetchAllAgentPolicyIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> & {
   spaceId?: string;

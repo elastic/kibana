@@ -15,7 +15,7 @@ import {
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
-import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
+import type { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
 export const indices: ElasticsearchIndexWithIngestion[] = [
   {
@@ -280,10 +280,6 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       sync_now: false,
     },
     count: 1,
-    crawler: {
-      id: '5',
-      index_name: 'connector-crawler',
-    },
     hidden: false,
     name: 'crawler',
     total: {

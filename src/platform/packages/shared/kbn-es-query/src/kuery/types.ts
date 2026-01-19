@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SerializableRecord } from '@kbn/utility-types';
-import { KQL_NODE_TYPE_FUNCTION } from './node_types/function';
-import { KQL_NODE_TYPE_LITERAL } from './node_types/literal';
-import { KQL_NODE_TYPE_WILDCARD } from './node_types/wildcard';
+import type { estypes } from '@elastic/elasticsearch';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { KQL_NODE_TYPE_FUNCTION } from './node_types/function';
+import type { KQL_NODE_TYPE_LITERAL } from './node_types/literal';
+import type { KQL_NODE_TYPE_WILDCARD } from './node_types/wildcard';
 
 /** @public */
 export type KqlNodeType =

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IEventLogClient } from '@kbn/event-log-plugin/server';
-import { Logger } from '@kbn/core/server';
+import type { IEventLogClient } from '@kbn/event-log-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { FindGapsParams } from './types';
-import { Gap } from './gap';
+import type { FindGapsParams, FindGapsSearchAfterParams } from '../../application/gaps/types';
+import type { Gap } from './gap';
 import { transformToGap } from './transforms/transform_to_gap';
 import { buildGapsFilter } from './build_gaps_filter';
-
 export const findGaps = async ({
   eventLogClient,
   logger,
@@ -56,6 +56,87 @@ export const findGaps = async ({
     };
   } catch (err) {
     logger.error(`Failed to find gaps for rule ${ruleId}: ${err.message}`);
+    throw err;
+  }
+};
+
+const FIND_GAPS_SEARCH_AFTER_MAX_RULES = 100;
+
+/**
+ * This function is used to find gaps using search after.
+ * It's used when to be able process more than 10,000 gaps with stable sorting.
+ */
+export const findGapsSearchAfter = async ({
+  eventLogClient,
+  logger,
+  params,
+}: {
+  eventLogClient: IEventLogClient;
+  logger: Logger;
+  params: FindGapsSearchAfterParams;
+}): Promise<{
+  total: number;
+  data: Gap[];
+  searchAfter?: SortResults[];
+  pitId?: string;
+}> => {
+  const {
+    ruleIds,
+    start,
+    end,
+    perPage,
+    statuses,
+    sortField,
+    sortOrder,
+    hasUnfilledIntervals,
+    hasInProgressIntervals,
+    hasFilledIntervals,
+    updatedBefore,
+    failedAutoFillAttemptsLessThan,
+  } = params;
+
+  if (ruleIds.length > FIND_GAPS_SEARCH_AFTER_MAX_RULES) {
+    throw new Error(`ruleIds max size must be ${FIND_GAPS_SEARCH_AFTER_MAX_RULES}`);
+  }
+
+  try {
+    const filter = buildGapsFilter({
+      start,
+      end,
+      statuses,
+      hasUnfilledIntervals,
+      hasInProgressIntervals,
+      hasFilledIntervals,
+      failedAutoFillAttemptsLessThan,
+      updatedBefore,
+    });
+    const gapsResponse = await eventLogClient.findEventsBySavedObjectIdsSearchAfter(
+      RULE_SAVED_OBJECT_TYPE,
+      ruleIds,
+      {
+        filter,
+        sort: [
+          {
+            sort_field: sortField ?? '@timestamp',
+            sort_order: sortOrder ?? 'desc',
+          },
+        ],
+        per_page: perPage,
+        pit_id: params?.pitId,
+        search_after: params?.searchAfter,
+      }
+    );
+
+    return {
+      total: gapsResponse.total,
+      data: transformToGap(gapsResponse),
+      searchAfter: gapsResponse.search_after as SortResults[] | undefined,
+      pitId: gapsResponse.pit_id,
+    };
+  } catch (err) {
+    logger.error(
+      `Failed to find gaps with search after for rules ${ruleIds.join(', ')}: ${err.message}`
+    );
     throw err;
   }
 };

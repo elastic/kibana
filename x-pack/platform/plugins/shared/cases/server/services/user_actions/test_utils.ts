@@ -186,7 +186,7 @@ export const createCaseUserAction = (): SavedObject<CaseUserActionWithoutReferen
         connector: restConnector,
         title: 'a title',
         description: 'a desc',
-        settings: { syncAlerts: false },
+        settings: { syncAlerts: false, extractObservables: false },
         status: CaseStatuses.open,
         severity: CaseSeverity.LOW,
         tags: [],

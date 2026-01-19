@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { OtelSpanLink, SpanLink } from '@kbn/apm-types';
 import moment from 'moment';
 
 export function getBufferedTimerange({
@@ -20,4 +21,26 @@ export function getBufferedTimerange({
     startWithBuffer: moment(start).subtract(bufferSize, 'days').valueOf(),
     endWithBuffer: moment(end).add(bufferSize, 'days').valueOf(),
   };
+}
+
+export function mapOtelToSpanLink(
+  otelSpanLinks: Partial<OtelSpanLink> | undefined = {}
+): SpanLink[] {
+  const spanLinks: SpanLink[] = [];
+
+  const { span_id: spanIds = [], trace_id: traceIds = [] } = otelSpanLinks ?? {};
+
+  for (let i = 0; i < Math.max(spanIds.length, traceIds.length); i++) {
+    const spanId = spanIds[i];
+    const traceId = traceIds[i];
+
+    if (traceId && spanId) {
+      spanLinks.push({
+        span: { id: spanId },
+        trace: { id: traceId },
+      });
+    }
+  }
+
+  return spanLinks;
 }

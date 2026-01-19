@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { take, filter } from 'rxjs';
 import supertest from 'supertest';
-import { Server as HapiServer } from '@hapi/hapi';
-import { createHttpService } from '@kbn/core-http-server-mocks';
+import type { Server as HapiServer } from '@hapi/hapi';
 import type { IRouter } from '@kbn/core-http-server';
-import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ServerMetricsCollector } from '@kbn/core-metrics-collectors-server-internal';
-import { setTimeout as setTimeoutPromise } from 'timers/promises';
+import { createInternalHttpService } from '../utilities';
 
 describe('ServerMetricsCollector', () => {
   let server: HttpService;
@@ -25,12 +26,14 @@ describe('ServerMetricsCollector', () => {
   let hapiServer: HapiServer;
   let router: IRouter;
 
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
 
   beforeEach(async () => {
-    server = createHttpService();
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService();
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const contextSetup = contextServiceMock.createSetupContract();
     const httpSetup = await server.setup({
       context: contextSetup,
@@ -46,9 +49,12 @@ describe('ServerMetricsCollector', () => {
   });
 
   it('collect requests infos', async () => {
-    router.get({ path: '/', validate: false }, async (ctx, req, res) => {
-      return res.ok({ body: '' });
-    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        return res.ok({ body: '' });
+      }
+    );
 
     await server.start();
 
@@ -81,17 +87,27 @@ describe('ServerMetricsCollector', () => {
     const disconnectRequested$ = new Subject<void>(); // Controls the number of requests in the /disconnect endpoint
     const disconnectAborted$ = new Subject<void>(); // Controls the abort event in the /disconnect endpoint
 
-    router.get({ path: '/', validate: false }, async (ctx, req, res) => {
-      return res.ok({ body: '' });
-    });
-    router.get({ path: '/disconnect', validate: false }, async (ctx, req, res) => {
-      disconnectRequested$.next();
-      req.events.aborted$.subscribe(() => {
-        disconnectAborted$.next();
-      });
-      await never; // Never resolve the request
-      return res.ok({ body: '' });
-    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        return res.ok({ body: '' });
+      }
+    );
+    router.get(
+      {
+        path: '/disconnect',
+        validate: false,
+        security: { authz: { requiredPrivileges: ['foo'] } },
+      },
+      async (ctx, req, res) => {
+        disconnectRequested$.next();
+        req.events.aborted$.subscribe(() => {
+          disconnectAborted$.next();
+        });
+        await never; // Never resolve the request
+        return res.ok({ body: '' });
+      }
+    );
     await server.start();
 
     await sendGet('/');
@@ -148,17 +164,26 @@ describe('ServerMetricsCollector', () => {
   });
 
   it('collect response times', async () => {
-    router.get({ path: '/no-delay', validate: false }, async (ctx, req, res) => {
-      return res.ok({ body: '' });
-    });
-    router.get({ path: '/500-ms', validate: false }, async (ctx, req, res) => {
-      await delay(500);
-      return res.ok({ body: '' });
-    });
-    router.get({ path: '/250-ms', validate: false }, async (ctx, req, res) => {
-      await delay(250);
-      return res.ok({ body: '' });
-    });
+    router.get(
+      { path: '/no-delay', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        return res.ok({ body: '' });
+      }
+    );
+    router.get(
+      { path: '/500-ms', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        await timer(500);
+        return res.ok({ body: '' });
+      }
+    );
+    router.get(
+      { path: '/250-ms', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        await timer(250);
+        return res.ok({ body: '' });
+      }
+    );
     await server.start();
 
     await Promise.all([sendGet('/no-delay'), sendGet('/250-ms')]);
@@ -178,11 +203,14 @@ describe('ServerMetricsCollector', () => {
     const waitSubject = new Subject();
     const hitSubject = new BehaviorSubject(0);
 
-    router.get({ path: '/', validate: false }, async (ctx, req, res) => {
-      hitSubject.next(hitSubject.value + 1);
-      await waitSubject.pipe(take(1)).toPromise();
-      return res.ok({ body: '' });
-    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+      async (ctx, req, res) => {
+        hitSubject.next(hitSubject.value + 1);
+        await waitSubject.pipe(take(1)).toPromise();
+        return res.ok({ body: '' });
+      }
+    );
     await server.start();
 
     const waitForHits = (hits: number) =>
@@ -214,16 +242,19 @@ describe('ServerMetricsCollector', () => {
     await Promise.all([res1, res2]);
     // Give the event-loop one more cycle to allow concurrent connections to be
     // up to date before collecting
-    await setTimeoutPromise(0);
+    await timer(0);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
   });
 
   describe('#reset', () => {
     it('reset the requests state', async () => {
-      router.get({ path: '/', validate: false }, async (ctx, req, res) => {
-        return res.ok({ body: '' });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+        async (ctx, req, res) => {
+          return res.ok({ body: '' });
+        }
+      );
       await server.start();
 
       await sendGet('/');
@@ -266,21 +297,32 @@ describe('ServerMetricsCollector', () => {
     });
 
     it('resets the response times', async () => {
-      router.get({ path: '/no-delay', validate: false }, async (ctx, req, res) => {
-        return res.ok({ body: '' });
-      });
-      router.get({ path: '/500-ms', validate: false }, async (ctx, req, res) => {
-        await delay(500);
-        return res.ok({ body: '' });
-      });
+      router.get(
+        {
+          path: '/no-delay',
+          validate: false,
+          security: { authz: { requiredPrivileges: ['foo'] } },
+        },
+        async (ctx, req, res) => {
+          return res.ok({ body: '' });
+        }
+      );
+      router.get(
+        { path: '/500-ms', validate: false, security: { authz: { requiredPrivileges: ['foo'] } } },
+        async (ctx, req, res) => {
+          await timer(500);
+          return res.ok({ body: '' });
+        }
+      );
 
       await server.start();
 
       await Promise.all([sendGet('/no-delay'), sendGet('/500-ms')]);
       let metrics = await collector.collect();
 
-      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(250);
-      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(240);
+      expect(metrics.response_times.avg_in_millis).toBeLessThanOrEqual(260);
+      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(490);
 
       collector.reset();
       metrics = await collector.collect();
@@ -290,8 +332,8 @@ describe('ServerMetricsCollector', () => {
       await Promise.all([sendGet('/500-ms'), sendGet('/500-ms')]);
       metrics = await collector.collect();
 
-      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(500);
-      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(490);
+      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(490);
     });
   });
 });

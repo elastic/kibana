@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import { defer, from } from 'rxjs';
 import { rateLimitingForkJoin } from '../../common/data_views/utils';
@@ -122,11 +122,15 @@ export class IndexPatternsFetcher {
 
     if (this.rollupsEnabled && type === DataViewType.ROLLUP && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
-      const capabilityCheck = getCapabilitiesForRollupIndices(
+      const capabilities = getCapabilitiesForRollupIndices(
         await this.elasticsearchClient.rollup.getRollupIndexCaps({
           index: rollupIndex,
         })
-      )[rollupIndex];
+      );
+
+      const capabilityCheck =
+        // use the rollup index name BUT if its an alias, we'll take the first one
+        capabilities[rollupIndex] || capabilities[Object.keys(capabilities)[0]];
 
       if (capabilityCheck.error) {
         throw new Error(capabilityCheck.error);

@@ -6,8 +6,8 @@
  */
 
 import type { Subject } from 'rxjs';
-import { ObjectType } from '@kbn/config-schema';
-import {
+import type { ObjectType } from '@kbn/config-schema';
+import type {
   RequestHandler,
   RouteConfig,
   RouteMethod,
@@ -15,15 +15,17 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
+  RouteSecurity,
 } from '@kbn/core/server';
-import {
+import type {
   VersionedRouteValidation,
   HttpResponsePayload,
   ResponseError,
 } from '@kbn/core-http-server';
-import { SyntheticsEsClient } from '../lib';
-import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
-import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { MonitorConfigRepository } from '../services/monitor_config_repository';
+import type { SyntheticsEsClient } from '../lib';
+import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
+import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 export type SyntheticsRequest = KibanaRequest<
   Record<string, any>,
   Record<string, any>,
@@ -53,7 +55,9 @@ export interface UMServerRoute<T> {
  * provided by Kibana core.
  */
 export type UMRouteDefinition<T> = UMServerRoute<T> &
-  RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>;
+  Omit<RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>, 'security'> & {
+    security?: RouteSecurity;
+  };
 
 /**
  * This type represents an Uptime route definition that corresponds to the contract
@@ -82,17 +86,7 @@ export type SyntheticsRouteWrapper = (
   uptimeRoute: SyntheticsRoute<Record<string, unknown>>,
   server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient
-) => UMKibanaRoute;
-
-export interface UptimeRouteContext {
-  syntheticsEsClient: SyntheticsEsClient;
-  context: UptimeRequestHandlerContext;
-  request: SyntheticsRequest;
-  response: KibanaResponseFactory;
-  savedObjectsClient: SavedObjectsClientContract;
-  server: SyntheticsServerSetup;
-  subject?: Subject<unknown>;
-}
+) => UMKibanaRoute & { security: RouteSecurity };
 
 export interface RouteContext<
   Params = Record<string, any>,
@@ -108,6 +102,7 @@ export interface RouteContext<
   syntheticsMonitorClient: SyntheticsMonitorClient;
   subject?: Subject<unknown>;
   spaceId: string;
+  monitorConfigRepository: MonitorConfigRepository;
 }
 
 export type SyntheticsRouteHandler<

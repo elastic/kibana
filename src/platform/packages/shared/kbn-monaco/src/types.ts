@@ -9,7 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { UseEuiTheme } from '@elastic/eui';
-import { monaco } from './monaco_imports';
+import type { monaco } from './monaco_imports';
 
 export interface LangModuleType {
   ID: string;
@@ -17,6 +17,8 @@ export interface LangModuleType {
   languageConfiguration?: monaco.languages.LanguageConfiguration;
   foldingRangeProvider?: monaco.languages.FoldingRangeProvider;
   getSuggestionProvider?: Function;
+  onLanguage?: () => void;
+  languageThemeResolver?: (args: UseEuiTheme) => monaco.editor.IStandaloneThemeData;
 }
 
 export interface CompleteLangModuleType extends LangModuleType {
@@ -26,23 +28,24 @@ export interface CompleteLangModuleType extends LangModuleType {
   validation$: () => Observable<LangValidation>;
 }
 
-export interface LanguageProvidersModule<Deps = unknown> {
+interface LanguageProvidersModule<Deps = unknown, MarkerDataType = monaco.editor.IMarkerData> {
   validate: (
     model: monaco.editor.ITextModel,
     code: string,
-    callbacks?: Deps
-  ) => Promise<{ errors: monaco.editor.IMarkerData[]; warnings: monaco.editor.IMarkerData[] }>;
+    callbacks?: Deps,
+    options?: { invalidateColumnsCache?: boolean }
+  ) => Promise<{ errors: MarkerDataType[]; warnings: MarkerDataType[] }>;
   getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
   getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;
   getHoverProvider?: (callbacks?: Deps) => monaco.languages.HoverProvider;
+  getInlineCompletionsProvider?: (callbacks?: Deps) => monaco.languages.InlineCompletionsProvider;
   getCodeActionProvider?: (callbacks?: Deps) => monaco.languages.CodeActionProvider;
 }
 
-export interface CustomLangModuleType<Deps = unknown>
-  extends Omit<LangModuleType, 'getSuggestionProvider'>,
-    LanguageProvidersModule<Deps> {
-  onLanguage: () => void;
-  languageThemeResolver: (args: UseEuiTheme) => monaco.editor.IStandaloneThemeData;
+export interface CustomLangModuleType<Deps = unknown, MarkerDataType = monaco.editor.IMarkerData>
+  extends Omit<LangModuleType, 'getSuggestionProvider' | 'onLanguage'>,
+    LanguageProvidersModule<Deps, MarkerDataType> {
+  onLanguage: NonNullable<LangModuleType['onLanguage']>;
 }
 
 export interface MonacoEditorError {
@@ -52,7 +55,7 @@ export interface MonacoEditorError {
   endLineNumber: number;
   endColumn: number;
   message: string;
-  code?: string | undefined;
+  code: string;
 }
 
 export interface LangValidation {

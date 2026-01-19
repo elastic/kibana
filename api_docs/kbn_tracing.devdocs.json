@@ -1,0 +1,501 @@
+{
+  "id": "@kbn/tracing",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/tracing",
+        "id": "def-server.LateBindingSpanProcessor",
+        "type": "Class",
+        "tags": [],
+        "label": "LateBindingSpanProcessor",
+        "description": [
+          "\nThis processor allows consumers to register Span processors after startup,\nwhich is useful if processors should be conditionally applied based on config\nor runtime logic."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/tracing",
+            "scope": "server",
+            "docId": "kibKbnTracingPluginApi",
+            "section": "def-server.LateBindingSpanProcessor",
+            "text": "LateBindingSpanProcessor"
+          },
+          " implements ",
+          "SpanProcessor"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.LateBindingSpanProcessor.instance",
+            "type": "Object",
+            "tags": [],
+            "label": "#instance",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tracing",
+                "scope": "server",
+                "docId": "kibKbnTracingPluginApi",
+                "section": "def-server.LateBindingSpanProcessor",
+                "text": "LateBindingSpanProcessor"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.LateBindingSpanProcessor.processors",
+            "type": "Array",
+            "tags": [],
+            "label": "#processors",
+            "description": [],
+            "signature": [
+              "SpanProcessor",
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.LateBindingSpanProcessor.onStart",
+            "type": "Function",
+            "tags": [],
+            "label": "onStart",
+            "description": [],
+            "signature": [
+              "(span: ",
+              "Span",
+              ", parentContext: ",
+              "Context",
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.LateBindingSpanProcessor.onStart.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "span",
+                "description": [],
+                "signature": [
+                  "Span"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+                "lineNumber": 28,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.LateBindingSpanProcessor.onStart.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "parentContext",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+                "lineNumber": 28,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.LateBindingSpanProcessor.onEnd",
+            "type": "Function",
+            "tags": [],
+            "label": "onEnd",
+            "description": [],
+            "signature": [
+              "(span: ",
+              "ReadableSpan",
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.LateBindingSpanProcessor.onEnd.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "span",
+                "description": [],
+                "signature": [
+                  "ReadableSpan"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+                "lineNumber": 32,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.LateBindingSpanProcessor.forceFlush",
+            "type": "Function",
+            "tags": [],
+            "label": "forceFlush",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.LateBindingSpanProcessor.shutdown",
+            "type": "Function",
+            "tags": [],
+            "label": "shutdown",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.LateBindingSpanProcessor.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [],
+            "signature": [
+              "(processor: ",
+              "SpanProcessor",
+              ") => () => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.LateBindingSpanProcessor.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "processor",
+                "description": [],
+                "signature": [
+                  "SpanProcessor"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+                "lineNumber": 43,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.LateBindingSpanProcessor.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [],
+            "signature": [
+              "(processor: ",
+              "SpanProcessor",
+              ") => () => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.LateBindingSpanProcessor.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "processor",
+                "description": [],
+                "signature": [
+                  "SpanProcessor"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+                "lineNumber": 52,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.LateBindingSpanProcessor.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/tracing",
+                "scope": "server",
+                "docId": "kibKbnTracingPluginApi",
+                "section": "def-server.LateBindingSpanProcessor",
+                "text": "LateBindingSpanProcessor"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/late_binding_span_processor.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tracing",
+        "id": "def-server.OTLPSpanProcessor",
+        "type": "Class",
+        "tags": [],
+        "label": "OTLPSpanProcessor",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/tracing",
+            "scope": "server",
+            "docId": "kibKbnTracingPluginApi",
+            "section": "def-server.OTLPSpanProcessor",
+            "text": "OTLPSpanProcessor"
+          },
+          " extends ",
+          "BatchSpanProcessor"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.OTLPSpanProcessor.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.OTLPSpanProcessor.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tracing-config",
+                    "scope": "common",
+                    "docId": "kibKbnTracingConfigPluginApi",
+                    "section": "def-common.OTLPExportConfig",
+                    "text": "OTLPExportConfig"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+                "lineNumber": 17,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.OTLPSpanProcessor.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "protocol",
+                "description": [],
+                "signature": [
+                  "\"http\" | \"grpc\""
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+                "lineNumber": 17,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/tracing",
+        "id": "def-server.initTracing",
+        "type": "Function",
+        "tags": [],
+        "label": "initTracing",
+        "description": [
+          "\nInitialize the OpenTelemetry tracing provider"
+        ],
+        "signature": [
+          "({\n  resource,\n  tracingConfig,\n}: { resource: ",
+          "Resource",
+          "; tracingConfig: ",
+          {
+            "pluginId": "@kbn/tracing-config",
+            "scope": "common",
+            "docId": "kibKbnTracingConfigPluginApi",
+            "section": "def-common.TracingConfig",
+            "text": "TracingConfig"
+          },
+          "; }) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.initTracing.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  resource,\n  tracingConfig,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
+            "lineNumber": 29,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.initTracing.$1.resource",
+                "type": "Object",
+                "tags": [],
+                "label": "resource",
+                "description": [],
+                "signature": [
+                  "Resource"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.initTracing.$1.tracingConfig",
+                "type": "Object",
+                "tags": [],
+                "label": "tracingConfig",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tracing-config",
+                    "scope": "common",
+                    "docId": "kibKbnTracingConfigPluginApi",
+                    "section": "def-common.TracingConfig",
+                    "text": "TracingConfig"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
+                "lineNumber": 31,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

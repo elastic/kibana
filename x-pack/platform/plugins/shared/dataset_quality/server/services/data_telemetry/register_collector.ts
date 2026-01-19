@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { DataTelemetryObject } from './types';
+import type { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { DataTelemetryObject } from './types';
 
 const structureLevelSchema: MakeSchemaFrom<
   DataTelemetryObject,

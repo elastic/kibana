@@ -8,22 +8,11 @@
  */
 
 import apm from 'elastic-apm-node';
-import {
-  finalize,
-  fromEventPattern,
-  lastValueFrom,
-  map,
-  mergeMap,
-  Observable,
-  of,
-  takeUntil,
-  tap,
-} from 'rxjs';
-import { Writable } from 'stream';
+import type { Observable } from 'rxjs';
+import { finalize, fromEventPattern, lastValueFrom, map, mergeMap, of, takeUntil, tap } from 'rxjs';
 
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import {
-  CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -31,15 +20,11 @@ import {
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
-import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type { JobParamsPNGV2, TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';
+import { PNG_JOB_TYPE_V2, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+import type { RunTaskOpts } from '@kbn/reporting-server';
 import {
-  JobParamsPNGV2,
-  PNG_JOB_TYPE_V2,
-  PNG_REPORT_TYPE_V2,
-  TaskPayloadPNGV2,
-} from '@kbn/reporting-export-types-png-common';
-import {
-  decryptJobHeaders,
   ExportType,
   getFullRedirectAppUrl,
   REPORTING_TRANSACTION_TYPE,
@@ -86,22 +71,21 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
    * @param cancellationToken
    * @param stream
    */
-  public runTask = (
-    jobId: string,
-    payload: TaskPayloadPNGV2,
-    taskInstanceFields: TaskInstanceFields,
-    cancellationToken: CancellationToken,
-    stream: Writable
-  ) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
+  public runTask = ({
+    jobId,
+    payload,
+    request,
+    taskInstanceFields,
+    cancellationToken,
+    stream,
+  }: RunTaskOpts<TaskPayloadPNGV2>) => {
+    const logger = this.logger.get('execute-job');
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
-    const { encryptionKey } = this.config;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, logger)),
-      mergeMap((headers) => {
+      mergeMap(() => {
         const url = getFullRedirectAppUrl(
           this.config,
           this.getServerInfo(),
@@ -126,8 +110,8 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
           .screenshotting!.getScreenshots({
             format: 'png',
             browserTimezone: payload.browserTimezone,
-            headers,
             layout,
+            request,
             urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
             taskInstanceFields,
             logger,
@@ -155,7 +139,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
               }, [] as string[]),
             })),
             tap(({ buffer }) => {
-              logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
+              logger.debug(`PNG buffer byte length: ${buffer.byteLength}`, { tags: [jobId] });
               apmTrans.setLabel('byte-length', buffer.byteLength, false);
             }),
             finalize(() => {
@@ -170,7 +154,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         metrics: { png: metrics },
         warnings,
       })),
-      tap({ error: (error) => logger.error(error) }),
+      tap({ error: (error) => logger.error(error, { tags: [jobId] }) }),
       finalize(() => apmGeneratePng?.end())
     );
 

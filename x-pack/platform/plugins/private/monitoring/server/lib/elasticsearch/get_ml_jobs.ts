@@ -9,8 +9,8 @@ import { includes } from 'lodash';
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
 import { ML_SUPPORTED_LICENSES } from '../../../common/constants';
-import { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest, Cluster } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest, Cluster } from '../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
@@ -73,19 +73,17 @@ export function getMlJobs(req: LegacyRequest) {
       'hits.hits._source.job_stats.node.name',
       'hits.hits._source.elasticsearch.node.name',
     ],
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      collapse: { field: 'job_stats.job_id' },
-      query: createQuery({
-        type,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        clusterUuid,
-        metric,
-      }),
-    },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    collapse: { field: 'job_stats.job_id' },
+    query: createQuery({
+      type,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      clusterUuid,
+      metric,
+    }),
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
@@ -121,19 +119,17 @@ export function getMlJobsForCluster(req: LegacyRequest, cluster: Cluster, ccs: s
       size: 0,
       ignore_unavailable: true,
       filter_path: 'aggregations.jobs_count.value',
-      body: {
-        query: createQuery({
-          type,
-          dsDataset: getElasticsearchDataset(dataset),
-          metricset: dataset,
-          start,
-          end,
-          clusterUuid,
-          metric,
-        }),
-        aggs: {
-          jobs_count: { cardinality: { field: 'job_stats.job_id' } },
-        },
+      query: createQuery({
+        type,
+        dsDataset: getElasticsearchDataset(dataset),
+        metricset: dataset,
+        start,
+        end,
+        clusterUuid,
+        metric,
+      }),
+      aggs: {
+        jobs_count: { cardinality: { field: 'job_stats.job_id' } },
       },
     };
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

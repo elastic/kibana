@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
+import type { HttpSetup } from '@kbn/core/public';
+import type { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { getFilter } from './get_filter';
 

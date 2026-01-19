@@ -6,7 +6,8 @@
  */
 
 import { persistTokenCloudData } from './persist_token'; // Adjust the import based on the actual file path
-import { Logger, SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from '../routes/constants';
 
@@ -47,7 +48,77 @@ describe('persistTokenCloudData', () => {
     );
   });
 
-  it('updates an existing saved object if onboardingToken is provided and different', async () => {
+  it('creates a new saved object if none exists and resourceData is provided', async () => {
+    (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    await persistTokenCloudData(mockSavedObjectsClient, {
+      logger: mockLogger,
+      solutionType: 'test_solution',
+      resourceData: {
+        project: {
+          search: {
+            type: 'general',
+          },
+        },
+      },
+    });
+
+    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      {
+        onboardingData: {
+          solutionType: 'test_solution',
+          token: '',
+        },
+        resourceData: {
+          project: {
+            search: {
+              type: 'general',
+            },
+          },
+        },
+      },
+      { id: CLOUD_DATA_SAVED_OBJECT_ID }
+    );
+  });
+
+  it('creates a new saved object if none exists and security details are provided', async () => {
+    (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    await persistTokenCloudData(mockSavedObjectsClient, {
+      logger: mockLogger,
+      solutionType: 'security',
+      security: {
+        useCase: 'siem',
+        migration: {
+          value: true,
+          type: 'splunk',
+        },
+      },
+    });
+
+    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      {
+        onboardingData: {
+          solutionType: 'security',
+          token: '',
+          security: {
+            useCase: 'siem',
+            migration: {
+              value: true,
+              type: 'splunk',
+            },
+          },
+        },
+      },
+      { id: CLOUD_DATA_SAVED_OBJECT_ID }
+    );
+  });
+
+  it('updates an existing saved object if onboardingToken is provided', async () => {
     (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
       id: CLOUD_DATA_SAVED_OBJECT_ID,
       attributes: {
@@ -75,13 +146,113 @@ describe('persistTokenCloudData', () => {
     );
   });
 
-  it('does nothing if onboardingToken is the same', async () => {
+  it('updates an existing saved object if resourceData is provided', async () => {
+    (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
+      id: CLOUD_DATA_SAVED_OBJECT_ID,
+      attributes: {
+        onboardingData: {
+          token: 'test_token',
+          solutionType: 'test_solution',
+          resourceData: {
+            project: {
+              search: {
+                type: 'general',
+              },
+            },
+          },
+        },
+      },
+    });
+    await persistTokenCloudData(mockSavedObjectsClient, {
+      resourceData: {
+        project: {
+          search: {
+            type: 'vector',
+          },
+        },
+      },
+    });
+
+    expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      CLOUD_DATA_SAVED_OBJECT_ID,
+      {
+        onboardingData: {
+          solutionType: 'test_solution',
+          token: 'test_token',
+        },
+        resourceData: {
+          project: {
+            search: {
+              type: 'vector',
+            },
+          },
+        },
+      }
+    );
+  });
+
+  it('updates an existing saved object if security details are provided', async () => {
+    (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
+      id: CLOUD_DATA_SAVED_OBJECT_ID,
+      attributes: {
+        onboardingData: {
+          solutionType: 'security',
+          token: 'test_token',
+          security: {
+            useCase: 'siem',
+            migration: {
+              value: true,
+              type: 'splunk',
+            },
+          },
+        },
+      },
+    });
+
+    await persistTokenCloudData(mockSavedObjectsClient, {
+      logger: mockLogger,
+      solutionType: 'security',
+      security: {
+        useCase: 'siem',
+        migration: {
+          value: false,
+        },
+      },
+    });
+
+    expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      CLOUD_DATA_SAVED_OBJECT_ID,
+      {
+        onboardingData: {
+          solutionType: 'security',
+          token: 'test_token',
+          security: {
+            useCase: 'siem',
+            migration: {
+              value: false,
+            },
+          },
+        },
+      }
+    );
+  });
+
+  it('does nothing if onboardingToken and security details are the same', async () => {
     (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
       id: CLOUD_DATA_SAVED_OBJECT_ID,
       attributes: {
         onboardingData: {
           token: 'same_token',
           solutionType: 'test_solution',
+          security: {
+            useCase: 'siem',
+            migration: {
+              value: true,
+              type: 'splunk',
+            },
+          },
         },
       },
     });
@@ -89,6 +260,13 @@ describe('persistTokenCloudData', () => {
       logger: mockLogger,
       onboardingToken: 'same_token',
       solutionType: 'test_solution',
+      security: {
+        useCase: 'siem',
+        migration: {
+          value: true,
+          type: 'splunk',
+        },
+      },
     });
 
     expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();

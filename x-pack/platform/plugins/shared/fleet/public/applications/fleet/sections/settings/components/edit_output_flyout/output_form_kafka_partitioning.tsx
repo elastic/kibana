@@ -144,6 +144,7 @@ export const OutputFormKafkaPartitioning: React.FunctionComponent<{
           data-test-subj={'settingsOutputsFlyout.kafkaPartitioningRadioInput'}
           options={kafkaPartitioningOptions}
           compressed
+          name="kafkaPartitioningStrategy"
           {...inputs.kafkaPartitionTypeInput.props}
         />
       </EuiFormRow>

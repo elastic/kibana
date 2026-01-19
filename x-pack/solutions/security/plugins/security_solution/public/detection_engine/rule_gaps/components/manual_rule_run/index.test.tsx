@@ -32,8 +32,7 @@ describe('ManualRuleRunModal', () => {
 
   beforeEach(() => {
     render(<ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />);
-
-    timeRangeForm = screen.getByTestId('manual-rule-run-time-range-form');
+    timeRangeForm = screen.getByTestId('schedule-bulk-action-modal-time-range-form');
     startDatePicker = timeRangeForm.getElementsByClassName('start-date-picker')[0];
     endDatePicker = timeRangeForm.getElementsByClassName('end-date-picker')[0];
     confirmModalConfirmButton = screen.getByTestId('confirmModalConfirmButton');

@@ -14,17 +14,10 @@ export const ATTACK_DISCOVERY_PAGE_TITLE = i18n.translate(
   }
 );
 
-export const BETA = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.pages.pageTitle.betaBadge',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-
-export const BETA_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.pages.pageTitle.betaTooltip',
+export const ATTACK_DISCOVERY_ANNOUNCEMENT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.pageTitle.announcementTooltip',
   {
     defaultMessage:
-      'This functionality is in technical preview and is subject to change. Please use Attack Discovery with caution in production environments.',
+      'The Attack Discovery page will be moved under enhanced experience in a new section: Detections -> Attacks',
   }
 );

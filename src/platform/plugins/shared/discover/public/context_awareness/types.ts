@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
   UnifiedDataTableProps,
+  DataGridPaginationMode,
+  CustomGridColumnsConfiguration,
 } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
@@ -22,9 +24,19 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type {
+  ChartSectionProps,
+  UnifiedHistogramTopPanelHeightContext,
+} from '@kbn/unified-histogram/types';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
-import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { DiscoverAppState } from '../application/main/state_management/redux';
+import type { UpdateESQLQueryActionPayload } from '../application/main/state_management/redux/types';
+
+export type UpdateESQLQueryFn = (
+  queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
+) => void;
 
 /**
  * Supports extending the Discover app menu
@@ -39,14 +51,123 @@ export interface AppMenuExtension {
 }
 
 /**
+ * Supports extending the Pagination Config in Discover
+ */
+export interface PaginationConfigExtension {
+  /**
+   * Supports customizing the pagination mode in Discover
+   * @returns paginationMode - which mode to use for loading Pagination toolbar
+   */
+  paginationMode: DataGridPaginationMode;
+}
+
+/**
+ * Support exposing additional fields for the Field List API
+ */
+
+export interface FieldListExtension {
+  /**
+   * Adds additional fields to the field list
+   * @param recommendedFields The field list
+   * @returns The updated field list
+   */
+  recommendedFields: Array<DataViewField['name']>;
+}
+
+/**
  * Parameters passed to the app menu extension
  */
 export interface AppMenuExtensionParams {
+  /**
+   * Available actions for the app menu
+   */
+  actions: {
+    /**
+     * Updates the ad hoc data views list
+     * @param adHocDataViews The new ad hoc data views to set
+     */
+    updateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
+  };
+  /**
+   * True if Discover is in ESQL mode
+   */
   isEsqlMode: boolean;
+  /**
+   * The current data view
+   */
   dataView: DataView | undefined;
+  /**
+   * The available ad hoc data views
+   */
   adHocDataViews: DataView[];
-  onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
+  /**
+   * The authorized alerting rule type IDs for the current user
+   */
+  authorizedRuleTypeIds: string[];
 }
+
+/**
+ * Parameters passed to the open in new tab action
+ */
+export interface OpenInNewTabParams {
+  /**
+   * The query to open in the new tab
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * The label of the new tab
+   */
+  tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
+  timeRange?: TimeRange;
+}
+
+export interface ChartSectionConfigurationExtensionParams {
+  /**
+   * Available actions for the chart section configuration
+   */
+  actions: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: UpdateESQLQueryFn;
+  };
+}
+
+/**
+ * Supports customizing the chart (UnifiedHistogram) section in Discover
+ */
+export type ChartSectionConfiguration<T extends object = object> =
+  | {
+      /**
+       * The render function for the chart section
+       */
+      renderChartSection: (
+        props: ChartSectionProps & RestorableStateProviderProps<T>
+      ) => React.ReactElement;
+      /**
+       * Controls whether or not to replace the default histogram and activate the custom chart
+       */
+      replaceDefaultChart: true;
+      /**
+       * Prefix for the local storage key used to store the chart section state, when not set, it will use the default Discover key
+       */
+      localStorageKeyPrefix?: string;
+      /**
+       * The default chart section height
+       */
+      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+    }
+  | {
+      replaceDefaultChart: false;
+    };
 
 /**
  * Supports customizing the Discover document viewer flyout
@@ -68,6 +189,20 @@ export interface DocViewerExtension {
  * Parameters passed to the doc viewer extension
  */
 export interface DocViewerExtensionParams {
+  /**
+   * Available actions for the doc viewer extension
+   */
+  actions: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: UpdateESQLQueryFn;
+  };
   /**
    * The record being displayed in the doc viewer
    */
@@ -127,6 +262,20 @@ export interface DefaultAppStateExtension {
    * The field to apply for the histogram breakdown
    */
   breakdownField?: string;
+  /**
+   * The state for chart visibility toggle
+   */
+  hideChart?: boolean;
+}
+
+/**
+ * Parameters passed to the modified vis attributes extension
+ */
+export interface ModifiedVisAttributesExtensionParams {
+  /**
+   * The vis attributes to modify
+   */
+  attributes: TypedLensByValueInput['attributes'];
 }
 
 /**
@@ -137,6 +286,9 @@ export interface CellRenderersExtensionParams {
    * Available actions for cell renderers
    */
   actions: {
+    /**
+     * Adds a filter to the current search in data view mode, or a where clause in ESQL mode
+     */
     addFilter?: DocViewFilterFn;
   };
   /**
@@ -158,13 +310,24 @@ export interface CellRenderersExtensionParams {
  */
 export interface RowControlsExtensionParams {
   /**
+   * Available actions for row controls
+   */
+  actions: {
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: UpdateESQLQueryFn;
+    /**
+     * Sets the expanded document, which is displayed in a flyout
+     * @param record - The record to display in the flyout
+     * @param options.initialTabId - The tabId to display in the flyout
+     */
+    setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  };
+  /**
    * The current data view
    */
   dataView: DataView;
-  /**
-   * The current query
-   */
-  updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
   /**
    * The current query
    */
@@ -287,6 +450,27 @@ export interface Profile {
   >;
 
   /**
+   * Chart
+   */
+
+  /**
+   * Allows modifying the default vis attributes used in the Discover chart
+   * @returns The modified vis attributes to use in the chart
+   */
+  getModifiedVisAttributes: (
+    params: ModifiedVisAttributesExtensionParams
+  ) => TypedLensByValueInput['attributes'];
+
+  /**
+   * Gets configuration for the Discover chart (UnifiedHistogram) section
+   * This allows modifying the chart section with a custom component
+   * @returns The custom configuration for the chart
+   */
+  getChartSectionConfiguration: (
+    params: ChartSectionConfigurationExtensionParams
+  ) => ChartSectionConfiguration;
+
+  /**
    * Data grid
    */
 
@@ -320,6 +504,30 @@ export interface Profile {
    * @returns The additional cell actions to show in the data grid
    */
   getAdditionalCellActions: () => AdditionalCellAction[];
+
+  /**
+   * Allows setting the pagination mode and its configuration
+   * The `getPaginationConfig` extension point currently gives `paginationMode` which can be set to 'multiPage' | 'singlePage' | 'infinite';
+   * Note: This extension point currently only returns `paginationMode` but can be extended to return `pageSize` etc as well.
+   * @returns The pagination mode extension
+   */
+  getPaginationConfig: () => PaginationConfigExtension;
+
+  /**
+   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
+   * Example use case is to overwrite the column header display name or to add icons to the column headers.
+   */
+  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Field list
+   */
+
+  /**
+   * Allows passing additional fields (recommended fields) to the field list area.
+   * @returns The additional fields to display in the Field List under Recommended fields section
+   */
+  getRecommendedFields: () => FieldListExtension;
 
   /**
    * Document viewer flyout

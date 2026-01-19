@@ -14,8 +14,8 @@ jest.mock('../react_router_helpers', () => ({
 }));
 import { letBrowserHandleEvent } from '../react_router_helpers';
 
+import type { Breadcrumb } from './generate_breadcrumbs';
 import {
-  Breadcrumb,
   useGenerateBreadcrumbs,
   useEuiBreadcrumbs,
   useEnterpriseSearchBreadcrumbs,
@@ -161,7 +161,7 @@ describe('useSearchBreadcrumbs', () => {
     expect(useSearchBreadcrumbs(breadcrumbs)).toEqual([
       {
         text: 'Elasticsearch',
-        href: '/app/elasticsearch/overview',
+        href: '/app/elasticsearch/home',
         onClick: expect.any(Function),
       },
       {
@@ -204,7 +204,7 @@ describe('useEnterpriseSearchBreadcrumbs', () => {
     expect(useEnterpriseSearchBreadcrumbs(breadcrumbs)).toEqual([
       {
         text: 'Enterprise Search',
-        href: '/app/elasticsearch/overview',
+        href: '/app/elasticsearch/home',
         onClick: expect.any(Function),
       },
       {

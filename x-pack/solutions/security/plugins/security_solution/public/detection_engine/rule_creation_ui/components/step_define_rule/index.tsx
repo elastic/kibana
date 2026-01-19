@@ -8,15 +8,15 @@
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
-  EuiButtonGroup,
   EuiText,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual } from 'lodash';
@@ -25,21 +25,19 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SetRuleQuery } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
+import type { SetRuleQuery } from '../../../../detections/hooks/use_rule_from_timeline';
+import { useRuleFromTimeline } from '../../../../detections/hooks/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
-import type {
-  DefineStepRule,
-  RuleStepProps,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule, RuleStepProps } from '../../../common/types';
+import { DataSourceType } from '../../../common/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarFieldProps } from '../query_bar_field';
 import { QueryBarField } from '../query_bar_field';
 import { SelectRuleType } from '../select_rule_type';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
+import type { FormHook } from '../../../../shared_imports';
 import {
   Field,
   Form,
@@ -48,19 +46,17 @@ import {
   UseField,
   useFormData,
 } from '../../../../shared_imports';
-import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
 import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
 import * as i18n from './translations';
 import {
   isEqlRule,
+  isEsqlRule,
   isNewTermsRule,
+  isQueryRule,
+  isSuppressionRuleInGA,
   isThreatMatchRule,
   isThresholdRule as getIsThresholdRule,
-  isQueryRule,
-  isEsqlRule,
-  isEqlSequenceQuery,
-  isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
@@ -102,6 +98,7 @@ const CommonUseField = getUseField({ component: Field });
 const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? 'block' : 'none')};
 `;
+
 export interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
@@ -312,9 +309,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * purpose and so are treated as if the field is always selected.  */
   const areSuppressionFieldsSelected = isThresholdRule || Boolean(alertSuppressionFields?.length);
 
-  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(
-    isEqlSequenceQuery(queryBar?.query?.query as string)
-  );
+  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
 
   /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
   const areSuppressionFieldsDisabledByMlFields =
@@ -398,14 +393,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 id="xpack.securitySolution.dataViewSelectorText1"
                 defaultMessage="Use Kibana "
               />
-              <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
+              <DocLink
+                docPath="explore-analyze/find-and-organize/data-views"
+                linkText="Data Views"
+              />
               <FormattedMessage
                 id="xpack.securitySolution.dataViewSelectorText2"
                 defaultMessage=" or specify individual "
               />
               <DocLink
-                guidePath="kibana"
-                docPath="index-patterns-api-create.html"
+                docPath="api/doc/kibana/group/endpoint-data-views"
                 linkText="index patterns"
               />
               <FormattedMessage
@@ -505,6 +502,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             onSavedQueryError: handleSavedQueryError,
             defaultSavedQuery,
             onOpenTimeline,
+            bubbleSubmitEvent: true,
           } as QueryBarFieldProps
         }
       />

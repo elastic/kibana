@@ -15,9 +15,10 @@ import {
   ImportListItemsRequestQuery,
   ImportListItemsResponse,
 } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
-import { ConfigType } from '../../config';
+import type { ConfigType } from '../../config';
 import { buildSiemResponse } from '../utils';
 import { createStreamFromBuffer } from '../utils/create_stream_from_buffer';
 import { getListClient } from '..';
@@ -41,7 +42,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
       path: `${LIST_ITEM_URL}/_import`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })

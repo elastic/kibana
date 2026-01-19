@@ -8,9 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppIds, AppId, AppDefinition, appCategories } from './types';
+import type { AppId, AppDefinition } from './types';
+import { AppIds, appCategories } from './types';
 
 export { AppIds, appCategories } from './types';
+
+import connectorLogo from './assets/connector_logo.svg';
 
 export const appDefinitions: Record<AppId, AppDefinition> = {
   [AppIds.INDEX_MANAGEMENT]: {
@@ -78,6 +81,17 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
       defaultMessage: 'View data usage and retention.',
     }),
     icon: 'stats',
+  },
+
+  [AppIds.CONTENT_CONNECTORS]: {
+    category: appCategories.DATA,
+    description: i18n.translate(
+      'management.landing.withCardNavigation.searchConnectorsDescription',
+      {
+        defaultMessage: 'Manage Content Connectors.',
+      }
+    ),
+    icon: connectorLogo,
   },
 
   [AppIds.RULES]: {

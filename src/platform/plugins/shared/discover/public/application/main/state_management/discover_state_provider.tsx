@@ -9,10 +9,9 @@
 
 import React, { useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { InternalStateProvider } from './discover_internal_state_container';
-import { DiscoverAppStateProvider } from './discover_app_state_container';
-import { DiscoverStateContainer } from './discover_state';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DiscoverStateContainer } from './discover_state';
+import { InternalStateProvider } from './redux';
 
 function createStateHelpers() {
   const context = React.createContext<DiscoverStateContainer | null>(null);
@@ -24,35 +23,14 @@ function createStateHelpers() {
       container!.savedSearchState.getCurrent$().getValue()
     );
   };
-  const useSavedSearchInitial = () => {
-    const container = useContainer();
-    return useObservable<SavedSearch>(
-      container!.savedSearchState.getInitial$(),
-      container!.savedSearchState.getInitial$().getValue()
-    );
-  };
-  const useSavedSearchHasChanged = () => {
-    const container = useContainer();
-    return useObservable<boolean>(
-      container!.savedSearchState.getHasChanged$(),
-      container!.savedSearchState.getHasChanged$().getValue()
-    );
-  };
 
   return {
     Provider: context.Provider,
     useSavedSearch,
-    useSavedSearchInitial,
-    useSavedSearchHasChanged,
   };
 }
 
-export const {
-  Provider: DiscoverStateProvider,
-  useSavedSearchInitial,
-  useSavedSearch,
-  useSavedSearchHasChanged,
-} = createStateHelpers();
+export const { Provider: DiscoverStateProvider, useSavedSearch } = createStateHelpers();
 
 export const DiscoverMainProvider = ({
   value,
@@ -62,9 +40,11 @@ export const DiscoverMainProvider = ({
 }>) => {
   return (
     <DiscoverStateProvider value={value}>
-      <DiscoverAppStateProvider value={value.appState}>
-        <InternalStateProvider value={value.internalState}>{children}</InternalStateProvider>
-      </DiscoverAppStateProvider>
+      {/**
+       * TODO: We should be able to remove this since it already wraps the whole application,
+       * but doing so causes FTR flakiness in CI, so it needs to be investigated further.
+       */}
+      <InternalStateProvider store={value.internalState}>{children}</InternalStateProvider>
     </DiscoverStateProvider>
   );
 };

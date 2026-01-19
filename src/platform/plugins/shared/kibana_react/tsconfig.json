@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -12,7 +12,6 @@
   "kbn_references": [
     "@kbn/storybook",
     "@kbn/core",
-    "@kbn/monaco",
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -24,7 +23,6 @@
     "@kbn/react-kibana-context-styled",
     "@kbn/code-editor",
     "@kbn/core-analytics-browser",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-user-profile-browser",
   ],
   "exclude": [

@@ -6,6 +6,7 @@
  */
 
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AlertClosingReason } from '../../../../../common/types';
 import type { Status } from '../../../../../common/api/detection_engine';
 import {
   updateAlertStatusByIds,
@@ -22,6 +23,7 @@ interface UpdatedAlertsProps {
   query?: object;
   signalIds?: string[];
   signal?: AbortSignal;
+  reason?: AlertClosingReason;
 }
 
 /**
@@ -34,6 +36,7 @@ interface UpdatedAlertsProps {
  * @param query optional query object to update alerts by query.
  * @param signalIds optional signalIds to update alerts by signalIds.
  * @param signal to cancel request
+ * @param reason to specify the reason of the status update
  *
  * @throws An error if response is not OK
  */
@@ -42,14 +45,15 @@ export const updateAlertStatus = ({
   query,
   signalIds,
   signal,
+  reason,
 }: UpdatedAlertsProps): Promise<UpdatedAlertsResponse> => {
   if (signalIds && signalIds.length > 0) {
-    return updateAlertStatusByIds({ status, signalIds, signal }).then(({ updated }) => ({
+    return updateAlertStatusByIds({ status, signalIds, signal, reason }).then(({ updated }) => ({
       updated: updated ?? 0,
       version_conflicts: 0,
     }));
   } else if (query) {
-    return updateAlertStatusByQuery({ status, query, signal }).then(
+    return updateAlertStatusByQuery({ status, query, signal, reason }).then(
       ({ updated, version_conflicts: conflicts }) => ({
         updated: updated ?? 0,
         version_conflicts: conflicts,

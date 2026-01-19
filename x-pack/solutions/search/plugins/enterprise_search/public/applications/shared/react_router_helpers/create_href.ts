@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
 /**
  * This helper uses React Router's createHref function to generate links with router basenames included.

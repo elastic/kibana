@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertStatusValues } from '@kbn/alerting-plugin/common';
+import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 
 export interface AlertListItem {
   alert: string;

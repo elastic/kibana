@@ -19,6 +19,10 @@ export interface MlUsageData {
         bucket: number;
         influencer: number;
       };
+      count_with_kql_filter: {
+        record: number;
+        influencer: number;
+      };
     };
     'xpack.ml.anomaly_detection_jobs_health': {
       count_by_check_type: {
@@ -52,6 +56,22 @@ export function registerCollector(
             bucket: {
               type: 'long',
               _meta: { description: 'total number of alerting rules using bucket result type' },
+            },
+          },
+          count_with_kql_filter: {
+            record: {
+              type: 'long',
+              _meta: {
+                description:
+                  'total number of alerting rules using record result type with a KQL filter',
+              },
+            },
+            influencer: {
+              type: 'long',
+              _meta: {
+                description:
+                  'total number of alerting rules using influencer result type with a KQL filter',
+              },
             },
           },
         },
@@ -96,24 +116,31 @@ export function registerCollector(
         {
           index: alertIndex,
           size: 0,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { term: { type: 'alert' } },
-                  {
-                    term: {
-                      'alert.alertTypeId': ML_ALERT_TYPES.ANOMALY_DETECTION,
+          query: {
+            bool: {
+              filter: [
+                { term: { type: 'alert' } },
+                {
+                  term: {
+                    'alert.alertTypeId': ML_ALERT_TYPES.ANOMALY_DETECTION,
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            count_by_result_type: {
+              terms: {
+                field: 'alert.params.resultType',
+                size: 3,
+              },
+              aggs: {
+                with_kql_filter: {
+                  filter: {
+                    exists: {
+                      field: 'alert.params.kqlQueryString',
                     },
                   },
-                ],
-              },
-            },
-            aggs: {
-              count_by_result_type: {
-                terms: {
-                  field: 'alert.params.resultType',
-                  size: 3,
                 },
               },
             },
@@ -127,13 +154,25 @@ export function registerCollector(
           buckets: Array<{
             key: MlAnomalyResultType;
             doc_count: number;
+            with_kql_filter: {
+              doc_count: number;
+            };
           }>;
         };
       };
-      const countByResultType = aggResponse.count_by_result_type.buckets.reduce((acc, curr) => {
-        acc[curr.key] = curr.doc_count;
-        return acc;
-      }, {} as MlUsageData['alertRules'][typeof ML_ALERT_TYPES.ANOMALY_DETECTION]['count_by_result_type']);
+
+      const countByResultType =
+        {} as MlUsageData['alertRules'][typeof ML_ALERT_TYPES.ANOMALY_DETECTION]['count_by_result_type'];
+      const countWithKqlFilter =
+        {} as MlUsageData['alertRules'][typeof ML_ALERT_TYPES.ANOMALY_DETECTION]['count_with_kql_filter'];
+
+      for (const bucket of aggResponse.count_by_result_type.buckets) {
+        countByResultType[bucket.key] = bucket.doc_count;
+        // KQL filter is only available for record and influencer result types
+        if (bucket.key !== 'bucket') {
+          countWithKqlFilter[bucket.key] = bucket.with_kql_filter.doc_count;
+        }
+      }
 
       const jobsHealthRuleInstances = await esClient.search<{
         alert: {
@@ -143,18 +182,16 @@ export function registerCollector(
         {
           index: alertIndex,
           size: 10000,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { term: { type: 'alert' } },
-                  {
-                    term: {
-                      'alert.alertTypeId': ML_ALERT_TYPES.AD_JOBS_HEALTH,
-                    },
+          query: {
+            bool: {
+              filter: [
+                { term: { type: 'alert' } },
+                {
+                  term: {
+                    'alert.alertTypeId': ML_ALERT_TYPES.AD_JOBS_HEALTH,
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         },
@@ -193,6 +230,7 @@ export function registerCollector(
         alertRules: {
           [ML_ALERT_TYPES.ANOMALY_DETECTION]: {
             count_by_result_type: countByResultType,
+            count_with_kql_filter: countWithKqlFilter,
           },
           [ML_ALERT_TYPES.AD_JOBS_HEALTH]: {
             count_by_check_type: resultsByCheckType,

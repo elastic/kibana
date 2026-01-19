@@ -12,25 +12,25 @@ import { ApiKeyBtn } from './api_key_btn';
 import { render } from '../../../utils/testing';
 
 describe('<APIKeyButton />', () => {
-  const setLoadAPIKey = jest.fn();
+  const clickCallback = jest.fn();
 
   it('calls delete monitor on monitor deletion', async () => {
-    render(<ApiKeyBtn setLoadAPIKey={setLoadAPIKey} apiKey="" loading={false} />);
+    render(<ApiKeyBtn apiKey="" loading={false} onClick={clickCallback} />);
 
     expect(screen.getByText('Generate Project API key')).toBeInTheDocument();
     await userEvent.click(screen.getByTestId('uptimeMonitorManagementApiKeyGenerate'));
-    expect(setLoadAPIKey).toHaveBeenCalled();
+    expect(clickCallback).toHaveBeenCalled();
   });
 
   it('shows correct content on loading', () => {
-    render(<ApiKeyBtn setLoadAPIKey={setLoadAPIKey} apiKey="" loading={true} />);
+    render(<ApiKeyBtn apiKey="" loading={true} onClick={clickCallback} />);
 
     expect(screen.getByText('Generating API key')).toBeInTheDocument();
   });
 
   it('shows api key when available and hides button', () => {
     const apiKey = 'sampleApiKey';
-    render(<ApiKeyBtn setLoadAPIKey={setLoadAPIKey} apiKey={apiKey} loading={false} />);
+    render(<ApiKeyBtn apiKey={apiKey} loading={false} onClick={clickCallback} />);
 
     expect(screen.queryByText('Generate Project API key')).not.toBeInTheDocument();
   });

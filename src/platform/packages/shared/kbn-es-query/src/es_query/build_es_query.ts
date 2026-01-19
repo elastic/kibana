@@ -8,13 +8,13 @@
  */
 
 import { groupBy, has, isEqual } from 'lodash';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
-import { Filter, Query, AggregateQuery } from '../filters';
+import type { Filter, Query, AggregateQuery } from '../filters';
 import { isOfQueryType } from './es_aggregate_query';
-import { BoolQuery, DataViewBase } from './types';
+import type { BoolQuery, DataViewBase } from './types';
 import type { KueryQueryOptions } from '../kuery';
 import type { EsQueryFiltersConfig } from './from_filters';
 

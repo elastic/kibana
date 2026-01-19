@@ -8,15 +8,14 @@
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { TemplateFields } from './template_fields';
 
-// FLAKY: https://github.com/elastic/kibana/issues/194703
-describe.skip('Template fields', () => {
+describe('Template fields', () => {
   let user: UserEvent;
-  let appMockRenderer: AppMockRenderer;
+
   const onSubmit = jest.fn();
   const formDefaultValue = { templateTags: [] };
   const defaultProps = {
@@ -36,15 +35,10 @@ describe.skip('Template fields', () => {
     jest.clearAllMocks();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    appMockRenderer = createAppMockRenderer();
-  });
-
-  afterEach(async () => {
-    await appMockRenderer.clearQueryCache();
   });
 
   it('renders template fields correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <TemplateFields {...defaultProps} />
       </FormTestComponent>
@@ -56,7 +50,7 @@ describe.skip('Template fields', () => {
   });
 
   it('renders template fields with existing value', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent
         formDefaultValue={{
           name: 'Sample template',
@@ -86,7 +80,7 @@ describe.skip('Template fields', () => {
   });
 
   it('calls onSubmit with template fields', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <TemplateFields {...defaultProps} />
       </FormTestComponent>
@@ -119,7 +113,7 @@ describe.skip('Template fields', () => {
   });
 
   it('calls onSubmit with updated template fields', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent
         formDefaultValue={{
           name: 'Sample template',

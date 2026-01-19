@@ -1,6 +1,6 @@
 # ST_X
 
-The ST_X function extracts the `x` coordinate from a given point.
+Extracts the `x` coordinate from the supplied point. For points of type `geo_point`, this corresponds to the `longitude` value.
 
 ## Syntax
 
@@ -8,20 +8,15 @@ The ST_X function extracts the `x` coordinate from a given point.
 
 ### Parameters
 
-#### point
+#### `point`
 
-This is an expression of type `geo_point` or `cartesian_point`.
+Expression of type `geo_point` or `cartesian_point`. If `null`, the function returns `null`.
 
 ## Examples
 
-Here is an example of how to use the ST_X function:
+Extract the `x` (longitude) and `y` (latitude) coordinates from a `geo_point`:
 
 ```esql
 ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
-| EVAL x = ST_X(point), y = ST_Y(point)
-```
-
-```esql
-ROW point = TO_CARTESIANPOINT("POINT(100.0 200.0)")
 | EVAL x = ST_X(point), y = ST_Y(point)
 ```

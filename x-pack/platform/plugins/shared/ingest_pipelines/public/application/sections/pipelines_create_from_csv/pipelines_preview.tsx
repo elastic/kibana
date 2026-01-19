@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -62,7 +63,12 @@ export const PipelinesPreview: FC<Props> = ({
     <EuiFlexGroup>
       <EuiFlexItem>
         {!hasError && (
-          <EuiCallOut title="Processor definitions generated" color="success" iconType="check">
+          <EuiCallOut
+            announceOnMount
+            title="Processor definitions generated"
+            color="success"
+            iconType="check"
+          >
             <EuiText>
               <p>
                 <FormattedMessage

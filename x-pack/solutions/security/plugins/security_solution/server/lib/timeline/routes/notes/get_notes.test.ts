@@ -16,6 +16,7 @@ import {
 import { NOTE_URL } from '../../../../../common/constants';
 import type { GetNotesRequestQuery } from '../../../../../common/api/timeline';
 import { mockGetCurrentUser } from '../../__mocks__/import_timelines';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../../detection_engine/routes/__mocks__/request_context';
 
 const getAllNotesRequest = (query?: GetNotesRequestQuery) =>
   requestMock.create({
@@ -42,7 +43,7 @@ const createMockedNotes = (
 describe('get notes route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
-  let { context } = requestContextMock.createTools();
+  let context: SecuritySolutionRequestHandlerContextMock;
   let mockGetAllSavedNote: jest.Mock;
 
   beforeEach(() => {
@@ -65,6 +66,11 @@ describe('get notes route', () => {
 
     const getNotesRoute = jest.requireActual('.').getNotesRoute;
     getNotesRoute(server.router, createMockConfig(), securitySetup);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   test('should return a list of notes and the count by default', async () => {

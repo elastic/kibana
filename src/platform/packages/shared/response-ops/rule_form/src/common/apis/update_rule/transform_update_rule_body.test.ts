@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleTypeParams } from '../../types';
+import type { RuleTypeParams } from '../../types';
 import { transformUpdateRuleBody } from './transform_update_rule_body';
-import { UpdateRuleBody } from './types';
+import type { UpdateRuleBody } from './types';
 
 const ruleToUpdate: UpdateRuleBody<RuleTypeParams> = {
   params: {
@@ -54,6 +54,7 @@ const ruleToUpdate: UpdateRuleBody<RuleTypeParams> = {
     active: 10,
   },
   flapping: {
+    enabled: true,
     lookBackWindow: 10,
     statusChangeThreshold: 10,
   },
@@ -104,6 +105,7 @@ describe('transformUpdateRuleBody', () => {
       tags: [],
       throttle: null,
       flapping: {
+        enabled: true,
         look_back_window: 10,
         status_change_threshold: 10,
       },

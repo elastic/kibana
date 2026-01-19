@@ -9,7 +9,7 @@ import React from 'react';
 import moment, { type MomentInput } from 'moment';
 import { css } from '@emotion/react';
 import { EuiToolTip } from '@elastic/eui';
-import { CSP_MOMENT_FORMAT } from '../common/constants';
+import { CSP_MOMENT_FORMAT } from '@kbn/cloud-security-posture-common';
 
 // Offset top-aligned tooltips so that cell actions are visible
 const datagridToolTipOffset = css`
@@ -24,6 +24,6 @@ export const TimestampTableCell = ({ timestamp }: { timestamp: MomentInput }) =>
     css={datagridToolTipOffset}
     content={moment(timestamp).format(CSP_MOMENT_FORMAT)}
   >
-    <span>{moment(timestamp).fromNow()}</span>
+    <span tabIndex={0}>{moment(timestamp).fromNow()}</span>
   </EuiToolTip>
 );

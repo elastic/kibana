@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 
@@ -19,7 +19,7 @@ import { handleEsError } from '../../shared_imports';
 
 import { register } from './add_route';
 
-import { ScopedClusterClientMock } from './types';
+import type { ScopedClusterClientMock } from './types';
 
 // Re-implement the mock that was imported directly from `x-pack/mocks`
 function createCoreRequestHandlerContextMock() {
@@ -115,19 +115,14 @@ describe('ADD remote clusters', () => {
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: ['127.0.0.1:9300'],
-                  skip_unavailable: false,
-                  mode: 'sniff',
-                  node_connections: null,
-                  proxy_address: null,
-                  proxy_socket_connections: null,
-                  server_name: null,
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                seeds: ['127.0.0.1:9300'],
+                skip_unavailable: false,
+                mode: 'sniff',
+                node_connections: null,
               },
             },
           },
@@ -176,19 +171,15 @@ describe('ADD remote clusters', () => {
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: null,
-                  skip_unavailable: false,
-                  mode: 'proxy',
-                  node_connections: null,
-                  proxy_address: '127.0.0.1:9300',
-                  proxy_socket_connections: null,
-                  server_name: 'foobar',
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                skip_unavailable: false,
+                mode: 'proxy',
+                proxy_address: '127.0.0.1:9300',
+                proxy_socket_connections: null,
+                server_name: 'foobar',
               },
             },
           },
@@ -247,19 +238,14 @@ describe('ADD remote clusters', () => {
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: ['127.0.0.1:9300'],
-                  skip_unavailable: false,
-                  mode: 'sniff',
-                  node_connections: null,
-                  proxy_address: null,
-                  proxy_socket_connections: null,
-                  server_name: null,
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                seeds: ['127.0.0.1:9300'],
+                skip_unavailable: false,
+                mode: 'sniff',
+                node_connections: null,
               },
             },
           },

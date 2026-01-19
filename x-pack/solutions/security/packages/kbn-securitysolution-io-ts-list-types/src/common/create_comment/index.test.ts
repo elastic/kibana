@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
 import { getCreateCommentsArrayMock, getCreateCommentsMock } from './index.mock';
-import {
-  CreateComment,
-  createComment,
-  CreateCommentsArray,
-  createCommentsArray,
-  CreateCommentsArrayOrUndefined,
-  createCommentsArrayOrUndefined,
-} from '.';
+import type { CreateComment, CreateCommentsArray, CreateCommentsArrayOrUndefined } from '.';
+import { createComment, createCommentsArray, createCommentsArrayOrUndefined } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('CreateComment', () => {

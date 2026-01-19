@@ -51,6 +51,7 @@ import type {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from './types';
+import { registerDataProviders } from './agent_builder/data_provider/register_data_providers';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -130,6 +131,14 @@ export class APMPlugin
       const { getApmIndices } = plugins.apmDataAccess;
       return getApmIndices(soClient);
     })();
+    const managedOtlpServiceFeaturePromise = (async () => {
+      const coreStart = await getCoreStart();
+
+      return await coreStart.featureFlags.getBooleanValue(
+        'observability.managedOtlpServiceEnabled',
+        false
+      );
+    })();
 
     // This if else block will go away in favour of removing Home Tutorial Integration
     // Ideally we will directly register a custom integration and pass the configs
@@ -138,14 +147,17 @@ export class APMPlugin
     if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
       plugins.customIntegrations?.registerCustomIntegration(apmTutorialCustomIntegration);
     } else {
-      apmIndicesPromise
-        .then((apmIndices) => {
+      Promise.all([apmIndicesPromise, managedOtlpServiceFeaturePromise])
+        .then(([apmIndices, isManagedOtlpServiceFeatureEnabled]) => {
           plugins.home?.tutorials.registerTutorial(
             tutorialProvider({
               apmConfig: currentConfig,
               apmIndices,
               cloud: plugins.cloud,
+              observability: plugins.observability,
               isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+              isManagedOtlpServiceFeatureEnabled,
+              managedOtlpServiceUrl: plugins.observability.managedOtlpServiceUrl,
             })
           );
         })
@@ -237,6 +249,12 @@ export class APMPlugin
       getAlertDetailsContextHandler(getCoreStart(), resourcePlugins, logger)
     );
 
+    registerDataProviders({
+      core,
+      plugins,
+      logger: this.logger!.get('observabilityAgentBuilder'),
+    });
+
     registerDeprecations({
       core,
       apmDeps: {
@@ -258,20 +276,17 @@ export class APMPlugin
 
     // create .apm-agent-configuration index without blocking start lifecycle
     createApmAgentConfigurationIndex({ client, logger }).catch((e) => {
-      logger.error('Failed to create .apm-agent-configuration index');
-      logger.error(e);
+      logger.debug(`Failed to create .apm-agent-configuration index: ${e.message}`);
     });
 
     // create .apm-custom-link index without blocking start lifecycle
     createApmCustomLinkIndex({ client, logger }).catch((e) => {
-      logger.error('Failed to create .apm-custom-link index');
-      logger.error(e);
+      logger.debug(`Failed to create .apm-custom-link index: ${e.message}`);
     });
 
     // create .apm-source-map index without blocking start lifecycle
     createApmSourceMapIndexTemplate({ client, logger }).catch((e) => {
-      logger.error('Failed to create apm-source-map index template');
-      logger.error(e);
+      logger.debug(`Failed to create apm-source-map index template: ${e.message}`);
     });
   }
 

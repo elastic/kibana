@@ -6,8 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ProcessorFields } from './format_synthetics_policy';
-import { ConfigKey, HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
+import type { ProcessorFields } from './format_synthetics_policy';
+import type { HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 interface FieldProcessor {
   add_fields: {
@@ -18,6 +19,8 @@ interface FieldProcessor {
 
 export const processorsFormatter = (config: MonitorFields & ProcessorFields) => {
   const labels = config[ConfigKey.LABELS] ?? {};
+  const kSpaces = config[ConfigKey.KIBANA_SPACES] ?? [];
+  const spaces = Array.from(new Set([config.space_id, ...kSpaces]));
   const processors: FieldProcessor[] = [
     {
       add_fields: {
@@ -30,7 +33,7 @@ export const processorsFormatter = (config: MonitorFields & ProcessorFields) => 
           'monitor.project.name': config['monitor.project.name'],
           'monitor.project.id': config['monitor.project.id'],
           meta: {
-            space_id: config.space_id,
+            space_id: spaces.length === 1 ? spaces[0] : spaces,
           },
           ...(isEmpty(labels) ? {} : { labels }),
         },

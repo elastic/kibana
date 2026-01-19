@@ -11,7 +11,7 @@ import valid from 'semver/functions/valid';
 import semVerCompare from 'semver/functions/compare';
 import semVerCoerce from 'semver/functions/coerce';
 import ipaddr, { type IPv4, type IPv6 } from 'ipaddr.js';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import moment from 'moment';
 
 type CompareFn<T extends unknown> = (
@@ -234,6 +234,14 @@ function getUndefinedHandler(
   };
 }
 
+export enum NonStringSortableFieldType {
+  date = 'date',
+  number = 'number',
+  range = 'range',
+  ip = 'ip',
+  version = 'version',
+}
+
 export function getSortingCriteria(
   type: string | undefined,
   sortBy: string,
@@ -245,21 +253,21 @@ export function getSortingCriteria(
 ) => number {
   const arrayValueHandler = createArrayValuesHandler(sortBy, formatter);
 
-  if (type === 'date') {
+  if (type === NonStringSortableFieldType.date) {
     return getUndefinedHandler(sortBy, arrayValueHandler(dateCompare));
   }
-  if (type === 'number') {
+  if (type === NonStringSortableFieldType.number) {
     return getUndefinedHandler(sortBy, arrayValueHandler(numberCompare));
   }
   // this is a custom type, and can safely assume the gte and lt fields are all numbers or undefined
-  if (type === 'range') {
+  if (type === NonStringSortableFieldType.range) {
     return getUndefinedHandler(sortBy, arrayValueHandler(rangeComparison));
   }
   // IP have a special sorting
-  if (type === 'ip') {
+  if (type === NonStringSortableFieldType.ip) {
     return getUndefinedHandler(sortBy, arrayValueHandler(ipComparison));
   }
-  if (type === 'version') {
+  if (type === NonStringSortableFieldType.version) {
     // do not wrap in undefined handler because of special invalid-case handling
     return arrayValueHandler(versionComparison);
   }

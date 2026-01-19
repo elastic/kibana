@@ -13,12 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -46,6 +47,7 @@ export interface UnifiedDocViewerStartDeps {
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   share: SharePluginStart;
+  discoverShared: DiscoverSharedPublicStart;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -60,7 +62,7 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'Table',
       }),
       order: 10,
-      component: (props) => {
+      render: (props) => {
         return <LazyDocViewerTable {...props} />;
       },
     });
@@ -71,13 +73,16 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
+      render: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
         return (
           <LazySourceViewer
             index={hit.raw._index}
             id={hit.raw._id ?? hit.id}
             dataView={dataView}
-            textBasedHits={textBasedHits}
+            // If ES|QL query changes, then textBasedHits will update too.
+            // This is a workaround to reuse the previously referred hit
+            // so the doc viewer preserves the state even after the record disappears from hits list.
+            esqlHit={Array.isArray(textBasedHits) ? hit : undefined}
             decreaseAvailableHeightBy={decreaseAvailableHeightBy}
             onRefresh={() => {}}
           />
@@ -91,8 +96,12 @@ export class UnifiedDocViewerPublicPlugin
   }
 
   public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
-    const { analytics, uiSettings } = core;
-    const { data, fieldFormats, fieldsMetadata, share } = deps;
+    const {
+      analytics,
+      uiSettings,
+      notifications: { toasts },
+    } = core;
+    const { data, fieldFormats, fieldsMetadata, share, discoverShared } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
@@ -102,11 +111,13 @@ export class UnifiedDocViewerPublicPlugin
       data,
       fieldFormats,
       fieldsMetadata,
+      toasts,
       storage,
       uiSettings,
       unifiedDocViewer,
       share,
       core,
+      discoverShared,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type { ConfigSchema } from '../server/config';
 
 /*
@@ -22,6 +22,7 @@ export {
   getIndexPatternFromFilter,
 } from './query';
 
+export { convertIntervalToEsInterval } from '../common/search/aggs/buckets/lib/time_buckets/calc_es_interval';
 /**
  * Exporters (CSV)
  */
@@ -33,42 +34,6 @@ export const exporters = {
   cellHasFormulas,
   tableHasFormulas,
 };
-
-/*
- * Index patterns:
- */
-
-import {
-  isNestedField,
-  isFilterable,
-  isMultiField,
-  getFieldSubtypeNested,
-  getFieldSubtypeMulti,
-} from '../common';
-
-import {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  ILLEGAL_CHARACTERS,
-  validateDataView,
-} from './data_views';
-
-// Index patterns namespace:
-export const indexPatterns = {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  ILLEGAL_CHARACTERS,
-  isFilterable,
-  isNestedField,
-  isMultiField,
-  getFieldSubtypeMulti,
-  getFieldSubtypeNested,
-  validate: validateDataView,
-};
-
-export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
   AggregationRestrictions as IndexPatternAggRestrictions,
@@ -258,6 +223,7 @@ export type {
   QuerySetup,
   TimefilterSetup,
   GlobalQueryStateFromUrl,
+  TimefilterHook,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

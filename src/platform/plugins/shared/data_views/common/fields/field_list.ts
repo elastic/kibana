@@ -9,8 +9,8 @@
 
 import { findIndex } from 'lodash';
 import { DataViewField } from './data_view_field';
-import { FieldSpec, DataViewFieldMap } from '../types';
-import { DataView } from '../data_views';
+import type { FieldSpec, DataViewFieldMap } from '../types';
+import type { DataView } from '../data_views';
 
 type FieldMap = Map<DataViewField['name'], DataViewField>;
 
@@ -22,6 +22,12 @@ interface ToSpecOptions {
  * Interface for data view field list which _extends_ the array class.
  */
 export interface IIndexPatternFieldList extends Array<DataViewField> {
+  /**
+   * Creates a DataViewField instance. Does not add it to the data view.
+   * @param field field spec to create field instance
+   * @returns a new data view field instance
+   */
+  create(field: FieldSpec): DataViewField;
   /**
    * Add field to field list.
    * @param field field spec to add field to list
@@ -101,8 +107,13 @@ export const fieldList = (
     public readonly getByType = (type: DataViewField['type']) => [
       ...(this.groups.get(type) || new Map()).values(),
     ];
+
+    public readonly create = (field: FieldSpec): DataViewField => {
+      return new DataViewField({ ...field, shortDotsEnable });
+    };
+
     public readonly add = (field: FieldSpec): DataViewField => {
-      const newField = new DataViewField({ ...field, shortDotsEnable });
+      const newField = this.create(field);
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);

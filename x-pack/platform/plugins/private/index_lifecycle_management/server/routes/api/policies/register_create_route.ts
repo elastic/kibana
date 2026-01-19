@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function createPolicy(
@@ -16,12 +16,11 @@ async function createPolicy(
   name: string,
   policy: Omit<typeof bodySchema.type, 'name'>
 ): Promise<any> {
-  const body = { policy };
   const options = {
     ignore: [404],
   };
 
-  return client.ilm.putLifecycle({ name, body }, options);
+  return client.ilm.putLifecycle({ name, policy }, options);
 }
 
 /**

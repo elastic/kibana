@@ -16,8 +16,6 @@
 
 import { z } from '@kbn/zod';
 
-import { AlertIds } from '../../../model/alert.gen';
-
 export type Id = z.infer<typeof Id>;
 export const Id = z.string();
 
@@ -37,13 +35,13 @@ export type PageSize = z.infer<typeof PageSize>;
 export const PageSize = z.number().int().min(1).max(100).default(10);
 
 /**
- * Start date
+ * A start date in ISO 8601 format or Date Math format.
  */
 export type StartDate = z.infer<typeof StartDate>;
 export const StartDate = z.string();
 
 /**
- * End date
+ * An end date in ISO format or Date Math format.
  */
 export type EndDate = z.infer<typeof EndDate>;
 export const EndDate = z.string();
@@ -54,11 +52,54 @@ export const EndDate = z.string();
 export type AgentId = z.infer<typeof AgentId>;
 export const AgentId = z.string();
 
+/**
+ * A KQL string.
+ */
+export type Kuery = z.infer<typeof Kuery>;
+export const Kuery = z.string();
+
+/**
+ * A set of agent health statuses to filter by.
+ */
+export type HostStatuses = z.infer<typeof HostStatuses>;
+export const HostStatuses = z.array(
+  z.enum(['healthy', 'offline', 'updating', 'inactive', 'unenrolled'])
+);
+
+/**
+ * Determines the sort order.
+ */
+export type SortDirection = z.infer<typeof SortDirection>;
+export const SortDirection = z.enum(['asc', 'desc']);
+export type SortDirectionEnum = typeof SortDirection.enum;
+export const SortDirectionEnum = SortDirection.enum;
+
+/**
+ * Determines which field is used to sort the results.
+ */
+export type SortField = z.infer<typeof SortField>;
+export const SortField = z.enum([
+  'enrolled_at',
+  'metadata.host.hostname',
+  'host_status',
+  'metadata.Endpoint.policy.applied.name',
+  'metadata.Endpoint.policy.applied.status',
+  'metadata.host.os.name',
+  'metadata.host.ip',
+  'metadata.agent.version',
+  'last_checkin',
+]);
+export type SortFieldEnum = typeof SortField.enum;
+export const SortFieldEnum = SortField.enum;
+
+/**
+ * A list of agent IDs. Max of 50.
+ */
 export type AgentIds = z.infer<typeof AgentIds>;
 export const AgentIds = z.union([z.array(z.string().min(1)).min(1).max(50), z.string().min(1)]);
 
 /**
- * The command to be executed (cannot be an empty string)
+ * The command for the response action
  */
 export type Command = z.infer<typeof Command>;
 export const Command = z.enum([
@@ -71,10 +112,15 @@ export const Command = z.enum([
   'execute',
   'upload',
   'scan',
+  'runscript',
+  'cancel',
 ]);
 export type CommandEnum = typeof Command.enum;
 export const CommandEnum = Command.enum;
 
+/**
+ * A list of response action command names.
+ */
 export type Commands = z.infer<typeof Commands>;
 export const Commands = z.array(Command);
 
@@ -93,13 +139,13 @@ export type Statuses = z.infer<typeof Statuses>;
 export const Statuses = z.array(Status);
 
 /**
- * User IDs
+ * A list of user IDs.
  */
 export type UserIds = z.infer<typeof UserIds>;
 export const UserIds = z.union([z.array(z.string().min(1)).min(1), z.string().min(1)]);
 
 /**
- * Shows detailed outputs for an action response
+ * A list of action IDs that should include the complete output of the action.
  */
 export type WithOutputs = z.infer<typeof WithOutputs>;
 export const WithOutputs = z.union([z.array(z.string().min(1)).min(1), z.string().min(1)]);
@@ -125,12 +171,6 @@ export type EndpointIds = z.infer<typeof EndpointIds>;
 export const EndpointIds = z.array(z.string().min(1)).min(1);
 
 /**
- * Case IDs to be updated (cannot contain empty strings)
- */
-export type CaseIds = z.infer<typeof CaseIds>;
-export const CaseIds = z.array(z.string().min(1)).min(1);
-
-/**
  * Optional comment
  */
 export type Comment = z.infer<typeof Comment>;
@@ -143,7 +183,7 @@ export type Parameters = z.infer<typeof Parameters>;
 export const Parameters = z.object({});
 
 /**
- * The host agent type (optional). Defaults to endpoint.
+ * List of agent types to retrieve. Defaults to `endpoint`.
  */
 export type AgentTypes = z.infer<typeof AgentTypes>;
 export const AgentTypes = z.enum([
@@ -158,8 +198,14 @@ export const AgentTypesEnum = AgentTypes.enum;
 export type BaseActionSchema = z.infer<typeof BaseActionSchema>;
 export const BaseActionSchema = z.object({
   endpoint_ids: EndpointIds,
-  alert_ids: AlertIds.optional(),
-  case_ids: CaseIds.optional(),
+  /**
+   * If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+   */
+  alert_ids: z.array(z.string().min(1)).min(1).optional(),
+  /**
+   * The IDs of cases where the action taken will be logged.
+   */
+  case_ids: z.array(z.string().min(1)).min(1).optional(),
   comment: Comment.optional(),
   parameters: Parameters.optional(),
   agent_type: AgentTypes.optional(),
@@ -170,19 +216,115 @@ export const NoParametersRequestSchema = z.object({
   body: BaseActionSchema,
 });
 
-export type Pid = z.infer<typeof Pid>;
-export const Pid = z.object({
-  pid: z.number().int().min(1).optional(),
-});
-
-export type EntityId = z.infer<typeof EntityId>;
-export const EntityId = z.object({
-  entity_id: z.string().min(1).optional(),
-});
-
 export type ProtectionUpdatesNoteResponse = z.infer<typeof ProtectionUpdatesNoteResponse>;
 export const ProtectionUpdatesNoteResponse = z.object({
   note: z.string().optional(),
+});
+
+export type ResponseActionDetails = z.infer<typeof ResponseActionDetails>;
+export const ResponseActionDetails = z.object({
+  /**
+   * The response action ID
+   */
+  id: z.string().uuid().optional(),
+  command: Command,
+  agentType: AgentTypes.optional(),
+  /**
+   * Whether the response action is expired
+   */
+  isExpired: z.boolean().optional(),
+  /**
+   * Whether the response action is complete
+   */
+  isComplete: z.boolean().optional(),
+  /**
+   * Whether the response action was successful
+   */
+  wasSuccessful: z.boolean().optional(),
+  /**
+   * The response action status
+   */
+  status: z.string().optional(),
+  /**
+   * The response action start time
+   */
+  startedAt: z.string().datetime().optional(),
+  /**
+   * The response action completion time
+   */
+  completedAt: z.string().datetime().optional(),
+  /**
+   * The user who created the response action
+   */
+  createdBy: z.string().optional(),
+  /**
+   * The agent IDs for the hosts that the response action was sent to
+   */
+  agents: z.array(z.string().uuid()).optional(),
+  /**
+   * The parameters of the response action. Content different depending on the response action command
+   */
+  parameters: z.object({}).optional(),
+  /**
+   * An object containing the host names associated with the agent IDs the response action was sent to
+   */
+  hosts: z
+    .object({})
+    .catchall(
+      z.object({
+        /**
+         * The host name
+         */
+        name: z.string().optional(),
+      })
+    )
+    .optional(),
+  /**
+   * The state of the response action for each agent ID that it was sent to
+   */
+  agentState: z
+    .object({})
+    .catchall(
+      z.object({
+        /**
+         * Whether the response action is completed for the agent ID
+         */
+        isCompleted: z.boolean().optional(),
+        /**
+         * Whether the response action was successful for the agent ID
+         */
+        wasSuccessful: z.boolean().optional(),
+        /**
+         * The date and time the response action was completed for the agent ID
+         */
+        completedAt: z.string().optional(),
+      })
+    )
+    .optional(),
+  /** 
+      * The outputs of the response action for each agent ID that it was sent to. Content different depending on the
+response action command and will only be present for agents that have responded to the response action
+ 
+      */
+  outputs: z
+    .object({})
+    .catchall(
+      z.object({
+        type: z.enum(['json', 'text']),
+        /**
+         * The response action output content for the agent ID. Exact format depends on the response action command.
+         */
+        content: z.union([z.object({}), z.string()]),
+      })
+    )
+    .optional(),
+});
+
+export type ResponseActionCreateSuccessResponse = z.infer<
+  typeof ResponseActionCreateSuccessResponse
+>;
+export const ResponseActionCreateSuccessResponse = z.object({
+  data: ResponseActionDetails.optional(),
 });
 
 export type SuccessResponse = z.infer<typeof SuccessResponse>;

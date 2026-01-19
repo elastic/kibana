@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { TaskTypes } from '../../../../common/types';
-import { FilterOptions } from '../types';
-import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
+import React, { useMemo } from 'react';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { FilterOptions } from '../types';
+import type { MultiSelectFilterOption } from './multi_select_filter';
+import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
-  optionKeys: TaskTypes[];
+  optionKeys: InferenceTaskType[];
   onChange: (newFilterOptions: Partial<FilterOptions>) => void;
+  uniqueTaskTypes: Set<InferenceTaskType>;
 }
 
-const options = Object.values(TaskTypes).map((option) => ({
-  key: option,
-  label: option,
-}));
-
-export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
+export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange, uniqueTaskTypes }) => {
   const filterId: string = 'type';
   const onSystemFilterChange = (newOptions: MultiSelectFilterOption[]) => {
     onChange({
@@ -31,11 +28,18 @@ export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
     });
   };
 
+  const filteredOptions = useMemo(() => {
+    return [...uniqueTaskTypes].map((type) => ({
+      key: type,
+      label: type,
+    }));
+  }, [uniqueTaskTypes]);
+
   return (
     <MultiSelectFilter
       buttonLabel={i18n.TASK_TYPE}
       onChange={onSystemFilterChange}
-      options={options}
+      options={filteredOptions}
       renderOption={(option) => option.label}
       selectedOptionKeys={optionKeys}
       dataTestSubj="type-field-endpoints"

@@ -13,14 +13,11 @@ import type { LensAttributes } from '../../types';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getDnsTopDomainsLensAttributes } from './dns_top_domains';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('b1c3efc6-c886-4fba-978f-3b6bb5e7948a')
-    .mockReturnValueOnce('e8842815-2a45-4c74-86de-c19a391e2424')
-    .mockReturnValueOnce('d1452b87-0e9e-4fc0-a725-3727a18e0b37')
-    .mockReturnValueOnce('2a4d5e20-f570-48e4-b9ab-ff3068919377'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 jest.mock('../../../../../sourcerer/containers', () => ({
@@ -43,6 +40,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getDnsTopDomainsLensAttributes', () => {
+  beforeAll(() => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
+  });
+
   let result: RenderHookResult<LensAttributes | null, unknown>['result'];
   const render = () => {
     const hookRenderResponse = renderHook(

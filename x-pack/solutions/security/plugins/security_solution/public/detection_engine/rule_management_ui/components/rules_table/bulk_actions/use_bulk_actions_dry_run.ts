@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseMutateAsyncFunction } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutateAsyncFunction } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 
 import type { BulkAction, BulkActionResponse } from '../../../../rule_management/logic';
 import { performBulkAction } from '../../../../rule_management/logic';

@@ -13,3 +13,4 @@ Alerts as data client API Interface
 - [BulkUpdateOptions](interfaces/bulkupdateoptions.md)
 - [ConstructorOptions](interfaces/constructoroptions.md)
 - [UpdateOptions](interfaces/updateoptions.md)
+- [BulkUpdateTagArgs](interfaces/bulk_update_tag_args.md)

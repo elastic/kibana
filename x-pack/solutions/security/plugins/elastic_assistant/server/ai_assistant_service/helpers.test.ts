@@ -11,9 +11,15 @@ import { loggerMock } from '@kbn/logging-mocks';
 const mockLogger = loggerMock.create();
 const mockProductDocManager = {
   getStatus: jest.fn(),
+  getStatuses: jest.fn(),
   install: jest.fn(),
+  installSecurityLabs: jest.fn(),
   uninstall: jest.fn(),
+  uninstallSecurityLabs: jest.fn(),
   update: jest.fn(),
+  updateAll: jest.fn(),
+  updateSecurityLabsAll: jest.fn().mockResolvedValue({ inferenceIds: [] }),
+  getSecurityLabsStatus: jest.fn(),
 };
 
 describe('helpers', () => {
@@ -26,7 +32,11 @@ describe('helpers', () => {
       mockProductDocManager.getStatus.mockResolvedValue({ status: 'uninstalled' });
       mockProductDocManager.install.mockResolvedValue(null);
 
-      await ensureProductDocumentationInstalled(mockProductDocManager, mockLogger);
+      await ensureProductDocumentationInstalled({
+        productDocManager: mockProductDocManager,
+        setIsProductDocumentationInProgress: jest.fn(),
+        logger: mockLogger,
+      });
 
       expect(mockProductDocManager.getStatus).toHaveBeenCalled();
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -42,7 +52,11 @@ describe('helpers', () => {
     it('should not install product documentation if already installed', async () => {
       mockProductDocManager.getStatus.mockResolvedValue({ status: 'installed' });
 
-      await ensureProductDocumentationInstalled(mockProductDocManager, mockLogger);
+      await ensureProductDocumentationInstalled({
+        productDocManager: mockProductDocManager,
+        setIsProductDocumentationInProgress: jest.fn(),
+        logger: mockLogger,
+      });
 
       expect(mockProductDocManager.getStatus).toHaveBeenCalled();
       expect(mockProductDocManager.install).not.toHaveBeenCalled();
@@ -54,7 +68,11 @@ describe('helpers', () => {
       mockProductDocManager.getStatus.mockResolvedValue({ status: 'not_installed' });
       mockProductDocManager.install.mockRejectedValue(new Error('Install failed'));
 
-      await ensureProductDocumentationInstalled(mockProductDocManager, mockLogger);
+      await ensureProductDocumentationInstalled({
+        productDocManager: mockProductDocManager,
+        setIsProductDocumentationInProgress: jest.fn(),
+        logger: mockLogger,
+      });
 
       expect(mockProductDocManager.getStatus).toHaveBeenCalled();
       expect(mockProductDocManager.install).toHaveBeenCalled();
@@ -67,7 +85,11 @@ describe('helpers', () => {
     it('should log a warning if getStatus fails', async () => {
       mockProductDocManager.getStatus.mockRejectedValue(new Error('Status check failed'));
 
-      await ensureProductDocumentationInstalled(mockProductDocManager, mockLogger);
+      await ensureProductDocumentationInstalled({
+        productDocManager: mockProductDocManager,
+        setIsProductDocumentationInProgress: jest.fn(),
+        logger: mockLogger,
+      });
 
       expect(mockProductDocManager.getStatus).toHaveBeenCalled();
       expect(mockLogger.warn).toHaveBeenCalledWith(

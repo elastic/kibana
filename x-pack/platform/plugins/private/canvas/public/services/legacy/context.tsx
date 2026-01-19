@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import React, {
-  useContext,
-  createElement,
-  createContext,
-  ComponentType,
-  FC,
-  ReactElement,
-} from 'react';
-import { CanvasServices, CanvasServiceProviders, services } from '.';
+import type { ComponentType, FC, ReactElement } from 'react';
+import React, { useContext, createElement, createContext } from 'react';
+import type { CanvasServices, CanvasServiceProviders } from '.';
+import { services } from '.';
 
 export interface WithServicesProps {
   services: CanvasServices;

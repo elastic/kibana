@@ -6,4 +6,3 @@
  */
 
 export { getCellRendererForGivenRecord } from './cell_renderers';
-export { createSecuritySolutionDiscoverAppWrapperGetter } from './app_wrapper';

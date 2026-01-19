@@ -71,32 +71,26 @@ import {
   concat,
   omitBy,
   isNil,
+  omit,
 } from 'lodash';
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  buildEsQuery,
-  Filter,
-  isOfQueryType,
-  isPhraseFilter,
-  isPhrasesFilter,
-} from '@kbn/es-query';
+import type { estypes } from '@elastic/elasticsearch';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery, isOfQueryType, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
-import {
-  ExpressionAstExpression,
-  buildExpression,
-  buildExpressionFunction,
-} from '@kbn/expressions-plugin/common';
+import type { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
 import { normalizeSortRequest } from './normalize_sort_request';
 
-import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+import type { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 import { queryToFields } from './query_to_fields';
 
-import { AggConfigs, EsQuerySortValue } from '../..';
+import type { EsQuerySortValue } from '../..';
+import { AggConfigs } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -109,14 +103,13 @@ import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
-import { AggsStart } from '../aggs';
+import type { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
-import {
+import type {
   EsdslExpressionFunctionDefinition,
   ExpressionFunctionKibanaContext,
-  filtersToAst,
-  queryToAst,
 } from '../expressions';
+import { filtersToAst, queryToAst } from '../expressions';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -223,7 +216,7 @@ export class SearchSource {
   /**
    * Internal, do not use. Overrides all search source fields with the new field array.
    *
-   * @private
+   * @internal
    * @param newFields New field array.
    */
   private setFields(newFields: SearchSourceFields) {
@@ -543,12 +536,12 @@ export class SearchSource {
     options: SearchSourceSearchOptions
   ): Observable<IKibanaSearchResponse<unknown>> {
     const { search, getConfig, onResponse } = this.dependencies;
-
-    const params = getSearchParamsFromRequest(searchRequest, {
+    const { indexType, ...restRequest } = searchRequest;
+    const params = getSearchParamsFromRequest(restRequest, {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).pipe(
+    return search({ params, indexType }, options).pipe(
       switchMap((response) => {
         // For testing timeout messages in UI, uncomment the next line
         // response.rawResponse.timed_out = true;
@@ -652,10 +645,12 @@ export class SearchSource {
       case 'filter':
         return addToRoot(
           'filters',
-          (typeof data.filters === 'function' ? data.filters() : data.filters || []).concat(val)
+          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
         );
+      case 'nonHighlightingFilters':
+        return addToRoot('nonHighlightingFilters', (data.nonHighlightingFilters ?? []).concat(val));
       case 'query':
-        return addToRoot(key, (data.query || []).concat(val));
+        return addToRoot(key, (data.query ?? []).concat(val));
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified
@@ -693,6 +688,8 @@ export class SearchSource {
         } else {
           return addToBody('aggs', val);
         }
+      case 'timezone':
+        return addToRoot(key, val);
       default:
         return addToBody(key, val);
     }
@@ -795,9 +792,17 @@ export class SearchSource {
     const metaFields = getConfig<string[]>(UI_SETTINGS.META_FIELDS) ?? [];
 
     const searchRequest = this.mergeProps();
-    searchRequest.body = searchRequest.body || {};
-    const { body, index } = searchRequest;
-    const dataView = this.getDataView(index);
+    const bodyParams = omit(searchRequest, [
+      'index',
+      'filters',
+      'nonHighlightingFilters',
+      'highlightAll',
+      'fieldsFromSource',
+      'body',
+      'timezone',
+    ]);
+    const body = { ...bodyParams, ...searchRequest.body };
+    const dataView = this.getDataView(searchRequest.index);
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, runtimeFields } = dataView?.getComputedFields() ?? {
@@ -809,7 +814,9 @@ export class SearchSource {
 
     // set defaults
     const _source =
-      index && !Object.hasOwn(body, '_source') ? dataView?.getSourceFiltering() : body._source;
+      searchRequest.index && !Object.hasOwn(body, '_source')
+        ? dataView?.getSourceFiltering()
+        : body._source;
 
     // get filter if data view specified, otherwise null filter
     const filter = this.getFieldFilter({ bodySourceExcludes: _source?.excludes, metaFields });
@@ -855,7 +862,7 @@ export class SearchSource {
     // 2. Create a data view using the index pattern `kibana*` and don't use a timestamp field.
     // 3. Uncomment the lines below, navigate to Discover,
     //    and switch to the data view created in step 2.
-    // body.query.bool.must.push({
+    // query.bool.must.push({
     //   error_query: {
     //     indices: [
     //       {
@@ -878,21 +885,51 @@ export class SearchSource {
       });
     }
 
+    // Evaluate filters if they are functions
+    const filters =
+      typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters;
+
+    const nonHighlightingFilters = searchRequest.nonHighlightingFilters ?? [];
+
+    // Merge filters and nonHighlightingFilters for the main query
+    const allFilters = [
+      ...(Array.isArray(filters) ? filters : filters ? [filters] : []),
+      ...nonHighlightingFilters,
+    ];
+
     const builtQuery = this.getBuiltEsQuery({
-      index,
+      index: searchRequest.index,
       query: searchRequest.query,
-      filters: searchRequest.filters,
+      filters: allFilters,
       getConfig,
       sort: body.sort,
     });
 
+    // Build highlight query using only filters (not nonHighlightingFilters)
+    const filterArray = Array.isArray(filters) ? filters : filters ? [filters] : [];
+    const highlightQuery =
+      searchRequest.highlightAll && filterArray.length > 0
+        ? this.getBuiltEsQuery({
+            index: searchRequest.index,
+            query: searchRequest.query,
+            filters: filterArray,
+            getConfig,
+            sort: body.sort,
+          })
+        : undefined;
+
     const bodyToReturn = {
-      ...searchRequest.body,
+      ...body,
       pit: searchRequest.pit,
       query: builtQuery,
       highlight:
         searchRequest.highlightAll && builtQuery
-          ? getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
+          ? highlightQuery
+            ? {
+                ...getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT)),
+                highlight_query: highlightQuery,
+              }
+            : getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
           : undefined,
       // remove _source, since everything's coming from fields API, scripted, or stored fields
       _source: fieldListProvided && !sourceFieldsProvided ? false : body._source,
@@ -913,9 +950,15 @@ export class SearchSource {
     };
 
     return omitByIsNil({
-      ...searchRequest,
+      ...omit(searchRequest, [
+        'query',
+        'filters',
+        'nonHighlightingFilters',
+        'fieldsFromSource',
+        'timezone',
+      ]),
       body: omitByIsNil(bodyToReturn),
-      indexType: this.getIndexType(index),
+      indexType: this.getIndexType(searchRequest.index),
       highlightAll:
         searchRequest.highlightAll && builtQuery ? undefined : searchRequest.highlightAll,
     });
@@ -965,9 +1008,11 @@ export class SearchSource {
     const filtersInMustClause = (sort ?? []).some((srt: EsQuerySortValue[]) =>
       Object.hasOwn(srt, '_score')
     );
+    const overwriteTimezone = this.getField('timezone');
     const esQueryConfigs = {
       ...getEsQueryConfig({ get: getConfig }),
       filtersInMustClause,
+      ...(overwriteTimezone ? { dateFormatTZ: overwriteTimezone } : {}),
     };
     return buildEsQuery(
       this.getDataView(index),
@@ -1090,9 +1135,10 @@ export class SearchSource {
   public getSerializedFields(recurse = false): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
+      nonHighlightingFilters: originalNonHighlightingFilters,
       aggs: searchSourceAggs,
       parent,
-      size: omit,
+      size: _size, // omit it
       sort,
       index,
       ...searchSourceFields
@@ -1112,6 +1158,12 @@ export class SearchSource {
       serializedSearchSourceFields = {
         ...serializedSearchSourceFields,
         filter: filters,
+      };
+    }
+    if (originalNonHighlightingFilters) {
+      serializedSearchSourceFields = {
+        ...serializedSearchSourceFields,
+        nonHighlightingFilters: originalNonHighlightingFilters,
       };
     }
     if (searchSourceAggs) {
@@ -1214,23 +1266,16 @@ export class SearchSource {
   }
 
   parseActiveIndexPatternFromQueryString(queryString: string): string[] {
-    let m;
     const indexPatternSet: Set<string> = new Set();
-    const regex = /\s?(_index)\s?:\s?[\'\"]?(\w+\-?\*?)[\'\"]?\s?(\w+)?/g;
+    //  Regex to capture full index names including dashes, numbers, and periods
+    const indexNameRegExp = /\s?(_index)\s*:\s*(['"]?)([^\s'"]+)\2/g;
 
-    while ((m = regex.exec(queryString)) !== null) {
-      // This is necessary to avoid infinite loops with zero-width matches
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
+    for (const match of queryString.matchAll(indexNameRegExp)) {
+      const indexName = match[3];
+      if (indexName) {
+        indexPatternSet.add(indexName);
       }
-
-      m.forEach((match, groupIndex) => {
-        if (groupIndex === 2) {
-          indexPatternSet.add(match);
-        }
-      });
     }
-
     return [...indexPatternSet];
   }
 }

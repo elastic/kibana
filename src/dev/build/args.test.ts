@@ -28,16 +28,15 @@ it('build default and oss dist for current platform, without packages, by defaul
   expect(readCliArgs(['node', 'scripts/build'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": false,
+        "createDockerCloudFIPS": false,
         "createDockerContexts": true,
         "createDockerFIPS": false,
         "createDockerServerless": false,
         "createDockerUBI": false,
-        "createDockerUbuntu": false,
         "createDockerWolfi": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -70,16 +69,15 @@ it('builds packages if --all-platforms is passed', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,
         "createDockerCloud": true,
+        "createDockerCloudFIPS": true,
         "createDockerContexts": true,
         "createDockerFIPS": true,
         "createDockerServerless": true,
         "createDockerUBI": true,
-        "createDockerUbuntu": true,
         "createDockerWolfi": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -112,16 +110,15 @@ it('limits packages if --rpm passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--rpm'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": false,
+        "createDockerCloudFIPS": false,
         "createDockerContexts": true,
         "createDockerFIPS": false,
         "createDockerServerless": false,
         "createDockerUBI": false,
-        "createDockerUbuntu": false,
         "createDockerWolfi": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -154,16 +151,15 @@ it('limits packages if --deb passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--deb'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,
         "createDockerCloud": false,
+        "createDockerCloudFIPS": false,
         "createDockerContexts": true,
         "createDockerFIPS": false,
         "createDockerServerless": false,
         "createDockerUBI": false,
-        "createDockerUbuntu": false,
         "createDockerWolfi": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -197,16 +193,15 @@ it('limits packages if --docker passed with --all-platforms', () => {
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": true,
+        "createDockerCloudFIPS": true,
         "createDockerContexts": true,
         "createDockerFIPS": true,
         "createDockerServerless": true,
         "createDockerUBI": true,
-        "createDockerUbuntu": true,
         "createDockerWolfi": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -247,63 +242,19 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
   ).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": true,
+        "createDockerCloudFIPS": true,
         "createDockerContexts": true,
         "createDockerFIPS": true,
         "createDockerServerless": true,
         "createDockerUBI": false,
-        "createDockerUbuntu": true,
         "createDockerWolfi": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
-        "dockerContextUseLocalArtifact": null,
-        "dockerCrossCompile": false,
-        "dockerNamespace": null,
-        "dockerPush": false,
-        "dockerTag": null,
-        "dockerTagQualifier": null,
-        "downloadCloudDependencies": true,
-        "downloadFreshNode": true,
-        "eprRegistry": "snapshot",
-        "initialize": true,
-        "isRelease": false,
-        "targetAllPlatforms": true,
-        "targetServerlessPlatforms": false,
-        "versionQualifier": "",
-        "withExamplePlugins": false,
-        "withTestPlugins": false,
-      },
-      "log": <ToolingLog>,
-      "showHelp": false,
-      "unknownFlags": Array [],
-    }
-  `);
-});
-
-it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => {
-  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-ubuntu']))
-    .toMatchInlineSnapshot(`
-    Object {
-      "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
-        "createArchives": true,
-        "createCdnAssets": true,
-        "createDebPackage": true,
-        "createDockerCloud": true,
-        "createDockerContexts": true,
-        "createDockerFIPS": true,
-        "createDockerServerless": true,
-        "createDockerUBI": true,
-        "createDockerUbuntu": false,
-        "createDockerWolfi": true,
-        "createGenericFolders": true,
-        "createPlatformFolders": true,
-        "createRpmPackage": true,
         "dockerContextUseLocalArtifact": null,
         "dockerCrossCompile": false,
         "dockerNamespace": null,
@@ -333,16 +284,57 @@ it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,
         "createDockerCloud": true,
+        "createDockerCloudFIPS": true,
         "createDockerContexts": true,
         "createDockerFIPS": false,
         "createDockerServerless": true,
         "createDockerUBI": true,
-        "createDockerUbuntu": true,
+        "createDockerWolfi": true,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-cloud-fips']))
+    .toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": true,
+        "createDockerCloud": true,
+        "createDockerCloudFIPS": false,
+        "createDockerContexts": true,
+        "createDockerFIPS": true,
+        "createDockerServerless": true,
+        "createDockerUBI": true,
         "createDockerWolfi": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,

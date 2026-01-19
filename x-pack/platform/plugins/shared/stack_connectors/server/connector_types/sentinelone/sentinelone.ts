@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { Stream } from 'stream';
+import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { Stream } from 'stream';
 import type {
   SentinelOneConfig,
   SentinelOneSecrets,
@@ -21,8 +22,16 @@ import type {
   SentinelOneGetRemoteScriptsResponse,
   SentinelOneIsolateHostParams,
   SentinelOneExecuteScriptParams,
-} from '../../../common/sentinelone/types';
+  SentinelOneFetchAgentFilesParams,
+  SentinelOneDownloadAgentFileParams,
+  SentinelOneGetActivitiesParams,
+  SentinelOneGetRemoteScriptResultsParams,
+  SentinelOneDownloadRemoteScriptResultsParams,
+  SentinelOneGetRemoteScriptResultsApiResponse,
+  SentinelOneGetRemoteScriptStatusApiResponse,
+} from '@kbn/connector-schemas/sentinelone';
 import {
+  SUB_ACTION,
   SentinelOneExecuteScriptParamsSchema,
   SentinelOneGetRemoteScriptsParamsSchema,
   SentinelOneGetRemoteScriptsResponseSchema,
@@ -44,19 +53,8 @@ import {
   SentinelOneDownloadRemoteScriptResultsParamsSchema,
   SentinelOneDownloadRemoteScriptResultsResponseSchema,
   SentinelOneApiDoNotValidateResponsesSchema,
-} from '../../../common/sentinelone/schema';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
-import {
-  SentinelOneFetchAgentFilesParams,
-  SentinelOneDownloadAgentFileParams,
-  SentinelOneGetActivitiesParams,
-  SentinelOneGetRemoteScriptResultsParams,
-  SentinelOneDownloadRemoteScriptResultsParams,
-  SentinelOneGetRemoteScriptResultsApiResponse,
-  SentinelOneGetRemoteScriptStatusApiResponse,
-} from '../../../common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 
-export const API_MAX_RESULTS = 1000;
 export const API_PATH = '/web/api/v2.1';
 
 export class SentinelOneConnector extends SubActionConnector<
@@ -368,7 +366,7 @@ export class SentinelOneConnector extends SubActionConnector<
       () => `script results for taskId [${taskId}]:\n${JSON.stringify(scriptResultsInfo)}`
     );
 
-    let fileUrl: string = '';
+    let fileUrl = '';
 
     for (const downloadLinkInfo of scriptResultsInfo.data.download_links) {
       if (downloadLinkInfo.taskId === taskId) {
@@ -440,14 +438,13 @@ export class SentinelOneConnector extends SubActionConnector<
   }
 
   public async getRemoteScripts(
-    payload: SentinelOneGetRemoteScriptsParams,
+    payload: Partial<SentinelOneGetRemoteScriptsParams>,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetRemoteScriptsResponse> {
     return this.sentinelOneApiRequest(
       {
         url: this.urls.remoteScripts,
         params: {
-          limit: API_MAX_RESULTS,
           ...payload,
         },
         responseSchema: SentinelOneGetRemoteScriptsResponseSchema,

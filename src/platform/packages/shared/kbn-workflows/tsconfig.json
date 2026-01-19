@@ -1,0 +1,15 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "kbn_references": [
+    "@kbn/zod",
+    "@kbn/es-query",
+    "@kbn/utility-types",
+    "@kbn/core",
+    "@kbn/repo-info"  ],
+  "exclude": ["target/**/*"]
+}

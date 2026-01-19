@@ -8,12 +8,13 @@
 import { load } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
-import { Pipeline, ESProcessorItem } from '../../../common';
+import type { Pipeline, ESProcessorItem } from '../../../common';
 import type { EcsMappingState } from '../../types';
 import { ECS_TYPES } from './constants';
 import { deepCopy } from '../../util/util';
 import { type FieldPath, fieldPathToProcessorString } from '../../util/fields';
-import { fieldPathToPainlessExpression, SafePainlessExpression } from '../../util/painless';
+import type { SafePainlessExpression } from '../../util/painless';
+import { fieldPathToPainlessExpression } from '../../util/painless';
 
 interface ECSField {
   target: string;
@@ -153,7 +154,7 @@ function needsTypeConversion(sample: unknown, expected: KnownESType): boolean {
   return false;
 }
 
-function generateProcessors(
+export function generateProcessors(
   ecsMapping: object,
   samples: object,
   basePath: FieldPath = []
@@ -167,10 +168,9 @@ function generateProcessors(
 
   for (const [key, value] of Object.entries(ecsMapping)) {
     const currentPath = [...basePath, key];
-
-    if (value !== null && typeof value === 'object' && value?.target !== null) {
+    if (value !== null && !Array.isArray(value) && typeof value === 'object') {
       const valueKeys = new Set(Object.keys(value));
-      if ([...valueFieldKeys].every((k) => valueKeys.has(k))) {
+      if (value?.target != null && [...valueFieldKeys].every((k) => valueKeys.has(k))) {
         const processor = generateProcessor(
           currentPath,
           value as ECSField,

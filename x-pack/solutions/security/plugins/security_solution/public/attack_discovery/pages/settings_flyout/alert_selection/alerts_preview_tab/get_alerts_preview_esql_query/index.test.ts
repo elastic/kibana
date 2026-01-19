@@ -16,8 +16,8 @@ describe('getAlertsPreviewEsqlQuery', () => {
     });
 
     expect(result).toBe(
-      `FROM alerts-* METADATA _id, _index, _version
-| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.rule.building_block_type IS NULL
+      `FROM alerts-* METADATA _id, _index, _version, _ignored
+| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.building_block_type IS NULL
 | SORT kibana.alert.risk_score DESC, @timestamp DESC
 | LIMIT 10
 | RENAME kibana.alert.rule.name AS \`Rule name\`, kibana.alert.risk_score AS \`Risk score\`
@@ -33,8 +33,8 @@ describe('getAlertsPreviewEsqlQuery', () => {
     });
 
     expect(result).toBe(
-      `FROM alerts-* METADATA _id, _index, _version
-| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.rule.building_block_type IS NULL
+      `FROM alerts-* METADATA _id, _index, _version, _ignored
+| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.building_block_type IS NULL
 | SORT kibana.alert.risk_score DESC, @timestamp DESC
 | LIMIT 10
 | RENAME kibana.alert.risk_score AS \`Risk score\`
@@ -50,8 +50,8 @@ describe('getAlertsPreviewEsqlQuery', () => {
     });
 
     expect(result).toBe(
-      `FROM alerts-* METADATA _id, _index, _version
-| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.rule.building_block_type IS NULL
+      `FROM alerts-* METADATA _id, _index, _version, _ignored
+| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.building_block_type IS NULL
 | SORT kibana.alert.risk_score DESC, @timestamp DESC
 | LIMIT 10
 | RENAME kibana.alert.risk_score AS \`Risk score\`
@@ -67,8 +67,8 @@ describe('getAlertsPreviewEsqlQuery', () => {
     });
 
     expect(result).toBe(
-      `FROM alerts-* METADATA _id, _index, _version
-| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.rule.building_block_type IS NULL
+      `FROM alerts-* METADATA _id, _index, _version, _ignored
+| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.building_block_type IS NULL
 | SORT kibana.alert.risk_score DESC, @timestamp DESC
 | LIMIT 5
 | RENAME kibana.alert.rule.name AS \`Rule name\`, kibana.alert.risk_score AS \`Risk score\`
@@ -84,8 +84,8 @@ describe('getAlertsPreviewEsqlQuery', () => {
     });
 
     expect(result).toBe(
-      `FROM custom-alerts-* METADATA _id, _index, _version
-| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.rule.building_block_type IS NULL
+      `FROM custom-alerts-* METADATA _id, _index, _version, _ignored
+| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.building_block_type IS NULL
 | SORT kibana.alert.risk_score DESC, @timestamp DESC
 | LIMIT 10
 | RENAME kibana.alert.rule.name AS \`Rule name\`, kibana.alert.risk_score AS \`Risk score\`

@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getLensAttributes should generate lens attributes with default values 1`] = `
+Object {
+  "description": "",
+  "references": Array [],
+  "state": Object {
+    "adHocDataViews": Object {
+      "uuidv4()": Object {
+        "id": "uuidv4()",
+      },
+    },
+    "datasourceStates": Object {
+      "textBased": Object {
+        "layers": Object {
+          "uuidv4()": Object {
+            "columns": Array [
+              Object {
+                "columnId": "uuidv4()",
+                "fieldName": "timestamp",
+                "meta": Object {
+                  "type": "date",
+                },
+              },
+              Object {
+                "columnId": "uuidv4()",
+                "fieldName": "results",
+                "inMetricDimension": true,
+                "meta": Object {
+                  "type": "number",
+                },
+              },
+              Object {
+                "columnId": "uuidv4()",
+                "fieldName": "user.name",
+                "meta": Object {
+                  "esType": "keyword",
+                  "type": "string",
+                },
+              },
+            ],
+            "index": "uuidv4()",
+            "query": Object {
+              "esql": "FROM my_index",
+            },
+            "timeField": "@timestamp",
+          },
+        },
+      },
+    },
+    "filters": Array [],
+    "internalReferences": Array [
+      Object {
+        "id": "uuidv4()",
+        "name": "indexpattern-datasource-layer-uuidv4()",
+        "type": "index-pattern",
+      },
+    ],
+    "query": Object {
+      "esql": "",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "fittingFunction": "Linear",
+      "gridlinesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "labelsOrientation": Object {
+        "x": 0,
+        "yLeft": 0,
+        "yRight": 0,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "uuidv4()",
+          ],
+          "layerId": "uuidv4()",
+          "layerType": "data",
+          "seriesType": "bar_stacked",
+          "showGridlines": false,
+          "splitAccessor": "uuidv4()",
+          "xAccessor": "uuidv4()",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "layout": "list",
+        "legendSize": "xlarge",
+        "legendStats": Array [
+          "total",
+        ],
+        "maxLines": 1,
+        "position": "right",
+        "showSingleSeries": true,
+      },
+      "preferredSeriesType": "bar_stacked",
+      "tickLabelsVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "valueLabels": "hide",
+    },
+  },
+  "title": "Events",
+  "visualizationType": "lnsXY",
+}
+`;

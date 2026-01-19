@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { estypes } from '@elastic/elasticsearch';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IInspectorInfo, isRunningResponse } from '@kbn/data-plugin/common';
+import type { IInspectorInfo } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import { getInspectResponse } from '../../common/utils/get_inspect_response';
 import { useInspectorContext } from '../contexts/inspector/use_inspector_context';
 import { FETCH_STATUS, useFetcher } from './use_fetcher';

@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ConnectorSecretCreateResponse } from '../types/connectors_api';
+import type { ConnectorSecretCreateResponse } from '../types/connectors_api';
 
 export const createConnectorSecret = async (client: ElasticsearchClient, value: string) => {
   return await client.transport.request<ConnectorSecretCreateResponse>({

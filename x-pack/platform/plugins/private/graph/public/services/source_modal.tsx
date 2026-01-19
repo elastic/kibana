@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SourceModal } from '../components/source_modal';
-import { IndexPatternSavedObject } from '../types';
+import type { IndexPatternSavedObject } from '../types';
 
 export function openSourceModal(
   {
@@ -32,6 +32,9 @@ export function openSourceModal(
         onSelected(indexPattern);
         modalRef.close();
       }}
-    />
+    />,
+    {
+      'aria-labelledby': 'source-modal-title',
+    }
   );
 }

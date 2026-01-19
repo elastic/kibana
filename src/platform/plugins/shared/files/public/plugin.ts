@@ -16,8 +16,8 @@ import type {
 } from './types';
 import { FileKindsRegistryImpl } from '../common/file_kinds_registry';
 import { createFilesClient } from './files_client';
-import { FileKindBrowser } from '../common';
-import { ScopedFilesClient } from '.';
+import type { FileKindBrowser } from '../common';
+import type { ScopedFilesClient } from '.';
 import * as DefaultImageFileKind from '../common/default_image_file_kind';
 
 /**

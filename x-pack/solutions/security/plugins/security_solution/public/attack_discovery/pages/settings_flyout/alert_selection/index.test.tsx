@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
 
 import { AlertSelection } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { CUSTOMIZE_THE_ALERTS } from './translations';
+import { CUSTOMIZE_THE_CONNECTOR_AND_ALERTS } from './translations';
 
 jest.mock('react-router', () => ({
   matchPath: jest.fn(),
@@ -23,22 +24,28 @@ jest.mock('react-router', () => ({
 }));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('default'),
+}));
 
 const defaultProps = {
+  connectorId: undefined,
   alertsPreviewStackBy0: 'defaultAlertPreview',
   alertSummaryStackBy0: 'defaultAlertSummary',
-  end: '2024-10-01T00:00:00.000Z',
-  filters: [],
-  maxAlerts: 100,
-  query: { query: '', language: 'kuery' },
+  filterManager: jest.fn() as unknown as FilterManager,
+  settings: {
+    end: '2024-10-01T00:00:00.000Z',
+    filters: [],
+    query: { query: '', language: 'kuery' },
+    size: 100,
+    start: '2024-09-01T00:00:00.000Z',
+  },
+  onConnectorIdSelected: jest.fn(),
+  onSettingsChanged: jest.fn(),
   setAlertsPreviewStackBy0: jest.fn(),
   setAlertSummaryStackBy0: jest.fn(),
-  setEnd: jest.fn(),
-  setFilters: jest.fn(),
-  setMaxAlerts: jest.fn(),
-  setQuery: jest.fn(),
-  setStart: jest.fn(),
-  start: '2024-09-01T00:00:00.000Z',
+  showConnectorSelector: true,
+  stats: null,
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -76,7 +83,7 @@ describe('AlertSelection', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText(CUSTOMIZE_THE_ALERTS)).toBeInTheDocument();
+    expect(screen.getByText(CUSTOMIZE_THE_CONNECTOR_AND_ALERTS)).toBeInTheDocument();
   });
 
   it('renders the AlertSelectionQuery', () => {
@@ -124,5 +131,15 @@ describe('AlertSelection', () => {
     fireEvent.click(secondTab);
 
     expect(secondTab).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('does not render the connector selector or customize text when showConnectorSelector is false', () => {
+    render(
+      <TestProviders>
+        <AlertSelection {...defaultProps} showConnectorSelector={false} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('customizeAlerts')).toBeNull();
   });
 });

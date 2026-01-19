@@ -17,42 +17,37 @@
 import { z } from '@kbn/zod';
 
 import {
-  SuccessResponse,
-  AgentIds,
-  AgentTypes,
-  Commands,
   Page,
+  PageSize,
+  Commands,
+  AgentIds,
+  UserIds,
   StartDate,
   EndDate,
-  UserIds,
-  Types,
+  AgentTypes,
   WithOutputs,
+  Types,
 } from '../../model/schema/common.gen';
 
-export type GetEndpointActionListRouteQuery = z.infer<typeof GetEndpointActionListRouteQuery>;
-export const GetEndpointActionListRouteQuery = z.object({
-  agentIds: AgentIds.optional(),
-  agentTypes: AgentTypes.optional(),
-  commands: Commands.optional(),
-  page: Page.optional(),
-  /**
-   * Number of items per page
-   */
-  pageSize: z.number().int().min(1).max(10000).optional().default(10),
-  startDate: StartDate.optional(),
-  endDate: EndDate.optional(),
-  userIds: UserIds.optional(),
-  types: Types.optional(),
-  withOutputs: WithOutputs.optional(),
-});
+export type GetEndpointActionListResponse = z.infer<typeof GetEndpointActionListResponse>;
+export const GetEndpointActionListResponse = z.object({});
 
 export type EndpointGetActionsListRequestQuery = z.infer<typeof EndpointGetActionsListRequestQuery>;
 export const EndpointGetActionsListRequestQuery = z.object({
-  query: GetEndpointActionListRouteQuery,
+  page: Page.optional(),
+  pageSize: PageSize.optional(),
+  commands: Commands.optional(),
+  agentIds: AgentIds.optional(),
+  userIds: UserIds.optional(),
+  startDate: StartDate.optional(),
+  endDate: EndDate.optional(),
+  agentTypes: AgentTypes.optional(),
+  withOutputs: WithOutputs.optional(),
+  types: Types.optional(),
 });
 export type EndpointGetActionsListRequestQueryInput = z.input<
   typeof EndpointGetActionsListRequestQuery
 >;
 
 export type EndpointGetActionsListResponse = z.infer<typeof EndpointGetActionsListResponse>;
-export const EndpointGetActionsListResponse = SuccessResponse;
+export const EndpointGetActionsListResponse = GetEndpointActionListResponse;

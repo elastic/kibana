@@ -4,29 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type {
   IUiSettingsClient,
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 import { getEsRequestTimeout } from '../lib';
-import {
-  createWrappedScopedClusterClientFactory,
-  WrappedScopedClusterClient,
-} from '../lib/wrap_scoped_cluster_client';
-import {
-  WrappedSearchSourceClient,
-  wrapSearchSourceClient,
-} from '../lib/wrap_search_source_client';
-import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
-import { RuleResultService } from '../monitoring/rule_result_service';
-import { PublicRuleMonitoringService, PublicRuleResultService } from '../types';
+import type { WrappedScopedClusterClient } from '../lib/wrap_scoped_cluster_client';
+import { createWrappedScopedClusterClientFactory } from '../lib/wrap_scoped_cluster_client';
+import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
+import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
+import type { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
+import type { RuleResultService } from '../monitoring/rule_result_service';
+import type {
+  AsyncSearchParams,
+  AsyncSearchStrategies,
+  PublicRuleMonitoringService,
+  PublicRuleResultService,
+} from '../types';
 import { withAlertingSpan } from './lib';
-import { TaskRunnerContext } from './types';
+import type { AsyncSearchClient, TaskRunnerContext } from './types';
+import { wrapAsyncSearchClient } from '../lib/wrap_async_search_client';
 
 interface GetExecutorServicesOpts {
   context: TaskRunnerContext;
@@ -47,9 +48,12 @@ export interface ExecutorServices {
   wrappedScopedClusterClient: WrappedScopedClusterClient;
   getDataViews: () => Promise<DataViewsContract>;
   getWrappedSearchSourceClient: () => Promise<WrappedSearchSourceClient>;
+  getAsyncSearchClient: <T extends AsyncSearchParams>(
+    strategy: AsyncSearchStrategies
+  ) => AsyncSearchClient<T>;
 }
 
-export const getExecutorServices = (opts: GetExecutorServicesOpts) => {
+export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServices => {
   const { context, abortController, fakeRequest, logger, ruleData, ruleTaskTimeout } = opts;
 
   const wrappedClientOptions = {
@@ -94,6 +98,18 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts) => {
       return wrapSearchSourceClient({
         ...wrappedClientOptions,
         searchSourceClient,
+      });
+    },
+
+    getAsyncSearchClient: (strategy) => {
+      const client = context.data.search.asScoped(fakeRequest);
+
+      return wrapAsyncSearchClient({
+        logger,
+        rule: ruleData,
+        strategy,
+        client,
+        abortController,
       });
     },
   };

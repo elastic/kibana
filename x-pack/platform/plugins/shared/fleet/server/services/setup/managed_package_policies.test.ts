@@ -19,8 +19,9 @@ jest.mock('../app_context', () => {
     ...jest.requireActual('../app_context'),
     appContextService: {
       getLogger: jest.fn(() => {
-        return { error: jest.fn(), debug: jest.fn() };
+        return { error: jest.fn(), debug: jest.fn(), info: jest.fn() };
       }),
+      getConfig: jest.fn(() => ({})),
     },
   };
 });
@@ -88,7 +89,7 @@ describe('upgradeManagedPackagePolicies', () => {
     expect(packagePolicyService.upgrade).toBeCalledWith(
       soClient,
       esClient,
-      ['managed-package-id'],
+      'managed-package-id',
       { force: true },
       packagePolicy,
       '1.0.0'

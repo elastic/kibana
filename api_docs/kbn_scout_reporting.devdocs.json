@@ -38,7 +38,9 @@
           " extends ",
           "ScoutReport"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/report.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,7 +54,9 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -73,7 +77,9 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/report.ts",
+                "lineNumber": 23,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -88,7 +94,9 @@
             "tags": [],
             "label": "eventLogPath",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,7 +120,9 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -134,7 +144,9 @@
                     "text": "ScoutReportEvent"
                   }
                 ],
-                "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/report.ts",
+                "lineNumber": 41,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -154,7 +166,9 @@
             "signature": [
               "(destination: string) => void"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -170,7 +184,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/report.ts",
+                "lineNumber": 56,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -199,7 +215,9 @@
           " extends ",
           "ScoutReport"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -213,7 +231,9 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -234,7 +254,9 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+                "lineNumber": 32,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -249,7 +271,9 @@
             "tags": [],
             "label": "testFailuresPath",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,7 +297,9 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -295,7 +321,9 @@
                     "text": "TestFailure"
                   }
                 ],
-                "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+                "lineNumber": 45,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -315,7 +343,9 @@
             "signature": [
               "(destination: string) => void"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -331,7 +361,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+                "lineNumber": 56,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -349,7 +381,9 @@
         "tags": [],
         "label": "ScoutReportDataStream",
         "description": [],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -363,7 +397,9 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -377,7 +413,9 @@
                 "signature": [
                   "default"
                 ],
-                "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+                "lineNumber": 23,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -399,7 +437,9 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+                "lineNumber": 23,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -417,7 +457,9 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -433,7 +475,9 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -449,7 +493,9 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -465,7 +511,9 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -489,7 +537,9 @@
               },
               ") => Promise<void>"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -509,7 +559,9 @@
                     "text": "ScoutReportEvent"
                   }
                 ],
-                "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+                "lineNumber": 107,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -525,26 +577,319 @@
             "label": "addEventsFromFile",
             "description": [],
             "signature": [
-              "(eventLogPath: string) => Promise<void>"
+              "(...eventLogPaths: string[]) => Promise<void>"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/scout-reporting",
                 "id": "def-common.ScoutReportDataStream.addEventsFromFile.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "eventLogPaths",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+                "lineNumber": 111,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStats",
+        "type": "Class",
+        "tags": [],
+        "label": "ScoutTestConfigStats",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "{ configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "lineNumber": 55,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.findConfigByPath",
+            "type": "Function",
+            "tags": [],
+            "label": "findConfigByPath",
+            "description": [],
+            "signature": [
+              "(configPath: string) => { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; } | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.findConfigByPath.$1",
                 "type": "string",
                 "tags": [],
-                "label": "eventLogPath",
+                "label": "configPath",
                 "description": [],
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "lineNumber": 57,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.largestConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "largestConfig",
+            "description": [],
+            "signature": [
+              "{ path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.writeToFile",
+            "type": "Function",
+            "tags": [],
+            "label": "writeToFile",
+            "description": [],
+            "signature": [
+              "(outputPath: string) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.writeToFile.$1",
+                "type": "string",
+                "tags": [],
+                "label": "outputPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "lineNumber": 67,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.fromFile",
+            "type": "Function",
+            "tags": [],
+            "label": "fromFile",
+            "description": [],
+            "signature": [
+              "(statsFilePath: string) => ",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfigStats",
+                "text": "ScoutTestConfigStats"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.fromFile.$1",
+                "type": "string",
+                "tags": [],
+                "label": "statsFilePath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "lineNumber": 72,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.fromElasticsearch",
+            "type": "Function",
+            "tags": [],
+            "label": "fromElasticsearch",
+            "description": [],
+            "signature": [
+              "(es: ",
+              "default",
+              ", options: { configPaths: string[]; lookbackDays: number; buildkite: { branch?: string | undefined; pipelineSlug?: string | undefined; }; }) => Promise<",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfigStats",
+                "text": "ScoutTestConfigStats"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.fromElasticsearch.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "es",
+                "description": [],
+                "signature": [
+                  "default"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "lineNumber": 86,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.fromElasticsearch.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "lineNumber": 87,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/scout-reporting",
+                    "id": "def-common.ScoutTestConfigStats.fromElasticsearch.$2.configPaths",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "configPaths",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                    "lineNumber": 88,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout-reporting",
+                    "id": "def-common.ScoutTestConfigStats.fromElasticsearch.$2.lookbackDays",
+                    "type": "number",
+                    "tags": [],
+                    "label": "lookbackDays",
+                    "description": [],
+                    "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                    "lineNumber": 89,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout-reporting",
+                    "id": "def-common.ScoutTestConfigStats.fromElasticsearch.$2.buildkite",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "buildkite",
+                    "description": [],
+                    "signature": [
+                      "{ branch?: string | undefined; pipelineSlug?: string | undefined; }"
+                    ],
+                    "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                    "lineNumber": 90,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -556,6 +901,60 @@
     "functions": [
       {
         "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.computeTestID",
+        "type": "Function",
+        "tags": [],
+        "label": "computeTestID",
+        "description": [],
+        "signature": [
+          "(testFilePath: string, testTitle: string) => string"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.computeTestID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "testFilePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+            "lineNumber": 16,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.computeTestID.$2",
+            "type": "string",
+            "tags": [],
+            "label": "testTitle",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+            "lineNumber": 16,
+            "columnNumber": 53,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
         "id": "def-common.excapeHtmlCharacters",
         "type": "Function",
         "tags": [],
@@ -564,7 +963,9 @@
         "signature": [
           "(htmlText: string) => string"
         ],
-        "path": "packages/kbn-scout-reporting/src/helpers/text_processing.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/text_processing.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -578,7 +979,9 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-scout-reporting/src/helpers/text_processing.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/text_processing.ts",
+            "lineNumber": 25,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -597,7 +1000,9 @@
         "signature": [
           "() => string"
         ],
-        "path": "packages/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -606,12 +1011,12 @@
       },
       {
         "parentPluginId": "@kbn/scout-reporting",
-        "id": "def-common.getPluginManifestData",
+        "id": "def-common.getKibanaModuleData",
         "type": "Function",
         "tags": [],
-        "label": "getPluginManifestData",
+        "label": "getKibanaModuleData",
         "description": [
-          "\nResolves the plugin manifest file path and reads its content."
+          "\nResolves the module manifest file path and reads its content."
         ],
         "signature": [
           "(configPath: string) => ",
@@ -619,17 +1024,19 @@
             "pluginId": "@kbn/scout-reporting",
             "scope": "common",
             "docId": "kibKbnScoutReportingPluginApi",
-            "section": "def-common.PluginManifest",
-            "text": "PluginManifest"
+            "section": "def-common.KibanaModuleMetadata",
+            "text": "KibanaModuleMetadata"
           }
         ],
-        "path": "packages/kbn-scout-reporting/src/helpers/plugin_manifest.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/read_manifest.ts",
+        "lineNumber": 96,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.getPluginManifestData.$1",
+            "id": "def-common.getKibanaModuleData.$1",
             "type": "string",
             "tags": [],
             "label": "configPath",
@@ -639,14 +1046,16 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-scout-reporting/src/helpers/plugin_manifest.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/read_manifest.ts",
+            "lineNumber": 96,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "Parsed `PluginManifest` object."
+          "Parsed `KibanaModuleMetadata` object."
         ],
         "initialIsOpen": false
       },
@@ -660,7 +1069,9 @@
         "signature": [
           "(argv: string[]) => string"
         ],
-        "path": "packages/kbn-scout-reporting/src/helpers/cli_processing.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -674,40 +1085,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-scout-reporting/src/helpers/cli_processing.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-reporting",
-        "id": "def-common.getTestIDForTitle",
-        "type": "Function",
-        "tags": [],
-        "label": "getTestIDForTitle",
-        "description": [],
-        "signature": [
-          "(title: string) => string"
-        ],
-        "path": "packages/kbn-scout-reporting/src/helpers/test_id_generator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.getTestIDForTitle.$1",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "packages/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
+            "lineNumber": 29,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -726,7 +1106,9 @@
         "signature": [
           "(stdout: (string | Buffer)[]) => string"
         ],
-        "path": "packages/kbn-scout-reporting/src/helpers/text_processing.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/text_processing.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -740,7 +1122,9 @@
             "signature": [
               "(string | Buffer)[]"
             ],
-            "path": "packages/kbn-scout-reporting/src/helpers/text_processing.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/text_processing.ts",
+            "lineNumber": 16,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -762,7 +1146,9 @@
           " | undefined) => ",
           "ReporterDescription"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/index.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -777,7 +1163,9 @@
               "ScoutPlaywrightReporterOptions",
               " | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/index.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -799,7 +1187,9 @@
           " | undefined) => ",
           "ReporterDescription"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/index.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -814,7 +1204,9 @@
               "ScoutPlaywrightReporterOptions",
               " | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/index.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -833,7 +1225,9 @@
         "signature": [
           "(filePath: string) => string"
         ],
-        "path": "packages/kbn-scout-reporting/src/helpers/text_processing.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/text_processing.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -847,7 +1241,9 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-scout-reporting/src/helpers/text_processing.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/text_processing.ts",
+            "lineNumber": 13,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -866,7 +1262,9 @@
         "signature": [
           "(commandArgs: string[]) => string"
         ],
-        "path": "packages/kbn-scout-reporting/src/helpers/cli_processing.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -880,79 +1278,12 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-scout-reporting/src/helpers/cli_processing.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
+            "lineNumber": 10,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-reporting",
-        "id": "def-common.uploadScoutReportEvents",
-        "type": "Function",
-        "tags": [],
-        "label": "uploadScoutReportEvents",
-        "description": [
-          "\nUpload events logged by a Scout reporter to the configured Scout Reporter ES instance\n"
-        ],
-        "signature": [
-          "(eventLogPath: string, log: ",
-          {
-            "pluginId": "@kbn/tooling-log",
-            "scope": "common",
-            "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-common.ToolingLog",
-            "text": "ToolingLog"
-          },
-          " | undefined) => Promise<void>"
-        ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.uploadScoutReportEvents.$1",
-            "type": "string",
-            "tags": [],
-            "label": "eventLogPath",
-            "description": [
-              "Path to event log file"
-            ],
-            "signature": [
-              "string"
-            ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.uploadScoutReportEvents.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "log",
-            "description": [
-              "Logger instance"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/tooling-log",
-                "scope": "common",
-                "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-common.ToolingLog",
-                "text": "ToolingLog"
-              },
-              " | undefined"
-            ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -962,40 +1293,59 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/scout-reporting",
-        "id": "def-common.PluginManifest",
+        "id": "def-common.KibanaModuleMetadata",
         "type": "Interface",
         "tags": [],
-        "label": "PluginManifest",
+        "label": "KibanaModuleMetadata",
         "description": [],
-        "path": "packages/kbn-scout-reporting/src/helpers/plugin_manifest.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/read_manifest.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.PluginManifest.id",
+            "id": "def-common.KibanaModuleMetadata.id",
             "type": "string",
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/helpers/plugin_manifest.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/read_manifest.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.PluginManifest.group",
+            "id": "def-common.KibanaModuleMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/read_manifest.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.KibanaModuleMetadata.group",
             "type": "string",
             "tags": [],
             "label": "group",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/helpers/plugin_manifest.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/read_manifest.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.PluginManifest.owner",
+            "id": "def-common.KibanaModuleMetadata.owner",
             "type": "Array",
             "tags": [],
             "label": "owner",
@@ -1003,32 +1353,22 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-scout-reporting/src/helpers/plugin_manifest.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/read_manifest.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.PluginManifest.visibility",
+            "id": "def-common.KibanaModuleMetadata.visibility",
             "type": "string",
             "tags": [],
             "label": "visibility",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/helpers/plugin_manifest.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.PluginManifest.plugin",
-            "type": "Object",
-            "tags": [],
-            "label": "plugin",
-            "description": [],
-            "signature": [
-              "{ id: string; }"
-            ],
-            "path": "packages/kbn-scout-reporting/src/helpers/plugin_manifest.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/read_manifest.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1044,7 +1384,9 @@
         "description": [
           "\nScout file info"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1055,7 +1397,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1069,7 +1413,9 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1083,7 +1429,9 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1099,7 +1447,9 @@
         "description": [
           "\nScout reporter info"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1110,7 +1460,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1122,9 +1474,11 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"jest\" | \"playwright\" | \"ftr\""
+              "\"cypress\" | \"playwright\" | \"jest\" | \"ftr\""
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1140,7 +1494,9 @@
         "description": [
           "\nDocument that records an event to be logged by the Scout reporter"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1154,7 +1510,9 @@
             "signature": [
               "Date | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1169,7 +1527,9 @@
               "BuildkiteMetadata",
               " | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1184,7 +1544,9 @@
               "HostMetadata",
               " | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1204,7 +1566,9 @@
                 "text": "ScoutReportEventInfo"
               }
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1218,7 +1582,9 @@
             "signature": [
               "{ [id: string]: string; } | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1238,7 +1604,9 @@
                 "text": "ScoutReporterInfo"
               }
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1258,7 +1626,9 @@
                 "text": "ScoutTestRunInfo"
               }
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1279,7 +1649,9 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1300,7 +1672,25 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutReportEvent.process",
+            "type": "Object",
+            "tags": [],
+            "label": "process",
+            "description": [],
+            "signature": [
+              "{ uptime?: number | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1316,7 +1706,9 @@
         "description": [
           "\nScout report event info"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1336,7 +1728,9 @@
                 "text": "ScoutReportEventAction"
               }
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1350,7 +1744,9 @@
             "signature": [
               "\"unknown\" | \"success\" | \"failure\" | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1364,7 +1760,9 @@
             "signature": [
               "{ message?: string | undefined; id?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; type?: string | undefined; } | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1380,7 +1778,9 @@
         "description": [
           "\nScout suite info"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1391,7 +1791,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1402,7 +1804,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1418,7 +1822,9 @@
         "description": [
           "\nScout test info"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1429,7 +1835,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1440,7 +1848,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1454,7 +1864,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1468,7 +1880,9 @@
             "signature": [
               "{ type: string; description?: string | undefined; }[] | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1482,7 +1896,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1496,7 +1912,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1510,7 +1928,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1524,7 +1944,9 @@
             "signature": [
               "{ title: string; category?: string | undefined; duration?: number | undefined; } | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1545,7 +1967,9 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1561,7 +1985,9 @@
         "description": [
           "\nScout test run info"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1572,7 +1998,41 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestRunInfo.target",
+            "type": "Object",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "{ type: string; mode: string; }"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestRunInfo.fully_parallel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fully_parallel",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1592,9 +2052,19 @@
                 "section": "def-common.ScoutFileInfo",
                 "text": "ScoutFileInfo"
               },
+              " | undefined; category?: ",
+              {
+                "pluginId": "@kbn/scout-info",
+                "scope": "common",
+                "docId": "kibKbnScoutInfoPluginApi",
+                "section": "def-common.ScoutTestRunConfigCategory",
+                "text": "ScoutTestRunConfigCategory"
+              },
               " | undefined; } | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1608,7 +2078,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1622,7 +2094,25 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestRunInfo.tests",
+            "type": "Object",
+            "tags": [],
+            "label": "tests",
+            "description": [],
+            "signature": [
+              "{ passes?: number | undefined; pending?: number | undefined; failures?: number | undefined; total?: number | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1636,7 +2126,9 @@
         "tags": [],
         "label": "TestFailure",
         "description": [],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1647,7 +2139,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1658,7 +2152,9 @@
             "tags": [],
             "label": "suite",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1669,7 +2165,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1680,7 +2178,9 @@
             "tags": [],
             "label": "target",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1691,7 +2191,9 @@
             "tags": [],
             "label": "command",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1702,7 +2204,9 @@
             "tags": [],
             "label": "location",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1716,21 +2220,25 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.TestFailure.plugin",
+            "id": "def-common.TestFailure.kibanaModule",
             "type": "Object",
             "tags": [],
-            "label": "plugin",
+            "label": "kibanaModule",
             "description": [],
             "signature": [
-              "{ id: string; visibility: string; group: string; } | undefined"
+              "{ id: string; type: string; visibility: string; group: string; } | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1741,7 +2249,9 @@
             "tags": [],
             "label": "duration",
             "description": [],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1755,7 +2265,9 @@
             "signature": [
               "{ message?: string | undefined; stack_trace?: string | undefined; }"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1769,7 +2281,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1783,7 +2297,9 @@
             "signature": [
               "{ name: string; path?: string | undefined; contentType: string; }[]"
             ],
-            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1801,13 +2317,159 @@
         "description": [
           "\nScout reporter event type"
         ],
-        "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStatsData",
+        "type": "Type",
+        "tags": [],
+        "label": "ScoutTestConfigStatsData",
+        "description": [],
+        "signature": [
+          "{ configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStatsEntry",
+        "type": "Type",
+        "tags": [],
+        "label": "ScoutTestConfigStatsEntry",
+        "description": [],
+        "signature": [
+          "{ path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStatsDataSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ScoutTestConfigStatsDataSchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ lastUpdated: ",
+          "ZodDate",
+          "; lookbackDays: ",
+          "ZodNumber",
+          "; buildkite: ",
+          "ZodObject",
+          "<{ branch: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; pipeline: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ slug: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { slug?: string | undefined; }, { slug?: string | undefined; }>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }, { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }>; configs: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ path: ",
+          "ZodString",
+          "; runCount: ",
+          "ZodNumber",
+          "; runtime: ",
+          "ZodObject",
+          "<{ avg: ",
+          "ZodNumber",
+          "; median: ",
+          "ZodNumber",
+          "; pc95th: ",
+          "ZodNumber",
+          "; pc99th: ",
+          "ZodNumber",
+          "; max: ",
+          "ZodNumber",
+          "; estimate: ",
+          "ZodNumber",
+          "; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }, { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }, { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }>, \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }, { configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }>"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStatsEntrySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ScoutTestConfigStatsEntrySchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ path: ",
+          "ZodString",
+          "; runCount: ",
+          "ZodNumber",
+          "; runtime: ",
+          "ZodObject",
+          "<{ avg: ",
+          "ZodNumber",
+          "; median: ",
+          "ZodNumber",
+          "; pc95th: ",
+          "ZodNumber",
+          "; pc99th: ",
+          "ZodNumber",
+          "; max: ",
+          "ZodNumber",
+          "; estimate: ",
+          "ZodNumber",
+          "; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }, { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }, { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }>"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

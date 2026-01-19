@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workflows-extensions",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Extension point registry for workflows. Allows other plugins to extend workflows.",
+  "plugin": {
+    "id": "workflowsExtensions",
+    "configPath": ["workflowsExtensions"],
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["actions", "inference"],
+    "extraPublicDirs": ["common"]
+  }
+}
+

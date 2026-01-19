@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -17,9 +16,13 @@ const withTheme = (storyFn: () => ReactNode) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: true })}>{storyFn()}</ThemeProvider>
 );
 
-storiesOf('JobIdFilter', module)
-  .addDecorator(withTheme)
-  .add('empty', () => (
+export default {
+  title: 'JobIdFilter',
+  decorators: [withTheme],
+};
+
+export const Empty = {
+  render: () => (
     <JobIdFilter
       title="Job id"
       selectedJobIds={[]}
@@ -27,8 +30,13 @@ storiesOf('JobIdFilter', module)
       jobNameById={{}}
       onSelect={action('onSelect')}
     />
-  ))
-  .add('one selected item', () => (
+  ),
+
+  name: 'empty',
+};
+
+export const OneSelectedItem = {
+  render: () => (
     <JobIdFilter
       title="Job id"
       selectedJobIds={['test_job_1']}
@@ -36,8 +44,13 @@ storiesOf('JobIdFilter', module)
       jobNameById={{}}
       onSelect={action('onSelect')}
     />
-  ))
-  .add('multiple selected item', () => (
+  ),
+
+  name: 'one selected item',
+};
+
+export const MultipleSelectedItem = {
+  render: () => (
     <JobIdFilter
       title="Job id"
       selectedJobIds={['test_job_2', 'test_job_3']}
@@ -45,8 +58,13 @@ storiesOf('JobIdFilter', module)
       jobNameById={{}}
       onSelect={action('onSelect')}
     />
-  ))
-  .add('no selected item', () => (
+  ),
+
+  name: 'multiple selected item',
+};
+
+export const NoSelectedItem = {
+  render: () => (
     <JobIdFilter
       title="Job id"
       selectedJobIds={[]}
@@ -54,4 +72,7 @@ storiesOf('JobIdFilter', module)
       jobNameById={{}}
       onSelect={action('onSelect')}
     />
-  ));
+  ),
+
+  name: 'no selected item',
+};

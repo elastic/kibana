@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   DATE_NOW,
@@ -19,7 +19,7 @@ import {
 } from '../../../common/constants.mock';
 import { getShardMock } from '../common/get_shard.mock';
 
-import { SearchEsListItemSchema } from './search_es_list_item_schema';
+import type { SearchEsListItemSchema } from './search_es_list_item_schema';
 
 export const getSearchEsListItemsAsAllUndefinedMock = (): SearchEsListItemSchema => ({
   '@timestamp': DATE_NOW,

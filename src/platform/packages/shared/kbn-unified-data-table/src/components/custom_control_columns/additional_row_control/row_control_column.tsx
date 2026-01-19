@@ -8,22 +8,16 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiButtonIcon,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridControlColumn,
-  EuiScreenReaderOnly,
-  EuiToolTip,
-} from '@elastic/eui';
-import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
-import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
 export const RowControlCell = ({
-  renderControl,
+  rowControlColumn,
   ...props
 }: EuiDataGridCellValueElementProps & {
-  renderControl: RowControlColumn['renderControl'];
+  rowControlColumn: RowControlColumn;
 }) => {
   const { record, rowIndex } = useControlColumn(props);
 
@@ -47,7 +41,7 @@ export const RowControlCell = ({
           <EuiButtonIcon
             aria-label={label}
             color={color ?? 'text'}
-            data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
+            data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${rowControlColumn.id}`}
             disabled={disabled}
             iconSize="s"
             iconType={iconType}
@@ -75,29 +69,14 @@ export const RowControlCell = ({
 
         return control;
       },
-    [props.columnId, record, rowIndex]
+    [rowControlColumn.id, record, rowIndex]
   );
 
-  return record ? renderControl(Control, { record, rowIndex }) : null;
+  return record ? rowControlColumn.render(Control, { record, rowIndex }) : null;
 };
 
-export const getRowControlColumn = (
-  rowControlColumn: RowControlColumn
-): EuiDataGridControlColumn => {
-  const { id, headerAriaLabel, headerCellRender, renderControl } = rowControlColumn;
-
-  return {
-    id: `additionalRowControl_${id}`,
-    width: DEFAULT_CONTROL_COLUMN_WIDTH,
-    headerCellRender:
-      headerCellRender ??
-      (() => (
-        <EuiScreenReaderOnly>
-          <span>{headerAriaLabel}</span>
-        </EuiScreenReaderOnly>
-      )),
-    rowCellRender: (props) => {
-      return <RowControlCell {...props} renderControl={renderControl} />;
-    },
+export const getRowControlColumn = (rowControlColumn: RowControlColumn) => {
+  return (props: EuiDataGridCellValueElementProps) => {
+    return <RowControlCell {...props} rowControlColumn={rowControlColumn} />;
   };
 };

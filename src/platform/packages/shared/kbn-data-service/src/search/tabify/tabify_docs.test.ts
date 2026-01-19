@@ -9,7 +9,7 @@
 
 import { tabifyDocs, flattenHit } from './tabify_docs';
 import { DataView } from '@kbn/data-views-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';

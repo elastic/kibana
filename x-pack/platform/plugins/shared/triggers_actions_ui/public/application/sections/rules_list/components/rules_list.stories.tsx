@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { ComponentProps, useEffect } from 'react';
-import { Meta } from '@storybook/react';
+import type { ComponentProps } from 'react';
+import React, { useEffect } from 'react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { RulesList, RulesListProps } from './rules_list';
+import type { RulesListProps } from './rules_list';
+import { RulesList } from './rules_list';
 
 type Args = ComponentProps<typeof RulesList>;
 
@@ -99,8 +101,14 @@ const Template = (args: RulesListProps) => {
   return <RulesList {...args} />;
 };
 
-export const Empty = Template.bind({});
+export const Empty = {
+  render: Template,
+};
 
-export const WithRules = Template.bind({});
+export const WithRules = {
+  render: Template,
+};
 
-export const WithPaginatedRules = Template.bind({});
+export const WithPaginatedRules = {
+  render: Template,
+};

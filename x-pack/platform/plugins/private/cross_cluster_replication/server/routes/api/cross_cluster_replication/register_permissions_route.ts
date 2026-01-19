@@ -6,7 +6,7 @@
  */
 
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Returns whether the user has CCR permissions
@@ -44,9 +44,7 @@ export const registerPermissionsRoute = ({
       try {
         const { has_all_requested: hasPermission, cluster } =
           await client.asCurrentUser.security.hasPrivileges({
-            body: {
-              cluster: ['manage', 'manage_ccr'],
-            },
+            cluster: ['manage', 'manage_ccr'],
           });
 
         const missingClusterPrivileges = Object.keys(cluster).reduce(

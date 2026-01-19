@@ -7,48 +7,55 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { isPlainObject } from 'lodash';
-import {
-  EuiCode,
-  EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { CreateRuleMigrationRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { UploadFileButton } from '../../../../../../../common/components';
+import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
+import {
+  type SplunkRow,
+  useParseFileInput,
+  parseContent,
+} from '../../../../../../../common/hooks/use_parse_file_input';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
-import { FILE_UPLOAD_ERROR } from '../../../../translations';
-import { useParseFileInput, type SplunkRow } from '../../../common/use_parse_file_input';
-import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
-import { UploadFileButton } from '../../../common/upload_file_button';
+import type { CreateRuleMigrationRulesRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
+import { RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_DESCRIPTION } from '../check_resources/translations';
+import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
+import { MigrationSource } from '../../../../../../../common/types';
 
 type SplunkRulesResult = Partial<Record<(typeof SPLUNK_RULES_COLUMNS)[number], string>>;
 
 export interface RulesFileUploadProps {
   createMigration: CreateMigration;
-  apiError?: string;
-  isLoading?: boolean;
-  isCreated?: boolean;
+  isLoading: boolean;
+  isCreated: boolean;
+  onRulesFileChanged: (files: FileList | null) => void;
+  migrationName: string | undefined;
+  apiError: string | undefined;
 }
+
 export const RulesFileUpload = React.memo<RulesFileUploadProps>(
-  ({ createMigration, apiError, isLoading, isCreated }) => {
-    const [rulesToUpload, setRulesToUpload] = useState<CreateRuleMigrationRequestBody>([]);
+  ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
+    const [rulesToUpload, setRulesToUpload] = useState<CreateRuleMigrationRulesRequestBody>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const createRules = useCallback(() => {
-      filePickerRef.current?.removeFiles();
-      createMigration(rulesToUpload);
-    }, [createMigration, rulesToUpload]);
+      if (migrationName) {
+        filePickerRef.current?.removeFiles();
+        createMigration({
+          migrationName,
+          rules: rulesToUpload,
+          vendor: MigrationSource.SPLUNK,
+        });
+      }
+    }, [createMigration, migrationName, rulesToUpload]);
 
-    const onFileParsed = useCallback((content: Array<SplunkRow<SplunkRulesResult>>) => {
-      const rules = content.map(formatRuleRow);
+    const onFileParsed = useCallback((content: string) => {
+      const rules = parseContent(content).map(formatRuleRow);
       setRulesToUpload(rules);
     }, []);
 
@@ -57,9 +64,10 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     const onFileChange = useCallback(
       (files: FileList | null) => {
         setRulesToUpload([]);
+        onRulesFileChanged(files);
         parseFile(files);
       },
-      [parseFile]
+      [parseFile, onRulesFileChanged]
     );
 
     const error = useMemo(() => {
@@ -70,36 +78,27 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     }, [apiError, fileError]);
 
     const showLoader = isParsing || isLoading;
-    const isDisabled = showLoader || isCreated;
+    const isDisabled = !migrationName || showLoader || isCreated;
     const isButtonDisabled = isDisabled || rulesToUpload.length === 0;
 
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiFormRow
-            helpText={
-              <EuiText color="subdued" size="xs">
-                <FormattedMessage
-                  id="xpack.securitySolution.siemMigrations.rulesFileUpload.disclaimer"
-                  defaultMessage="Note: To avoid exceeding your LLM API rate limit when translating a large number of queries, consider exporting rules in batches, for example by adding {operator} to the query above"
-                  values={{ operator: <EuiCode>{'| head'}</EuiCode> }}
-                />
-              </EuiText>
-            }
-            isInvalid={error != null}
-            fullWidth
-            error={error}
-          >
+          <EuiText size="s">{RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_DESCRIPTION}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow isInvalid={error != null} fullWidth error={error}>
             <EuiFilePicker
+              isInvalid={error != null}
               id="rulesFilePicker"
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
-                  {i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT}
+                  {i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_SPLUNK}
                 </EuiText>
               }
-              accept="application/json, application/x-ndjson"
+              accept={'application/json, application/x-ndjson'}
               onChange={onFileChange}
               display="large"
               aria-label="Upload rules file"
@@ -127,7 +126,7 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
 );
 RulesFileUpload.displayName = 'RulesFileUpload';
 
-const formatRuleRow = (row: SplunkRow<SplunkRulesResult>): OriginalRule => {
+export const formatRuleRow = (row: SplunkRow<SplunkRulesResult>): OriginalRule => {
   if (!isPlainObject(row.result)) {
     throw new Error(FILE_UPLOAD_ERROR.NOT_OBJECT);
   }
@@ -138,6 +137,7 @@ const formatRuleRow = (row: SplunkRow<SplunkRulesResult>): OriginalRule => {
     query: row.result.search,
     query_language: 'spl',
     description: row.result['action.escu.eli5']?.trim() || row.result.description,
+    severity: row.result['alert.severity'] as OriginalRule['severity'],
   };
 
   if (row.result['action.correlationsearch.annotations']) {

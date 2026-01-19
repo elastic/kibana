@@ -11,7 +11,7 @@ import type { HandleKVNodeParams } from './types';
 import { KV_ERROR_PROMPT, KV_HEADER_ERROR_PROMPT } from './prompts';
 import { COMMON_ERRORS, KV_EXAMPLE_ANSWER, KV_HEADER_ERROR_EXAMPLE_ANSWER } from './constants';
 import { createKVProcessor } from '../../util/processors';
-import { KVProcessor } from '../../processor_types';
+import type { KVProcessor } from '../../processor_types';
 
 export async function handleKVError({
   state,

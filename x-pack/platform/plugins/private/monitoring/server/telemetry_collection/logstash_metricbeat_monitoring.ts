@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
 import { incrementByKey } from './get_high_level_stats';
@@ -16,9 +16,7 @@ import {
   INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE,
   INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS,
 } from '../../common/constants';
-import {
-  HITS_SIZE,
-  getLogstashBaseStats,
+import type {
   Counter,
   LogstashMonitoring,
   LogstashProcessOptions,
@@ -26,12 +24,15 @@ import {
   LogstashStats,
   LogstashStatsByClusterUuid,
 } from './logstash_monitoring';
+import { HITS_SIZE, getLogstashBaseStats } from './logstash_monitoring';
 
 export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
   private indexPattern: { [key: string]: string } = {
     state: INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE,
     stats: INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS,
   };
+
+  private monitoringType: string = 'metricbeat';
 
   /*
    * Call the function for fetching and summarizing Logstash metrics for Metricbeat monitoring
@@ -67,6 +68,7 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
    * @param monitoringType - the monitoring type where metricbeat monitoring is intended.
    */
   setIndexPattern(monitoringType: string) {
+    this.monitoringType = monitoringType;
     if (monitoringType === 'stack') {
       this.indexPattern.state = INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE;
       this.indexPattern.stats = INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS;
@@ -79,6 +81,11 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
   getIndexPattern(): { [key: string]: string } {
     return this.indexPattern;
   }
+
+  getMonitoringType(): string {
+    return this.monitoringType;
+  }
+
   /*
    * Update a clusters object with processed Logstash stats for metricbeat monitoring
    * @param {Array} results - array of LogstashStats docs from ES
@@ -117,7 +124,8 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
         incrementByKey(a, thisVersion);
         clusters[clusterUuid].versions = mapToList(a, 'version');
 
-        const thisCollectionType = hit._source?.agent?.type || 'metricbeat';
+        // for stack_monitoring, agent internally uses metricbeat or filebeat
+        const thisCollectionType = this.getMonitoringType() === 'stack' ? 'agent' : 'metricbeat';
         if (!Object.hasOwn(clusterStats, 'collection_types')) {
           clusterStats.collection_types = {};
         }

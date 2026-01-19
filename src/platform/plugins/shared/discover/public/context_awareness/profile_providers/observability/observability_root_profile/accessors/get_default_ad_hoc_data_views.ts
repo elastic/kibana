@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
+import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
 import type { ObservabilityRootProfileProvider } from '../types';
-
-const ALL_LOGS_DATA_VIEW_ID = 'discover-observability-root-profile-all-logs';
 
 export const getDefaultAdHocDataViews: ObservabilityRootProfileProvider['profile']['getDefaultAdHocDataViews'] =
 
@@ -22,12 +20,7 @@ export const getDefaultAdHocDataViews: ObservabilityRootProfileProvider['profile
         return prevDataViews;
       }
 
-      return prevDataViews.concat({
-        id: ALL_LOGS_DATA_VIEW_ID,
-        name: i18n.translate('discover.observabilitySolution.allLogsDataViewName', {
-          defaultMessage: 'All logs',
-        }),
-        title: context.allLogsIndexPattern,
-        timeFieldName: '@timestamp',
-      });
+      return prevDataViews.concat(
+        getAllLogsDataViewSpec({ allLogsIndexPattern: context.allLogsIndexPattern })
+      );
     };

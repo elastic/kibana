@@ -9,15 +9,15 @@
 
 import * as Rx from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { PublishesSavedSearch } from '@kbn/discover-plugin/public';
+import type { PublishesSavedSearch } from '@kbn/discover-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { LicenseCheckState } from '@kbn/licensing-plugin/public';
+import type { LicenseCheckState } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -59,8 +59,11 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   beforeEach(() => {
+    core.uiSettings.get.mockReturnValue('America/Los_Angeles');
+
     csvConfig = {
       scroll: {} as ClientConfigType['csv']['scroll'],
+      maxRows: 10000,
     };
 
     apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0');
@@ -93,7 +96,6 @@ describe('GetCsvReportPanelAction', () => {
       embeddable: {
         type: 'search',
         savedSearch$: new BehaviorSubject({ searchSource: mockSearchSource }),
-        getTitle: () => `The Dude`,
         getInspectorAdapters: () => null,
         getInput: () => ({
           viewMode: 'list',
@@ -103,6 +105,8 @@ describe('GetCsvReportPanelAction', () => {
           },
         }),
         hasTimeRange: () => true,
+        title$: new BehaviorSubject('embeddable title'),
+        hideTitle$: new BehaviorSubject(false),
         parentApi: {
           viewMode$: new BehaviorSubject('view'),
         },
@@ -127,11 +131,11 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_searchsource', {
-      browserTimezone: undefined,
+      browserTimezone: 'America/Los_Angeles',
       columns: [],
       objectType: 'search',
       searchSource: {},
-      title: '',
+      title: 'embeddable title',
       version: '7.15.0',
     });
   });
@@ -161,11 +165,11 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_searchsource', {
-      browserTimezone: undefined,
+      browserTimezone: 'America/Los_Angeles',
       columns: ['column_a', 'column_b'],
       objectType: 'search',
       searchSource: { testData: 'testDataValue' },
-      title: '',
+      title: 'embeddable title',
       version: '7.15.0',
     });
   });
@@ -183,7 +187,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(core.http.post).toHaveBeenCalledWith('/internal/reporting/generate/csv_searchsource', {
-      body: '{"jobParams":"(columns:!(),objectType:search,searchSource:(),title:\'\',version:\'7.15.0\')"}',
+      body: '{"jobParams":"(browserTimezone:America/Los_Angeles,columns:!(),objectType:search,searchSource:(),title:\'embeddable title\',version:\'7.15.0\')"}',
       method: 'POST',
     });
   });

@@ -11,9 +11,9 @@ import { screen } from '@testing-library/react';
 import { connector } from '../mock';
 import { useGetIssueTypes } from './use_get_issue_types';
 import FieldsPreview from './case_fields_preview';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
-import { createQueryWithMarkup } from '../../../common/test_utils';
+
+import { renderWithTestingProviders } from '../../../common/mock';
+import { tableMatchesExpectedContent } from '../../../common/test_utils';
 
 jest.mock('./use_get_issue_types');
 
@@ -41,23 +41,26 @@ describe('Jira Fields: Preview', () => {
     issueType: '10006',
     priority: 'High',
     parent: 'Parent Task',
+    otherFields: '{"testField":"testValue"}',
   };
 
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     jest.clearAllMocks();
   });
 
   it('renders all fields correctly', () => {
-    appMockRenderer.render(<FieldsPreview connector={connector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
+    const rows = screen.getAllByTestId('card-list-item-row');
 
-    expect(getByText('Issue type: Task')).toBeInTheDocument();
-    expect(getByText('Parent issue: Parent Task')).toBeInTheDocument();
-    expect(getByText('Priority: High')).toBeInTheDocument();
+    const expectedContent = [
+      ['Issue type', 'Task'],
+      ['Parent issue', 'Parent Task'],
+      ['Priority', 'High'],
+      ['testField', 'testValue'],
+    ];
+
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
 });

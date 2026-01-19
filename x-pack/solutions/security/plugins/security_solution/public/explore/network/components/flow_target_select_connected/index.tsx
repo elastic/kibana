@@ -9,12 +9,12 @@ import type { Location } from 'history';
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import * as i18nIp from '../details/translations';
 
 import { FlowTargetSelect } from '../flow_controls/flow_target_select';
-import { IpOverviewId } from '../../../../timelines/components/field_renderers/field_renderers';
+import { IpOverviewId } from '../field_renderers/field_renderers';
 import type { FlowTarget, FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { FlowDirection } from '../../../../../common/search_strategy';
 

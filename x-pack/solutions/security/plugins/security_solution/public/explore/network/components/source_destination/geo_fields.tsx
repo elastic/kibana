@@ -8,9 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { get, uniq } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
-import { DefaultDraggable } from '../../../../common/components/draggables';
+import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
 
 import { CountryFlag } from './country_flag';
 import type { GeoFieldsProps, SourceDestinationType } from './types';
@@ -73,9 +73,9 @@ const GeoFieldValues = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
-  isDraggable?: boolean;
   values?: string[] | null;
-}>(({ contextId, eventId, fieldName, isDraggable, values }) =>
+  scopeId: string;
+}>(({ contextId, eventId, fieldName, values, scopeId }) =>
   values != null ? (
     <>
       {uniq(values).map((value) => (
@@ -89,11 +89,9 @@ const GeoFieldValues = React.memo<{
             ) : null}
 
             <EuiFlexItem grow={false}>
-              <DefaultDraggable
-                data-test-subj={fieldName}
+              <CellActionsRenderer
+                scopeId={scopeId}
                 field={fieldName}
-                id={`geo-field-values-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-                isDraggable={isDraggable}
                 tooltipContent={fieldName}
                 value={value}
               />
@@ -116,17 +114,17 @@ GeoFieldValues.displayName = 'GeoFieldValues';
  * - `source|destination.geo.city_name`
  */
 export const GeoFields = React.memo<GeoFieldsProps>((props) => {
-  const { contextId, eventId, isDraggable, type } = props;
+  const { contextId, eventId, type, scopeId } = props;
 
   const propNameToFieldName = getGeoFieldPropNameToFieldNameMap(type);
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       {uniq(propNameToFieldName).map((geo) => (
         <GeoFieldValues
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           fieldName={geo.fieldName}
-          isDraggable={isDraggable}
           key={geo.fieldName}
           values={get(geo.prop, props)}
         />

@@ -54,10 +54,6 @@
 # Use this token instead of a username/password.
 # elasticsearch.serviceAccountToken: "my_token"
 
-# Time in milliseconds to wait for Elasticsearch to respond to pings. Defaults to the value of
-# the elasticsearch.requestTimeout setting.
-#elasticsearch.pingTimeout: 1500
-
 # Time in milliseconds to wait for responses from the back end or Elasticsearch. This value
 # must be a positive integer.
 #elasticsearch.requestTimeout: 30000
@@ -149,7 +145,7 @@
 #ops.interval: 5000
 
 # Specifies locale to be used for all localizable strings, dates and number formats.
-# Supported languages are the following: English (default) "en", Chinese "zh-CN", Japanese "ja-JP", French "fr-FR".
+# Supported languages are the following: English (default) "en", Chinese "zh-CN", Japanese "ja-JP", French "fr-FR", German "de-DE".
 #i18n.locale: "en"
 
 # =================== Frequently used (Optional)===================
@@ -176,7 +172,7 @@
 # =================== Search Autocomplete ===================
 # Time in milliseconds to wait for autocomplete suggestions from Elasticsearch.
 # This value must be a whole number greater than zero. Defaults to 1000ms
-#unifiedSearch.autocomplete.valueSuggestions.timeout: 1000
+# unifiedSearch.autocomplete.valueSuggestions.timeout: 1000
 
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000

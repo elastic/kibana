@@ -39,31 +39,29 @@ export async function lookupServices({
         ProcessorEvent.error,
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [...rangeQuery(start, end), ...kqlQuery(kuery)],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [...rangeQuery(start, end), ...kqlQuery(kuery)],
       },
-      aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: maxNumberOfServices,
-          },
-          aggs: {
-            environments: {
-              terms: {
-                field: SERVICE_ENVIRONMENT,
-              },
+    },
+    aggs: {
+      services: {
+        terms: {
+          field: SERVICE_NAME,
+          size: maxNumberOfServices,
+        },
+        aggs: {
+          environments: {
+            terms: {
+              field: SERVICE_ENVIRONMENT,
             },
-            latest: {
-              top_metrics: {
-                metrics: [{ field: AGENT_NAME } as const],
-                sort: { '@timestamp': 'desc' },
-              },
+          },
+          latest: {
+            top_metrics: {
+              metrics: [{ field: AGENT_NAME } as const],
+              sort: { '@timestamp': 'desc' },
             },
           },
         },

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
-import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ISearchOptions } from '@kbn/search-types';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import type { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ISearchOptions } from '@kbn/search-types';
 import { UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
-import { SearchConfigSchema } from '../../../config';
+import type { SearchConfigSchema } from '../../../config';
 import {
   getCommonDefaultAsyncGetParams,
   getCommonDefaultAsyncSubmitParams,
@@ -35,11 +35,11 @@ export async function getIgnoreThrottled(
 export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchConfig: SearchConfigSchema,
-  options: ISearchOptions
+  options: ISearchOptions,
+  isServerless: boolean = false
 ): Promise<
   Pick<
     AsyncSearchSubmitRequest,
-    // @ts-expect-error 'keep_alive' has been removed from the spec due to a misunderstanding, but it still works
     | 'batched_reduce_size'
     | 'ccs_minimize_roundtrips'
     | 'keep_alive'
@@ -49,13 +49,14 @@ export async function getDefaultAsyncSubmitParams(
     | 'ignore_unavailable'
     | 'track_total_hits'
     | 'keep_on_completion'
-  >
+  > & { project_routing?: string }
 > {
   return {
     // TODO: adjust for partial results
     batched_reduce_size: searchConfig.asyncSearch.batchedReduceSize,
-    // Decreases delays due to network when using CCS
-    ccs_minimize_roundtrips: true,
+    // Decreases delays due to network when using CCS, only if not serverless.
+    // In case of serverless, this setting is ignored or errors out (in case of CPS)
+    ...(isServerless ? {} : { ccs_minimize_roundtrips: true }),
     ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),

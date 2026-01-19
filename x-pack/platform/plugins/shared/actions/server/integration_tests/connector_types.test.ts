@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import zodToJsonSchema from 'zod-to-json-schema';
+import type { z } from '@kbn/zod';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ActionTypeRegistry } from '../action_type_registry';
+import type { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
 import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionTypeConfig, Services } from '../types';
+import { connectorsSpecs } from '@kbn/connector-specs';
 
 jest.mock('../action_type_registry', () => {
   const actual = jest.requireActual('../action_type_registry');
@@ -22,6 +25,24 @@ jest.mock('../action_type_registry', () => {
     }),
   };
 });
+
+const mockTee = jest.fn();
+
+const mockCreate = jest.fn().mockImplementation(() => ({
+  tee: mockTee.mockReturnValue([jest.fn(), jest.fn()]),
+}));
+
+jest.mock('openai', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    api_key: '123',
+    chat: {
+      completions: {
+        create: mockCreate,
+      },
+    },
+  })),
+}));
 
 describe('Connector type config checks', () => {
   let esServer: TestElasticsearchUtils;
@@ -48,14 +69,13 @@ describe('Connector type config checks', () => {
   });
 
   test('ensure connector types list up to date', () => {
-    expect(connectorTypes).toEqual(actionTypeRegistry.getAllTypes());
+    const connectorSpecIds = Object.values(connectorsSpecs).map(({ metadata }) => metadata.id);
+    expect([...connectorTypes, ...connectorSpecIds].sort()).toEqual(
+      actionTypeRegistry.getAllTypes().sort()
+    );
   });
 
   for (const connectorTypeId of connectorTypes) {
-    const skipConnectorType = ['.gen-ai'];
-    if (skipConnectorType.includes(connectorTypeId)) {
-      continue;
-    }
     test(`detect connector type changes for: ${connectorTypeId}`, async () => {
       const {
         getService,
@@ -73,6 +93,20 @@ describe('Connector type config checks', () => {
             oAuthServerUrl: 'https://_fake_auth.com/',
             oAuthScope: 'some-scope',
             apiUrl: 'https://_face_api_.com',
+          };
+        } else if (connectorTypeId === '.gen-ai') {
+          connectorConfig = {
+            apiUrl: 'https//_fake_api_.com',
+            provider: 'Azure Open AI',
+          };
+        } else if (connectorTypeId === '.bedrock') {
+          connectorConfig = {
+            apiUrl: 'https://_face_api_.com',
+          };
+        } else if (connectorTypeId === '.mcp') {
+          connectorConfig = {
+            serverUrl: 'https://_fake_mcp_.com',
+            hasAuth: false,
           };
         }
 
@@ -94,9 +128,15 @@ describe('Connector type config checks', () => {
         });
       }
 
-      expect(config.schema.getSchema!().describe()).toMatchSnapshot();
-      expect(secrets.schema.getSchema!().describe()).toMatchSnapshot();
-      expect(params.schema.getSchema!().describe()).toMatchSnapshot();
+      expect(
+        zodToJsonSchema(config.schema as z.ZodType, { name: 'config', $refStrategy: 'none' })
+      ).toMatchSnapshot();
+      expect(
+        zodToJsonSchema(secrets.schema as z.ZodType, { name: 'secrets', $refStrategy: 'none' })
+      ).toMatchSnapshot();
+      expect(
+        zodToJsonSchema(params!.schema as z.ZodType, { name: 'params', $refStrategy: 'none' })
+      ).toMatchSnapshot();
     });
   }
 });

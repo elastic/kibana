@@ -11,31 +11,32 @@ import React, { useMemo, useCallback, type ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutResizable,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
   EuiSpacer,
   EuiPortal,
   EuiPagination,
   keys,
-  EuiButtonEmpty,
   useEuiTheme,
   useIsWithinMinBreakpoint,
-  EuiFlyoutProps,
+  isDOMNode,
 } from '@elastic/eui';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 
-export interface UnifiedDocViewerFlyoutProps {
+export interface UnifiedDocViewerFlyoutProps extends Pick<DocViewerProps, 'onUpdateSelectedTabId'> {
+  docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
   flyoutTitle?: string;
   flyoutDefaultWidth?: EuiFlyoutProps['size'];
@@ -62,6 +63,7 @@ export interface UnifiedDocViewerFlyoutProps {
   onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
   setExpandedDoc: (doc?: DataTableRecord) => void;
+  initialTabId?: string;
 }
 
 function getIndexByDocId(hits: DataTableRecord[], id: string) {
@@ -76,6 +78,7 @@ export const FLYOUT_WIDTH_KEY = 'unifiedDocViewer:flyoutWidth';
  * Flyout displaying an expanded row details
  */
 export function UnifiedDocViewerFlyout({
+  docViewerRef,
   'data-test-subj': dataTestSubj,
   flyoutTitle,
   flyoutActions,
@@ -96,6 +99,8 @@ export function UnifiedDocViewerFlyout({
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
+  initialTabId,
+  onUpdateSelectedTabId,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
@@ -135,7 +140,7 @@ export function UnifiedDocViewerFlyout({
         return;
       }
 
-      if (ev.key === keys.ESCAPE) {
+      if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
         ev.preventDefault();
         ev.stopPropagation();
         onClose();
@@ -143,6 +148,19 @@ export function UnifiedDocViewerFlyout({
 
       if (ev.target instanceof HTMLInputElement) {
         // ignore events triggered from the search input
+        return;
+      }
+
+      const isTabButton = (ev.target as HTMLElement).getAttribute('role') === 'tab';
+      if (isTabButton) {
+        // ignore events triggered when the tab buttons are focused
+        return;
+      }
+
+      const isResizableButton =
+        (ev.target as HTMLElement).getAttribute('data-test-subj') === 'euiResizableButton';
+      if (isResizableButton) {
+        // ignore events triggered when the resizable button is focused
         return;
       }
 
@@ -184,6 +202,7 @@ export function UnifiedDocViewerFlyout({
   const renderDefaultContent = useCallback(
     () => (
       <UnifiedDocViewer
+        ref={docViewerRef}
         columns={columns}
         columnsMeta={columnsMeta}
         dataView={dataView}
@@ -193,20 +212,26 @@ export function UnifiedDocViewerFlyout({
         onRemoveColumn={removeColumn}
         textBasedHits={isEsqlQuery ? hits : undefined}
         docViewsRegistry={docViewsRegistry}
-        decreaseAvailableHeightBy={80} // flyout footer height
+        decreaseAvailableHeightBy={euiTheme.base}
+        initialTabId={initialTabId}
+        onUpdateSelectedTabId={onUpdateSelectedTabId}
       />
     ),
     [
-      actualHit,
-      addColumn,
+      docViewerRef,
       columns,
       columnsMeta,
       dataView,
-      hits,
-      isEsqlQuery,
       onFilter,
+      actualHit,
+      addColumn,
       removeColumn,
+      isEsqlQuery,
+      hits,
       docViewsRegistry,
+      euiTheme.base,
+      initialTabId,
+      onUpdateSelectedTabId,
     ]
   );
 
@@ -283,7 +308,7 @@ export function UnifiedDocViewerFlyout({
               <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
                 <EuiPagination
                   aria-label={i18n.translate('unifiedDocViewer.flyout.documentNavigation', {
-                    defaultMessage: 'Document navigation',
+                    defaultMessage: 'Document pagination',
                   })}
                   pageCount={pageCount}
                   activePage={activePage}
@@ -302,18 +327,6 @@ export function UnifiedDocViewerFlyout({
           )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            iconType="cross"
-            onClick={onClose}
-            flush="left"
-            data-test-subj="docViewerFlyoutCloseButton"
-          >
-            {i18n.translate('unifiedDocViewer.flyout.closeButtonLabel', {
-              defaultMessage: 'Close',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
       </EuiFlyoutResizable>
     </EuiPortal>
   );

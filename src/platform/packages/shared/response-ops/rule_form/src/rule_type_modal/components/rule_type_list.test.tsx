@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RuleTypeList } from './rule_type_list';
-import { RuleTypeWithDescription } from '../types';
+import type { RuleTypeWithDescription } from '../types';
 
 const ruleTypes: RuleTypeWithDescription[] = [
   {
@@ -32,6 +32,8 @@ const ruleTypes: RuleTypeWithDescription[] = [
     },
     defaultActionGroupId: '1',
     category: 'my-category-1',
+    isExportable: true,
+    isInternallyManaged: false,
   },
   {
     id: '2',
@@ -51,6 +53,8 @@ const ruleTypes: RuleTypeWithDescription[] = [
     },
     defaultActionGroupId: '2',
     category: 'my-category-2',
+    isExportable: true,
+    isInternallyManaged: false,
   },
   {
     id: '3',
@@ -70,6 +74,8 @@ const ruleTypes: RuleTypeWithDescription[] = [
     },
     defaultActionGroupId: '3',
     category: 'my-category-3',
+    isExportable: true,
+    isInternallyManaged: false,
   },
 ];
 

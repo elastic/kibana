@@ -9,8 +9,8 @@ import type { Moment } from 'moment';
 import moment from 'moment';
 import parser from '@kbn/datemath';
 import { isNumber, isString } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
 import type { Config, ParsedSchedule, Schedule } from '../types';
 import { createEvents } from './create_events';
 
@@ -36,7 +36,9 @@ export async function indexSchedule(config: Config, client: Client, logger: Tool
   const compiledSchedule = config.schedule.map(parseSchedule(now));
   for (const schedule of compiledSchedule) {
     const interval = schedule.interval ?? config.indexing.interval;
-    const startTs = moment(schedule.start);
+    const startTs = config.indexing.alignEventsToInterval
+      ? moment(schedule.start).startOf('minute')
+      : moment(schedule.start);
     const end =
       schedule.end === false && startTs.isAfter(now)
         ? moment(schedule.start + interval)

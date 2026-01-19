@@ -22,7 +22,9 @@
         "tags": [],
         "label": "savedObjectsServiceMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+        "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+        "lineNumber": 105,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +38,9 @@
             "signature": [
               "() => jest.Mocked<SavedObjectsServiceContract>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +58,9 @@
               "InternalSavedObjectsServiceSetup",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -72,7 +78,9 @@
               "SavedObjectsServiceSetup",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -92,7 +100,9 @@
               "InternalSavedObjectsServiceStart",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -109,7 +119,9 @@
                   "ISavedObjectTypeRegistry",
                   "> | undefined"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+                "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+                "lineNumber": 57,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -129,7 +141,9 @@
               "SavedObjectsServiceStart",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -146,7 +160,9 @@
                   "ISavedObjectTypeRegistry",
                   "> | undefined"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+                "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+                "lineNumber": 38,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -164,7 +180,9 @@
               "SavedObjectMigrationContext",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -179,7 +197,9 @@
                 "signature": [
                   "{ migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
+                "path": "src/core/packages/saved-objects/migration-server-mocks/src/migration.mocks.ts",
+                "lineNumber": 28,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -194,12 +214,12 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ISavedObjectTypeRegistry",
-              " & Pick<",
-              "SavedObjectTypeRegistry",
-              ", \"registerType\">>"
+              "ISavedObjectTypeRegistryInternal",
+              ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -217,7 +237,9 @@
               "ISavedObjectsExporter",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -235,7 +257,9 @@
               "ISavedObjectsImporter",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -253,7 +277,9 @@
               "ISavedObjectsSerializer",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

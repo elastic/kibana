@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
+import type { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '.';
 import { mockMoment } from '../../../../lib/helper/test_helpers';
 import { render } from '../../../../lib/helper/rtl_helpers';

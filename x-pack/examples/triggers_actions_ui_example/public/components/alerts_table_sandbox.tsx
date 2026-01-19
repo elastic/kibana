@@ -5,26 +5,20 @@
  * 2.0.
  */
 import React from 'react';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 
-interface SandboxProps {
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-}
-
-export const AlertsTableSandbox = ({ triggersActionsUi }: SandboxProps) => {
-  const { getAlertsStateTable: AlertsTable, alertsTableConfigurationRegistry } = triggersActionsUi;
-  const alertStateProps: AlertsTableStateProps = {
-    id: 'observabilityCases',
-    configurationId: 'observabilityCases',
-    alertsTableConfigurationRegistry,
-    ruleTypeIds: ['.es-query'],
-    query: {
-      bool: {
-        filter: [],
-      },
-    },
-  };
-
-  return <AlertsTable {...alertStateProps} />;
+export const AlertsTableSandbox = ({ services }: Pick<AlertsTableProps, 'services'>) => {
+  return (
+    <AlertsTable
+      id={'observabilityCases'}
+      ruleTypeIds={['.es-query']}
+      query={{
+        bool: {
+          filter: [],
+        },
+      }}
+      services={services}
+    />
+  );
 };

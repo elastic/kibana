@@ -5,21 +5,50 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
+import { omit, pick } from 'lodash';
+import { convertToQueryString } from './utils';
+
+// Search body fields as per https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html#search-search-api-request-body
+const BODY_FIELDS = [
+  'aggs',
+  'aggregations',
+  'docvalue_fields',
+  'fields',
+  'stored_fields',
+  'explain',
+  'from',
+  'indices_boost',
+  'knn',
+  'min_score',
+  'pit',
+  'query',
+  'retriever',
+  'runtime_mappings',
+  'seq_no_primary_term',
+  'size',
+  'sort',
+  '_source',
+  'stats',
+  'terminate_after',
+  'timeout',
+  'version',
+];
 
 export const logSearchRequest = (searchRequest: estypes.SearchRequest): string => {
-  const { body, index, ...params } = searchRequest;
-  const urlParams = Object.entries(params)
-    .reduce<string[]>((acc, [key, value]) => {
-      if (value != null) {
-        acc.push(`${key}=${value}`);
-      }
+  const { index } = searchRequest;
 
-      return acc;
-    }, [])
-    .join('&');
+  const params = {
+    ...omit(searchRequest, [...BODY_FIELDS, 'index', 'body', 'querystring']),
+    ...searchRequest.querystring,
+  };
 
-  const url = `/${index}/_search${urlParams ? `?${urlParams}` : ''}`;
+  const body = {
+    ...pick(searchRequest, [...BODY_FIELDS, 'querystring']),
+    ...(searchRequest.body as Record<string, unknown>),
+  };
+
+  const url = `/${index}/_search${convertToQueryString(params)}`;
 
   if (body) {
     return `POST ${url}\n${JSON.stringify({ ...body }, null, 2)}`;

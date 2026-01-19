@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { buildRangeFilter, Filter, updateFilterReferences } from '@kbn/es-query';
-import {
+import type { Filter } from '@kbn/es-query';
+import { buildRangeFilter, updateFilterReferences } from '@kbn/es-query';
+import type {
   DataView,
   DataViewsContract,
   ISearchSource,
   ISearchStartSearchSource,
-  SortDirection,
 } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-plugin/common';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -20,13 +21,14 @@ import {
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { OnlySearchSourceRuleParams } from '../types';
+import type { OnlySearchSourceRuleParams, EsQuerySourceFields } from '../types';
 import { getComparatorScript } from '../../../../common';
 import { checkForShardFailures } from '../util';
 
@@ -45,6 +47,7 @@ export interface FetchSearchSourceQueryOpts {
   };
   dateStart: string;
   dateEnd: string;
+  sourceFields: EsQuerySourceFields;
 }
 
 export async function fetchSearchSourceQuery({
@@ -56,6 +59,7 @@ export async function fetchSearchSourceQuery({
   services,
   dateStart,
   dateEnd,
+  sourceFields,
 }: FetchSearchSourceQueryOpts) {
   const { logger, getSearchSourceClient, ruleResultService } = services;
   const searchSourceClient = await getSearchSourceClient();
@@ -109,6 +113,7 @@ export async function fetchSearchSourceQuery({
     spacePrefix,
     filterToExcludeHitsFromPreviousRun
   );
+
   return {
     link,
     numMatches: Number(searchResult.hits.total),
@@ -117,7 +122,8 @@ export async function fetchSearchSourceQuery({
       isCountAgg,
       isGroupAgg,
       esResult: searchResult,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
+      generateSourceFieldsFromHits: true,
       termField: params.termField,
     }),
     index: [index.name],
@@ -138,7 +144,10 @@ export async function updateSearchSource(
   const timeField = await index.getTimeField();
 
   if (!timeField) {
-    throw new Error(`Data view with ID ${index.id} no longer contains a time field.`);
+    throw createTaskRunError(
+      new Error(`Data view with ID ${index.id} no longer contains a time field.`),
+      TaskErrorSource.USER
+    );
   }
 
   searchSource.setField('size', isGroupAgg ? 0 : params.size);
@@ -185,7 +194,6 @@ export async function updateSearchSource(
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
-      sourceFieldsParams: params.sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(
@@ -246,10 +254,9 @@ export async function generateLink(
 
   // use `lzCompress` flag for making the link readable during debugging/testing
   // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
-  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
-  const [start, end] = redirectUrl.split('/app');
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { spaceId: spacePrefix });
 
-  return start + spacePrefix + '/app' + end;
+  return redirectUrl;
 }
 
 export function getSmallerDataViewSpec(

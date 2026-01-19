@@ -27,12 +27,16 @@ import { MissingPrivilegesToolTip } from '../../../../../../components/missing_p
 import { getLogstashPipeline, LOGSTASH_CONFIG_PIPELINES } from './helpers';
 import { useLogstashApiKey } from './hooks';
 
-export const LogstashInstructions = () => {
+interface LogstashInstructionsProps {
+  isSSLEnabled: boolean;
+}
+
+export const LogstashInstructions = ({ isSSLEnabled }: LogstashInstructionsProps) => {
   const { docLinks } = useStartServices();
 
   return (
     <CollapsibleCallout
-      iconType="iInCircle"
+      iconType="info"
       title={
         <FormattedMessage
           id="xpack.fleet.settings.logstashInstructions.calloutTitle"
@@ -47,7 +51,11 @@ export const LogstashInstructions = () => {
           {documentationLink}."
           values={{
             documentationLink: (
-              <EuiLink external={true} href={docLinks.links.logstash.inputElasticAgent}>
+              <EuiLink
+                external={true}
+                target="_blank"
+                href={docLinks.links.logstash.inputElasticAgent}
+              >
                 <FormattedMessage
                   id="xpack.fleet.settings.logstashInstructions.documentationLink"
                   defaultMessage="Learn more"
@@ -57,7 +65,7 @@ export const LogstashInstructions = () => {
           }}
         />
         <EuiSpacer size="m" />
-        <LogstashInstructionSteps />
+        <LogstashInstructionSteps isSSLEnabled={isSSLEnabled} />
       </>
     </CollapsibleCallout>
   );
@@ -100,7 +108,10 @@ const CollapsibleCallout: React.FunctionComponent<EuiCallOutProps> = ({ children
   );
 };
 
-const LogstashInstructionSteps = () => {
+interface LogstashInstructionStepsProps {
+  isSSLEnabled: boolean;
+}
+const LogstashInstructionSteps = ({ isSSLEnabled }: LogstashInstructionStepsProps) => {
   const { docLinks } = useStartServices();
   const logstashApiKey = useLogstashApiKey();
   const authz = useAuthz();
@@ -170,7 +181,7 @@ const LogstashInstructionSteps = () => {
             />
             <EuiSpacer size="m" />
             <EuiCodeBlock paddingSize="m" language="yaml" isCopyable>
-              {getLogstashPipeline(logstashApiKey.apiKey)}
+              {getLogstashPipeline(isSSLEnabled, logstashApiKey.apiKey)}
             </EuiCodeBlock>
           </>
         ),
@@ -200,7 +211,11 @@ const LogstashInstructionSteps = () => {
               defaultMessage="Replace the parts between the brackets with your generated SSL certificate file paths. View {documentationLink} to generate the certificates."
               values={{
                 documentationLink: (
-                  <EuiLink external={true} href={docLinks.links.fleet.secureLogstash}>
+                  <EuiLink
+                    external={true}
+                    target="_blank"
+                    href={docLinks.links.fleet.secureLogstash}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.settings.logstashInstructions.ourDocumentationLink"
                       defaultMessage="our documentation"
@@ -225,7 +240,7 @@ const LogstashInstructionSteps = () => {
         ),
       },
     ],
-    [logstashApiKey, docLinks, hasAllSettings]
+    [logstashApiKey, docLinks, hasAllSettings, isSSLEnabled]
   );
 
   return (

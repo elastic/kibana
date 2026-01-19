@@ -9,10 +9,10 @@ import React, { useState, useCallback, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -36,8 +36,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FieldIcon } from '@kbn/react-field';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { SchemaField } from '../../../../../common/types/search_applications';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../../../../common/constants';
+import type { SchemaField } from '../../../../../common/types/search_applications';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../enterprise_search_content/routes';
 import { docLinks } from '../../../shared/doc_links';
@@ -62,7 +62,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
       ),
       render: (name: string) => (
         <EuiLinkTo
-          to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          to={`${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
             indexName: name,
             tabId: 'index_mappings',
           })}`}
@@ -117,7 +117,8 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
       <EuiFlexGroup direction="column" gutterSize="l">
         {notInAllIndices && (
           <EuiCallOut
-            iconType="iInCircle"
+            announceOnMount
+            iconType="info"
             title={
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.title"
@@ -143,6 +144,13 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
         )}
         <EuiBasicTable
           css={{ '& .euiTable': { backgroundColor: 'transparent' } }}
+          tableCaption={i18n.translate(
+            'xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.tableCaption',
+            {
+              defaultMessage: 'Indices for {fieldName}',
+              values: { fieldName: schemaField.name },
+            }
+          )}
           columns={columns}
           items={schemaField.indices}
           responsiveBreakpoint={false}
@@ -352,6 +360,7 @@ export const SearchApplicationSchema: React.FC = () => {
       <EuiFlexGroup direction="column" gutterSize="l">
         {hasSchemaConflicts && (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.title',
               { defaultMessage: 'Potential field mapping issues found' }
@@ -446,6 +455,12 @@ export const SearchApplicationSchema: React.FC = () => {
         </EuiFlexGroup>
 
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.enterpriseSearch.searchApplications.searchApplication.schema.tableCaption',
+            {
+              defaultMessage: 'Search application schema fields',
+            }
+          )}
           items={filteredSchemaFields}
           columns={columns}
           loading={isLoadingSearchApplicationSchema}
@@ -455,6 +470,7 @@ export const SearchApplicationSchema: React.FC = () => {
         />
         {totalConflictsHiddenByTypeFilters > 0 && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.title"
@@ -463,7 +479,7 @@ export const SearchApplicationSchema: React.FC = () => {
               />
             }
             color="danger"
-            iconType="iInCircle"
+            iconType="info"
           >
             <p>
               {i18n.translate(

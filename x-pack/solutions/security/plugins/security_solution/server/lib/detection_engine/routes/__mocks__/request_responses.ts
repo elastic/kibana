@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
@@ -25,11 +25,9 @@ import {
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
-  DETECTION_ENGINE_RULES_BULK_UPDATE,
-  DETECTION_ENGINE_RULES_BULK_DELETE,
-  DETECTION_ENGINE_RULES_BULK_CREATE,
   DETECTION_ENGINE_RULES_URL_FIND,
   DETECTION_ENGINE_RULES_IMPORT_URL,
+  DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
 } from '../../../../../common/constants';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
@@ -41,6 +39,7 @@ import {
 import {
   getBulkDisableRuleActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
+  getPerformBulkActionEditAlertSuppressionSchemaMock,
 } from '../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -117,27 +116,6 @@ export const getFindRequest = () =>
     path: DETECTION_ENGINE_RULES_URL_FIND,
   });
 
-export const getReadBulkRequest = () =>
-  requestMock.create({
-    method: 'post',
-    path: DETECTION_ENGINE_RULES_BULK_CREATE,
-    body: [getCreateRulesSchemaMock()],
-  });
-
-export const getUpdateBulkRequest = () =>
-  requestMock.create({
-    method: 'put',
-    path: DETECTION_ENGINE_RULES_BULK_UPDATE,
-    body: [getCreateRulesSchemaMock()],
-  });
-
-export const getPatchBulkRequest = () =>
-  requestMock.create({
-    method: 'patch',
-    path: DETECTION_ENGINE_RULES_BULK_UPDATE,
-    body: [getCreateRulesSchemaMock()],
-  });
-
 export const getBulkDisableRuleActionRequest = () =>
   requestMock.create({
     method: 'patch',
@@ -152,32 +130,11 @@ export const getBulkActionEditRequest = () =>
     body: getPerformBulkActionEditSchemaMock(),
   });
 
-export const getDeleteBulkRequest = () =>
+export const getBulkActionEditAlertSuppressionRequest = () =>
   requestMock.create({
-    method: 'delete',
-    path: DETECTION_ENGINE_RULES_BULK_DELETE,
-    body: [{ rule_id: 'rule-1' }],
-  });
-
-export const getDeleteBulkRequestById = () =>
-  requestMock.create({
-    method: 'delete',
-    path: DETECTION_ENGINE_RULES_BULK_DELETE,
-    body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
-  });
-
-export const getDeleteAsPostBulkRequestById = () =>
-  requestMock.create({
-    method: 'post',
-    path: DETECTION_ENGINE_RULES_BULK_DELETE,
-    body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
-  });
-
-export const getDeleteAsPostBulkRequest = () =>
-  requestMock.create({
-    method: 'post',
-    path: DETECTION_ENGINE_RULES_BULK_DELETE,
-    body: [{ rule_id: 'rule-1' }],
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: getPerformBulkActionEditAlertSuppressionSchemaMock(),
   });
 
 export const getPrivilegeRequest = (options: { auth?: { isAuthenticated: boolean } } = {}) =>
@@ -354,6 +311,27 @@ export const getSignalsAggsAndQueryRequest = () =>
   requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
+  });
+
+export const getUnifiedAlertsQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
+    body: typicalSignalsQuery(),
+  });
+
+export const getUnifiedAlertsAggsQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
+    body: typicalSignalsQueryAggs(),
+  });
+
+export const getUnifiedAlertsAggsAndQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
     body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
   });
 

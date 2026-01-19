@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, ScopedHistory } from '@kbn/core-application-browser';
+import type { AppMountParameters, ScopedHistory } from '@kbn/core-application-browser';
 
 export interface DashboardEmbedSettings {
   forceHideFilterBar?: boolean;
@@ -22,3 +22,12 @@ export interface DashboardMountContextProps {
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
+
+export type DashboardRedirect = (props: RedirectToProps) => void;
+/**
+ * Properties for redirecting within the dashboard application.
+ * Can redirect to either a specific dashboard or the listing page.
+ */
+export type RedirectToProps =
+  | { destination: 'dashboard'; id?: string; useReplace?: boolean; editMode?: boolean }
+  | { destination: 'listing'; filter?: string; useReplace?: boolean };

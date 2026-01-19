@@ -52,7 +52,17 @@ describe('Login view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: 'optional', excludeFromOAS: true });
+      expect(routeConfig.options).toEqual({ excludeFromOAS: true, excludeFromRateLimiter: true });
+
+      expect(routeConfig.security).toEqual(
+        expect.objectContaining({
+          authc: { enabled: 'optional' },
+          authz: {
+            enabled: false,
+            reason: expect.any(String),
+          },
+        })
+      );
 
       expect(routeConfig.validate).toEqual({
         body: undefined,
@@ -274,6 +284,68 @@ describe('Login view routes', () => {
             },
           ],
           getAuthcConfig({ providers: { token: { token1: { order: 0 } } } }),
+        ],
+      ];
+
+      for (const [providers, authcConfig] of cases) {
+        config.authc = authcConfig;
+
+        const expectedPayload = expect.objectContaining({
+          selector: { enabled: false, providers },
+        });
+        await expect(
+          routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
+        ).resolves.toEqual({
+          options: { body: expectedPayload },
+          payload: expectedPayload,
+          status: 200,
+        });
+      }
+    });
+
+    it('returns `origin` configuration for providers.', async () => {
+      license.getFeatures.mockReturnValue({ allowLogin: true, showLogin: true } as any);
+
+      const request = httpServerMock.createKibanaRequest();
+      const contextMock = coreMock.createRequestHandlerContext();
+
+      const cases: Array<[LoginSelectorProvider[], ConfigType['authc']]> = [
+        [[], getAuthcConfig({ providers: { basic: { basic1: { order: 0, enabled: false } } } })],
+        [
+          [
+            {
+              name: 'basic1',
+              type: 'basic',
+              origin: 'http://example.com',
+              usesLoginForm: true,
+              showInSelector: true,
+              icon: 'logoElasticsearch',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
+          getAuthcConfig({
+            providers: { basic: { basic1: { order: 0, origin: 'http://example.com' } } },
+          }),
+        ],
+        [
+          [
+            {
+              name: 'token1',
+              type: 'token',
+              origin: ['http://example.com', 'http://example-2.com'],
+              usesLoginForm: true,
+              showInSelector: true,
+              icon: 'logoElasticsearch',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
+          getAuthcConfig({
+            providers: {
+              token: {
+                token1: { order: 0, origin: ['http://example.com', 'http://example-2.com'] },
+              },
+            },
+          }),
         ],
       ];
 

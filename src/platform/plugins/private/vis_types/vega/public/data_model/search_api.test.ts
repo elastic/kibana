@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extendSearchParamsWithRuntimeFields } from './search_api';
+import { extendSearchParamsWithRuntimeFields, SearchAPI } from './search_api';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { of } from 'rxjs';
 
-import { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
+import type { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 const mockComputedFields = (
@@ -45,10 +46,8 @@ describe('extendSearchParamsWithRuntimeFields', () => {
     expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
       .toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "runtime_mappings": Object {
-            "foo": Object {},
-          },
+        "runtime_mappings": Object {
+          "foo": Object {},
         },
       }
     `);
@@ -56,10 +55,8 @@ describe('extendSearchParamsWithRuntimeFields', () => {
 
   test('should use runtime mappings from spec if it is specified', async () => {
     const requestParams = {
-      body: {
-        runtime_mappings: {
-          test: {},
-        },
+      runtime_mappings: {
+        test: {},
       },
     } as unknown as ReturnType<typeof getSearchParamsFromRequest>;
     const runtimeFields = { foo: {} };
@@ -69,12 +66,76 @@ describe('extendSearchParamsWithRuntimeFields', () => {
     expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
       .toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "runtime_mappings": Object {
-            "test": Object {},
-          },
+        "runtime_mappings": Object {
+          "test": Object {},
         },
       }
     `);
+  });
+});
+
+describe('SearchAPI projectRouting', () => {
+  let mockSearch: jest.Mock;
+  let dataViewsStart: DataViewsPublicPluginStart;
+  let mockDependencies: any;
+
+  const createSearchRequest = () => ({
+    url: 'test-url',
+    name: 'test-request',
+    index: 'test-index',
+    body: {
+      query: { match_all: {} },
+    },
+  });
+
+  const testProjectRouting = (
+    projectRouting: string | undefined,
+    expectedValue: string | undefined,
+    done: jest.DoneCallback
+  ) => {
+    const searchAPI = new SearchAPI(
+      mockDependencies,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      projectRouting
+    );
+
+    searchAPI.search([createSearchRequest()]).subscribe(() => {
+      expect(mockSearch).toHaveBeenCalled();
+      const searchOptions = mockSearch.mock.calls[0][1];
+      expect(searchOptions?.projectRouting).toBe(expectedValue);
+      done();
+    });
+  };
+
+  beforeEach(() => {
+    dataViewsStart = dataViewPluginMocks.createStartContract();
+    mockSearch = jest.fn().mockReturnValue(
+      of({
+        rawResponse: [],
+        isPartial: false,
+        isRunning: false,
+      })
+    );
+    mockDependencies = {
+      search: {
+        search: mockSearch,
+      },
+      indexPatterns: dataViewsStart,
+      uiSettings: {
+        get: jest.fn(),
+      },
+    };
+    mockComputedFields(dataViewsStart, 'test-index', {});
+  });
+
+  test('should include project_routing in ES params when projectRouting is provided', (done) => {
+    testProjectRouting('_alias:_origin', '_alias:_origin', done);
+  });
+
+  test('should not include project_routing in ES params when projectRouting is undefined', (done) => {
+    testProjectRouting(undefined, undefined, done);
   });
 });

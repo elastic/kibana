@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { SUB_ACTION } from '../../../common/d3security/constants';
-import {
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SUB_ACTION } from '@kbn/connector-schemas/d3security/constants';
+import type {
   D3SecurityConfig,
   D3SecuritySecrets,
   D3SecurityRunActionParams,
-} from '../../../common/d3security/types';
+} from '@kbn/connector-schemas/d3security';
 
 export interface D3SecurityActionParams {
   subAction: SUB_ACTION.RUN | SUB_ACTION.TEST;

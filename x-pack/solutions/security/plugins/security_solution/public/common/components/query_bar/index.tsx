@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { cloneDeep, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
+import type { PropsWithChildren, FC } from 'react';
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -16,15 +17,17 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { css, Global } from '@emotion/react';
 import { useKibana } from '../../lib/kibana';
 import { convertToQueryType } from './convert_to_query_type';
+import { matchFiltersToIndexPattern } from './match_filters_to_index_pattern';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  indexPattern: DataViewBase;
+  indexPattern: DataView | DataViewBase;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
@@ -37,10 +40,33 @@ export interface QueryBarComponentProps {
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
   displayStyle?: SearchBarProps['displayStyle'];
   isDisabled?: boolean;
+  bubbleSubmitEvent?: boolean;
+  preventCacheClearOnUnmount?: boolean;
 }
 
 export const isDataView = (obj: unknown): obj is DataView =>
   obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
+
+const CustomStylesWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  const wrapperClassName = 'ruleEditQueryBarWrapper';
+
+  const customCss = css`
+    .${wrapperClassName} .kbnQueryBar__filterButtonGroup {
+      align-self: start;
+    }
+
+    .${wrapperClassName} .kbnQueryBar__wrap {
+      height: auto !important;
+    }
+  `;
+
+  return (
+    <>
+      <Global styles={customCss} />
+      <div className={wrapperClassName}>{children}</div>
+    </>
+  );
+};
 
 export const QueryBar = memo<QueryBarComponentProps>(
   ({
@@ -61,6 +87,8 @@ export const QueryBar = memo<QueryBarComponentProps>(
     dataTestSubj,
     displayStyle,
     isDisabled,
+    bubbleSubmitEvent,
+    preventCacheClearOnUnmount = false,
   }) => {
     const { data } = useKibana().services;
     const [dataView, setDataView] = useState<DataView>();
@@ -133,56 +161,54 @@ export const QueryBar = memo<QueryBarComponentProps>(
         createDataView();
       }
       return () => {
-        if (dv?.id) {
+        // Cache needs to be cleared in certain instances where ad-hoc dataviews are created, like rule creation
+        if (dv?.id && !preventCacheClearOnUnmount) {
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, indexPattern, isEsql]);
+    }, [data.dataViews, indexPattern, isEsql, preventCacheClearOnUnmount]);
 
     const searchBarFilters = useMemo(() => {
-      if (isDataView(indexPattern) || isEsql) {
+      if (!dataView?.id || isEsql) {
         return filters;
       }
 
-      /**
-       * We update filters and set new data view id to make sure that SearchBar does not show data view picker
-       * More details in https://github.com/elastic/kibana/issues/174026
-       */
-      const updatedFilters = cloneDeep(filters);
-      updatedFilters.forEach((filter) => (filter.meta.index = indexPattern.title));
-      return updatedFilters;
-    }, [filters, indexPattern, isEsql]);
+      return matchFiltersToIndexPattern(dataView.id, filters);
+    }, [filters, isEsql, dataView?.id]);
 
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
     return (
-      <SearchBar
-        showSubmitButton={false}
-        dateRangeFrom={dateRangeFrom}
-        dateRangeTo={dateRangeTo}
-        filters={searchBarFilters}
-        indexPatterns={arrDataView}
-        isLoading={isLoading}
-        isRefreshPaused={isRefreshPaused}
-        query={query}
-        onClearSavedQuery={onClearSavedQuery}
-        onFiltersUpdated={onFiltersUpdated}
-        onQueryChange={onQueryChange}
-        onQuerySubmit={onQuerySubmit}
-        onSaved={onSavedQuery}
-        onSavedQueryUpdated={onSavedQueryUpdated}
-        refreshInterval={refreshInterval}
-        showAutoRefreshOnly={false}
-        showFilterBar={!hideSavedQuery}
-        showDatePicker={false}
-        showQueryInput={true}
-        showSaveQuery={true}
-        timeHistory={timeHistory}
-        dataTestSubj={dataTestSubj}
-        savedQuery={savedQuery}
-        displayStyle={isEsql ? 'withBorders' : displayStyle}
-        isDisabled={isDisabled}
-      />
+      <CustomStylesWrapper>
+        <SearchBar
+          showSubmitButton={false}
+          dateRangeFrom={dateRangeFrom}
+          dateRangeTo={dateRangeTo}
+          filters={searchBarFilters}
+          indexPatterns={arrDataView}
+          isLoading={isLoading}
+          isRefreshPaused={isRefreshPaused}
+          query={query}
+          onClearSavedQuery={onClearSavedQuery}
+          onFiltersUpdated={onFiltersUpdated}
+          onQueryChange={onQueryChange}
+          onQuerySubmit={onQuerySubmit}
+          onSaved={onSavedQuery}
+          onSavedQueryUpdated={onSavedQueryUpdated}
+          refreshInterval={refreshInterval}
+          showAutoRefreshOnly={false}
+          showFilterBar={!hideSavedQuery}
+          showDatePicker={false}
+          showQueryInput={true}
+          showSaveQuery={true}
+          timeHistory={timeHistory}
+          dataTestSubj={dataTestSubj}
+          savedQuery={savedQuery}
+          displayStyle={isEsql ? 'withBorders' : displayStyle}
+          isDisabled={isDisabled}
+          bubbleSubmitEvent={bubbleSubmitEvent}
+        />
+      </CustomStylesWrapper>
     );
   }
 );

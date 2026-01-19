@@ -9,9 +9,28 @@ import { load } from 'js-yaml';
 import semverGte from 'semver/functions/gte';
 import semverLte from 'semver/functions/lte';
 
-import type { ChangeLogParams } from '../settings/changelog_modal';
+export enum ChangeType {
+  Enhancement = 'enhancement',
+  BreakingChange = 'breaking-change',
+  BugFix = 'bugfix',
+}
 
-export const formatChangelog = (parsedChangelog: ChangeLogParams[]) => {
+interface Change<T extends ChangeType = ChangeType> {
+  description: string;
+  link: string;
+  type: T;
+}
+
+export interface ChangelogEntry<T extends ChangeType = ChangeType> {
+  version: string;
+  changes: Array<Change<T>>;
+}
+
+export type Changelog = ChangelogEntry[];
+
+export type BreakingChangesLog = Array<ChangelogEntry<ChangeType.BreakingChange>>;
+
+export const formatChangelog = (parsedChangelog: Changelog) => {
   if (!parsedChangelog) return '';
 
   return parsedChangelog.reduce((acc, val) => {
@@ -20,13 +39,12 @@ export const formatChangelog = (parsedChangelog: ChangeLogParams[]) => {
   }, '');
 };
 
-// Exported for testing
-export const filterYamlChangelog = (
+export const parseYamlChangelog = (
   changelogText: string | null | undefined,
   latestVersion: string,
   currentVersion?: string
 ) => {
-  const parsedChangelog: ChangeLogParams[] = changelogText ? load(changelogText) : [];
+  const parsedChangelog: Changelog = changelogText ? load(changelogText) : [];
 
   if (!currentVersion) return parsedChangelog.filter((e) => semverLte(e.version, latestVersion));
 
@@ -35,11 +53,18 @@ export const filterYamlChangelog = (
   );
 };
 
-export const getFormattedChangelog = (
-  changelogText: string | null | undefined,
-  latestVersion: string,
-  currentVersion?: string
-) => {
-  const parsed = filterYamlChangelog(changelogText, latestVersion, currentVersion);
-  return formatChangelog(parsed);
+export const getBreakingChanges = (changelog: Changelog): BreakingChangesLog => {
+  return changelog.reduce<BreakingChangesLog>((acc, entry) => {
+    const breakingChanges = entry.changes.filter(
+      (change): change is Change<ChangeType.BreakingChange> => {
+        return change.type === ChangeType.BreakingChange;
+      }
+    );
+
+    if (breakingChanges.length > 0) {
+      return [...acc, { ...entry, changes: breakingChanges }];
+    }
+
+    return acc;
+  }, []);
 };

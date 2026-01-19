@@ -8,20 +8,26 @@
  */
 
 import React, { Suspense } from 'react';
-import { DashboardTopNavProps } from './dashboard_top_nav_with_context';
+import type { DashboardTopNavProps } from './dashboard_top_nav_with_context';
 import { untilPluginStartServicesReady } from '../services/kibana_services';
 
-const LazyDashboardTopNav = React.lazy(() =>
-  (async () => {
-    const modulePromise = import('./dashboard_top_nav_with_context');
-    const [module] = await Promise.all([modulePromise, untilPluginStartServicesReady()]);
+const LazyDashboardTopNav = React.lazy(async () => {
+  const [{ DashboardTopNavWithContext }] = await Promise.all([
+    import('../dashboard_renderer/dashboard_module'),
+    untilPluginStartServicesReady(),
+  ]);
+  return {
+    default: DashboardTopNavWithContext,
+  };
+});
 
-    return {
-      default: module.DashboardTopNavWithContext,
-    };
-  })().then((module) => module)
-);
-
+/**
+ * A lazy-loaded component that renders the dashboard top navigation bar.
+ * This component provides controls for dashboard editing, saving, and other actions.
+ *
+ * @param props - The {@link DashboardTopNavProps} for configuring the top navigation.
+ * @returns A React element containing the dashboard top navigation bar.
+ */
 export const DashboardTopNav = (props: DashboardTopNavProps) => {
   return (
     <Suspense fallback={<div />}>

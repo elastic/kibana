@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
@@ -15,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { AddFromLibraryButton, IconButtonGroup, Toolbar } from '@kbn/shared-ux-button-toolbar';
 
 import { getElementStrings } from '../../../i18n';
-import { CommitFn, ElementSpec } from '../../../types';
+import type { CommitFn, ElementSpec } from '../../../types';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { RefreshControl } from './refresh_control';
 // @ts-expect-error untyped local
@@ -177,7 +178,7 @@ export const WorkpadHeader: FC<Props> = ({
                     onClick={showEmbedPanel}
                     data-test-subj="canvas-add-from-library-button"
                   />,
-                  <EditorMenu addElement={addElement} />,
+                  <EditorMenu />,
                 ],
               }}
             </Toolbar>
@@ -225,6 +226,7 @@ export const WorkpadHeader: FC<Props> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              {/* @ts-expect-error upgrade typescript v5.9.3 */}
               <RefreshControl />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -239,11 +241,14 @@ export const WorkpadHeader: FC<Props> = ({
 };
 
 WorkpadHeader.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   isWriteable: PropTypes.bool,
   commit: PropTypes.func.isRequired,
   onSetWriteable: PropTypes.func,
+  // @ts-expect-error upgrade typescript v5.9.3
   canUserWrite: PropTypes.bool,
   renderEmbedPanel: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   elements: PropTypes.object.isRequired,
   addElement: PropTypes.func.isRequired,
 };

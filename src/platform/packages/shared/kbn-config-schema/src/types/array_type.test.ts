@@ -216,3 +216,105 @@ describe('#extendsDeep', () => {
     ).toThrowErrorMatchingInlineSnapshot(`"[0.bar]: definition for this key is missing"`);
   });
 });
+
+describe('nested unknowns with arrays', () => {
+  test('should strip unknown nested keys if stripUnkownKeys is true in validate', () => {
+    const type = schema.arrayOf(
+      schema.object({
+        a: schema.string(),
+      })
+    );
+
+    expect(
+      type.validate(
+        [
+          { a: '123', b: 'should be stripped' },
+          { a: '324', x: 'should be stripped' },
+        ],
+        void 0,
+        void 0,
+        {
+          stripUnknownKeys: true,
+        }
+      )
+    ).toStrictEqual([{ a: '123' }, { a: '324' }]);
+  });
+
+  test('should strip unknown nested keys if unknowns is ignore in the schema', () => {
+    const type = schema.arrayOf(
+      schema.object({
+        a: schema.string(),
+      }),
+      { unknowns: 'ignore' }
+    );
+
+    expect(
+      type.validate(
+        [
+          { a: '123', b: 'should be stripped' },
+          { a: '324', x: 'should be stripped' },
+        ],
+        void 0,
+        void 0,
+        {}
+      )
+    ).toStrictEqual([{ a: '123' }, { a: '324' }]);
+  });
+
+  test('should strip unknown keys in object inside map inside array when stripUnkownKeys is true', () => {
+    const type = schema.arrayOf(
+      schema.mapOf(
+        schema.string(),
+        schema.object({
+          a: schema.string(),
+        })
+      )
+    );
+
+    const value = [
+      new Map([
+        ['key1', { a: '123', b: 'should be stripped' }],
+        ['key2', { a: '456', extra: 'remove this' }],
+      ]),
+    ];
+
+    const expected = [
+      new Map([
+        ['key1', { a: '123' }],
+        ['key2', { a: '456' }],
+      ]),
+    ];
+
+    expect(type.validate(value, void 0, void 0, { stripUnknownKeys: true })).toStrictEqual(
+      expected
+    );
+  });
+
+  test('should strip unknown keys in object inside map inside array when unknowns is ignore', () => {
+    const type = schema.arrayOf(
+      schema.mapOf(
+        schema.string(),
+        schema.object({
+          a: schema.string(),
+        })
+      ),
+      { unknowns: 'ignore' }
+    );
+
+    const value = [
+      new Map([
+        ['key1', { a: '123', b: 'should be stripped' }],
+        ['key2', { a: '456', extra: 'remove this' }],
+      ]),
+    ];
+
+    const expected = [
+      new Map([
+        ['key1', { a: '123' }],
+        ['key2', { a: '456' }],
+      ]),
+    ];
+
+    expect(type.validate(value, void 0, void 0, {})).toStrictEqual(expected);
+  });
+});

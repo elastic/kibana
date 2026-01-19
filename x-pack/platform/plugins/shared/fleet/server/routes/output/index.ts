@@ -28,7 +28,7 @@ import { genericErrorResponse } from '../schema/errors';
 
 import {
   deleteOutputHandler,
-  getOneOuputHandler,
+  getOneOutputHandler,
   getOutputsHandler,
   postOutputHandler,
   putOutputHandler,
@@ -64,9 +64,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOutputsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetOutputsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -102,15 +104,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOneOutputRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => OutputResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
         },
       },
-      getOneOuputHandler
+      getOneOutputHandler
     );
   router.versioned
     .put({
@@ -140,9 +144,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PutOutputRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => OutputResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -171,9 +177,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PostOutputRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => OutputResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -203,12 +211,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: DeleteOutputRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeleteOutputResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: genericErrorResponse,
             },
           },
@@ -237,9 +248,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GenerateLogstashApiKeyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -268,9 +281,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetLatestOutputHealthRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetLatestOutputHealthResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

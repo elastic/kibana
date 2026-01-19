@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiPopoverProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiLink,
   EuiPanel,
@@ -17,12 +18,13 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIconTip,
-  EuiPopoverProps,
+  euiTextBreakWord,
+  useEuiFontSize,
 } from '@elastic/eui';
 import type { DataViewBase, Query } from '@kbn/es-query';
+import { css } from '@emotion/react';
 import { QueryInput, validateQuery } from '.';
 import type { QueryInputServices } from '.';
-import './filter_query_input.scss';
 
 const filterByLabel = i18n.translate('visualizationUiComponents.filterQueryInput.label', {
   defaultMessage: 'Filter by',
@@ -45,6 +47,13 @@ export interface FilterQueryInputProps {
   queryInputServices: QueryInputServices;
   appName: string;
 }
+
+const LinkStyles = ({ euiTheme }: UseEuiTheme) => `
+  ${euiTextBreakWord()};
+  ${useEuiFontSize('s')};
+  min-height: ${euiTheme.size.xl};
+  width: 100%;
+`;
 
 export function FilterQueryInput({
   inputFilter,
@@ -69,6 +78,14 @@ export function FilterQueryInput({
     dataView
   );
 
+  const emptyFilterQueryText = i18n.translate(
+    'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
+    {
+      defaultMessage: '(empty)',
+    }
+  );
+  const filterQueryText = (inputFilter?.query as string) || emptyFilterQueryText;
+
   return (
     <EuiFormRow
       display="rowCompressed"
@@ -84,7 +101,7 @@ export function FilterQueryInput({
               }}
               position="top"
               size="s"
-              type="questionInCircle"
+              type="question"
             />
           </>
         ) : (
@@ -100,6 +117,11 @@ export function FilterQueryInput({
             isOpen={filterPopoverOpen}
             closePopover={onClosePopup}
             display="block"
+            panelProps={{
+              css: css`
+                width: 960px;
+              `,
+            }}
             panelClassName="filterQueryInput__popover"
             initialFocus={dataTestSubj ? `textarea[data-test-subj='${dataTestSubj}']` : undefined}
             button={
@@ -113,6 +135,7 @@ export function FilterQueryInput({
                       onClick={() => {
                         setFilterPopoverOpen(!filterPopoverOpen);
                       }}
+                      css={LinkStyles}
                       color={isInputFilterValid ? 'text' : 'danger'}
                       title={i18n.translate(
                         'visualizationUiComponents.filterQueryInput.clickToEdit',
@@ -120,14 +143,9 @@ export function FilterQueryInput({
                           defaultMessage: 'Click to edit',
                         }
                       )}
+                      aria-label={`${filterByLabel} ${filterQueryText}`}
                     >
-                      {(inputFilter?.query as string) ||
-                        i18n.translate(
-                          'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
-                          {
-                            defaultMessage: '(empty)',
-                          }
-                        )}
+                      {filterQueryText}
                     </EuiLink>
                   </EuiFlexItem>
                 </EuiFlexGroup>

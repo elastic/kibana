@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import './_index.scss';
-
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 
 import {
@@ -31,6 +29,7 @@ import { ExplorerChartLabel } from './components/explorer_chart_label';
 import { CHART_TYPE } from '../explorer_constants';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
@@ -43,7 +42,7 @@ import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { BarSeries, Chart, Settings, LEGACY_LIGHT_THEME } from '@elastic/charts';
+import { BarSeries, Chart, Settings } from '@elastic/charts';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 import { useCssMlExplorerChartContainer } from './explorer_chart_styles';
 
@@ -113,6 +112,8 @@ function ExplorerChartContainer({
       application: { navigateToApp },
     },
   } = useMlKibana();
+
+  const chartBaseTheme = useElasticChartsTheme();
 
   const getMapsLink = useCallback(async () => {
     const { queryString, query } = getEntitiesQuery(series);
@@ -240,8 +241,7 @@ function ExplorerChartContainer({
       <div style={{ width: 0, height: 0 }}>
         <Chart ref={chartRef}>
           <Settings
-            // TODO connect to charts.theme service see src/platform/plugins/shared/charts/public/services/theme/README.md
-            baseTheme={LEGACY_LIGHT_THEME}
+            baseTheme={chartBaseTheme}
             noResults={<div />}
             width={0}
             height={0}
@@ -347,6 +347,7 @@ function ExplorerChartContainer({
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
+                  euiTheme={euiTheme}
                 />
               )}
             </MlTooltipComponent>
@@ -368,6 +369,7 @@ function ExplorerChartContainer({
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
+                  euiTheme={euiTheme}
                 />
               )}
             </MlTooltipComponent>

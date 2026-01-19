@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel, EuiSelectableOption, EuiText } from '@elastic/eui';
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
+import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useGetSettings } from '../../slo_settings/hooks/use_get_settings';
@@ -78,6 +79,16 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
       value: 'slo.indicator.type',
       onClick: () => {
         handleChangeGroupBy('slo.indicator.type');
+      },
+    },
+    {
+      label: i18n.translate('xpack.slo.list.groupBy.sloId', {
+        defaultMessage: 'SLO definition id',
+      }),
+      checked: groupBy === 'slo.id',
+      value: 'slo.id',
+      onClick: () => {
+        handleChangeGroupBy('slo.id');
       },
     },
     {

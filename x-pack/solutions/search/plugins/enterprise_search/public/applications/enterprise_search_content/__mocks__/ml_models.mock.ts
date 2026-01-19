@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   MlTrainedModelDeploymentStats,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
+import type { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
 export const nerModel: TrainedModelConfigResponse = {
   inference_config: {
@@ -52,7 +52,6 @@ export const textClassificationModel: TrainedModelConfigResponse = {
       tokenization: {
         roberta: {
           add_prefix_space: false,
-          // @ts-expect-error upgrade typescript v5.1.6
           do_lower_case: false,
           max_sequence_length: 512,
           span: -1,
@@ -73,7 +72,11 @@ export const textClassificationModel: TrainedModelConfigResponse = {
 
 export const textExpansionModel: TrainedModelConfigResponse = {
   inference_config: {
-    text_expansion: {},
+    text_expansion: {
+      vocabulary: {
+        index: 'vocabulary-index',
+      },
+    },
   },
   input: {
     field_names: ['text_field'],

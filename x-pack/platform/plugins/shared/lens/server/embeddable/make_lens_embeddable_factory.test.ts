@@ -8,9 +8,9 @@
 import semverGte from 'semver/functions/gte';
 import { makeLensEmbeddableFactory } from './make_lens_embeddable_factory';
 import { getAllMigrations } from '../migrations/saved_object_migrations';
-import { Filter } from '@kbn/es-query';
-import { GetMigrationFunctionObjectFn } from '@kbn/kibana-utils-plugin/common';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import type { GetMigrationFunctionObjectFn } from '@kbn/kibana-utils-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('embeddable migrations', () => {
   test('should have all saved object migrations versions (>7.13.0)', () => {

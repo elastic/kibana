@@ -79,6 +79,11 @@ export function PrimaryAndComparisonSearchBar() {
       defaultMessage: 'Comparison functions',
     });
   }
+
+  const swapSides = i18n.translate('xpack.profiling.comparisonSearch.swapSides', {
+    defaultMessage: 'Swap sides',
+  });
+
   return (
     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexEnd">
       <EuiFlexItem>
@@ -89,11 +94,12 @@ export function PrimaryAndComparisonSearchBar() {
         <PrimaryProfilingSearchBar showSubmitButton={false} />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ padding: '0 8px' }}>
-        <EuiToolTip position="top" content="Swap sides">
+        <EuiToolTip position="top" content={swapSides} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="profilingPrimaryAndComparisonSearchBarButton"
             iconType="merge"
             size="m"
+            aria-label={swapSides}
             onClick={() => {
               const next = {
                 ...query,

@@ -6,26 +6,27 @@
  */
 
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
-import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ReactElement } from 'react';
+import React from 'react';
+import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import type { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildExistsFilter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
-import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView, SortDirectionNumeric } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { SortDirection } from '@kbn/data-plugin/common';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { AbstractESSource } from '../es_source';
 import { getCore, getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
+import type { TotalHits } from '../../../../common/elasticsearch_util';
 import {
   addFieldToDSL,
   getField,
   hitsToGeoJson,
   isTotalHitsGreaterThan,
-  TotalHits,
 } from '../../../../common/elasticsearch_util';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
@@ -43,7 +44,7 @@ import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-import {
+import type {
   AbstractESSourceDescriptor,
   DataRequestMeta,
   ESSearchSourceDescriptor,
@@ -51,20 +52,21 @@ import {
   TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { IField } from '../../fields/field';
-import {
-  getLayerFeaturesRequestName,
+import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import type { IField } from '../../fields/field';
+import type {
   GetFeatureActionsArgs,
   GeoJsonWithMeta,
   IMvtVectorSource,
   SourceStatus,
 } from '../vector_source';
-import { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { DataRequest } from '../../util/data_request';
+import { getLayerFeaturesRequestName } from '../vector_source';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import type { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
-import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
+import type { ScriptField } from './util/get_docvalue_source_fields';
+import { getDocValueAndSourceFields } from './util/get_docvalue_source_fields';
 import {
   addFeatureToIndex,
   deleteFeatureFromIndex,
@@ -101,10 +103,12 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
 });
 
 export class ESSearchSource extends AbstractESSource implements IMvtVectorSource {
-  readonly _descriptor: ESSearchSourceDescriptor;
+  readonly _descriptor: Required<ESSearchSourceDescriptor>;
   protected readonly _tooltipFields: ESDocField[];
 
-  static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESSearchSourceDescriptor>
+  ): Required<ESSearchSourceDescriptor> {
     const normalizedDescriptor = AbstractESSource.createDescriptor(
       descriptor
     ) as AbstractESSourceDescriptor & Partial<ESSearchSourceDescriptor>;
@@ -140,7 +144,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         typeof descriptor.topHitsSize === 'number' && descriptor.topHitsSize > 0
           ? descriptor.topHitsSize
           : 1,
-    };
+    } as Required<ESSearchSourceDescriptor>;
   }
 
   constructor(descriptor: Partial<ESSearchSourceDescriptor>) {
@@ -152,6 +156,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           return this.getFieldByName(property);
         })
       : [];
+  }
+
+  getGeoFieldName(): string {
+    return this._descriptor.geoField;
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
@@ -326,7 +334,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
     };
 
-    const searchSource = await this.makeSearchSource(requestMeta, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
 
     if (topHitsGroupByTimeseries) {
@@ -389,6 +397,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions,
     });
 
     const allHits: any[] = [];
@@ -400,7 +409,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     entityBuckets.forEach((entityBucket: any) => {
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
-      allHits.push(...hits.reverse());
+      allHits.push(...hits.slice().reverse());
       if (isTotalHitsGreaterThan(entityBucket.entityHits.hits.total, hits.length)) {
         areTopHitsTrimmed = true;
       }
@@ -453,7 +462,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       ));
 
     const maxResultWindow = await this.getMaxResultWindow();
-    const searchSource = await this.makeSearchSource(
+    const { searchSource, fetchOptions } = await this.makeSearchSource(
       useRequestMetaWithoutTimeslice ? requestMetaWithoutTimeslice : requestMeta,
       maxResultWindow,
       initialSearchContext
@@ -484,12 +493,13 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions,
     });
 
     const isTimeExtentForTimeslice =
       requestMeta.timeslice !== undefined && !useRequestMetaWithoutTimeslice;
     return {
-      hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
+      hits: resp.hits.hits.slice().reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
         resultsCount: resp.hits.hits.length,
         areResultsTrimmed: isTotalHitsGreaterThan(resp.hits.total, resp.hits.hits.length),
@@ -897,7 +907,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const dataView = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(dataView.getIndexPattern());
 
-    const searchSource = await this.makeSearchSource(requestMeta, indexSettings.maxResultWindow);
+    const { searchSource } = await this.makeSearchSource(
+      requestMeta,
+      indexSettings.maxResultWindow
+    );
     // searchSource calls dataView.getComputedFields to seed docvalueFields
     // dataView.getComputedFields adds each date field in the dataView to docvalueFields to ensure standardized date format across kibana
     // we don't need these as they request unneeded fields and bloat responses
@@ -1004,7 +1017,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     onWarning: (warning: SearchResponseWarning) => void
   ) {
     const maxResultWindow = await this.getMaxResultWindow();
-    const searchSource = await this.makeSearchSource(requestMeta, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', maxResultWindow + 1);
     const resp = await this._runEsQuery({
       requestId: this._getFeaturesCountRequestId(),
@@ -1021,6 +1034,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       ),
       requestsAdapter: inspectorAdapters.requests,
       onWarning,
+      fetchOptions,
     });
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }

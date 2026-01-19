@@ -15,12 +15,14 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { builtInAggregationTypes } from '../constants';
-import { AggregationType, FieldOption, ValidNormalizedTypes } from '../types';
-import { IErrorObject } from '../../types';
+import type { AggregationType, FieldOption, ValidNormalizedTypes } from '../types';
+import type { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
-import './of.scss';
+import { firstFieldOption } from '../index_controls';
 
 interface OfFieldOption {
   label: string;
@@ -62,16 +64,8 @@ export const OfExpression = ({
   popupPosition,
   helpText,
 }: OfExpressionProps) => {
+  const { euiTheme } = useEuiTheme();
   const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
-  const firstFieldOption = {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.common.expressionItems.of.selectTimeFieldOptionLabel',
-      {
-        defaultMessage: 'Select a field',
-      }
-    ),
-    value: '',
-  };
   const aggregationTypes = customAggTypesOptions ?? builtInAggregationTypes;
 
   const availableFieldOptions: OfFieldOption[] = fields.reduce(
@@ -89,6 +83,10 @@ export const OfExpression = ({
     },
     []
   );
+
+  const aggFieldContainerCss = css`
+    width: calc(${euiTheme.size.base} * 29);
+  `;
 
   useEffect(() => {
     // if current field set doesn't contain selected field, clear selection
@@ -139,7 +137,7 @@ export const OfExpression = ({
           />
         </ClosablePopoverTitle>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
+          <EuiFlexItem grow={false} className="actOf__aggFieldContainer" css={aggFieldContainerCss}>
             <EuiFormRow
               id="ofField"
               fullWidth

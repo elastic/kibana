@@ -6,20 +6,16 @@
  */
 
 import type { SecurityAppStore } from '../../../../common/store/types';
-import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
+import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 
 import { createToggleColumnCellActionFactory } from './toggle_column';
 import { mockGlobalState } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 
 const services = createStartServicesMock();
-const mockAlertConfigGetActions = jest.fn();
-services.triggersActionsUi.alertsTableConfigurationRegistry.getActions = mockAlertConfigGetActions;
 const mockToggleColumn = jest.fn();
-mockAlertConfigGetActions.mockImplementation(() => ({
-  toggleColumn: mockToggleColumn,
-}));
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn().mockReturnValue(mockGlobalState);
@@ -82,8 +78,8 @@ describe('createToggleColumnCellActionFactory', () => {
   describe('execute', () => {
     afterEach(() => {
       mockToggleColumn.mockClear();
-      mockAlertConfigGetActions.mockClear();
     });
+
     it('should remove column', async () => {
       await toggleColumnAction.execute(context);
       expect(mockDispatch).toHaveBeenCalledWith(
@@ -113,28 +109,48 @@ describe('createToggleColumnCellActionFactory', () => {
       );
     });
 
-    it('should call triggersActionsUi.alertsTableConfigurationRegistry to add a column in alert', async () => {
-      const name = 'fake-field-name';
-      await toggleColumnAction.execute({
-        ...context,
-        data: [{ ...context.data[0], field: { ...context.data[0].field, name } }],
-        metadata: {
-          scopeId: TableId.alertsOnAlertsPage,
-        },
+    [
+      TableId.alertsOnAlertsPage,
+      TableId.alertsOnCasePage,
+      TableId.alertsOnRuleDetailsPage,
+      TableId.alertsRiskInputs,
+      TableId.alertsOnAttacksPage,
+    ].forEach((scopeId) => {
+      it(`should call toggleColumn on the visible alerts table to add a column in alert for TableId ${scopeId}`, async () => {
+        const name = 'fake-field-name';
+        await toggleColumnAction.execute({
+          ...context,
+          data: [{ ...context.data[0], field: { ...context.data[0].field, name } }],
+          metadata: {
+            scopeId,
+            alertsTableRef: {
+              current: { toggleColumn: mockToggleColumn } as unknown as AlertsTableImperativeApi,
+            },
+          },
+        });
+        expect(mockToggleColumn).toHaveBeenCalledWith(name);
       });
-      expect(mockAlertConfigGetActions).toHaveBeenCalledWith('securitySolution-alerts-page');
-      expect(mockToggleColumn).toHaveBeenCalledWith(name);
     });
 
-    it('should call triggersActionsUi.alertsTableConfigurationRegistry to remove a column in alert', async () => {
-      await toggleColumnAction.execute({
-        ...context,
-        metadata: {
-          scopeId: TableId.alertsOnAlertsPage,
-        },
+    [
+      TableId.alertsOnAlertsPage,
+      TableId.alertsOnCasePage,
+      TableId.alertsOnRuleDetailsPage,
+      TableId.alertsRiskInputs,
+      TableId.alertsOnAttacksPage,
+    ].forEach((scopeId) => {
+      it(`should call toggleColumn on the visible alerts table to remove a column in alert for TableId ${scopeId}`, async () => {
+        await toggleColumnAction.execute({
+          ...context,
+          metadata: {
+            scopeId: TableId.alertsOnAlertsPage,
+            alertsTableRef: {
+              current: { toggleColumn: mockToggleColumn } as unknown as AlertsTableImperativeApi,
+            },
+          },
+        });
+        expect(mockToggleColumn).toHaveBeenCalledWith(fieldName);
       });
-      expect(mockAlertConfigGetActions).toHaveBeenCalledWith('securitySolution-alerts-page');
-      expect(mockToggleColumn).toHaveBeenCalledWith(fieldName);
     });
   });
 });

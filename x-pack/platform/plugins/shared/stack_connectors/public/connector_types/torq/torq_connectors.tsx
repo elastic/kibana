@@ -8,15 +8,16 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
-import {
-  UseField,
+import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+import type {
   ValidationError,
   ValidationFunc,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
-import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
+import { isValidTorqHostName } from '../../../common/torq';
 import * as i18n from './translations';
 
 const { urlField, emptyField } = fieldValidators;
@@ -25,7 +26,7 @@ const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dat
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut size="s" iconType="iInCircle" data-test-subj={dataTestSubj} title={title} />
+      <EuiCallOut size="s" iconType="info" data-test-subj={dataTestSubj} title={title} />
       <EuiSpacer size="m" />
     </>
   );
@@ -42,7 +43,7 @@ const torqWebhookEndpoint =
     };
     if (!isUrl(value)) return error;
     const hostname = new URL(value).hostname;
-    return hostname === 'hooks.torq.io' ? undefined : error;
+    return isValidTorqHostName(hostname) ? undefined : error;
   };
 
 const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({

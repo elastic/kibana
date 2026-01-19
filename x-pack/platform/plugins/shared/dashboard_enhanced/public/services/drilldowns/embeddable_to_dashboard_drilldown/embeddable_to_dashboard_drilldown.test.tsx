@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { Filter, RangeFilter, FilterStateStore, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, RangeFilter, Query, TimeRange } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { type Context, EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
-import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
-import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
-import { StartDependencies } from '../../../plugin';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
-import { DashboardAppLocatorDefinition } from '@kbn/dashboard-plugin/public/dashboard_app/locator/locator';
+import type { DashboardDrilldownConfig } from '../abstract_dashboard_drilldown';
+import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
+import type { StartDependencies } from '../../../plugin';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import { DashboardAppLocatorDefinition } from '@kbn/dashboard-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 
 describe('.isConfigValid()', () => {
@@ -58,22 +59,15 @@ test('getHref is defined', () => {
   expect(drilldown.getHref).toBeDefined();
 });
 
-test('inject/extract are defined', () => {
-  const drilldown = new EmbeddableToDashboardDrilldown({} as any);
-  expect(drilldown.extract).toBeDefined();
-  expect(drilldown.inject).toBeDefined();
-});
-
 describe('.execute() & getHref', () => {
   async function setupTestBed(
-    config: Partial<Config>,
+    config: Partial<DashboardDrilldownConfig>,
     embeddableInput: { filters?: Filter[]; timeRange?: TimeRange; query?: Query },
     filtersFromEvent: Filter[],
     timeFieldName?: string
   ) {
     const navigateToApp = jest.fn();
     const getUrlForApp = jest.fn((app, opt) => `${app}/${opt.path}`);
-    const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
     const definition = new DashboardAppLocatorDefinition({
       useHashedUrl: false,
       getDashboardFilterFields: async () => [],
@@ -86,27 +80,29 @@ describe('.execute() & getHref', () => {
             navigateToApp,
             getUrlForApp,
           },
-          savedObjects: {
-            client: savedObjectsClient,
-          },
         },
         plugins: {
+          dashboard: dashboardPluginMock.createStartContract(),
           uiActionsEnhanced: {},
-          dashboard: {
-            locator: {
-              getLocation: async (params: DashboardLocatorParams) => {
-                return await definition.getLocation(params);
+          share: {
+            url: {
+              locators: {
+                get: () => ({
+                  getLocation: async (params: DashboardLocatorParams) => {
+                    return await definition.getLocation(params);
+                  },
+                }),
               },
             },
           },
         },
         self: {},
       })) as unknown as StartServicesGetter<
-        Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'dashboard'>
+        Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'share' | 'dashboard'>
       >,
     });
 
-    const completeConfig: Config = {
+    const completeConfig: DashboardDrilldownConfig = {
       dashboardId: 'id',
       useCurrentFilters: false,
       useCurrentDateRange: false,

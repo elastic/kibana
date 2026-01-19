@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
 import { elasticsearchErrorHandler } from './elasticsearch_error_handler';
-import { Config } from '../types';
+import type { Config } from '../types';
 
 export async function setupKibanaSystemUser(config: Config, client: Client, logger: ToolingLog) {
   await client.security
-    .changePassword({ username: 'kibana_system', body: { password: 'changeme' } })
+    .changePassword({ username: 'kibana_system', password: 'changeme' })
     .then(() => {
       logger.info('Password changed to "changeme" for "kibana_system" user');
     })

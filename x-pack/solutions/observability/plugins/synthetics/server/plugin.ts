@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   PluginInitializerContext,
   CoreStart,
   CoreSetup,
   Plugin as PluginType,
   Logger,
-  SavedObjectsClient,
   SavedObjectsClientContract,
+  KibanaRequest,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
-import {
+import { SyncGlobalParamsPrivateLocationsTask } from './tasks/sync_global_params_task';
+import type {
   SyntheticsPluginsSetupDependencies,
   SyntheticsPluginsStartDependencies,
   SyntheticsServerSetup,
@@ -25,11 +27,15 @@ import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor
 import { initSyntheticsServer } from './server';
 import { syntheticsFeature } from './feature';
 import { registerSyntheticsSavedObjects } from './saved_objects/saved_objects';
-import { UptimeConfig } from './config';
+import type { UptimeConfig } from './config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
+import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import { getTransformIn } from '../common/embeddables/stats_overview/get_transform_in';
+import { getTransformOut } from '../common/embeddables/stats_overview/get_transform_out';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -38,6 +44,8 @@ export class Plugin implements PluginType {
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
+  private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
+  private syncGlobalParamsTask?: SyncGlobalParamsPrivateLocationsTask;
 
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
     this.logger = initContext.logger.get();
@@ -89,6 +97,24 @@ export class Plugin implements PluginType {
 
     registerSyntheticsSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
+    this.syncPrivateLocationMonitorsTask = new SyncPrivateLocationMonitorsTask(
+      this.server,
+      this.syntheticsMonitorClient
+    );
+    this.syncPrivateLocationMonitorsTask.registerTaskDefinition(plugins.taskManager);
+
+    this.syncGlobalParamsTask = new SyncGlobalParamsPrivateLocationsTask(
+      this.server,
+      plugins.taskManager,
+      this.syntheticsMonitorClient
+    );
+
+    this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
+    plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
+      transformIn: getTransformIn(plugins.embeddable.transformEnhancementsIn),
+      transformOut: getTransformOut(plugins.embeddable.transformEnhancementsOut),
+    });
+
     return {};
   }
 
@@ -96,6 +122,14 @@ export class Plugin implements PluginType {
     this.savedObjectsClient = new SavedObjectsClient(
       coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
     );
+
+    const getMaintenanceWindowClientInternal = (request: KibanaRequest) => {
+      if (!pluginsStart.maintenanceWindows) {
+        return;
+      }
+
+      return pluginsStart.maintenanceWindows?.getMaintenanceWindowClientInternal(request);
+    };
 
     if (this.server) {
       this.server.coreStart = coreStart;
@@ -106,7 +140,11 @@ export class Plugin implements PluginType {
       this.server.savedObjectsClient = this.savedObjectsClient;
       this.server.spaces = pluginsStart.spaces;
       this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
+      this.server.getMaintenanceWindowClientInternal = getMaintenanceWindowClientInternal;
     }
+    this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
+      this.logger.error('Failed to start sync private location monitors task', { error: e });
+    });
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 

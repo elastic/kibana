@@ -19,11 +19,12 @@ import { ruleRunMetricsStoreMock } from '../../lib/rule_run_metrics_store.mock';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../types';
 import { alertsClientMock } from '../alerts_client.mock';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { legacyAlertsClientMock } from '../legacy_alerts_client.mock';
-import { initializeAlertsClient, RuleData } from './initialize_alerts_client';
+import type { RuleData } from './initialize_alerts_client';
+import { initializeAlertsClient } from './initialize_alerts_client';
 import { maintenanceWindowsServiceMock } from '../../task_runner/maintenance_windows/maintenance_windows_service.mock';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
@@ -70,6 +71,8 @@ const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 const mockedRule: RuleData<Record<string, unknown>> = {
+  muteAll: false,
+  mutedInstanceIds: [],
   id: '1',
   name: 'rule-name',
   tags: ['rule-', '-tags'],
@@ -95,6 +98,7 @@ describe('initializeAlertsClient', () => {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         maintenanceWindowsService,
+        logger,
         request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
@@ -124,6 +128,8 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -154,6 +160,7 @@ describe('initializeAlertsClient', () => {
       alertsService,
       context: {
         alertingEventLogger,
+        logger,
         maintenanceWindowsService,
         request: fakeRequest,
         ruleId: RULE_ID,
@@ -184,6 +191,8 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -216,6 +225,7 @@ describe('initializeAlertsClient', () => {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         maintenanceWindowsService,
+        logger,
         request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
@@ -245,6 +255,8 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -285,6 +297,7 @@ describe('initializeAlertsClient', () => {
       context: {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        logger,
         maintenanceWindowsService,
         request: fakeRequest,
         ruleId: RULE_ID,
@@ -316,6 +329,8 @@ describe('initializeAlertsClient', () => {
         executionId: 'abc',
         id: '1',
         name: 'rule-name',
+        muteAll: false,
+        mutedInstanceIds: [],
         parameters: {
           bar: true,
         },

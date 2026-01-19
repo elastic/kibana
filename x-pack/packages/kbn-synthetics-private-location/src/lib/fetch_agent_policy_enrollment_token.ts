@@ -6,9 +6,9 @@
  */
 
 import { isError } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { KibanaAPIClient } from './kibana_api_client';
-import { CliOptions } from '../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { KibanaAPIClient } from './kibana_api_client';
+import type { CliOptions } from '../types';
 
 export async function fetchAgentPolicyEnrollmentToken(
   { kibanaUrl, kibanaPassword, kibanaUsername }: CliOptions,

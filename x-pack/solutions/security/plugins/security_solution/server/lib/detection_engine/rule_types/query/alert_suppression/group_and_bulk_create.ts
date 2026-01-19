@@ -7,11 +7,15 @@
 
 import type moment from 'moment';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
-import { buildTimeRangeFilter } from '../../utils/build_events_query';
-import type { RuleServices, RunOpts, SearchAfterAndBulkCreateReturnType } from '../../types';
+import { buildEventsSearchQuery, buildTimeRangeFilter } from '../../utils/build_events_query';
+import type {
+  SecurityRuleServices,
+  SecuritySharedParams,
+  SearchAfterAndBulkCreateReturnType,
+} from '../../types';
 import {
   addToSearchAfterReturn,
   getUnprocessedExceptionsWarnings,
@@ -30,10 +34,9 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../com
 import { bulkCreateUnsuppressedAlerts } from './bulk_create_unsuppressed_alerts';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
-import type { ExperimentalFeatures } from '../../../../../../common';
-import { createEnrichEventsFunction } from '../../utils/enrichments';
 import { getNumberOfSuppressedAlerts } from '../../utils/get_number_of_suppressed_alerts';
 import * as i18n from '../../translations';
+import { bulkCreate } from '../../factories';
 
 export interface BucketHistory {
   key: Record<string, string | number | null>;
@@ -41,15 +44,13 @@ export interface BucketHistory {
 }
 
 export interface GroupAndBulkCreateParams {
-  runOpts: RunOpts<UnifiedQueryRuleParams>;
-  services: RuleServices;
-  spaceId: string;
+  sharedParams: SecuritySharedParams<UnifiedQueryRuleParams>;
+  services: SecurityRuleServices;
   filter: estypes.QueryDslQueryContainer;
   buildReasonMessage: BuildReasonMessage;
   bucketHistory?: BucketHistory[];
   groupByFields: string[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  experimentalFeatures: ExperimentalFeatures;
   isLoggedRequestsEnabled: boolean;
 }
 
@@ -122,19 +123,17 @@ export const filterBucketHistory = ({
 };
 
 export const groupAndBulkCreate = async ({
-  runOpts,
+  sharedParams,
   services,
-  spaceId,
   filter,
   buildReasonMessage,
   bucketHistory,
   groupByFields,
   eventsTelemetry,
-  experimentalFeatures,
   isLoggedRequestsEnabled,
 }: GroupAndBulkCreateParams): Promise<GroupAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
-    const tuple = runOpts.tuple;
+    const tuple = sharedParams.tuple;
 
     const filteredBucketHistory = filterBucketHistory({
       bucketHistory: bucketHistory ?? [],
@@ -147,7 +146,6 @@ export const groupAndBulkCreate = async ({
       searchAfterTimes: [],
       enrichmentTimes: [],
       bulkCreateTimes: [],
-      lastLookBackDate: null,
       createdSignalsCount: 0,
       createdSignals: [],
       errors: [],
@@ -158,7 +156,7 @@ export const groupAndBulkCreate = async ({
       },
     };
 
-    const exceptionsWarning = getUnprocessedExceptionsWarnings(runOpts.unprocessedExceptions);
+    const exceptionsWarning = getUnprocessedExceptionsWarnings(sharedParams.unprocessedExceptions);
     if (exceptionsWarning) {
       toReturn.warningMessages.push(exceptionsWarning);
     }
@@ -170,47 +168,49 @@ export const groupAndBulkCreate = async ({
 
       const bucketHistoryFilter = buildBucketHistoryFilter({
         bucketHistory: filteredBucketHistory,
-        primaryTimestamp: runOpts.primaryTimestamp,
-        secondaryTimestamp: runOpts.secondaryTimestamp,
+        primaryTimestamp: sharedParams.primaryTimestamp,
+        secondaryTimestamp: sharedParams.secondaryTimestamp,
         from: tuple.from,
       });
 
       // if we do not suppress alerts for docs with missing values, we will create aggregation for null missing buckets
       const suppressOnMissingFields =
-        (runOpts.completeRule.ruleParams.alertSuppression?.missingFieldsStrategy ??
+        (sharedParams.completeRule.ruleParams.alertSuppression?.missingFieldsStrategy ??
           DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
         AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
       const groupingAggregation = buildGroupByFieldAggregation({
         groupByFields,
         maxSignals: tuple.maxSignals,
-        aggregatableTimestampField: runOpts.aggregatableTimestampField,
+        aggregatableTimestampField: sharedParams.aggregatableTimestampField,
         missingBucket: suppressOnMissingFields,
       });
 
-      const eventsSearchParams = {
+      const searchRequest = buildEventsSearchQuery({
         aggregations: groupingAggregation,
         searchAfterSortIds: undefined,
-        index: runOpts.inputIndex,
+        index: sharedParams.inputIndex,
         from: tuple.from.toISOString(),
         to: tuple.to.toISOString(),
-        services,
-        ruleExecutionLogger: runOpts.ruleExecutionLogger,
         filter,
-        pageSize: 0,
-        primaryTimestamp: runOpts.primaryTimestamp,
-        secondaryTimestamp: runOpts.secondaryTimestamp,
-        runtimeMappings: runOpts.runtimeMappings,
+        size: 0,
+        primaryTimestamp: sharedParams.primaryTimestamp,
+        secondaryTimestamp: sharedParams.secondaryTimestamp,
+        runtimeMappings: sharedParams.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
-        loggedRequestsConfig: isLoggedRequestsEnabled
-          ? {
-              type: 'findDocuments',
-              description: i18n.FIND_EVENTS_DESCRIPTION,
-            }
-          : undefined,
-      };
+      });
       const { searchResult, searchDuration, searchErrors, loggedRequests } =
-        await singleSearchAfter(eventsSearchParams);
+        await singleSearchAfter({
+          searchRequest,
+          services,
+          ruleExecutionLogger: sharedParams.ruleExecutionLogger,
+          loggedRequestsConfig: isLoggedRequestsEnabled
+            ? {
+                type: 'findDocuments',
+                description: i18n.FIND_EVENTS_DESCRIPTION,
+              }
+            : undefined,
+        });
 
       if (isLoggedRequestsEnabled) {
         toReturn.loggedRequests = loggedRequests;
@@ -232,7 +232,7 @@ export const groupAndBulkCreate = async ({
         const unsuppressedResult = await bulkCreateUnsuppressedAlerts({
           groupByFields,
           size: maxUnsuppressedCount,
-          runOpts,
+          sharedParams,
           buildReasonMessage,
           eventsTelemetry,
           filter,
@@ -265,43 +265,32 @@ export const groupAndBulkCreate = async ({
       }));
 
       const wrappedAlerts = wrapSuppressedAlerts({
+        sharedParams,
         suppressionBuckets,
-        spaceId,
-        completeRule: runOpts.completeRule,
-        mergeStrategy: runOpts.mergeStrategy,
-        indicesToQuery: runOpts.inputIndex,
-        publicBaseUrl: runOpts.publicBaseUrl,
         buildReasonMessage,
-        alertTimestampOverride: runOpts.alertTimestampOverride,
-        ruleExecutionLogger: runOpts.ruleExecutionLogger,
-        intendedTimestamp: runOpts.intendedTimestamp,
       });
 
-      const suppressionDuration = runOpts.completeRule.ruleParams.alertSuppression?.duration;
+      const suppressionDuration = sharedParams.completeRule.ruleParams.alertSuppression?.duration;
 
       if (suppressionDuration) {
         const suppressionWindow = `now-${suppressionDuration.value}${suppressionDuration.unit}`;
         const bulkCreateResult = await bulkCreateWithSuppression({
-          alertWithSuppression: runOpts.alertWithSuppression,
-          ruleExecutionLogger: runOpts.ruleExecutionLogger,
+          sharedParams,
           wrappedDocs: wrappedAlerts,
           services,
           suppressionWindow,
-          alertTimestampOverride: runOpts.alertTimestampOverride,
-          experimentalFeatures,
           ruleType: 'query',
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
-        runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
-      } else {
-        const bulkCreateResult = await runOpts.bulkCreate(
-          wrappedAlerts,
-          undefined,
-          createEnrichEventsFunction({
-            services,
-            logger: runOpts.ruleExecutionLogger,
-          })
+        sharedParams.ruleExecutionLogger.debug(
+          `created ${bulkCreateResult.createdItemsCount} signals`
         );
+      } else {
+        const bulkCreateResult = await bulkCreate({
+          services,
+          sharedParams,
+          wrappedAlerts,
+        });
         addToSearchAfterReturn({
           current: toReturn,
           next: {
@@ -309,7 +298,9 @@ export const groupAndBulkCreate = async ({
             suppressedItemsCount: getNumberOfSuppressedAlerts(bulkCreateResult.createdItems, []),
           },
         });
-        runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+        sharedParams.ruleExecutionLogger.debug(
+          `created ${bulkCreateResult.createdItemsCount} signals`
+        );
       }
 
       const newBucketHistory: BucketHistory[] = buckets.map((bucket) => {

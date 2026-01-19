@@ -5,7 +5,11 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "pipeline": ""
+      "pipeline": "",
+      "merge_type": [
+        "index",
+        "template"
+      ]
     },
     "methods": [
       "GET",
@@ -15,7 +19,7 @@
       "_ingest/_simulate",
       "_ingest/{index}/_simulate"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/simulate-ingest-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-simulate-ingest",
     "availability": {
       "stack": true,
       "serverless": false

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsNames } from './names';
+import type { EsNames } from './names';
 import mappings from '../../generated/mappings.json';
 
 // returns the body of an index template used in an ES indices.putTemplate call

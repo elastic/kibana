@@ -31,7 +31,9 @@
       "eventLog",
       "features",
       "fieldFormats",
+      "inference",
       "inspector",
+      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -40,11 +42,11 @@
       "sessionView",
       "spaces",
       "taskManager",
-      "threatIntelligence",
       "timelines",
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "files",
       "controls",
       "dataViewEditor",
@@ -60,7 +62,9 @@
       "inference",
       "discoverShared",
       "productDocBase",
-      "telemetry"
+      "telemetry",
+      "elasticAssistantSharedState",
+      "share"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -75,9 +79,10 @@
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
-      "guidedOnboarding",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "agentBuilder",
+      "llmTasks"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -88,7 +93,8 @@
       "lists",
       "ml",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "agentBuilder"
     ],
     "extraPublicDirs": [
       "common"

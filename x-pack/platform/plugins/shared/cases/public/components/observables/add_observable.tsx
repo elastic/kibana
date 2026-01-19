@@ -12,6 +12,7 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 
@@ -30,7 +31,7 @@ export interface AddObservableProps {
 const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
   const { permissions } = useCasesContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { isLoading, mutateAsync: postObservables } = usePostObservable(caseData.id);
+  const { isLoading, mutateAsync: postObservable } = usePostObservable(caseData.id);
   const { observablesAuthorized: isObservablesEnabled } = useCasesFeatures();
 
   const closeModal = () => setIsModalVisible(false);
@@ -38,14 +39,16 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
 
   const handleCreateObservable = useCallback(
     async (observable: ObservablePost) => {
-      await postObservables({
+      await postObservable({
         observable,
       });
 
       closeModal();
     },
-    [postObservables]
+    [postObservable]
   );
+
+  const modalTitleId = useGeneratedHtmlId();
 
   return permissions.create && permissions.update ? (
     <EuiFlexItem grow={false}>
@@ -59,9 +62,13 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
         {i18n.ADD_OBSERVABLE}
       </EuiButton>
       {isModalVisible && (
-        <EuiModal data-test-subj="cases-observables-add-modal" onClose={closeModal}>
+        <EuiModal
+          data-test-subj="cases-observables-add-modal"
+          onClose={closeModal}
+          aria-labelledby={modalTitleId}
+        >
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{i18n.ADD_OBSERVABLE}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>{i18n.ADD_OBSERVABLE}</EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <ObservableForm

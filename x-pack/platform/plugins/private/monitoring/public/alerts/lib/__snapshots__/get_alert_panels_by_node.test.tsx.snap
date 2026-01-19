@@ -44,11 +44,13 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -72,11 +74,13 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -251,11 +255,13 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -273,11 +279,13 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -295,11 +303,13 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -323,11 +333,13 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -345,11 +357,13 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -367,11 +381,13 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>

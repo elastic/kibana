@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { none } from 'fp-ts/lib/Option';
+import { none } from 'fp-ts/Option';
 import { FillPoolResult } from '../lib/fill_pool';
 import { asOk, asErr } from '../lib/result_type';
 import { PollingError, PollingErrorType } from '../polling';

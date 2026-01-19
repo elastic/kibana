@@ -18,12 +18,13 @@ import {
   type EuiThemeComputed,
 } from '@elastic/eui';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
-import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import { useMlKibana } from '../../../contexts/kibana';
 import { Controls, Cytoscape, JobMapLegend } from './components';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
+import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 
 const getCytoscapeDivStyle = (theme: EuiThemeComputed) => ({
   background: `linear-gradient(
@@ -67,19 +68,15 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
   } = useFetchAnalyticsMapData();
 
   const {
-    services: {
-      notifications,
-      application: { navigateToUrl },
-    },
+    services: { notifications },
   } = useMlKibana();
-  const locator = useMlLocator()!;
   const { euiTheme } = useEuiTheme();
   const refresh = useRefresh();
 
-  const redirectToAnalyticsManagementPage = async () => {
-    const url = await locator.getUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
-    await navigateToUrl(url);
-  };
+  const redirectToAnalyticsManagementPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    'analytics'
+  );
 
   const updateElements = (nodeId: string, nodeLabel: string, destIndexNode?: string) => {
     // If removing the root job just go back to the jobs list

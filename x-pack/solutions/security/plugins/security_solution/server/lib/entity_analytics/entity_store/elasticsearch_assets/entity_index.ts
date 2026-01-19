@@ -65,17 +65,13 @@ export const getEntityIndexStatus = async ({
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
 export const generateIndexMappings = (
-  description: Pick<EntityEngineInstallationDescriptor, 'fields' | 'identityField'>
+  description: Pick<
+    EntityEngineInstallationDescriptor,
+    'fields' | 'identityField' | 'identityFieldMapping'
+  >
 ): MappingTypeMapping => {
   const identityFieldMappings: MappingProperties = {
-    [description.identityField]: {
-      type: 'keyword',
-      fields: {
-        text: {
-          type: 'match_only_text',
-        },
-      },
-    },
+    [description.identityField]: description.identityFieldMapping,
   };
 
   const otherFieldMappings = description.fields
@@ -99,11 +95,6 @@ export const BASE_ENTITY_INDEX_MAPPING: MappingProperties = {
   },
   'entity.name': {
     type: 'keyword',
-    fields: {
-      text: {
-        type: 'match_only_text',
-      },
-    },
   },
   'entity.source': {
     type: 'keyword',

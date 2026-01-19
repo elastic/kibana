@@ -7,7 +7,7 @@
 
 import { getInferenceExecutorMock, getInferenceAdapterMock } from './api.test.mocks';
 
-import { of, Subject, isObservable, toArray, firstValueFrom } from 'rxjs';
+import { of, Subject, isObservable, toArray, firstValueFrom, filter } from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -15,14 +15,17 @@ import {
   type ChatCompleteAPI,
   type ChatCompletionChunkEvent,
   MessageRole,
+  isChatCompletionChunkEvent,
 } from '@kbn/inference-common';
 import {
   createInferenceConnectorAdapterMock,
   createInferenceConnectorMock,
   createInferenceExecutorMock,
+  createRegexWorkerServiceMock,
   chunkEvent,
 } from '../test_utils';
 import { createChatCompleteApi } from './api';
+import { createChatCompleteCallbackApi } from './callback_api';
 
 describe('createChatCompleteApi', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
@@ -31,15 +34,30 @@ describe('createChatCompleteApi', () => {
   let inferenceAdapter: ReturnType<typeof createInferenceConnectorAdapterMock>;
   let inferenceConnector: ReturnType<typeof createInferenceConnectorMock>;
   let inferenceExecutor: ReturnType<typeof createInferenceExecutorMock>;
+  let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
 
   let chatComplete: ChatCompleteAPI;
-
+  const mockEsClient = {
+    ml: {
+      inferTrainedModel: jest.fn(),
+    },
+  } as any;
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
     logger = loggerMock.create();
     actions = actionsMock.createStart();
-
-    chatComplete = createChatCompleteApi({ request, actions, logger });
+    regexWorker = createRegexWorkerServiceMock();
+    const callbackApi = createChatCompleteCallbackApi({
+      request,
+      actions,
+      logger,
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
+      esClient: mockEsClient,
+    });
+    chatComplete = createChatCompleteApi({
+      callbackApi,
+    });
 
     inferenceAdapter = createInferenceConnectorAdapterMock();
     inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
@@ -60,6 +78,7 @@ describe('createChatCompleteApi', () => {
     await chatComplete({
       connectorId: 'connectorId',
       messages: [{ role: MessageRole.User, content: 'question' }],
+      maxRetries: 0,
     });
 
     expect(getInferenceExecutorMock).toHaveBeenCalledTimes(1);
@@ -74,6 +93,7 @@ describe('createChatCompleteApi', () => {
     await chatComplete({
       connectorId: 'connectorId',
       messages: [{ role: MessageRole.User, content: 'question' }],
+      maxRetries: 0,
     });
 
     expect(getInferenceAdapterMock).toHaveBeenCalledTimes(1);
@@ -86,6 +106,7 @@ describe('createChatCompleteApi', () => {
       messages: [{ role: MessageRole.User, content: 'question' }],
       temperature: 0.7,
       modelName: 'gpt-4o',
+      maxRetries: 0,
     });
 
     expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
@@ -105,6 +126,7 @@ describe('createChatCompleteApi', () => {
       chatComplete({
         connectorId: 'connectorId',
         messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Adapter for type .gen-ai not implemented"`);
   });
@@ -118,7 +140,36 @@ describe('createChatCompleteApi', () => {
       const response = await chatComplete({
         connectorId: 'connectorId',
         messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
       });
+
+      expect(response).toEqual({
+        content: 'chunk-1chunk-2',
+        toolCalls: [],
+      });
+    });
+
+    it('implicitly retries errors when configured to', async () => {
+      let count = 0;
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        if (++count < 3) {
+          throw new Error(`Failing on attempt ${count}`);
+        }
+        return of(chunkEvent('chunk-1'), chunkEvent('chunk-2'));
+      });
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 2,
+        retryConfiguration: {
+          retryOn: 'all',
+          initialDelay: 1,
+          backoffMultiplier: 1,
+        },
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(3);
 
       expect(response).toEqual({
         content: 'chunk-1chunk-2',
@@ -134,6 +185,7 @@ describe('createChatCompleteApi', () => {
           connectorId: 'connectorId',
           messages: [{ role: MessageRole.User, content: 'question' }],
           abortSignal: abortController.signal,
+          maxRetries: 0,
         });
 
         expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
@@ -159,6 +211,7 @@ describe('createChatCompleteApi', () => {
           connectorId: 'connectorId',
           messages: [{ role: MessageRole.User, content: 'question' }],
           abortSignal: abortController.signal,
+          maxRetries: 1,
         }).catch((err) => {
           caughtError = err;
         });
@@ -183,6 +236,7 @@ describe('createChatCompleteApi', () => {
         stream: true,
         connectorId: 'connectorId',
         messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
       });
 
       expect(isObservable(events$)).toBe(true);
@@ -207,6 +261,48 @@ describe('createChatCompleteApi', () => {
       ]);
     });
 
+    it('implicitly retries errors when configured to', async () => {
+      let count = 0;
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        count++;
+        if (count < 3) {
+          throw new Error(`Failing on attempt ${count}`);
+        }
+        return of(chunkEvent('chunk-1'), chunkEvent('chunk-2'));
+      });
+
+      const events$ = chatComplete({
+        stream: true,
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 2,
+        retryConfiguration: {
+          retryOn: 'all',
+          initialDelay: 1,
+          backoffMultiplier: 1,
+        },
+      });
+
+      const events = await firstValueFrom(
+        events$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(3);
+
+      expect(events).toEqual([
+        {
+          content: 'chunk-1',
+          tool_calls: [],
+          type: 'chatCompletionChunk',
+        },
+        {
+          content: 'chunk-2',
+          tool_calls: [],
+          type: 'chatCompletionChunk',
+        },
+      ]);
+    });
+
     describe('request cancellation', () => {
       it('throws an error when the signal is triggered', async () => {
         const abortController = new AbortController();
@@ -223,6 +319,7 @@ describe('createChatCompleteApi', () => {
           connectorId: 'connectorId',
           messages: [{ role: MessageRole.User, content: 'question' }],
           abortSignal: abortController.signal,
+          maxRetries: 0,
         });
 
         events$.subscribe({

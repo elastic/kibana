@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -583,20 +583,9 @@ export function getMlClient(
         // but is added for type correctness below
         throw new Error('Incorrect arguments supplied');
       }
-      // @ts-expect-error body doesn't exist in the type
-      const { model_id: id, body, query: querystring } = p[0];
 
       return auditLogger.wrapTask(
-        () =>
-          client.asInternalUser.transport.request(
-            {
-              method: 'POST',
-              path: `/_ml/trained_models/${id}/_infer`,
-              body,
-              querystring,
-            },
-            p[1]
-          ),
+        () => client.asInternalUser.ml.inferTrainedModel(...p),
         'ml_infer_trained_model',
         p
       );
@@ -776,7 +765,7 @@ export function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string
 
 export function getJobIdFromBody(p: any): string | undefined {
   const [params] = p;
-  return params?.body?.job_id;
+  return params?.body?.job_id || params.job_id;
 }
 
 function filterAll(ids: string[]) {

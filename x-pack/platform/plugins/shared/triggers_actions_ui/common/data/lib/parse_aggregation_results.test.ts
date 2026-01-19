@@ -106,6 +106,16 @@ const sampleEsqlSourceFieldsHit = {
   },
 };
 
+const sampleEsqlSourceFieldsHitWithArray = {
+  _id: 'esql_query_document',
+  _index: '',
+  _source: {
+    ...sampleEsqlSourceFieldsHit._source,
+    'host.name': ['host-2'],
+    'host.name.keyword': ['host-2'],
+  },
+};
+
 describe('parseAggregationResults', () => {
   it('correctly parses results for count over all', () => {
     expect(
@@ -187,6 +197,9 @@ describe('parseAggregationResults', () => {
               value: 'execute',
             },
           ],
+          groupingObject: {
+            event: 'execute',
+          },
           count: 120,
           hits: [],
           sourceFields: {},
@@ -199,6 +212,9 @@ describe('parseAggregationResults', () => {
               value: 'execute-start',
             },
           ],
+          groupingObject: {
+            event: 'execute-start',
+          },
           count: 120,
           hits: [],
           sourceFields: {},
@@ -211,6 +227,9 @@ describe('parseAggregationResults', () => {
               value: 'active-instance',
             },
           ],
+          groupingObject: {
+            event: 'active-instance',
+          },
           count: 100,
           hits: [],
           sourceFields: {},
@@ -223,6 +242,9 @@ describe('parseAggregationResults', () => {
               value: 'execute-action',
             },
           ],
+          groupingObject: {
+            event: 'execute-action',
+          },
           count: 100,
           hits: [],
           sourceFields: {},
@@ -235,6 +257,9 @@ describe('parseAggregationResults', () => {
               value: 'new-instance',
             },
           ],
+          groupingObject: {
+            event: 'new-instance',
+          },
           count: 100,
           hits: [],
           sourceFields: {},
@@ -345,6 +370,9 @@ describe('parseAggregationResults', () => {
               value: 'execute',
             },
           ],
+          groupingObject: {
+            event: 'execute',
+          },
           count: 120,
           hits: [sampleHit],
           sourceFields: {},
@@ -357,6 +385,9 @@ describe('parseAggregationResults', () => {
               value: 'execute-start',
             },
           ],
+          groupingObject: {
+            event: 'execute-start',
+          },
           count: 120,
           hits: [sampleHit],
           sourceFields: {},
@@ -369,6 +400,9 @@ describe('parseAggregationResults', () => {
               value: 'active-instance',
             },
           ],
+          groupingObject: {
+            event: 'active-instance',
+          },
           count: 100,
           hits: [sampleHit],
           sourceFields: {},
@@ -381,6 +415,9 @@ describe('parseAggregationResults', () => {
               value: 'execute-action',
             },
           ],
+          groupingObject: {
+            event: 'execute-action',
+          },
           count: 100,
           hits: [sampleHit],
           sourceFields: {},
@@ -393,6 +430,9 @@ describe('parseAggregationResults', () => {
               value: 'new-instance',
             },
           ],
+          groupingObject: {
+            event: 'new-instance',
+          },
           count: 100,
           hits: [sampleHit],
           sourceFields: {},
@@ -499,6 +539,9 @@ describe('parseAggregationResults', () => {
               value: 'execute-action',
             },
           ],
+          groupingObject: {
+            event: 'execute-action',
+          },
           count: 120,
           hits: [],
           value: null,
@@ -512,6 +555,9 @@ describe('parseAggregationResults', () => {
               value: 'execute-start',
             },
           ],
+          groupingObject: {
+            event: 'execute-start',
+          },
           count: 139,
           hits: [],
           value: null,
@@ -525,6 +571,9 @@ describe('parseAggregationResults', () => {
               value: 'starting',
             },
           ],
+          groupingObject: {
+            event: 'starting',
+          },
           count: 1,
           hits: [],
           value: null,
@@ -538,6 +587,9 @@ describe('parseAggregationResults', () => {
               value: 'recovered-instance',
             },
           ],
+          groupingObject: {
+            event: 'recovered-instance',
+          },
           count: 120,
           hits: [],
           value: 12837500000,
@@ -551,6 +603,9 @@ describe('parseAggregationResults', () => {
               value: 'execute',
             },
           ],
+          groupingObject: {
+            event: 'execute',
+          },
           count: 139,
           hits: [],
           value: 137647482.0143885,
@@ -631,6 +686,10 @@ describe('parseAggregationResults', () => {
               value: 'action1',
             },
           ],
+          groupingObject: {
+            event: 'execute-action',
+            action: 'action1',
+          },
           count: 120,
           hits: [],
           value: null,
@@ -648,6 +707,10 @@ describe('parseAggregationResults', () => {
               value: 'action2',
             },
           ],
+          groupingObject: {
+            event: 'execute-start',
+            action: 'action2',
+          },
           count: 139,
           hits: [],
           value: null,
@@ -665,6 +728,10 @@ describe('parseAggregationResults', () => {
               value: 'action3',
             },
           ],
+          groupingObject: {
+            event: 'starting',
+            action: 'action3',
+          },
           count: 1,
           hits: [],
           value: null,
@@ -682,6 +749,10 @@ describe('parseAggregationResults', () => {
               value: 'action4',
             },
           ],
+          groupingObject: {
+            event: 'recovered-instance',
+            action: 'action4',
+          },
           count: 120,
           hits: [],
           value: 12837500000,
@@ -699,6 +770,10 @@ describe('parseAggregationResults', () => {
               value: 'action5',
             },
           ],
+          groupingObject: {
+            event: 'execute',
+            action: 'action5',
+          },
           count: 139,
           hits: [],
           value: 137647482.0143885,
@@ -825,6 +900,9 @@ describe('parseAggregationResults', () => {
               value: 'execute-action',
             },
           ],
+          groupingObject: {
+            event: 'execute-action',
+          },
           count: 120,
           hits: [sampleHit],
           value: null,
@@ -838,6 +916,9 @@ describe('parseAggregationResults', () => {
               value: 'execute-start',
             },
           ],
+          groupingObject: {
+            event: 'execute-start',
+          },
           count: 139,
           hits: [sampleHit],
           value: null,
@@ -851,6 +932,9 @@ describe('parseAggregationResults', () => {
               value: 'starting',
             },
           ],
+          groupingObject: {
+            event: 'starting',
+          },
           count: 1,
           hits: [sampleHit],
           value: null,
@@ -864,6 +948,9 @@ describe('parseAggregationResults', () => {
               value: 'recovered-instance',
             },
           ],
+          groupingObject: {
+            event: 'recovered-instance',
+          },
           count: 120,
           hits: [sampleHit],
           value: 12837500000,
@@ -877,6 +964,9 @@ describe('parseAggregationResults', () => {
               value: 'execute',
             },
           ],
+          groupingObject: {
+            event: 'execute',
+          },
           count: 139,
           hits: [sampleHit],
           value: 137647482.0143885,
@@ -942,6 +1032,9 @@ describe('parseAggregationResults', () => {
               value: 'execute',
             },
           ],
+          groupingObject: {
+            event: 'execute',
+          },
           count: 120,
           hits: [],
           sourceFields: {},
@@ -954,6 +1047,9 @@ describe('parseAggregationResults', () => {
               value: 'execute-start',
             },
           ],
+          groupingObject: {
+            event: 'execute-start',
+          },
           count: 120,
           hits: [],
           sourceFields: {},
@@ -966,6 +1062,9 @@ describe('parseAggregationResults', () => {
               value: 'active-instance',
             },
           ],
+          groupingObject: {
+            event: 'active-instance',
+          },
           count: 100,
           hits: [],
           sourceFields: {},
@@ -997,6 +1096,7 @@ describe('parseAggregationResults', () => {
           { label: 'host.id', searchPath: 'host.id.keyword' },
           { label: 'host.name', searchPath: 'host.name.keyword' },
         ],
+        generateSourceFieldsFromHits: true,
       })
     ).toEqual({
       results: [
@@ -1073,6 +1173,7 @@ describe('parseAggregationResults', () => {
           { label: 'host.id', searchPath: 'host.id.keyword' },
           { label: 'host.name', searchPath: 'host.name.keyword' },
         ],
+        generateSourceFieldsFromHits: true,
       })
     ).toEqual({
       results: [
@@ -1084,6 +1185,9 @@ describe('parseAggregationResults', () => {
               value: 'host-1',
             },
           ],
+          groupingObject: {
+            'host.name': 'host-1',
+          },
           hits: [
             sampleSourceFieldsHit,
             sampleSourceFieldsHit,
@@ -1141,9 +1245,58 @@ describe('parseAggregationResults', () => {
             sampleEsqlSourceFieldsHit,
           ],
           sourceFields: {
-            'host.hostname': ['host-1', 'host-1', 'host-1', 'host-1'],
-            'host.id': ['1', '1', '1', '1'],
-            'host.name': ['host-1', 'host-1', 'host-1', 'host-1'],
+            'host.hostname': ['host-1'],
+            'host.id': ['1'],
+            'host.name': ['host-1'],
+          },
+        },
+      ],
+      truncated: false,
+    });
+  });
+
+  it('correctly parses results for count with source field array values and generateSourceFieldsFromHits = true', () => {
+    expect(
+      parseAggregationResults({
+        isCountAgg: true,
+        isGroupAgg: false,
+        esResult: {
+          took: 0,
+          timed_out: false,
+          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          hits: {
+            total: 4,
+            hits: [
+              sampleEsqlSourceFieldsHitWithArray,
+              sampleEsqlSourceFieldsHitWithArray,
+              sampleEsqlSourceFieldsHitWithArray,
+              sampleEsqlSourceFieldsHitWithArray,
+            ],
+          },
+        },
+        resultLimit: 1000,
+        sourceFieldsParams: [
+          { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
+          { label: 'host.id', searchPath: 'host.id.keyword' },
+          { label: 'host.name', searchPath: 'host.name.keyword' },
+        ],
+        generateSourceFieldsFromHits: true,
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'all documents',
+          count: 4,
+          hits: [
+            sampleEsqlSourceFieldsHitWithArray,
+            sampleEsqlSourceFieldsHitWithArray,
+            sampleEsqlSourceFieldsHitWithArray,
+            sampleEsqlSourceFieldsHitWithArray,
+          ],
+          sourceFields: {
+            'host.hostname': ['host-1'],
+            'host.id': ['1'],
+            'host.name': ['host-2'],
           },
         },
       ],

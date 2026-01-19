@@ -14,8 +14,8 @@ import type {
 } from '../../../../../common/api/detection_engine';
 import { useKibana } from '../../../../common/lib/kibana';
 import { previewRule } from '../../../rule_management/api/api';
-import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
-import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import { transformOutput } from '../../../common/transforms';
+import type { TimeframePreviewOptions } from '../../../common/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 import * as i18n from './translations';
 import { PreviewRuleEventTypes } from '../../../../common/lib/telemetry';

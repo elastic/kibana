@@ -131,6 +131,8 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
             e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
           }`;
           setError(errorMessage);
+          onUpdateValidation(!!errorMessage);
+          onUpdateNeedsGeneration(true);
         } finally {
           setIsFlyoutGenerating(false);
         }
@@ -150,6 +152,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
       setIsFlyoutGenerating,
       dataStreamTitle,
       onAnalyzeApiGenerationComplete,
+      onUpdateValidation,
     ]);
 
     const onCancel = useCallback(() => {
@@ -190,6 +193,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
                   />
                   {successfulGeneration ? (
                     <EuiCallOut
+                      announceOnMount
                       title={i18n.SUCCESS}
                       color="success"
                       iconType="check"

@@ -2,8 +2,7 @@
   "type": "plugin",
   "id": "@kbn/data-usage-plugin",
   "owner": [
-    "@elastic/obs-ai-assistant",
-    "@elastic/security-solution"
+    "@elastic/kibana-management"
   ],
   "group": "platform",
   "visibility": "private",

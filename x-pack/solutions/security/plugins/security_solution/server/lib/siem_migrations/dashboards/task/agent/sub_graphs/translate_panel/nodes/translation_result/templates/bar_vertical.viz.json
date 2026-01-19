@@ -1,0 +1,129 @@
+{
+    "type": "lens",
+    "gridData": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 6,
+        "i": "da3460eb-dcbe-4da9-b675-320cd9cc17e4"
+    },
+    "panelIndex": "da3460eb-dcbe-4da9-b675-320cd9cc17e4",
+    "embeddableConfig": {
+        "attributes": {
+            "title": "",
+            "references": [
+                {
+                    "type": "index-pattern",
+                    "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                    "name": "textBasedLanguages-datasource-layer-7fb5abc5-850c-4ed2-bf42-815ec57524fe"
+                }
+            ],
+            "state": {
+                "datasourceStates": {
+                    "textBased": {
+                        "layers": {
+                            "3a5310ab-2832-41db-bdbe-1b6939dd5651": {
+                                "index": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                                "query": {
+                                    "esql": ""
+                                },
+                                "columns": [],
+                                "timeField": "@timestamp"
+                            }
+                        },
+                        "indexPatternRefs": [
+                            {
+                                "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                                "title": "logs-*",
+                                "timeField": "@timestamp"
+                            }
+                        ]
+                    }
+                },
+                "filters": [],
+                "query": {
+                    "esql": ""
+                },
+                "visualization": {
+                    "legend": {
+                        "isVisible":true,
+                        "position": "right"
+                    },
+                    "valueLabels": "hide",
+                    "fittingFunction": "None",
+                    "axisTitlesVisibilitySettings": {
+                        "x":true,
+                        "yLeft":true,
+                        "yRight":true
+                    },
+                    "tickLabelsVisibilitySettings": {
+                        "x":true,
+                        "yLeft":true,
+                        "yRight":true
+                    },
+                    "labelsOrientation": {
+                        "x": 0,
+                        "yLeft": 0,
+                        "yRight": 0
+                    },
+                    "gridlinesVisibilitySettings": {
+                        "x":true,
+                        "yLeft":true,
+                        "yRight":true
+                    },
+                    "preferredSeriesType": "bar",
+                    "layers": [
+                        {
+                            "layerId": "3a5310ab-2832-41db-bdbe-1b6939dd5651",
+                            "seriesType": "bar",
+                            "xAccessor": "agent.name",
+                            "accessors": [
+                                "count()"
+                            ],
+                            "layerType": "data",
+                            "colorMapping": {
+                                "assignments": [],
+                                "specialAssignments": [
+                                    {
+                                        "rule": {
+                                            "type": "other"
+                                        },
+                                        "color": {
+                                            "type": "loop"
+                                        },
+                                        "touched":false
+                                    }
+                                ],
+                                "paletteId": "eui_amsterdam_color_blind",
+                                "colorMode": {
+                                    "type": "categorical"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "adHocDataViews": {
+                    "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da": {
+                        "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                        "title": "logs-*",
+                        "timeFieldName": "@timestamp",
+                        "sourceFilters": [],
+                        "type": "esql",
+                        "fieldFormats": {},
+                        "runtimeFieldMap": {},
+                        "allowNoIndex": false,
+                        "name": "logs-*",
+                        "allowHidden": false
+                    }
+                }
+            },
+            "visualizationType": "lnsXY",
+            "type": "lens"
+        },
+        "disabledActions": [
+            "OPEN_FLYOUT_ADD_DRILLDOWN"
+        ],
+        "enhancements": {}
+    },
+    "title": ""
+}

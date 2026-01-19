@@ -32,7 +32,6 @@ export const analyticsMapRouteFactory = (
   }),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.analyticsMapLabel', {
         defaultMessage: 'Analytics Map',

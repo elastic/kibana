@@ -6,8 +6,8 @@
  */
 
 import type { IndexPatternMapping } from '../types';
-import type { IndexPatternSavedObject } from '../../../../../common/hooks/types';
 import { LAYER_TYPE } from '@kbn/maps-plugin/common';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 export const mockIndexPatternIds: IndexPatternMapping[] = [
   { title: 'filebeat-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
@@ -50,11 +50,11 @@ export const mockSourceLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: 'euiColorVis4' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -108,11 +108,11 @@ export const mockDestinationLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#D36086' },
+        options: { color: 'euiColorVis2' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -164,11 +164,11 @@ export const mockClientLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: 'euiColorVis4' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -227,11 +227,11 @@ export const mockServerLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#D36086' },
+        options: { color: 'euiColorVis2' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -282,11 +282,11 @@ export const mockLineLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#1EA593' },
+        options: { color: '#A6EDEA' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineWidth: {
         type: 'DYNAMIC',
@@ -347,11 +347,11 @@ export const mockClientServerLineLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#1EA593' },
+        options: { color: '#A6EDEA' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineWidth: {
         type: 'DYNAMIC',
@@ -432,101 +432,13 @@ export const mockLayerListMixed = [
   },
 ];
 
-export const mockAPMIndexPattern: IndexPatternSavedObject = {
-  id: 'apm-*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'apm-*',
+export const mockEuiTheme: EuiThemeComputed<{}> = {
+  colors: {
+    vis: {
+      euiColorVisNeutral1: 'euiColorVisNeutral1',
+      euiColorVis4: 'euiColorVis4',
+      euiColorVis2: 'euiColorVis2',
+      euiColorVisBase0: 'euiColorVisBase0',
+    },
   },
-};
-
-export const mockAPMRegexIndexPattern: IndexPatternSavedObject = {
-  id: 'apm-7.*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'apm-7.*',
-  },
-};
-
-export const mockFilebeatIndexPattern: IndexPatternSavedObject = {
-  id: 'filebeat-*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'filebeat-*',
-  },
-};
-
-export const mockAuditbeatIndexPattern: IndexPatternSavedObject = {
-  id: 'auditbeat-*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'auditbeat-*',
-  },
-};
-
-export const mockAPMTransactionIndexPattern: IndexPatternSavedObject = {
-  id: 'apm-*-transaction*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'apm-*-transaction*',
-  },
-};
-
-export const mockAPMTracesDataStreamIndexPattern: IndexPatternSavedObject = {
-  id: 'traces-apm*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'traces-apm*',
-  },
-};
-
-export const mockGlobIndexPattern: IndexPatternSavedObject = {
-  id: '*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: '*',
-  },
-};
-
-export const mockCCSGlobIndexPattern: IndexPatternSavedObject = {
-  id: '*:*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: '*:*',
-  },
-};
-
-export const mockCommaFilebeatAuditbeatGlobIndexPattern: IndexPatternSavedObject = {
-  id: 'filebeat-*,auditbeat-*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'filebeat-*,auditbeat-*',
-  },
-};
-
-export const mockCommaFilebeatAuditbeatCCSGlobIndexPattern: IndexPatternSavedObject = {
-  id: '*:filebeat-*,*:auditbeat-*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: '*:filebeat-*,*:auditbeat-*',
-  },
-};
-
-export const mockCommaFilebeatExclusionGlobIndexPattern: IndexPatternSavedObject = {
-  id: 'filebeat-*,-filebeat-7.6.0*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'filebeat-*,-filebeat-7.6.0*',
-  },
-};
+} as unknown as EuiThemeComputed<{}>;

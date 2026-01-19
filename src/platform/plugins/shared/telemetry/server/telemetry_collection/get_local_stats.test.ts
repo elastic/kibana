@@ -8,7 +8,7 @@
  */
 
 import { merge, omit } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
 import {
@@ -16,7 +16,7 @@ import {
   createCollectorFetchContextMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { StatsCollectionConfig } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { StatsCollectionConfig } from '@kbn/telemetry-collection-manager-plugin/server';
 
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();

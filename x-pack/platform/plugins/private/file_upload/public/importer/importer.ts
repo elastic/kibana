@@ -6,38 +6,45 @@
  */
 
 import { chunk, intersection } from 'lodash';
-import moment from 'moment';
 import type {
   IndicesIndexSettings,
+  IngestDeletePipelineResponse,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import {
+  type MessageReader,
+  type TikaReader,
+  type NdjsonReader,
+  type ImportDoc,
+  type ImportFailure,
+  type ImportResponse,
+  type IngestPipeline,
+  type IngestPipelineWrapper,
+  type ImportResults,
+  updatePipelineTimezone,
+  AbortError,
+} from '@kbn/file-upload-common';
 import { getHttp } from '../kibana_services';
-import { MB } from '../../common/constants';
-import type {
-  ImportDoc,
-  ImportFailure,
-  ImportResponse,
-  IngestPipeline,
-  IngestPipelineWrapper,
-} from '../../common/types';
-import { CreateDocsResponse, IImporter, ImportResults } from './types';
+
+import type { IImporter } from './types';
+import { callImportRoute, callInitializeImportRoute } from './routes';
 
 const CHUNK_SIZE = 5000;
 const REDUCED_CHUNK_SIZE = 100;
 export const MAX_CHUNK_CHAR_COUNT = 1000000;
 export const IMPORT_RETRIES = 5;
-const STRING_CHUNKS_MB = 100;
 const DEFAULT_TIME_FIELD = '@timestamp';
 
 export abstract class Importer implements IImporter {
   protected _docArray: ImportDoc[] = [];
   protected _chunkSize = CHUNK_SIZE;
   private _index: string | undefined;
-  private _pipeline: IngestPipeline | undefined;
+  private _pipelines: IngestPipelineWrapper[] = [];
   private _timeFieldName: string | undefined;
   private _initialized = false;
+  protected abstract _reader: MessageReader | TikaReader | NdjsonReader;
 
   public initialized() {
     return this._initialized;
@@ -52,60 +59,35 @@ export abstract class Importer implements IImporter {
   }
 
   public read(data: ArrayBuffer) {
-    const decoder = new TextDecoder();
-    const size = STRING_CHUNKS_MB * MB;
-
-    // chop the data up into 100MB chunks for processing.
-    // if the chop produces a partial line at the end, a character "remainder" count
-    // is returned which is used to roll the next chunk back that many chars so
-    // it is included in the next chunk.
-    const parts = Math.ceil(data.byteLength / size);
-    let remainder = 0;
-    for (let i = 0; i < parts; i++) {
-      const byteArray = decoder.decode(data.slice(i * size - remainder, (i + 1) * size));
-      const {
-        success,
-        docs,
-        remainder: tempRemainder,
-      } = this._createDocs(byteArray, i === parts - 1);
-      if (success) {
-        this._docArray = this._docArray.concat(docs);
-        remainder = tempRemainder;
-      } else {
-        return { success: false };
-      }
-    }
+    this._docArray = this._reader.read(data);
 
     return { success: true };
   }
 
-  protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse<ImportDoc>;
-
-  public async initializeImport(
+  private _initialize(
     index: string,
-    settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline | undefined
+    pipelines: Array<IngestPipeline | undefined>
   ) {
-    let ingestPipeline: IngestPipelineWrapper | undefined;
-    if (pipeline !== undefined) {
-      updatePipelineTimezone(pipeline);
+    for (let i = 0; i < pipelines.length; i++) {
+      const pipeline = pipelines[i];
+      if (pipeline !== undefined) {
+        updatePipelineTimezone(pipeline);
 
-      if (pipelineContainsSpecialProcessors(pipeline)) {
-        // pipeline contains processors which we know are slow
-        // so reduce the chunk size significantly to avoid timeouts
-        this._chunkSize = REDUCED_CHUNK_SIZE;
+        if (pipelineContainsSpecialProcessors(pipeline)) {
+          // pipeline contains processors which we know are slow
+          // so reduce the chunk size significantly to avoid timeouts
+          this._chunkSize = REDUCED_CHUNK_SIZE;
+        }
       }
-      // if no pipeline has been supplied,
-      // send an empty object
-      ingestPipeline = {
-        id: `${index}-pipeline`,
+
+      this._pipelines.push({
+        id: `${index}-${i}-pipeline`,
         pipeline,
-      };
+      });
     }
 
     this._index = index;
-    this._pipeline = pipeline;
 
     // if an @timestamp field has been added to the
     // mappings, use this field as the time field.
@@ -116,43 +98,60 @@ export abstract class Importer implements IImporter {
       : undefined;
 
     this._initialized = true;
+  }
 
-    return await callImportRoute({
-      id: undefined,
+  public async initializeImport(
+    index: string,
+    settings: IndicesIndexSettings,
+    mappings: MappingTypeMapping,
+    pipelines: Array<IngestPipeline | undefined>,
+    existingIndex: boolean = false,
+    signal?: AbortSignal
+  ) {
+    this._initialize(index, mappings, pipelines);
+
+    return await callInitializeImportRoute({
       index,
-      data: [],
       settings,
       mappings,
-      ingestPipeline,
+      ingestPipelines: this._pipelines,
+      existingIndex,
+      signal,
     });
   }
 
-  public async import(
-    id: string,
+  public async initializeWithoutCreate(
     index: string,
-    pipelineId: string | undefined,
-    setImportProgress: (progress: number) => void
+    mappings: MappingTypeMapping,
+    pipelines: IngestPipeline[]
+  ) {
+    this._initialize(index, mappings, pipelines);
+  }
+
+  public async import(
+    index: string,
+    ingestPipelineId: string,
+    setImportProgress: (progress: number) => void,
+    signal?: AbortSignal
   ): Promise<ImportResults> {
-    if (!id || !index) {
+    if (!index) {
       return {
         success: false,
-        error: i18n.translate('xpack.fileUpload.import.noIdOrIndexSuppliedErrorMessage', {
-          defaultMessage: 'no ID or index supplied',
+        error: i18n.translate('xpack.fileUpload.import.noIndexSuppliedErrorMessage', {
+          defaultMessage: 'No index supplied',
         }),
       };
     }
 
     const chunks = createDocumentChunks(this._docArray, this._chunkSize);
 
-    const ingestPipeline: IngestPipelineWrapper | undefined = pipelineId
-      ? {
-          id: pipelineId,
-        }
-      : undefined;
-
     let success = true;
     const failures: ImportFailure[] = [];
     let error;
+
+    if (signal?.aborted) {
+      throw new AbortError();
+    }
 
     for (let i = 0; i < chunks.length; i++) {
       let retries = IMPORT_RETRIES;
@@ -160,20 +159,17 @@ export abstract class Importer implements IImporter {
         success: false,
         failures: [],
         docCount: 0,
-        id: '',
         index: '',
         pipelineId: '',
       };
 
-      while (resp.success === false && retries > 0) {
+      while (resp.success === false && retries > 0 && !signal?.aborted) {
         try {
           resp = await callImportRoute({
-            id,
             index,
+            ingestPipelineId,
             data: chunks[i],
-            settings: {},
-            mappings: {},
-            ingestPipeline,
+            signal,
           });
 
           if (retries < IMPORT_RETRIES) {
@@ -187,6 +183,10 @@ export abstract class Importer implements IImporter {
           resp.error = err;
           retries = 0;
         }
+      }
+
+      if (signal?.aborted) {
+        throw new AbortError();
       }
 
       if (resp.success) {
@@ -229,7 +229,8 @@ export abstract class Importer implements IImporter {
   }
 
   public async previewIndexTimeRange() {
-    if (this._initialized === false || this._pipeline === undefined) {
+    const ingestPipeline = this._pipelines[0];
+    if (this._initialized === false || ingestPipeline?.pipeline === undefined) {
       throw new Error('Import has not been initialized');
     }
 
@@ -240,7 +241,7 @@ export abstract class Importer implements IImporter {
 
     const body = JSON.stringify({
       docs: firstDocs.concat(lastDocs),
-      pipeline: this._pipeline,
+      pipeline: ingestPipeline.pipeline,
       timeField: this._timeFieldName,
     });
     return await getHttp().fetch<{ start: number | null; end: number | null }>({
@@ -248,6 +249,21 @@ export abstract class Importer implements IImporter {
       method: 'POST',
       version: '1',
       body,
+    });
+  }
+
+  public async deletePipelines(signal?: AbortSignal) {
+    const ids = this._pipelines.filter((p) => p.pipeline !== undefined).map((p) => p.id);
+
+    if (ids.length === 0) {
+      return [];
+    }
+
+    return await getHttp().fetch<IngestDeletePipelineResponse[]>({
+      path: `/internal/file_upload/remove_pipelines/${ids.join(',')}`,
+      method: 'DELETE',
+      version: '1',
+      signal,
     });
   }
 }
@@ -266,25 +282,6 @@ function populateFailures(
       failure.item = failure.item + chunkSize * chunkCount;
     }
     failures.push(...error.failures);
-  }
-}
-
-// The file structure endpoint sets the timezone to be {{ event.timezone }}
-// as that's the variable Filebeat would send the client timezone in.
-// In this data import function the UI is effectively performing the role of Filebeat,
-// i.e. doing basic parsing, processing and conversion to JSON before forwarding to the ingest pipeline.
-// But it's not sending every single field that Filebeat would add, so the ingest pipeline
-// cannot look for a event.timezone variable in each input record.
-// Therefore we need to replace {{ event.timezone }} with the actual browser timezone
-function updatePipelineTimezone(ingestPipeline: IngestPipeline) {
-  if (ingestPipeline !== undefined && ingestPipeline.processors && ingestPipeline.processors) {
-    const dateProcessor = ingestPipeline.processors.find(
-      (p: any) => p.date !== undefined && p.date.timezone === '{{ event.timezone }}'
-    );
-
-    if (dateProcessor) {
-      dateProcessor.date.timezone = moment.tz.guess();
-    }
   }
 }
 
@@ -337,37 +334,4 @@ function pipelineContainsSpecialProcessors(pipeline: IngestPipeline) {
 
   const specialProcessors = ['inference', 'enrich'];
   return intersection(specialProcessors, keys).length !== 0;
-}
-
-export function callImportRoute({
-  id,
-  index,
-  data,
-  settings,
-  mappings,
-  ingestPipeline,
-}: {
-  id: string | undefined;
-  index: string;
-  data: ImportDoc[];
-  settings: IndicesIndexSettings;
-  mappings: MappingTypeMapping;
-  ingestPipeline: IngestPipelineWrapper | undefined;
-}) {
-  const query = id !== undefined ? { id } : {};
-  const body = JSON.stringify({
-    index,
-    data,
-    settings,
-    mappings,
-    ingestPipeline,
-  });
-
-  return getHttp().fetch<ImportResponse>({
-    path: `/internal/file_upload/import`,
-    method: 'POST',
-    version: '1',
-    query,
-    body,
-  });
 }

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import {
+import type {
   CustomRequestHandlerContext,
   IContextProvider,
   SavedObject,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import { ExpressionsServiceStart } from '@kbn/expressions-plugin/common';
-import { WorkpadAttributes } from './routes/workpad/workpad_attributes';
+import type { ExpressionsServiceStart } from '@kbn/expressions-plugin/common';
+import type { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
 import { injectReferences, extractReferences } from './saved_objects/workpad_references';
 import { getId } from '../common/lib/get_id';
-import { CanvasWorkpad, ImportedCanvasWorkpad } from '../types';
+import type { CanvasWorkpad, ImportedCanvasWorkpad } from '../types';
 
 export type CanvasRouteHandlerContext = CustomRequestHandlerContext<{
   canvas: {

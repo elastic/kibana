@@ -41,7 +41,7 @@ export interface UsePrevalenceParams {
   /**
    * User defined fields to highlight (defined on the rule)
    */
-  investigationFields?: string[];
+  investigationFields: string[];
 }
 
 export interface UsePrevalenceResult {

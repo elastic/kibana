@@ -7,16 +7,16 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
-  SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
-import { OverviewItem } from './overview_item';
+import { DefinitionItem } from '../definition/definition_item';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -45,7 +45,7 @@ export function ApmIndicatorOverview({ slo }: Props) {
   } = indicator;
 
   return (
-    <OverviewItem
+    <DefinitionItem
       title={i18n.translate('xpack.slo.sloDetails.overview.apmSource', {
         defaultMessage: 'APM source',
       })}

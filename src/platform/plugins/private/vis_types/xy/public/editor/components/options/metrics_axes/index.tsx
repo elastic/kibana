@@ -13,12 +13,11 @@ import { cloneDeep, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 
-import { BUCKET_TYPES, IAggConfig } from '@kbn/data-plugin/public';
-import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
-import { getUISettings } from '../../../../services';
+import type { IAggConfig } from '@kbn/data-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
-import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
-import { ValidationVisOptionsProps } from '../../common';
+import type { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
+import type { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { ValueAxesPanel } from './value_axes_panel';
@@ -298,12 +297,10 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
   const xAxisIsHorizontal =
     stateParams.categoryAxes[0].position === Position.Bottom ||
     stateParams.categoryAxes[0].position === Position.Top;
-  const useLegacyTimeAxis = getUISettings().get(LEGACY_TIME_AXIS, false);
   const linearOrStackedBars = stateParams.seriesParams.every(
     ({ mode, type }) => type !== 'histogram' || (type === 'histogram' && mode === 'stacked')
   );
-  const useMultiLayerAxis =
-    xAxisIsHorizontal && isTimeViz && !useLegacyTimeAxis && linearOrStackedBars;
+  const disableAxisControls = xAxisIsHorizontal && isTimeViz && linearOrStackedBars;
 
   return isTabSelected ? (
     <>
@@ -329,7 +326,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
         axis={stateParams.categoryAxes[0]}
         onPositionChanged={onCategoryAxisPositionChanged}
         setCategoryAxis={setCategoryAxis}
-        useMultiLayerAxis={useMultiLayerAxis}
+        disableAxisControls={disableAxisControls}
       />
     </>
   ) : null;

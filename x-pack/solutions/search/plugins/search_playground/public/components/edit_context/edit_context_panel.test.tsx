@@ -10,7 +10,7 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { EditContextPanel } from './edit_context_panel';
 import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ChatFormFields } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 
 jest.mock('../../hooks/use_source_indices_field', () => ({
   useSourceIndicesFields: () => ({
@@ -19,14 +19,14 @@ jest.mock('../../hooks/use_source_indices_field', () => ({
         elser_query_fields: [],
         dense_vector_query_fields: [],
         bm25_query_fields: ['field1', 'field2'],
-        source_fields: ['context_field1', 'context_field2'],
+        source_fields: ['title', 'description'],
         semantic_fields: [],
       },
       index2: {
         elser_query_fields: [],
         dense_vector_query_fields: [],
-        bm25_query_fields: ['field1', 'field2'],
-        source_fields: ['context_field1', 'context_field2'],
+        bm25_query_fields: ['foo', 'bar'],
+        source_fields: ['body'],
         semantic_fields: [],
       },
     },
@@ -44,11 +44,11 @@ jest.mock('../../hooks/use_usage_tracker', () => ({
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const methods = useForm({
     values: {
-      [ChatFormFields.indices]: ['index1'],
-      [ChatFormFields.docSize]: 1,
-      [ChatFormFields.sourceFields]: {
-        index1: ['context_field1'],
-        index2: ['context_field2'],
+      [PlaygroundFormFields.indices]: ['index1'],
+      [PlaygroundFormFields.docSize]: 1,
+      [PlaygroundFormFields.sourceFields]: {
+        index1: ['title'],
+        index2: ['body'],
       },
     },
   });
@@ -66,10 +66,28 @@ describe('EditContextFlyout component tests', () => {
     );
   });
 
+  it('should render the documentSizeButtonGroup with all options', () => {
+    // Check if the EuiButtonGroup is rendered
+    const buttonGroup = screen.getByTestId('documentSizeButtonGroup');
+    expect(buttonGroup).toBeInTheDocument();
+
+    // Check if all options are rendered within the button group
+    expect(screen.getByTestId('playground_context_doc_number-1')).toBeInTheDocument();
+    expect(screen.getByTestId('playground_context_doc_number-3')).toBeInTheDocument();
+    expect(screen.getByTestId('playground_context_doc_number-5')).toBeInTheDocument();
+    expect(screen.getByTestId('playground_context_doc_number-10')).toBeInTheDocument();
+  });
+
   it('should see the context fields', async () => {
-    expect(screen.getByTestId('contextFieldsSelectable-0')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('contextFieldsSelectable-0'));
-    const fields = await screen.findAllByTestId('contextField');
-    expect(fields.length).toBe(2);
+    expect(screen.getByTestId('contextFieldsSelectable-index1')).toBeInTheDocument();
+    const listButton = screen
+      .getByTestId('contextFieldsSelectable-index1')
+      .querySelector('[data-test-subj="comboBoxToggleListButton"]');
+    expect(listButton).not.toBeNull();
+    fireEvent.click(listButton!);
+
+    for (const field of ['title', 'description']) {
+      expect(screen.getByTestId(`contextField-${field}`)).toBeInTheDocument();
+    }
   });
 });

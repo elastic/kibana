@@ -6,23 +6,28 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const LOGS_ALERT_DETAILS_FEEDBACK_LINK = 'https://ela.st/log-alert-details-feedback';
-
+const feedbackButtonLabel = i18n.translate(
+  'xpack.observability.logs.alertDetails.feedbackButtonLabel',
+  {
+    defaultMessage: 'Give feedback',
+  }
+);
 export function FeedbackButton() {
   return (
-    <EuiButton
-      data-test-subj="logsAlertDetailsFeedbackButton"
+    <EuiButtonEmpty
+      aria-label={feedbackButtonLabel}
       href={LOGS_ALERT_DETAILS_FEEDBACK_LINK}
+      size="s"
+      iconType="popout"
+      iconSide="right"
       target="_blank"
-      color="warning"
-      iconType="editorComment"
+      data-test-subj="logsAlertDetailsFeedbackButton"
     >
-      {i18n.translate('xpack.observability.logs.alertDetails.feedbackButtonLabel', {
-        defaultMessage: 'Tell us what you think!',
-      })}
-    </EuiButton>
+      {feedbackButtonLabel}
+    </EuiButtonEmpty>
   );
 }

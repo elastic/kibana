@@ -6,7 +6,7 @@
  */
 import { Transform } from 'stream';
 import type { ExperimentalFeatures } from '../../../../common';
-import type { AssetCriticalityUpsert } from '../../../../common/entity_analytics/asset_criticality/types';
+import type { AssetCriticalityUpsertForBulkUpload } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
   parseAssetCriticalityCsvRow,
   isErrorResult,
@@ -25,10 +25,10 @@ class TransformCSVToUpsertRecords extends Transform {
   public _transform(
     chunk: string[],
     encoding: string,
-    callback: (error: Error | null, data?: AssetCriticalityUpsert | Error) => void
+    callback: (error: Error | null, data?: AssetCriticalityUpsertForBulkUpload | Error) => void
   ) {
     try {
-      const parseResult = parseAssetCriticalityCsvRow(chunk, this.experimentalFeatures);
+      const parseResult = parseAssetCriticalityCsvRow(chunk);
       if (isErrorResult(parseResult)) {
         return callback(null, new Error(parseResult.error));
       } else {

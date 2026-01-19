@@ -23,10 +23,8 @@ const withExcludedDataTiers = (tiers: DataTier[]) => ({
 const mockedInfra = { getMetricsIndices: () => Promise.resolve(['*.indices']) };
 
 const infraMetricsTestHarness =
-  (tiers: DataTier[], input: QueryDslQueryContainer | undefined, output: QueryDslQueryContainer) =>
-  async () => {
+  (tiers: DataTier[], input: QueryDslQueryContainer | undefined, expectedBool: any) => async () => {
     const callWithRequest = jest.fn();
-
     const mockedCore = withExcludedDataTiers(tiers);
 
     const context = {
@@ -41,24 +39,22 @@ const infraMetricsTestHarness =
     });
 
     await client.search({
-      body: {
-        query: input,
-        size: 1,
-        track_total_hits: false,
-      },
+      query: input,
+      size: 1,
+      track_total_hits: false,
     });
 
     expect(callWithRequest).toBeCalledWith(
       context,
       'search',
       {
-        body: {
-          query: output,
-          size: 1,
-          track_total_hits: false,
-        },
+        size: 1,
+        track_total_hits: false,
         ignore_unavailable: true,
         index: ['*.indices'],
+        query: {
+          bool: expectedBool,
+        },
       },
       {}
     );
@@ -66,85 +62,64 @@ const infraMetricsTestHarness =
 
 describe('getInfraMetricsClient', () => {
   it(
-    'defines an empty must_not query if given no data tiers to filter by',
-    infraMetricsTestHarness([], undefined, { bool: { must_not: [] } })
+    'defines an empty bool query if given no data tiers to filter by and no query',
+    infraMetricsTestHarness([], undefined, {
+      filter: undefined,
+      must: [undefined],
+    })
   );
 
   it(
     'includes excluded data tiers in the request filter by default',
     infraMetricsTestHarness(['data_frozen'], undefined, {
-      bool: {
-        must_not: [
-          {
-            terms: {
-              _tier: ['data_frozen'],
-            },
+      filter: [
+        {
+          bool: {
+            must_not: [
+              {
+                terms: {
+                  _tier: ['data_frozen'],
+                },
+              },
+            ],
           },
-        ],
-      },
+        },
+      ],
+      must: [undefined],
     })
+  );
+
+  it(
+    'puts the input query in must if no excluded data tiers',
+    infraMetricsTestHarness(
+      [],
+      { exists: { field: 'a-field' } },
+      {
+        must: [{ exists: { field: 'a-field' } }],
+      }
+    )
   );
 
   it(
     'merges provided filters with the excluded data tier filter',
     infraMetricsTestHarness(
       ['data_frozen'],
+      { exists: { field: 'a-field' } },
       {
-        bool: {
-          must_not: {
-            exists: {
-              field: 'a-field',
+        filter: [
+          {
+            bool: {
+              must_not: [
+                {
+                  terms: {
+                    _tier: ['data_frozen'],
+                  },
+                },
+              ],
             },
           },
-        },
-      },
-      {
-        bool: {
-          must_not: [
-            {
-              exists: {
-                field: 'a-field',
-              },
-            },
-            {
-              terms: {
-                _tier: ['data_frozen'],
-              },
-            },
-          ],
-        },
-      }
-    )
-  );
-
-  it(
-    'merges other query params with the excluded data tiers filter',
-    infraMetricsTestHarness(
-      ['data_frozen'],
-      {
-        bool: {
-          must: {
-            exists: {
-              field: 'a-field',
-            },
-          },
-        },
-      },
-      {
-        bool: {
-          must: {
-            exists: {
-              field: 'a-field',
-            },
-          },
-          must_not: [
-            {
-              terms: {
-                _tier: ['data_frozen'],
-              },
-            },
-          ],
-        },
+        ],
+        must: [{ exists: { field: 'a-field' } }],
       }
     )
   );

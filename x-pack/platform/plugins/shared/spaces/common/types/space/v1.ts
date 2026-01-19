@@ -61,7 +61,7 @@ export interface Space {
   /**
    * Indicates that this space is reserved (system controlled).
    * Reserved spaces cannot be created or deleted by end-users.
-   * @private
+   * @internal
    */
   _reserved?: boolean;
 

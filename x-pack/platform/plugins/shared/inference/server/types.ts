@@ -10,8 +10,14 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { BoundChatCompleteOptions } from '@kbn/inference-common';
-import type { InferenceClient, BoundInferenceClient } from './inference_client';
+import type {
+  BoundInferenceClient,
+  BoundOptions,
+  InferenceClient,
+  InferenceConnector,
+} from '@kbn/inference-common';
+import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
+import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -36,6 +42,10 @@ export interface InferenceUnboundClientCreateOptions {
    * The request to scope the client to.
    */
   request: KibanaRequest;
+  /**
+   * Callbacks to be used by the client to report lifecycle events.
+   */
+  callbacks?: InferenceCallbacks;
 }
 
 /**
@@ -45,7 +55,7 @@ export interface InferenceBoundClientCreateOptions extends InferenceUnboundClien
   /**
    * The parameters to bind the client to.
    */
-  bindTo: BoundChatCompleteOptions;
+  bindTo: BoundOptions;
 }
 
 /**
@@ -93,4 +103,68 @@ export interface InferenceServerStart {
   getClient: <T extends InferenceClientCreateOptions>(
     options: T
   ) => T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
+
+  /**
+   * Creates a langchain {@link InferenceChatModel} that will be using the inference framework
+   * under the hood.
+   *
+   * @example
+   * ```ts
+   * const chatModel = await myStartDeps.inference.getChatModel({
+   *   request,
+   *   connectorId: 'my-connector-id',
+   *   chatModelOptions: {
+   *    temperature: 0.3,
+   *   }
+   * });
+   */
+  getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
+
+  /**
+   * Returns a list of all available inference connectors.
+   *
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to an array of inference connectors
+   */
+  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
+
+  /**
+   * Retrieves the default inference connector configured for the system.
+   *
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the default inference connector
+   */
+  getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector>;
+
+  /**
+   * Retrieves a specific inference connector by its ID.
+   *
+   * @param id - The unique identifier of the connector to retrieve
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the requested inference connector
+   * @throws Error if the connector with the specified ID does not exist
+   */
+  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+}
+
+/**
+ * Options to create an inference chat model using the {@link InferenceServerStart.getChatModel} API.
+ */
+export interface CreateChatModelOptions {
+  /**
+   * The request to scope the client to.
+   */
+  request: KibanaRequest;
+  /**
+   * The id of the GenAI connector to use.
+   */
+  connectorId: string;
+  /**
+   * Callback to be used by the client to report lifecycle events.
+   */
+  callbacks?: InferenceCallbacks;
+  /**
+   * Additional parameters to be passed down to the model constructor.
+   */
+  chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete' | 'logger'>;
 }

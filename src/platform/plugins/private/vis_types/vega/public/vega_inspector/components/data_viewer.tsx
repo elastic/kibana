@@ -9,15 +9,9 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiComboBoxProps,
-  EuiFlexItem,
-  EuiSpacer,
-  CommonProps,
-} from '@elastic/eui';
-import { VegaAdapter, InspectDataSets } from '../vega_adapter';
+import type { EuiComboBoxProps, CommonProps } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { VegaAdapter, InspectDataSets } from '../vega_adapter';
 import { InspectorDataGrid } from './inspector_data_grid';
 
 interface DataViewerProps extends CommonProps {

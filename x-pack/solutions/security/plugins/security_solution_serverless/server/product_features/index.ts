@@ -9,21 +9,15 @@ import type { Logger } from '@kbn/logging';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
-import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
-import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
-import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
-import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
-import { getTimelineProductFeaturesConfigurator } from './timeline_product_features_config';
-import { getNotesProductFeaturesConfigurator } from './notes_product_features_config';
 import { enableRuleActions } from '../rules/enable_rule_actions';
 import type { ServerlessSecurityConfig } from '../config';
 import type { Tier, SecuritySolutionServerlessPluginSetupDeps } from '../types';
 import { ProductLine } from '../../common/product';
+import { productFeaturesExtensions } from './product_features_extensions';
 
 export const registerProductFeatures = (
   pluginsSetup: SecuritySolutionServerlessPluginSetupDeps,
-  enabledProductFeatureKeys: ProductFeatureKeys,
-  config: ServerlessSecurityConfig
+  enabledProductFeatureKeys: ProductFeatureKeys
 ): void => {
   // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
   // This check is an additional layer of security to prevent double registrations when
@@ -35,15 +29,8 @@ export const registerProductFeatures = (
 
   // register product features for the main security solution product features service
   pluginsSetup.securitySolution.setProductFeaturesConfigurator({
-    attackDiscovery: getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys),
-    security: getSecurityProductFeaturesConfigurator(
-      enabledProductFeatureKeys,
-      config.experimentalFeatures
-    ),
-    cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
-    securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),
-    timeline: getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys),
-    notes: getNotesProductFeaturesConfigurator(enabledProductFeatureKeys),
+    enabledProductFeatureKeys,
+    extensions: productFeaturesExtensions,
   });
 
   // enable rule actions based on the enabled product features
@@ -59,15 +46,26 @@ export const registerProductFeatures = (
 };
 
 /**
- * Get the security product tier from the security product type in the config
+ * Get the product tier from the security/ai_soc product type in the config. This is used to determine if AI features
+ * are available in the given configuration.
  */
-export const getSecurityProductTier = (config: ServerlessSecurityConfig, logger: Logger): Tier => {
+export const getSecurityAiSocProductTier = (
+  config: ServerlessSecurityConfig,
+  logger: Logger
+): Tier => {
   const securityProductType = config.productTypes.find(
     (productType) => productType.product_line === ProductLine.security
   );
-  const tier = securityProductType ? securityProductType.product_tier : 'none';
+  const ai4SocProductType = config.productTypes.find(
+    (productType) => productType.product_line === ProductLine.aiSoc
+  );
+  const tier = securityProductType
+    ? securityProductType.product_tier
+    : ai4SocProductType
+    ? ai4SocProductType.product_tier
+    : 'none';
   if (tier === 'none') {
-    logger.error(`Failed to fetch security product tier, config: ${JSON.stringify(config)}`);
+    logger.error(`Failed to fetch security/aiSoc product tier, config: ${JSON.stringify(config)}`);
   }
 
   return tier;

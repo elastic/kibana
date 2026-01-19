@@ -16,6 +16,7 @@ import {
 
 import type { AgentPolicySOAttributes } from '../types';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';
+import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 import { API_VERSIONS } from '../../common/constants';
 
 import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from './helpers';
@@ -26,6 +27,7 @@ const logFilePath = Path.join(__dirname, 'logs.log');
 describe('Fleet preconfiguration reset', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
+  let agentPolicyType: string;
 
   const registryUrl = useDockerRegistry();
 
@@ -178,6 +180,7 @@ describe('Fleet preconfiguration reset', () => {
   // Share the same servers for all the test to make test a lot faster (but test are not isolated anymore)
   beforeAll(async () => {
     await startServers();
+    agentPolicyType = await getAgentPolicySavedObjectType();
   });
 
   afterAll(async () => {
@@ -265,7 +268,7 @@ describe('Fleet preconfiguration reset', () => {
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
         .find<AgentPolicySOAttributes>({
-          type: 'ingest-agent-policies',
+          type: agentPolicyType,
           perPage: 10000,
         });
       expect(agentPolicies.saved_objects).toHaveLength(2);
@@ -287,10 +290,10 @@ describe('Fleet preconfiguration reset', () => {
     it('Works and reset one preconfigured policies if the policy is already deleted (with a ghost package policy)', async () => {
       const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
 
-      await soClient.delete('ingest-agent-policies', POLICY_ID);
+      await soClient.delete(agentPolicyType, POLICY_ID);
 
       const oldAgentPolicies = await soClient.find<AgentPolicySOAttributes>({
-        type: 'ingest-agent-policies',
+        type: agentPolicyType,
         perPage: 10000,
       });
 
@@ -301,6 +304,7 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
+
       await resetAPI
         .set('kbn-sxrf', 'xx')
         .set('Elastic-Api-Version', `${API_VERSIONS.public.v1}`)
@@ -310,7 +314,7 @@ describe('Fleet preconfiguration reset', () => {
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
         .find<AgentPolicySOAttributes>({
-          type: 'ingest-agent-policies',
+          type: agentPolicyType,
           perPage: 10000,
         });
       expect(agentPolicies.saved_objects).toHaveLength(2);
@@ -332,7 +336,7 @@ describe('Fleet preconfiguration reset', () => {
     it('Works if the preconfigured policies already exists with a missing package policy', async () => {
       const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
 
-      await soClient.update('ingest-agent-policies', POLICY_ID, {});
+      await soClient.update(agentPolicyType, POLICY_ID, {});
 
       const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
@@ -346,7 +350,7 @@ describe('Fleet preconfiguration reset', () => {
         .send();
 
       const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
-        type: 'ingest-agent-policies',
+        type: agentPolicyType,
         perPage: 10000,
       });
       expect(agentPolicies.saved_objects).toHaveLength(2);
@@ -366,7 +370,7 @@ describe('Fleet preconfiguration reset', () => {
     it('Works and reset one preconfigured policies if the policy was deleted with a preconfiguration deletion record', async () => {
       const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
 
-      await soClient.delete('ingest-agent-policies', POLICY_ID);
+      await soClient.delete(agentPolicyType, POLICY_ID);
       await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
         id: POLICY_ID,
       });
@@ -385,7 +389,7 @@ describe('Fleet preconfiguration reset', () => {
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
         .find<AgentPolicySOAttributes>({
-          type: 'ingest-agent-policies',
+          type: agentPolicyType,
           perPage: 10000,
         });
       expect(agentPolicies.saved_objects).toHaveLength(2);

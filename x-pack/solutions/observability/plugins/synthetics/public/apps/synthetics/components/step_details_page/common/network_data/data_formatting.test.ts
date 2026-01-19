@@ -12,17 +12,11 @@ import {
   getSeriesAndDomain,
   getSidebarItems,
 } from './data_formatting';
-import {
-  MimeType,
-  FriendlyFlyoutLabels,
-  FriendlyTimingLabels,
-  Timings,
-  Metadata,
-  WaterfallTooltipItem,
-} from './types';
+import type { WaterfallTooltipItem } from './types';
+import { MimeType, FriendlyFlyoutLabels, FriendlyTimingLabels, Timings, Metadata } from './types';
 import type { DateFormatter } from '../../../../../../hooks/use_date_format';
 import { mockMoment } from '../../../../utils/formatting/test_helpers';
-import { NetworkEvent } from '../../../../../../../common/runtime_types';
+import type { NetworkEvent } from '../../../../../../../common/runtime_types';
 
 export const networkItems: NetworkEvent[] = [
   {
@@ -218,21 +212,21 @@ describe('getConnectingTime', () => {
 describe('Palettes', () => {
   it('A colour palette comprising timing and mime type colours is correctly generated', () => {
     expect(colourPalette).toEqual({
-      blocked: '#b0c9e0',
-      connect: '#c8b8dc',
-      dns: '#aad9cc',
-      font: '#d36086',
-      html: '#6092c0',
-      image: '#ca8eae',
-      media: '#d6bf57',
-      other: '#b9a888',
-      receive: '#ebdfab',
-      script: '#da8b45',
-      send: '#f3b3a6',
-      ssl: '#e5c7d7',
-      stylesheet: '#9170b8',
-      wait: '#e7664c',
-      xhr: '#54b399',
+      blocked: '#d3f6f5',
+      connect: '#dfedff',
+      dns: '#8be2e0',
+      font: '#61a2ff',
+      html: '#a6edea',
+      image: '#ee72a6',
+      media: '#ffc7db',
+      other: '#f6726a',
+      receive: '#ffe3ed',
+      script: '#ffc9c2',
+      send: '#feecc1',
+      ssl: '#f7b9d3',
+      stylesheet: '#bfdbff',
+      wait: '#fcd883',
+      xhr: '#16c5c0',
     });
   });
 });
@@ -250,7 +244,7 @@ describe('getSeriesAndDomain', () => {
       Array [
         Object {
           "config": Object {
-            "colour": "#b0c9e0",
+            "colour": "#d3f6f5",
             "id": 0,
             "isHighlighted": true,
           },
@@ -260,7 +254,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#aad9cc",
+            "colour": "#8be2e0",
             "id": 0,
             "isHighlighted": true,
           },
@@ -270,7 +264,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#c8b8dc",
+            "colour": "#dfedff",
             "id": 0,
             "isHighlighted": true,
           },
@@ -280,7 +274,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#e5c7d7",
+            "colour": "#f7b9d3",
             "id": 0,
             "isHighlighted": true,
           },
@@ -290,7 +284,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#f3b3a6",
+            "colour": "#feecc1",
             "id": 0,
             "isHighlighted": true,
           },
@@ -300,7 +294,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#e7664c",
+            "colour": "#fcd883",
             "id": 0,
             "isHighlighted": true,
           },
@@ -310,7 +304,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#9170b8",
+            "colour": "#bfdbff",
             "id": 0,
             "isHighlighted": true,
           },
@@ -320,7 +314,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#b0c9e0",
+            "colour": "#d3f6f5",
             "id": 1,
             "isHighlighted": true,
           },
@@ -330,7 +324,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#f3b3a6",
+            "colour": "#feecc1",
             "id": 1,
             "isHighlighted": true,
           },
@@ -340,7 +334,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#e7664c",
+            "colour": "#fcd883",
             "id": 1,
             "isHighlighted": true,
           },
@@ -350,7 +344,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#da8b45",
+            "colour": "#ffc9c2",
             "id": 1,
             "isHighlighted": true,
           },
@@ -368,7 +362,7 @@ describe('getSeriesAndDomain', () => {
       Array [
         Object {
           "config": Object {
-            "colour": "#b0c9e0",
+            "colour": "#d3f6f5",
             "id": 0,
             "isHighlighted": true,
           },
@@ -378,7 +372,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#aad9cc",
+            "colour": "#8be2e0",
             "id": 0,
             "isHighlighted": true,
           },
@@ -388,7 +382,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#c8b8dc",
+            "colour": "#dfedff",
             "id": 0,
             "isHighlighted": true,
           },
@@ -398,7 +392,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#e5c7d7",
+            "colour": "#f7b9d3",
             "id": 0,
             "isHighlighted": true,
           },
@@ -408,7 +402,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#f3b3a6",
+            "colour": "#feecc1",
             "id": 0,
             "isHighlighted": true,
           },
@@ -418,7 +412,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#e7664c",
+            "colour": "#fcd883",
             "id": 0,
             "isHighlighted": true,
           },
@@ -428,7 +422,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#9170b8",
+            "colour": "#bfdbff",
             "id": 0,
             "isHighlighted": true,
           },
@@ -438,7 +432,7 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#da8b45",
+            "colour": "#ffc9c2",
             "isHighlighted": true,
           },
           "x": 1,

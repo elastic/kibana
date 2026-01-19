@@ -14,7 +14,9 @@
         "tags": [],
         "label": "coreContextMock",
         "description": [],
-        "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
+        "path": "src/core/packages/base/browser-mocks/src/core_context.mock.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +40,9 @@
               },
               "; }"
             ],
-            "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
+            "path": "src/core/packages/base/browser-mocks/src/core_context.mock.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -53,7 +57,9 @@
                 "signature": [
                   "{ production?: boolean | undefined; }"
                 ],
-                "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
+                "path": "src/core/packages/base/browser-mocks/src/core_context.mock.ts",
+                "lineNumber": 15,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -7,23 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
+import { isNumber, keys, values, find, each, flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  buildExistsFilter,
-  buildPhrasesFilter,
-  buildQueryFromFilters,
-  Filter,
-} from '@kbn/es-query';
+import type { estypes } from '@elastic/elasticsearch';
+import type { Filter } from '@kbn/es-query';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { AggGroupNames } from '../agg_groups';
-import { IAggConfigs } from '../agg_configs';
-import { IAggType } from '../agg_type';
-import { IAggConfig } from '../agg_config';
+import type { IAggConfigs } from '../agg_configs';
+import type { IAggType } from '../agg_type';
+import type { IAggConfig } from '../agg_config';
 import { createSamplerAgg } from '../utils/sampler';
 
-const MISSING_KEY_STRING = '__missing__';
 export const OTHER_NESTED_BUCKET_SEPARATOR = '╰┄►';
 const otherBucketRegexp = new RegExp(`^${OTHER_NESTED_BUCKET_SEPARATOR}`);
 
@@ -106,7 +102,7 @@ const getAggConfigResultMissingBuckets = (responseAggs: any, aggId: string) => {
   const resultBuckets: Array<Record<string, any>> = [];
   if (responseAggs[aggId]) {
     const matchingBucket = responseAggs[aggId].buckets.find(
-      (bucket: Record<string, any>) => bucket.key === MISSING_KEY_STRING
+      (bucket: Record<string, any>) => bucket.key === MISSING_TOKEN
     );
     if (matchingBucket) {
       resultBuckets.push(matchingBucket);
@@ -227,7 +223,7 @@ export const buildOtherBucketAgg = (
           bucket,
           isNumber(bucketObjKey) ? undefined : bucketObjKey
         );
-        const filter = cloneDeep(bucket.filters) || currentAgg.createFilter(bucketKey);
+        const filter = structuredClone(bucket.filters) || currentAgg.createFilter(bucketKey);
         const newFilters = flatten([...filters, filter]);
         walkBucketTree(
           newAggIndex,
@@ -243,7 +239,7 @@ export const buildOtherBucketAgg = (
     const hasScriptedField = !!aggWithOtherBucket.params.field?.scripted;
     const hasMissingBucket = !!aggWithOtherBucket.params.missingBucket;
     const hasMissingBucketKey = agg.buckets.some(
-      (bucket: { key: string }) => bucket.key === MISSING_KEY_STRING
+      (bucket: { key: string }) => bucket.key === MISSING_TOKEN
     );
     if (
       aggWithOtherBucket.params.field &&
@@ -260,7 +256,7 @@ export const buildOtherBucketAgg = (
 
     // create not filters for all the buckets
     each(agg.buckets, (bucket) => {
-      if (bucket.key === MISSING_KEY_STRING) return;
+      if (bucket.key === MISSING_TOKEN) return;
       const filter = currentAgg.createFilter(currentAgg.getKey(bucket, bucket.key));
       filter.meta.negate = true;
       filters.push(filter);
@@ -306,8 +302,12 @@ export const mergeOtherBucketAggResponse = (
   requestAgg: Record<string, any>,
   otherFilterBuilder: (requestAgg: Record<string, any>, key: string, otherAgg: IAggConfig) => Filter
 ): estypes.SearchResponse<any> => {
-  const updatedResponse = cloneDeep(response);
-  const aggregationsRoot = getCorrectAggregationsCursorFromResponse(otherResponse, aggsConfig);
+  const updatedResponse = structuredClone(response);
+  const updatedOtherResponse = structuredClone(otherResponse);
+  const aggregationsRoot = getCorrectAggregationsCursorFromResponse(
+    updatedOtherResponse,
+    aggsConfig
+  );
   const updatedAggregationsRoot = getCorrectAggregationsCursorFromResponse(
     updatedResponse,
     aggsConfig
@@ -333,7 +333,7 @@ export const mergeOtherBucketAggResponse = (
 
     if (
       aggResultBuckets.some(
-        (aggResultBucket: Record<string, any>) => aggResultBucket.key === MISSING_KEY_STRING
+        (aggResultBucket: Record<string, any>) => aggResultBucket.key === MISSING_TOKEN
       )
     ) {
       bucket.filters.push(
@@ -349,13 +349,13 @@ export const updateMissingBucket = (
   aggConfigs: IAggConfigs,
   agg: IAggConfig
 ) => {
-  const updatedResponse = cloneDeep(response);
+  const updatedResponse = structuredClone(response);
   const aggResultBuckets = getAggConfigResultMissingBuckets(
     getCorrectAggregationsCursorFromResponse(updatedResponse, aggConfigs),
     agg.id
   );
   aggResultBuckets.forEach((bucket) => {
-    bucket.key = MISSING_KEY_STRING;
+    bucket.key = MISSING_TOKEN;
   });
   return updatedResponse;
 };

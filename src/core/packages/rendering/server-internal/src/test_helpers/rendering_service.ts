@@ -10,7 +10,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RenderingService as Service } from '../rendering_service';
 import type { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../types';
-import { mockRenderingServiceParams } from './params';
+import type { mockRenderingServiceParams } from './params';
 
 type IRenderingService = PublicMethodsOf<Service>;
 
@@ -22,10 +22,12 @@ export const setupMock: jest.Mocked<InternalRenderingServiceSetup> = {
 };
 export const mockPreboot = jest.fn().mockResolvedValue(prebootMock);
 export const mockSetup = jest.fn().mockResolvedValue(setupMock);
+export const mockStart = jest.fn();
 export const mockStop = jest.fn();
 export const mockRenderingService: jest.Mocked<IRenderingService> = {
   preboot: mockPreboot,
   setup: mockSetup,
+  start: mockStart,
   stop: mockStop,
 };
 export const RenderingService = jest.fn<IRenderingService, [typeof mockRenderingServiceParams]>(

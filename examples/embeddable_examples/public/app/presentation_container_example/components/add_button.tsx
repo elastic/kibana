@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
+import { apiPublishesViewMode, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { of } from 'rxjs';
 
 export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions: UiActionsStart }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [items, setItems] = useState<ReactElement[]>([]);
+
+  const viewMode = useStateFromPublishingSubject(
+    apiPublishesViewMode(pageApi) ? pageApi?.viewMode$ : (of('edit') as PublishingSubject<ViewMode>)
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -32,7 +41,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
         return (
           <EuiContextMenuItem
             key={action.id}
-            icon="share"
+            icon={action?.getIconType(actionContext) ?? ''}
             onClick={() => {
               action.execute(actionContext);
               setIsPopoverOpen(false);
@@ -59,6 +68,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
+          disabled={viewMode !== 'edit'}
         >
           Add panel
         </EuiButton>

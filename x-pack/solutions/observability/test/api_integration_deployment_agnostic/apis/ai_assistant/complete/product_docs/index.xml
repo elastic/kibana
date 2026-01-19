@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListBucketResult>
+  <Name>kibana-ai-assistant-kb-artifacts</Name>
+  <Contents>
+    <Key>kb-product-doc-kibana-0.0.zip</Key>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-elasticsearch-0.0.zip</Key>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-observability-0.0.zip</Key>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-security-0.0.zip</Key>
+  </Contents>
+</ListBucketResult>

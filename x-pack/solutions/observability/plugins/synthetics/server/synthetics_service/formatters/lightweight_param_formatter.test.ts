@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
+import type { ParsedVars } from './lightweight_param_formatter';
+import { replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 
 const params = {

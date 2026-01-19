@@ -39,18 +39,20 @@ $domDragDropZLevel3: 3;
 }
 
 // Style for drop area when there's an item being dragged
+// Until SCSS -> emotions migration we should continue using "transparentize()" here
 @mixin mixinDomDroppableActive($borderWidth: $euiBorderWidthThin) {
-  background-color: $euiColorBackgroundBaseSuccess !important;
+  background-color: transparentize($euiColorBackgroundLightSuccess, .7) !important;
   &:before {
-    border-color: $euiColorBorderBaseSuccess !important;
+    border-color: $euiColorBorderStrongSuccess !important;
   }
 }
 
 // Style for drop area while hovering with item
+// Until SCSS -> emotions migration we should continue using "transparentize()" here
 @mixin mixinDomDroppableHover($borderWidth: $euiBorderWidthThin) {
-  background-color: $euiColorBackgroundLightSuccess !important;
+  background-color: transparentize($euiColorBackgroundFilledSuccess, .75) !important;
   &:before {
-    border-color: $euiColorBorderBaseSuccess !important;
+    border-color: $euiColorBorderStrongSuccess !important;
   }
 }
 

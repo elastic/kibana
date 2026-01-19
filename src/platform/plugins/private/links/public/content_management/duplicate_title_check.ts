@@ -31,28 +31,32 @@ export const checkForDuplicateTitle = async ({
   isTitleDuplicateConfirmed,
   onTitleDuplicate,
 }: Props) => {
-  if (isTitleDuplicateConfirmed) {
-    return true;
+  try {
+    if (isTitleDuplicateConfirmed) {
+      return true;
+    }
+
+    if (title === lastSavedTitle && !copyOnSave) {
+      return true;
+    }
+
+    const { hits } = await linksClient.search(
+      {
+        text: `"${title}"`,
+        limit: 10,
+      },
+      { onlyTitle: true }
+    );
+
+    const existing = hits.find((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
+
+    if (!existing || existing.id === id) {
+      return true;
+    }
+
+    onTitleDuplicate();
+    return Promise.reject(new Error(rejectErrorMessage));
+  } catch (error) {
+    return { error };
   }
-
-  if (title === lastSavedTitle && !copyOnSave) {
-    return true;
-  }
-
-  const { hits } = await linksClient.search(
-    {
-      text: `"${title}"`,
-      limit: 10,
-    },
-    { onlyTitle: true }
-  );
-
-  const existing = hits.find((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
-
-  if (!existing || existing.id === id) {
-    return true;
-  }
-
-  onTitleDuplicate();
-  return Promise.reject(new Error(rejectErrorMessage));
 };

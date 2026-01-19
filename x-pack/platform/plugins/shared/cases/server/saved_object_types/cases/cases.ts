@@ -17,14 +17,23 @@ import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { handleExport } from '../import_export/export';
 import { caseMigrations } from '../migrations';
-import { modelVersion1, modelVersion2 } from './model_versions';
+import {
+  modelVersion1,
+  modelVersion2,
+  modelVersion3,
+  modelVersion4,
+  modelVersion5,
+  modelVersion6,
+  modelVersion7,
+  modelVersion8,
+} from './model_versions';
+import { handleImport } from '../import_export/import';
 
 export const createCaseSavedObjectType = (
   coreSetup: CoreSetup,
   logger: Logger
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
-  switchToModelVersionAt: '8.10.0',
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
@@ -179,6 +188,9 @@ export const createCaseSavedObjectType = (
           syncAlerts: {
             type: 'boolean',
           },
+          extractObservables: {
+            type: 'boolean',
+          },
         },
       },
       severity: {
@@ -188,6 +200,12 @@ export const createCaseSavedObjectType = (
         type: 'integer',
       },
       total_comments: {
+        type: 'integer',
+      },
+      total_events: {
+        type: 'integer',
+      },
+      total_observables: {
         type: 'integer',
       },
       category: {
@@ -211,7 +229,6 @@ export const createCaseSavedObjectType = (
               },
               boolean: {
                 type: 'boolean',
-                // @ts-expect-error: es types are not correct. ignore_malformed is supported.
                 ignore_malformed: true,
               },
               string: {
@@ -238,6 +255,20 @@ export const createCaseSavedObjectType = (
           value: {
             type: 'keyword',
           },
+          description: {
+            type: 'keyword',
+          },
+        },
+      },
+      incremental_id: {
+        type: 'unsigned_long',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+          text: {
+            type: 'text',
+          },
         },
       },
     },
@@ -246,6 +277,12 @@ export const createCaseSavedObjectType = (
   modelVersions: {
     1: modelVersion1,
     2: modelVersion2,
+    3: modelVersion3,
+    4: modelVersion4,
+    5: modelVersion5,
+    6: modelVersion6,
+    7: modelVersion7,
+    8: modelVersion8,
   },
   management: {
     importableAndExportable: true,
@@ -256,5 +293,6 @@ export const createCaseSavedObjectType = (
       context: SavedObjectsExportTransformContext,
       objects: Array<SavedObject<CasePersistedAttributes>>
     ) => handleExport({ context, objects, coreSetup, logger }),
+    onImport: (objects: Array<SavedObject<CasePersistedAttributes>>) => handleImport({ objects }),
   },
 });

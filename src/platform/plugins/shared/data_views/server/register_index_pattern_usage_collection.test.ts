@@ -13,7 +13,7 @@ import {
   updateMax,
   getIndexPatternTelemetry,
 } from './register_index_pattern_usage_collection';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClient } from '@kbn/core/server';
 
 const scriptA = 'emit(0);';
 const scriptB = 'emit(1);\nemit(2);';

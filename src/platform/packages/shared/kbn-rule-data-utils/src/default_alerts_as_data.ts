@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 
 const TIMESTAMP = '@timestamp' as const;
 
@@ -15,6 +15,8 @@ const TIMESTAMP = '@timestamp' as const;
 const KIBANA_NAMESPACE = 'kibana' as const;
 const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
 const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
+const ALERT_SCHEDULED_ACTION_NAMESPACE = `${ALERT_NAMESPACE}.scheduled_action` as const;
+const ALERT_STATE_NAMESPACE = `${ALERT_NAMESPACE}.state` as const;
 
 // kibana.space_ids - space ID(s) of the rule that created this alert
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
@@ -50,8 +52,14 @@ const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
 // kibana.alert.maintenance_window_ids - IDs of maintenance windows that are affecting this alert
 const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids` as const;
 
+// kibana.alert.maintenance_window_names - Names of maintenance windows that are affecting this alert
+const ALERT_MAINTENANCE_WINDOW_NAMES = `${ALERT_NAMESPACE}.maintenance_window_names` as const;
+
 // kibana.alert.consecutive_matches - count of consecutive times the alert has been active
 const ALERT_CONSECUTIVE_MATCHES = `${ALERT_NAMESPACE}.consecutive_matches` as const;
+
+// kibana.alert.pending_recovered_count - count of consecutive times the alert has been recovered
+const ALERT_PENDING_RECOVERED_COUNT = `${ALERT_NAMESPACE}.pending_recovered_count` as const;
 
 // kibana.alert.instance.id - alert ID, also known as alert instance ID
 const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
@@ -67,6 +75,15 @@ const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 
 // kibana.alert.start - timestamp when the alert is first active
 const ALERT_START = `${ALERT_NAMESPACE}.start` as const;
+
+// kibana.alert.updated_at - timestamp when the alert was last updated
+const ALERT_UPDATED_AT = `${ALERT_NAMESPACE}.updated_at` as const;
+
+// kibana.alert.updated_by.user.id - user id of the user that last updated the alert
+const ALERT_UPDATED_BY_USER_ID = `${ALERT_NAMESPACE}.updated_by.user.id` as const;
+
+// kibana.alert.updated_by.user.name - user name of the user that last updated the alert
+const ALERT_UPDATED_BY_USER_NAME = `${ALERT_NAMESPACE}.updated_by.user.name` as const;
 
 // kibana.alert.status - active/recovered status of alert
 const ALERT_STATUS = `${ALERT_NAMESPACE}.status` as const;
@@ -125,13 +142,23 @@ const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 // kibana.alert.rule.execution.type - rule execution type for rule that generated this alert (manual /scheduled)
 const ALERT_RULE_EXECUTION_TYPE = `${ALERT_RULE_NAMESPACE}.execution.type` as const;
 
+const ALERT_SCHEDULED_ACTION_GROUP = `${ALERT_SCHEDULED_ACTION_NAMESPACE}.group` as const;
+const ALERT_SCHEDULED_ACTION_DATE = `${ALERT_SCHEDULED_ACTION_NAMESPACE}.date` as const;
+const ALERT_SCHEDULED_ACTION_THROTTLING = `${ALERT_SCHEDULED_ACTION_NAMESPACE}.throttling` as const;
+
+// kibana.alert.index_pattern - index pattern for the alert
+const ALERT_INDEX_PATTERN = `${ALERT_NAMESPACE}.index_pattern` as const;
+
+const ALERT_MUTED = `${ALERT_NAMESPACE}.muted` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
+  ALERT_STATE_NAMESPACE,
 };
 
-const fields = {
+export const fields = {
   ALERT_ACTION_GROUP,
   ALERT_CASE_IDS,
   ALERT_DURATION,
@@ -139,8 +166,11 @@ const fields = {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
+  ALERT_INDEX_PATTERN,
   ALERT_LAST_DETECTED,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
@@ -159,6 +189,9 @@ const fields = {
   ALERT_RULE_UUID,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
+  ALERT_UPDATED_AT,
+  ALERT_UPDATED_BY_USER_ID,
+  ALERT_UPDATED_BY_USER_NAME,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
   ALERT_URL,
@@ -166,9 +199,13 @@ const fields = {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_SCHEDULED_ACTION_GROUP,
+  ALERT_SCHEDULED_ACTION_DATE,
+  ALERT_SCHEDULED_ACTION_THROTTLING,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_MUTED,
 };
 
 export {
@@ -176,6 +213,7 @@ export {
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
   KIBANA_NAMESPACE,
+  ALERT_STATE_NAMESPACE,
 
   // fields
   ALERT_ACTION_GROUP,
@@ -185,8 +223,11 @@ export {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_INSTANCE_ID,
+  ALERT_INDEX_PATTERN,
   ALERT_LAST_DETECTED,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
@@ -205,6 +246,9 @@ export {
   ALERT_RULE_UUID,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
+  ALERT_UPDATED_AT,
+  ALERT_UPDATED_BY_USER_ID,
+  ALERT_UPDATED_BY_USER_NAME,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
   ALERT_URL,
@@ -212,9 +256,13 @@ export {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_SCHEDULED_ACTION_GROUP,
+  ALERT_SCHEDULED_ACTION_DATE,
+  ALERT_SCHEDULED_ACTION_THROTTLING,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_MUTED,
 };
 
 export type DefaultAlertFieldName = ValuesType<typeof fields & typeof namespaces>;

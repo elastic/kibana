@@ -10,6 +10,7 @@ Props description:
 | **className** | (optional) string | Optional class name to apply. |
 | **columns** | string[] | Determines ids of the columns which are displayed. |
 | **expandedDoc** | (optional) DataTableRecord  | If set, the given document is displayed in a flyout. |
+| **enableInTableSearch** | (optional) boolean  | Set to true to allow users to search inside the table. |
 | **dataView** | DataView | The used data view. |
 | **loadingState** | DataLoadingState | Determines if data is currently loaded. |
 | **onFilter** | DocViewFilterFn | Function to add a filter in the grid cell or document flyout. |
@@ -66,15 +67,13 @@ Props description:
 Usage example:
 
 ```
-    // Memoize unified data table to avoid the unnecessary re-renderings
-    const DataTableMemoized = React.memo(UnifiedDataTable);
-
-   // Add memoized component with all needed props
-    <DataTableMemoized
+    // Add memoized component with all needed props
+    <DataTable
       ariaLabelledBy="timelineDocumentsAriaLabel"
       className={'unifiedDataTableTimeline'}
       columns={['event.category', 'event.action', 'host.name', 'user.name']}
       expandedDoc={expandedDoc as DataTableRecord}
+      enableInTableSearch
       dataView={dataView}
       loadingState={isQueryLoading ? DataLoadingState.loading : DataLoadingState.loaded}
       onFilter={() => {

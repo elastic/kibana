@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleTypeModel, RuleTypeParams, RuleTypeWithDescription } from '../common';
+import type { RuleTypeModel, RuleTypeParams, RuleTypeWithDescription } from '../common';
 import { getActionGroups, getSelectedActionGroup } from './get_selected_action_group';
 
 describe('getActionGroups', () => {

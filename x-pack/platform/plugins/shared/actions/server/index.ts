@@ -5,10 +5,11 @@
  * 2.0.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, ActionsConfig } from './config';
-import { ActionsClient as ActionsClientClass } from './actions_client';
-import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
+import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import type { ActionsConfig } from './config';
+import { configSchema } from './config';
+import type { ActionsClient as ActionsClientClass } from './actions_client';
+import type { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
@@ -20,11 +21,16 @@ export type {
   ActionResult,
   ActionTypeExecutorOptions,
   ActionType,
+  ClassicActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
 } from './types';
 
-export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
+export type {
+  ConnectorWithExtraFindData as FindActionResult,
+  Connector,
+  ConnectorType,
+} from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
@@ -48,7 +54,9 @@ export type { ServiceParams } from './sub_action_framework/types';
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   exposeToBrowser: {
-    email: { domain_allowlist: true },
+    // recipient_allowlist is not exposed because it may contain sensitive information
+    email: { domain_allowlist: true, recipient_allowlist: false, services: { enabled: true } },
+    webhook: { ssl: { pfx: { enabled: true } } },
   },
 };
 

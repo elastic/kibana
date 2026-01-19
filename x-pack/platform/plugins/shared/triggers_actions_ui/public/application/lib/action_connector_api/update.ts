@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
-import { RewriteRequestCase } from '@kbn/actions-plugin/common';
+import type { HttpSetup } from '@kbn/core/public';
+import type { RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
 import type {
   ActionConnector,
@@ -21,6 +21,7 @@ const rewriteBodyRes: RewriteRequestCase<
   is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
   is_system_action: isSystemAction,
+  is_connector_type_deprecated: isConnectorTypeDeprecated,
   ...res
 }) => ({
   ...res,
@@ -29,6 +30,7 @@ const rewriteBodyRes: RewriteRequestCase<
   isDeprecated,
   isMissingSecrets,
   isSystemAction,
+  isConnectorTypeDeprecated,
 });
 
 export async function updateActionConnector({

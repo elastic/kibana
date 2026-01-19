@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 
 export const isCspPackagePolicyInstalled = async (

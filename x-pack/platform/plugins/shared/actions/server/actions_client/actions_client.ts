@@ -7,35 +7,39 @@
 
 import Boom from '@hapi/boom';
 import url from 'url';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import {
+import type {
   IScopedClusterClient,
   SavedObjectsClientContract,
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import { AuditLogger } from '@kbn/security-plugin/server';
-import { IEventLogClient } from '@kbn/event-log-plugin/server';
-import { KueryNode } from '@kbn/es-query';
-import { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
-import { ConnectorType } from '../application/connector/types';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import type { IEventLogClient } from '@kbn/event-log-plugin/server';
+import type { KueryNode } from '@kbn/es-query';
+import type { AxiosInstance } from 'axios';
+import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
+import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
 import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
 import { execute } from '../application/connector/methods/execute';
-import {
+import type {
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
   IExecutionLogResult,
 } from '../../common';
-import { ActionTypeRegistry } from '../action_type_registry';
-import { ActionExecutorContract, parseDate } from '../lib';
-import {
+import type { ActionTypeRegistry } from '../action_type_registry';
+import type { ActionExecutorContract } from '../lib';
+import { parseDate } from '../lib';
+import type {
   ActionResult,
   RawAction,
   InMemoryConnector,
@@ -45,29 +49,26 @@ import {
   ActionType,
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
-import {
+import type {
   ExecuteOptions as EnqueueExecutionOptions,
   BulkExecutionEnqueuer,
   ExecutionResponse,
 } from '../create_execute_function';
-import { ActionsAuthorization } from '../authorization/actions_authorization';
+import type { ActionsAuthorization } from '../authorization/actions_authorization';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import {
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type {
   OAuthClientCredentialsParams,
   OAuthJwtParams,
   OAuthParams,
 } from '../routes/get_oauth_access_token';
-import {
-  getOAuthJwtAccessToken,
-  GetOAuthJwtConfig,
-  GetOAuthJwtSecrets,
-} from '../lib/get_oauth_jwt_access_token';
-import {
-  getOAuthClientCredentialsAccessToken,
+import type { GetOAuthJwtConfig, GetOAuthJwtSecrets } from '../lib/get_oauth_jwt_access_token';
+import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
+import type {
   GetOAuthClientCredentialsConfig,
   GetOAuthClientCredentialsSecrets,
 } from '../lib/get_oauth_client_credentials_access_token';
+import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import {
   ACTION_FILTER,
   formatExecutionKPIResult,
@@ -76,18 +77,22 @@ import {
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
-import { ListTypesParams } from '../application/connector/methods/list_types/types';
-import { ConnectorUpdateParams } from '../application/connector/methods/update/types';
-import { ConnectorCreateParams } from '../application/connector/methods/create/types';
+import type { ListTypesParams } from '../application/connector/methods/list_types/types';
+import type { ConnectorUpdateParams } from '../application/connector/methods/update/types';
+import type { ConnectorCreateParams } from '../application/connector/methods/create/types';
 import { isPreconfigured } from '../lib/is_preconfigured';
 import { isSystemAction } from '../lib/is_system_action';
-import { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
+import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
+import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
+import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
+import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
 
 export interface ConstructorOptions {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
@@ -98,12 +103,18 @@ export interface ConstructorOptions {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
+  getAxiosInstanceWithAuth: (
+    getAxiosParams: GetAxiosInstanceWithAuthFnOpts
+  ) => Promise<AxiosInstance>;
+  spaces?: SpacesServiceSetup;
+  isESOCanEncrypt: boolean;
 }
 
 export interface ActionsClientContext {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   actionTypeRegistry: ActionTypeRegistry;
   inMemoryConnectors: InMemoryConnector[];
@@ -115,6 +126,11 @@ export interface ActionsClientContext {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
+  getAxiosInstanceWithAuth: (
+    getAxiosParams: GetAxiosInstanceWithAuthFnOpts
+  ) => Promise<AxiosInstance>;
+  spaces?: SpacesServiceSetup;
+  isESOCanEncrypt: boolean;
 }
 
 export class ActionsClient {
@@ -125,6 +141,7 @@ export class ActionsClient {
     actionTypeRegistry,
     kibanaIndices,
     scopedClusterClient,
+    encryptedSavedObjectsClient,
     unsecuredSavedObjectsClient,
     inMemoryConnectors,
     actionExecutor,
@@ -135,10 +152,14 @@ export class ActionsClient {
     usageCounter,
     connectorTokenClient,
     getEventLogClient,
+    getAxiosInstanceWithAuth,
+    spaces,
+    isESOCanEncrypt,
   }: ConstructorOptions) {
     this.context = {
       logger,
       actionTypeRegistry,
+      encryptedSavedObjectsClient,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -151,6 +172,9 @@ export class ActionsClient {
       usageCounter,
       connectorTokenClient,
       getEventLogClient,
+      getAxiosInstanceWithAuth,
+      spaces,
+      isESOCanEncrypt,
     };
   }
 
@@ -212,7 +236,7 @@ export class ActionsClient {
   }: {
     ids: string[];
     throwIfSystemAction?: boolean;
-  }): Promise<ActionResult[]> {
+  }): Promise<(ActionResult | InMemoryConnector)[]> {
     try {
       await this.context.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
@@ -230,22 +254,28 @@ export class ActionsClient {
 
     const actionResults = new Array<ActionResult>();
 
-    for (const actionId of ids) {
-      const action = this.context.inMemoryConnectors.find(
-        (inMemoryConnector) => inMemoryConnector.id === actionId
+    for (const connectorId of ids) {
+      const inMemoryConnector = this.context.inMemoryConnectors.find(
+        (connector) => connector.id === connectorId
       );
 
-      /**
-       * Getting system connector is not allowed
-       * if throwIfSystemAction is set to true.
-       * Default behavior is to throw
-       */
-      if (action !== undefined && action.isSystemAction && throwIfSystemAction) {
-        throw Boom.notFound(`Connector ${action.id} not found`);
-      }
+      if (inMemoryConnector !== undefined) {
+        const connector = connectorFromInMemoryConnector({
+          inMemoryConnector,
+          id: connectorId,
+          actionTypeRegistry: this.context.actionTypeRegistry,
+        });
 
-      if (action !== undefined) {
-        actionResults.push(action);
+        /**
+         * Getting system connector is not allowed
+         * if throwIfSystemAction is set to true.
+         * Default behavior is to throw
+         */
+        if (connector.isSystemAction && throwIfSystemAction) {
+          throw Boom.notFound(`Connector ${connector.id} not found`);
+        }
+
+        actionResults.push(connector);
       }
     }
 
@@ -282,7 +312,11 @@ export class ActionsClient {
         );
       }
       actionResults.push(
-        connectorFromSavedObject(action, isConnectorDeprecated(action.attributes))
+        connectorFromSavedObject(
+          action,
+          isConnectorDeprecated(action.attributes),
+          this.context.actionTypeRegistry.isDeprecated(action.attributes.actionTypeId)
+        )
       );
     }
 
@@ -488,6 +522,10 @@ export class ActionsClient {
     connectorExecuteParams: ConnectorExecuteParams
   ): Promise<ActionTypeExecutorResult<unknown>> {
     return execute(this.context, connectorExecuteParams);
+  }
+
+  public async getAxiosInstance(actionId: string): Promise<AxiosInstance> {
+    return getAxiosInstance(this.context, actionId);
   }
 
   public async bulkEnqueueExecution(

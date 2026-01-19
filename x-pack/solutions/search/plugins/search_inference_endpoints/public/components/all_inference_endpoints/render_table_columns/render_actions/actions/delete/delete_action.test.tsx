@@ -6,14 +6,14 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 
 import { DeleteAction } from './delete_action';
-import { InferenceEndpointUI } from '../../../../types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 describe('Delete Action', () => {
-  const mockProvider = {
+  const mockProvider: InferenceInferenceEndpointInfo = {
     inference_id: 'my-hugging-face',
     service: 'hugging_face',
     service_settings: {
@@ -21,15 +21,10 @@ describe('Delete Action', () => {
       url: 'https://dummy.huggingface.com',
     },
     task_settings: {},
-  } as any;
-
-  const mockItem: InferenceEndpointUI = {
-    endpoint: 'my-hugging-face',
-    provider: mockProvider,
-    type: 'text_embedding',
+    task_type: 'text_embedding',
   };
 
-  const Wrapper = ({ item }: { item: InferenceEndpointUI }) => {
+  const Wrapper = ({ item }: { item: InferenceInferenceEndpointInfo }) => {
     const queryClient = new QueryClient();
     return (
       <QueryClientProvider client={queryClient}>
@@ -39,7 +34,7 @@ describe('Delete Action', () => {
   };
 
   it('loads confirm delete modal', () => {
-    render(<Wrapper item={mockItem} />);
+    render(<Wrapper item={mockProvider} />);
     expect(screen.getByTestId('deleteModalForInferenceUI')).toBeInTheDocument();
   });
 });

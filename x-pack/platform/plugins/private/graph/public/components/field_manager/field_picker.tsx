@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, ReactNode } from 'react';
-import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useState, useEffect } from 'react';
+import { EuiPopover, EuiSelectable, EuiBadge, type UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import { FieldIcon } from '@kbn/react-field';
-import { WorkspaceField } from '../../types';
+import { css } from '@emotion/react';
+import type { WorkspaceField } from '../../types';
+import { gphFieldBadgeSizeStyles } from '../../styles';
 
 export interface FieldPickerProps {
   fieldMap: Record<string, WorkspaceField>;
@@ -27,6 +29,8 @@ export function FieldPicker({
   open,
   setOpen,
 }: FieldPickerProps) {
+  const euiThemeContext = useEuiTheme();
+
   const allFields = Object.values(fieldMap);
 
   const hasFields = allFields.length > 0;
@@ -55,9 +59,6 @@ export function FieldPicker({
       button={
         <EuiBadge
           data-test-subj="graph-add-field-button"
-          className={classNames('gphFieldPicker__button', {
-            'gphFieldPicker__button--disabled': !hasFields,
-          })}
           color="hollow"
           iconType="plusInCircleFilled"
           aria-disabled={!hasFields}
@@ -67,13 +68,30 @@ export function FieldPicker({
             }
           }}
           onClickAriaLabel={badgeDescription}
+          css={[
+            gphFieldBadgeSizeStyles(euiThemeContext),
+            css({
+              color: euiThemeContext.euiTheme.colors.primary,
+              ...(!hasFields && {
+                color: euiThemeContext.euiTheme.colors.mediumShade,
+
+                '&, span': {
+                  cursor: 'not-allowed !important',
+                },
+
+                '&:hover, &:focus': {
+                  textDecoration: 'none !important',
+                },
+              }),
+            }),
+          ]}
         >
           {badgeDescription}
         </EuiBadge>
       }
       isOpen={open}
       closePopover={() => setOpen(false)}
-      panelClassName="gphFieldPicker__popoverPanel"
+      panelProps={{ css: styles.popoverPanel }}
     >
       {open && (
         <EuiSelectable
@@ -84,9 +102,7 @@ export function FieldPicker({
             compressed: true,
             'data-test-subj': 'graph-field-search',
           }}
-          listProps={{
-            className: 'gphFieldPicker__selectableList',
-          }}
+          listProps={{ css: styles.selectableList }}
           searchable
           options={fieldOptions}
           onChange={(newOptions) => {
@@ -138,3 +154,15 @@ function isExplorable(field: WorkspaceField) {
 
   return explorableTypes.includes(field.type);
 }
+
+const styles = {
+  popoverPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '350px',
+      padding: euiTheme.size.xs,
+    }),
+  selectableList: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: `0 -${euiTheme.size.xs} -${euiTheme.size.xs}`,
+    }),
+};

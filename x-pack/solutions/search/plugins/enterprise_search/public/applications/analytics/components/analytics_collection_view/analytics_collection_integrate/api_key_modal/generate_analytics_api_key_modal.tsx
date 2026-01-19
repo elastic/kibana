@@ -130,6 +130,7 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
                   ) : (
                     <EuiFlexItem>
                       <EuiCallOut
+                        announceOnMount
                         title={
                           <FormattedMessage
                             id="xpack.enterpriseSearch.content.analytics.api.generateAnalyticsApiKeyModal.callOutMessage"

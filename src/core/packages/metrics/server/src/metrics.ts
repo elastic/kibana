@@ -36,6 +36,8 @@ export interface IntervalHistogram {
     50: number;
     // 75th percentile of delays of the collected data points.
     75: number;
+    // 90th percentile of delays of the collected data points.
+    90: number;
     // 95th percentile of delays of the collected data points.
     95: number;
     // 99th percentile of delays of the collected data points.

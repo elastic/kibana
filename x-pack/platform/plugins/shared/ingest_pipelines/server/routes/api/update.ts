@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { pipelineSchema } from './shared';
 
 const bodySchema = schema.object(pipelineSchema);
@@ -38,7 +38,6 @@ export const registerUpdateRoute = ({
     async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params;
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { description, processors, version, on_failure, _meta } = req.body;
 
       try {
@@ -47,13 +46,11 @@ export const registerUpdateRoute = ({
 
         const response = await clusterClient.asCurrentUser.ingest.putPipeline({
           id: name,
-          body: {
-            description,
-            processors,
-            version,
-            on_failure,
-            _meta,
-          },
+          description,
+          processors,
+          version,
+          on_failure,
+          _meta,
         });
 
         return res.ok({ body: response });

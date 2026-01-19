@@ -1,12 +1,13 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "scripts/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -57,7 +58,6 @@
     "@kbn/shared-ux-file-upload",
     "@kbn/shared-ux-file-mocks",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/utility-types-jest",
     "@kbn/ui-actions-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-api-server-mocks",
@@ -76,13 +76,32 @@
     "@kbn/securitysolution-rules",
     "@kbn/alerts-ui-shared",
     "@kbn/cloud-plugin",
+    "@kbn/response-ops-alerts-table",
+    "@kbn/field-formats-plugin",
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-server-utils",
     "@kbn/code-editor-mock",
     "@kbn/monaco",
     "@kbn/code-editor",
+    "@kbn/logging",
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/alerting-types",
+    "@kbn/elastic-assistant-common",
+    "@kbn/test",
+    "@kbn/dev-utils",
+    "@kbn/tooling-log",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/licensing-types",
+    "@kbn/lazy-object",
+    "@kbn/setup-node-env",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/react-query",
+    "@kbn/zod",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/response-ops-retry-service"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

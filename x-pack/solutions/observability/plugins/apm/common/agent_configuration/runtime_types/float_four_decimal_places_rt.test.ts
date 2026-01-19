@@ -6,7 +6,7 @@
  */
 
 import { floatFourDecimalPlacesRt } from './float_four_decimal_places_rt';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 
 describe('floatFourDecimalPlacesRt', () => {
   it('does not accept empty values', () => {

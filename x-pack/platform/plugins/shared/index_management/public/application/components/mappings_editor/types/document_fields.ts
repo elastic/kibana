@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { ModelConfig } from '@kbn/inference_integration_flyout';
-import { GenericObject } from './mappings_editor';
+import type { GenericObject } from './mappings_editor';
 
-import { PARAMETERS_DEFINITION } from '../constants';
-import { FieldConfig, RuntimeField } from '../shared_imports';
+import type { PARAMETERS_DEFINITION } from '../constants';
+import type { FieldConfig, RuntimeField } from '../shared_imports';
 
 export interface DataTypeDefinition {
   label: string;
@@ -253,13 +251,4 @@ export interface NormalizedRuntimeFields {
 export enum DefaultInferenceModels {
   elser_model_2 = 'elser_model_2',
   e5 = 'e5',
-}
-
-export enum DeploymentState {
-  'DEPLOYED' = 'deployed',
-  'NOT_DEPLOYED' = 'not_deployed',
-}
-export interface CustomInferenceEndpointConfig {
-  taskType: InferenceTaskType;
-  modelConfig: ModelConfig;
 }

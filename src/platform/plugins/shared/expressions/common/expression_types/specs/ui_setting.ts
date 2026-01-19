@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable, DatatableColumnType } from './datatable';
-import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
-import { ExpressionValueRender } from './render';
+import type { Datatable, DatatableColumnType } from './datatable';
+import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
+import type { ExpressionValueRender } from './render';
 
 const name = 'ui_setting';
 

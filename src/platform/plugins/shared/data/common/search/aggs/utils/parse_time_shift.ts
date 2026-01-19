@@ -9,7 +9,7 @@
 
 import moment from 'moment';
 import { getAbsoluteTimeRange } from '../../../query/timefilter/get_time';
-import { TimeRange } from '../../../types';
+import type { TimeRange } from '../../../types';
 
 const ALLOWED_UNITS = ['s', 'm', 'h', 'd', 'w', 'M', 'y'] as const;
 const ANCHORED_TIME_SHIFT_REGEXP = /^(startAt|endAt)\((.+)\)$/;

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -74,13 +74,13 @@ const doHandle = async ({
 };
 
 export async function handleSystemColorModeChange({
-  notifications,
+  getNotifications,
   uiSettings,
   coreStart,
   stop$,
   http,
 }: {
-  notifications: NotificationsStart;
+  getNotifications: () => Promise<NotificationsStart>;
   http: InternalHttpStart;
   uiSettings: IUiSettingsClient;
   coreStart: {
@@ -97,18 +97,18 @@ export async function handleSystemColorModeChange({
   let currentDarkModeValue: boolean | undefined;
   const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
-  const onDarkModeChange = ({ matches: isDarkMode }: { matches: boolean }) => {
+  const onDarkModeChange = async ({ matches: isDarkMode }: { matches: boolean }) => {
     if (currentDarkModeValue === undefined) {
       // The current value can only be set on page reload as that's the moment when
       // we actually apply set the dark/light color mode of the page.
       currentDarkModeValue = isDarkMode;
     } else if (currentDarkModeValue !== isDarkMode) {
-      notifications.toasts.addInfo(
+      (await getNotifications()).toasts.addInfo(
         {
           title: i18n.translate('core.ui.chrome.appearanceChange.successNotificationTitle', {
             defaultMessage: 'System color mode updated',
           }),
-          text: toMountPoint(
+          text: mountReactNode(
             <>
               <p>
                 {i18n.translate('core.ui.chrome.appearanceChange.successNotificationText', {
@@ -121,6 +121,7 @@ export async function handleSystemColorModeChange({
                     size="s"
                     onClick={() => window.location.reload()}
                     data-test-subj="windowReloadButton"
+                    autoFocus
                   >
                     {i18n.translate(
                       'core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel',
@@ -131,8 +132,7 @@ export async function handleSystemColorModeChange({
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </>,
-            coreStart
+            </>
           ),
         },
         { toastLifeTimeMs: Infinity } // leave it on until discard or page reload

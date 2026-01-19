@@ -14,20 +14,23 @@ import { of } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchEsql, getTextBasedQueryStateToAstProps } from './fetch_esql';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 
 describe('fetchEsql', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
+  const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
+    scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+  });
   const fetchEsqlMockProps = {
     query: { esql: 'from *' },
     dataView: dataViewWithTimefieldMock,
     inspectorAdapters: { requests: new RequestAdapter() },
     data: discoverServiceMock.data,
     expressions: discoverServiceMock.expressions,
-    profilesManager: discoverServiceMock.profilesManager,
+    scopedProfilesManager,
   };
 
   it('resolves with returned records', async () => {
@@ -52,14 +55,12 @@ describe('fetchEsql', () => {
         })
       ),
     } as unknown as ExecutionContract);
-    const resolveDocumentProfileSpy = jest.spyOn(
-      discoverServiceMock.profilesManager,
-      'resolveDocumentProfile'
-    );
+    const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
     expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
       records,
       esqlQueryColumns: ['_id', 'foo'],
       esqlHeaderWarning: undefined,
+      interceptedWarnings: [],
     });
     expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[0] });

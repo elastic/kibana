@@ -84,7 +84,7 @@ describe('<InvestigationGuide />', () => {
       error: true,
     });
     const { getByTestId } = render(
-      renderInvestigationGuide({ ...mockContextValue, isPreview: true })
+      renderInvestigationGuide({ ...mockContextValue, isRulePreview: true })
     );
     expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });

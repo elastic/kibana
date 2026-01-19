@@ -42,7 +42,7 @@ export function App() {
   }, [expressions]);
 
   return (
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <EuiPageTemplate offset={0}>
         <EuiPageTemplate.Header pageTitle="Partial Results Demo" />
         <EuiPageTemplate.Section>
@@ -66,7 +66,7 @@ export function App() {
               items={datatable.rows ?? []}
             />
           ) : (
-            <EuiCallOut color="success">
+            <EuiCallOut announceOnMount={false} color="success">
               <p>Click or press any key.</p>
             </EuiCallOut>
           )}

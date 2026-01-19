@@ -15,11 +15,11 @@ import {
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import { PageScope } from '../../../../data_view_manager/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
@@ -35,7 +35,7 @@ import { AlertsByStatus } from '../../../../overview/components/detection_respon
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { LastEventIndexKey, type HostItem } from '../../../../../common/search_strategy';
+import { type HostItem, LastEventIndexKey } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
@@ -59,19 +59,14 @@ import { inputsSelectors } from '../../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import type { HostDetailsProps } from './types';
 import { HostsType } from '../../store/model';
 import { getHostDetailsPageFilters } from './helpers';
-import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../display';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
@@ -81,16 +76,15 @@ import { AlertCountByRuleByStatus } from '../../../../common/components/alert_co
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../common/components/endpoint/responder';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../../../common/components/page_loader';
 
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
-  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.hostsPageEvents) ?? tableDefaults).graphEventId
-  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -129,7 +123,24 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [dispatch]
   );
 
-  const { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
+
+  const indicesExist = newDataViewPickerEnabled
+    ? !!experimentalDataView.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
@@ -142,7 +153,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     try {
       return [
         buildEsQuery(
-          dataViewSpecToViewBase(sourcererDataView),
+          newDataViewPickerEnabled
+            ? experimentalDataView
+            : dataViewSpecToViewBase(oldSourcererDataView),
           [query],
           [...hostDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -151,7 +164,15 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     } catch (e) {
       return [undefined, e];
     }
-  }, [sourcererDataView, query, hostDetailsPageFilters, globalFilters, uiSettings]);
+  }, [
+    newDataViewPickerEnabled,
+    experimentalDataView,
+    oldSourcererDataView,
+    query,
+    hostDetailsPageFilters,
+    globalFilters,
+    uiSettings,
+  ]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -167,8 +188,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
-  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+  const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasAlertsRead && hasIndexRead;
 
   const entityFilter = useMemo(
     () => ({
@@ -201,13 +222,21 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     onChange: calculateEntityRiskScore,
   });
 
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
+
   return (
     <>
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+          <FiltersGlobal>
+            <SiemSearchBar
+              dataView={experimentalDataView}
+              id={InputsModelId.global}
+              sourcererDataViewSpec={oldSourcererDataView} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+            />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper
@@ -265,6 +294,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     hostName={detailName}
                     indexNames={selectedPatterns}
                     jobNameById={jobNameById}
+                    scopeId={PageScope.explore}
                   />
                 )}
               </AnomalyTableProvider>
@@ -316,7 +346,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               setQuery={setQuery}
               filterQuery={stringifiedAdditionalFilters}
               hostDetailsPagePath={hostDetailsPagePath}
-              dataViewSpec={sourcererDataView}
             />
           </SecuritySolutionPageWrapper>
         </>

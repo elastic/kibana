@@ -14,6 +14,8 @@ export const GEN_AI_TOKEN_COUNT_EVENT: EventTypeOpts<{
   completion_tokens: number;
   provider?: string;
   model?: string;
+  pluginId?: string;
+  aggregateBy?: string;
 }> = {
   eventType: 'gen_ai_token_count',
   schema: {
@@ -56,6 +58,21 @@ export const GEN_AI_TOKEN_COUNT_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'LLM model',
+        optional: true,
+      },
+    },
+    pluginId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Optional Kibana plugin ID that can be used to filter/aggregate telemetry',
+        optional: true,
+      },
+    },
+    aggregateBy: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Optional field used to group telemetry data by a specific field that is important to the consumer, like a task or conversation ID',
         optional: true,
       },
     },

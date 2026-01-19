@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
@@ -16,31 +16,42 @@ import { mockObservedHostData } from '../mocks';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
-storiesOf('Components/HostPanelContent', module)
-  .addDecorator((storyFn) => (
-    <StorybookProviders>
-      <TestProvider>
-        <EuiFlyout size="m" onClose={() => {}}>
-          {storyFn()}
-        </EuiFlyout>
-      </TestProvider>
-    </StorybookProviders>
-  ))
-  .add('default', () => (
+export default {
+  title: 'Components/HostPanelContent',
+
+  decorators: [
+    (storyFn) => (
+      <StorybookProviders>
+        <TestProvider>
+          <EuiFlyout size="m" onClose={() => {}}>
+            {storyFn()}
+          </EuiFlyout>
+        </TestProvider>
+      </StorybookProviders>
+    ),
+  ],
+} as Meta;
+
+export const Default = {
+  render: () => (
     <HostPanelContent
       observedHost={mockObservedHostData}
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ))
-  .add('no observed data', () => (
+  ),
+
+  name: 'default',
+};
+
+export const NoObservedData = {
+  render: () => (
     <HostPanelContent
       observedHost={{
         details: {},
@@ -58,15 +69,19 @@ storiesOf('Components/HostPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ))
-  .add('loading', () => (
+  ),
+
+  name: 'no observed data',
+};
+
+export const Loading = {
+  render: () => (
     <HostPanelContent
       observedHost={{
         details: {},
@@ -84,11 +99,13 @@ storiesOf('Components/HostPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
-  ));
+  ),
+
+  name: 'loading',
+};

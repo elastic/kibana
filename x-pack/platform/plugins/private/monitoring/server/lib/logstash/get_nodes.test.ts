@@ -7,7 +7,7 @@
 
 import { getNodes } from './get_nodes';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -53,7 +53,7 @@ describe('getNodes', () => {
     expect(callWithRequest.mock.calls.length).toBe(1);
     expect(callWithRequest.mock.calls[0].length).toBe(3);
 
-    const filters = callWithRequest.mock.calls[0][2].body.query.bool.filter;
+    const filters = callWithRequest.mock.calls[0][2].query.bool.filter;
     expect(filters).toContainEqual(
       expect.objectContaining({
         exists: {

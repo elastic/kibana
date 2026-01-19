@@ -19,6 +19,7 @@ export const ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN = `${ENDPOINT_ACTION_RESPON
 
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const FILE_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.file-*';
+export const DEVICE_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.device-*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 
 // metadata datastream
@@ -86,6 +87,7 @@ export const SUGGESTIONS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/sugge
 
 /** Base Actions route. Used to get a list of all actions and is root to other action related routes */
 export const BASE_ENDPOINT_ACTION_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
+export const BASE_INTERNAL_ENDPOINT_ACTION_ROUTE = `/internal${BASE_ENDPOINT_ACTION_ROUTE}`;
 
 export const ISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/isolate`;
 export const UNISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/unisolate`;
@@ -97,14 +99,23 @@ export const EXECUTE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/execute`;
 export const UPLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/upload`;
 export const SCAN_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/scan`;
 export const RUN_SCRIPT_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/run_script`;
+export const MEMORY_DUMP_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/memory_dump`;
+export const CANCEL_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/cancel`;
+export const CUSTOM_SCRIPTS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ACTION_ROUTE}/custom_scripts`;
 
 /** Endpoint Actions Routes */
-export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;
 export const ACTION_DETAILS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}`;
 export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}`;
 export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}/download`;
 export const ACTION_STATE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/state`;
+// Route that allows read/update the space id that should be used to display orphaned action
+export const ORPHAN_ACTIONS_SPACE_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/action/_orphan_actions_space`;
+
+/** Scripts Library */
+export const SCRIPTS_LIBRARY_ROUTE = `${BASE_ENDPOINT_ROUTE}/scripts_library`;
+export const SCRIPTS_LIBRARY_ROUTE_ITEM = `${SCRIPTS_LIBRARY_ROUTE}/{script_id}`;
+export const SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE = `${SCRIPTS_LIBRARY_ROUTE_ITEM}/download`;
 
 /** Endpoint Agent Routes */
 export const AGENT_STATUS_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}/agent_status`;

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/discover_app_state_container';
-import type { InternalState } from '@kbn/discover-plugin/public/application/main/state_management/discover_internal_state_container';
+import type {
+  DiscoverInternalState,
+  DiscoverAppState,
+} from '@kbn/discover-plugin/public/application/main/state_management/redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,7 +24,7 @@ export const useDiscoverState = () => {
     const result = state.discover.app;
     return result;
   });
-  const discoverInternalState = useSelector<State, InternalState | undefined>((state) => {
+  const discoverInternalState = useSelector<State, DiscoverInternalState | undefined>((state) => {
     const result = state.discover.internal;
     return result;
   });
@@ -41,7 +43,7 @@ export const useDiscoverState = () => {
   );
 
   const setDiscoverInternalState = useCallback(
-    (newState: InternalState) => {
+    (newState: DiscoverInternalState) => {
       dispatch(updateDiscoverInternalState({ newState }));
     },
     [dispatch]

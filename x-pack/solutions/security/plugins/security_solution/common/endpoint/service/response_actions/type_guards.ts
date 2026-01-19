@@ -17,6 +17,8 @@ import type {
   GetProcessesActionOutputContent,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
+  ResponseActionMemoryDumpOutputContent,
+  ResponseActionMemoryDumpParameters,
 } from '../../types';
 import { RESPONSE_ACTION_AGENT_TYPE, RESPONSE_ACTION_TYPE } from './constants';
 
@@ -56,6 +58,15 @@ export const isRunScriptAction = (
   ResponseActionRunScriptParameters
 > => {
   return action.command === 'runscript';
+};
+
+export const isMemoryDumpAction = (
+  action: MaybeImmutable<SomeObjectWithCommand>
+): action is ActionDetails<
+  ResponseActionMemoryDumpOutputContent,
+  ResponseActionMemoryDumpParameters
+> => {
+  return action.command === 'memory-dump';
 };
 
 // type guards to ensure only the matching string values are attached to the types filter type

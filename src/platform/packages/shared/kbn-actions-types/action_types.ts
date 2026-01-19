@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
+
+export enum ACTION_TYPE_SOURCES {
+  spec = 'spec',
+  yml = 'yml',
+  stack = 'stack',
+}
+export type ActionTypeSource = keyof typeof ACTION_TYPE_SOURCES;
 
 export enum SUB_FEATURE {
   endpointSecurity,
@@ -23,5 +30,8 @@ export interface ActionType {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
+  source?: ActionTypeSource;
   subFeature?: SubFeature;
+  isDeprecated: boolean;
+  allowMultipleSystemActions?: boolean;
 }

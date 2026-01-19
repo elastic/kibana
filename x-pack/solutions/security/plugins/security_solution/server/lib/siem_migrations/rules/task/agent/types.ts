@@ -6,18 +6,40 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { Runnable, RunnableConfig } from '@langchain/core/runnables';
+import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
+import type { AIMessageChunk } from '@langchain/core/messages';
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base';
 import type { RuleMigrationsRetriever } from '../retrievers';
-import type { ChatModel } from '../util/actions_client_chat';
-import type { migrateRuleState } from './state';
+import type { EsqlKnowledgeBase } from '../../../common/task/util/esql_knowledge_base';
+import type { ChatModel } from '../../../common/task/util/actions_client_chat';
+import type { migrateRuleConfigSchema, migrateRuleState } from './state';
+import type { RuleMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
+import type { RulesMigrationTools } from './tools';
 
 export type MigrateRuleState = typeof migrateRuleState.State;
-export type GraphNode = (state: MigrateRuleState) => Promise<Partial<MigrateRuleState>>;
+export type MigrateRuleConfigSchema = (typeof migrateRuleConfigSchema)['State'];
+export type MigrateRuleConfig = RunnableConfig<MigrateRuleConfigSchema>;
+export type GraphNode = (
+  state: MigrateRuleState,
+  config: MigrateRuleConfig
+) => Promise<Partial<MigrateRuleState>>;
+
+export interface RuleMigrationAgentRunOptions {
+  skipPrebuiltRulesMatching: boolean;
+}
+
+export type ModelWithTools = Runnable<
+  BaseLanguageModelInput,
+  AIMessageChunk,
+  InferenceChatModelCallOptions
+>;
 
 export interface MigrateRuleGraphParams {
-  inferenceClient: InferenceClient;
+  esqlKnowledgeBase: EsqlKnowledgeBase;
   model: ChatModel;
-  connectorId: string;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   logger: Logger;
+  telemetryClient: RuleMigrationTelemetryClient;
+  tools: RulesMigrationTools;
 }

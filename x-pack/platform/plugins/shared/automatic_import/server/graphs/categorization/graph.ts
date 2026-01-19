@@ -7,7 +7,7 @@
 
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
-import { SamplesFormat } from '../../../common';
+import type { SamplesFormat } from '../../../common';
 import type { CategorizationState } from '../../types';
 import { handleValidatePipeline } from '../../util/graph';
 import { prefixSamples } from '../../util/samples';
@@ -208,7 +208,7 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
     .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
     .addEdge('modelInput', 'handleValidatePipeline')
-    .addEdge('handleCategorization', 'handleValidatePipeline')
+    .addEdge('handleCategorization', 'handleCategorizationValidation')
     .addEdge('handleInvalidCategorization', 'handleValidatePipeline')
     .addEdge('handleErrors', 'handleValidatePipeline')
     .addEdge('handleReview', 'handleValidatePipeline')

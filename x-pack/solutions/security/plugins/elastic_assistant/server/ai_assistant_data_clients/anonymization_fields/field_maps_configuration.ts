@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldMap } from '@kbn/data-stream-adapter';
+import type { FieldMap } from '@kbn/data-stream-adapter';
 
 export const assistantAnonymizationFieldsFieldMap: FieldMap = {
   '@timestamp': {

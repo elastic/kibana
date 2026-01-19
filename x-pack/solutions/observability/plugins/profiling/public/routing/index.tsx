@@ -103,6 +103,7 @@ const routes = {
                 topNType: t.union([
                   t.literal(TopNType.Containers),
                   t.literal(TopNType.Deployments),
+                  t.literal(TopNType.Executables),
                   t.literal(TopNType.Hosts),
                   t.literal(TopNType.Threads),
                   t.literal(TopNType.Traces),
@@ -124,20 +125,13 @@ const routes = {
             },
           },
           '/stacktraces': {
-            element: <RedirectTo pathname="/stacktraces/threads" />,
+            element: <RedirectTo pathname="/stacktraces/executables" />,
           },
           '/flamegraphs': {
             element: (
-              <RouteBreadcrumb
-                title={i18n.translate('xpack.profiling.breadcrumb.flamegraphs', {
-                  defaultMessage: 'Flamegraphs',
-                })}
-                href="/flamegraphs/flamegraph"
-              >
-                <FlameGraphsView>
-                  <Outlet />
-                </FlameGraphsView>
-              </RouteBreadcrumb>
+              <FlameGraphsView>
+                <Outlet />
+              </FlameGraphsView>
             ),
             children: {
               '/flamegraphs/flamegraph': {
@@ -204,16 +198,9 @@ const routes = {
           },
           '/functions': {
             element: (
-              <RouteBreadcrumb
-                title={i18n.translate('xpack.profiling.breadcrumb.functions', {
-                  defaultMessage: 'Functions',
-                })}
-                href="/functions/topn"
-              >
-                <FunctionsView>
-                  <Outlet />
-                </FunctionsView>
-              </RouteBreadcrumb>
+              <FunctionsView>
+                <Outlet />
+              </FunctionsView>
             ),
             params: t.type({
               query: t.type({
@@ -232,7 +219,7 @@ const routes = {
                 element: (
                   <RouteBreadcrumb
                     title={i18n.translate('xpack.profiling.breadcrumb.topnFunctions', {
-                      defaultMessage: 'Top N',
+                      defaultMessage: 'TopN functions',
                     })}
                     href="/functions/topn"
                   >
@@ -240,14 +227,14 @@ const routes = {
                   </RouteBreadcrumb>
                 ),
                 params: t.type({
-                  query: t.partial({ pageIndex: toNumberRt }),
+                  query: t.partial({ pageIndex: toNumberRt, searchFunctionName: t.string }),
                 }),
               },
               '/functions/differential': {
                 element: (
                   <RouteBreadcrumb
                     title={i18n.translate('xpack.profiling.breadcrumb.differentialFunctions', {
-                      defaultMessage: 'Differential Top N',
+                      defaultMessage: 'Differential topN functions',
                     })}
                     href="/functions/differential"
                   >
@@ -271,6 +258,7 @@ const routes = {
                       baseline: toNumberRt,
                       comparison: toNumberRt,
                       pageIndex: toNumberRt,
+                      searchFunctionName: t.string,
                     }),
                   ]),
                 }),

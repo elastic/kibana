@@ -31,6 +31,7 @@ import {
   EuiText,
   EuiAccordion,
   EuiCode,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -62,23 +63,24 @@ import { OutputFormLogstashSection } from './output_form_logstash';
 import { OutputFormElasticsearchSection } from './output_form_elasticsearch';
 
 export interface EditOutputFlyoutProps {
-  defaultOuput?: Output;
+  defaultOutput?: Output;
   output?: Output;
   onClose: () => void;
   proxies: FleetProxy[];
 }
 
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
-  defaultOuput,
+  defaultOutput,
   onClose,
   output,
   proxies,
 }) => {
   useBreadcrumbs('settings');
-  const form = useOutputForm(onClose, output, defaultOuput);
+  const form = useOutputForm(onClose, output, defaultOutput);
   const inputs = form.inputs;
   const { docLinks, cloud } = useStartServices();
   const fleetStatus = useFleetStatus();
+  const isServerless = !!cloud?.isServerlessEnabled;
 
   const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
     'disabled'
@@ -133,7 +135,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderElasticsearchSection = () => {
-    return <OutputFormElasticsearchSection inputs={inputs} />;
+    return (
+      <OutputFormElasticsearchSection
+        inputs={inputs}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+      />
+    );
   };
 
   const renderRemoteElasticsearchSection = () => {
@@ -183,47 +191,60 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             defaultMessage:
               'This output type does not support connectivity to a remote Elasticsearch cluster, please use the Remote Elasticsearch type for that.',
           });
+        case outputType.RemoteElasticsearch:
+          return i18n.translate('xpack.fleet.settings.editOutputFlyout.remoteESOutputTypeCallout', {
+            defaultMessage:
+              'Remote Elasticsearch output does not support connectivity to a serverless project.',
+          });
       }
     };
-    return isRemoteESOutput ? (
+    return (
       <>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.remoteESTypeText"
-            defaultMessage="Enter your output hosts, service token for your remote cluster, and any advanced YAML configuration. Learn more about how to use these parameters in {doc}."
-            values={{
-              doc: (
-                <EuiLink href={docLinks.links.fleet.remoteESOoutput} target="_blank">
-                  {i18n.translate('xpack.fleet.settings.editOutputFlyout.docLabel', {
-                    defaultMessage: 'our documentation',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-      </>
-    ) : (
-      <>
-        <EuiSpacer size="xs" />
-        <EuiCallOut
-          data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
-          title={generateWarningMessage()}
-          iconType="alert"
-          color="warning"
-          size="s"
-          heading="p"
-        />
+        {!isServerless ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiCallOut
+              announceOnMount
+              data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
+              title={generateWarningMessage()}
+              iconType="alert"
+              color="warning"
+              size="s"
+              heading="p"
+            />
+          </>
+        ) : null}
+        {isRemoteESOutput ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.remoteESTypeText"
+                defaultMessage="Enter your output hosts, service token for your remote cluster, and any advanced YAML configuration. Learn more about how to use these parameters in {doc}."
+                values={{
+                  doc: (
+                    <EuiLink href={docLinks.links.fleet.remoteESOoutput} target="_blank">
+                      {i18n.translate('xpack.fleet.settings.editOutputFlyout.docLabel', {
+                        defaultMessage: 'our documentation',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+          </>
+        ) : null}
       </>
     );
   };
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
-          <h2 id="FleetEditOutputFlyoutTitle">
+          <h2 id={modalTitleId}>
             {!output ? (
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.createTitle"
@@ -242,6 +263,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         {output?.is_preconfigured && (
           <>
             <EuiCallOut
+              announceOnMount
               iconType="lock"
               title={
                 <FormattedMessage
@@ -443,6 +465,45 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               </EuiFormRow>
             </>
           )}
+          {(isESOutput || isRemoteESOutput) && (
+            <EuiFormRow
+              helpText={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.writeToStreamsHelpText"
+                  defaultMessage="When enabled, agents will be granted additional permissions to write data to {streamsLink}. To learn more, refer to the {learnMore} documentation."
+                  values={{
+                    streamsLink: (
+                      <EuiLink href={docLinks.links.observability.logsStreams} target="_blank">
+                        <FormattedMessage
+                          id="xpack.fleet.settings.editOutputFlyout.streamsLink"
+                          defaultMessage="Streams"
+                        />
+                      </EuiLink>
+                    ),
+                    learnMore: (
+                      <EuiLink href={docLinks.links.observability.wiredStreams} target="_blank">
+                        <FormattedMessage
+                          id="xpack.fleet.settings.editOutputFlyout.learnMore"
+                          defaultMessage="wired streams"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
+            >
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.writeToStreamsLabel"
+                    defaultMessage="Allow agents to write to Streams"
+                  />
+                }
+                checked={inputs.writeToStreams.value}
+                onChange={(e) => inputs.writeToStreams.setValue(e.target.checked)}
+              />
+            </EuiFormRow>
+          )}
           {supportsPresets &&
             outputYmlIncludesReservedPerformanceKey(
               inputs.additionalYamlConfigInput.value,
@@ -451,6 +512,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
+                  announceOnMount
                   color="warning"
                   iconType="alert"
                   size="s"

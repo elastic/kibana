@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { parseBadgeStatus } from '../monitor_test_result/status_badge';
 import { JourneyStepScreenshotContainer } from './journey_step_screenshot_container';
-import { ScreenshotImageSize } from './screenshot_size';
+import type { ScreenshotImageSize } from './screenshot_size';
 
 export const JourneyLastScreenshot = ({
   checkGroupId,

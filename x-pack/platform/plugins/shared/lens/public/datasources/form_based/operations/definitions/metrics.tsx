@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   AVG_ID,
@@ -24,7 +23,18 @@ import {
   SUM_ID,
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
-import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
+import type {
+  AvgIndexPatternColumn,
+  BaseIndexPatternColumn,
+  MaxIndexPatternColumn,
+  MedianIndexPatternColumn,
+  MetricColumn,
+  MinIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
+  SumIndexPatternColumn,
+} from '@kbn/lens-common';
+import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -32,23 +42,10 @@ import {
   getFilter,
   isColumnOfType,
 } from './helpers';
-import {
-  FieldBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-  ValueFormatConfig,
-} from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
-
-type MetricColumn<T> = FieldBasedIndexPatternColumn & {
-  operationType: T;
-  params?: {
-    emptyAsNull?: boolean;
-    format?: ValueFormatConfig;
-  };
-};
 
 const typeToFn: Record<string, string> = {
   min: 'aggMin',
@@ -57,6 +54,15 @@ const typeToFn: Record<string, string> = {
   sum: 'aggSum',
   median: 'aggMedian',
   standard_deviation: 'aggStdDeviation',
+};
+
+const typeToESQLFn: Record<string, string> = {
+  min: 'MIN',
+  max: 'MAX',
+  average: 'AVG',
+  sum: 'SUM',
+  median: 'MEDIAN',
+  standard_deviation: 'MEDIAN_ABSOLUTE_DEVIATION',
 };
 
 const supportedTypes = ['number', 'histogram'];
@@ -150,7 +156,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         operationType: type,
         sourceField: field.name,
         isBucketed: false,
-        scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,
@@ -172,12 +177,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    getAdvancedOptions: ({
-      layer,
-      columnId,
-      currentColumn,
-      paramEditorUpdater,
-    }: ParamEditorProps<T>) => {
+    getAdvancedOptions: ({ layer, columnId, currentColumn, paramEditorUpdater, euiTheme }) => {
       if (!hideZeroOption) return [];
       return [
         {
@@ -193,7 +193,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
               }
               labelProps={{
                 style: {
-                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                  fontWeight: euiTheme.font.weight.medium,
                 },
               }}
               checked={Boolean(currentColumn.params?.emptyAsNull)}
@@ -212,6 +212,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           ),
         },
       ];
+    },
+    toESQL: (column, columnId, _indexPattern, layer) => {
+      if (column.timeShift) return;
+      if (!typeToESQLFn[type]) return;
+      return `${typeToESQLFn[type]}(${sanitazeESQLInput(column.sourceField)})`;
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {
@@ -243,13 +248,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     shiftable: true,
   } as OperationDefinition<T, 'field', {}, true>;
 }
-
-export type SumIndexPatternColumn = MetricColumn<'sum'>;
-export type AvgIndexPatternColumn = MetricColumn<'average'>;
-export type StandardDeviationIndexPatternColumn = MetricColumn<'standard_deviation'>;
-export type MinIndexPatternColumn = MetricColumn<'min'>;
-export type MaxIndexPatternColumn = MetricColumn<'max'>;
-export type MedianIndexPatternColumn = MetricColumn<'median'>;
 
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
   type: MIN_ID,

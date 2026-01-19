@@ -218,6 +218,7 @@ describe('Risk Scoring Task', () => {
         _meta: {
           mappingsVersion: 1,
         },
+        enableResetToZero: true,
       });
       mockIsCancelled = jest.fn().mockReturnValue(false);
 
@@ -230,6 +231,12 @@ describe('Risk Scoring Task', () => {
           after_keys: {},
           scores_written: 0,
           errors: [],
+          entities: {
+            host: [],
+            user: [],
+            service: [],
+            generic: [],
+          },
         });
       });
 
@@ -254,11 +261,23 @@ describe('Risk Scoring Task', () => {
             after_keys: { host: { 'host.name': 'value' } },
             scores_written: 5,
             errors: [],
+            entities: {
+              host: [],
+              user: [],
+              service: [],
+              generic: [],
+            },
           })
           .mockResolvedValueOnce({
             after_keys: {},
             scores_written: 5,
             errors: [],
+            entities: {
+              host: [],
+              user: [],
+              service: [],
+              generic: [],
+            },
           });
       });
 
@@ -304,6 +323,7 @@ describe('Risk Scoring Task', () => {
           _meta: {
             mappingsVersion: 1,
           },
+          enableResetToZero: true,
         });
         await runTask({
           getRiskScoreService,
@@ -344,18 +364,43 @@ describe('Risk Scoring Task', () => {
             _meta: {
               mappingsVersion: 1,
             },
+            enableResetToZero: true,
           });
           // add additional mock responses for the additional identifier calls
           mockRiskScoreService.calculateAndPersistScores
             .mockResolvedValueOnce({
+              // first call - host entity type
               after_keys: { host: { 'user.name': 'value' } },
               scores_written: 5,
               errors: [],
-            })
+              entities: {
+                host: [],
+                user: [],
+                service: [],
+                generic: [],
+              },
+            }) // second call - user entity type
             .mockResolvedValueOnce({
               after_keys: {},
               scores_written: 5,
               errors: [],
+              entities: {
+                host: [],
+                user: [],
+                service: [],
+                generic: [],
+              },
+            }) // third call - service entity type
+            .mockResolvedValueOnce({
+              after_keys: {},
+              scores_written: 5,
+              errors: [],
+              entities: {
+                host: [],
+                user: [],
+                service: [],
+                generic: [],
+              },
             });
         });
 
@@ -369,7 +414,7 @@ describe('Risk Scoring Task', () => {
             entityAnalyticsConfig,
             experimentalFeatures: mockExperimentalFeatures,
           });
-          expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(4);
+          expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(5);
 
           expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -421,6 +466,7 @@ describe('Risk Scoring Task', () => {
             _meta: {
               mappingsVersion: 1,
             },
+            enableResetToZero: true,
           });
           await runTask({
             getRiskScoreService,

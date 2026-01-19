@@ -6,7 +6,8 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
@@ -28,10 +29,9 @@ import {
   EuiLink,
   EuiSplitPanel,
 } from '@elastic/eui';
-import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
+import { css } from '@emotion/react';
+import type { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
 import { RecurrenceScheduler } from './recurrence_scheduler';
-
-import './scheduler.scss';
 
 interface PanelOpts {
   onSaveSchedule: (sched: SnoozeSchedule) => void;
@@ -55,6 +55,14 @@ const useDefaultTimzezone = () => {
   if (!kibanaTz || kibanaTz === 'Browser') return moment.tz?.guess() ?? 'UTC';
   return kibanaTz;
 };
+
+const ruleSnoozeSchedulerPseudoFocusCss = css`
+  &:not(:focus) {
+    background-image: linear-gradient(to top, #07c, #07c 2px, transparent 2px, transparent 100%);
+    background-size: 100% 100%;
+    outline: none;
+  }
+`;
 
 export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
   onClose,
@@ -313,6 +321,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
                 preventOpenOnFocus
                 showTimeSelect
                 className={selectingEndDate && !endDT ? 'RuleSnoozeScheduler__pseudofocus' : ''}
+                css={ruleSnoozeSchedulerPseudoFocusCss}
                 onFocus={onFocusEnd}
                 selected={endDT}
                 onChange={setEndDT}

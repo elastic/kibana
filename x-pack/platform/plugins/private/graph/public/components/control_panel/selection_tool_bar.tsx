@@ -8,7 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { ControlType, Workspace } from '../../types';
+import { css } from '@emotion/react';
+import type { ControlType, Workspace } from '../../types';
 
 interface SelectionToolBarProps {
   workspace: Workspace;
@@ -66,11 +67,14 @@ export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarPr
 
   return (
     <EuiFlexGroup
-      className="vertexSelectionTypesBar"
       justifyContent="flexStart"
       gutterSize="s"
       alignItems="center"
       responsive={false}
+      css={css`
+        margin-top: 0;
+        margin-bottom: 0;
+      `}
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip content={selectAllButtonMsg}>

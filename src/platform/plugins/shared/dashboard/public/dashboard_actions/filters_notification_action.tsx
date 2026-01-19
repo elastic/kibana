@@ -8,13 +8,11 @@
  */
 
 import React from 'react';
-import { merge } from 'rxjs';
+import { map, merge } from 'rxjs';
 
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import {
-  apiPublishesPartialUnifiedSearch,
-  apiHasUniqueId,
+import type {
   EmbeddableApiContext,
   HasParentApi,
   HasUniqueId,
@@ -23,7 +21,9 @@ import {
   CanLockHoverActions,
   CanAccessViewMode,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { apiPublishesPartialUnifiedSearch, apiHasUniqueId } from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
@@ -87,14 +87,11 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
     return apiPublishesPartialUnifiedSearch(embeddable);
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: FiltersNotificationAction) => void
-  ) {
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return;
     return merge(
       ...[embeddable.query$, embeddable.filters$].filter((value) => Boolean(value))
-    ).subscribe(() => onChange(compatibilityCheck(embeddable), this));
+    ).pipe(map(() => undefined));
   }
 
   public execute = async () => {};

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -31,7 +31,7 @@ export const useFavorites = ({ enabled = true }: { enabled?: boolean } = { enabl
   return useQuery(
     favoritesKeys.byType(favoritesClient?.getFavoriteType() ?? 'never'),
     () => favoritesClient!.getFavorites(),
-    { enabled }
+    { enabled, staleTime: 5 * 60 * 1000 }
   );
 };
 

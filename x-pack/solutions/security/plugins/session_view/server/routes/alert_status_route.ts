@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   AlertsClient,
@@ -28,15 +28,15 @@ export const registerAlertStatusRoute = (
     .get({
       access: 'internal',
       path: ALERT_STATUS_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            requiredPrivileges: ['securitySolution'],
-          },
-        },
         validate: {
           request: {
             query: schema.object({

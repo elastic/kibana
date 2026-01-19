@@ -8,72 +8,71 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
 import {
-  createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
-  StateContainer,
-  withNotifyOnErrors,
+  syncState,
+  type IKbnUrlStateStorage,
+  type INullableBaseStateContainer,
 } from '@kbn/kibana-utils-plugin/public';
-import {
+import type {
   DataPublicPluginStart,
-  noSearchSessionStorageCapabilityMessage,
+  GlobalQueryStateFromUrl,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
-import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
+import {
+  connectToQueryState,
+  noSearchSessionStorageCapabilityMessage,
+} from '@kbn/data-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { merge } from 'rxjs';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
-import {
-  AggregateQuery,
-  isOfAggregateQueryType,
-  isOfQueryType,
-  Query,
-  TimeRange,
-} from '@kbn/es-query';
-import { isFunction } from 'lodash';
-import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
-import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
+import type { Observable } from 'rxjs';
+import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
+import { FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
+import { isEqual } from 'lodash';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { DiscoverServices } from '../../..';
 import { FetchStatus } from '../../types';
 import { changeDataView } from './utils/change_data_view';
 import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
-import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
-import { DiscoverSearchSessionManager } from './discover_search_session';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
-import {
-  DiscoverAppState,
-  DiscoverAppStateContainer,
-  getDiscoverAppStateContainer,
-} from './discover_app_state_container';
-import {
-  DiscoverInternalStateContainer,
-  getInternalStateContainer,
-} from './discover_internal_state_container';
-import { DiscoverServices } from '../../../build_services';
-import {
-  getDefaultAppState,
-  getSavedSearchContainer,
-  DiscoverSavedSearchContainer,
-} from './discover_saved_search_container';
+import type { DiscoverDataStateContainer } from './discover_data_state_container';
+import { getDataStateContainer } from './discover_data_state_container';
+import type { DiscoverSearchSessionManager } from './discover_search_session';
+import type { DiscoverAppLocatorParams } from '../../../../common';
+import { APP_STATE_URL_KEY, DISCOVER_APP_LOCATOR } from '../../../../common';
+import type { DiscoverAppState, ReactiveTabRuntimeState } from './redux';
+import { getCurrentUrlState } from './utils/cleanup_url_state';
 import { updateFiltersReferences } from './utils/update_filter_references';
-import {
-  getDiscoverGlobalStateContainer,
-  DiscoverGlobalStateContainer,
-} from './discover_global_state_container';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import {
   createDataViewDataSource,
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
+import type {
+  DiscoverInternalState,
+  InternalStateStore,
+  RuntimeStateManager,
+  TabActionInjector,
+  TabState,
+} from './redux';
+import {
+  createTabActionInjector,
+  internalStateActions,
+  selectTab,
+  selectTabRuntimeState,
+  selectIsDataViewUsedInMultipleRuntimeTabStates,
+} from './redux';
+import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
+import { getSavedSearchContainer } from './discover_saved_search_container';
+import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
 
 export interface DiscoverStateContainerParams {
   /**
-   * Browser history
+   * The ID of the tab associated with this state container
    */
-  history: History;
+  tabId: string;
   /**
    * The current savedSearch
    */
@@ -87,39 +86,28 @@ export interface DiscoverStateContainerParams {
    */
   customizationContext: DiscoverCustomizationContext;
   /**
-   * a custom url state storage
+   * URL state storage
    */
-  stateStorageContainer?: IKbnUrlStateStorage;
-}
-
-export interface LoadParams {
+  stateStorageContainer: IKbnUrlStateStorage;
   /**
-   * the id of the saved search to load, if undefined, a new saved search will be created
+   * Internal shared state that's used at several places in the UI
    */
-  savedSearchId?: string;
+  internalState: InternalStateStore;
   /**
-   * the data view to use, if undefined, the saved search's data view will be used
+   * State manager for runtime state that can't be stored in Redux
    */
-  dataView?: DataView;
+  runtimeStateManager: RuntimeStateManager;
   /**
-   * Custom initial app state for loading a saved search
+   * Manages search sessions and search session URL state
    */
-  initialAppState?: DiscoverAppState;
-  /**
-   * the data view spec to use, if undefined, the saved search's data view will be used
-   */
-  dataViewSpec?: DataViewSpec;
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 export interface DiscoverStateContainer {
   /**
-   * Global State, the _g part of the URL
+   * An observable of the current tab's app state
    */
-  globalState: DiscoverGlobalStateContainer;
-  /**
-   * App state, the _a part of the URL
-   */
-  appState: DiscoverAppStateContainer;
+  appState$: Observable<DiscoverAppState>;
   /**
    * Data fetching related state
    **/
@@ -127,7 +115,24 @@ export interface DiscoverStateContainer {
   /**
    * Internal shared state that's used at several places in the UI
    */
-  internalState: DiscoverInternalStateContainer;
+  internalState: InternalStateStore;
+  /**
+   * @deprecated Do not use, this only exists to support
+   * Timeline which accesses the internal state directly
+   */
+  internalStateActions: typeof internalStateActions;
+  /**
+   * Injects the current tab into a given internalState action
+   */
+  injectCurrentTab: TabActionInjector;
+  /**
+   * Gets the state of the current tab
+   */
+  getCurrentTab: () => TabState;
+  /**
+   * State manager for runtime state that can't be stored in Redux
+   */
+  runtimeStateManager: RuntimeStateManager;
   /**
    * State of saved search, the saved object of Discover
    */
@@ -157,16 +162,11 @@ export interface DiscoverStateContainer {
     /**
      * Initializing state containers and start subscribing to changes triggering e.g. data fetching
      */
-    initializeAndSync: () => () => void;
+    initializeAndSync: () => void;
     /**
-     * Load current list of data views, add them to internal state
+     * Stop syncing the state containers started by initializeAndSync
      */
-    loadDataViewList: () => Promise<void>;
-    /**
-     * Load a saved search by id or create a new one that's not persisted yet
-     * @param LoadParams - optional parameters to load a saved search
-     */
-    loadSavedSearch: (param?: LoadParams) => Promise<SavedSearch | undefined>;
+    stopSyncing: () => void;
     /**
      * Create and select a temporary/adhoc data view by a given index pattern
      * Used by the Data View Picker
@@ -184,29 +184,10 @@ export interface DiscoverStateContainer {
      */
     onDataViewEdited: (dataView: DataView) => Promise<void>;
     /**
-     * Triggered when transitioning from ESQL to Dataview
-     * Clean ups the ES|QL query and moves to the dataview mode
-     */
-    transitionFromESQLToDataView: (dataViewId: string) => void;
-    /**
-     * Triggered when transitioning from ESQL to Dataview
-     * Clean ups the ES|QL query and moves to the dataview mode
-     */
-    transitionFromDataViewToESQL: (dataView: DataView) => void;
-    /**
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
      */
-    onOpenSavedSearch: (savedSearchId: string) => void;
-    /**
-     * Triggered when the unified search bar query is updated
-     * @param payload
-     * @param isUpdate
-     */
-    onUpdateQuery: (
-      payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-      isUpdate?: boolean
-    ) => void;
+    onOpenSavedSearch: (savedSearchId: string) => Promise<void>;
     /**
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
@@ -218,18 +199,10 @@ export interface DiscoverStateContainer {
      */
     setDataView: (dataView: DataView) => void;
     /**
-     * Undo changes made to the saved search, e.g. when the user triggers the "Reset search" button
-     */
-    undoSavedSearchChanges: () => Promise<SavedSearch>;
-    /**
-     * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+     * When editing an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
-    updateAdHocDataViewId: () => Promise<DataView | undefined>;
-    /**
-     * Updates the ES|QL query string
-     */
-    updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+    updateAdHocDataViewId: (editedDataView: DataView) => Promise<DataView | undefined>;
   };
 }
 
@@ -238,77 +211,42 @@ export interface DiscoverStateContainer {
  * Used to sync URL with UI state
  */
 export function getDiscoverStateContainer({
-  history,
+  tabId,
   services,
   customizationContext,
-  stateStorageContainer,
+  stateStorageContainer: stateStorage,
+  internalState,
+  runtimeStateManager,
+  searchSessionManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
-  const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
-  const toasts = services.core.notifications.toasts;
-
-  /**
-   * state storage for state in the URL
-   */
-  const stateStorage =
-    stateStorageContainer ??
-    createKbnUrlStateStorage({
-      useHash: storeInSessionStorage,
-      history,
-      useHashQuery: customizationContext.displayMode !== 'embedded',
-      ...(toasts && withNotifyOnErrors(toasts)),
-    });
-
-  /**
-   * Search session logic
-   */
-  const searchSessionManager = new DiscoverSearchSessionManager({
-    history,
-    session: services.data.search.session,
-  });
-
-  /**
-   * Global State Container, synced with the _g part URL
-   */
-  const globalStateContainer = getDiscoverGlobalStateContainer(stateStorage);
-
-  /**
-   * Internal State Container, state that's not persisted and not part of the URL
-   */
-  const internalStateContainer = getInternalStateContainer();
+  const injectCurrentTab = createTabActionInjector(tabId);
+  const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
   /**
    * Saved Search State Container, the persisted saved object of Discover
    */
   const savedSearchContainer = getSavedSearchContainer({
     services,
-    globalStateContainer,
-    internalStateContainer,
-  });
-
-  /**
-   * App State Container, synced with the _a part URL
-   */
-  const appStateContainer = getDiscoverAppStateContainer({
-    stateStorage,
-    internalStateContainer,
-    savedSearchContainer,
-    services,
+    getCurrentTab,
   });
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      const state = globalStateContainer.get();
+      const state = selectTab(internalState.getState(), tabId).globalState;
       if (state?.refreshInterval && !state.refreshInterval.pause) {
-        await globalStateContainer.set({
-          ...state,
-          refreshInterval: { ...state?.refreshInterval, pause: true },
-        });
+        internalState.dispatch(
+          injectCurrentTab(internalStateActions.updateGlobalState)({
+            globalState: {
+              refreshInterval: { ...state.refreshInterval, pause: true },
+            },
+          })
+        );
       }
     }
   };
 
   const setDataView = (dataView: DataView) => {
-    internalStateContainer.transitions.setDataView(dataView);
+    internalState.dispatch(injectCurrentTab(internalStateActions.setDataView)({ dataView }));
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
@@ -316,31 +254,36 @@ export function getDiscoverStateContainer({
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
-    appStateContainer,
-    internalStateContainer,
-    getSavedSearch: savedSearchContainer.getState,
+    internalState,
+    runtimeStateManager,
+    savedSearchContainer,
     setDataView,
+    injectCurrentTab,
+    getCurrentTab,
   });
 
-  const loadDataViewList = async () => {
-    const dataViewList = await services.dataViews.getIdsWithTitle(true);
-    internalStateContainer.transitions.setSavedDataViews(dataViewList);
-  };
-
   /**
-   * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+   * When editing an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
    */
-  const updateAdHocDataViewId = async () => {
-    const prevDataView = internalStateContainer.getState().dataView;
+  const updateAdHocDataViewId = async (editedDataView: DataView) => {
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
+    const isUsedInMultipleTabs = selectIsDataViewUsedInMultipleRuntimeTabStates(
+      runtimeStateManager,
+      prevDataView.id!
+    );
+
     const nextDataView = await services.dataViews.create({
-      ...prevDataView.toSpec(),
+      ...editedDataView.toSpec(),
       id: uuidv4(),
     });
 
-    services.dataViews.clearInstanceCache(prevDataView.id);
+    if (!isUsedInMultipleTabs) {
+      services.dataViews.clearInstanceCache(prevDataView.id);
+    }
 
     await updateFiltersReferences({
       prevDataView,
@@ -348,17 +291,28 @@ export function getDiscoverStateContainer({
       services,
     });
 
-    internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView);
-
-    if (isDataSourceType(appStateContainer.get().dataSource, DataSourceType.DataView)) {
-      await appStateContainer.replaceUrlState({
-        dataSource: nextDataView.id
-          ? createDataViewDataSource({ dataViewId: nextDataView.id })
-          : undefined,
-      });
+    if (isUsedInMultipleTabs) {
+      internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
+    } else {
+      internalState.dispatch(
+        internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView)
+      );
     }
 
-    const trackingEnabled = Boolean(nextDataView.isPersisted() || savedSearchContainer.getId());
+    if (isDataSourceType(getCurrentTab().appState.dataSource, DataSourceType.DataView)) {
+      await internalState.dispatch(
+        injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+          appState: {
+            dataSource: nextDataView.id
+              ? createDataViewDataSource({ dataViewId: nextDataView.id })
+              : undefined,
+          },
+        })
+      );
+    }
+
+    const { persistedDiscoverSession } = internalState.getState();
+    const trackingEnabled = Boolean(nextDataView.isPersisted() || persistedDiscoverSession?.id);
     services.urlTracker.setTrackingEnabled(trackingEnabled);
 
     return nextDataView;
@@ -366,10 +320,10 @@ export function getDiscoverStateContainer({
 
   const onOpenSavedSearch = async (newSavedSearchId: string) => {
     addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
-    const currentSavedSearch = savedSearchContainer.getState();
-    if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
+    const { persistedDiscoverSession } = internalState.getState();
+    if (persistedDiscoverSession?.id === newSavedSearchId) {
       addLog('[discoverState] undo changes since saved search did not change');
-      await undoSavedSearchChanges();
+      await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
     } else {
       addLog('[discoverState] onOpenSavedSearch open view URL');
       services.locator.navigate({
@@ -378,44 +332,11 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const transitionFromESQLToDataView = (dataViewId: string) => {
-    appStateContainer.update({
-      query: {
-        language: 'kuery',
-        query: '',
-      },
-      columns: [],
-      dataSource: {
-        type: DataSourceType.DataView,
-        dataViewId,
-      },
-    });
-  };
-
-  const transitionFromDataViewToESQL = (dataView: DataView) => {
-    const appState = appStateContainer.get();
-    const { query } = appState;
-    const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, filterQuery);
-
-    appStateContainer.update({
-      query: { esql: queryString },
-      filters: [],
-      dataSource: {
-        type: DataSourceType.Esql,
-      },
-      columns: [],
-    });
-    // clears pinned filters
-    const globalState = globalStateContainer.get();
-    globalStateContainer.set({ ...globalState, filters: [] });
-  };
-
   const onDataViewCreated = async (nextDataView: DataView) => {
     if (!nextDataView.isPersisted()) {
-      internalStateContainer.transitions.appendAdHocDataViews(nextDataView);
+      internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
     } else {
-      await loadDataViewList();
+      await internalState.dispatch(internalStateActions.loadDataViewList());
     }
     if (nextDataView.id) {
       await onChangeDataView(nextDataView);
@@ -429,61 +350,265 @@ export function getDiscoverStateContainer({
       services.dataViews.clearInstanceCache(editedDataView.id);
       setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
     } else {
-      await updateAdHocDataViewId();
+      await updateAdHocDataViewId(editedDataView);
     }
-    loadDataViewList();
+    void internalState.dispatch(internalStateActions.loadDataViewList());
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
     fetchData();
   };
 
-  const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
-    return loadSavedSearchFn(params ?? {}, {
+  const getAppState = (state: DiscoverInternalState): DiscoverAppState => {
+    return selectTab(state, tabId).appState;
+  };
+
+  const appState$ = from(internalState).pipe(
+    map(getAppState),
+    distinctUntilChanged((a, b) => isEqual(a, b)),
+    skip(1)
+  );
+
+  const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
+    get: () => getAppState(internalState.getState()),
+    set: (appState) => {
+      if (!appState) {
+        return;
+      }
+
+      internalState.dispatch(injectCurrentTab(internalStateActions.setAppState)({ appState }));
+    },
+    state$: appState$,
+  };
+
+  const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
+    const tabState = selectTab(state, tabId);
+    const { timeRange: time, refreshInterval, filters } = tabState.globalState;
+
+    return { time, refreshInterval, filters };
+  };
+
+  const globalState$ = from(internalState).pipe(
+    map(getGlobalState),
+    distinctUntilChanged((a, b) => isEqual(a, b)),
+    skip(1)
+  );
+
+  const globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl> = {
+    get: () => getGlobalState(internalState.getState()),
+    set: (state) => {
+      if (!state) {
+        return;
+      }
+
+      const { time: timeRange, refreshInterval, filters } = state;
+
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.setGlobalState)({
+          globalState: {
+            timeRange,
+            refreshInterval,
+            filters,
+          },
+        })
+      );
+    },
+    state$: globalState$,
+  };
+
+  const initializeAndSyncUrlState = () => {
+    const currentSavedSearch = savedSearchContainer.getState();
+
+    addLog('[appState] initialize state and sync with URL', currentSavedSearch);
+
+    // Set the default profile state only if not loading a saved search,
+    // to avoid overwriting saved search state
+    if (!currentSavedSearch.id) {
+      const { breakdownField, columns, rowHeight, hideChart } = getCurrentUrlState(
+        stateStorage,
+        services
+      );
+
+      // Only set default state which is not already set in the URL
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+          resetDefaultProfileState: {
+            columns: columns === undefined,
+            rowHeight: rowHeight === undefined,
+            breakdownField: breakdownField === undefined,
+            hideChart: hideChart === undefined,
+          },
+        })
+      );
+    }
+
+    const { data } = services;
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentDataView = currentDataView$.getValue();
+    const appState = appStateContainer.get();
+    const setDataViewFromSavedSearch =
+      !appState.dataSource ||
+      (isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
+        appState.dataSource.dataViewId !== currentDataView?.id);
+
+    if (setDataViewFromSavedSearch) {
+      // used data view is different from the given by url/state which is invalid
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.updateAppState)({
+          appState: {
+            dataSource: currentDataView?.id
+              ? createDataViewDataSource({ dataViewId: currentDataView.id })
+              : undefined,
+          },
+        })
+      );
+    }
+
+    // syncs `_a` portion of url with query services
+    const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
+      data.query,
       appStateContainer,
-      dataStateContainer,
-      internalStateContainer,
-      savedSearchContainer,
-      globalStateContainer,
-      services,
-      setDataView,
+      {
+        filters: FilterStateStore.APP_STATE,
+        query: true,
+      }
+    );
+
+    const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } = syncState({
+      storageKey: APP_STATE_URL_KEY,
+      stateContainer: appStateContainer,
+      stateStorage,
     });
+
+    // syncs `_g` portion of url with query services
+    const stopSyncingQueryGlobalStateWithStateContainer = connectToQueryState(
+      data.query,
+      globalStateContainer,
+      {
+        refreshInterval: true,
+        time: true,
+        filters: FilterStateStore.GLOBAL_STATE,
+      }
+    );
+
+    // Subscribe to CPS projectRouting changes (global subscription affects all tabs)
+    // When projectRouting changes, mark non-active tabs for refetch and trigger data fetch
+    const cpsProjectRoutingSubscription = services.cps?.cpsManager
+      ?.getProjectRouting$()
+      .subscribe(() => {
+        internalState.dispatch(internalStateActions.markNonActiveTabsForRefetch());
+        addLog('[getDiscoverStateContainer] projectRouting changes triggers data fetching');
+        fetchData();
+      });
+
+    const { start: startSyncingGlobalStateWithUrl, stop: stopSyncingGlobalStateWithUrl } =
+      syncState({
+        storageKey: GLOBAL_STATE_URL_KEY,
+        stateContainer: globalStateContainer,
+        stateStorage,
+      });
+
+    // current state needs to be pushed to url
+    internalState
+      .dispatch(injectCurrentTab(internalStateActions.pushCurrentTabStateToUrl)())
+      .then(() => {
+        startSyncingAppStateWithUrl();
+        startSyncingGlobalStateWithUrl();
+      });
+
+    return () => {
+      stopSyncingQueryAppStateWithStateContainer();
+      stopSyncingQueryGlobalStateWithStateContainer();
+      stopSyncingAppStateWithUrl();
+      stopSyncingGlobalStateWithUrl();
+      cpsProjectRoutingSubscription?.unsubscribe();
+    };
+  };
+
+  const initializeUrlTracking = () => {
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+
+    const subscription = combineLatest([
+      currentDataView$,
+      appState$.pipe(startWith(getAppState(internalState.getState()))),
+    ]).subscribe(([dataView, appState]) => {
+      if (!dataView?.id) {
+        return;
+      }
+
+      const dataViewSupportsTracking =
+        // Disable for ad hoc data views, since they can't be restored after a page refresh
+        dataView.isPersisted() ||
+        // Unless it's a default profile data view, which can be restored on refresh
+        internalState.getState().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
+        // Or we're in ES|QL mode, in which case we don't care about the data view
+        isOfAggregateQueryType(appState.query);
+
+      const { persistedDiscoverSession } = internalState.getState();
+      const trackingEnabled = dataViewSupportsTracking || Boolean(persistedDiscoverSession?.id);
+
+      services.urlTracker.setTrackingEnabled(trackingEnabled);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  };
+
+  let internalStopSyncing = () => {};
+
+  const stopSyncing = () => {
+    internalStopSyncing();
+    internalStopSyncing = () => {};
   };
 
   /**
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
   const initializeAndSync = () => {
-    // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
+    const syncLocallyPersistedTabState = () =>
+      internalState.dispatch(injectCurrentTab(internalStateActions.syncLocallyPersistedTabState)());
+
+    // This needs to be the first thing that's wired up because initializeAndSyncUrlState is pulling the current state from the URL which
     // might change the time filter and thus needs to re-check whether the saved search has changed.
     const timefilerUnsubscribe = merge(
       services.timefilter.getTimeUpdate$(),
       services.timefilter.getRefreshIntervalUpdate$()
     ).subscribe(() => {
       savedSearchContainer.updateTimeRange();
+      syncLocallyPersistedTabState();
     });
 
-    // initialize app state container, syncing with _g and _a part of the URL
-    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
+    // Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
+    const unsubscribeUrlTracking = initializeUrlTracking();
+
+    // initialize syncing with _g and _a part of the URL
+    const unsubscribeUrlState = initializeAndSyncUrlState();
 
     // subscribing to state changes of appStateContainer, triggering data fetching
-    const appStateUnsubscribe = appStateContainer.subscribe(
+    const appStateSubscription = appStateContainer.state$.subscribe(
       buildStateSubscribe({
-        appState: appStateContainer,
         savedSearchState: savedSearchContainer,
         dataState: dataStateContainer,
-        internalState: internalStateContainer,
+        internalState,
+        runtimeStateManager,
         services,
         setDataView,
+        getCurrentTab,
       })
     );
+
+    const savedSearchChangesSubscription = savedSearchContainer
+      .getCurrent$()
+      .subscribe(syncLocallyPersistedTabState);
 
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 
     // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
+      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       savedSearchContainer.update({
-        nextDataView: internalStateContainer.getState().dataView,
-        nextState: appStateContainer.getState(),
+        nextDataView: currentDataView$.getValue(),
+        nextState: getCurrentTab().appState,
         useFilterAndQueryServices: true,
       });
       addLog('[getDiscoverStateContainer] filter changes triggers data fetching');
@@ -492,9 +617,10 @@ export function getDiscoverStateContainer({
 
     services.data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({
-        appStateContainer,
         data: services.data,
-        getSavedSearch: () => savedSearchContainer.getState(),
+        getPersistedDiscoverSession: () => internalState.getState().persistedDiscoverSession,
+        getCurrentTab,
+        getCurrentTabRuntimeState: () => selectTabRuntimeState(runtimeStateManager, tabId),
       }),
       {
         isDisabled: () =>
@@ -507,10 +633,12 @@ export function getDiscoverStateContainer({
       }
     );
 
-    return () => {
+    internalStopSyncing = () => {
+      savedSearchChangesSubscription.unsubscribe();
       unsubscribeData();
-      appStateUnsubscribe();
-      appStateInitAndSyncUnsubscribe();
+      appStateSubscription.unsubscribe();
+      unsubscribeUrlState();
+      unsubscribeUrlTracking();
       filterUnsubscribe.unsubscribe();
       timefilerUnsubscribe.unsubscribe();
     };
@@ -521,63 +649,23 @@ export function getDiscoverStateContainer({
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
     }
-    internalStateContainer.transitions.appendAdHocDataViews(newDataView);
-
+    internalState.dispatch(internalStateActions.appendAdHocDataViews(newDataView));
     await onChangeDataView(newDataView);
     return newDataView;
   };
 
   /**
-   * Triggered when a user submits a query in the search bar
-   */
-  const onUpdateQuery = (
-    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-    isUpdate?: boolean
-  ) => {
-    if (isUpdate === false) {
-      // remove the search session if the given query is not just updated
-      searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-      addLog('[getDiscoverStateContainer] onUpdateQuery triggers data fetching');
-      dataStateContainer.fetch();
-    }
-  };
-
-  /**
    * Function e.g. triggered when user changes data view in the sidebar
    */
-  const onChangeDataView = async (id: string | DataView) => {
-    await changeDataView(id, {
+  const onChangeDataView = async (dataViewId: string | DataView) => {
+    await changeDataView({
+      dataViewId,
       services,
-      internalState: internalStateContainer,
-      appState: appStateContainer,
+      internalState,
+      runtimeStateManager,
+      injectCurrentTab,
+      getCurrentTab,
     });
-  };
-
-  /**
-   * Undo all changes to the current saved search
-   */
-  const undoSavedSearchChanges = async () => {
-    addLog('undoSavedSearchChanges');
-    const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
-    savedSearchContainer.set(nextSavedSearch);
-    restoreStateFromSavedSearch({
-      savedSearch: nextSavedSearch,
-      timefilter: services.timefilter,
-    });
-    const newAppState = getDefaultAppState(nextSavedSearch, services);
-
-    // a saved search can't have global (pinned) filters so we can reset global filters state
-    const globalFilters = globalStateContainer.get()?.filters;
-    if (globalFilters) {
-      await globalStateContainer.set({
-        ...globalStateContainer.get(),
-        filters: [],
-      });
-    }
-
-    internalStateContainer.transitions.resetOnSavedSearchChange();
-    await appStateContainer.replaceUrlState(newAppState);
-    return nextSavedSearch;
   };
 
   const fetchData = (initial: boolean = false) => {
@@ -587,26 +675,13 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const updateESQLQuery = (queryOrUpdater: string | ((prevQuery: string) => string)) => {
-    addLog('updateESQLQuery');
-    const { query: currentQuery } = appStateContainer.getState();
-
-    if (!isOfAggregateQueryType(currentQuery)) {
-      throw new Error(
-        'Cannot update a non-ES|QL query. Make sure this function is only called once in ES|QL mode.'
-      );
-    }
-
-    const queryUpdater = isFunction(queryOrUpdater) ? queryOrUpdater : () => queryOrUpdater;
-    const query = { esql: queryUpdater(currentQuery.esql) };
-
-    appStateContainer.update({ query });
-  };
-
   return {
-    globalState: globalStateContainer,
-    appState: appStateContainer,
-    internalState: internalStateContainer,
+    appState$,
+    internalState,
+    internalStateActions,
+    injectCurrentTab,
+    getCurrentTab,
+    runtimeStateManager,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
     stateStorage,
@@ -614,36 +689,29 @@ export function getDiscoverStateContainer({
     customizationContext,
     actions: {
       initializeAndSync,
+      stopSyncing,
       fetchData,
-      loadDataViewList,
-      loadSavedSearch,
       onChangeDataView,
       createAndAppendAdHocDataView,
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
-      transitionFromESQLToDataView,
-      transitionFromDataViewToESQL,
-      onUpdateQuery,
       setDataView,
-      undoSavedSearchChanges,
       updateAdHocDataViewId,
-      updateESQLQuery,
     },
   };
 }
 
 export function createSearchSessionRestorationDataProvider(deps: {
-  appStateContainer: StateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
-  getSavedSearch: () => SavedSearch;
+  getPersistedDiscoverSession: () => DiscoverSession | undefined;
+  getCurrentTab: () => TabState;
+  getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
 }): SearchSessionInfoProvider {
-  const getSavedSearch = () => deps.getSavedSearch();
   return {
     getName: async () => {
-      const savedSearch = deps.getSavedSearch();
       return (
-        (savedSearch.id && savedSearch.title) ||
+        deps.getPersistedDiscoverSession()?.title ||
         i18n.translate('discover.discoverDefaultSearchSessionName', {
           defaultMessage: 'Discover',
         })
@@ -654,12 +722,10 @@ export function createSearchSessionRestorationDataProvider(deps: {
         id: DISCOVER_APP_LOCATOR,
         initialState: createUrlGeneratorState({
           ...deps,
-          getSavedSearch,
           shouldRestoreSearchSession: false,
         }),
         restoreState: createUrlGeneratorState({
           ...deps,
-          getSavedSearch,
           shouldRestoreSearchSession: true,
         }),
       };
@@ -668,23 +734,25 @@ export function createSearchSessionRestorationDataProvider(deps: {
 }
 
 function createUrlGeneratorState({
-  appStateContainer,
   data,
-  getSavedSearch,
+  getPersistedDiscoverSession,
+  getCurrentTab,
+  getCurrentTabRuntimeState,
   shouldRestoreSearchSession,
 }: {
-  appStateContainer: StateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
-  getSavedSearch: () => SavedSearch;
+  getPersistedDiscoverSession: () => DiscoverSession | undefined;
+  getCurrentTab: () => TabState;
+  getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
   shouldRestoreSearchSession: boolean;
 }): DiscoverAppLocatorParams {
-  const appState = appStateContainer.get();
-  const dataView = getSavedSearch().searchSource.getField('index');
+  const appState = getCurrentTab().appState;
+  const dataView = getCurrentTabRuntimeState().currentDataView$.getValue();
   return {
     filters: data.query.filterManager.getFilters(),
     dataViewId: dataView?.id,
     query: appState.query,
-    savedSearchId: getSavedSearch().id,
+    savedSearchId: getPersistedDiscoverSession()?.id,
     timeRange: shouldRestoreSearchSession
       ? data.query.timefilter.timefilter.getAbsoluteTime()
       : data.query.timefilter.timefilter.getTime(),
@@ -705,5 +773,11 @@ function createUrlGeneratorState({
     hideAggregatedPreview: appState.hideAggregatedPreview,
     breakdownField: appState.breakdownField,
     dataViewSpec: !dataView?.isPersisted() ? dataView?.toMinimalSpec() : undefined,
+    ...(shouldRestoreSearchSession
+      ? {
+          hideChart: appState.hideChart ?? false,
+          sampleSize: appState.sampleSize,
+        }
+      : {}),
   };
 }

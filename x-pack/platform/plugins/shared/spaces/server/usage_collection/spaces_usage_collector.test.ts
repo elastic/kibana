@@ -9,7 +9,8 @@ import * as Rx from 'rxjs';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
-import type { ILicense, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 import type { UsageData } from './spaces_usage_collector';
@@ -164,17 +165,15 @@ describe('with a basic license', () => {
     usageData = await collector.fetch(getMockFetchContext(esClient));
 
     expect(esClient.search).toHaveBeenCalledWith({
-      body: {
-        aggs: {
-          disabledFeatures: {
-            terms: { field: 'space.disabledFeatures', include: ['feature1', 'feature2'], size: 2 },
-          },
-          solution: { terms: { field: 'space.solution', missing: 'unset', size: 5 } },
+      aggs: {
+        disabledFeatures: {
+          terms: { field: 'space.disabledFeatures', include: ['feature1', 'feature2'], size: 2 },
         },
-        query: { term: { type: { value: 'space' } } },
-        size: 0,
-        track_total_hits: true,
+        solution: { terms: { field: 'space.solution', missing: 'unset', size: 5 } },
       },
+      query: { term: { type: { value: 'space' } } },
+      size: 0,
+      track_total_hits: true,
       index: kibanaIndex,
     });
   });

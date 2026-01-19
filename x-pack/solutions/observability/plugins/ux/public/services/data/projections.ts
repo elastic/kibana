@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
@@ -12,7 +12,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_EXIT, TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
-import { SetupUX } from '../../../typings/ui_filters';
+import type { SetupUX } from '../../../typings/ui_filters';
 import { getEsFilter } from './get_es_filter';
 import { rangeQuery } from './range_query';
 
@@ -62,10 +62,8 @@ export function getRumPageLoadTransactionsProjection({
   };
 
   return {
-    body: {
-      query: {
-        bool,
-      },
+    query: {
+      bool,
     },
   };
 }
@@ -103,21 +101,17 @@ export function getRumPageExitTransactionsProjection({
   };
 
   return {
-    body: {
-      query: {
-        bool,
-      },
+    query: {
+      bool,
     },
   };
 }
 
 export interface RumErrorsProjection {
-  body: {
-    query: {
-      bool: {
-        filter: QueryDslQueryContainer[];
-        must_not: QueryDslQueryContainer[];
-      };
+  query: {
+    bool: {
+      filter: QueryDslQueryContainer[];
+      must_not: QueryDslQueryContainer[];
     };
   };
 }
@@ -134,30 +128,28 @@ export function getRumErrorsProjection({
   end: number;
 }): RumErrorsProjection {
   return {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            { term: { [AGENT_NAME]: 'rum-js' } },
-            {
-              terms: {
-                [PROCESSOR_EVENT]: [ProcessorEvent.error],
-              },
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(start, end),
+          { term: { [AGENT_NAME]: 'rum-js' } },
+          {
+            terms: {
+              [PROCESSOR_EVENT]: [ProcessorEvent.error],
             },
-            ...getEsFilter(setup.uiFilters),
-            ...(urlQuery
-              ? [
-                  {
-                    wildcard: {
-                      'url.full': `*${urlQuery}*`,
-                    },
+          },
+          ...getEsFilter(setup.uiFilters),
+          ...(urlQuery
+            ? [
+                {
+                  wildcard: {
+                    'url.full': `*${urlQuery}*`,
                   },
-                ]
-              : []),
-          ],
-          must_not: [...getEsFilter(setup.uiFilters, true)],
-        },
+                },
+              ]
+            : []),
+        ],
+        must_not: [...getEsFilter(setup.uiFilters, true)],
       },
     },
   };

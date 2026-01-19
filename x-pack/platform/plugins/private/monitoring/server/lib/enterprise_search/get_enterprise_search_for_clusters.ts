@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TimeRange } from '../../../common/http_api/shared';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { TimeRange } from '../../../common/http_api/shared';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
-import { Cluster, LegacyRequest } from '../../types';
+import type { Cluster, LegacyRequest } from '../../types';
 import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { EnterpriseSearchMetric } from '../metrics';
 import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
@@ -51,15 +51,13 @@ export function getEnterpriseSearchForClusters(
         size: 0,
         ignore_unavailable: true,
         filter_path: entSearchAggFilterPath,
-        body: {
-          query: createEnterpriseSearchQuery({
-            start,
-            end,
-            uuid: clusterUuid,
-            metric: EnterpriseSearchMetric.getMetricFields(),
-          }),
-          aggs: entSearchUuidsAgg(maxBucketSize),
-        },
+        query: createEnterpriseSearchQuery({
+          start,
+          end,
+          uuid: clusterUuid,
+          metric: EnterpriseSearchMetric.getMetricFields(),
+        }),
+        aggs: entSearchUuidsAgg(maxBucketSize),
       };
 
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

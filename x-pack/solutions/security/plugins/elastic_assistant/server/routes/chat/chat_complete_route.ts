@@ -6,35 +6,39 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { Replacements, ConversationResponse } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
   ChatCompleteProps,
   API_VERSIONS,
-  Message,
-  Replacements,
   transformRawData,
   getAnonymizedValue,
-  ConversationResponse,
-  contentReferencesStoreFactory,
+  newContentReferencesStore,
   pruneContentReferences,
+  ChatCompleteRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { v4 as uuidv4 } from 'uuid';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
-import { ElasticAssistantPluginRouter, GetElser } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
-  DEFAULT_PLUGIN_NAME,
   getIsKnowledgeBaseInstalled,
+  getSystemPromptFromPromptId,
+  getSystemPromptFromUserConversation,
   langChainExecute,
   performChecks,
 } from '../helpers';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import type { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { isOpenSourceModel } from '../utils';
+import type { ConfigSchema } from '../../config_schema';
+import type { OnLlmResponse } from '../../lib/langchain/executors/types';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -42,8 +46,10 @@ export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
 
 export const chatCompleteRoute = (
   router: ElasticAssistantPluginRouter,
-  getElser: GetElser
+  config?: ConfigSchema
 ): void => {
+  const RESPONSE_TIMEOUT = config?.responseTimeout as number;
+
   router.versioned
     .post({
       access: 'public',
@@ -54,6 +60,12 @@ export const chatCompleteRoute = (
           requiredPrivileges: ['elasticAssistant'],
         },
       },
+      options: {
+        timeout: {
+          // Add extra time to the timeout to account for the time it takes to process the request
+          idleSocket: RESPONSE_TIMEOUT + 30 * 1000,
+        },
+      },
     })
     .addVersion(
       {
@@ -61,12 +73,14 @@ export const chatCompleteRoute = (
         validate: {
           request: {
             body: buildRouteValidationWithZod(ChatCompleteProps),
+            query: buildRouteValidationWithZod(ChatCompleteRequestQuery),
           },
         },
       },
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const assistantResponse = buildResponse(response);
+        const { content_references_disabled: contentReferencesDisabled } = request.query;
         let telemetry;
         let actionTypeId;
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
@@ -75,10 +89,12 @@ export const chatCompleteRoute = (
           telemetry = ctx.elasticAssistant.telemetry;
           const inference = ctx.elasticAssistant.inference;
           const productDocsAvailable =
-            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable({
+              inferenceId: defaultInferenceEndpoints.ELSER,
+            })) ?? false;
 
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -87,21 +103,16 @@ export const chatCompleteRoute = (
             return checkResponse.response;
           }
 
-          const contentReferencesEnabled =
-            ctx.elasticAssistant.getRegisteredFeatures(
-              DEFAULT_PLUGIN_NAME
-            ).contentReferencesEnabled;
-
           const conversationsDataClient =
-            await ctx.elasticAssistant.getAIAssistantConversationsDataClient({
-              contentReferencesEnabled,
-            });
+            await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const anonymizationFieldsDataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
+          const promptsDataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
+
           let messages;
-          const conversationId = request.body.conversationId;
+          const existingConversationId = request.body.conversationId;
           const connectorId = request.body.connectorId;
 
           let latestReplacements: Replacements = {};
@@ -109,6 +120,7 @@ export const chatCompleteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
+          const threadId = uuidv4();
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -167,11 +179,10 @@ export const chatCompleteRoute = (
           });
 
           let newConversation: ConversationResponse | undefined | null;
-          if (conversationsDataClient && !conversationId && request.body.persist) {
+          if (conversationsDataClient && !existingConversationId && request.body.persist) {
             newConversation = await createConversationWithUserInput({
               actionTypeId,
               connectorId,
-              conversationId,
               conversationsDataClient,
               promptId: request.body.promptId,
               replacements: latestReplacements,
@@ -186,63 +197,104 @@ export const chatCompleteRoute = (
             }));
           }
 
-          const contentReferencesStore =
-            contentReferencesEnabled && contentReferencesStoreFactory();
+          const timeout = new Promise((_, reject) => {
+            setTimeout(() => {
+              reject(
+                new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
+              );
+            }, config?.responseTimeout as number);
+          }) as unknown as IKibanaResponse;
 
-          const onLlmResponse = async (
-            content: string,
-            traceData: Message['traceData'] = {},
-            isError = false
-          ): Promise<void> => {
-            if (newConversation?.id && conversationsDataClient) {
-              const contentReferences =
-                contentReferencesStore && pruneContentReferences(content, contentReferencesStore);
+          // Do not persist conversation messages if `persist = false`
+          const conversationId = request.body.persist
+            ? existingConversationId ?? newConversation?.id
+            : undefined;
+
+          const systemPromptParts: string[] = [];
+
+          if (conversationsDataClient && promptsDataClient && existingConversationId) {
+            const conversationSystemPrompt = await getSystemPromptFromUserConversation({
+              conversationsDataClient,
+              conversationId: existingConversationId,
+              promptsDataClient,
+            });
+
+            if (conversationSystemPrompt) {
+              systemPromptParts.push(conversationSystemPrompt);
+            }
+          }
+
+          if (promptsDataClient && request.body.promptId) {
+            const requestSystemPrompt = await getSystemPromptFromPromptId({
+              promptId: request.body.promptId,
+              promptsDataClient,
+            });
+
+            if (requestSystemPrompt) {
+              systemPromptParts.push(requestSystemPrompt);
+            }
+          }
+
+          const systemPrompt =
+            systemPromptParts.length > 0 ? systemPromptParts.join('\n\n') : undefined;
+
+          const contentReferencesStore = newContentReferencesStore({
+            disabled: contentReferencesDisabled ?? false,
+          });
+
+          const onLlmResponse: OnLlmResponse = async ({
+            content,
+            refusal,
+            traceData = {},
+            isError = false,
+          }): Promise<void> => {
+            if (conversationId && conversationsDataClient) {
+              const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
+                content,
+                contentReferencesStore
+              );
 
               await appendAssistantMessageToConversation({
-                conversationId: newConversation?.id,
+                conversationId,
                 conversationsDataClient,
-                messageContent: content,
+                messageContent: prunedContent,
+                messageRefusal: refusal,
                 replacements: latestReplacements,
                 isError,
                 traceData,
-                contentReferences,
+                contentReferences: prunedContentReferencesStore,
               });
             }
           };
 
-          return await langChainExecute({
-            abortSignal,
-            isStream: request.body.isStream ?? false,
-            actionsClient,
-            actionTypeId,
-            connectorId,
-            isOssModel,
-            conversationId: conversationId ?? newConversation?.id,
-            context: ctx,
-            getElser,
-            logger,
-            inference,
-            messages: messages ?? [],
-            onLlmResponse,
-            onNewReplacements,
-            replacements: latestReplacements,
-            contentReferencesStore,
-            request: {
-              ...request,
-              // TODO: clean up after empty tools will be available to use
-              body: {
-                ...request.body,
-                replacements: {},
-                size: 10,
-                alertsIndexPattern: '.alerts-security.alerts-default',
-              },
-            },
-            response,
-            telemetry,
-            responseLanguage: request.body.responseLanguage,
-            savedObjectsClient,
-            ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
-          });
+          return await Promise.race([
+            langChainExecute({
+              abortSignal,
+              isStream: request.body.isStream ?? false,
+              actionsClient,
+              actionTypeId,
+              connectorId,
+              threadId,
+              isOssModel,
+              conversationId,
+              context: ctx,
+              logger,
+              inference,
+              messages: messages ?? [],
+              onLlmResponse,
+              onNewReplacements,
+              replacements: latestReplacements,
+              contentReferencesStore,
+              request,
+              response,
+              telemetry,
+              responseLanguage: request.body.responseLanguage,
+              savedObjectsClient,
+              systemPrompt,
+              ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+            }),
+            timeout,
+          ]);
         } catch (err) {
           const error = transformError(err as Error);
           const kbDataClient =
@@ -255,6 +307,7 @@ export const chatCompleteRoute = (
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.isStream ?? false,
             isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
+            errorLocation: 'chatCompleteRoute',
           });
           return assistantResponse.error({
             body: error.message,

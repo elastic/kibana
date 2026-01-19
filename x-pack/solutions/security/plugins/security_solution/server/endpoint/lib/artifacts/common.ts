@@ -9,13 +9,15 @@ import type { Logger } from '@kbn/core/server';
 import type { InternalArtifactSchema } from '../../schemas/artifacts';
 
 export const ArtifactConstants = {
-  GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
   /**
    * Saved objects no longer used for storing artifacts
    * @deprecated
    */
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact',
-  SUPPORTED_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
+
+  SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
+  GLOBAL_ENDPOINT_EXCEPTIONS_NAME: 'endpoint-exceptionlist',
+
   SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
   GLOBAL_TRUSTED_APPS_NAME: 'endpoint-trustlist',
 
@@ -27,6 +29,9 @@ export const ArtifactConstants = {
 
   SUPPORTED_BLOCKLISTS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
   GLOBAL_BLOCKLISTS_NAME: 'endpoint-blocklist',
+
+  SUPPORTED_TRUSTED_DEVICES_OPERATING_SYSTEMS: ['macos', 'windows'],
+  GLOBAL_TRUSTED_DEVICES_NAME: 'endpoint-trusteddevicelist',
 };
 
 export const ManifestConstants = {

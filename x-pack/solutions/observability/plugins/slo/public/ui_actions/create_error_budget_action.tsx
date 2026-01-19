@@ -7,18 +7,19 @@
 import { i18n } from '@kbn/i18n';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { SLOPublicPluginsStart } from '..';
+import type { CoreStart } from '@kbn/core/public';
+import type { SLOPublicPluginsStart } from '..';
 import {
   ADD_SLO_ERROR_BUDGET_ACTION_ID,
   SLO_ERROR_BUDGET_ID,
 } from '../embeddable/slo/error_budget/constants';
-import { SLORepositoryClient } from '../types';
+import type { SLORepositoryClient } from '../types';
+import { openSloConfiguration } from '../embeddable/slo/error_budget/error_budget_open_configuration';
 
 export function createAddErrorBudgetPanelAction(
   coreStart: CoreStart,
@@ -36,16 +37,15 @@ export function createAddErrorBudgetPanelAction(
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       try {
-        const { openSloConfiguration } = await import(
-          '../embeddable/slo/error_budget/error_budget_open_configuration'
-        );
         const initialState = await openSloConfiguration(coreStart, pluginsStart, sloClient);
         embeddable.addNewPanel(
           {
             panelType: SLO_ERROR_BUDGET_ID,
-            initialState,
+            serializedState: initialState,
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       } catch (e) {
         return Promise.reject();

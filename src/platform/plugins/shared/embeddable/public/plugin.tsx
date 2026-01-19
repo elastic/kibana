@@ -7,42 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subscription } from 'rxjs';
-import {
+import type { Subscription } from 'rxjs';
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   PublicAppInfo,
 } from '@kbn/core/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { registerTriggers } from './ui_actions/register_triggers';
 import { EmbeddableStateTransfer } from './state_transfer';
-import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
-import {
-  getExtractFunction,
-  getInjectFunction,
-  getMigrateFunction,
-  getTelemetryFunction,
-} from '../common/lib';
-import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
-import { EnhancementsRegistry } from './enhancements/registry';
-import {
+import type {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './types';
+import {
+  registerLegacyURLTransform,
+  hasLegacyURLTransform,
+  getLegacyURLTransform,
+} from './transforms_registry';
+import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private appList?: ReadonlyMap<string, PublicAppInfo>;
   private appListSubscription?: Subscription;
-  private enhancementsRegistry = new EnhancementsRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -52,7 +47,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
-      registerEnhancement: this.enhancementsRegistry.registerEnhancement,
+      registerLegacyURLTransform,
+      transformEnhancementsIn: enhancementsPersistableState.extract,
+      transformEnhancementsOut: enhancementsPersistableState.inject,
     };
   }
 
@@ -67,18 +64,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       this.appList
     );
 
-    const commonContract: CommonEmbeddableStartContract = {
-      getEnhancement: this.enhancementsRegistry.getEnhancement,
-    };
-
-    const getAllMigrationsFn = () =>
-      getAllMigrations(
-        [],
-        this.enhancementsRegistry.getEnhancements(),
-        getMigrateFunction(commonContract)
-      );
-
     const embeddableStart: EmbeddableStart = {
+      getAddFromLibraryComponent: async () => {
+        const { AddFromLibraryFlyout } = await import('./add_from_library/add_from_library_flyout');
+        return AddFromLibraryFlyout;
+      },
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(
@@ -88,13 +78,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
               storage
             )
           : this.stateTransferService,
-      telemetry: getTelemetryFunction(commonContract),
-      extract: getExtractFunction(commonContract),
-      inject: getInjectFunction(commonContract),
-      getAllMigrations: getAllMigrationsFn,
-      migrateToLatest: (state) => {
-        return migrateToLatest(getAllMigrationsFn(), state) as EmbeddableStateWithType;
-      },
+      hasLegacyURLTransform,
+      getLegacyURLTransform,
     };
 
     setKibanaServices(core, embeddableStart, deps);

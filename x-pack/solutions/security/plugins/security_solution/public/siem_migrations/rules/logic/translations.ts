@@ -48,9 +48,16 @@ export const UPDATE_MIGRATION_RULES_FAILURE = i18n.translate(
   }
 );
 
-export const RETRY_FAILED_RULES_FAILURE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.retryFailedRulesFailDescription',
+export const UPDATE_INDEX_PATTERN_SUCCESS = (updated: number) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.rules.updateIndexPatternSuccess', {
+    defaultMessage:
+      '{updated, plural, one {# migration} other {# migrations}} updated successfully.',
+    values: { updated },
+  });
+
+export const UPDATE_INDEX_PATTERN_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.updateIndexPatternFailDescription',
   {
-    defaultMessage: 'Failed to reprocess migration rules',
+    defaultMessage: 'Failed to update index pattern',
   }
 );

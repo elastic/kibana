@@ -6,23 +6,15 @@
  */
 
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
-import type { ProductFeaturesConfigurator } from '@kbn/security-solution-plugin/server/lib/product_features_service/types';
-import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
-import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
-import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
-import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
-import { getTimelineProductFeaturesConfigurator } from './timeline_product_features_config';
-import { getNotesProductFeaturesConfigurator } from './notes_product_features_config';
+import type { SecuritySolutionEssPluginSetupDeps } from '../types';
+import { productFeaturesExtensions } from './product_features_extensions';
 
-export const getProductProductFeaturesConfigurator = (
+export const registerProductFeatures = (
+  pluginsSetup: SecuritySolutionEssPluginSetupDeps,
   enabledProductFeatureKeys: ProductFeatureKeys
-): ProductFeaturesConfigurator => {
-  return {
-    attackDiscovery: getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys),
-    security: getSecurityProductFeaturesConfigurator(enabledProductFeatureKeys),
-    cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
-    securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),
-    timeline: getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys),
-    notes: getNotesProductFeaturesConfigurator(enabledProductFeatureKeys),
-  };
+): void => {
+  pluginsSetup.securitySolution.setProductFeaturesConfigurator({
+    enabledProductFeatureKeys,
+    extensions: productFeaturesExtensions,
+  });
 };

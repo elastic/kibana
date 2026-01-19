@@ -9,7 +9,8 @@
 
 import * as React from 'react';
 import { EuiButton, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { Builder, ESQLSource } from '@kbn/esql-ast';
+import type { ESQLSource } from '@kbn/esql-language';
+import { Builder } from '@kbn/esql-language';
 import { useEsqlInspector } from '../../../../../../context';
 import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_subject';
 import { Source } from './source';
@@ -51,7 +52,7 @@ export const FromCommand: React.FC = () => {
           color="text"
           onClick={() => {
             const length = from.args.length;
-            const source = Builder.expression.source({
+            const source = Builder.expression.source.node({
               index: `source${length + 1}`,
               sourceType: 'index',
             });

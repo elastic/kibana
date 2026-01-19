@@ -72,9 +72,10 @@ export interface PackagePolicyEditExtensionComponentProps {
    */
   onChange: (opts: {
     /** is current form state is valid */
-    isValid: boolean;
+    isValid?: boolean;
     /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: Partial<NewPackagePolicy>;
+    isExtensionLoaded?: boolean;
   }) => void;
 }
 
@@ -167,7 +168,7 @@ export interface PackagePolicyCreateExtensionComponentProps {
    */
   onChange: (opts: {
     /** is current form state is valid */
-    isValid: boolean;
+    isValid?: boolean;
     /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: NewPackagePolicy;
   }) => void;

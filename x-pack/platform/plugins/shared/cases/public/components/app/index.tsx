@@ -39,9 +39,12 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
         getFilesClient,
         owner: [APP_OWNER],
         useFetchAlertData: () => [false, {}],
-        permissions: userCapabilities.generalCasesV2,
+        permissions: userCapabilities.generalCasesV3,
         basePath: '/',
-        features: { alerts: { enabled: true, sync: false } },
+        features: {
+          alerts: { enabled: true, sync: false },
+          observables: { enabled: true, autoExtract: false },
+        },
       })}
     </div>
   );

@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalDeprecationRouter } from '../internal_types';
 import { buildApiDeprecationId } from '../deprecations';
 
@@ -21,6 +21,12 @@ export const registerMarkAsResolvedRoute = (
       path: '/mark_as_resolved',
       options: {
         access: 'internal',
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Core Usage Client',
+        },
       },
       validate: {
         body: schema.object({

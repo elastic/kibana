@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { buildExpression } from '@kbn/expressions-plugin/public';
 import { sampleAreaVis } from './sample_vis.test.mocks';
 
 import { toExpressionAst } from './to_ast';
-import { VisParams } from './types';
+import type { VisParams } from './types';
 
 jest.mock('@kbn/expressions-plugin/public', () => ({
   ...(jest.requireActual('@kbn/expressions-plugin/public') as any),

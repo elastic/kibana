@@ -6,7 +6,7 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { SyntheticsServices } from './services/synthetics_services';
@@ -53,7 +53,7 @@ journeySkip(`TestNowMode`, async ({ page, params }) => {
       }
     });
 
-    await services.cleaUp();
+    await services.cleanUp();
     await services.enableMonitorManagedViaApi();
     await services.addTestMonitor('Test Monitor', {
       type: 'http',
@@ -65,7 +65,7 @@ journeySkip(`TestNowMode`, async ({ page, params }) => {
   });
 
   after(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   step('Go to monitors page', async () => {

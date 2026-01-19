@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
+import type { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const taskMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
@@ -68,6 +68,25 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     priority: {
       type: 'integer',
     },
+    // NO NEED TO BE INDEXED
+    // apiKey: {
+    //   type: 'binary',
+    // },
+    userScope: {
+      properties: {
+        // Indexing apiKeyId to query for mass deletion in the future
+        apiKeyId: {
+          type: 'keyword',
+        },
+        // NO NEED TO BE INDEXED
+        // apiKeyCreatedByUser: {
+        //   type: 'boolean',
+        // },
+        // spaceId: {
+        //   type: 'keyword',
+        // },
+      },
+    },
   },
 };
 
@@ -78,6 +97,18 @@ export const backgroundTaskNodeMapping: SavedObjectsTypeMappingDefinition = {
       type: 'keyword',
     },
     last_seen: {
+      type: 'date',
+    },
+  },
+};
+
+export const apiKeyToInvalidateMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    apiKeyId: {
+      type: 'keyword',
+    },
+    createdAt: {
       type: 'date',
     },
   },

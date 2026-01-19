@@ -8,7 +8,11 @@
  */
 
 import type { FunctionComponent } from 'react';
-import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
+import type {
+  EuiContextMenuItem,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
+} from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -56,4 +60,14 @@ export interface CustomGridColumnProps {
 export type CustomGridColumnsConfiguration = Record<
   string,
   (props: CustomGridColumnProps) => EuiDataGridColumn
+>;
+
+export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
+
+export type CustomBulkActions = Array<
+  Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {
+    onClick: (payload: { selectedDocIds: string[] }) => void;
+    label: React.ReactElement | string;
+    key: string;
+  }
 >;

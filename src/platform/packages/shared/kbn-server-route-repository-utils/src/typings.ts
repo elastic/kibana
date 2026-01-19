@@ -18,11 +18,11 @@ import type {
   RouteMethod,
 } from '@kbn/core/server';
 import type { ServerSentEvent } from '@kbn/sse-utils';
-import { z } from '@kbn/zod';
-import * as t from 'io-ts';
-import { Observable } from 'rxjs';
-import { Readable } from 'stream';
-import { Required, RequiredKeys, ValuesType } from 'utility-types';
+import type { z } from '@kbn/zod';
+import type * as t from 'io-ts';
+import type { Observable } from 'rxjs';
+import type { Readable } from 'stream';
+import type { Required, RequiredKeys, ValuesType } from 'utility-types';
 
 type MaybeOptional<T extends { params?: Record<string, any> }> = RequiredKeys<
   T['params']
@@ -151,7 +151,7 @@ export type CreateServerRouteFactory<
     endpoint: ValidateEndpoint<TEndpoint, TRouteAccess> extends true ? TEndpoint : never;
     handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
     params?: TRouteParamsRT;
-    security?: RouteSecurity;
+    security: RouteSecurity;
   } & Required<
     {
       options?: (TRouteCreateOptions extends DefaultRouteCreateOptions ? TRouteCreateOptions : {}) &
@@ -181,7 +181,7 @@ export type ServerRoute<
 > = {
   endpoint: TEndpoint;
   handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
-  security?: RouteSecurity;
+  security: RouteSecurity;
 } & (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {}) &
   (TRouteCreateOptions extends DefaultRouteCreateOptions ? { options: TRouteCreateOptions } : {});
 

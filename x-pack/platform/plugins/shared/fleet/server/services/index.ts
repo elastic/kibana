@@ -16,6 +16,7 @@ export { getRegistryUrl } from './epm/registry/registry_url';
 
 export interface AgentPolicyServiceInterface {
   create: (typeof agentPolicyService)['create'];
+  createWithPackagePolicies: (typeof agentPolicyService)['createWithPackagePolicies'];
   get: (typeof agentPolicyService)['get'];
   list: (typeof agentPolicyService)['list'];
   delete: (typeof agentPolicyService)['delete'];
@@ -24,6 +25,7 @@ export interface AgentPolicyServiceInterface {
   turnOffAgentTamperProtections: (typeof agentPolicyService)['turnOffAgentTamperProtections'];
   fetchAllAgentPolicyIds: (typeof agentPolicyService)['fetchAllAgentPolicyIds'];
   fetchAllAgentPolicies: (typeof agentPolicyService)['fetchAllAgentPolicies'];
+  deployPolicy: (typeof agentPolicyService)['deployPolicy'];
 }
 
 // Agent services
@@ -38,6 +40,7 @@ export { outputService } from './output';
 export { downloadSourceService } from './download_source';
 export { settingsService };
 export { dataStreamService } from './data_streams';
+export { fleetServerHostService } from './fleet_server_host';
 
 // Plugin services
 export { appContextService } from './app_context';
@@ -61,4 +64,11 @@ export { FleetUsageSender } from './telemetry/fleet_usage_sender';
 
 export { checkAllowedPackages } from './check_allowed_packages';
 
+export { cloudConnectorService } from './cloud_connector';
+export type { CloudConnectorServiceInterface } from './cloud_connector';
+
+export * from './cloud_connectors';
+
 export type { MessageSigningServiceInterface } from './security';
+
+export type { AgentlessPoliciesService } from './agentless/agentless_policies';

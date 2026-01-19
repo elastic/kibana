@@ -7,19 +7,17 @@
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiAccordion,
   EuiButtonEmpty,
-  EuiCheckbox,
   EuiFieldSearch,
   EuiFormRow,
   EuiIconTip,
   EuiPanel,
+  EuiRadioGroup,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce } from 'lodash';
 import type {
   IErrorObject,
   RuleTypeParams,
@@ -30,6 +28,9 @@ import type { TimeUnitChar } from '@kbn/observability-plugin/common/utils/format
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { GenericAggType } from '@kbn/observability-plugin/public';
 import { RuleConditionChart } from '@kbn/observability-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
+import type { NoDataBehavior } from '../../../../common/alerting/metrics';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import {
   useMetricsDataViewContext,
@@ -37,12 +38,10 @@ import {
   withSourceProvider,
 } from '../../../containers/metrics_source';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import type { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
-const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
@@ -64,12 +63,100 @@ const defaultExpression = {
 } as MetricExpression;
 export { defaultExpression };
 
+const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
+  {
+    id: 'recover',
+    label: (
+      <>
+        {i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.recover', {
+          defaultMessage: 'Recover active alerts',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={i18n.translate('xpack.infra.metricThreshold.rule.recoverHelpText', {
+            defaultMessage:
+              "Recover any active alerts when data isn't returned for the specified conditions. New alerts won't be created for the missing data.",
+          })}
+        />
+      </>
+    ),
+  },
+  {
+    id: 'alertOnNoData',
+    label: (
+      <>
+        {i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.alertOnNoData', {
+          defaultMessage: 'Alert me about the missing data',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={
+            hasGroupBy
+              ? i18n.translate('xpack.infra.metricThreshold.rule.groupDisappearHelpText', {
+                  defaultMessage:
+                    'Get a "no data" alert when a previously detected group stops returning data. This option is not suitable for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                })
+              : i18n.translate('xpack.infra.metricThreshold.rule.noDataHelpText', {
+                  defaultMessage:
+                    'Get a "no data" alert when data isn\'t returned during the rule execution period or if the rule does not successfully query Elasticsearch.',
+                })
+          }
+        />
+      </>
+    ),
+  },
+  {
+    id: 'remainActive',
+    label: (
+      <>
+        {i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.remainActive', {
+          defaultMessage: 'Do nothing',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={i18n.translate('xpack.infra.metricThreshold.rule.remainActiveHelpText', {
+            defaultMessage:
+              'Keep active alerts in their current state, and do not create new alerts for the missing data.',
+          })}
+        />
+      </>
+    ),
+  },
+];
+
+export const getNoDataBehaviorValue = (
+  ruleParams: AlertParams,
+  hasGroupBy: boolean
+): NoDataBehavior => {
+  if (ruleParams.noDataBehavior) {
+    return ruleParams.noDataBehavior;
+  }
+
+  // Derive from legacy params for backwards compatibility
+  if (hasGroupBy) {
+    return ruleParams.alertOnGroupDisappear ? 'alertOnNoData' : 'recover';
+  }
+
+  return ruleParams.alertOnNoData ? 'alertOnNoData' : 'recover';
+};
+
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { source } = useSourceContext();
   const { metricsView } = useMetricsDataViewContext();
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
+
+  const hasGroupBy = useMemo(
+    () => Boolean(ruleParams.groupBy && ruleParams.groupBy.length > 0),
+    [ruleParams.groupBy]
+  );
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -113,12 +200,14 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const onFilterChange = useCallback(
-    (filter: any) => {
-      setRuleParams('filterQueryText', filter);
+    (payload: { query?: Query }) => {
+      const kuery = payload.query?.query as string;
+
+      setRuleParams('filterQueryText', kuery);
       try {
         setRuleParams(
           'filterQuery',
-          convertKueryToElasticSearchQuery(filter, metricsView?.dataViewReference, false) || ''
+          convertKueryToElasticSearchQuery(kuery, metricsView?.dataViewReference, false) || ''
         );
       } catch (e) {
         setRuleParams('filterQuery', QUERY_INVALID);
@@ -126,11 +215,6 @@ export const Expressions: React.FC<Props> = (props) => {
     },
     [setRuleParams, metricsView?.dataViewReference]
   );
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
-    onFilterChange,
-  ]);
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
@@ -243,27 +327,15 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('sourceId', source?.id || 'default');
     }
 
-    if (typeof ruleParams.alertOnNoData === 'undefined') {
-      setRuleParams('alertOnNoData', true);
-    }
-    if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
-      setRuleParams('alertOnGroupDisappear', false);
+    if (typeof ruleParams.noDataBehavior === 'undefined') {
+      setRuleParams('noDataBehavior', 'recover');
     }
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
+    (e: ChangeEvent<HTMLInputElement>) =>
+      onFilterChange({ query: { query: e.target.value, language: 'kuery' } }),
     [onFilterChange]
-  );
-
-  const hasGroupBy = useMemo(
-    () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
-    [ruleParams.groupBy]
-  );
-
-  const disableNoData = useMemo(
-    () => ruleParams.criteria?.every((c) => c.aggType === Aggregators.COUNT),
-    [ruleParams.criteria]
   );
 
   return (
@@ -310,6 +382,7 @@ export const Expressions: React.FC<Props> = (props) => {
               <RuleConditionChart
                 metricExpression={{
                   metrics: metricExpression,
+                  equation: e.equation,
                   threshold: e.threshold,
                   comparator: e.comparator,
                   timeSize,
@@ -346,6 +419,9 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size="m" />
       <div>
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.infra.expressions.addconditionButton.ariaLabel', {
+            defaultMessage: 'Add condition',
+          })}
           data-test-subj="infraExpressionsAddConditionButton"
           color="primary"
           iconSide="left"
@@ -359,41 +435,6 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         </EuiButtonEmpty>
       </div>
-
-      <EuiSpacer size="m" />
-      <EuiAccordion
-        id="advanced-options-accordion"
-        buttonContent={i18n.translate('xpack.infra.metrics.alertFlyout.advancedOptions', {
-          defaultMessage: 'Advanced options',
-        })}
-      >
-        <EuiPanel color="subdued">
-          <EuiCheckbox
-            disabled={disableNoData}
-            id="metrics-alert-no-data-toggle"
-            label={
-              <>
-                {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
-                  defaultMessage: "Alert me if there's no data",
-                })}{' '}
-                <EuiIconTip
-                  type="questionInCircle"
-                  color="subdued"
-                  content={
-                    (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
-                    i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
-                      defaultMessage:
-                        'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                    })
-                  }
-                />
-              </>
-            }
-            checked={ruleParams.alertOnNoData}
-            onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
-          />
-        </EuiPanel>
-      </EuiAccordion>
       <EuiSpacer size="m" />
 
       <EuiFormRow
@@ -407,10 +448,10 @@ export const Expressions: React.FC<Props> = (props) => {
         display="rowCompressed"
       >
         {(metadata && (
-          <MetricsExplorerKueryBar
-            onChange={debouncedOnFilterChange}
-            onSubmit={onFilterChange}
-            value={ruleParams.filterQueryText}
+          <UnifiedSearchBar
+            onQuerySubmit={onFilterChange}
+            useDefaultBehaviors={false}
+            query={{ query: ruleParams.filterQueryText || '', language: 'kuery' }}
           />
         )) || (
           <EuiFieldSearch
@@ -442,42 +483,30 @@ export const Expressions: React.FC<Props> = (props) => {
           }}
         />
       </EuiFormRow>
-      <EuiSpacer size="s" />
-      <EuiCheckbox
-        id="metrics-alert-group-disappear-toggle"
-        label={
-          <>
-            {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnGroupDisappear', {
-              defaultMessage: 'Alert me if a group stops reporting data',
-            })}{' '}
-            <EuiIconTip
-              type="questionInCircle"
-              color="subdued"
-              content={
-                (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
-                i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
-                  defaultMessage:
-                    'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-                })
-              }
-            />
-          </>
-        }
-        disabled={!hasGroupBy}
-        checked={Boolean(ruleParams.alertOnGroupDisappear)}
-        onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
-      />
       <EuiSpacer size="m" />
+      <EuiPanel color="subdued">
+        <EuiRadioGroup
+          name="noDataBehavior"
+          legend={{
+            children: (
+              <span>
+                {i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehaviorLabel', {
+                  defaultMessage: 'If there is no data',
+                })}
+              </span>
+            ),
+          }}
+          options={getNoDataBehaviorOptions(hasGroupBy)}
+          idSelected={getNoDataBehaviorValue(ruleParams, hasGroupBy)}
+          onChange={(id) => {
+            setRuleParams('noDataBehavior', id as NoDataBehavior);
+          }}
+          data-test-subj="metrics-alert-no-data-behavior"
+        />
+      </EuiPanel>
     </>
   );
 };
-
-const docCountNoDataDisabledHelpText = i18n.translate(
-  'xpack.infra.metrics.alertFlyout.docCountNoDataDisabledHelpText',
-  {
-    defaultMessage: '[This setting is not applicable to the Document Count aggregator.]',
-  }
-);
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export

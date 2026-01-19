@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { Indicator, indicatorSchema, sloDefinitionSchema } from '@kbn/slo-schema';
+import type { Indicator } from '@kbn/slo-schema';
+import { indicatorSchema, sloDefinitionSchema } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import { isLeft } from 'fp-ts/lib/Either';
-import { SLODefinition } from '../../domain/models';
-import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
+import { isLeft } from 'fp-ts/Either';
+import type { SLODefinition } from '../../domain/models';
+import type { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 
 export function fromRemoteSummaryDocumentToSloDefinition(
   summaryDoc: EsSummaryDocument,
@@ -48,8 +49,8 @@ export function fromRemoteSummaryDocumentToSloDefinition(
 
   if (isLeft(res)) {
     const errors = formatErrors(res.left);
-    logger.error(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
-    logger.error(errors.join('|'));
+    logger.debug(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
+    logger.debug(errors.join('|'));
 
     return undefined;
   }
@@ -65,10 +66,10 @@ function getIndicator(summaryDoc: EsSummaryDocument, logger: Logger): Indicator 
 
   if (isLeft(res)) {
     const errors = formatErrors(res.left);
-    logger.info(
+    logger.debug(
       `Invalid indicator from remote summary SLO id [${summaryDoc.slo.id}] - Fallback on dummy indicator`
     );
-    logger.info(errors.join('|'));
+    logger.debug(errors.join('|'));
 
     return getDummyIndicator(summaryDoc);
   }

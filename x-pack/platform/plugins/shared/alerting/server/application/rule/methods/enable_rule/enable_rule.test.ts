@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -18,23 +18,23 @@ import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
-import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
+import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
-    migrateLegacyActions: jest.fn(),
+    bulkMigrateLegacyActions: jest.fn(),
   };
 });
 
@@ -54,6 +54,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const alertsService = alertsServiceMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -79,7 +80,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
+  alertsService,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
@@ -155,11 +156,7 @@ describe('enable()', () => {
       apiKeysEnabled: false,
     });
     taskManager.get.mockResolvedValue(mockTask);
-    (migrateLegacyActions as jest.Mock).mockResolvedValue({
-      hasLegacyActions: false,
-      resultedActions: [],
-      resultedReferences: [],
-    });
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
   });
 
   describe('authorization', () => {
@@ -764,57 +761,48 @@ describe('enable()', () => {
     );
   });
 
-  describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions', async () => {
-      (migrateLegacyActions as jest.Mock).mockResolvedValueOnce({
-        hasLegacyActions: true,
-        resultedActions: ['fake-action-1'],
-        resultedReferences: ['fake-ref-1'],
-      });
-
-      const existingDecryptedSiemRule = {
-        ...existingRule,
-        attributes: { ...existingRule.attributes, consumer: AlertConsumers.SIEM },
-      };
-
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedSiemRule);
-      (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
-
-      await rulesClient.enableRule({ id: '1' });
-
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
-        actions: [
-          {
-            actionRef: '1',
-            actionTypeId: '1',
-            group: 'default',
-            id: '1',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-        references: [],
-        ruleId: '1',
-      });
-      // to mitigate AAD issues, we call create with overwrite=true and actions related props
-      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-        RULE_SAVED_OBJECT_TYPE,
-        expect.objectContaining({
-          ...existingDecryptedSiemRule.attributes,
-          actions: ['fake-action-1'],
-          throttle: undefined,
-          notifyWhen: undefined,
-          enabled: true,
-        }),
-        {
-          id: existingDecryptedSiemRule.id,
-          overwrite: true,
-          references: ['fake-ref-1'],
-          version: existingDecryptedSiemRule.version,
-        }
-      );
+  test('should clear flapping history for alerts generated by rule when enabled', async () => {
+    rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
+    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+      autoRecoverAlerts: true,
     });
+
+    await rulesClient.enableRule({ id: '1' });
+
+    expect(alertsService.clearAlertFlappingHistory).toHaveBeenCalledWith({
+      indices: ['test-index'],
+      ruleIds: ['1'],
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+  });
+
+  test('should not prevent rule from being enable if clearing flapping throws an error', async () => {
+    rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
+    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+      autoRecoverAlerts: true,
+    });
+
+    (rulesClientParams.alertsService?.clearAlertFlappingHistory as jest.Mock).mockRejectedValue(
+      Error('something went wrong!')
+    );
+
+    await rulesClient.enableRule({ id: '1' });
+
+    expect(rulesClientParams.alertsService?.clearAlertFlappingHistory).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+      'Failure to clear flapping history from rule 1 - something went wrong!'
+    );
+  });
+
+  test('should not try to clear flapping if the ruletype does not support lifecycle rules', async () => {
+    rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
+    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+      autoRecoverAlerts: false,
+    });
+
+    await rulesClient.enableRule({ id: '1' });
+    expect(alertsService.clearAlertFlappingHistory).toHaveBeenCalledTimes(0);
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
   });
 });

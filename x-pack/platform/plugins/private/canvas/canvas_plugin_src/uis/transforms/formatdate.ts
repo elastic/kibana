@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TransformFactory } from '../../../types/transforms';
-import { Arguments } from '../../functions/common/formatdate';
+import type { TransformFactory } from '../../../types/transforms';
+import type { Arguments } from '../../functions/common/formatdate';
 import { TransformStrings } from '../../../i18n';
 
 const { FormatDate: strings } = TransformStrings;

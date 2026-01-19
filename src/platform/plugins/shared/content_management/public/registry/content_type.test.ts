@@ -15,7 +15,7 @@ test('create a content type with just an id', () => {
 
   expect(type.id).toBe('test');
   expect(type.name).toBe('test');
-  expect(type.icon).toBe('questionInCircle');
+  expect(type.icon).toBe('question');
   expect(type.description).toBe('');
 });
 

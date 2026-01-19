@@ -6,21 +6,17 @@
  */
 
 import React from 'react';
-import type { Screen } from '@testing-library/react';
 import { waitFor, within, screen, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { useKibana } from '../../common/lib/kibana';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 
-import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
-import { useGetSeverity } from '../connectors/resilient/use_get_severity';
-import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
+import { useGetFields } from '../connectors/resilient/use_get_fields';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
 import {
@@ -31,18 +27,16 @@ import {
   sampleConnectorData,
   sampleData,
   sampleTags,
-  useGetIncidentTypesResponse,
-  useGetSeverityResponse,
   useGetIssueTypesResponse,
   useGetFieldsByIssueTypeResponse,
   useGetChoicesResponse,
 } from './mock';
-import { FormContext } from './form_context';
+import { FormContext, type FormContextProps } from './form_context';
 import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
-import type { CaseAttachments } from '../../types';
+import type { CaseAttachments, CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { waitForComponentToUpdate } from '../../common/test_utils';
@@ -60,15 +54,25 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CreateCaseFormFieldsProps } from './form_fields';
 import { CreateCaseFormFields } from './form_fields';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { renderWithTestingProviders } from '../../common/mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import { OBSERVABLE_TYPE_HOSTNAME } from '../../../common/constants/observables';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
+import { DEFAULT_FEATURES } from '../../../common/constants';
+import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
+import { useGetFieldsResponse } from '../connectors/resilient/mocks';
+import type { ObservablePost } from '../../../common/types/api';
+import { useSubmitCase } from './use_submit_case';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
+jest.mock('../../containers/use_bulk_post_observables');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_get_all_case_configurations');
-jest.mock('../connectors/resilient/use_get_incident_types');
-jest.mock('../connectors/resilient/use_get_severity');
+jest.mock('../connectors/resilient/use_get_fields');
 jest.mock('../connectors/jira/use_get_issue_types');
 jest.mock('../connectors/jira/use_get_fields_by_issue_type');
 jest.mock('../connectors/jira/use_get_issues');
@@ -83,9 +87,9 @@ const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+const useBulkPostObservablesMock = useBulkPostObservables as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
-const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
-const useGetSeverityMock = useGetSeverity as jest.Mock;
+const useGetFieldsMock = useGetFields as jest.Mock;
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
@@ -126,20 +130,18 @@ const sampleDataWithoutTags = {
 };
 
 const fillFormReactTestingLib = async ({
-  renderer,
   user,
   withTags = false,
 }: {
-  renderer: Screen;
   user: UserEvent;
   withTags?: boolean;
 }) => {
-  const titleInput = within(renderer.getByTestId('caseTitle')).getByTestId('input');
+  const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
 
   await user.click(titleInput);
   await user.paste(sampleDataWithoutTags.title);
 
-  const descriptionInput = within(renderer.getByTestId('caseDescription')).getByTestId(
+  const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
     'euiMarkdownEditorTextArea'
   );
 
@@ -147,7 +149,7 @@ const fillFormReactTestingLib = async ({
   await user.paste(sampleDataWithoutTags.description);
 
   if (withTags) {
-    const caseTags = renderer.getByTestId('caseTags');
+    const caseTags = screen.getByTestId('caseTags');
 
     for (const tag of sampleTags) {
       const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
@@ -156,10 +158,39 @@ const fillFormReactTestingLib = async ({
   }
 };
 
-const waitForFormToRender = async (renderer: Screen) => {
+const waitForFormToRender = async () => {
   await waitFor(() => {
-    expect(renderer.getByTestId('caseTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('caseTitle')).toBeInTheDocument();
   });
+};
+
+const TestComponent = ({
+  attachments,
+  observables,
+  onSuccess,
+  afterCaseCreated,
+  children,
+  ...props
+}: Omit<FormContextProps, 'onSubmitCase'> & {
+  onSuccess: VoidFunction;
+  afterCaseCreated?: () => Promise<void>;
+  attachments?: CaseAttachmentsWithoutOwner;
+  observables?: ObservablePost[];
+}) => {
+  const { submitCase, isSubmitting } = useSubmitCase({
+    attachments,
+    observables,
+    onSuccess,
+    afterCaseCreated: afterCaseCreated ?? (async () => {}),
+  });
+
+  return (
+    <FormContext {...props} onSubmitCase={submitCase}>
+      <>
+        {children} <SubmitCaseButton isSubmitting={isSubmitting} />
+      </>
+    </FormContext>
+  );
 };
 
 describe('Create case', () => {
@@ -167,8 +198,8 @@ describe('Create case', () => {
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const createAttachments = jest.fn();
+  const bulkPostObservables = jest.fn();
   let user: UserEvent;
-  let appMockRender: AppMockRenderer;
 
   // eslint-disable-next-line prefer-object-spread
   const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
@@ -210,11 +241,11 @@ describe('Create case', () => {
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
+    useBulkPostObservablesMock.mockImplementation(() => ({ mutateAsync: bulkPostObservables }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
     useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
-    useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
-    useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
+    useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
@@ -231,7 +262,7 @@ describe('Create case', () => {
       iconClass: 'logoSecurity',
     });
 
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
   });
 
   afterAll(() => {
@@ -242,7 +273,7 @@ describe('Create case', () => {
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
-    appMockRender = createAppMockRenderer();
+
     jest.clearAllMocks();
   });
 
@@ -253,18 +284,17 @@ describe('Create case', () => {
 
   describe('Step 1 - Case Fields', () => {
     it('renders correctly', async () => {
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
+      await waitForFormToRender();
 
       expect(screen.getByTestId('caseTitle')).toBeInTheDocument();
       expect(screen.getByTestId('caseSeverity')).toBeInTheDocument();
@@ -282,19 +312,18 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user, withTags: true });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user, withTags: true });
 
       await user.click(screen.getByTestId('create-case-submit'));
 
@@ -311,19 +340,18 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       await user.click(screen.getByTestId('case-severity-selection'));
       await waitForEuiPopoverOpen();
@@ -349,18 +377,17 @@ describe('Create case', () => {
       const newTags = ['coke     ', '     pepsi'];
       const newCategory = 'First           ';
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
+      await waitForFormToRender();
 
       const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
 
@@ -400,19 +427,18 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       const syncAlertsButton = within(screen.getByTestId('caseSyncAlerts')).getByTestId('input');
 
@@ -424,34 +450,34 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          settings: { syncAlerts: false },
+          settings: { syncAlerts: false, extractObservables: false },
         },
       });
     });
 
     it('should set sync alerts to false when the sync feature setting is false', async () => {
-      appMockRender = createAppMockRenderer({
-        features: { alerts: { sync: false, enabled: true } },
-      });
-
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         data: connectorsMock,
       });
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>,
+        {
+          wrapperProps: {
+            features: { alerts: { sync: false, enabled: true } },
+          },
+        }
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       await user.click(screen.getByTestId('create-case-submit'));
 
@@ -460,24 +486,23 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          settings: { syncAlerts: false },
+          settings: { syncAlerts: false, extractObservables: false },
         },
       });
     });
 
     it('should select LOW as the default severity', async () => {
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
+      await waitForFormToRender();
 
       expect(screen.getByTestId('caseSeverity')).toBeTruthy();
       expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(1);
@@ -501,19 +526,18 @@ describe('Create case', () => {
         },
       ];
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={configurations[0]}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} configuration={configurations[0]} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       const textField = customFieldsConfigurationMock[0];
       const toggleField = customFieldsConfigurationMock[1];
@@ -586,8 +610,8 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
@@ -597,12 +621,11 @@ describe('Create case', () => {
             configuration={configuration}
             connectors={connectorsMock}
           />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       await user.click(screen.getByTestId('create-case-submit'));
 
@@ -649,8 +672,8 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
@@ -660,18 +683,16 @@ describe('Create case', () => {
             configuration={configuration}
             connectors={connectorsMock}
           />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       await user.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalled();
-        expect(pushCaseToExternalService).not.toHaveBeenCalled();
       });
 
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
@@ -686,19 +707,18 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
 
@@ -721,19 +741,18 @@ describe('Create case', () => {
         data: connectorsMock,
       });
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       await user.click(screen.getByTestId('dropdown-connectors'));
       await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
@@ -754,9 +773,10 @@ describe('Create case', () => {
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
-        expect(pushCaseToExternalService).toHaveBeenCalled();
-        expect(onFormSubmitSuccess).toHaveBeenCalled();
       });
+
+      expect(pushCaseToExternalService).toHaveBeenCalled();
+      expect(onFormSubmitSuccess).toHaveBeenCalled();
 
       expect(postCase).toBeCalledWith({
         request: {
@@ -765,7 +785,7 @@ describe('Create case', () => {
             id: 'resilient-2',
             name: 'My Resilient connector',
             type: '.resilient',
-            fields: { incidentTypes: ['21'], severityCode: '4' },
+            fields: { incidentTypes: ['21'], severityCode: '4', additionalFields: null },
           },
         },
       });
@@ -776,7 +796,7 @@ describe('Create case', () => {
           id: 'resilient-2',
           name: 'My Resilient connector',
           type: '.resilient',
-          fields: { incidentTypes: ['21'], severityCode: '4' },
+          fields: { incidentTypes: ['21'], severityCode: '4', additionalFields: null },
         },
       });
 
@@ -797,19 +817,18 @@ describe('Create case', () => {
         data: connectors,
       });
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectors} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       await user.click(screen.getByTestId('dropdown-connectors'));
       await user.click(screen.getByTestId('dropdown-connector-servicenow-1'));
@@ -855,20 +874,19 @@ describe('Create case', () => {
       data: connectorsMock,
     });
 
-    appMockRender.render(
-      <FormContext
+    renderWithTestingProviders(
+      <TestComponent
         selectedOwner={SECURITY_SOLUTION_OWNER}
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
         currentConfiguration={currentConfiguration}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
-        <SubmitCaseButton />
-      </FormContext>
+      </TestComponent>
     );
 
-    await waitForFormToRender(screen);
-    await fillFormReactTestingLib({ renderer: screen, user });
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
 
     await user.click(screen.getByTestId('dropdown-connectors'));
 
@@ -921,20 +939,19 @@ describe('Create case', () => {
       },
     ];
 
-    appMockRender.render(
-      <FormContext
+    renderWithTestingProviders(
+      <TestComponent
         selectedOwner={SECURITY_SOLUTION_OWNER}
         onSuccess={onFormSubmitSuccess}
         attachments={attachments}
         currentConfiguration={currentConfiguration}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} />
-        <SubmitCaseButton />
-      </FormContext>
+      </TestComponent>
     );
 
-    await waitForFormToRender(screen);
-    await fillFormReactTestingLib({ renderer: screen, user });
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
 
     await user.click(screen.getByTestId('create-case-submit'));
 
@@ -957,20 +974,19 @@ describe('Create case', () => {
 
     const attachments: CaseAttachments = [];
 
-    appMockRender.render(
-      <FormContext
+    renderWithTestingProviders(
+      <TestComponent
         selectedOwner={SECURITY_SOLUTION_OWNER}
         onSuccess={onFormSubmitSuccess}
         attachments={attachments}
         currentConfiguration={currentConfiguration}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} />
-        <SubmitCaseButton />
-      </FormContext>
+      </TestComponent>
     );
 
-    await waitForFormToRender(screen);
-    await fillFormReactTestingLib({ renderer: screen, user });
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
 
     await user.click(screen.getByTestId('create-case-submit'));
 
@@ -979,7 +995,87 @@ describe('Create case', () => {
     expect(createAttachments).not.toHaveBeenCalled();
   });
 
+  it('should call bulkPostObservables if the observables are not empty', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+    const observables = [
+      {
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host1',
+        description: null,
+      },
+      {
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host2',
+        description: null,
+      },
+    ];
+
+    renderWithTestingProviders(
+      <TestComponent
+        selectedOwner={SECURITY_SOLUTION_OWNER}
+        onSuccess={onFormSubmitSuccess}
+        observables={observables}
+        currentConfiguration={currentConfiguration}
+      >
+        <CreateCaseFormFields {...defaultCreateCaseForm} />
+      </TestComponent>,
+      {
+        wrapperProps: { license, features: { observables: { enabled: true, autoExtract: true } } },
+      }
+    );
+
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
+
+    expect(screen.getByTestId('caseObservablesToggle')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('create-case-submit'));
+
+    await waitFor(() => {
+      expect(bulkPostObservables).toHaveBeenCalledTimes(1);
+    });
+
+    expect(bulkPostObservables).toHaveBeenCalledWith({
+      caseId: 'case-id',
+      observables,
+    });
+  });
+
+  it('should NOT call bulkPostObservables if the observables are an empty array', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+    renderWithTestingProviders(
+      <TestComponent
+        selectedOwner={SECURITY_SOLUTION_OWNER}
+        onSuccess={onFormSubmitSuccess}
+        observables={[]}
+        currentConfiguration={currentConfiguration}
+      >
+        <CreateCaseFormFields {...defaultCreateCaseForm} />
+      </TestComponent>,
+      {
+        wrapperProps: { license, features: { observables: { enabled: true, autoExtract: true } } },
+      }
+    );
+
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
+
+    expect(screen.getByTestId('caseObservablesToggle')).toBeInTheDocument();
+    await user.click(screen.getByTestId('create-case-submit'));
+
+    await waitForComponentToUpdate();
+
+    expect(createAttachments).not.toHaveBeenCalled();
+  });
+
   it(`should call callbacks in correct order`, async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
     useGetConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
       data: connectorsMock,
@@ -997,21 +1093,38 @@ describe('Create case', () => {
       },
     ];
 
-    appMockRender.render(
-      <FormContext
+    const observables = [
+      {
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host1',
+        description: null,
+      },
+    ];
+
+    renderWithTestingProviders(
+      <TestComponent
         selectedOwner={SECURITY_SOLUTION_OWNER}
         currentConfiguration={currentConfiguration}
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
         attachments={attachments}
+        observables={observables}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
-        <SubmitCaseButton />
-      </FormContext>
+      </TestComponent>,
+      {
+        wrapperProps: {
+          license,
+          features: {
+            ...DEFAULT_FEATURES,
+            observables: { enabled: true, autoExtract: true },
+          },
+        },
+      }
     );
 
-    await waitForFormToRender(screen);
-    await fillFormReactTestingLib({ renderer: screen, user });
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
 
     await user.click(screen.getByTestId('dropdown-connectors'));
 
@@ -1025,46 +1138,93 @@ describe('Create case', () => {
 
     await waitFor(() => {
       expect(postCase).toHaveBeenCalled();
-      expect(createAttachments).toHaveBeenCalled();
-      expect(afterCaseCreated).toHaveBeenCalled();
+    });
+
+    expect(createAttachments).toHaveBeenCalled();
+    expect(bulkPostObservables).toHaveBeenCalled();
+    expect(afterCaseCreated).toHaveBeenCalled();
+
+    await waitFor(() => {
       expect(pushCaseToExternalService).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
       expect(onFormSubmitSuccess).toHaveBeenCalled();
     });
 
     const postCaseOrder = postCase.mock.invocationCallOrder[0];
     const createAttachmentsOrder = createAttachments.mock.invocationCallOrder[0];
+    const bulkPostObservablesOrder = bulkPostObservables.mock.invocationCallOrder[0];
     const afterCaseOrder = afterCaseCreated.mock.invocationCallOrder[0];
     const pushCaseToExternalServiceOrder = pushCaseToExternalService.mock.invocationCallOrder[0];
     const onFormSubmitSuccessOrder = onFormSubmitSuccess.mock.invocationCallOrder[0];
 
     expect(
       postCaseOrder < createAttachmentsOrder &&
-        createAttachmentsOrder < afterCaseOrder &&
+        createAttachmentsOrder < bulkPostObservablesOrder &&
+        bulkPostObservablesOrder < afterCaseOrder &&
         afterCaseOrder < pushCaseToExternalServiceOrder &&
         pushCaseToExternalServiceOrder < onFormSubmitSuccessOrder
     ).toBe(true);
   });
 
+  it('should succeed even when pushing to an external service fails', async () => {
+    const failPushCaseToExternalService = jest.fn().mockRejectedValue(new Error('Push failed'));
+    usePostPushToServiceMock.mockImplementation(() => ({
+      isLoading: false,
+      isError: false,
+      mutateAsync: failPushCaseToExternalService,
+    }));
+
+    renderWithTestingProviders(
+      <TestComponent
+        selectedOwner={SECURITY_SOLUTION_OWNER}
+        onSuccess={onFormSubmitSuccess}
+        afterCaseCreated={afterCaseCreated}
+        currentConfiguration={currentConfiguration}
+      >
+        <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
+      </TestComponent>
+    );
+
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
+
+    await user.click(screen.getByTestId('dropdown-connectors'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await user.click(screen.getByTestId('create-case-submit'));
+
+    await waitFor(() => {
+      expect(onFormSubmitSuccess).toHaveBeenCalled();
+    });
+  });
+
   describe('Permissions', () => {
     it('should not push to service if the user does not have access to actions', async () => {
-      appMockRender.coreStart.application.capabilities = {
-        ...appMockRender.coreStart.application.capabilities,
+      const coreStart = coreMock.createStart();
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
         actions: { save: false, show: false },
       };
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>,
+        { wrapperProps: { coreStart } }
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       await user.click(screen.getByTestId('create-case-submit'));
 
@@ -1075,19 +1235,18 @@ describe('Create case', () => {
 
   describe('Assignees', () => {
     it('should submit assignees', async () => {
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen, user });
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
 
       const assigneesComboBox = within(screen.getByTestId('createCaseAssigneesComboBox'));
 
@@ -1117,20 +1276,22 @@ describe('Create case', () => {
     });
 
     it('should not render the assignees on basic license', async () => {
-      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+      useLicenseMock.mockReturnValue({
+        isAtLeastGold: () => false,
+        isAtLeastPlatinum: () => false,
+      });
 
-      appMockRender.render(
-        <FormContext
+      renderWithTestingProviders(
+        <TestComponent
           selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
+        </TestComponent>
       );
 
-      await waitForFormToRender(screen);
+      await waitForFormToRender();
       await waitForComponentToUpdate();
 
       expect(screen.queryByTestId('createCaseAssigneesComboBox')).toBeNull();
@@ -1148,18 +1309,17 @@ describe('Create case', () => {
       });
 
       it('should have session storage value same as draft comment', async () => {
-        appMockRender.render(
-          <FormContext
+        renderWithTestingProviders(
+          <TestComponent
             selectedOwner={SECURITY_SOLUTION_OWNER}
             onSuccess={onFormSubmitSuccess}
             currentConfiguration={currentConfiguration}
           >
             <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
+          </TestComponent>
         );
 
-        await waitForFormToRender(screen);
+        await waitForFormToRender();
         const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
           'euiMarkdownEditorTextArea'
         );
@@ -1176,18 +1336,17 @@ describe('Create case', () => {
       });
 
       it('should have session storage value same as draft comment', async () => {
-        appMockRender.render(
-          <FormContext
+        renderWithTestingProviders(
+          <TestComponent
             selectedOwner={SECURITY_SOLUTION_OWNER}
             onSuccess={onFormSubmitSuccess}
             currentConfiguration={currentConfiguration}
           >
             <CreateCaseFormFields {...defaultCreateCaseForm} />
-            <SubmitCaseButton />
-          </FormContext>
+          </TestComponent>
         );
 
-        await waitForFormToRender(screen);
+        await waitForFormToRender();
         const descriptionInput = within(await screen.findByTestId('caseDescription')).getByTestId(
           'euiMarkdownEditorTextArea'
         );

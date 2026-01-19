@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { CommonProps, EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { ResourceFieldDescriptor } from './utils';
+import type { ResourceFieldDescriptor } from './utils';
 
 const MAX_LIMITED_FIELDS_VISIBLE = 3;
 
@@ -28,8 +29,17 @@ export const Resource = ({ fields, limited = false, onFilter, ...props }: Resour
 
   return (
     <EuiFlexGroup gutterSize="s" {...props}>
-      {displayedFields.map(({ name, value, ResourceBadge, Icon }) => (
-        <ResourceBadge key={name} property={name} value={value} icon={Icon} onFilter={onFilter} />
+      {displayedFields.map(({ name, rawValue, value, ResourceBadge, Icon, property }) => (
+        <ResourceBadge
+          key={name}
+          name={name}
+          property={property}
+          rawValue={rawValue}
+          value={value}
+          icon={Icon}
+          onFilter={onFilter}
+          truncateTitle={true}
+        />
       ))}
       {extraFieldsCount > 0 && (
         <div>

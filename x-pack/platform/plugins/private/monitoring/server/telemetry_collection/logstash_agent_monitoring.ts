@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import moment from 'moment';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
@@ -16,10 +16,7 @@ import {
   INDEX_PATTERN_LOGSTASH_METRICS_PLUGINS,
   INDEX_PATTERN_LOGSTASH_METRICS_NODE,
 } from '../../common/constants';
-import {
-  HITS_SIZE,
-  LOGSTASH_PLUGIN_TYPES,
-  getLogstashBaseStats,
+import type {
   Counter,
   LogstashMonitoring,
   LogstashProcessOptions,
@@ -27,6 +24,7 @@ import {
   LogstashStats,
   LogstashStatsByClusterUuid,
 } from './logstash_monitoring';
+import { HITS_SIZE, LOGSTASH_PLUGIN_TYPES, getLogstashBaseStats } from './logstash_monitoring';
 
 export class LogstashAgentMonitoring implements LogstashMonitoring {
   /*
@@ -120,7 +118,7 @@ export class LogstashAgentMonitoring implements LogstashMonitoring {
           }
         }
 
-        const thisCollectionType = hit._source?.agent?.type || 'agent';
+        const thisCollectionType = 'agent';
         if (!Object.hasOwn(clusterStats, 'collection_types')) {
           clusterStats.collection_types = {};
         }

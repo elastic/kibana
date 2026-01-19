@@ -14,7 +14,7 @@ import {
 import { getPipelineVersions } from '../../../../lib/logstash/get_pipeline_versions';
 import { getPipeline } from '../../../../lib/logstash/get_pipeline';
 import { getPipelineVertex } from '../../../../lib/logstash/get_pipeline_vertex';
-import { MonitoringCore, PipelineVersion } from '../../../../types';
+import type { MonitoringCore, PipelineVersion } from '../../../../types';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 
 function getPipelineVersion(versions: PipelineVersion[], pipelineHash: string | null) {
@@ -30,6 +30,12 @@ export function logstashPipelineRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipeline/{pipelineId}/{pipelineHash?}',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

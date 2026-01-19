@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import type { Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import {
   MonitorTypeEnum,
   ScreenshotOption,
-  Locations,
   LocationStatus,
-  ProjectMonitor,
 } from '../../../../common/runtime_types';
 import {
   DEFAULT_FIELDS,
@@ -18,7 +17,7 @@ import {
   PROFILES_MAP,
 } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {
@@ -73,6 +72,7 @@ describe('browser normalizers', () => {
         tags: ['tag1', 'tag2'],
         ignoreHTTPSErrors: true,
         hash: testHash,
+        'service.name': 'test-service',
       } as ProjectMonitor, // test that normalizers defaults to browser when type is omitted
       {
         type: MonitorTypeEnum.BROWSER,
@@ -144,7 +144,7 @@ describe('browser normalizers', () => {
               unit: 'm',
             },
             screenshots: 'off',
-            'service.name': '',
+            'service.name': 'test-service',
             'source.project.content': 'test content 1',
             tags: ['tag1', 'tag2'],
             params: '',
@@ -328,7 +328,7 @@ describe('browser normalizers', () => {
               unit: 'm',
             },
             screenshots: 'off',
-            'service.name': '',
+            'service.name': 'test-service',
             'source.project.content': 'test content 1',
             tags: ['tag1', 'tag2'],
             params: '',
@@ -398,7 +398,7 @@ describe('browser normalizers', () => {
               unit: 'm',
             },
             screenshots: 'off',
-            'service.name': '',
+            'service.name': 'test-service',
             'source.project.content': 'test content 1',
             tags: ['tag1', 'tag2'],
             params: '',

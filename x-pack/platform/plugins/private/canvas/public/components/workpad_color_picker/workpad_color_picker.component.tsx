@@ -10,7 +10,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { addColor, removeColor } from '../../state/actions/workpad';
 import { getWorkpadColors } from '../../state/selectors/workpad';
-import { ColorPickerPopover, Props } from '../color_picker_popover';
+import type { Props } from '../color_picker_popover';
+import { ColorPickerPopover } from '../color_picker_popover';
 
 const strings = {
   getBackgroundColorLabel: () =>

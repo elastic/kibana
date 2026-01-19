@@ -7,10 +7,11 @@
 
 import { useMemo } from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { PreFetchPageContext } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import type { Alert } from '@kbn/alerting-types';
 import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
 
-export interface RenderCellValueContext {
+export interface AlertsUserProfilesData {
   profiles: UserProfileWithAvatar[] | undefined;
   isLoading: boolean;
 }
@@ -21,24 +22,27 @@ export const profileUidColumns = [
   'kibana.alert.workflow_user',
 ];
 
-export const useFetchPageContext: PreFetchPageContext<RenderCellValueContext> = ({
+export const useFetchUserProfilesFromAlerts = ({
   alerts,
   columns,
+}: {
+  alerts: Alert[];
+  columns: EuiDataGridColumn[];
 }) => {
   const uids = useMemo(() => {
     const ids = new Set<string>();
     alerts.forEach((alert) => {
       profileUidColumns.forEach((columnId) => {
         if (columns.find((column) => column.id === columnId) != null) {
-          const userUids = alert[columnId];
-          userUids?.forEach((uid) => ids.add(uid as string));
+          const userUids = alert[columnId] as string[];
+          userUids?.forEach((uid) => ids.add(uid));
         }
       });
     });
     return ids;
   }, [alerts, columns]);
   const result = useBulkGetUserProfiles({ uids });
-  return useMemo(
+  return useMemo<AlertsUserProfilesData>(
     () => ({ profiles: result.data, isLoading: result.isLoading }),
     [result.data, result.isLoading]
   );

@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import moment from 'moment-timezone';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { EuiButton, EuiButtonEmpty, EuiIconTip, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 
@@ -109,7 +109,7 @@ export const EventsTable: FC<Props> = ({
               <EuiIconTip
                 size="s"
                 color="subdued"
-                type="questionInCircle"
+                type="question"
                 className="eui-alignTop"
                 content={i18n.translate('xpack.ml.calendarsEdit.eventsTable.startColumnTooltip', {
                   defaultMessage: 'The start time of the daylight savings change event.',
@@ -135,7 +135,7 @@ export const EventsTable: FC<Props> = ({
               <EuiIconTip
                 size="s"
                 color="subdued"
-                type="questionInCircle"
+                type="question"
                 className="eui-alignTop"
                 content={i18n.translate('xpack.ml.calendarsEdit.eventsTable.endColumnTooltip', {
                   defaultMessage:

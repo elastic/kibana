@@ -7,29 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 
+import type { TimeUnitChar } from '../common/utils';
 import {
   LEGACY_COMPARATORS,
-  TimeUnitChar,
   oneOfLiterals,
   validateIsStringElasticsearchJSONFilter,
 } from '../common/utils';
 
 const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
+const dataSchemaFormats = ['ecs', 'semconv'] as const;
 type SnapshotCustomAggregation = (typeof SNAPSHOT_CUSTOM_AGGREGATIONS)[number];
 
 const SnapshotMetricTypeKeysArray = [
   'count',
   'cpuV2',
   'cpu',
-  'diskLatency',
   'diskSpaceUsage',
   'load',
   'memory',
   'memoryFree',
-  'memoryTotal',
   'normalizedLoad1m',
   'tx',
   'rx',
@@ -86,6 +86,7 @@ export const metricInventoryThresholdRuleParamsSchema = schema.object(
     filterQuery: schema.maybe(schema.string({ validate: validateIsStringElasticsearchJSONFilter })),
     sourceId: schema.string(),
     alertOnNoData: schema.maybe(schema.boolean()),
+    schema: schema.maybe(oneOfLiterals(dataSchemaFormats)),
   },
   { unknowns: 'allow' }
 );

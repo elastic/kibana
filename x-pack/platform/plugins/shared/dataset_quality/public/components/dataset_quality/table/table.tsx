@@ -37,7 +37,7 @@ export const Table = () => {
     resultsCount,
     showInactiveDatasets,
     showFullDatasetNames,
-    canUserMonitorDataset,
+    canUserMonitorAnyDataset,
     canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
@@ -63,7 +63,7 @@ export const Table = () => {
             tooltipText={fullDatasetNameDescription}
             onToggle={toggleFullDatasetNames}
           />
-          {canUserMonitorDataset && canUserMonitorAnyDataStream && (
+          {canUserMonitorAnyDataset && canUserMonitorAnyDataStream && (
             <DescriptiveSwitch
               testSubject="datasetQualityInactiveDatasetsSwitch"
               label={inactiveDatasetsLabel}
@@ -75,7 +75,7 @@ export const Table = () => {
         </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" style={{ height: 2 }} />
+      <EuiHorizontalRule margin="none" css={{ height: 2 }} />
       <EuiBasicTable
         tableLayout="auto"
         sorting={sort}

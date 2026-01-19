@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { DEFAULTS } from '../constants';
-import { DatasetRT, PartialConfig, Schedule, CliOptions } from '../types';
+import type { PartialConfig, Schedule, CliOptions } from '../types';
+import { DatasetRT } from '../types';
 
 export function cliOptionsToPartialConfig(options: CliOptions) {
   const schedule: Schedule = {
@@ -48,6 +49,7 @@ export function cliOptionsToPartialConfig(options: CliOptions) {
       reduceWeekendTrafficBy: options.reduceWeekendTrafficBy,
       ephemeralProjectIds: options.ephemeralProjectIds,
       alignEventsToInterval: options.alignEventsToInterval === true,
+      slashLogs: options.slashLogs,
     },
     schedule: [schedule],
   };

@@ -8,7 +8,7 @@
  */
 
 import { last } from 'lodash';
-import { Metric } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { getAggByPredicate, isBasicAgg } from '../../../../common/agg_utils';
 
 export const getMetricsField = (metrics: Metric[]) => {

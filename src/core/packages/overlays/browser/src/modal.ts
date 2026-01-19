@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiConfirmModalProps } from '@elastic/eui';
+import type { EuiConfirmModalProps, EuiModalProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 
 /**
@@ -22,6 +22,7 @@ export interface OverlayModalConfirmOptions {
   'data-test-subj'?: string;
   defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
   buttonColor?: EuiConfirmModalProps['buttonColor'];
+  'aria-labelledby'?: EuiConfirmModalProps['aria-labelledby'];
   /**
    * Sets the max-width of the modal.
    * Set to `true` to use the default (`euiBreakpoints 'm'`),
@@ -66,4 +67,5 @@ export interface OverlayModalOpenOptions {
   closeButtonAriaLabel?: string;
   'data-test-subj'?: string;
   maxWidth?: boolean | number | string;
+  'aria-labelledby'?: EuiModalProps['aria-labelledby'];
 }

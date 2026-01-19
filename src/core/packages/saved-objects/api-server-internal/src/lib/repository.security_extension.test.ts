@@ -17,11 +17,11 @@ import {
 
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import {
+import type { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import type {
   ISavedObjectsSecurityExtension,
   SavedObjectsRawDocSource,
   AuthorizationTypeEntry,
@@ -62,11 +62,12 @@ import {
   generateIndexPatternSearchResults,
   setupAuthorizeFunc,
   setupAuthorizeFind,
+  HIDDEN_TYPE,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
-import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('SavedObjectsRepository Security Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -281,6 +282,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         type: 'multiNamespaceTypeCustomIndex',
         id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
         existingNamespaces: multiNamespaceObjNamespaces,
+        name: 'Testing',
       };
 
       const { namespace: actualNamespace, object: actualObject } =
@@ -844,6 +846,58 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
     });
 
+    test(`passes an empty type map to the query when partially authorized but no types are authorized for find or are hidden`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      await findSuccess(
+        client,
+        repository,
+        {
+          type: [type, NAMESPACE_AGNOSTIC_TYPE, HIDDEN_TYPE],
+          namespaces: [namespace, 'ns-1'],
+        }, // include multiple types and spaces
+        namespace
+      );
+
+      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this should always pass
+      const {
+        typeToNamespacesMap: actualMap,
+      }: { typeToNamespacesMap: Map<string, string[] | undefined> } =
+        mockGetSearchDsl.mock.calls[0][2];
+
+      expect(actualMap).not.toBeUndefined();
+      const expectedMap = new Map<string, string[] | undefined>();
+
+      expect(arrayMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
+    });
+
+    test(`passes an empty type map to the query when fully authorized but no types are authorized for find or are hidden`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      await findSuccess(
+        client,
+        repository,
+        {
+          type: [type, NAMESPACE_AGNOSTIC_TYPE, HIDDEN_TYPE],
+          namespaces: [namespace, 'ns-1'],
+        }, // include multiple types and spaces
+        namespace
+      );
+
+      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this should always pass
+      const {
+        typeToNamespacesMap: actualMap,
+      }: { typeToNamespacesMap: Map<string, string[] | undefined> } =
+        mockGetSearchDsl.mock.calls[0][2];
+
+      expect(actualMap).not.toBeUndefined();
+      const expectedMap = new Map<string, string[] | undefined>();
+
+      expect(arrayMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
+    });
+
     test(`uses the authorization map when partially authorized`, async () => {
       setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
@@ -851,7 +905,49 @@ describe('SavedObjectsRepository Security Extension', () => {
       await findSuccess(
         client,
         repository,
-        { type: [type, NAMESPACE_AGNOSTIC_TYPE], namespaces: [namespace, 'ns-1'] }, // include multiple types and spaces
+        {
+          type: [
+            type,
+            'foo',
+            // Explicitly request the hidden type despite the repository not having access to it to confirm that it's not authorized.
+            HIDDEN_TYPE,
+            NAMESPACE_AGNOSTIC_TYPE,
+          ],
+          namespaces: [namespace, 'ns-1'],
+        }, // include multiple types and spaces
+        namespace
+      );
+
+      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this should always pass
+      const {
+        typeToNamespacesMap: actualMap,
+      }: { typeToNamespacesMap: Map<string, string[] | undefined> } =
+        mockGetSearchDsl.mock.calls[0][2];
+
+      expect(actualMap).not.toBeUndefined();
+      const expectedMap = new Map<string, string[] | undefined>();
+      expectedMap.set('foo', ['bar']); // this is what is hard-coded in authMap
+
+      expect(arrayMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
+    });
+
+    test(`uses the authorization map when fully authorized`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      await findSuccess(
+        client,
+        repository,
+        {
+          type: [
+            type,
+            'foo',
+            // Explicitly request the hidden type despite the repository not having access to it to confirm that it's not authorized.
+            HIDDEN_TYPE,
+            NAMESPACE_AGNOSTIC_TYPE,
+          ],
+          namespaces: [namespace, 'ns-1'],
+        }, // include multiple types and spaces
         namespace
       );
 

@@ -10,7 +10,9 @@
 import { tap } from 'rxjs';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { createRequestHash } from '../../../create_request_hash';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
@@ -20,8 +22,7 @@ import type {
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
 
-export interface EsSearchRequest {
-  body: Record<string, any>;
+export interface EsSearchRequest extends SearchRequest {
   index?: string;
   trackingEsSearchMeta?: {
     requestId: string;
@@ -47,28 +48,34 @@ export abstract class AbstractSearchStrategy {
 
     const searchContext = await requestContext.search;
 
-    esRequests.forEach(({ body, index, trackingEsSearchMeta }) => {
+    esRequests.forEach(({ body = {}, index, trackingEsSearchMeta, ...rest }) => {
       // User may abort the request without waiting for the results
       // we need to handle this scenario by aborting underlying server requests
       const abortSignal = getRequestAbortedSignal(req.events.aborted$);
       const startTime = Date.now();
+      const searchBody = {
+        ...rest,
+        ...(typeof body === 'string' ? { body } : body),
+      };
+      const params = {
+        ...searchBody,
+        index,
+      };
+      const requestHash = createRequestHash(params);
       requests.push(
         searchContext
           .search(
             {
               indexType,
-              params: {
-                body,
-                index,
-              },
+              params,
             },
-            { ...req.body.searchSession, abortSignal }
+            { ...req.body.searchSession, abortSignal, requestHash }
           )
           .pipe(
             tap((data) => {
               if (trackingEsSearchMeta?.requestId && trackedEsSearches) {
                 trackedEsSearches[trackingEsSearchMeta.requestId] = {
-                  body,
+                  body: searchBody,
                   time: Date.now() - startTime,
                   label: trackingEsSearchMeta.requestLabel,
                   response: omit(data.rawResponse, 'aggregations'),

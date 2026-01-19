@@ -1,0 +1,76 @@
+{
+  "lastModified": "2025-12-03T19:03:45.191Z",
+  "sha1": "4e28fc89c7aef69501d9b4110c9d5ab54d73fffa",
+  "tests": [
+    {
+      "id": "16bb4a7ec47d274-1887bb9ce43cc37",
+      "title": "Observability Landing Page redirects to page specified in defaultRoute uiSetting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "16bb4a7ec47d274-b4d285151fca090",
+      "title": "Observability Landing Page redirects to Discover logs when logs data exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "16bb4a7ec47d274-1089e5f36b13719",
+      "title": "Observability Landing Page redirects to APM services when only APM data exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "16bb4a7ec47d274-b8a96bff3cd83db",
+      "title": "Observability Landing Page redirects to Discover logs when both logs and APM data exist (logs priority)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "16bb4a7ec47d274-00e86e3614855e3",
+      "title": "Observability Landing Page redirects to onboarding when no data exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 97,
+        "column": 7
+      }
+    }
+  ]
+}

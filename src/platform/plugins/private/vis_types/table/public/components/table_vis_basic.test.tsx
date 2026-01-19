@@ -10,11 +10,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { TableVisBasic } from './table_vis_basic';
-import { FormattedColumn, TableVisConfig, TableVisUiState } from '../types';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { FormattedColumn, TableVisConfig, TableVisUiState } from '../types';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createTableVisCell } from './table_vis_cell';
 import { createGridColumns } from './table_vis_columns';
-import { EuiDataGridProps } from '@elastic/eui';
+import type { EuiDataGridProps } from '@elastic/eui';
 
 jest.mock('./table_vis_columns', () => ({
   createGridColumns: jest.fn(() => []),

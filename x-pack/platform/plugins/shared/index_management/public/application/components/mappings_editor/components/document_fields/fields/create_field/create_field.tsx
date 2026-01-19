@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
+  EuiPanel,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
-import classNames from 'classnames';
+import type { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect, useRef } from 'react';
-import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
+import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
-import { Field, MainType, NormalizedFields } from '../../../../types';
+import type { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
@@ -33,6 +33,21 @@ import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    createFieldRequiredProps: css`
+      margin-top: ${euiTheme.size.l};
+      padding-top: ${euiTheme.size.base};
+      border-top: 1px solid ${euiTheme.colors.lightShade};
+    `,
+    createFieldContent: css`
+      position: relative;
+    `,
+  };
+};
 
 export interface ModelIdMapEntry {
   trainedModelId: string;
@@ -57,9 +72,7 @@ interface Props {
   allFields: NormalizedFields['byId'];
   isRootLevelField: boolean;
   isMultiField?: boolean;
-  paddingLeft?: number;
   isCancelable?: boolean;
-  maxNestedDepth?: number;
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   semanticTextInfo?: SemanticTextInfo;
@@ -70,9 +83,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
   isRootLevelField,
   isMultiField,
-  paddingLeft,
   isCancelable,
-  maxNestedDepth,
   onCancelAddingNewFields,
   isAddingFields,
   semanticTextInfo,
@@ -82,6 +93,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const dispatch = useDispatch();
   const { fields, mappingViewFields } = useMappingsState();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
+  const styles = useStyles();
 
   const { form } = useForm<Field>({
     serializer: fieldSerializer,
@@ -128,15 +140,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
       const defaultName = getFieldByPathName(allSemanticFields, 'semantic_text')
         ? ''
         : 'semantic_text';
-      const referenceField =
-        Object.values(allSemanticFields.byId)
-          .find((field) => field.source.type === 'text' && !field.isMultiField)
-          ?.path.join('.') || '';
       if (!form.getFormData().name) {
         form.setFieldValue('name', defaultName);
       }
       if (!form.getFormData().reference_field) {
-        form.setFieldValue('reference_field', referenceField);
+        form.setFieldValue('reference_field', '');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -167,7 +175,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       form.reset();
     }
 
-    if (fieldTypeInputRef.current) {
+    if (!clickOutside && fieldTypeInputRef.current) {
       fieldTypeInputRef.current.focus();
     }
   };
@@ -236,7 +244,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const typeDefinition = TYPE_DEFINITION[type?.[0].value as MainType];
 
     return (
-      <div className="mappingsEditor__createFieldRequiredProps">
+      <div css={styles.createFieldRequiredProps}>
         {typeDefinition?.isBeta ? (
           <>
             <FieldBetaBadge />
@@ -281,16 +289,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
     </EuiFlexGroup>
   );
 
-  const { euiTheme } = useEuiTheme();
-
-  const paddingLeftCreateFieldWrapper = `${
-    isMultiField
-      ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
-      : paddingLeft
-  }px`;
-
   return (
     <>
+      <EuiSpacer size="s" />
       <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
         <Form
           form={form}
@@ -298,21 +299,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onSubmit={submitForm}
           data-test-subj="createFieldForm"
         >
-          <div
-            className={classNames('mappingsEditor__createFieldWrapper', {
-              'mappingsEditor__createFieldWrapper--toggle':
-                Boolean(maxNestedDepth) && maxNestedDepth! > 0,
-              'mappingsEditor__createFieldWrapper--multiField': isMultiField,
-            })}
-            css={css`
-              padding: ${euiTheme.size.l};
-              paddingleft: ${paddingLeftCreateFieldWrapper};
-              background-color: ${euiTheme.colors.backgroundBaseSubdued};
-            `}
-            ref={createFieldFormRef}
-            tabIndex={0}
-          >
-            <div className="mappingsEditor__createFieldContent">
+          <EuiPanel color="subdued" paddingSize="m" panelRef={createFieldFormRef} tabIndex={0}>
+            <div css={styles.createFieldContent}>
               {renderFormFields()}
 
               {renderRequiredParametersForm()}
@@ -320,7 +308,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               {isSemanticText && <SelectInferenceId />}
               {renderFormActions()}
             </div>
-          </div>
+          </EuiPanel>
         </Form>
       </EuiOutsideClickDetector>
     </>

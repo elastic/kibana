@@ -7,9 +7,9 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { validateExpression } from './validation';
-import { GeoContainmentAlertParams } from './types';
+import type { GeoContainmentAlertParams } from './types';
 
 export function getRuleType(): RuleTypeModel<GeoContainmentAlertParams> {
   return {

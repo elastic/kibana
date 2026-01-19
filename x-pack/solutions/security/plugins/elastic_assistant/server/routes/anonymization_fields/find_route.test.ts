@@ -23,7 +23,7 @@ describe('Find user anonymization fields route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     const mockUser1 = {
-      username: 'my_username',
+      username: 'elastic',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
@@ -33,15 +33,15 @@ describe('Find user anonymization fields route', () => {
     clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getFindAnonymizationFieldsResultWithSingleHit())
     );
-    context.elasticAssistant.getCurrentUser.mockReturnValue({
-      username: 'my_username',
+    context.elasticAssistant.getCurrentUser.mockResolvedValue({
+      username: 'elastic',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
       },
     } as AuthenticatedUser);
     logger = loggingSystemMock.createLogger();
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
     findAnonymizationFieldsRoute(server.router, logger);
   });
 

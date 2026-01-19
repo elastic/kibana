@@ -7,15 +7,22 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
-import { OpsgenieSubActions } from '../../../common';
+import {
+  SUB_ACTION,
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+} from '@kbn/connector-schemas/opsgenie/constants';
+import type {
+  Config as OpsgenieActionConfig,
+  Secrets as OpsgenieActionSecrets,
+} from '@kbn/connector-schemas/opsgenie';
 import { RULE_TAGS_TEMPLATE } from '../../../common/opsgenie';
-import type { OpsgenieActionConfig, OpsgenieActionSecrets } from '../../../server/connector_types';
-import { OpsgenieConnectorTypeParams, ValidationParams } from './types';
+import type { OpsgenieConnectorTypeParams, ValidationParams } from './types';
 import { DEFAULT_ALIAS } from './constants';
 
 const SELECT_MESSAGE = i18n.translate(
@@ -25,32 +32,28 @@ const SELECT_MESSAGE = i18n.translate(
   }
 );
 
-const TITLE = i18n.translate('xpack.stackConnectors.components.opsgenie.connectorTypeTitle', {
-  defaultMessage: 'Opsgenie',
-});
-
 export const getConnectorType = (): ConnectorTypeModel<
   OpsgenieActionConfig,
   OpsgenieActionSecrets,
   OpsgenieConnectorTypeParams
 > => {
   return {
-    id: '.opsgenie',
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: SELECT_MESSAGE,
-    actionTypeTitle: TITLE,
+    actionTypeTitle: CONNECTOR_NAME,
     validateParams,
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
     defaultActionParams: {
-      subAction: OpsgenieSubActions.CreateAlert,
+      subAction: SUB_ACTION.CreateAlert,
       subActionParams: {
         alias: DEFAULT_ALIAS,
         tags: [RULE_TAGS_TEMPLATE],
       },
     },
     defaultRecoveredActionParams: {
-      subAction: OpsgenieSubActions.CloseAlert,
+      subAction: SUB_ACTION.CloseAlert,
       subActionParams: {
         alias: DEFAULT_ALIAS,
       },
@@ -72,7 +75,7 @@ const validateParams = async (
     errors,
   };
 
-  if (actionParams.subAction === OpsgenieSubActions.CreateAlert) {
+  if (actionParams.subAction === SUB_ACTION.CreateAlert) {
     if (!actionParams?.subActionParams?.message?.length) {
       errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
     } else if (isEmpty(actionParams?.subActionParams?.message?.trim())) {
@@ -80,7 +83,7 @@ const validateParams = async (
     }
   }
   if (
-    actionParams.subAction === OpsgenieSubActions.CloseAlert &&
+    actionParams.subAction === SUB_ACTION.CloseAlert &&
     !actionParams?.subActionParams?.alias?.length
   ) {
     errors['subActionParams.alias'].push(translations.ALIAS_IS_REQUIRED);

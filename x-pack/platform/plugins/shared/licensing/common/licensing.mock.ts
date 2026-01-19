@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense, PublicLicense, PublicFeatures } from './types';
+import type { ILicense, PublicLicense, PublicFeatures } from '@kbn/licensing-types';
 import { License } from './license';
 
 function createLicense({

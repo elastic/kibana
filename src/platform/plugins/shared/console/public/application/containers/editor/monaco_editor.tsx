@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { CSSProperties } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CodeEditor } from '@kbn/code-editor';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import { CodeEditor } from '@kbn/code-editor/code_editor';
+import type { monaco } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang } from '@kbn/monaco';
+
 import { i18n } from '@kbn/i18n';
-import { useSetInputEditor } from '../../hooks';
-import { ContextMenu } from './components';
-import {
-  useServicesContext,
-  useEditorReadContext,
-  useRequestActionContext,
-  useEditorActionContext,
-} from '../../contexts';
+import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
+import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
+import type { EditorRequest } from './types';
 import {
   useSetInitialValue,
   useSetupAutocompletePolling,
@@ -28,22 +27,59 @@ import {
   useResizeCheckerUtils,
   useKeyboardCommandsUtils,
 } from './hooks';
-import type { EditorRequest } from './types';
-import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
-import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
+import {
+  useServicesContext,
+  useEditorReadContext,
+  useRequestActionContext,
+  useEditorActionContext,
+} from '../../contexts';
+import { ContextMenu } from './components';
+import { useSetInputEditor } from '../../hooks';
+import { useActionStyles, useHighlightedLinesClassName } from './styles';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { actions } = useActionStyles();
+
+  return {
+    editorActions: css`
+      ${actions}
+      padding-left: ${euiTheme.size.xs};
+      padding-right: ${euiTheme.size.xs};
+
+      // For IE11
+      min-width: calc(${euiTheme.size.l} * 2);
+    `,
+  };
+};
 
 export interface EditorProps {
   localStorageValue: string | undefined;
   value: string;
   setValue: (value: string) => void;
+  customParsedRequestsProvider?: (model: any) => any;
+  enableSuggestWidgetRepositioning: boolean;
 }
 
-export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps) => {
+export const MonacoEditor = ({
+  localStorageValue,
+  value,
+  setValue,
+  customParsedRequestsProvider,
+  enableSuggestWidgetRepositioning,
+}: EditorProps) => {
   const context = useServicesContext();
   const {
-    services: { notifications, settings: settingsService, autocompleteInfo },
+    services: {
+      http,
+      notifications,
+      settings: settingsService,
+      autocompleteInfo,
+      data,
+      licensing,
+      application,
+    },
     docLinkVersion,
-    config: { isDevMode },
   } = context;
   const { toasts } = notifications;
   const {
@@ -54,7 +90,6 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const [editorInstance, setEditorInstace] = useState<
     monaco.editor.IStandaloneCodeEditor | undefined
   >();
-
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useKeyboardCommandsUtils();
@@ -65,6 +100,8 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
   const setInputEditor = useSetInputEditor();
+  const styles = useStyles();
+  const highlightedLinesClassName = useHighlightedLinesClassName();
 
   const getRequestsCallback = useCallback(async (): Promise<EditorRequest[]> => {
     const requests = await actionsProvider.current?.getRequests();
@@ -76,8 +113,8 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   }, [docLinkVersion]);
 
   const autoIndentCallback = useCallback(async () => {
-    return actionsProvider.current!.autoIndent();
-  }, []);
+    return actionsProvider.current!.autoIndent(context);
+  }, [context]);
 
   const sendRequestsCallback = useCallback(async () => {
     await actionsProvider.current?.sendRequests(dispatch, context);
@@ -89,13 +126,29 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, isDevMode);
+      // Create custom provider if factory function is provided
+      const customProvider = customParsedRequestsProvider
+        ? customParsedRequestsProvider(editor.getModel())
+        : undefined;
+
+      const provider = new MonacoEditorActionsProvider(
+        editor,
+        setEditorActionsCss,
+        highlightedLinesClassName,
+        customProvider
+      );
       setInputEditor(provider);
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
       setEditorInstace(editor);
     },
-    [setupResizeChecker, setInputEditor, setEditorInstace, isDevMode]
+    [
+      setupResizeChecker,
+      setInputEditor,
+      setEditorInstace,
+      customParsedRequestsProvider,
+      highlightedLinesClassName,
+    ]
   );
 
   useEffect(() => {
@@ -103,7 +156,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       registerKeyboardCommands({
         editor: editorInstance,
         sendRequest: sendRequestsCallback,
-        autoIndent: async () => await actionsProvider.current?.autoIndent(),
+        autoIndent: async () => await actionsProvider.current?.autoIndent(context),
         getDocumentationLink: getDocumenationLink,
         moveToPreviousRequestEdge: async () =>
           await actionsProvider.current?.moveToPreviousRequestEdge(),
@@ -119,6 +172,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     registerKeyboardCommands,
     unregisterKeyboardCommands,
     settings.isKeyboardShortcutsEnabled,
+    context,
   ]);
 
   const editorWillUnmountCallback = useCallback(() => {
@@ -126,9 +180,27 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     unregisterKeyboardCommands();
   }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
-  const suggestionProvider = useMemo(() => {
-    return getSuggestionProvider(actionsProvider);
-  }, []);
+  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+    const callbacks: ESQLCallbacks = {
+      getSources: async () => {
+        const getLicense = licensing?.getLicense;
+        return await getESQLSources({ application, http }, getLicense);
+      },
+      getColumnsFor: async ({ query }: { query?: string } | undefined = {}) => {
+        const columns = await getEsqlColumns({
+          esqlQuery: query,
+          search: data?.search?.search,
+        });
+        return columns;
+      },
+    };
+    return callbacks;
+  }, [licensing, application, http, data?.search?.search]);
+
+  const suggestionProvider = useMemo(
+    () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
+    [esqlCallbacks]
+  );
 
   useSetInitialValue({ localStorageValue, setValue, toasts });
 
@@ -168,7 +240,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       data-test-subj="consoleMonacoEditorContainer"
     >
       <EuiFlexGroup
-        className="conApp__editorActions"
+        css={styles.editorActions}
         id="ConAppEditorActions"
         gutterSize="xs"
         responsive={false}
@@ -183,13 +255,13 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
             })}
           >
             <EuiButtonIcon
-              iconType="playFilled"
+              display="fill"
+              iconType="play"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
-              iconSize={'s'}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -212,6 +284,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
+        links={true}
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
@@ -224,6 +297,8 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
+        enableCustomContextMenu={true}
+        enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
       />
     </div>
   );

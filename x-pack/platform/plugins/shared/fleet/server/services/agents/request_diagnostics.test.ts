@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
 
 import { createClientMock } from './action.mock';
 import { bulkRequestDiagnostics, requestDiagnostics } from './request_diagnostics';
+
+jest.mock('../secrets', () => ({
+  isActionSecretStorageEnabled: jest.fn(),
+}));
 
 describe('requestDiagnostics', () => {
   beforeEach(async () => {

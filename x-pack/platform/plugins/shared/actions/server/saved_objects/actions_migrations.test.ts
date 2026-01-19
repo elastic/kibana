@@ -7,8 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { getActionsMigrations } from './actions_migrations';
-import { RawAction } from '../types';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { RawAction } from '../types';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';

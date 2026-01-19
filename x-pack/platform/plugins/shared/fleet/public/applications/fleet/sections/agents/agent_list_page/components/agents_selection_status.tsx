@@ -81,7 +81,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
                   values={{ count: totalAgents }}
                 />{' '}
                 <EuiIconTip
-                  type="iInCircle"
+                  type="info"
                   content={
                     <FormattedMessage
                       data-test-subj="selectedAgentCountTooltip"
@@ -120,7 +120,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
                 />{' '}
                 {selectionMode === 'query' && (
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     content={
                       <FormattedMessage
                         data-test-subj="selectedAgentCountTooltip"

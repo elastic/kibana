@@ -1,231 +1,7 @@
 {
   "id": "savedObjects",
   "client": {
-    "classes": [
-      {
-        "parentPluginId": "savedObjects",
-        "id": "def-public.SavedObjectSaveModal",
-        "type": "Class",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "SavedObjectSaveModal",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "savedObjects",
-            "scope": "public",
-            "docId": "kibSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectSaveModal",
-            "text": "SavedObjectSaveModal"
-          },
-          " extends React.Component<Props, ",
-          {
-            "pluginId": "savedObjects",
-            "scope": "public",
-            "docId": "kibSavedObjectsPluginApi",
-            "section": "def-public.SaveModalState",
-            "text": "SaveModalState"
-          },
-          ", any>"
-        ],
-        "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-        "deprecated": true,
-        "removeBy": "8.8.0",
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "presentationUtil",
-            "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
-          },
-          {
-            "plugin": "presentationUtil",
-            "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
-          },
-          {
-            "plugin": "links",
-            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
-          },
-          {
-            "plugin": "links",
-            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectSaveModal.state",
-            "type": "Object",
-            "tags": [],
-            "label": "state",
-            "description": [],
-            "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.copyOnSave",
-                "type": "boolean",
-                "tags": [],
-                "label": "copyOnSave",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.isTitleDuplicateConfirmed",
-                "type": "boolean",
-                "tags": [],
-                "label": "isTitleDuplicateConfirmed",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.hasTitleDuplicate",
-                "type": "boolean",
-                "tags": [],
-                "label": "hasTitleDuplicate",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.isLoading",
-                "type": "boolean",
-                "tags": [],
-                "label": "isLoading",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.visualizationDescription",
-                "type": "string",
-                "tags": [],
-                "label": "visualizationDescription",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.hasAttemptedSubmit",
-                "type": "boolean",
-                "tags": [],
-                "label": "hasAttemptedSubmit",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectSaveModal.componentDidMount",
-            "type": "Function",
-            "tags": [],
-            "label": "componentDidMount",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectSaveModal.render",
-            "type": "Function",
-            "tags": [],
-            "label": "render",
-            "description": [],
-            "signature": [
-              "() => React.JSX.Element"
-            ],
-            "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "savedObjects",
@@ -240,6 +16,8 @@
           "(error: { message: string; }) => boolean"
         ],
         "path": "src/platform/plugins/shared/saved_objects/public/saved_object/helpers/save_saved_object.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -251,6 +29,8 @@
             "label": "error",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/saved_object/helpers/save_saved_object.ts",
+            "lineNumber": 16,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -262,6 +42,8 @@
                 "label": "message",
                 "description": [],
                 "path": "src/platform/plugins/shared/saved_objects/public/saved_object/helpers/save_saved_object.ts",
+                "lineNumber": 16,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -269,6 +51,70 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
+        "id": "def-public.SavedObjectSaveModal",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "SavedObjectSaveModal",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<Omit<Props<void>, \"theme\"> & React.RefAttributes<Omit<Props<void>, \"theme\">>>"
+        ],
+        "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+        "lineNumber": 444,
+        "columnNumber": 14,
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "presentationUtil",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/save_modal.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/save_modal.tsx"
+          }
+        ],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectSaveModal.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -290,6 +136,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -310,6 +158,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+            "lineNumber": 36,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -320,17 +170,193 @@
       },
       {
         "parentPluginId": "savedObjects",
+        "id": "def-public.SavedObjectSaveModalWithSaveResult",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "SavedObjectSaveModalWithSaveResult",
+        "description": [
+          "\nThis is a workaround for using this directly with the `showSaveModal` method.\n\nThe `showSaveModal` method wraps and calls these props from outside but this modal\ndoes not require the `SaveResult` to be returned from `onSave`.\n"
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<Omit<Props<",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SaveResult",
+            "text": "SaveResult"
+          },
+          ">, \"theme\"> & React.RefAttributes<Omit<Props<",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SaveResult",
+            "text": "SaveResult"
+          },
+          ">, \"theme\">>>"
+        ],
+        "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+        "lineNumber": 454,
+        "columnNumber": 14,
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/save_modal.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/save_modal.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
+          }
+        ],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectSaveModalWithSaveResult.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
         "id": "def-public.showSaveModal",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "showSaveModal",
         "description": [],
         "signature": [
-          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
+          "(saveModal: React.ReactElement<",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.ShowSaveModalMinimalSaveModalProps",
+            "text": "ShowSaveModalMinimalSaveModalProps"
+          },
+          ", string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
         ],
         "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
-        "deprecated": false,
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/visualize_app/utils/get_top_nav_config.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/visualize_app/utils/get_top_nav_config.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/top_nav_config.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/top_nav_config.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/open_save_modal.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/open_save_modal.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/on_save_discover_session.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/on_save_discover_session.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/services/save_modal.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/services/save_modal.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "savedObjects",
@@ -340,9 +366,19 @@
             "label": "saveModal",
             "description": [],
             "signature": [
-              "React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.ShowSaveModalMinimalSaveModalProps",
+                "text": "ShowSaveModalMinimalSaveModalProps"
+              },
+              ", string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -358,6 +394,8 @@
               "React.FC<{ children?: React.ReactNode; }> | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -376,6 +414,8 @@
         "label": "OnSaveProps",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -387,6 +427,8 @@
             "label": "newTitle",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -398,6 +440,8 @@
             "label": "newCopyOnSave",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -409,6 +453,8 @@
             "label": "isTitleDuplicateConfirmed",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -423,6 +469,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -436,6 +484,8 @@
             "label": "newDescription",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -450,6 +500,8 @@
         "label": "OriginSaveModalProps",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -464,6 +516,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -478,6 +532,8 @@
               "((appId: string) => string | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -492,6 +548,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+                "lineNumber": 26,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -510,6 +568,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -524,6 +584,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -538,6 +600,8 @@
               "SaveModalDocumentInfo"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -549,6 +613,8 @@
             "label": "objectType",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -563,6 +629,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -587,6 +655,8 @@
               ") => React.ReactNode)"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -606,9 +676,19 @@
                 "section": "def-public.OnSaveProps",
                 "text": "OnSaveProps"
               },
-              " & { returnToOrigin: boolean; }) => void"
+              " & { returnToOrigin: boolean; }) => Promise<",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.SaveResult",
+                "text": "SaveResult"
+              },
+              ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -630,6 +710,8 @@
                   " & { returnToOrigin: boolean; }"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
+                "lineNumber": 33,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -660,6 +742,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": true,
         "removeBy": "8.8.0",
         "trackAdoption": false,
@@ -680,6 +764,8 @@
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -696,6 +782,8 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -720,6 +808,8 @@
               "<T>>"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -734,6 +824,8 @@
                   "EsResponse"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+                "lineNumber": 21,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -749,6 +841,8 @@
             "label": "copyOnSave",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -765,6 +859,8 @@
               ") => Record<string, unknown>"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -779,6 +875,8 @@
                   "SavedObjectCreationOpts"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+                "lineNumber": 23,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -797,6 +895,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -811,6 +911,8 @@
               "(() => Promise<{}>) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -827,6 +929,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -843,6 +947,8 @@
               "() => string"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -859,6 +965,8 @@
               "() => string"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -875,6 +983,8 @@
               "() => string"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -899,6 +1009,8 @@
               " | null>) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -913,6 +1025,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+                "lineNumber": 30,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -931,6 +1045,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -953,6 +1069,8 @@
               "<T>>) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -966,6 +1084,8 @@
             "label": "isSaving",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -980,6 +1100,8 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -993,6 +1115,8 @@
             "label": "lastSavedTitle",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1007,6 +1131,8 @@
               "Record<string, any> | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1029,6 +1155,8 @@
               ") => Promise<string>"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1049,6 +1177,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+                "lineNumber": 37,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1074,6 +1204,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1095,6 +1227,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1106,6 +1240,8 @@
             "label": "showInRecentlyAccessed",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1117,6 +1253,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1132,6 +1270,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1146,6 +1286,8 @@
         "label": "SavedObjectConfig",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1180,6 +1322,8 @@
               ">>) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1203,6 +1347,8 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+                "lineNumber": 66,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1221,6 +1367,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1239,6 +1387,8 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1253,6 +1403,8 @@
                   "SavedObjectAttributesAndRefs"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+                "lineNumber": 68,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1283,6 +1435,8 @@
               "[]) => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1297,6 +1451,8 @@
                   "T"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+                "lineNumber": 69,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1313,6 +1469,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+                "lineNumber": 69,
+                "columnNumber": 57,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1331,6 +1489,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1345,6 +1505,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1368,6 +1530,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1382,6 +1546,8 @@
               "Record<string, any> | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1396,6 +1562,8 @@
               "Record<string, any> | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1410,6 +1578,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1432,6 +1602,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1446,6 +1618,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1460,6 +1634,8 @@
         "label": "SavedObjectSaveOpts",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1474,6 +1650,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1488,6 +1666,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1502,6 +1682,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1518,6 +1700,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects/public/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1532,6 +1716,8 @@
         "label": "SaveModalState",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1543,6 +1729,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1554,6 +1742,8 @@
             "label": "copyOnSave",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1565,6 +1755,8 @@
             "label": "isTitleDuplicateConfirmed",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1576,17 +1768,21 @@
             "label": "hasTitleDuplicate",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjects",
-            "id": "def-public.SaveModalState.isLoading",
+            "id": "def-public.SaveModalState.isSaving",
             "type": "boolean",
             "tags": [],
-            "label": "isLoading",
+            "label": "isSaving",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1598,6 +1794,8 @@
             "label": "visualizationDescription",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1609,8 +1807,90 @@
             "label": "hasAttemptedSubmit",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
+        "id": "def-public.ShowSaveModalMinimalSaveModalProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ShowSaveModalMinimalSaveModalProps",
+        "description": [
+          "\nMinimum props expected for model components passed to `showSaveModal`"
+        ],
+        "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.ShowSaveModalMinimalSaveModalProps.onSave",
+            "type": "Function",
+            "tags": [],
+            "label": "onSave",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => Promise<",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.SaveResult",
+                "text": "SaveResult"
+              },
+              ">"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.ShowSaveModalMinimalSaveModalProps.onSave.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+                "lineNumber": 33,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.ShowSaveModalMinimalSaveModalProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1631,6 +1911,8 @@
           "{ id?: string | undefined; } | { error: Error; }"
         ],
         "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

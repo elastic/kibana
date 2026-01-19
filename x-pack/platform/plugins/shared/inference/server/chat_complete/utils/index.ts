@@ -16,3 +16,9 @@ export { streamToResponse } from './stream_to_response';
 export { handleCancellation } from './handle_cancellation';
 export { mergeChunks } from './merge_chunks';
 export { isNativeFunctionCallingSupported } from './function_calling_support';
+export { convertUpstreamError } from './convert_upstream_error';
+export {
+  handleConnectorStreamResponse,
+  handleConnectorDataResponse,
+} from './handle_connector_response';
+export { handleLifecycleCallbacks } from './handle_lifecycle_callbacks';

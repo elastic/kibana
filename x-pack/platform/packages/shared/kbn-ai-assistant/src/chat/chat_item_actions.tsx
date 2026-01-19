@@ -65,7 +65,7 @@ export function ChatItemActions({
           color="text"
           data-test-subj="observabilityAiAssistantChatItemActionsInspectPromptButton"
           display={expanded ? 'fill' : 'empty'}
-          iconType={expanded ? 'eyeClosed' : 'eye'}
+          iconType="inspect"
           onClick={onToggleExpand}
         />
       ) : null}

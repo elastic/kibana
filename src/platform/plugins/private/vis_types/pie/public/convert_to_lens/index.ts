@@ -8,14 +8,14 @@
  */
 
 import {
-  convertToLensModule,
+  getConvertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { v4 as uuidv4 } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
-import { ConvertPieToLensVisualization } from './types';
+import type { ConvertPieToLensVisualization } from './types';
 
 export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
@@ -29,7 +29,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
     return null;
   }
 
-  const { getColumnsFromVis } = await convertToLensModule;
+  const { getColumnsFromVis } = await getConvertToLensModule();
   const layers = getColumnsFromVis(vis, timefilter, dataView, {
     buckets: [],
     splits: ['segment'],

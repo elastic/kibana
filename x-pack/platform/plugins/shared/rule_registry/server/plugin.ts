@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { type Subject, ReplaySubject, Observable, map, distinctUntilChanged } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import { type Subject, ReplaySubject, map, distinctUntilChanged } from 'rxjs';
+import type {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
@@ -15,8 +16,8 @@ import {
   CoreStart,
   IContextProvider,
   CoreStatus,
-  ServiceStatusLevels,
 } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -134,16 +135,16 @@ export class RuleRegistryPlugin
           RULE_SEARCH_STRATEGY_NAME,
           ruleRegistrySearchStrategy
         );
+
+        core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
+          'rac',
+          this.createRouteHandlerContext()
+        );
       })
       .catch(() => {});
 
     // ALERTS ROUTES
     const router = core.http.createRouter<RacRequestHandlerContext>();
-    core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
-      'rac',
-      this.createRouteHandlerContext()
-    );
-
     defineRoutes(router);
 
     return {
@@ -164,6 +165,9 @@ export class RuleRegistryPlugin
       // NOTE: Alerts share the authorization client with the alerting plugin
       async getAlertingAuthorization(request: KibanaRequest) {
         return plugins.alerting.getAlertingAuthorizationWithRequest(request);
+      },
+      async getEsClientScoped(request: KibanaRequest) {
+        return core.elasticsearch.client.asScoped(request).asCurrentUser;
       },
       securityPluginSetup: security,
       ruleDataService,

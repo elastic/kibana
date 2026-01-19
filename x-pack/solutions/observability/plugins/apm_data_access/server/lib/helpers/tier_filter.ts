@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 

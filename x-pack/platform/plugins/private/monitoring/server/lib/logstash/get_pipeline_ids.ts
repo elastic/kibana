@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { get } from 'lodash';
-import { LegacyRequest, Bucket, Pipeline } from '../../types';
+import type { LegacyRequest, Bucket, Pipeline } from '../../types';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { getIndexPatterns } from '../../../common/get_index_patterns';
@@ -49,34 +49,32 @@ export async function getLogstashPipelineIds({
     size: 0,
     ignore_unavailable: true,
     filter_path: ['aggregations.nest.id.buckets', 'aggregations.nest_mb.id.buckets'],
-    body: {
-      query: createQuery({
-        start,
-        end,
-        metric: LogstashMetric.getMetricFields(),
-        clusterUuid,
-        filters,
-      }),
-      aggs: {
-        nest: {
-          nested: {
-            path: 'logstash_stats.pipelines',
-          },
-          aggs: {
-            id: {
-              terms: {
-                field: 'logstash_stats.pipelines.id',
-                size,
-              },
-              aggs: {
-                unnest: {
-                  reverse_nested: {},
-                  aggs: {
-                    nodes: {
-                      terms: {
-                        field: 'logstash_stats.logstash.uuid',
-                        size,
-                      },
+    query: createQuery({
+      start,
+      end,
+      metric: LogstashMetric.getMetricFields(),
+      clusterUuid,
+      filters,
+    }),
+    aggs: {
+      nest: {
+        nested: {
+          path: 'logstash_stats.pipelines',
+        },
+        aggs: {
+          id: {
+            terms: {
+              field: 'logstash_stats.pipelines.id',
+              size,
+            },
+            aggs: {
+              unnest: {
+                reverse_nested: {},
+                aggs: {
+                  nodes: {
+                    terms: {
+                      field: 'logstash_stats.logstash.uuid',
+                      size,
                     },
                   },
                 },
@@ -84,25 +82,25 @@ export async function getLogstashPipelineIds({
             },
           },
         },
-        nest_mb: {
-          nested: {
-            path: 'logstash.node.stats.pipelines',
-          },
-          aggs: {
-            id: {
-              terms: {
-                field: 'logstash.node.stats.pipelines.id',
-                size,
-              },
-              aggs: {
-                unnest_mb: {
-                  reverse_nested: {},
-                  aggs: {
-                    nodes: {
-                      terms: {
-                        field: 'logstash.node.stats.logstash.uuid',
-                        size,
-                      },
+      },
+      nest_mb: {
+        nested: {
+          path: 'logstash.node.stats.pipelines',
+        },
+        aggs: {
+          id: {
+            terms: {
+              field: 'logstash.node.stats.pipelines.id',
+              size,
+            },
+            aggs: {
+              unnest_mb: {
+                reverse_nested: {},
+                aggs: {
+                  nodes: {
+                    terms: {
+                      field: 'logstash.node.stats.logstash.uuid',
+                      size,
                     },
                   },
                 },

@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
-import { EuiCommentProps } from '@elastic/eui';
-import { UserAvatar } from '.';
+import type {
+  ApiConfig,
+  InterruptResumeValue,
+  Message,
+  Replacements,
+  User,
+} from '@kbn/elastic-assistant-common';
+import type { EuiCommentProps } from '@elastic/eui';
 
 export interface MessagePresentation {
   delay?: number;
@@ -29,38 +34,44 @@ export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
 export interface Conversation {
   '@timestamp'?: string;
   apiConfig?: ApiConfig;
-  user?: {
-    id?: string;
-    name?: string;
-  };
+  createdBy: User;
+  users: User[];
   category: string;
   id: string;
   title: string;
   messages: ClientMessage[];
-  updatedAt?: Date;
-  createdAt?: Date;
+  updatedAt?: string;
+  createdAt: string;
   replacements: Replacements;
-  isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }
 
 export interface AssistantTelemetry {
-  reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
+  reportAssistantInvoked: (params: { invokedBy: string }) => void;
   reportAssistantMessageSent: (params: {
-    conversationId: string;
     role: string;
     actionTypeId: string;
     model?: string;
     provider?: string;
     isEnabledKnowledgeBase: boolean;
   }) => void;
-  reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
-  reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
+  reportAssistantQuickPrompt: (params: { promptTitle: string }) => void;
+  reportAssistantStarterPrompt: (params: { promptTitle: string }) => void;
+  reportAssistantSettingToggled: (params: {
+    assistantStreamingEnabled?: boolean;
+    alertsCountUpdated?: boolean;
+  }) => void;
 }
 
 export interface AssistantAvailability {
+  // True when searchAiLake configurations is available
+  hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise, or Security Complete PLI for serverless. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
+  // True when the Assistant is visible, i.e. the Assistant is available and the Assistant is visible in the UI
+  isAssistantVisible: boolean;
+  // When true, user has `All` privilege for `Management > AI Assistant`
+  isAssistantManagementEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
   // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
@@ -71,18 +82,26 @@ export interface AssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  // When true, user has privilege to access Agent Builder feature
+  hasAgentBuilderPrivilege?: boolean;
+  // When true, use has privilege to manage Agent Builder feature
+  hasAgentBuilderManagePrivilege?: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {
   abortStream: () => void;
   currentConversation?: Conversation;
+  isConversationOwner: boolean;
   isFetchingResponse: boolean;
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
-  currentUserAvatar?: UserAvatar;
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
-  contentReferencesVisible?: boolean;
-  contentReferencesEnabled?: boolean;
+  contentReferencesVisible: boolean;
 }) => EuiCommentProps[];
+
+export type ResumeGraphFunction = (
+  threadId: string,
+  resumeValue: InterruptResumeValue
+) => Promise<void>;

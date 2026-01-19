@@ -41,9 +41,9 @@ export function GroupByLabel() {
         </EuiText>
       }
     >
-      <span>
+      <span tabIndex={0}>
         <FormattedMessage id="xpack.maps.source.esGeoGrid.groupByLabel" defaultMessage="Group by" />{' '}
-        <EuiIcon type="questionInCircle" color="subdued" />
+        <EuiIcon type="question" color="subdued" />
       </span>
     </EuiToolTip>
   );

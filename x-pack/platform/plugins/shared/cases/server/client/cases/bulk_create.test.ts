@@ -47,7 +47,7 @@ describe('bulkCreate', () => {
         type: ConnectorTypes.none,
         fields: null,
       },
-      settings: { syncAlerts: true },
+      settings: { syncAlerts: true, extractObservables: true },
       severity: CaseSeverity.LOW,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [{ uid: '1' }],
@@ -121,9 +121,11 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -134,6 +136,8 @@ describe('bulkCreate', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 0,
+              "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -165,9 +169,11 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "critical",
@@ -178,6 +184,8 @@ describe('bulkCreate', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 0,
+              "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -245,15 +253,18 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-saved-object-id",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
               "status": "open",
               "tags": Array [],
               "title": "My Case",
+              "total_observables": 0,
               "updated_at": null,
               "updated_by": null,
             },
@@ -284,15 +295,18 @@ describe('bulkCreate', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-saved-object-id",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "critical",
               "status": "open",
               "tags": Array [],
               "title": "My Case",
+              "total_observables": 0,
               "updated_at": null,
               "updated_by": null,
             },
@@ -416,6 +430,65 @@ describe('bulkCreate', () => {
           { id: 'mock-saved-object-id', owner: 'securitySolution' },
           { id: 'mock-saved-object-id', owner: 'cases' },
         ],
+        operation: [
+          {
+            action: 'cases_assign',
+            docType: 'case',
+            ecsType: 'change',
+            name: 'assignCase',
+            savedObjectType: 'cases',
+            verbs: { past: 'updated', present: 'update', progressive: 'updating' },
+          },
+          {
+            action: 'case_create',
+            docType: 'case',
+            ecsType: 'creation',
+            name: 'createCase',
+            savedObjectType: 'cases',
+            verbs: { past: 'created', present: 'create', progressive: 'creating' },
+          },
+        ],
+      });
+    });
+
+    it('validates with assign+create operations when cases have assignees', async () => {
+      await bulkCreate(
+        { cases: [getCases()[0], getCases({ owner: 'cases' })[0]] },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entities: [
+          { id: 'mock-saved-object-id', owner: 'securitySolution' },
+          { id: 'mock-saved-object-id', owner: 'cases' },
+        ],
+        operation: [
+          {
+            action: 'cases_assign',
+            docType: 'case',
+            ecsType: 'change',
+            name: 'assignCase',
+            savedObjectType: 'cases',
+            verbs: { past: 'updated', present: 'update', progressive: 'updating' },
+          },
+          {
+            action: 'case_create',
+            docType: 'case',
+            ecsType: 'creation',
+            name: 'createCase',
+            savedObjectType: 'cases',
+            verbs: { past: 'created', present: 'create', progressive: 'creating' },
+          },
+        ],
+      });
+    });
+
+    it('validates with only create operation when cases have no assignees', async () => {
+      await bulkCreate({ cases: [getCases({ assignees: [] })[0]] }, clientArgs, casesClientMock);
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entities: [{ id: 'mock-saved-object-id', owner: 'securitySolution' }],
         operation: {
           action: 'case_create',
           docType: 'case',
@@ -1188,7 +1261,7 @@ describe('bulkCreate', () => {
               customFields: [],
               description: 'This is a brand new case of a bad meanie defacing data',
               owner: 'securitySolution',
-              settings: { syncAlerts: true },
+              settings: { syncAlerts: true, extractObservables: true },
               severity: 'low',
               tags: ['defacement'],
               title: 'Super Bad Security Issue',
@@ -1222,7 +1295,7 @@ describe('bulkCreate', () => {
               customFields: [],
               description: 'This is a brand new case of a bad meanie defacing data',
               owner: 'securitySolution',
-              settings: { syncAlerts: true },
+              settings: { syncAlerts: true, extractObservables: true },
               severity: 'low',
               tags: ['defacement'],
               title: 'Super Bad Security Issue',

@@ -8,7 +8,7 @@
  */
 
 import { datemathStringRt } from '.';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 
 describe('datemathStringRt', () => {
   it('passes if it is a valid dateMath', () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AsApiContract, RewriteRequestCase, ActionType } from '@kbn/actions-types';
+import type { AsApiContract, RewriteRequestCase, ActionType } from '@kbn/actions-types';
 
 const transformConnectorType: RewriteRequestCase<ActionType> = ({
   enabled_in_config: enabledInConfig,
@@ -16,6 +16,8 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   supported_feature_ids: supportedFeatureIds,
   is_system_action_type: isSystemActionType,
   sub_feature: subFeature,
+  is_deprecated: isDeprecated,
+  allow_multiple_system_actions: allowMultipleSystemActions,
   ...res
 }: AsApiContract<ActionType>) => ({
   enabledInConfig,
@@ -24,6 +26,8 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   supportedFeatureIds,
   isSystemActionType,
   subFeature,
+  isDeprecated,
+  allowMultipleSystemActions,
   ...res,
 });
 

@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
 /** The maximum number of items to render */
 export const DEFAULT_STACK_BY_FIELD0_SIZE = 1000;

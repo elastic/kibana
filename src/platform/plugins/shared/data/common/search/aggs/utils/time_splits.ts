@@ -9,12 +9,13 @@
 
 import moment from 'moment-timezone';
 import { isArray } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
-import { RangeFilter } from '@kbn/es-query';
+import type { RangeFilter } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
-import { GenericBucket, AggConfigs, getTime, AggConfig } from '../../..';
-import { IBucketAggConfig } from '../buckets';
+import type { GenericBucket, AggConfigs, AggConfig } from '../../..';
+import { getTime } from '../../..';
+import type { IBucketAggConfig } from '../buckets';
 
 /**
  * This function will transform an ES response containg a time split (using a filters aggregation before the metrics or date histogram aggregation),

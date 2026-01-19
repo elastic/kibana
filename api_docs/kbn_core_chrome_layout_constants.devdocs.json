@@ -1,0 +1,521 @@
+{
+  "id": "@kbn/core-chrome-layout-constants",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.layoutVar",
+        "type": "Function",
+        "tags": [],
+        "label": "layoutVar",
+        "description": [
+          "\nHelper function to generate CSS custom property variables with type safety.\nAutomatically detects the correct prefix (--kbn-layout-- or --kbn-application--)\nbased on the variable name pattern.\n"
+        ],
+        "signature": [
+          "(name: ",
+          "CSSVarName",
+          ", fallback?: string | undefined) => string"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutVar.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The CSS variable name in dot notation"
+            ],
+            "signature": [
+              "CSSVarName"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+            "lineNumber": 49,
+            "columnNumber": 27,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutVar.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fallback",
+            "description": [
+              "- Optional fallback value"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+            "lineNumber": 49,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The complete CSS var() expression"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.layoutVarName",
+        "type": "Function",
+        "tags": [],
+        "label": "layoutVarName",
+        "description": [
+          "\nHelper function to get the CSS variable name with type safety.\nReturns the complete CSS variable name (with prefix) for use in template strings.\n"
+        ],
+        "signature": [
+          "(name: ",
+          "CSSVarName",
+          ") => string"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 77,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutVarName.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The CSS variable name in dot notation"
+            ],
+            "signature": [
+              "CSSVarName"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+            "lineNumber": 77,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The complete CSS variable name with appropriate prefix"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.APP_FIXED_VIEWPORT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_FIXED_VIEWPORT_ID",
+        "description": [
+          "\nThe ID of the fixed viewport container in the application.\nThis div is rendered by the `AppFixedViewport` component on the top of the application area and can be used to render fixed elements that should not scroll with the main content."
+        ],
+        "signature": [
+          "\"app-fixed-viewport\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.APP_MAIN_SCROLL_CONTAINER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_MAIN_SCROLL_CONTAINER_ID",
+        "description": [
+          "\nThe ID of the main scroll container in the application.\n`document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID)` can be used to find the main scroll container."
+        ],
+        "signature": [
+          "\"app-main-scroll\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.ApplicationComponent",
+        "type": "Type",
+        "tags": [],
+        "label": "ApplicationComponent",
+        "description": [],
+        "signature": [
+          "\"content\" | \"topBar\" | \"bottomBar\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.ApplicationVarName",
+        "type": "Type",
+        "tags": [],
+        "label": "ApplicationVarName",
+        "description": [],
+        "signature": [
+          "\"application.content.height\" | \"application.content.width\" | \"application.content.right\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.left\" | \"application.content.marginBottom\" | \"application.content.marginRight\" | \"application.topBar.height\" | \"application.topBar.width\" | \"application.topBar.right\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.left\" | \"application.topBar.marginBottom\" | \"application.topBar.marginRight\" | \"application.bottomBar.height\" | \"application.bottomBar.width\" | \"application.bottomBar.right\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.left\" | \"application.bottomBar.marginBottom\" | \"application.bottomBar.marginRight\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.CSSVarName",
+        "type": "Type",
+        "tags": [],
+        "label": "CSSVarName",
+        "description": [],
+        "signature": [
+          "\"application.height\" | \"application.width\" | \"application.right\" | \"application.top\" | \"application.bottom\" | \"application.left\" | \"application.marginBottom\" | \"application.marginRight\" | \"banner.height\" | \"banner.width\" | \"banner.right\" | \"banner.top\" | \"banner.bottom\" | \"banner.left\" | \"banner.marginBottom\" | \"banner.marginRight\" | \"navigation.height\" | \"navigation.width\" | \"navigation.right\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.left\" | \"navigation.marginBottom\" | \"navigation.marginRight\" | \"footer.height\" | \"footer.width\" | \"footer.right\" | \"footer.top\" | \"footer.bottom\" | \"footer.left\" | \"footer.marginBottom\" | \"footer.marginRight\" | \"header.height\" | \"header.width\" | \"header.right\" | \"header.top\" | \"header.bottom\" | \"header.left\" | \"header.marginBottom\" | \"header.marginRight\" | \"sidebar.height\" | \"sidebar.width\" | \"sidebar.right\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.left\" | \"sidebar.marginBottom\" | \"sidebar.marginRight\" | \"application.content.height\" | \"application.content.width\" | \"application.content.right\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.left\" | \"application.content.marginBottom\" | \"application.content.marginRight\" | \"application.topBar.height\" | \"application.topBar.width\" | \"application.topBar.right\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.left\" | \"application.topBar.marginBottom\" | \"application.topBar.marginRight\" | \"application.bottomBar.height\" | \"application.bottomBar.width\" | \"application.bottomBar.right\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.left\" | \"application.bottomBar.marginBottom\" | \"application.bottomBar.marginRight\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.LayoutComponent",
+        "type": "Type",
+        "tags": [],
+        "label": "LayoutComponent",
+        "description": [],
+        "signature": [
+          "\"application\" | \"banner\" | \"navigation\" | \"footer\" | \"header\" | \"sidebar\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.LayoutProperty",
+        "type": "Type",
+        "tags": [],
+        "label": "LayoutProperty",
+        "description": [],
+        "signature": [
+          "\"height\" | \"width\" | \"right\" | \"top\" | \"bottom\" | \"left\" | \"marginBottom\" | \"marginRight\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.LayoutVarName",
+        "type": "Type",
+        "tags": [],
+        "label": "LayoutVarName",
+        "description": [],
+        "signature": [
+          "\"application.height\" | \"application.width\" | \"application.right\" | \"application.top\" | \"application.bottom\" | \"application.left\" | \"application.marginBottom\" | \"application.marginRight\" | \"banner.height\" | \"banner.width\" | \"banner.right\" | \"banner.top\" | \"banner.bottom\" | \"banner.left\" | \"banner.marginBottom\" | \"banner.marginRight\" | \"navigation.height\" | \"navigation.width\" | \"navigation.right\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.left\" | \"navigation.marginBottom\" | \"navigation.marginRight\" | \"footer.height\" | \"footer.width\" | \"footer.right\" | \"footer.top\" | \"footer.bottom\" | \"footer.left\" | \"footer.marginBottom\" | \"footer.marginRight\" | \"header.height\" | \"header.width\" | \"header.right\" | \"header.top\" | \"header.bottom\" | \"header.left\" | \"header.marginBottom\" | \"header.marginRight\" | \"sidebar.height\" | \"sidebar.width\" | \"sidebar.right\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.left\" | \"sidebar.marginBottom\" | \"sidebar.marginRight\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.MAIN_CONTENT_SELECTORS",
+        "type": "Array",
+        "tags": [],
+        "label": "MAIN_CONTENT_SELECTORS",
+        "description": [
+          "\nThe ID of the main content container in the application, regardless of the type of the layout used.\n`document.querySelector(MAIN_CONTENT_SELECTORS.join(','))` can be used to find the main content container.\n\nTODO: Potentially allow this to be customizable per-plugin"
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.SIDE_PANEL_CONTENT_GAP",
+        "type": "number",
+        "tags": [],
+        "label": "SIDE_PANEL_CONTENT_GAP",
+        "description": [
+          "\nThe gap (in pixels) between the secondary side navigation panel and the main app content."
+        ],
+        "signature": [
+          "8"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.euiIncludeSelectorInFocusTrap",
+        "type": "Object",
+        "tags": [],
+        "label": "euiIncludeSelectorInFocusTrap",
+        "description": [
+          "\nThe selector for elements that should be included in the focus trap of a flyout.\nThis will allow the flyout focus trap to include header and sidenav by default."
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.euiIncludeSelectorInFocusTrap.prop",
+            "type": "Object",
+            "tags": [],
+            "label": "prop",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-layout-constants",
+                "id": "def-common.euiIncludeSelectorInFocusTrap.prop.dataeuiincludesinflyoutfocustrap",
+                "type": "boolean",
+                "tags": [],
+                "label": "'data-eui-includes-in-flyout-focus-trap'",
+                "description": [],
+                "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+                "lineNumber": 55,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.euiIncludeSelectorInFocusTrap.selector",
+            "type": "string",
+            "tags": [],
+            "label": "selector",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.layoutLevels",
+        "type": "Object",
+        "tags": [],
+        "label": "layoutLevels",
+        "description": [],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutLevels.content",
+            "type": "number",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "// Base application content layer"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutLevels.header",
+            "type": "number",
+            "tags": [],
+            "label": "header",
+            "description": [
+              "// Primary layout components that should appear above content"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutLevels.footer",
+            "type": "number",
+            "tags": [],
+            "label": "footer",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutLevels.navigation",
+            "type": "number",
+            "tags": [],
+            "label": "navigation",
+            "description": [
+              "// 999 is chosen to be the same as old EuiCollapsibleNavBeta for backwards compatibility"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutLevels.sidebar",
+            "type": "number",
+            "tags": [],
+            "label": "sidebar",
+            "description": [
+              "// Interactive layout components that need higher priority than euiFlyout (1000)"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutLevels.banner",
+            "type": "number",
+            "tags": [],
+            "label": "banner",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutLevels.applicationTopBar",
+            "type": "number",
+            "tags": [],
+            "label": "applicationTopBar",
+            "description": [
+              "// Application-level bars that appear within main content"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutLevels.applicationBottomBar",
+            "type": "number",
+            "tags": [],
+            "label": "applicationBottomBar",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.layoutLevels.debug",
+            "type": "number",
+            "tags": [],
+            "label": "debug",
+            "description": [
+              "// Debug and development tools - highest priority"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

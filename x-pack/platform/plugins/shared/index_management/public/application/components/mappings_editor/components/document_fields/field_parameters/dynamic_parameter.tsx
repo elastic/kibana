@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { documentationService } from '../../../../../services/documentation';
 import { UseField, CheckBoxField } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
-import { Field } from '../../../types';
+import type { Field } from '../../../types';
 import { EditFieldFormRow } from '../fields/edit_field';
 
 /**
@@ -25,7 +25,6 @@ export const dynamicSerializer = (field: Field): Field => {
 
   const dynamic =
     field.dynamic_toggle === true ? true : field.dynamic_strict === true ? 'strict' : false;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { dynamic_toggle, dynamic_strict, ...rest } = field;
 
   return {

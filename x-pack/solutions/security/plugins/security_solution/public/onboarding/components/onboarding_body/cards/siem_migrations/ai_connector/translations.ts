@@ -14,10 +14,22 @@ export const AI_CONNECTOR_CARD_TITLE = i18n.translate(
   }
 );
 
-export const AI_CONNECTOR_CARD_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.onboarding.aiConnector.description',
-  {
-    defaultMessage:
-      'Choose and configure any AI provider available to start a SIEM rules migration.',
-  }
+export const AI_CONNECTOR_CARD_DESCRIPTION_START = i18n.translate(
+  'xpack.securitySolution.onboarding.aiConnector.descriptionStart',
+  { defaultMessage: 'This feature relies on an AI connector for rule translation. ' }
+);
+
+export const LLM_MATRIX_LINK = i18n.translate(
+  'xpack.securitySolution.onboarding.aiConnector.llmMatrixLink',
+  { defaultMessage: 'model performance' }
+);
+
+export const AI_POWERED_MIGRATIONS_LINK = i18n.translate(
+  'xpack.securitySolution.onboarding.aiConnector.automaticMigrationLink',
+  { defaultMessage: 'AI-powered Automatic migration' }
+);
+
+export const LEARN_MORE_LINK = i18n.translate(
+  'xpack.securitySolution.onboarding.aiConnector.learnMoreLink',
+  { defaultMessage: 'Learn more' }
 );

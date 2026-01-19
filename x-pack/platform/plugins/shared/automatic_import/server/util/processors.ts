@@ -11,7 +11,7 @@ import { Environment, FileSystemLoader } from 'nunjucks';
 import { deepCopy } from './util';
 import type { ESProcessorItem, Pipeline } from '../../common';
 import type { KVState, SimplifiedProcessors } from '../types';
-import { KVProcessor } from '../processor_types';
+import type { KVProcessor } from '../processor_types';
 
 export function combineProcessors(
   initialPipeline: Pipeline,
@@ -69,6 +69,13 @@ export function createKVProcessor(kvInput: KVProcessor, state: KVState): ESProce
     autoescape: false,
   });
   const template = env.getTemplate('kv.yml.njk');
+  if (kvInput.trim_key) {
+    kvInput.trim_key = kvInput.trim_key.replace(/\\/g, '\\\\').replace(/['"]/g, '\\$&');
+  }
+
+  if (kvInput.trim_value) {
+    kvInput.trim_value = kvInput.trim_value.replace(/\\/g, '\\\\').replace(/['"]/g, '\\$&');
+  }
   const renderedTemplate = template.render({
     kvInput,
     packageName: state.packageName,

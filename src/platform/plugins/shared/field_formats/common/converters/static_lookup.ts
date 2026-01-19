@@ -10,7 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import type { TextContextTypeConvert } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 
 function convertLookupEntriesToMap(
   lookupEntries: Array<{ key: string; value: unknown }>
@@ -18,6 +19,19 @@ function convertLookupEntriesToMap(
   return lookupEntries.reduce(
     (lookupMap: Record<string, unknown>, lookupEntry: { key: string; value: unknown }) => {
       lookupMap[lookupEntry.key] = lookupEntry.value;
+
+      /**
+       * Do some key translations because Elasticsearch returns
+       * boolean-type aggregation results as 0 and 1
+       */
+      if (lookupEntry.key === 'true') {
+        lookupMap[1] = lookupEntry.value;
+      }
+
+      if (lookupEntry.key === 'false') {
+        lookupMap[0] = lookupEntry.value;
+      }
+
       return lookupMap;
     },
     {} as Record<string, unknown>

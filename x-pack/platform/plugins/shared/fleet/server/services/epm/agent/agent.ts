@@ -5,46 +5,119 @@
  * 2.0.
  */
 
-import Handlebars from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
-import type { PackagePolicyConfigRecord } from '../../../../common/types';
+import type {
+  PackageInfo,
+  PackagePolicyConfigRecord,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
+} from '../../../../common/types';
+import { PackagePolicyValidationError } from '../../../../common/errors';
 import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { appContextService } from '../..';
 
+import {
+  getHandlebarsCompiledTemplateCache,
+  setHandlebarsCompiledTemplateCache,
+} from '../packages/cache';
+
 const handlebars = Handlebars.create();
 
-export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
+export function getMetaVariables(
+  pkg: Pick<PackageInfo, 'name' | 'title' | 'version'>,
+  input: PackagePolicyInput,
+  stream?: PackagePolicyInputStream
+) {
+  return {
+    // Package variables
+    package: {
+      name: pkg.name,
+      title: pkg.title,
+      version: pkg.version,
+    },
+    // Stream meta variables
+    stream: {
+      id: stream?.id || '',
+      data_stream: {
+        dataset: stream?.data_stream.dataset || '',
+        type: stream?.data_stream.type || '',
+      },
+    },
+    // Input meta variables
+    input: {
+      id: input?.id || '',
+    },
+  };
+}
+
+export type MetaVariable = ReturnType<typeof getMetaVariables>;
+
+export function compileTemplate(
+  variables: PackagePolicyConfigRecord,
+  metaVariable: MetaVariable,
+  templateStr: string
+) {
   const logger = appContextService.getLogger();
-  const { vars, yamlValues } = buildTemplateVariables(logger, variables);
+  const { vars, yamlValues } = buildTemplateVariables(logger, variables, metaVariable);
   let compiledTemplate: string;
   try {
-    const template = handlebars.compile(templateStr, { noEscape: true });
+    let template = getHandlebarsCompiledTemplateCache(templateStr);
+
+    if (!template) {
+      template = handlebars.compileAST(templateStr, { noEscape: true });
+      setHandlebarsCompiledTemplateCache(templateStr, template);
+    }
+
     compiledTemplate = template(vars);
   } catch (err) {
     throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
   }
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-  const yamlFromCompiledTemplate = load(compiledTemplate, {});
+  try {
+    const yamlFromCompiledTemplate = load(compiledTemplate, {});
 
-  // Hack to keep empty string ('') values around in the end yaml because
-  // `load` replaces empty strings with null
-  const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
-    (acc, [key, value]) => {
-      if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
-        acc[key] = '';
-      } else {
-        acc[key] = value;
+    // Hack to keep empty string ('') values around in the end yaml because
+    // `load` replaces empty strings with null
+    const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
+      (acc, [key, value]) => {
+        if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
+          acc[key] = '';
+        } else {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {} as { [k: string]: any }
+    );
+
+    return replaceVariablesInYaml(yamlValues, patchedYamlFromCompiledTemplate);
+  } catch (error) {
+    const errorMessage = handleYamlError(error, compiledTemplate);
+    throw new PackagePolicyValidationError(errorMessage, error);
+  }
+}
+
+function handleYamlError(err: any, yaml: string): string {
+  if (err?.reason === 'duplicated mapping key') {
+    let position = err.mark?.position;
+    let key = 'unknown';
+    // Read key if position is available
+    if (position) {
+      key = '';
+      while (position < yaml.length && yaml.charAt(position) !== ':') {
+        key += yaml.charAt(position);
+        position++;
       }
-      return acc;
-    },
-    {} as { [k: string]: any }
-  );
+    }
+    return `YAMLException: Duplicated key "${key}" found in agent policy yaml, please check your yaml variables.`;
+  }
 
-  return replaceVariablesInYaml(yamlValues, patchedYamlFromCompiledTemplate);
+  return err.message;
 }
 
 function isValidKey(key: string) {
@@ -68,13 +141,16 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRecord) {
+function buildTemplateVariables(
+  logger: Logger,
+  variables: PackagePolicyConfigRecord,
+  metaVariable: MetaVariable
+) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop();
-    logger.debug(`Building agent template variables`);
 
     if (!lastKeyPart || !isValidKey(lastKeyPart)) {
       throw new PackageInvalidArchiveError(
@@ -100,12 +176,18 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? load(recordEntry.value) : null;
     } else if (recordEntry.value && recordEntry.value.isSecretRef) {
-      varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      if (recordEntry.value.ids) {
+        varPart[lastKeyPart] = recordEntry.value.ids.map((id: string) => toCompiledSecretRef(id));
+      } else {
+        varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      }
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }
     return acc;
   }, {} as { [k: string]: any });
+
+  vars._meta = metaVariable;
 
   return { vars, yamlValues };
 }

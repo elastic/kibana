@@ -21,40 +21,38 @@ export const mockOptions: ThreatIntelSourceRequestOptionsInput = {
 };
 
 export const expectedDsl = {
-  body: {
-    aggs: {
-      dataset: {
-        terms: {
-          field: 'event.dataset',
-        },
-        aggs: {
-          name: {
-            terms: {
-              field: 'threat.feed.name',
-            },
+  aggs: {
+    dataset: {
+      terms: {
+        field: 'event.dataset',
+      },
+      aggs: {
+        name: {
+          terms: {
+            field: 'threat.feed.name',
           },
-          dashboard: {
-            terms: {
-              field: 'threat.feed.dashboard_id',
-            },
+        },
+        dashboard: {
+          terms: {
+            field: 'threat.feed.dashboard_id',
           },
         },
       },
     },
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: '2020-09-06T15:23:52.757Z',
-                lte: '2020-09-07T15:23:52.757Z',
-                format: 'strict_date_optional_time',
-              },
+  },
+  query: {
+    bool: {
+      filter: [
+        {
+          range: {
+            '@timestamp': {
+              gte: '2020-09-06T15:23:52.757Z',
+              lte: '2020-09-07T15:23:52.757Z',
+              format: 'strict_date_optional_time',
             },
           },
-        ],
-      },
+        },
+      ],
     },
   },
   ignore_unavailable: true,

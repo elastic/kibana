@@ -7,8 +7,8 @@
 
 import _ from 'lodash';
 
-import type { LicenseType } from '@kbn/licensing-plugin/server';
-import { AlertingKibanaPrivilege } from '../../common/alerting_kibana_privilege';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { AlertingKibanaPrivilege } from '../../common/alerting_kibana_privilege';
 import type { FeatureKibanaPrivileges, KibanaFeature } from '..';
 import { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
 
@@ -135,6 +135,14 @@ function mergeWithSubFeatures(
           ...(mergedConfig.alerting?.rule?.all ?? []),
           ...(subFeaturePrivilege.alerting?.rule?.all ?? []),
         ]),
+        enable: mergeAlertingEntries([
+          ...(mergedConfig.alerting?.rule?.enable ?? []),
+          ...(subFeaturePrivilege.alerting?.rule?.enable ?? []),
+        ]),
+        manual_run: mergeAlertingEntries([
+          ...(mergedConfig.alerting?.rule?.manual_run ?? []),
+          ...(subFeaturePrivilege.alerting?.rule?.manual_run ?? []),
+        ]),
         read: mergeAlertingEntries([
           ...(mergedConfig.alerting?.rule?.read ?? []),
           ...(subFeaturePrivilege.alerting?.rule?.read ?? []),
@@ -179,6 +187,10 @@ function mergeWithSubFeatures(
       reopenCase: mergeArrays(
         mergedConfig.cases?.reopenCase ?? [],
         subFeaturePrivilege.cases?.reopenCase ?? []
+      ),
+      assign: mergeArrays(
+        mergedConfig.cases?.assign ?? [],
+        subFeaturePrivilege.cases?.assign ?? []
       ),
     };
   }

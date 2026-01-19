@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/bench",
+  "owner": "@elastic/observability-ui",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

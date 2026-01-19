@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { RunContext, TaskInstance } from '../task';
+import type { RunContext, TaskInstance } from '../task';
 
 type Mapper<T> = (params: T) => Promise<T>;
 interface BeforeSaveContext {
   taskInstance: TaskInstance;
 }
 
+export type BeforeRunContext = Omit<RunContext, 'abortController'>;
+
 export type BeforeSaveContextFunction = Mapper<BeforeSaveContext>;
-export type BeforeRunContextFunction = Mapper<RunContext>;
+export type BeforeRunContextFunction = Mapper<BeforeRunContext>;
 
 export interface Middleware {
   beforeSave: BeforeSaveContextFunction;
@@ -39,7 +41,7 @@ const chain =
 export function createInitialMiddleware(): Middleware {
   return {
     beforeSave: async (saveOpts: BeforeSaveContext) => saveOpts,
-    beforeRun: async (runOpts: RunContext) => runOpts,
-    beforeMarkRunning: async (runOpts: RunContext) => runOpts,
+    beforeRun: async (runOpts: BeforeRunContext) => runOpts,
+    beforeMarkRunning: async (runOpts: BeforeRunContext) => runOpts,
   };
 }

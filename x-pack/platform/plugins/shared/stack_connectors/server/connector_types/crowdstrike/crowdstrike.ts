@@ -5,37 +5,39 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { CrowdStrikeSessionManager } from './rtr_session_manager';
-import { ExperimentalFeatures } from '../../../common/experimental_features';
-import { isAggregateError, NodeSystemError } from './types';
+import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
   CrowdstrikeGetAgentsResponse,
   CrowdstrikeGetAgentsParams,
   CrowdstrikeHostActionsParams,
-  CrowdstrikeGetTokenResponse,
   CrowdstrikeGetAgentOnlineStatusResponse,
   RelaxedCrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
-} from '../../../common/crowdstrike/types';
+  CrowdstrikeGetScriptsResponse,
+} from '@kbn/connector-schemas/crowdstrike';
 import {
+  SUB_ACTION,
+  CrowdstrikeGetScriptsResponseSchema,
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
   CrowdstrikeHostActionsResponseSchema,
   RelaxedCrowdstrikeBaseApiResponseSchema,
   CrowdstrikeRTRCommandParamsSchema,
   CrowdstrikeExecuteRTRResponseSchema,
-  CrowdstrikeGetScriptsParamsSchema,
   CrowdstrikeApiDoNotValidateResponsesSchema,
-  CrowdstrikeGetTokenResponseSchema,
-} from '../../../common/crowdstrike/schema';
-import { SUB_ACTION } from '../../../common/crowdstrike/constants';
+} from '@kbn/connector-schemas/crowdstrike';
+import { CrowdStrikeSessionManager } from './rtr_session_manager';
+import { CrowdStrikeTokenManager } from './token_manager';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { NodeSystemError } from './types';
+import { isAggregateError } from './types';
 import { CrowdstrikeError } from './error';
 
 const SUPPORTED_RTR_COMMANDS = ['runscript'];
@@ -48,21 +50,16 @@ const paramsSerializer = (params: Record<string, string>) => {
 
 /**
  * Crowdstrike Connector
- * @constructor
- * @param {string} token - Authorization token received from OAuth2 API, that needs to be sent along with each request.
- * @param {number} tokenExpiryTimeout - Tokens are valid for 30 minutes, so we will refresh them every 29 minutes
- * @param {base64} base64encodedToken - The base64 encoded token used for authentication.
+ * Uses instance-based token management with persistent storage via ConnectorTokenClient.
+ * Each connector instance manages its own OAuth2 tokens with automatic refresh and caching.
  */
 
 export class CrowdstrikeConnector extends SubActionConnector<
   CrowdstrikeConfig,
   CrowdstrikeSecrets
 > {
-  private static token: string | null;
-  private static tokenExpiryTimeout: NodeJS.Timeout;
-  private static base64encodedToken: string;
+  private tokenManager: CrowdStrikeTokenManager;
   private experimentalFeatures: ExperimentalFeatures;
-
   private crowdStrikeSessionManager: CrowdStrikeSessionManager;
   private urls: {
     getToken: string;
@@ -74,7 +71,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     batchExecuteRTR: string;
     batchActiveResponderExecuteRTR: string;
     batchAdminExecuteRTR: string;
-    getRTRCloudScriptsDetails: string;
+    getRTRCloudScripts: string;
   };
 
   constructor(
@@ -93,18 +90,22 @@ export class CrowdstrikeConnector extends SubActionConnector<
       batchExecuteRTR: `${this.config.url}/real-time-response/combined/batch-command/v1`,
       batchActiveResponderExecuteRTR: `${this.config.url}/real-time-response/combined/batch-active-responder-command/v1`,
       batchAdminExecuteRTR: `${this.config.url}/real-time-response/combined/batch-admin-command/v1`,
-      getRTRCloudScriptsDetails: `${this.config.url}/real-time-response/entities/scripts/v1`,
+      getRTRCloudScripts: `${this.config.url}/real-time-response/entities/scripts/v1`,
     };
 
-    if (!CrowdstrikeConnector.base64encodedToken) {
-      CrowdstrikeConnector.base64encodedToken = Buffer.from(
-        this.secrets.clientId + ':' + this.secrets.clientSecret
-      ).toString('base64');
-    }
+    // Initialize token manager
+    this.tokenManager = new CrowdStrikeTokenManager({
+      ...params,
+      apiRequest: (req, connectorUsageCollector) => this.request(req, connectorUsageCollector),
+    });
 
     this.crowdStrikeSessionManager = new CrowdStrikeSessionManager(
-      this.urls,
-      this.crowdstrikeApiRequest
+      {
+        batchInitRTRSession: this.urls.batchInitRTRSession,
+        batchRefreshRTRSession: this.urls.batchRefreshRTRSession,
+      },
+      this.crowdstrikeApiRequest,
+      this.logger
     );
     this.registerSubActions();
   }
@@ -144,11 +145,10 @@ export class CrowdstrikeConnector extends SubActionConnector<
         method: 'batchAdminExecuteRTR',
         schema: CrowdstrikeRTRCommandParamsSchema, // Define a proper schema for the command
       });
-      // temporary to fetch scripts and help testing
       this.registerSubAction({
         name: SUB_ACTION.GET_RTR_CLOUD_SCRIPTS,
         method: 'getRTRCloudScripts',
-        schema: CrowdstrikeGetScriptsParamsSchema,
+        schema: CrowdstrikeRTRCommandParamsSchema, // Empty schema - this request do not have any parameters
       });
     }
   }
@@ -220,45 +220,22 @@ export class CrowdstrikeConnector extends SubActionConnector<
     ) as Promise<CrowdstrikeGetAgentOnlineStatusResponse>;
   }
 
-  private getTokenRequest = async (connectorUsageCollector: ConnectorUsageCollector) => {
-    const response = await this.request<CrowdstrikeGetTokenResponse>(
-      {
-        url: this.urls.getToken,
-        method: 'post',
-        headers: {
-          accept: 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded',
-          authorization: 'Basic ' + CrowdstrikeConnector.base64encodedToken,
-        },
-        responseSchema:
-          CrowdstrikeApiDoNotValidateResponsesSchema as unknown as typeof CrowdstrikeGetTokenResponseSchema,
-      },
-      connectorUsageCollector
-    );
-    const token = response.data?.access_token;
-    if (token) {
-      // Clear any existing timeout
-      clearTimeout(CrowdstrikeConnector.tokenExpiryTimeout);
-
-      // Set a timeout to reset the token after 29 minutes (it expires after 30 minutes)
-      CrowdstrikeConnector.tokenExpiryTimeout = setTimeout(() => {
-        CrowdstrikeConnector.token = null;
-      }, 29 * 60 * 1000);
-    }
-    return token;
-  };
-
   private crowdstrikeApiRequest = async <R extends RelaxedCrowdstrikeBaseApiResponse>(
     req: SubActionRequestParams<R>,
     connectorUsageCollector: ConnectorUsageCollector,
     retried?: boolean
   ): Promise<R> => {
+    this.logger.debug('Making CrowdStrike API request', {
+      url: {
+        full: req.url,
+      },
+      method: req.method,
+      retried: retried || false,
+    });
+
     try {
-      if (!CrowdstrikeConnector.token) {
-        CrowdstrikeConnector.token = (await this.getTokenRequest(
-          connectorUsageCollector
-        )) as string;
-      }
+      this.logger.debug('Getting authentication token');
+      const token = await this.tokenManager.get(connectorUsageCollector);
 
       const response = await this.request<R>(
         {
@@ -270,16 +247,34 @@ export class CrowdstrikeConnector extends SubActionConnector<
             CrowdstrikeApiDoNotValidateResponsesSchema as unknown as SubActionRequestParams<R>['responseSchema'],
           headers: {
             ...req.headers,
-            Authorization: `Bearer ${CrowdstrikeConnector.token}`,
+            Authorization: `Bearer ${token}`,
           },
         },
         connectorUsageCollector
       );
 
+      this.logger.debug('CrowdStrike API request successful', {
+        url: {
+          full: req.url,
+        },
+        status: response.status,
+      });
+
       return response.data;
     } catch (error) {
+      this.logger.debug('CrowdStrike API request error', {
+        url: {
+          full: req.url,
+        },
+        code: error.code,
+        status: error.response?.status,
+        message: error.message,
+        retried: retried || false,
+      });
+
       if (error.code === 401 && !retried) {
-        CrowdstrikeConnector.token = null;
+        this.logger.debug('401 error, triggering token refresh and retry');
+        await this.tokenManager.generateNew(connectorUsageCollector);
         return this.crowdstrikeApiRequest(req, connectorUsageCollector, true);
       }
       throw new CrowdstrikeError(error.message);
@@ -295,10 +290,21 @@ export class CrowdstrikeConnector extends SubActionConnector<
     },
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdStrikeExecuteRTRResponse> => {
+    this.logger.debug('Executing RTR command', {
+      url: {
+        full: url,
+      },
+      command: payload.command,
+      endpointIds: payload.endpoint_ids,
+    });
+
+    this.logger.debug('Initializing RTR session');
     const batchId = await this.crowdStrikeSessionManager.initializeSession(
       { endpoint_ids: payload.endpoint_ids },
       connectorUsageCollector
     );
+
+    this.logger.debug(`RTR session initialized with batchId: ${batchId}`);
 
     const baseCommand = payload.command.split(' ')[0];
 
@@ -369,18 +375,16 @@ export class CrowdstrikeConnector extends SubActionConnector<
     );
   }
 
-  // TODO: for now just for testing purposes, will be a part of a following PR
   public async getRTRCloudScripts(
-    payload: CrowdstrikeGetAgentsParams,
+    _payload: {},
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
-    // @ts-expect-error will be a part of the next PR
-    return this.crowdstrikeApiRequest(
+  ): Promise<CrowdstrikeGetScriptsResponse> {
+    return await this.crowdstrikeApiRequest(
       {
-        url: this.urls.getRTRCloudScriptsDetails,
+        url: this.urls.getRTRCloudScripts,
         method: 'GET',
         paramsSerializer,
-        responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
+        responseSchema: CrowdstrikeGetScriptsResponseSchema,
       },
       connectorUsageCollector
     );

@@ -12,8 +12,10 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import { coreLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { allowedExperimentalValues, type ExperimentalFeatures } from '../../../common';
 import { ProductFeaturesService } from './product_features_service';
+import type { SecuritySolutionPluginSetupDependencies } from '../../plugin_contract';
 
 jest.mock('@kbn/security-solution-features/product_features', () => ({
   getSecurityFeature: jest.fn(() => ({
@@ -26,12 +28,32 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
+  getSecurityV3Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getSecurityV4Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getSecurityV5Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
   getCasesFeature: jest.fn(() => ({
     baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
   getCasesV2Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getCasesV3Feature: jest.fn(() => ({
     baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
@@ -56,131 +78,34 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
+  getSiemMigrationsFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getRulesFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
 }));
 
 export const createProductFeaturesServiceMock = (
   /** What features keys should be enabled. Default is all */
-  enabledFeatureKeys: ProductFeatureKeys = [...ALL_PRODUCT_FEATURE_KEYS],
+  enabledProductFeatureKeys: ProductFeatureKeys = [...ALL_PRODUCT_FEATURE_KEYS],
   experimentalFeatures: ExperimentalFeatures = { ...allowedExperimentalValues },
   featuresPluginSetupContract: FeaturesPluginSetup = featuresPluginMock.createSetup(),
   logger: Logger = loggingSystemMock.create().get('productFeatureMock')
 ) => {
   const productFeaturesService = new ProductFeaturesService(logger, experimentalFeatures);
 
-  productFeaturesService.init(featuresPluginSetupContract);
+  productFeaturesService.setup(coreLifecycleMock.createCoreSetup(), {
+    features: featuresPluginSetupContract,
+  } as SecuritySolutionPluginSetupDependencies);
 
-  if (enabledFeatureKeys) {
+  if (enabledProductFeatureKeys) {
     productFeaturesService.setProductFeaturesConfigurator({
-      security: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      cases: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      securityAssistant: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      attackDiscovery: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      timeline: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      notes: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                },
-              },
-            },
-          ])
-        )
-      ),
+      enabledProductFeatureKeys,
     });
   }
 

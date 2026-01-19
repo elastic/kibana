@@ -8,22 +8,19 @@
  */
 
 import { createElement } from 'react';
-import { SerializableRecord } from '@kbn/utility-types';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { SavedObjectReference } from '@kbn/core/types';
-import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import { DrilldownDefinition } from '../drilldowns';
-import {
-  ActionFactory,
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { ILicense } from '@kbn/licensing-types';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { DrilldownDefinition } from '../drilldowns';
+import type {
   ActionFactoryDefinition,
   BaseActionConfig,
   BaseActionFactoryContext,
-  SerializedEvent,
 } from '../dynamic_actions';
-import { ActionFactoryRegistry } from '../types';
+import { ActionFactory } from '../dynamic_actions';
+import type { ActionFactoryRegistry } from '../types';
 
-import { DynamicActionsState } from '../../common/types';
+import type { DynamicActionsState } from '../../common/types';
 
 export type { DynamicActionsState };
 
@@ -34,9 +31,7 @@ export interface UiActionsServiceEnhancementsParams {
   readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'] | undefined;
 }
 
-export class UiActionsServiceEnhancements
-  implements PersistableStateDefinition<DynamicActionsState>
-{
+export class UiActionsServiceEnhancements {
   protected readonly actionFactories: ActionFactoryRegistry;
   protected readonly deps: Omit<UiActionsServiceEnhancementsParams, 'actionFactories'>;
 
@@ -121,9 +116,6 @@ export class UiActionsServiceEnhancements
     supportedTriggers,
     isCompatible,
     isConfigurable,
-    telemetry,
-    extract,
-    inject,
   }: DrilldownDefinition<Config, ExecutionContext, FactoryContext>): void => {
     const actionFactory: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext> = {
       id: factoryId,
@@ -136,9 +128,6 @@ export class UiActionsServiceEnhancements
       isConfigValid,
       getDisplayName,
       supportedTriggers,
-      telemetry,
-      extract,
-      inject,
       getIconType: () => euiIcon,
       isCompatible: async (context) => !isConfigurable || isConfigurable(context),
       create: (serializedAction) => ({
@@ -168,47 +157,5 @@ export class UiActionsServiceEnhancements
         definition.minimalLicense
       );
     }
-  };
-
-  public readonly telemetry = (
-    state: DynamicActionsState,
-    telemetry: Record<string, string | number | boolean> = {}
-  ) => {
-    let telemetryData = telemetry;
-    state.events.forEach((event: SerializedEvent) => {
-      if (this.actionFactories.has(event.action.factoryId)) {
-        telemetryData = this.actionFactories
-          .get(event.action.factoryId)!
-          .telemetry(event, telemetryData);
-      }
-    });
-    return telemetryData;
-  };
-
-  public readonly extract = (state: DynamicActionsState) => {
-    const references: SavedObjectReference[] = [];
-    const newState = {
-      events: state.events.map((event: SerializedEvent) => {
-        const result = this.actionFactories.has(event.action.factoryId)
-          ? this.actionFactories.get(event.action.factoryId)!.extract(event)
-          : {
-              state: event,
-              references: [],
-            };
-        references.push(...result.references);
-        return result.state;
-      }),
-    };
-    return { state: newState, references };
-  };
-
-  public readonly inject = (state: DynamicActionsState, references: SavedObjectReference[]) => {
-    return {
-      events: state.events.map((event: SerializedEvent) => {
-        return this.actionFactories.has(event.action.factoryId)
-          ? this.actionFactories.get(event.action.factoryId)!.inject(event, references)
-          : event;
-      }),
-    };
   };
 }

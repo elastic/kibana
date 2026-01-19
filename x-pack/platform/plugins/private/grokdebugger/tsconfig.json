@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -14,12 +14,12 @@
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/licensing-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

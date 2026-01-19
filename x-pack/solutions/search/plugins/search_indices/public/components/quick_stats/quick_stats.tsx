@@ -9,8 +9,8 @@ import React, { useMemo, useState } from 'react';
 import type { Index } from '@kbn/index-management-shared-types';
 
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
-import { Mappings } from '../../types';
-import { IndexDocuments } from '../../hooks/api/use_document_search';
+import type { Mappings } from '../../types';
+import type { IndexDocuments } from '../../hooks/api/use_document_search';
 
 import { AISearchQuickStat } from './ai_search_stat';
 import { AliasesStat } from './aliases_quick_stat';
@@ -52,34 +52,57 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
           documentCount={indexDocuments?.results._meta.page.total ?? 0}
           open={open}
           setOpen={setOpen}
+          key="statelessDocumentCountStat"
         />,
         ...(Array.isArray(index.aliases) && index.aliases.length > 0
-          ? [<AliasesStat aliases={index.aliases} open={open} setOpen={setOpen} />]
+          ? [
+              <AliasesStat
+                aliases={index.aliases}
+                open={open}
+                setOpen={setOpen}
+                key="aliasesStat"
+              />,
+            ]
           : []),
         <AISearchQuickStat
           mappingStats={mappingStats}
           vectorFieldCount={vectorFieldCount}
           open={open}
           setOpen={setOpen}
+          key="aISearchQuickStat"
         />,
       ]
     : [
-        <IndexStatusStat index={index} open={open} setOpen={setOpen} />,
-        <StatefulIndexStorageStat index={index} open={open} setOpen={setOpen} />,
+        <IndexStatusStat index={index} open={open} setOpen={setOpen} key="indexStatusStat" />,
+        <StatefulIndexStorageStat
+          index={index}
+          open={open}
+          setOpen={setOpen}
+          key="statefulIndexStorageStat"
+        />,
         <StatefulDocumentCountStat
           open={open}
           setOpen={setOpen}
           index={index}
           mappingStats={mappingStats}
+          key="statefulDocumentCountStat"
         />,
         ...(Array.isArray(index.aliases) && index.aliases.length > 0
-          ? [<AliasesStat aliases={index.aliases} open={open} setOpen={setOpen} />]
+          ? [
+              <AliasesStat
+                aliases={index.aliases}
+                open={open}
+                setOpen={setOpen}
+                key="aliasesStat"
+              />,
+            ]
           : []),
         <AISearchQuickStat
           mappingStats={mappingStats}
           vectorFieldCount={vectorFieldCount}
           open={open}
           setOpen={setOpen}
+          key="aISearchQuickStat"
         />,
       ];
 

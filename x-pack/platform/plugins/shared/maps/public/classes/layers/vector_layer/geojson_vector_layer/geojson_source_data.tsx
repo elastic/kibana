@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import {
   EMPTY_FEATURE_COLLECTION,
   SOURCE_DATA_REQUEST_ID,
   VECTOR_SHAPE_TYPE,
 } from '../../../../../common/constants';
-import {
+import type {
   DataRequestMeta,
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
-import { DataRequestContext } from '../../../../actions';
-import { IVectorSource } from '../../../sources/vector_source';
+import type { DataRequestContext } from '../../../../actions';
+import type { IVectorSource } from '../../../sources/vector_source';
 import { DataRequestAbortError } from '../../../util/data_request';
-import { DataRequest } from '../../../util/data_request';
+import type { DataRequest } from '../../../util/data_request';
 import { getCentroidFeatures } from './get_centroid_features';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
 import { assignFeatureIds } from './assign_feature_ids';

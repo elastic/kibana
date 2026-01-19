@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, HttpStart } from '@kbn/core/public';
-import { IHttpFetchError, ResponseErrorBody, isHttpFetchError } from '@kbn/core-http-browser';
+import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_ASSETS_TO_IGNORE, HasEsDataFailureReason } from '../../common';
-import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
-import { IndicesResponse, IndicesResponseModified } from '../types';
+import type { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
+import type { IndicesResponse, IndicesResponseModified } from '../types';
 
 export interface HasEsDataParams {
   /**
@@ -155,14 +156,12 @@ export class HasData {
             ignore_unavailable: true,
             expand_wildcards: showAllIndices ? 'all' : 'open',
             index: pattern,
-            body: {
-              size: 0, // no hits
-              aggs: {
-                indices: {
-                  terms: {
-                    field: '_index',
-                    size: 200,
-                  },
+            size: 0, // no hits
+            aggs: {
+              indices: {
+                terms: {
+                  field: '_index',
+                  size: 200,
                 },
               },
             },

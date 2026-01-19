@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createApmQuery } from './create_apm_query';
 import { apmAggFilterPath, apmUuidsAgg, apmAggResponseHandler } from './_apm_stats';
@@ -38,14 +38,12 @@ export async function getStats(req: LegacyRequest, apmIndexPattern: string, clus
     filter_path: apmAggFilterPath,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      query: createApmQuery({
-        start,
-        end,
-        clusterUuid,
-      }),
-      aggs: apmUuidsAgg(maxBucketSize, cgroup),
-    },
+    query: createApmQuery({
+      start,
+      end,
+      clusterUuid,
+    }),
+    aggs: apmUuidsAgg(maxBucketSize, cgroup),
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

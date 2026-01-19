@@ -13,6 +13,26 @@ export const KV_EXAMPLE_ANSWER = {
   ignore_missing: true,
 };
 
+export const KV_HEADER_EXAMPLE_LOGS = [
+  {
+    example:
+      '[18/Feb/2025:22:39:16 +0000] CONNECT conn=20597223 from=10.1.1.1:1234 to=10.2.3.4:4389 protocol=LDAP',
+    header: '[18/Feb/2025:22:39:16 +0000] CONNECT',
+    structuredBody: 'conn=20597223 from=10.1.1.1:1234 to=10.2.3.4:4389 protocol=LDAP',
+    grok_pattern:
+      '[%{HTTPDATE:`{packageName}.{dataStreamName}.`timestamp}] %{WORD:`{packageName}.{dataStreamName}`action}s%{GREEDYDATA:message}',
+  },
+  {
+    example:
+      '2021-10-22 22:12:09,871 DEBUG [org.keycloak.events] (default task-3) operationType=CREATE, realmId=test, clientId=abcdefgh userId=sdfsf-b89c-4fca-9088-sdfsfsf, ipAddress=10.1.1.1, resourceType=USER, resourcePath=users/07972d16-b173-4c99-803d-90f211080f40',
+    header: '2021-10-22 22:12:09,871 DEBUG [org.keycloak.events] (default task-3)',
+    structuredBody:
+      'operationType=CREATE, realmId=test, clientId=7bcaf1cb-820a-40f1-91dd-75ced03ef03b, userId=ce637d23-b89c-4fca-9088-1aea1d053e19, ipAddress=10.1.1.1, resourceType=USER, resourcePath=users/07972d16-b173-4c99-803d-90f211080f40',
+    grok_pattern:
+      '%{TIMESTAMP_ISO8601:`{packageName}.{dataStreamName}.`timestamp} %{LOGLEVEL:`{packageName}.{dataStreamName}`loglevel} [%{DATA:`{packageName}.{dataStreamName}`logsource}] (%{DATA:`{packageName}.{dataStreamName}`task})s%{GREEDYDATA:message}',
+  },
+];
+
 export const KV_HEADER_EXAMPLE_ANSWER = {
   rfc: 'RFC2454',
   regex:

@@ -65,7 +65,7 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
   return (
     <EuiCallOut
       color="warning"
-      iconType="help"
+      iconType="question"
       title={
         <FormattedMessage
           id="xpack.spaces.legacyUrlConflict.calloutTitle"

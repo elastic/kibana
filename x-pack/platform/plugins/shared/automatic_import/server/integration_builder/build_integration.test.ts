@@ -7,7 +7,7 @@
 
 import yaml from 'js-yaml';
 import { testIntegration } from '../../__jest__/fixtures/build_integration';
-import { DataStream, Docs, InputType, Integration, Pipeline } from '../../common';
+import type { DataStream, Docs, InputType, Integration, Pipeline } from '../../common';
 import { createSync, ensureDirSync, generateUniqueId } from '../util';
 import { createAgentInput } from './agent';
 import {
@@ -303,6 +303,23 @@ describe('isValidName', () => {
     expect(isValidName('validname')).toBe(true);
     expect(isValidName('valid_name')).toBe(true);
     expect(isValidName('anothervalidname')).toBe(true);
+  });
+  it('should return false for names starting with numbers', () => {
+    expect(isValidName('123name')).toBe(false);
+    expect(isValidName('1name')).toBe(false);
+    expect(isValidName('999invalid')).toBe(false);
+  });
+
+  it('should return false for names starting with underscore', () => {
+    expect(isValidName('_name')).toBe(true);
+    expect(isValidName('_invalid_name')).toBe(true);
+    expect(isValidName('__name')).toBe(true);
+  });
+
+  it('should return true for names starting with letters followed by numbers', () => {
+    expect(isValidName('name123')).toBe(true);
+    expect(isValidName('valid1')).toBe(true);
+    expect(isValidName('valid_123')).toBe(true);
   });
 
   it('should return false for empty string', () => {

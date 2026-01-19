@@ -6,58 +6,146 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { parse, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
+import {
+  Walker,
+  walk,
+  Parser,
+  isFunctionExpression,
+  isColumn,
+  WrappingPrettyPrinter,
+  BasicPrettyPrinter,
+  isStringLiteral,
+  esqlCommandRegistry,
+} from '@kbn/esql-language';
 
 import type {
   ESQLSource,
   ESQLFunction,
   ESQLColumn,
   ESQLSingleAstItem,
+  ESQLInlineCast,
   ESQLCommandOption,
-} from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+  ESQLAstForkCommand,
+} from '@kbn/esql-language';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
-// retrieves the index pattern from the aggregate query for ES|QL using ast parsing
-export function getIndexPatternFromESQLQuery(esql?: string) {
-  const { ast } = parse(esql);
-  const sourceCommand = ast.find(({ name }) => ['from', 'metrics'].includes(name));
+export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
+  if (!esql) return undefined;
+  const { root } = Parser.parse(esql);
+  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  const indices = args.filter((arg) => arg.sourceType === 'index');
-  return indices?.map((index) => index.name).join(',');
+
+  const clustersSet = new Set<string>();
+
+  // Handle sources with explicit prefix (e.g., FROM cluster1:index1)
+  args
+    .filter((arg) => arg.prefix)
+    .forEach((arg) => {
+      if (arg.prefix?.value) {
+        clustersSet.add(arg.prefix.value);
+      }
+    });
+
+  // Handle sources without prefix that might contain cluster:index patterns
+  // This includes quoted sources like "cluster1:index1,cluster2:index2"
+  args
+    .filter((arg) => !arg.prefix)
+    .forEach((arg) => {
+      // Split by comma to handle cases like "cluster1:index1,cluster2:index2"
+      const indices = arg.name.split(',');
+      indices.forEach((index) => {
+        const trimmedIndex = index.trim();
+        const colonIndex = trimmedIndex.indexOf(':');
+        // Only add if there's a valid cluster:index pattern
+        if (colonIndex > 0 && colonIndex < trimmedIndex.length - 1) {
+          const clusterName = trimmedIndex.substring(0, colonIndex);
+          clustersSet.add(clusterName);
+        }
+      });
+    });
+
+  return clustersSet.size > 0 ? [...clustersSet] : undefined;
 }
 
-// For ES|QL we consider stats and keep transformational command
-// The metrics command too but only if it aggregates
+/**
+ * Determines if an ES|QL query contains transformational commands.
+ *
+ * For ES|QL, we consider the following as transformational commands:
+ * - `stats`: Performs aggregations and transformations
+ * - `keep`: Filters and selects specific fields
+ * - `fork` commands where ALL branches contain only transformational commands
+ *
+ * @param esql - The ES|QL query string to analyze
+ * @returns true if the query contains transformational commands or fork commands with all transformational branches
+ *
+ * @example
+ * hasTransformationalCommand('from index | stats count() by field') // true
+ * hasTransformationalCommand('from index | keep field1, field2') // true
+ * hasTransformationalCommand('from index | fork (stats count()) (keep field)') // true
+ * hasTransformationalCommand('from index | fork (where x > 0) (eval y = x * 2)') // false
+ * hasTransformationalCommand('from index | where field > 0') // false
+ */
 export function hasTransformationalCommand(esql?: string) {
+  if (!esql) return false;
   const transformationalCommands = ['stats', 'keep'];
-  const { ast } = parse(esql);
+  const { root } = Parser.parse(esql);
+
+  // Check for direct transformational commands first
   const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
-    ast.find(({ name }) => name === command)
+    root.commands.find(({ name }) => name === command)
   );
+
+  // Early return if we found direct transformational commands
   if (hasAtLeastOneTransformationalCommand) {
     return true;
   }
-  const metricsCommand = ast.find(({ name }) => name === 'metrics');
 
-  if (metricsCommand && 'aggregates' in metricsCommand) {
-    return true;
-  }
+  // Check for fork commands with all transformational branches
+  const forkCommands = Walker.findAll(
+    root,
+    (node) => node.name === 'fork'
+  ) as Array<ESQLAstForkCommand>;
 
-  return false;
+  const hasForkWithAllTransformationalBranches = forkCommands.some((forkCommand) => {
+    const forkArguments = forkCommand?.args;
+
+    if (!forkArguments || forkArguments.length === 0) {
+      return false;
+    }
+
+    return forkArguments.every((parens) => {
+      const branch = parens.child;
+
+      if (branch.type !== 'query') {
+        return false;
+      }
+
+      const branchCommands = branch.commands;
+
+      // Branch must have at least one command and all commands must be transformational
+      return (
+        branchCommands.length > 0 &&
+        branchCommands.every((cmd) => transformationalCommands.includes(cmd.name))
+      );
+    });
+  });
+
+  return hasForkWithAllTransformationalBranches;
 }
 
 export function getLimitFromESQLQuery(esql: string): number {
-  const { ast } = parse(esql);
-  const limitCommands = ast.filter(({ name }) => name === 'limit');
+  const { root } = Parser.parse(esql || '');
+  const limitCommands = root.commands.filter(({ name }) => name === 'limit');
   if (!limitCommands || !limitCommands.length) {
     return DEFAULT_ESQL_LIMIT;
   }
   const limits: number[] = [];
 
-  walk(ast, {
+  walk(root.commands, {
     visitLiteral: (node) => {
       if (!isNaN(Number(node.value))) {
         limits.push(Number(node.value));
@@ -79,19 +167,47 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
 }
 
 /**
+ * Converts timeseries (TS) commands to FROM commands in an ES|QL query
+ * @param esql - The ES|QL query string
+ * @returns The modified query with TS commands converted to FROM commands
+ */
+export function convertTimeseriesCommandToFrom(esql?: string): string {
+  const { root } = Parser.parse(esql || '');
+  const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
+  if (!timeseriesCommand) return esql || '';
+
+  const fromCommand = {
+    ...timeseriesCommand,
+    name: 'from',
+  };
+
+  // Replace the ts command with the from command in the commands array
+  const newCommands = root.commands.map((command) =>
+    command === timeseriesCommand ? fromCommand : command
+  );
+
+  const newRoot = {
+    ...root,
+    commands: newCommands,
+  };
+
+  return BasicPrettyPrinter.print(newRoot);
+}
+
+/**
  * When the ?_tstart and ?_tend params are used, we want to retrieve the timefield from the query.
  * @param esql:string
  * @returns string
  */
 export const getTimeFieldFromESQLQuery = (esql: string) => {
-  const { ast } = parse(esql);
+  const { root } = Parser.parse(esql);
   const functions: ESQLFunction[] = [];
 
-  walk(ast, {
+  walk(root.commands, {
     visitFunction: (node) => functions.push(node),
   });
 
-  const params = Walker.params(ast);
+  const params = Walker.params(root);
   const timeNamedParam = params.find(
     (param) => param.value === '_tstart' || param.value === '_tend'
   );
@@ -108,31 +224,59 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   }
   const lowLevelFunction = allFunctionsWithNamedParams[allFunctionsWithNamedParams.length - 1];
 
-  const column = lowLevelFunction.args.find((arg) => {
-    const argument = arg as ESQLSingleAstItem;
-    return argument.type === 'column';
-  }) as ESQLColumn;
+  let columnName: string | undefined;
 
-  return column?.name;
+  lowLevelFunction.args.some((arg) => {
+    const argument = arg as ESQLSingleAstItem | ESQLInlineCast<ESQLSingleAstItem>;
+    if (argument.type === 'column') {
+      columnName = argument.name;
+      return true;
+    }
+
+    if (
+      argument.type === 'inlineCast' &&
+      (argument as ESQLInlineCast<ESQLSingleAstItem>).value.type === 'column'
+    ) {
+      columnName = (argument as ESQLInlineCast<ESQLSingleAstItem>).value.name;
+      return true;
+    }
+
+    return false;
+  });
+
+  return columnName;
 };
 
-export const isQueryWrappedByPipes = (query: string): boolean => {
-  const { ast } = parse(query);
-  const numberOfCommands = ast.length;
-  const pipesWithNewLine = query.split('\n  |');
-  return numberOfCommands === pipesWithNewLine?.length;
+export const getKqlSearchQueries = (esql: string) => {
+  const { root } = Parser.parse(esql);
+  const functions: ESQLFunction[] = [];
+
+  walk(root.commands, {
+    visitFunction: (node) => functions.push(node),
+  });
+
+  const searchFunctions = functions.filter(({ name }) => name === 'kql');
+
+  return searchFunctions
+    .map((func) => {
+      if (func.args.length > 0 && isStringLiteral(func.args[0])) {
+        return func.args[0].valueUnquoted.trim();
+      }
+      return '';
+    })
+    .filter((query) => query !== '');
 };
 
-export const prettifyQuery = (query: string, isWrapped: boolean): string => {
-  const { root } = parse(query);
-  return BasicPrettyPrinter.print(root, { multiline: !isWrapped });
+export const prettifyQuery = (src: string): string => {
+  const { root } = Parser.parse(src, { withFormatting: true });
+  return WrappingPrettyPrinter.print(root, { multiline: true });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
-  const { ast } = parse(esql);
+  const { root } = Parser.parse(esql);
   const options: ESQLCommandOption[] = [];
 
-  walk(ast, {
+  walk(root, {
     visitCommandOption: (node) => options.push(node),
   });
   const metadataOptions = options.find(({ name }) => name === 'metadata');
@@ -140,7 +284,7 @@ export const retrieveMetadataColumns = (esql: string): string[] => {
 };
 
 export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
-  const { root } = parse(esql);
+  const { root } = Parser.parse(esql);
   const columns: ESQLColumn[] = [];
 
   walk(root, {
@@ -149,6 +293,13 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 
   return columns.map((column) => column.name);
 };
+
+export const getESQLQueryVariables = (esql: string): string[] => {
+  const { root } = Parser.parse(esql);
+  const usedVariablesInQuery = Walker.params(root);
+  return usedVariablesInQuery.map((v) => v.text.replace(/^\?+/, ''));
+};
+
 /**
  * This function is used to map the variables to the columns in the datatable
  * @param esql:string
@@ -164,12 +315,8 @@ export const mapVariableToColumn = (
   if (!variables.length) {
     return columns;
   }
-  const { root } = parse(esql);
-  const usedVariablesInQuery = Walker.params(root);
-
-  const uniqueVariablesInQyery = new Set<string>(
-    usedVariablesInQuery.map((v) => v.text.replace('?', ''))
-  );
+  const usedVariablesInQuery = getESQLQueryVariables(esql);
+  const uniqueVariablesInQyery = new Set<string>(usedVariablesInQuery);
 
   columns.map((column) => {
     if (variables.some((variable) => variable.value === column.id)) {
@@ -181,9 +328,93 @@ export const mapVariableToColumn = (
   return columns;
 };
 
-export const getValuesFromQueryField = (queryString: string) => {
-  const validQuery = `${queryString} ""`;
-  const { root } = parse(validQuery);
+export const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
+  const lines = queryString.split('\n');
+  const lineNumber = cursorPosition?.lineNumber ?? lines.length;
+  const column = cursorPosition?.column ?? lines[lineNumber - 1].length;
+
+  // Handle the case where the cursor is within the first line
+  if (lineNumber === 1) {
+    return lines[0].slice(0, column);
+  }
+
+  // Get all lines up to the specified line number (exclusive of the current line)
+  const previousLines = lines.slice(0, lineNumber - 1).join('\n');
+  const currentLine = lines[lineNumber - 1].slice(0, column);
+
+  // Join the previous lines and the partial current line
+  return previousLines + '\n' + currentLine;
+};
+
+const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
+  if (typeof queryString !== 'string' || queryString.length === 0) {
+    return false;
+  }
+
+  const lastChar = queryString.slice(-1);
+  const secondLastChar = queryString.slice(-2, -1);
+
+  return lastChar === '?' || secondLastChar === '?';
+};
+
+/**
+ * Finds the column closest to the given cursor position within an array of columns.
+ *
+ * @param columns An array of ES|QL columns.
+ * @param cursorPosition The current cursor position.
+ * @returns The column object closest to the cursor, or null if the columns array is empty.
+ */
+export function findClosestColumn(
+  columns: ESQLColumn[],
+  cursorPosition?: monaco.Position
+): ESQLColumn | undefined {
+  if (columns.length === 0) {
+    return undefined;
+  }
+
+  if (!cursorPosition) {
+    return columns[0]; // If no cursor position is provided, return the first column
+  }
+
+  const cursorCol = cursorPosition.column;
+  let closestColumn;
+  let minDistance = Infinity;
+
+  for (const column of columns) {
+    const columnMin = column.location.min;
+    const columnMax = column.location.max;
+
+    // If the cursor is within the column's range, it's the closest
+    if (cursorCol >= columnMin && cursorCol <= columnMax) {
+      return column;
+    }
+
+    // Calculate distance from the cursor to the nearest edge of the column
+    let distance: number;
+    if (cursorCol < columnMin) {
+      distance = columnMin - cursorCol; // Cursor is to the left of the column
+    } else {
+      distance = cursorCol - columnMax; // Cursor is to the right of the column
+    }
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestColumn = column;
+    }
+  }
+
+  return closestColumn;
+}
+
+export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
+  const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
+
+  if (hasQuestionMarkAtEndOrSecondLastPosition(queryInCursorPosition)) {
+    return undefined;
+  }
+
+  const validQuery = `${queryInCursorPosition} ""`;
+  const { root } = Parser.parse(validQuery);
   const lastCommand = root.commands[root.commands.length - 1];
   const columns: ESQLColumn[] = [];
 
@@ -191,9 +422,238 @@ export const getValuesFromQueryField = (queryString: string) => {
     visitColumn: (node) => columns.push(node),
   });
 
-  const column = Walker.match(lastCommand, { type: 'column' });
+  const column = findClosestColumn(columns, cursorPosition);
 
-  if (column) {
+  if (column && column.name && column.name !== '*') {
     return `${column.name}`;
   }
+};
+
+// this is for backward compatibility, if the query is of fields or functions type
+// and the query is not set with ?? in the query, we should set it
+// https://github.com/elastic/elasticsearch/pull/122459
+export const fixESQLQueryWithVariables = (
+  queryString: string,
+  esqlVariables?: ESQLControlVariable[]
+) => {
+  const currentVariables = getESQLQueryVariables(queryString);
+  if (!currentVariables.length) {
+    return queryString;
+  }
+
+  // filter out the variables that are not used in the query
+  // and that they are not of type FIELDS or FUNCTIONS
+  const identifierTypeVariables = esqlVariables?.filter(
+    (variable) =>
+      currentVariables.includes(variable.key) &&
+      (variable.type === ESQLVariableType.FIELDS || variable.type === ESQLVariableType.FUNCTIONS)
+  );
+
+  // check if they are set with ?? or ? in the query
+  // replace only if there is only one ? in front of the variable
+  if (identifierTypeVariables?.length) {
+    identifierTypeVariables.forEach((variable) => {
+      const regex = new RegExp(`(?<!\\?)\\?${variable.key}`);
+      queryString = queryString.replace(regex, `??${variable.key}`);
+    });
+    return queryString;
+  }
+
+  return queryString;
+};
+
+export const getCategorizeColumns = (esql: string): string[] => {
+  const { root } = Parser.parse(esql);
+  const statsCommand = root.commands.find(({ name }) => name === 'stats');
+  if (!statsCommand) {
+    return [];
+  }
+  const options: ESQLCommandOption[] = [];
+  const columns: string[] = [];
+
+  walk(statsCommand, {
+    visitCommandOption: (node) => options.push(node),
+  });
+
+  const statsByOptions = options.find(({ name }) => name === 'by');
+
+  // categorize is part of the stats by command
+  if (!statsByOptions) {
+    return [];
+  }
+
+  const categorizeOptions = statsByOptions.args.filter((arg) => {
+    return (arg as ESQLFunction).text.toLowerCase().indexOf('categorize') !== -1;
+  }) as ESQLFunction[];
+
+  if (categorizeOptions.length) {
+    categorizeOptions.forEach((arg) => {
+      // ... STATS ... BY CATEGORIZE(field)
+      if (isFunctionExpression(arg) && arg.name === 'categorize') {
+        columns.push(arg.text);
+      } else {
+        // ... STATS ... BY pattern = CATEGORIZE(field)
+        const columnArgs = arg.args.filter((a) => isColumn(a));
+        columnArgs.forEach((c) => columns.push((c as ESQLColumn).name));
+      }
+    });
+  }
+
+  // If there is a rename command, we need to check if the column is renamed
+  const renameCommand = root.commands.find(({ name }) => name === 'rename');
+  if (!renameCommand) {
+    return columns;
+  }
+  const renameFunctions: ESQLFunction[] = [];
+  walk(renameCommand, {
+    visitFunction: (node) => renameFunctions.push(node),
+  });
+
+  renameFunctions.forEach((renameFunction) => {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const oldColumn = original.name;
+    const newColumn = renamed.name;
+    if (columns.includes(oldColumn)) {
+      columns[columns.indexOf(oldColumn)] = newColumn;
+    }
+  });
+  return columns;
+};
+
+/**
+ * Extracts the original and renamed columns from a rename function.
+ * RENAME original AS renamed Vs RENAME renamed = original
+ * @param renameFunction
+ */
+export const getArgsFromRenameFunction = (
+  renameFunction: ESQLFunction
+): { original: ESQLColumn; renamed: ESQLColumn } => {
+  if (renameFunction.name === 'as') {
+    return {
+      original: renameFunction.args[0] as ESQLColumn,
+      renamed: renameFunction.args[1] as ESQLColumn,
+    };
+  }
+
+  return {
+    original: renameFunction.args[1] as ESQLColumn,
+    renamed: renameFunction.args[0] as ESQLColumn,
+  };
+};
+
+/**
+ * Extracts the fields used in the CATEGORIZE function from an ESQL query.
+ * @param esql: string - The ESQL query string
+ */
+export const getCategorizeField = (esql: string): string[] => {
+  const { root } = Parser.parse(esql);
+  const columns: string[] = [];
+  const functions = Walker.matchAll(root.commands, {
+    type: 'function',
+    name: 'categorize',
+  }) as ESQLFunction[];
+
+  if (functions.length) {
+    functions.forEach((func) => {
+      for (const arg of func.args) if (isColumn(arg)) columns.push(arg.name);
+    });
+    return columns;
+  }
+
+  return columns;
+};
+
+export const hasLimitBeforeAggregate = (esql: string): boolean => {
+  const {
+    root: { commands },
+  } = Parser.parse(esql);
+  const statsCommand = commands.find(({ name }) => name === 'stats');
+  const limitCommand = commands.find(({ name }) => name === 'limit');
+
+  if (statsCommand && limitCommand) {
+    return commands.indexOf(limitCommand) < commands.indexOf(statsCommand);
+  }
+  return false;
+};
+
+export const missingSortBeforeLimit = (esql: string): boolean => {
+  const {
+    root: { commands },
+  } = Parser.parse(esql);
+  const sortCommand = commands.find(({ name }) => name === 'sort');
+  const limitCommand = commands.find(({ name }) => name === 'limit');
+
+  if (limitCommand) {
+    if (sortCommand) {
+      return commands.indexOf(sortCommand) > commands.indexOf(limitCommand);
+    } else {
+      return false;
+    }
+  }
+  return false;
+};
+
+/**
+ * Checks if the ESQL query contains a timeseries bucket aggregation.
+ * @param esql: string - The ESQL query string
+ * @param columns: DatatableColumn[] - The columns of the datatable
+ * @returns true if the query contains a timeseries bucket aggregation, false otherwise
+ */
+export function hasDateBreakdown(esql: string, columns: DatatableColumn[] = []): boolean {
+  const { root } = Parser.parse(esql);
+
+  const normalize = (name: string) => name.toLowerCase().replace(/\s+/g, '');
+  const dateColumnNames = new Set(
+    columns.filter((col) => col.meta.type === 'date').map((col) => normalize(col.name))
+  );
+  if (dateColumnNames.size === 0) {
+    return false;
+  }
+
+  const commands = Walker.commands(root);
+  if (!commands.some((cmd) => cmd.name === 'ts')) {
+    return false;
+  }
+
+  const statsCommands = commands.filter((cmd) => cmd.name === 'stats');
+  if (statsCommands.length === 0) {
+    return false;
+  }
+
+  const statsByCommands = Walker.matchAll(statsCommands, { type: 'option', name: 'by' });
+  if (statsByCommands.length === 0) {
+    return false;
+  }
+
+  const lastByCommand = statsByCommands[statsByCommands.length - 1];
+
+  let foundDateField = false;
+  walk(lastByCommand, {
+    visitColumn: (node) => {
+      if (!foundDateField && dateColumnNames.has(normalize(node.name))) {
+        foundDateField = true;
+      }
+    },
+    visitFunction: (node) => {
+      if (!foundDateField && dateColumnNames.has(normalize(node.text))) {
+        foundDateField = true;
+      }
+    },
+  });
+
+  return foundDateField;
+}
+
+/**
+ * Checks if the ESQL query contains only source commands (e.g., FROM, TS).
+ * @param esql: string - The ESQL query string
+ * @returns true if the query contains only source commands, false otherwise
+ */
+export const hasOnlySourceCommand = (query: string): boolean => {
+  const { root } = Parser.parse(query);
+  const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+  return (
+    root.commands.length > 0 &&
+    root.commands.every((command) => sourceCommands.includes(command.name))
+  );
 };

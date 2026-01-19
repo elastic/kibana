@@ -5,12 +5,12 @@
 * Check if ES setup is done
 
       curl -H "content-type: application/json" -u <user:pass> \
-        -XGET "http://localhost:5601/internal/profiling/setup/es_resources"
+        -XGET "http://localhost:5601/api/profiling/setup/es_resources"
 
 * Apply the ES setup (mappings + Fleet policy)
 
       curl -H "content-type: application/json" -u <user:pass> -H "kbn-xsrf: reporting" \
-        -XPOST "http://localhost:5601/internal/profiling/setup/es_resources"
+        -XPOST "http://localhost:5601/api/profiling/setup/es_resources"
 
 * check data has been ingested
 
@@ -26,7 +26,7 @@ Build and push a Kibana image with the latest changes.
 Choose a unique identifier for the build, then:
 
 ```
-node scripts/build --docker-images --skip-docker-ubi --skip-docker-ubuntu --skip-docker-fips
+node scripts/build --docker-images --skip-docker-ubi --skip-docker-fips
 docker tag docker.elastic.co/kibana-ci/kibana-cloud:8.7.0-SNAPSHOT docker.elastic.co/observability-ci/kibana:<UNIQUE_IDENTIFIER>
 docker push docker.elastic.co/observability-ci/kibana:<UNIQUE_IDENTIFIER>
 ```

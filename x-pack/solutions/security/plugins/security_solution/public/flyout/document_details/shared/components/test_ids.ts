@@ -7,8 +7,6 @@
 
 import { PREFIX } from '../../../shared/test_ids';
 
-export const FLYOUT_PREVIEW_LINK_TEST_ID = `${PREFIX}PreviewLink` as const;
-
 export const SESSION_VIEW_UPSELL_TEST_ID = `${PREFIX}SessionViewUpsell` as const;
 export const SESSION_VIEW_NO_DATA_TEST_ID = `${PREFIX}SessionViewNoData` as const;
 
@@ -16,5 +14,7 @@ const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
 export const INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID = `${INSIGHTS_TEST_ID}AlertsCount` as const;
 export const INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID =
   `${INSIGHTS_TEST_ID}AlertsCountInvestigateInTimelineButton` as const;
+export const INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID =
+  `${INSIGHTS_TEST_ID}AlertsCountNavigationButton` as const;
 
 export const FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID = `${PREFIX}FooterDropdownButton` as const;

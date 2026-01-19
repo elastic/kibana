@@ -7,12 +7,12 @@
 
 import React, { type MouseEvent } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
-import { ALERT_STATUS_ACTIVE, AlertStatus } from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import {
   ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ,
   ACTIVE_NOW_LABEL,
   ALERTS_LABEL,
-  ALL_ALERT_COLOR,
   TOTAL_ALERT_COUNT_DATA_TEST_SUBJ,
 } from './constants';
 import { AlertItem } from './alert_item';
@@ -34,7 +34,7 @@ export const AlertCounts = ({ activeAlertCount, recoveredAlertCount, handleClick
       <AlertItem
         label={ALERTS_LABEL}
         count={activeAlertCount + recoveredAlertCount}
-        color={ALL_ALERT_COLOR}
+        color={euiTheme.colors.vis.euiColorVis0}
         data-test-subj={TOTAL_ALERT_COUNT_DATA_TEST_SUBJ}
         handleClick={handleClick}
       />

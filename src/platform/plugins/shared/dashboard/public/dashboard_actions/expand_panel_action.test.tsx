@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { ExpandPanelActionApi, ExpandPanelAction } from './expand_panel_action';
+import { BehaviorSubject, take } from 'rxjs';
+import type { ExpandPanelActionApi } from './expand_panel_action';
+import { ExpandPanelAction } from './expand_panel_action';
 
 describe('Expand panel action', () => {
   let action: ExpandPanelAction;
@@ -20,6 +21,7 @@ describe('Expand panel action', () => {
     action = new ExpandPanelAction();
     context = {
       embeddable: {
+        isExpandable: true,
         uuid: 'superId',
         parentApi: {
           expandPanel: jest.fn(),
@@ -40,11 +42,12 @@ describe('Expand panel action', () => {
     expect(await action.isCompatible(emptyContext)).toBe(false);
   });
 
-  it('calls onChange when expandedPanelId changes', async () => {
-    const onChange = jest.fn();
-    action.subscribeToCompatibilityChanges(context, onChange);
+  it('getCompatibilityChangesSubject emits when expandedPanelId changes', (done) => {
+    const subject = action.getCompatibilityChangesSubject(context);
+    subject?.pipe(take(1)).subscribe(() => {
+      done();
+    });
     expandedPanelId$.next('superPanelId');
-    expect(onChange).toHaveBeenCalledWith(true, action);
   });
 
   it('returns the correct icon based on expanded panel id', async () => {

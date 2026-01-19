@@ -31,7 +31,13 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
             "areaSeriesStyle": Object {
               "area": Object {
-                "opacity": 0.3,
+                "dimmed": Object {
+                  "fill": "rgba(202, 211, 226, 0.15)",
+                  "texture": Object {
+                    "opacity": 0.25,
+                  },
+                },
+                "opacity": 0.2,
                 "visible": true,
               },
               "fit": Object {
@@ -59,16 +65,30 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": "auto",
               },
               "line": Object {
+                "dimmed": Object {
+                  "stroke": "rgba(202, 211, 226, 0.5)",
+                  "strokeWidth": 1,
+                },
+                "focused": Object {
+                  "strokeWidth": 2.5,
+                },
                 "opacity": 1,
-                "strokeWidth": 2,
+                "strokeWidth": 1.5,
                 "visible": true,
               },
               "point": Object {
-                "fill": "__use__series__color__",
+                "dimmed": Object {
+                  "fill": "#FFFFFF",
+                  "stroke": "rgba(202, 211, 226, 0.15)",
+                },
+                "fill": "#FFFFFF",
+                "focused": Object {
+                  "strokeWidth": 2.5,
+                },
                 "opacity": 1,
                 "radius": 3,
-                "stroke": "__use__empty__color__",
-                "strokeWidth": 0,
+                "stroke": "__use__series__color__",
+                "strokeWidth": 1.5,
                 "visible": "never",
               },
               "pointVisibilityMinDistance": 20,
@@ -110,24 +130,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -196,8 +198,17 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": false,
               },
             },
+            "brush": Object {
+              "fill": "#0B64DD",
+              "opacity": 0.1,
+              "stroke": "#0B64DD",
+              "strokeWidth": 1,
+            },
             "bubbleSeriesStyle": Object {
               "point": Object {
+                "dimmed": Object {
+                  "opacity": 0.25,
+                },
                 "fill": "__use__series__color__",
                 "opacity": 1,
                 "radius": 2,
@@ -231,23 +242,23 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "top": 0,
             },
             "colors": Object {
-              "defaultVizColor": "#6092C0",
+              "defaultVizColor": "#16C5C0",
               "vizColors": Array [
-                "#54B399",
-                "#6092C0",
-                "#9170B8",
-                "#CA8EAE",
-                "#D36086",
-                "#E7664C",
-                "#AA6556",
-                "#DA8B45",
-                "#B9A888",
-                "#D6BF57",
+                "#16C5C0",
+                "#A6EDEA",
+                "#61A2FF",
+                "#BFDBFF",
+                "#EE72A6",
+                "#FFC7DB",
+                "#F6726A",
+                "#FFC9C2",
+                "#EAAE01",
+                "#FCD883",
               ],
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "rgba(23 80 186 / 0.04)",
+                "fill": "rgba(23, 80, 186, 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -255,7 +266,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   4,
                   4,
                 ],
-                "stroke": "#CAD3E2",
+                "stroke": "#0B64DD",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -264,7 +275,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   4,
                   4,
                 ],
-                "stroke": "#CAD3E2",
+                "stroke": "#0B64DD",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -337,11 +348,11 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "rgba(255 255 255 / 0.7)",
+                "fill": "rgba(255, 255, 255, 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "rgba(255 255 255 / 0.7)",
+                "fill": "rgba(255, 255, 255, 0.7)",
                 "visible": false,
               },
               "cell": Object {
@@ -407,10 +418,17 @@ exports[`DonutChart component passes correct props without errors for valid prop
             "highlighter": Object {
               "point": Object {
                 "fill": "__use__series__color__",
-                "opacity": 0.5,
-                "radius": 5,
-                "stroke": "__use__empty__color__",
-                "strokeWidth": 0,
+                "onHover": Object {
+                  "fill": "__use__series__color__",
+                  "opacity": 0.5,
+                  "radius": 5,
+                  "stroke": "__use__empty__color__",
+                  "strokeWidth": 0,
+                },
+                "opacity": 1,
+                "radius": 3,
+                "stroke": "__use__series__color__",
+                "strokeWidth": 1.5,
               },
             },
             "legend": Object {
@@ -450,33 +468,54 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": "auto",
               },
               "line": Object {
+                "dimmed": Object {
+                  "stroke": "rgba(202, 211, 226, 0.35)",
+                  "strokeWidth": 1,
+                },
+                "focused": Object {
+                  "strokeWidth": 2.5,
+                },
                 "opacity": 1,
-                "strokeWidth": 2,
+                "strokeWidth": 1.5,
                 "visible": true,
               },
               "point": Object {
-                "fill": "__use__series__color__",
+                "dimmed": Object {
+                  "fill": "#FFFFFF",
+                  "stroke": "rgba(202, 211, 226, 0.15)",
+                },
+                "fill": "#FFFFFF",
+                "focused": Object {
+                  "strokeWidth": 2.5,
+                },
                 "opacity": 1,
                 "radius": 3,
-                "stroke": "__use__empty__color__",
-                "strokeWidth": 0,
+                "stroke": "__use__series__color__",
+                "strokeWidth": 1.5,
                 "visible": "auto",
               },
-              "pointVisibilityMinDistance": 40,
+              "pointVisibilityMinDistance": 20,
             },
             "metric": Object {
               "barBackground": "#ECF1F9",
               "border": "#E3E8F2",
               "emptyBackground": "transparent",
+              "extraTextAlign": "right",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
               "textDarkColor": "#111C2C",
+              "textExtraDarkColor": "#1D2A3E",
+              "textExtraLightColor": "#CAD3E2",
               "textLightColor": "#E3E8F2",
+              "textSubtitleDarkColor": "#1D2A3E",
+              "textSubtitleLightColor": "#CAD3E2",
+              "titleWeight": "bold",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
-              "valuesTextAlign": "right",
+              "valuePosition": "bottom",
+              "valueTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -644,7 +683,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
 }
 
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-center-row"
+  class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
 >
   <div
     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -652,6 +691,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
   >
     <div
       class="echChart"
+      data-testid="echChart"
       style="width:125px;height:125px"
     >
       <div
@@ -697,7 +737,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#BD271E"
+                  color="#C61E25"
                   data-euiicon-type="dot"
                 />
               </div>
@@ -739,7 +779,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#D3DAE6"
+                  color="#CAD3E2"
                   data-euiicon-type="dot"
                 />
               </div>
@@ -799,7 +839,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
 }
 
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-center-row"
+  class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
 >
   <div
     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -807,6 +847,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
   >
     <div
       class="echChart"
+      data-testid="echChart"
       style="width:125px;height:125px"
     >
       <div
@@ -856,7 +897,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#BD271E"
+                  color="#C61E25"
                   data-euiicon-type="dot"
                 />
               </div>
@@ -898,7 +939,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#D3DAE6"
+                  color="#CAD3E2"
                   data-euiicon-type="dot"
                 />
               </div>

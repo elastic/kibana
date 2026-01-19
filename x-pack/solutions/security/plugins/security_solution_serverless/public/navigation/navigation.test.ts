@@ -1,0 +1,86 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import type { ProductLine, ProductTier } from '../../common/product';
+import { mockServices } from '../common/services/__mocks__/services.mock';
+import { registerSolutionNavigation } from './navigation';
+import { createNavigationTree } from './navigation_tree';
+import { createAiNavigationTree } from './ai_navigation/ai_navigation_tree';
+
+jest.mock('./navigation_tree');
+jest.mock('./ai_navigation/ai_navigation_tree');
+
+const mockedCreateNavigationTree = createNavigationTree as jest.Mock;
+const mockedCreateAiNavigationTree = createAiNavigationTree as jest.Mock;
+
+const mockedNavTree = {};
+mockedCreateNavigationTree.mockResolvedValue(mockedNavTree);
+const mockedAiNavTree = {};
+mockedCreateAiNavigationTree.mockReturnValue(mockedAiNavTree);
+
+describe('Security Side Nav', () => {
+  const services = mockServices;
+  const initNavigationSpy = jest.spyOn(services.serverless, 'initNavigation');
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    initNavigationSpy.mockReset();
+    // Mock settings.client.get$ to return Classic chat experience by default
+    services.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
+  });
+
+  it('registers the navigation tree definition for serverless security', async () => {
+    expect(initNavigationSpy).not.toHaveBeenCalled();
+
+    await registerSolutionNavigation(services, []);
+
+    expect(initNavigationSpy).toHaveBeenCalled();
+    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services, AIChatExperience.Classic);
+    expect(mockedCreateAiNavigationTree).not.toHaveBeenCalled();
+
+    const [, navigationTree$] = initNavigationSpy.mock.calls[0];
+
+    navigationTree$.subscribe({
+      next: (value) => {
+        expect(value).toBe(mockedNavTree);
+      },
+    });
+  });
+
+  it('registers the navigation tree definition for serverless security with AI SOC', async () => {
+    expect(initNavigationSpy).not.toHaveBeenCalled();
+
+    await registerSolutionNavigation(services, [
+      {
+        product_line: 'ai_soc' as ProductLine,
+        product_tier: 'search_ai_lake' as ProductTier,
+      },
+    ]);
+
+    expect(initNavigationSpy).toHaveBeenCalled();
+    expect(mockedCreateAiNavigationTree).toHaveBeenCalledWith(AIChatExperience.Classic);
+    expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
+
+    const [, navigationTree$] = initNavigationSpy.mock.calls[0];
+
+    navigationTree$.subscribe({
+      next: (value) => {
+        expect(value).toBe(mockedAiNavTree);
+      },
+    });
+  });
+
+  it('passes Agent chat experience when settings return Agent', async () => {
+    services.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Agent));
+
+    await registerSolutionNavigation(services, []);
+
+    expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services, AIChatExperience.Agent);
+  });
+});

@@ -14,11 +14,13 @@ import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../com
 import { getTimeBucketsFromCache } from '../../../../../../util/get_time_buckets_from_cache';
 
 export function useChartColors() {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
+  const isDarkMode = colorMode === 'DARK';
+
   return {
-    LINE_COLOR: euiTheme.colors.primary,
-    MODEL_COLOR: euiTheme.colors.primary,
-    EVENT_RATE_COLOR: euiTheme.colors.primary,
+    LINE_COLOR: isDarkMode ? euiTheme.colors.vis.euiColorVisGrey0 : euiTheme.colors.darkestShade,
+    MODEL_COLOR: euiTheme.colors.lightShade,
+    EVENT_RATE_COLOR: euiTheme.colors.vis.euiColorVis0,
     EVENT_RATE_COLOR_WITH_ANOMALIES: euiTheme.colors.lightShade,
   };
 }
@@ -39,7 +41,7 @@ export const defaultChartSettings: ChartSettings = {
 
 export const lineSeriesStyle: RecursivePartial<LineSeriesStyle> = {
   line: {
-    strokeWidth: 2,
+    strokeWidth: 1,
     visible: true,
     opacity: 1,
   },
@@ -54,7 +56,7 @@ export const lineSeriesStyle: RecursivePartial<LineSeriesStyle> = {
 export const areaSeriesStyle: RecursivePartial<AreaSeriesStyle> = {
   ...lineSeriesStyle,
   area: {
-    opacity: 0.25,
+    opacity: 0.6,
     visible: false,
   },
 };

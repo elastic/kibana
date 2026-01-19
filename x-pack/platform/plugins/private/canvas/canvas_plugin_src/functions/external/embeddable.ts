@@ -6,19 +6,20 @@
  */
 
 import { mapValues } from 'lodash';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import {
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type {
   ExpressionFunctionDefinition,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
-import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
-import { ExpressionValueFilter, EmbeddableInput } from '../../../types';
-import { EmbeddableExpressionType, EmbeddableExpression } from '../../expression_types';
+import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { ExpressionValueFilter } from '../../../types';
+import type { EmbeddableExpression } from '../../expression_types';
+import { EmbeddableExpressionType } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { decode, encode } from '../../../common/lib/embeddable_dataurl';
-import { InitializeArguments } from '.';
+import type { InitializeArguments } from '.';
 
 export interface Arguments {
   config: string;
@@ -36,13 +37,11 @@ const baseEmbeddableInput = {
   renderMode: 'noInteractivity',
 };
 
-type Return = EmbeddableExpression<EmbeddableInput>;
-
 type EmbeddableFunction = ExpressionFunctionDefinition<
   'embeddable',
   ExpressionValueFilter | null,
   Arguments,
-  Return
+  EmbeddableExpression
 >;
 
 export function embeddableFunctionFactory({
@@ -56,7 +55,7 @@ export function embeddableFunctionFactory({
         migrateFn: MigrateFunction<EmbeddableStateWithType, EmbeddableStateWithType>
       ): MigrateFunction<ExpressionAstFunction, ExpressionAstFunction> =>
       (state: ExpressionAstFunction): ExpressionAstFunction => {
-        const embeddableInput = decode(state.arguments.config[0] as string) as EmbeddableInput;
+        const embeddableInput = decode(state.arguments.config[0] as string);
 
         const embeddableType = state.arguments.type[0];
 
@@ -92,7 +91,7 @@ export function embeddableFunctionFactory({
       fn: (input, args) => {
         const filters = input ? input.and : [];
 
-        const embeddableInput = decode(args.config) as EmbeddableInput;
+        const embeddableInput = decode(args.config);
 
         return {
           type: EmbeddableExpressionType,

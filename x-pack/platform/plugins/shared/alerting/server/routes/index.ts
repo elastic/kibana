@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { DocLinksServiceSetup, IRouter } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
-import { Observable } from 'rxjs';
-import { GetAlertIndicesAlias, ILicenseState } from '../lib';
-import { AlertingRequestHandlerContext } from '../types';
+import type { CoreSetup, DocLinksServiceSetup, IRouter } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { ConfigSchema } from '@kbn/kql/server/config';
+import type { Observable } from 'rxjs';
+import type { AlertingConfig } from '../config';
+import type { GetAlertIndicesAlias, ILicenseState } from '../lib';
+import type { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
 import { updateRuleRoute } from './rule/apis/update/update_rule_route';
@@ -30,16 +31,17 @@ import { getRuleExecutionKPIRoute } from './get_rule_execution_kpi';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './framework/apis/health';
 import { resolveRuleRoute } from './rule/apis/resolve';
-import { ruleTypesRoute } from './rule/apis/list_types/rule_types';
+import { getRuleTypesRoute } from './rule/apis/list_types/external/get_rule_types_route';
+import { getRuleTypesInternalRoute } from './rule/apis/list_types/internal/get_rule_types_internal_route';
 import { muteAllRuleRoute } from './rule/apis/mute_all/mute_all_rule';
 import { muteAlertRoute } from './rule/apis/mute_alert/mute_alert';
 import { unmuteAllRuleRoute } from './rule/apis/unmute_all';
 import { unmuteAlertRoute } from './rule/apis/unmute_alert/unmute_alert_route';
 import { updateRuleApiKeyRoute } from './rule/apis/update_api_key/update_rule_api_key_route';
 import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rules_route';
-import { snoozeRuleRoute } from './rule/apis/snooze';
-import { unsnoozeRuleRoute } from './rule/apis/unsnooze';
-import { runSoonRoute } from './run_soon';
+import { snoozeRuleInternalRoute, snoozeRuleRoute } from './rule/apis/snooze';
+import { unsnoozeRuleRoute, unsnoozeRuleInternalRoute } from './rule/apis/unsnooze';
+import { runSoonRoute } from './rule/apis/run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './rule/apis/bulk_enable/bulk_enable_rules_route';
 import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rules_route';
@@ -51,20 +53,14 @@ import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 import { bulkUntrackAlertsRoute } from './rule/apis/bulk_untrack';
 import { bulkUntrackAlertsByQueryRoute } from './rule/apis/bulk_untrack_by_query';
 
-import { createMaintenanceWindowRoute } from './maintenance_window/apis/create/create_maintenance_window_route';
-import { getMaintenanceWindowRoute } from './maintenance_window/apis/get/get_maintenance_window_route';
-import { updateMaintenanceWindowRoute } from './maintenance_window/apis/update/update_maintenance_window_route';
-import { deleteMaintenanceWindowRoute } from './maintenance_window/apis/delete/delete_maintenance_window_route';
-import { findMaintenanceWindowsRoute } from './maintenance_window/apis/find/find_maintenance_windows_route';
-import { archiveMaintenanceWindowRoute } from './maintenance_window/apis/archive/archive_maintenance_window_route';
-import { finishMaintenanceWindowRoute } from './maintenance_window/apis/finish/finish_maintenance_window_route';
-import { getActiveMaintenanceWindowsRoute } from './maintenance_window/apis/get_active/get_active_maintenance_windows_route';
 import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
-import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
 import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
+import { alertDeletePreviewRoute } from './alert_delete/apis/preview/get_alert_delete_preview_route';
+import { alertDeleteScheduleRoute } from './alert_delete/apis/schedule/create_alert_delete_schedule_route';
+import { alertDeleteLastRunRoute } from './alert_delete/apis/last_run/get_alert_delete_last_run_route';
 
 // backfill API
 import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfill_route';
@@ -77,6 +73,18 @@ import { findGapsRoute } from './gaps/apis/find/find_gaps_route';
 import { fillGapByIdRoute } from './gaps/apis/fill/fill_gap_by_id_route';
 import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route';
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
+import { createAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route';
+import { getAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/get/get_auto_fill_scheduler_route';
+import { updateAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route';
+import { deleteAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route';
+import { findAutoFillSchedulerLogsRoute } from './gaps/apis/gap_auto_fill_schedule/logs/find_auto_fill_scheduler_logs_route';
+import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
+import type { AlertingPluginsStart } from '../plugin';
+import { getInternalRuleTemplateRoute } from './rule_templates/apis/get/get_rule_template_route';
+import { findInternalRuleTemplatesRoute } from './rule_templates/apis/find/find_rule_template_route';
+import { bulkMuteAlertsRoute } from './rule/apis/bulk_mute_alerts/bulk_mute_alerts_route';
+import { bulkUnmuteAlertsRoute } from './rule/apis/bulk_unmute_alerts/bulk_unmute_alerts_route';
+
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
@@ -86,6 +94,8 @@ export interface RouteOptions {
   config$?: Observable<ConfigSchema>;
   isServerless?: boolean;
   docLinks: DocLinksServiceSetup;
+  alertingConfig: AlertingConfig;
+  core: CoreSetup<AlertingPluginsStart, unknown>;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -96,10 +106,14 @@ export function defineRoutes(opts: RouteOptions) {
     usageCounter,
     config$,
     getAlertIndicesAlias,
+    alertingConfig,
+    core,
   } = opts;
 
   createRuleRoute(opts);
   getRuleRoute(router, licenseState);
+  getInternalRuleTemplateRoute(router, licenseState);
+  findInternalRuleTemplatesRoute(router, licenseState);
   getInternalRuleRoute(router, licenseState);
   resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
@@ -113,7 +127,8 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleExecutionLogRoute(router, licenseState);
   getRuleExecutionKPIRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
-  ruleTypesRoute(router, licenseState);
+  getRuleTypesRoute(router, licenseState);
+  getRuleTypesInternalRoute(router, licenseState);
   muteAllRuleRoute(router, licenseState, usageCounter);
   unmuteAllRuleRoute(router, licenseState);
   updateRuleApiKeyRoute(router, licenseState);
@@ -121,8 +136,10 @@ export function defineRoutes(opts: RouteOptions) {
   bulkDeleteRulesRoute({ router, licenseState });
   bulkEnableRulesRoute({ router, licenseState });
   bulkDisableRulesRoute({ router, licenseState });
+  snoozeRuleInternalRoute(router, licenseState);
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
+  unsnoozeRuleInternalRoute(router, licenseState);
   cloneRuleRoute(router, licenseState);
   getRuleTagsRoute(router, licenseState);
   registerRulesValueSuggestionsRoute(router, licenseState, config$!);
@@ -133,17 +150,11 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertsByQueryRoute(router, licenseState);
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
-
-  // Maintenance Window APIs
-  createMaintenanceWindowRoute(router, licenseState);
-  getMaintenanceWindowRoute(router, licenseState);
-  updateMaintenanceWindowRoute(router, licenseState);
-  deleteMaintenanceWindowRoute(router, licenseState);
-  findMaintenanceWindowsRoute(router, licenseState);
-  archiveMaintenanceWindowRoute(router, licenseState);
-  finishMaintenanceWindowRoute(router, licenseState);
-  getActiveMaintenanceWindowsRoute(router, licenseState);
-  bulkGetMaintenanceWindowRoute(router, licenseState);
+  bulkMuteAlertsRoute(router, licenseState);
+  bulkUnmuteAlertsRoute(router, licenseState);
+  alertDeletePreviewRoute(router, licenseState);
+  alertDeleteScheduleRoute(router, licenseState, core);
+  alertDeleteLastRunRoute(router, licenseState);
 
   // backfill APIs
   scheduleBackfillRoute(router, licenseState);
@@ -157,16 +168,28 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleIdsWithGapsRoute(router, licenseState);
   getGapsSummaryByRuleIdsRoute(router, licenseState);
 
+  if (alertingConfig?.gapAutoFillScheduler?.enabled) {
+    createAutoFillSchedulerRoute(router, licenseState);
+    getAutoFillSchedulerRoute(router, licenseState);
+    updateAutoFillSchedulerRoute(router, licenseState);
+    deleteAutoFillSchedulerRoute(router, licenseState);
+    findAutoFillSchedulerLogsRoute(router, licenseState);
+  }
+
+  // Rules Settings APIs
+  if (alertingConfig.rulesSettings.enabled) {
+    getQueryDelaySettingsRoute(router, licenseState);
+    updateQueryDelaySettingsRoute(router, licenseState);
+    getFlappingSettingsRoute(router, licenseState);
+    updateFlappingSettingsRoute(router, licenseState);
+  }
   // Other APIs
   registerFieldsRoute(router, licenseState);
   getScheduleFrequencyRoute(router, licenseState);
-  getQueryDelaySettingsRoute(router, licenseState);
-  updateQueryDelaySettingsRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);
   getActionErrorLogRoute(router, licenseState);
-  getFlappingSettingsRoute(router, licenseState);
-  updateFlappingSettingsRoute(router, licenseState);
   runSoonRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   getGlobalExecutionKPIRoute(router, licenseState);
+  getGlobalExecutionSummaryRoute(router, licenseState);
 }

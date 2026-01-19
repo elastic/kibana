@@ -16,6 +16,12 @@ export function registerStatusRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
       path: GET_STATUS_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {},
       options: {
         access: 'internal',
@@ -36,6 +42,12 @@ export function registerStatusRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
       path: GET_USER_PRIVILEGES_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),

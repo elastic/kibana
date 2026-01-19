@@ -10,11 +10,14 @@
 import Path from 'path';
 import Os from 'os';
 import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
-import { ThemeTag, ThemeTags, parseThemeTags } from '@kbn/core-ui-settings-common';
+import type { ThemeTag, ThemeTags } from '@kbn/core-ui-settings-common';
+import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
-import { Bundle, WorkerConfig, CacheableWorkerConfig, omit } from '../common';
+import type { WorkerConfig, CacheableWorkerConfig } from '../common';
+import { Bundle, omit } from '../common';
 
-import { toKibanaPlatformPlugin, KibanaPlatformPlugin } from './kibana_platform_plugins';
+import type { KibanaPlatformPlugin } from './kibana_platform_plugins';
+import { toKibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
 import { filterById } from './filter_by_id';
 import { focusBundles } from './focus_bundles';
@@ -26,14 +29,58 @@ export interface Limits {
   };
 }
 
-function pickMaxWorkerCount(dist: boolean) {
-  // don't break if cpus() returns nothing, or an empty array
-  const cpuCount = Math.max(Os.cpus()?.length, 1);
-  // if we're buiding the dist then we can use more of the system's resources to get things done a little quicker
-  const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
-  // ensure we always have at least two workers
-  return Math.max(maxWorkers, 2);
+interface SystemInfo {
+  cpuCount: number;
 }
+
+function getSystemInfo(): SystemInfo {
+  // collects useful system information for resource usage calculations
+  const cpuCount = Math.max(Os.cpus()?.length ?? 0, 1);
+
+  return { cpuCount };
+}
+
+const pickMaxWorkerCount = (dist: boolean) => {
+  const isDist = dist;
+  const isCI = !!process.env.CI;
+  const isUseMaxAvailableResources = !!process.env.KBN_OPTIMIZER_USE_MAX_AVAILABLE_RESOURCES;
+  const minWorkers = 2;
+  const { cpuCount } = getSystemInfo();
+  const maxWorkers = Math.max(cpuCount - 1, minWorkers);
+
+  // In case we get this env var set, just use max workers and avoid any kind of
+  // resource balance according to memory and cpu
+  if (isUseMaxAvailableResources) {
+    return maxWorkers;
+  }
+
+  // Start calculating base worker count
+  let workerCount;
+  if (isDist && isCI) {
+    // For CI dist builds, start with most available resources
+    workerCount = maxWorkers;
+  } else if (isDist) {
+    // For local dist builds, start with 80% of resources but leaving some headroom
+    workerCount = Math.max(Math.floor(cpuCount * 0.8), 2);
+  } else {
+    // For regular local builds, start with fewer resources of 50%
+    workerCount = Math.max(Math.floor(cpuCount * 0.5), 2);
+  }
+
+  // Adjust by the ratio workerCount to maxWorkers.
+  // If it is lower or equal to 50% it adds an extra worker
+  // so the available resources are better used
+  const ratioWorkerCountToMaxWorkers = 1 - workerCount / maxWorkers;
+  if (ratioWorkerCountToMaxWorkers >= 0.5) {
+    workerCount = Math.min(workerCount + 1, cpuCount);
+  }
+
+  // Make sure we respect min and max worker limits
+  workerCount = Math.max(workerCount, minWorkers);
+  workerCount = Math.min(workerCount, maxWorkers);
+
+  return workerCount;
+};
 
 interface Options {
   /** absolute path to root of the repo/build */
@@ -119,7 +166,6 @@ export interface ParsedOptions {
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
   pluginSelector: PluginSelector;
-  reactVersion: string;
 }
 
 export class OptimizerConfig {
@@ -134,7 +180,6 @@ export class OptimizerConfig {
     const includeCoreBundle = !!options.includeCoreBundle;
     const filters = options.filter || [];
     const focus = options.focus || [];
-    const reactVersion = process.env.REACT_18 ? '18' : '17';
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -179,7 +224,6 @@ export class OptimizerConfig {
       outputRoot,
       maxWorkerCount,
       profileWebpack,
-      reactVersion,
       cache,
       filters,
       focus,
@@ -237,8 +281,7 @@ export class OptimizerConfig {
       options.maxWorkerCount,
       options.dist,
       options.profileWebpack,
-      options.themeTags,
-      options.reactVersion
+      options.themeTags
     );
   }
 
@@ -253,8 +296,7 @@ export class OptimizerConfig {
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
-    public readonly themeTags: ThemeTags,
-    public readonly reactVersion: string
+    public readonly themeTags: ThemeTags
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
@@ -267,7 +309,6 @@ export class OptimizerConfig {
       optimizerCacheKey,
       themeTags: this.themeTags,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
-      reactVersion: this.reactVersion,
     };
   }
 

@@ -30,7 +30,7 @@ export type RightPanelPaths = 'overview' | 'table' | 'json';
 export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { storage, telemetry } = useKibana().services;
   const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, isPreview, dataAsNestedObject, getFieldsData } =
+  const { eventId, indexName, scopeId, isRulePreview, dataAsNestedObject, getFieldsData } =
     useDocumentDetailsContext();
 
   // if the flyout is expandable we render all 3 tabs (overview, table and json)
@@ -61,10 +61,10 @@ export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => 
     });
   };
 
-  // If flyout is open in preview mode, do not reload with stale information
+  // If flyout is open in rule preview, do not reload with stale information
   useEffect(() => {
     const beforeUnloadHandler = () => {
-      if (isPreview) {
+      if (isRulePreview) {
         closeFlyout();
       }
     };
@@ -72,7 +72,7 @@ export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => 
     return () => {
       window.removeEventListener('beforeunload', beforeUnloadHandler);
     };
-  }, [isPreview, closeFlyout]);
+  }, [isRulePreview, closeFlyout]);
 
   return (
     <>
@@ -83,7 +83,7 @@ export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => 
         setSelectedTabId={setSelectedTabId}
       />
       <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
-      <PanelFooter isPreview={isPreview} />
+      <PanelFooter isRulePreview={isRulePreview} />
     </>
   );
 });

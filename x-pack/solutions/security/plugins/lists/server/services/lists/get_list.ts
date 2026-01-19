@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Id, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { transformElasticToList } from '../utils/transform_elastic_to_list';
-import { SearchEsListSchema } from '../../schemas/elastic_response';
+import type { SearchEsListSchema } from '../../schemas/elastic_response';
 
 interface GetListOptions {
   id: Id;
@@ -26,15 +26,13 @@ export const getList = async ({
   // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
   // to explicitly define the type <T>.
   const response = await esClient.search<SearchEsListSchema>({
-    body: {
-      query: {
-        term: {
-          _id: id,
-        },
-      },
-    },
     ignore_unavailable: true,
     index: listIndex,
+    query: {
+      term: {
+        _id: id,
+      },
+    },
     seq_no_primary_term: true,
   });
   const list = transformElasticToList({ response });

@@ -8,17 +8,14 @@
  */
 
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
-import {
-  SummaryColumnGetterDeps,
-  getSummaryColumn,
-} from '../../../../components/data_types/logs/summary_column';
+import type { SummaryColumnGetterDeps } from '../../../../components/data_types/logs/summary_column';
+import { getSummaryColumn } from '../../../../components/data_types/logs/summary_column';
 
 export type DataGridColumnsDeps = CustomCellRendererDeps;
 
 export const getDataGridColumnsConfiguration = (params: DataGridColumnsDeps) => {
   return {
     customCellRenderer: createCustomCellRenderer(params),
-    customGridColumnsConfiguration: createCustomGridColumnsConfiguration(),
   };
 };
 
@@ -29,5 +26,3 @@ export const createCustomCellRenderer = (params: CustomCellRendererDeps) => {
     [SOURCE_COLUMN]: getSummaryColumn(params),
   };
 };
-
-export const createCustomGridColumnsConfiguration = () => ({});

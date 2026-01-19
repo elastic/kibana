@@ -6,7 +6,7 @@
  */
 
 import { ensureDirSync, createSync, copySync } from '../util';
-import { DataStream, Docs, InputType, Pipeline } from '../../common';
+import type { DataStream, Docs, InputType, Pipeline } from '../../common';
 import { createDataStream } from './data_stream';
 import { render } from 'nunjucks';
 
@@ -88,17 +88,6 @@ describe('createDataStream', () => {
 
     // dataStream files
     expect(copySync).toHaveBeenCalledWith(expect.any(String), `${dataStreamPath}/fields`);
-
-    // test files
-    expect(ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/_dev/test/pipeline`);
-    expect(copySync).toHaveBeenCalledWith(
-      expect.any(String),
-      `${dataStreamPath}/_dev/test/pipeline/test-common-config.yml`
-    );
-    expect(createSync).toHaveBeenCalledWith(
-      `${dataStreamPath}/_dev/test/pipeline/test-${packageName}-datastream-1.log`,
-      samples
-    );
 
     // // Manifest files
     expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/manifest.yml`, undefined);

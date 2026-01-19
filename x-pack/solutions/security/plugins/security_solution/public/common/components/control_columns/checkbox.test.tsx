@@ -5,34 +5,22 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
+import type { RowCheckBoxProps } from './checkbox';
 import { HeaderCheckBox, RowCheckBox } from './checkbox';
 import React from 'react';
-import type { ActionProps, HeaderActionProps } from '../../../../common/types';
+import type { HeaderActionProps } from '../../../../common/types';
 import { TimelineTabs } from '../../../../common/types';
 
 describe('checkbox control column', () => {
   describe('RowCheckBox', () => {
-    const defaultProps: ActionProps = {
+    const defaultProps: RowCheckBoxProps = {
       ariaRowindex: 1,
-      columnId: 'test-columnId',
-      columnValues: 'test-columnValues',
       checked: false,
+      columnValues: 'test-columnValues',
       onRowSelected: jest.fn(),
       eventId: 'test-event-id',
       loadingEventIds: [],
-      onEventDetailsPanelOpened: jest.fn(),
-      showCheckboxes: true,
-      data: [],
-      ecsData: {
-        _id: 'test-ecsData-id',
-      },
-      index: 1,
-      rowIndex: 1,
-      showNotes: true,
-      timelineId: 'test-timelineId',
-      setEventsLoading: jest.fn(),
-      setEventsDeleted: jest.fn(),
     };
     test('displays loader when id is included on loadingEventIds', () => {
       const { getByTestId } = render(

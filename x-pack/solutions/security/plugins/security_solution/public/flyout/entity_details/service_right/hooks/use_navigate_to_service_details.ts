@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCallback } from 'react';
 import { EntityType } from '../../../../../common/search_strategy';
@@ -11,53 +12,28 @@ import type { EntityDetailsPath } from '../../shared/components/left_panel/left_
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { ServiceDetailsPanelKey } from '../../service_details_left';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { ServicePanelKey } from '../../shared/constants';
 
 interface UseNavigateToServiceDetailsParams {
   serviceName: string;
-  email?: string[];
   scopeId: string;
-  contextID: string;
-  isDraggable?: boolean;
   isRiskScoreExist: boolean;
-  isPreviewMode?: boolean;
-}
-
-interface UseNavigateToServiceDetailsResult {
-  /**
-   * Opens the service details panel
-   */
-  openDetailsPanel: (path: EntityDetailsPath) => void;
-  /**
-   * Whether the link is enabled
-   */
-  isLinkEnabled: boolean;
 }
 
 export const useNavigateToServiceDetails = ({
   serviceName,
   scopeId,
-  contextID,
-  isDraggable,
   isRiskScoreExist,
-  isPreviewMode,
-}: UseNavigateToServiceDetailsParams): UseNavigateToServiceDetailsResult => {
+}: UseNavigateToServiceDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
-  const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
-  );
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
-  const isLinkEnabled = !isPreviewMode || (isNewNavigationEnabled && isPreviewMode);
-
-  const openDetailsPanel = useCallback(
+  return useCallback(
     (path: EntityDetailsPath) => {
       telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: EntityType.service,
       });
 
-      const left = {
+      openLeftPanel({
         id: ServiceDetailsPanelKey,
         params: {
           isRiskScoreExist,
@@ -67,39 +43,8 @@ export const useNavigateToServiceDetails = ({
           },
           path,
         },
-      };
-
-      const right = {
-        id: ServicePanelKey,
-        params: {
-          contextID,
-          serviceName,
-          scopeId,
-          isDraggable,
-        },
-      };
-
-      // When new navigation is enabled, navigation in preview is enabled and open a new flyout
-      if (isNewNavigationEnabled && isPreviewMode) {
-        openFlyout({ right, left });
-      } else if (!isPreviewMode) {
-        // When not in preview mode, open left panel as usual
-        openLeftPanel(left);
-      }
+      });
     },
-    [
-      contextID,
-      isDraggable,
-      isNewNavigationEnabled,
-      isPreviewMode,
-      isRiskScoreExist,
-      openFlyout,
-      openLeftPanel,
-      scopeId,
-      serviceName,
-      telemetry,
-    ]
+    [isRiskScoreExist, openLeftPanel, scopeId, serviceName, telemetry]
   );
-
-  return { openDetailsPanel, isLinkEnabled };
 };

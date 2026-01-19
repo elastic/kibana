@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
@@ -19,7 +20,7 @@ import { LearnMoreLink } from '../../../../learn_more_link';
 
 import { NodeAttrsDetails } from './node_attrs_details';
 
-import { SharedProps } from './types';
+import type { SharedProps } from './types';
 
 const i18nTexts = {
   allocateToDataNodesOption: i18n.translate(

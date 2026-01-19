@@ -11,13 +11,15 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { ColorPicker } from '@kbn/visualization-ui-components';
 
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import { PaletteRegistry, ColorMapping, PaletteOutput } from '@kbn/coloring';
+import type { PaletteRegistry, ColorMapping, PaletteOutput } from '@kbn/coloring';
+import { canCreateCustomMatch } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { ValuesType } from 'utility-types';
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
-import type { VisualizationDimensionEditorProps } from '../../../types';
-import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
-import { FormatFactory } from '../../../../common/types';
+import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import type { XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
+import type { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
 import { getDataLayers } from '../visualization_helpers';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
@@ -28,22 +30,22 @@ import { ColorMappingByTerms } from '../../../shared_components/coloring/color_m
 export const idPrefix = htmlIdGenerator()();
 
 function updateLayer(
-  state: State,
+  state: XYState,
   index: number,
-  layer: ValuesType<State['layers']>,
-  newLayer: Partial<ValuesType<State['layers']>>
-): State['layers'] {
+  layer: ValuesType<XYState['layers']>,
+  newLayer: Partial<ValuesType<XYState['layers']>>
+): XYState['layers'] {
   const newLayers = [...state.layers];
   newLayers[index] = {
     ...layer,
     ...newLayer,
-  } as ValuesType<State['layers']>;
+  } as ValuesType<XYState['layers']>;
 
   return newLayers;
 }
 
 export function DataDimensionEditor(
-  props: VisualizationDimensionEditorProps<State> & {
+  props: VisualizationDimensionEditorProps<XYState> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
     palettes: KbnPalettes;
@@ -60,7 +62,7 @@ export function DataDimensionEditor(
   });
 
   const updateLayerState = useCallback(
-    (layerIndex: number, newLayer: Partial<ValuesType<State['layers']>>) => {
+    (layerIndex: number, newLayer: Partial<ValuesType<XYState['layers']>>) => {
       setLocalState({
         ...localState,
         layers: updateLayer(localState, layerIndex, layer, newLayer),
@@ -102,7 +104,7 @@ export function DataDimensionEditor(
   );
   const setPalette = useCallback(
     (palette: PaletteOutput) => {
-      updateLayerState(index, { palette });
+      updateLayerState(index, { palette, colorMapping: undefined });
     },
     [updateLayerState, index]
   );
@@ -132,24 +134,30 @@ export function DataDimensionEditor(
     ).color;
   }, [props.frame, props.paletteService, state.layers, accessor, props.formatFactory, layer]);
 
-  const table = props.frame.activeData?.[layer.layerId];
-  const { splitAccessor } = layer;
-  const splitCategories = getColorCategories(table?.rows ?? [], splitAccessor);
-
   if (props.groupId === 'breakdown') {
+    const currentData = props.frame.activeData?.[layer.layerId];
+    const splitCategories = getColorCategories(currentData?.rows, layer.splitAccessor);
+    const columnMeta = currentData?.columns?.find(({ id }) => id === layer.splitAccessor)?.meta;
+    const allowCustomMatch = canCreateCustomMatch(columnMeta);
+    const formatter = props.formatFactory(columnMeta?.params);
+
     return !layer.collapseFn ? (
-      <ColorMappingByTerms
-        isDarkMode={isDarkMode}
-        colorMapping={layer.colorMapping}
-        palette={layer.palette}
-        isInlineEditing={isInlineEditing}
-        setPalette={setPalette}
-        setColorMapping={setColorMapping}
-        paletteService={props.paletteService}
-        palettes={props.palettes}
-        panelRef={props.panelRef}
-        categories={splitCategories}
-      />
+      <div className="lnsIndexPatternDimensionEditor--padded">
+        <ColorMappingByTerms
+          isDarkMode={isDarkMode}
+          colorMapping={layer.colorMapping}
+          palette={layer.palette}
+          isInlineEditing={isInlineEditing}
+          setPalette={setPalette}
+          setColorMapping={setColorMapping}
+          paletteService={props.paletteService}
+          palettes={props.palettes}
+          panelRef={props.panelRef}
+          categories={splitCategories}
+          formatter={formatter}
+          allowCustomMatch={allowCustomMatch}
+        />
+      </div>
     ) : null;
   }
 
@@ -162,7 +170,7 @@ export function DataDimensionEditor(
     : undefined;
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <ColorPicker
         {...props}
         overwriteColor={overwriteColor}
@@ -224,12 +232,12 @@ export function DataDimensionEditor(
           }}
         />
       </EuiFormRow>
-    </>
+    </div>
   );
 }
 
 export function DataDimensionEditorDataSectionExtra(
-  props: VisualizationDimensionEditorProps<State> & {
+  props: VisualizationDimensionEditorProps<XYState> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
   }
@@ -244,7 +252,7 @@ export function DataDimensionEditorDataSectionExtra(
   });
 
   const updateLayerState = useCallback(
-    (layerIndex: number, newLayer: Partial<ValuesType<State['layers']>>) => {
+    (layerIndex: number, newLayer: Partial<ValuesType<XYState['layers']>>) => {
       setLocalState({
         ...localState,
         layers: updateLayer(localState, layerIndex, layer, newLayer),

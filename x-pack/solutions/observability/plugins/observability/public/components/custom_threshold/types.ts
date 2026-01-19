@@ -15,7 +15,7 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { ALERT_GROUP, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import type { ALERT_GROUP, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -25,6 +25,7 @@ import type {
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { Group } from '../../../common/typings';
 import {
   aggType,
@@ -77,6 +78,7 @@ export interface InfraClientStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   usageCollection: UsageCollectionStart;
 }
 

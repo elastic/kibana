@@ -15,6 +15,8 @@
       "label": "ServerlessPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "ServerlessPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -49,6 +53,8 @@
             "> | undefined) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+          "lineNumber": 22,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -66,6 +72,8 @@
                 "[]"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 23,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -83,6 +91,8 @@
                 "> | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 24,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -101,6 +111,8 @@
             "(homeHref: string) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+          "lineNumber": 26,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -115,6 +127,8 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 26,
+              "columnNumber": 18,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -130,25 +144,17 @@
           "label": "initNavigation",
           "description": [],
           "signature": [
-            "(id: ",
-            "SolutionId",
-            ", navigationTree$: ",
+            "(id: \"security\" | \"workplaceai\" | \"oblt\" | \"es\", navigationTree$: ",
             "Observable",
             "<",
             "NavigationTreeDefinition",
             "<",
             "AppDeepLinkId",
-            ", string, string>>, config?: { dataTestSubj?: string | undefined; panelContentProvider?: ",
-            {
-              "pluginId": "@kbn/shared-ux-chrome-navigation",
-              "scope": "public",
-              "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-              "section": "def-public.ContentProvider",
-              "text": "ContentProvider"
-            },
-            " | undefined; } | undefined) => void"
+            ", string, string>>, config?: { dataTestSubj?: string | undefined; } | undefined) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+          "lineNumber": 27,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -160,9 +166,11 @@
               "label": "id",
               "description": [],
               "signature": [
-                "SolutionId"
+                "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 28,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -183,6 +191,8 @@
                 ", string, string>>"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 29,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -195,6 +205,8 @@
               "label": "config",
               "description": [],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 30,
+              "columnNumber": 14,
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -209,68 +221,12 @@
                     "string | undefined"
                   ],
                   "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                },
-                {
-                  "parentPluginId": "serverless",
-                  "id": "def-public.ServerlessPluginStart.initNavigation.$3.panelContentProvider",
-                  "type": "Function",
-                  "tags": [],
-                  "label": "panelContentProvider",
-                  "description": [],
-                  "signature": [
-                    {
-                      "pluginId": "@kbn/shared-ux-chrome-navigation",
-                      "scope": "public",
-                      "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-                      "section": "def-public.ContentProvider",
-                      "text": "ContentProvider"
-                    },
-                    " | undefined"
-                  ],
-                  "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+                  "lineNumber": 30,
+                  "columnNumber": 16,
                   "deprecated": false,
                   "trackAdoption": false
                 }
               ]
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "serverless",
-          "id": "def-public.ServerlessPluginStart.setSideNavComponentDeprecated",
-          "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
-          "label": "setSideNavComponentDeprecated",
-          "description": [],
-          "signature": [
-            "(navigation: ",
-            "SideNavComponent",
-            ") => void"
-          ],
-          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-          "deprecated": true,
-          "trackAdoption": false,
-          "references": [],
-          "children": [
-            {
-              "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.setSideNavComponentDeprecated.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "navigation",
-              "description": [],
-              "signature": [
-                "SideNavComponent"
-              ],
-              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
             }
           ],
           "returnComment": []
@@ -302,6 +258,8 @@
             "> | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+          "lineNumber": 32,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -316,6 +274,8 @@
                 "boolean | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 33,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -339,6 +299,8 @@
                 "> | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 34,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -366,6 +328,8 @@
       "label": "ServerlessServerSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+      "lineNumber": 8,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -380,6 +344,8 @@
             "(keys: string[]) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+          "lineNumber": 9,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -394,6 +360,8 @@
                 "string[]"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+              "lineNumber": 9,
+              "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -413,6 +381,8 @@
       "label": "ServerlessServerStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -428,23 +398,6 @@
     "misc": [
       {
         "parentPluginId": "serverless",
-        "id": "def-common.API_SWITCH_PROJECT",
-        "type": "string",
-        "tags": [],
-        "label": "API_SWITCH_PROJECT",
-        "description": [
-          "Internal API route responsible for switching between project configurations."
-        ],
-        "signature": [
-          "\"/internal/serverless/switch_project\""
-        ],
-        "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "serverless",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -454,6 +407,8 @@
           "\"serverless\""
         ],
         "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -469,6 +424,8 @@
           "\"serverless\""
         ],
         "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

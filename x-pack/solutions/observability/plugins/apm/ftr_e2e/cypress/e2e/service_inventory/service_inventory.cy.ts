@@ -56,15 +56,13 @@ describe('Service inventory', () => {
         cy.intercept(method, endpoint).as(aliasName)
       );
       cy.loginAsViewerUser();
-      cy.visitKibana(serviceInventoryHref, {
-        localStorageOptions: [['apm.dismissedEntitiesInventoryCallout', 'false']],
-      });
+      cy.visitKibana(serviceInventoryHref);
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.contains('h1', 'Services');
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+      cy.contains('h1', 'Service inventory');
+
+      checkA11y();
     });
 
     it('has a list of services', () => {
@@ -101,7 +99,7 @@ describe('Service inventory', () => {
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
         .contains('button', 'production')
-        .click();
+        .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: mainAliasNames,
@@ -110,8 +108,6 @@ describe('Service inventory', () => {
     });
 
     it('when selecting a different time range and clicking the update button', () => {
-      cy.wait(mainAliasNames);
-
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
         moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
@@ -154,9 +150,6 @@ describe('Service inventory', () => {
           to: new Date(rangeTo).getTime(),
         })
       );
-    });
-
-    beforeEach(() => {
       cy.loginAsViewerUser();
     });
 
@@ -168,11 +161,9 @@ describe('Service inventory', () => {
       cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
         'detailedStatisticsRequest'
       );
-      cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
 
       cy.visitKibana(`${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`);
-      cy.wait('@mainStatisticsRequest');
-      cy.contains('Services');
+      cy.contains('Service inventory');
       cy.get('.euiPagination__list').children().should('have.length', 5);
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(
@@ -184,6 +175,41 @@ describe('Service inventory', () => {
         expect(payload.request.body.serviceNames).eql(
           JSON.stringify(['18', '19', '2', '20', '21', '22', '23', '24', '25', '26'])
         );
+      });
+    });
+  });
+
+  describe('Check pagination with progressive loading enabled', () => {
+    before(() => {
+      // clean previous data created
+      synthtrace.clean();
+      const { rangeFrom, rangeTo } = timeRange;
+      synthtrace.index(
+        generateMultipleServicesData(
+          {
+            from: new Date(rangeFrom).getTime(),
+            to: new Date(rangeTo).getTime(),
+          },
+          500
+        )
+      );
+      // enable progressive loading
+      cy.loginAsEditorUser().then(() => {
+        cy.updateAdvancedSettings({
+          'observability:apmProgressiveLoading': 'low',
+        });
+      });
+      cy.visitKibana(serviceInventoryHref);
+    });
+
+    it('should navigate to the next page when clicking on the pagination button', () => {
+      cy.getByTestSubj('pagination-button-1').click();
+      cy.url().should('include', 'page=1');
+    });
+
+    after(() => {
+      cy.updateAdvancedSettings({
+        'observability:apmProgressiveLoading': 'off',
       });
     });
   });

@@ -18,9 +18,6 @@ export const initGetLogEntryExamplesRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
-  if (!framework.config.featureFlags.logsUIEnabled) {
-    return;
-  }
   framework
     .registerVersionedRoute({
       access: 'internal',

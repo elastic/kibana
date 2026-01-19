@@ -9,7 +9,7 @@
 
 import { AggTypes } from '../../../common';
 import { getConfiguration } from '.';
-import { CollapseFunction } from '@kbn/visualizations-plugin/common';
+import type { CollapseFunction } from '@kbn/lens-common';
 
 const params = {
   perPage: 20,
@@ -65,8 +65,8 @@ describe('getConfiguration', () => {
           columnId: 'bucket-1',
         },
       ],
-      headerRowHeight: 'single',
-      rowHeight: 'single',
+      headerRowHeight: 'custom',
+      rowHeight: 'custom',
       layerId: 'test1',
       layerType: 'data',
       paging: {

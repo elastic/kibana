@@ -21,7 +21,8 @@ export const allowedExperimentalValues = Object.freeze({
   ruleKqlBar: false,
   isMustacheAutocompleteOn: false,
   showMustacheAutocompleteSwitch: false,
-  isUsingRuleCreateFlyout: false,
+  alertDeletionSettingsEnabled: true,
+  unifiedRulesPage: false,
 });
 
 const deprecatedExperimentalValues = new Set(['ruleFormV2']);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import type { Transform } from './transform';
 import type { View } from './view';
 import type { Datasource } from './datasource';

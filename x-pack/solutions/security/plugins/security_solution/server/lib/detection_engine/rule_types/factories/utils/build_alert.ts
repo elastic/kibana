@@ -97,7 +97,7 @@ import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rul
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import type {
   AncestorLatest,
-  BaseFieldsLatest,
+  DetectionAlertLatest,
 } from '../../../../../../common/api/detection_engine/model/alerts';
 
 export interface BuildAlertFieldsProps {
@@ -117,7 +117,7 @@ export interface BuildAlertFieldsProps {
   intendedTimestamp: Date | undefined;
 }
 
-export const generateAlertId = (alert: BaseFieldsLatest) => {
+export const generateAlertId = (alert: DetectionAlertLatest) => {
   return createHash('sha256')
     .update(
       alert[ALERT_ANCESTORS].reduce(
@@ -152,8 +152,8 @@ export const buildParent = (doc: SimpleHit): AncestorLatest => {
  */
 export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
   const newAncestor = buildParent(doc);
-  const existingAncestors: AncestorLatest[] =
-    (getField(doc, ALERT_ANCESTORS) as AncestorLatest[] | undefined) ?? [];
+  const ancestorsField = getField(doc, ALERT_ANCESTORS);
+  const existingAncestors: AncestorLatest[] = Array.isArray(ancestorsField) ? ancestorsField : [];
   return [...existingAncestors, newAncestor];
 };
 
@@ -181,7 +181,7 @@ export const buildAlertFields = ({
   alertTimestampOverride,
   overrides,
   intendedTimestamp,
-}: BuildAlertFieldsProps): BaseFieldsLatest => {
+}: BuildAlertFieldsProps): DetectionAlertLatest => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce(

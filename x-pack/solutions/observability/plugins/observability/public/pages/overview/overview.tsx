@@ -5,60 +5,57 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  observabilityAlertFeatureIds,
-} from '../../../common/constants';
-import { paths } from '../../../common/locators/paths';
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
+import {
+  ExternalResourceLinks,
+  FETCH_STATUS,
+  useBreadcrumbs,
+  useFetcher,
+} from '@kbn/observability-shared-plugin/public';
+import React, { useEffect, useMemo } from 'react';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { LoadingObservability } from '../../components/loading_observability';
-import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../constants';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
-import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
-import { buildEsQuery } from '../../utils/build_es_query';
-import { DataAssistantFlyout } from './components/data_assistant_flyout';
-import { DataSections } from './components/data_sections';
+import { DATA_SECTIONS, DataSections, type DataSectionsApps } from './components/data_sections';
 import { HeaderActions } from './components/header_actions/header_actions';
 import { HeaderMenu } from './components/header_menu/header_menu';
 import { getNewsFeed } from './components/news_feed/helpers/get_news_feed';
 import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityOnboardingCallout } from './components/observability_onboarding_callout';
-import { Resources } from './components/resources';
-import { EmptySections } from './components/sections/empty/empty_sections';
-import { SectionContainer } from './components/sections/section_container';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useKibana } from '../../utils/kibana_react';
-import {
-  DataContextApps,
-  HasDataMap,
-  appLabels,
-} from '../../context/has_data_context/has_data_context';
-
-const ALERTS_PER_PAGE = 10;
-const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
+import type { DataContextApps, HasDataMap } from '../../context/has_data_context/has_data_context';
+import { appLabels } from '../../context/has_data_context/has_data_context';
 
 export function OverviewPage() {
   const {
     http,
     observabilityAIAssistant,
-    triggersActionsUi: {
-      alertsTableConfigurationRegistry,
-      getAlertsStateTable: AlertsStateTable,
-      getAlertSummaryWidget: AlertSummaryWidget,
-    },
     kibanaVersion,
+    serverless: isServerless,
+    share,
   } = useKibana().services;
 
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+  const onboardingHref = onboardingLocator?.useUrl({});
 
+  const { ObservabilityPageTemplate } = usePluginContext();
+  const { euiTheme } = useEuiTheme();
   useBreadcrumbs(
     [
       {
@@ -72,19 +69,41 @@ export function OverviewPage() {
     }
   );
 
-  const { data: newsFeed } = useFetcher(
-    () => getNewsFeed({ http, kibanaVersion }),
-    [http, kibanaVersion]
+  const { data: newsFeed } = useFetcher(() => {
+    if (!Boolean(isServerless)) {
+      return getNewsFeed({ http, kibanaVersion });
+    }
+  }, [http, kibanaVersion, isServerless]);
+
+  const { hasDataMap } = useHasData();
+  // we need to filter out unwanted apps
+  const hasData = useMemo<Partial<Pick<HasDataMap, DataSectionsApps>>>(
+    () =>
+      Object.entries(hasDataMap).reduce((acc, [app, value]) => {
+        if (DATA_SECTIONS.includes(app as DataSectionsApps)) {
+          acc[app as DataSectionsApps] = value;
+        }
+        return acc;
+      }, {} as Partial<Pick<HasDataMap, DataSectionsApps>>),
+    [hasDataMap]
   );
-  const { hasAnyData, isAllRequestsComplete, hasDataMap } = useHasData();
+
+  const hasAnyData = useMemo(() => Object.values(hasData).some((d) => d?.hasData), [hasData]);
+
+  const isAllRequestsComplete = useMemo(() => {
+    return DATA_SECTIONS.every((app) => {
+      const section = hasData[app as DataSectionsApps];
+      return section?.status === FETCH_STATUS.SUCCESS;
+    });
+  }, [hasData]);
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
-  const appsWithoutData = Object.keys(hasDataMap)
+  const appsWithoutData = (Object.keys(hasData) as DataSectionsApps[])
     .sort()
     .reduce((acc, app) => {
-      const data = hasDataMap[app as keyof HasDataMap];
-      if (data?.status === 'success' && !data?.hasData) {
+      const section = hasData[app];
+      if (section?.status === 'success' && !section?.hasData) {
         const appName = appLabels[app as DataContextApps];
 
         return `${acc}${appName}, `;
@@ -96,7 +115,7 @@ export function OverviewPage() {
   useEffect(() => {
     return setScreenContext?.({
       screenDescription: `The user is viewing the Overview page which shows a summary of the following apps: ${JSON.stringify(
-        hasDataMap
+        hasData
       )}`,
       starterPrompts: [
         ...(appsWithoutData.length > 0
@@ -121,22 +140,9 @@ export function OverviewPage() {
           : []),
       ],
     });
-  }, [appsWithoutData, hasDataMap, setScreenContext]);
+  }, [appsWithoutData, hasData, setScreenContext]);
 
-  const [isDataAssistantFlyoutVisible, setIsDataAssistantFlyoutVisible] = useState(false);
-
-  const [isGuidedSetupTourVisible, setGuidedSetupTourVisible] = useState(false);
-
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
-
-  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>(
-    buildEsQuery({
-      timeRange: {
-        from: relativeStart,
-        to: relativeEnd,
-      },
-    })
-  );
+  const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
@@ -148,52 +154,8 @@ export function OverviewPage() {
       }),
     [absoluteStart, absoluteEnd, timeBuckets]
   );
-  const alertSummaryTimeRange = useMemo(
-    () =>
-      getAlertSummaryTimeRange(
-        {
-          from: relativeStart,
-          to: relativeEnd,
-        },
-        bucketSize?.intervalString || DEFAULT_INTERVAL,
-        bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
-      ),
-    [bucketSize, relativeEnd, relativeStart]
-  );
 
-  useEffect(() => {
-    setEsQuery(
-      buildEsQuery({
-        timeRange: {
-          from: relativeStart,
-          to: relativeEnd,
-        },
-      })
-    );
-  }, [relativeEnd, relativeStart]);
-
-  const handleTimeRangeRefresh = useCallback(() => {
-    setEsQuery(
-      buildEsQuery({
-        timeRange: {
-          from: relativeStart,
-          to: relativeEnd,
-        },
-      })
-    );
-  }, [relativeEnd, relativeStart]);
-
-  const handleCloseGuidedSetupTour = () => {
-    setGuidedSetupTourVisible(false);
-  };
-
-  const handleGuidedSetupClick = useCallback(() => {
-    handleCloseGuidedSetupTour();
-
-    setIsDataAssistantFlyoutVisible(true);
-  }, []);
-
-  if (hasAnyData === undefined) {
+  if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
 
@@ -204,87 +166,91 @@ export function OverviewPage() {
         pageTitle: i18n.translate('xpack.observability.overview.pageTitle', {
           defaultMessage: 'Overview',
         }),
-        rightSideItems: [
-          <HeaderActions
-            showTour={isGuidedSetupTourVisible}
-            onGuidedSetupClick={handleGuidedSetupClick}
-            onTourDismiss={handleCloseGuidedSetupTour}
-            onTimeRangeRefresh={handleTimeRangeRefresh}
-          />,
-        ],
+        rightSideItems: hasAnyData ? [<HeaderActions />] : [],
         rightSideGroupProps: {
           responsive: true,
         },
         'data-test-subj': 'obltOverviewPageHeader',
       }}
+      pageSectionProps={{
+        contentProps: {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+          },
+        },
+      }}
     >
       <HeaderMenu />
 
-      <ObservabilityOnboardingCallout />
+      {hasAnyData ? (
+        <>
+          <ObservabilityOnboardingCallout />
 
-      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="obltOverviewAlerts">
-        <EuiFlexItem>
-          <SectionContainer
-            title={i18n.translate('xpack.observability.overview.alerts.title', {
-              defaultMessage: 'Alerts',
-            })}
-            appLink={{
-              href: paths.observability.alerts,
-              label: i18n.translate('xpack.observability.overview.alerts.appLink', {
-                defaultMessage: 'Show alerts',
-              }),
-            }}
-            initialIsOpen={hasAnyData}
-            hasError={false}
-          >
-            <AlertSummaryWidget
-              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-              consumers={observabilityAlertFeatureIds}
-              filter={esQuery}
-              fullSize
-              timeRange={alertSummaryTimeRange}
-            />
-            <AlertsStateTable
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              configurationId={AlertConsumers.OBSERVABILITY}
-              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-              consumers={observabilityAlertFeatureIds}
-              hideLazyLoader
-              id={ALERTS_TABLE_ID}
-              initialPageSize={ALERTS_PER_PAGE}
-              query={esQuery}
-              showAlertStatusWithFlapping
-              cellContext={{ observabilityRuleTypeRegistry }}
-            />
-          </SectionContainer>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {/* Data sections */}
-          <DataSections bucketSize={bucketSize} />
-          <EmptySections />
-        </EuiFlexItem>
-        <EuiSpacer size="s" />
-      </EuiFlexGroup>
-
-      <EuiHorizontalRule />
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          {/* Resources / What's New sections */}
-          <EuiFlexGroup>
-            <EuiFlexItem grow={4}>
-              {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <DataSections bucketSize={bucketSize} />
             </EuiFlexItem>
-            <EuiFlexItem grow={2}>
-              <Resources />
-            </EuiFlexItem>
+            <EuiSpacer size="s" />
           </EuiFlexGroup>
+        </>
+      ) : (
+        <EuiEmptyPrompt
+          iconType="logoObservability"
+          data-test-subj="obltOverviewNoDataPrompt"
+          css={{
+            flexGrow: 1,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+          title={
+            <h2>
+              {i18n.translate('xpack.observability.overview.emptyState.title', {
+                defaultMessage: 'Welcome to Observability',
+              })}
+            </h2>
+          }
+          body={
+            <p>
+              {i18n.translate('xpack.observability.overview.emptyState.body', {
+                defaultMessage:
+                  'Start collecting data to start detecting and resolving problems with your systems.',
+              })}
+            </p>
+          }
+          actions={
+            <EuiButton
+              data-test-subj="o11yOverviewPageAddDataButton"
+              color="primary"
+              fill
+              href={onboardingHref}
+            >
+              {i18n.translate('xpack.observability.overview.emptyState.action', {
+                defaultMessage: 'Add data',
+              })}
+            </EuiButton>
+          }
+        />
+      )}
+      <EuiHorizontalRule
+        css={{
+          width: 'auto',
+          marginLeft: `-${euiTheme.size.l}`,
+          marginRight: `-${euiTheme.size.l}`,
+        }}
+      />
+
+      <EuiFlexGroup direction="column" gutterSize="xl" css={{ flexGrow: 0 }}>
+        {!!newsFeed?.items?.length && (
+          <EuiFlexItem grow={false}>
+            <NewsFeed items={newsFeed.items.slice(0, 3)} />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <ExternalResourceLinks />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {isDataAssistantFlyoutVisible ? (
-        <DataAssistantFlyout onClose={() => setIsDataAssistantFlyoutVisible(false)} />
-      ) : null}
     </ObservabilityPageTemplate>
   );
 }

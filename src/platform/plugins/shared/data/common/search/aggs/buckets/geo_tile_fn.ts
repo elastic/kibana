@@ -8,8 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { BUCKET_TYPES } from '..';
 
 export const aggGeoTileFnName = 'aggGeoTile';
 

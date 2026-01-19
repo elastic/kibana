@@ -7,114 +7,93 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
+import type { EuiSelectableOption, EuiTableSortingType } from '@elastic/eui';
+import { EuiButtonIcon, EuiDescriptionList, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
+import type { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
-import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
-import React, {
-  lazy,
-  useEffect,
-  useState,
-  ReactNode,
-  useCallback,
-  useMemo,
-  useRef,
-  Suspense,
-} from 'react';
-import {
-  EuiSpacer,
-  EuiPageTemplate,
-  EuiTableSortingType,
-  EuiButtonIcon,
-  EuiSelectableOption,
-  EuiDescriptionList,
-} from '@elastic/eui';
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
+import type { ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import {
-  RuleExecutionStatus,
-  ALERTING_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
+import { MaintenanceWindowCallout, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { usePageReady } from '@kbn/ebt-tools';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
-  RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
-  STACK_ALERTS_FEATURE_ID,
   getCreateRuleRoute,
+  getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
-import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
-import {
+import type {
+  BulkEditActions,
+  Pagination,
   Rule,
+  RuleStatus,
   RuleTableItem,
   RuleType,
-  RuleStatus,
-  Pagination,
-  Percentiles,
   SnoozeSchedule,
   UpdateFiltersProps,
-  BulkEditActions,
   UpdateRulesToBulkEditProps,
 } from '../../../../types';
+import { Percentiles } from '../../../../types';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { RulesListFiltersBar } from './rules_list_filters_bar';
 
+import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
+import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
+import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
+import { cloneRule } from '../../../lib/rule_api/clone';
 import { snoozeRule } from '../../../lib/rule_api/snooze';
 import { unsnoozeRule } from '../../../lib/rule_api/unsnooze';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
-import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
-import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
-import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
-import { cloneRule } from '../../../lib/rule_api/clone';
 
-import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
-import { RulesListPrompts } from './rules_list_prompts';
-import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
-import { useKibana } from '../../../../common/lib/kibana';
-import './rules_list.scss';
-import { CreateRuleButton } from './create_rule_button';
-import { ManageLicenseModal } from './manage_license_modal';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
-import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
-import { RulesListDocLink } from './rules_list_doc_link';
+import { useKibana } from '../../../../common/lib/kibana';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
+import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
+import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { runRule } from '../../../lib/run_rule';
+import { ALERT_STATUS_LICENSE_ERROR, getConfirmDeletionModalWarningText } from '../translations';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
-import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
-import { runRule } from '../../../lib/run_rule';
+import { CreateRuleButton } from './create_rule_button';
+import { ManageLicenseModal } from './manage_license_modal';
+import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
+import { RulesListDocLink } from './rules_list_doc_link';
+import { RulesListPrompts } from './rules_list_prompts';
+import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 
-import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_query';
-import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
-import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
-import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
-import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
+import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_query';
+import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
+import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
+import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
 
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 import {
+  MULTIPLE_RULE_TITLE,
+  SINGLE_RULE_TITLE,
   getConfirmDeletionButtonText,
   getConfirmDeletionModalText,
-  SINGLE_RULE_TITLE,
-  MULTIPLE_RULE_TITLE,
 } from '../translations';
-import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
-import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 import { useRulesListFilterStore } from './hooks/use_rules_list_filter_store';
-
-// Directly lazy import the flyouts because the suspendedComponentWithProps component
-// cause a visual hitch due to the loading spinner
-const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
-const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
   ruleTypeIds?: string[];
@@ -142,7 +121,8 @@ export interface RulesListProps {
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
-  useNewRuleForm?: boolean;
+  navigateToEditRuleForm?: (ruleId: string) => void;
+  navigateToCreateRuleForm?: (ruleTypeId: string) => void;
 }
 
 export const percentileFields = {
@@ -184,8 +164,8 @@ export const RulesList = ({
   onTypeFilterChange,
   onRefresh,
   setHeaderActions,
-  initialSelectedConsumer = STACK_ALERTS_FEATURE_ID,
-  useNewRuleForm = false,
+  navigateToEditRuleForm,
+  navigateToCreateRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -202,13 +182,8 @@ export const RulesList = ({
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [inputText, setInputText] = useState<string>(searchFilter);
 
   const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
-  const [ruleTypeIdToCreate, setRuleTypeIdToCreate] = useState<string | undefined>(undefined);
-  const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
-  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -216,7 +191,6 @@ export const RulesList = ({
   const cloneRuleId = useRef<null | string>(null);
 
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
-  const isUsingRuleCreateFlyout = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
 
   const [percentileOptions, setPercentileOptions] =
     useState<EuiSelectableOption[]>(initialPercentileOptions);
@@ -255,7 +229,11 @@ export const RulesList = ({
     authorizedToReadAnyRules,
     authorizedToCreateAnyRules,
     isSuccess: isLoadRuleTypesSuccess,
-  } = useLoadRuleTypesQuery({ filteredRuleTypes });
+  } = useGetRuleTypesPermissions({
+    http,
+    toasts,
+    filteredRuleTypes,
+  });
   // Fetch action types
   const { actionTypes } = useLoadActionTypesQuery();
 
@@ -269,6 +247,8 @@ export const RulesList = ({
       searchFilter,
       typeFilter,
     });
+
+  const [inputText, setInputText] = useState<string>(filters.searchText ?? searchFilter ?? '');
 
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
@@ -316,23 +296,23 @@ export const RulesList = ({
     isLoadingRuleTypes: ruleTypesState.isLoading,
     isLoadingRules: rulesState.isLoading,
     hasData,
-    isInitialLoadingRuleTypes: ruleTypesState.initialLoad,
+    isInitialLoadingRuleTypes: ruleTypesState.isInitialLoad,
     isInitialLoadingRules: rulesState.initialLoad,
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    if (!isUsingRuleCreateFlyout && useNewRuleForm) {
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
-        state: {
-          returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/rules`,
-        },
-      });
-    } else {
-      setEditFlyoutVisibility(true);
-      setCurrentRuleToEdit(ruleItem);
+    if (navigateToEditRuleForm) {
+      navigateToEditRuleForm(ruleItem.id);
+      return;
     }
+
+    navigateToApp('management', {
+      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+      state: {
+        returnApp: 'management',
+        returnPath: `insightsAndAlerting/triggersActions/rules`,
+      },
+    });
   };
 
   const onRunRule = async (id: string) => {
@@ -362,7 +342,7 @@ export const RulesList = ({
   ]);
 
   const tableItems = useMemo(() => {
-    if (ruleTypesState.initialLoad) {
+    if (ruleTypesState.isInitialLoad) {
       return [];
     }
     return convertRulesToTableItems({
@@ -437,6 +417,14 @@ export const RulesList = ({
 
   const handleClearRuleParamFilter = () => updateFilters({ filter: 'ruleParams', value: {} });
 
+  usePageReady({
+    isReady: !rulesState?.initialLoad,
+    isRefreshing: rulesState?.isLoading,
+    meta: {
+      description: '[ttfmp_rules_list] The Rules List overview page has loaded successfully.',
+    },
+  });
+
   useEffect(() => {
     if (statusFilter) {
       updateFilters({ filter: 'ruleStatuses', value: statusFilter });
@@ -462,7 +450,11 @@ export const RulesList = ({
   }, [ruleParamFilter]);
 
   useEffect(() => {
-    if (typeof searchFilter === 'string') {
+    if (
+      typeof searchFilter === 'string' &&
+      searchFilter !== filters.searchText &&
+      searchFilter.trim() !== ''
+    ) {
       updateFilters({ filter: 'searchText', value: searchFilter });
     }
   }, [searchFilter]);
@@ -682,7 +674,9 @@ export const RulesList = ({
   useEffect(() => {
     setHeaderActions?.([
       ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-      <RulesSettingsLink />,
+      <RulesSettingsLink
+        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
+      />,
       <RulesListDocLink />,
     ]);
   }, [authorizedToCreateAnyRules]);
@@ -780,6 +774,7 @@ export const RulesList = ({
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
       <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={allRuleCategories} />
+      <EuiSpacer size="s" />
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}
@@ -787,7 +782,7 @@ export const RulesList = ({
         showSpinner={showSpinner}
         onCreateRulesClick={openRuleTypeModal}
       />
-      <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
+      <EuiPageTemplate.Section data-test-subj="rulesListSection" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (
           <RulesDeleteModalConfirmation
             onConfirm={onDeleteConfirm}
@@ -802,6 +797,8 @@ export const RulesList = ({
               SINGLE_RULE_TITLE,
               MULTIPLE_RULE_TITLE
             )}
+            showWarningText={isAllSelected}
+            warningText={getConfirmDeletionModalWarningText()}
           />
         )}
         <BulkSnoozeModal
@@ -1029,54 +1026,28 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              if (!isUsingRuleCreateFlyout) {
+              if (navigateToCreateRuleForm) {
+                navigateToCreateRuleForm(ruleTypeId);
+              } else {
                 navigateToApp('management', {
                   path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
                 });
-              } else {
-                setRuleTypeIdToCreate(ruleTypeId);
-                setRuleTypeModalVisibility(false);
-                setRuleFlyoutVisibility(true);
               }
+            }}
+            onSelectTemplate={(templateId) => {
+              // For templates, we need to extract the ruleTypeId or handle it differently
+              // For now, fall back to default behavior
+              navigateToApp('management', {
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                  encodeURIComponent(templateId)
+                )}`,
+              });
             }}
             http={http}
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
           />
-        )}
-        {ruleFlyoutVisible && (
-          <Suspense fallback={<div />}>
-            <RuleAdd
-              consumer={ALERTING_FEATURE_ID}
-              onClose={() => {
-                setRuleFlyoutVisibility(false);
-              }}
-              actionTypeRegistry={actionTypeRegistry}
-              ruleTypeRegistry={ruleTypeRegistry}
-              ruleTypeIndex={ruleTypesState.data}
-              onSave={refreshRules}
-              initialSelectedConsumer={initialSelectedConsumer}
-              ruleTypeId={ruleTypeIdToCreate}
-              canChangeTrigger={false}
-            />
-          </Suspense>
-        )}
-        {editFlyoutVisible && currentRuleToEdit && (
-          <Suspense fallback={<div />}>
-            <RuleEdit
-              initialRule={currentRuleToEdit}
-              onClose={() => {
-                setEditFlyoutVisibility(false);
-              }}
-              actionTypeRegistry={actionTypeRegistry}
-              ruleTypeRegistry={ruleTypeRegistry}
-              ruleType={
-                ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
-              }
-              onSave={refreshRules}
-            />
-          </Suspense>
         )}
       </EuiPageTemplate.Section>
     </>

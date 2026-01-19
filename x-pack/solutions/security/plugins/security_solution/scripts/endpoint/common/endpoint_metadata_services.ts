@@ -105,42 +105,40 @@ const fetchLastStreamedEndpointUpdate = async (
     {
       index: METADATA_DATASTREAM,
       size: 1,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [{ term: { 'elastic.agent.id': agentId } }],
-                },
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ term: { 'elastic.agent.id': agentId } }],
               },
-            ],
-          },
-        },
-        // Am I doing this right? I want only the last document for the host.id that was sent
-        collapse: {
-          field: 'host.id',
-          inner_hits: {
-            name: 'most_recent',
-            size: 1,
-            sort: [{ 'event.created': 'desc' }],
-          },
-        },
-        aggs: {
-          total: {
-            cardinality: {
-              field: 'host.id',
             },
-          },
+          ],
         },
-        sort: [
-          {
-            'event.created': {
-              order: 'desc',
-            },
-          },
-        ],
       },
+      // Am I doing this right? I want only the last document for the host.id that was sent
+      collapse: {
+        field: 'host.id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          sort: [{ 'event.created': 'desc' }],
+        },
+      },
+      aggs: {
+        total: {
+          cardinality: {
+            field: 'host.id',
+          },
+        },
+      },
+      sort: [
+        {
+          'event.created': {
+            order: 'desc',
+          },
+        },
+      ],
     },
     { ignore: [404] }
   );

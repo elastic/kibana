@@ -14,15 +14,15 @@ import { Section } from '../../../components/section';
 import { MetricsSectionTitle } from '../section_titles';
 
 interface Props {
-  assetId: string;
-  assetType: InventoryItemType;
+  entityId: string;
+  entityType: InventoryItemType;
   dateRange: TimeRange;
   dataView?: DataView;
 }
 
-export const MetricsContent = ({ assetType, ...props }: Props) => {
+export const MetricsContent = ({ entityType, ...props }: Props) => {
   const content = useMemo(() => {
-    switch (assetType) {
+    switch (entityType) {
       case 'host':
         return <HostMetrics {...props} />;
       case 'container':
@@ -30,11 +30,11 @@ export const MetricsContent = ({ assetType, ...props }: Props) => {
       default:
         return null;
     }
-  }, [assetType, props]);
+  }, [entityType, props]);
 
   return (
     <Section
-      title={<MetricsSectionTitle assetType={assetType} />}
+      title={<MetricsSectionTitle entityType={entityType} />}
       data-test-subj="infraAssetDetailsMetricsCollapsible"
       id="metrics"
       collapsible

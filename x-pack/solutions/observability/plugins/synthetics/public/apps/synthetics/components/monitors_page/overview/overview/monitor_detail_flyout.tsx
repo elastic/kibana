@@ -11,7 +11,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -31,13 +30,15 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
-import { ClientPluginsStart } from '../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
+import type { LocationsStatus } from '../../../../hooks/use_status_by_location';
+import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import {
   getMonitorAction,
   selectMonitorUpsertStatus,
+  selectOverviewState,
   selectServiceLocationsState,
   selectSyntheticsMonitor,
   selectSyntheticsMonitorError,
@@ -46,19 +47,22 @@ import {
 } from '../../../../state';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
+import { ErrorCallout } from '../../../common/components/error_callout';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
-import { ConfigKey, EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
+import type { EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
+import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
-import { FlyoutParamProps } from './types';
+import type { FlyoutParamProps } from './types';
+import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 
 interface Props {
   configId: string;
   id: string;
   location: string;
   locationId: string;
-  spaceId?: string;
+  spaces?: string[];
   onClose: () => void;
   onEnabledChange: () => void;
   onLocationChange: (params: FlyoutParamProps) => void;
@@ -209,7 +213,7 @@ function DetailedFlyoutHeader({
 
 export function LoadingState() {
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+    <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexItem>
@@ -218,7 +222,7 @@ export function LoadingState() {
 }
 
 export function MonitorDetailFlyout(props: Props) {
-  const { id, configId, onLocationChange, locationId, spaceId } = props;
+  const { id, configId, onLocationChange, locationId, spaces } = props;
 
   const { status: overviewStatus } = useOverviewStatus({ scopeStatusByLocation: true });
 
@@ -233,13 +237,14 @@ export function MonitorDetailFlyout(props: Props) {
 
   const setLocation = useCallback(
     (location: string, locationIdT: string) =>
-      onLocationChange({ id, configId, location, locationId: locationIdT, spaceId }),
-    [onLocationChange, id, configId, spaceId]
+      onLocationChange({ id, configId, location, locationId: locationIdT, spaces }),
+    [onLocationChange, id, configId, spaces]
   );
 
   const detailLink = useMonitorDetailLocator({
     configId,
     locationId,
+    spaces,
   });
 
   const dispatch = useDispatch();
@@ -263,10 +268,10 @@ export function MonitorDetailFlyout(props: Props) {
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
-        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+        ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
       })
     );
-  }, [configId, dispatch, space?.id, spaceId, upsertSuccess]);
+  }, [configId, dispatch, space, space?.id, spaces, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
@@ -285,7 +290,7 @@ export function MonitorDetailFlyout(props: Props) {
       onClose={props.onClose}
       paddingSize="none"
     >
-      {error && !isLoading && <EuiErrorBoundary>{error?.body?.message}</EuiErrorBoundary>}
+      {error && !isLoading && <ErrorCallout {...error} />}
       {isLoading && <LoadingState />}
       {monitorObject && (
         <>
@@ -369,6 +374,34 @@ export function MonitorDetailFlyout(props: Props) {
     </EuiFlyout>
   );
 }
+
+export const MaybeMonitorDetailsFlyout = ({
+  setFlyoutConfigCallback,
+}: {
+  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+}) => {
+  const dispatch = useDispatch();
+
+  const { flyoutConfig, pageState } = useSelector(selectOverviewState);
+  const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
+  const forceRefreshCallback = useCallback(
+    () => dispatch(quietFetchOverviewStatusAction.get({ pageState })),
+    [dispatch, pageState]
+  );
+
+  return flyoutConfig?.configId && flyoutConfig?.location ? (
+    <MonitorDetailFlyout
+      configId={flyoutConfig.configId}
+      id={flyoutConfig.id}
+      location={flyoutConfig.location}
+      locationId={flyoutConfig.locationId}
+      spaces={flyoutConfig.spaces}
+      onClose={hideFlyout}
+      onEnabledChange={forceRefreshCallback}
+      onLocationChange={setFlyoutConfigCallback}
+    />
+  ) : null;
+};
 
 const DURATION_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.durationHeaderText', {
   defaultMessage: 'Duration',

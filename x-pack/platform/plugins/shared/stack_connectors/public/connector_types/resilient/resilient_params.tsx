@@ -6,16 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import {
-  EuiFormRow,
-  EuiComboBox,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiComboBoxOptionOption,
-  EuiSelectOption,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiSelectOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
@@ -23,10 +15,12 @@ import {
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ResilientActionParams } from './types';
+import type { ResilientActionParams } from './types';
 
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
+import { OptionalFieldLabel } from '../../common/optional_field_label';
+import { AdditionalFields } from '../../common/components/additional_fields';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
   actionConnector,
@@ -129,6 +123,12 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       editSubActionProperty('incidentTypes', []);
     }
   }, [editSubActionProperty, incident.incidentTypes]);
+  const additionalFieldsOnChange = useCallback(
+    (value: string | null) => {
+      editSubActionProperty('additionalFields', value);
+    },
+    [editSubActionProperty]
+  );
 
   useEffect(() => {
     if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
@@ -174,6 +174,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           'xpack.stackConnectors.components.resilient.urgencySelectFieldLabel',
           { defaultMessage: 'Incident type' }
         )}
+        labelAppend={OptionalFieldLabel}
       >
         <EuiComboBox
           fullWidth
@@ -193,6 +194,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         label={i18n.translate('xpack.stackConnectors.components.resilient.severity', {
           defaultMessage: 'Severity',
         })}
+        labelAppend={OptionalFieldLabel}
       >
         <EuiSelect
           data-test-subj="severitySelect"
@@ -217,11 +219,6 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         label={i18n.translate('xpack.stackConnectors.components.resilient.nameFieldLabel', {
           defaultMessage: 'Name',
         })}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            Required
-          </EuiText>
-        }
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -237,21 +234,37 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         editAction={editSubActionProperty}
         messageVariables={messageVariables}
         paramsProperty={'description'}
-        inputTargetValue={incident.description ?? undefined}
         label={i18n.translate(
           'xpack.stackConnectors.components.resilient.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }
         )}
+        inputTargetValue={incident.description ?? undefined}
+        isOptionalField
       />
       <TextAreaWithMessageVariables
         index={index}
         editAction={editComment}
         messageVariables={messageVariables}
         paramsProperty={'comments'}
-        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.translate(
           'xpack.stackConnectors.components.resilient.commentsTextAreaFieldLabel',
           { defaultMessage: 'Additional comments' }
+        )}
+        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+        isOptionalField
+      />
+
+      <AdditionalFields
+        value={actionParams.subActionParams?.incident.additionalFields}
+        messageVariables={messageVariables}
+        errors={errors['subActionParams.incident.additionalFields'] as string[]}
+        onChange={additionalFieldsOnChange}
+        isOptionalField
+        helpText={i18n.translate(
+          'xpack.stackConnectors.components.resilient.additionalFieldsHelpTooltipText',
+          {
+            defaultMessage: 'Additional fields in JSON format',
+          }
         )}
       />
     </>

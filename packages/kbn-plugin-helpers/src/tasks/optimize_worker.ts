@@ -8,7 +8,8 @@
  */
 
 import webpack from 'webpack';
-import { parseBundles, BundleRemotes, WorkerConfig } from '@kbn/optimizer/src/common';
+import type { WorkerConfig } from '@kbn/optimizer/src/common';
+import { parseBundles, BundleRemotes } from '@kbn/optimizer/src/common';
 import { getWebpackConfig } from '@kbn/optimizer/src/worker/webpack.config';
 
 const send = process.send;
@@ -42,7 +43,7 @@ process.on('message', (msg: any) => {
         return;
       }
 
-      if (stats.hasErrors()) {
+      if (stats?.hasErrors()) {
         send.call(process, {
           success: false,
           error: `Failed to compile with webpack:\n${stats.toString()}`,
@@ -52,7 +53,7 @@ process.on('message', (msg: any) => {
 
       send.call(process, {
         success: true,
-        warnings: stats.hasWarnings() ? stats.toString() : '',
+        warnings: stats?.hasWarnings() ? stats.toString() : '',
       });
     }
   );

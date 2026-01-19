@@ -7,8 +7,8 @@
 
 import React, { useState, useMemo, useEffect, Fragment } from 'react';
 
+import type { CriteriaWithPagination, EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import {
-  CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -24,23 +24,22 @@ import {
   EuiContextMenuItem,
   EuiPageHeader,
   EuiPageTemplate,
-  EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../common/constants';
 import { listBreadcrumb } from '../../lib/breadcrumbs';
+import type { Error } from '../../components';
 import {
   getPageErrorCode,
   PageError,
   DeleteWatchesModal,
   WatchStateBadge,
   SectionLoading,
-  Error,
 } from '../../components';
 import { useLoadWatches } from '../../lib/api';
 import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../lib/navigation';
@@ -57,11 +56,11 @@ const stateColumnHeader = (
       defaultMessage: 'Active, inactive, or error.',
     })}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
         defaultMessage: 'State',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
     </span>
   </EuiToolTip>
 );
@@ -75,11 +74,11 @@ const conditionLastMetHeader = (
       }
     )}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
         defaultMessage: 'Condition last met',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
     </span>
   </EuiToolTip>
 );
@@ -93,11 +92,11 @@ const lastCheckedHeader = (
       }
     )}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
         defaultMessage: 'Last checked',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
     </span>
   </EuiToolTip>
 );
@@ -112,11 +111,11 @@ const commentHeader = (
       }
     )}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
         defaultMessage: 'Comment',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
     </span>
   </EuiToolTip>
 );
@@ -519,6 +518,7 @@ export const WatchListPage = () => {
             queryError && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   data-test-subj="watcherListSearchError"
                   iconType="warning"
                   color="danger"
@@ -534,7 +534,7 @@ export const WatchListPage = () => {
               </>
             )
           }
-          message={
+          noItemsMessage={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
               defaultMessage="No watches to show"
@@ -568,7 +568,7 @@ export const WatchListPage = () => {
           <EuiButtonEmpty
             href={watcherGettingStartedUrl}
             target="_blank"
-            iconType="help"
+            iconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage

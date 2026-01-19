@@ -19,12 +19,12 @@ import type {
 
 import type { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
+import type {
   FieldFormatParams as BaseFieldFormatParams,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
-import { FORMULA_COLUMN } from './configurations/constants';
+import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { FORMULA_COLUMN } from './configurations/constants';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',

@@ -1,0 +1,9 @@
+$schema: https://moonrepo.dev/schemas/tasks.json
+
+fileGroups:
+  "globalTsConfigs":
+    - "/tsconfig.json"
+    - "/tsconfig.base.json"
+    - "/tsconfig.browser.json"
+
+tasks: {}

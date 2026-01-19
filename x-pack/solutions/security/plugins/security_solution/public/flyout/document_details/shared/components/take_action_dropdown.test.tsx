@@ -7,6 +7,7 @@
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
+import { set } from '@kbn/safer-lodash-set';
 import { waitFor } from '@testing-library/react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { TakeActionDropdownProps } from './take_action_dropdown';
@@ -22,28 +23,30 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { allCasesPermissions } from '../../../../cases_test_utils';
 import {
   ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
   ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
 } from '../../../../common/components/toolbar/bulk_actions/translations';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 jest.mock('../../../../common/components/endpoint/host_isolation');
 jest.mock('../../../../common/components/endpoint/responder');
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 
 jest.mock('../../../../detections/components/user_info', () => ({
-  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
+  useUserData: jest.fn().mockReturnValue([{ hasIndexWrite: true }]),
 }));
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
 
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
   })
 );
 jest.mock('../../../../cases/components/use_insert_timeline');
@@ -102,13 +105,17 @@ describe('take action dropdown', () => {
             helpers: {
               canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
               getRuleIdFromEvent: () => null,
+              getObservablesFromEcs: jest.fn().mockReturnValue([]),
             },
           },
           osquery: {
             isOsqueryAvailable: jest.fn().mockReturnValue(true),
           },
           application: {
-            capabilities: { siemV2: { crud_alerts: true, read_alerts: true }, osquery: true },
+            capabilities: {
+              [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+              osquery: true,
+            },
           },
         },
       };
@@ -117,7 +124,7 @@ describe('take action dropdown', () => {
     (useHttp as jest.Mock).mockReturnValue(mockStartServicesMock.http);
   });
 
-  afterEach(() => {
+  beforeEach(() => {
     (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
@@ -150,6 +157,7 @@ describe('take action dropdown', () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: true },
+        rulesPrivileges: { read: true, edit: true },
       });
       wrapper = mount(
         <TestProviders>
@@ -185,9 +193,9 @@ describe('take action dropdown', () => {
 
     test('should render "mark as close"', async () => {
       await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="close-alert-status"]').first().text()).toEqual(
-          'Mark as closed'
-        );
+        expect(
+          wrapper.find('[data-test-subj="alert-close-context-menu-item"]').first().text()
+        ).toEqual('Mark as closed');
       });
     });
 
@@ -368,6 +376,72 @@ describe('take action dropdown', () => {
       render();
 
       expect(wrapper.exists('[data-test-subj="endpointResponseActions-action-item"]')).toBe(true);
+    });
+
+    describe('"Add Endpoint exception" button', () => {
+      const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
+
+      beforeEach(() => {
+        (useUserPrivileges as jest.Mock).mockReturnValue(
+          getUserPrivilegesMockDefaultValue({ rulesPrivileges: { read: true, edit: true } })
+        );
+      });
+
+      test('should enable the "Add Endpoint exception" button if provided endpoint alert and has right privileges', async () => {
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['endpoint']);
+        mockUseEndpointExceptionsCapability.mockReturnValue(true);
+
+        render();
+
+        await waitFor(() => {
+          expect(
+            wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
+          ).toBeEnabled();
+        });
+      });
+
+      test('should disable the "Add Endpoint exception" button if user has no endpoint exception write privilege', async () => {
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['endpoint']);
+        mockUseEndpointExceptionsCapability.mockReturnValue(false);
+
+        render();
+
+        await waitFor(() => {
+          expect(
+            wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
+          ).toBeDisabled();
+        });
+      });
+
+      test('should disable the "Add Endpoint exception" button if event kind is not alert', async () => {
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['event']);
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['endpoint']);
+        mockUseEndpointExceptionsCapability.mockReturnValue(true);
+
+        render();
+
+        await waitFor(() => {
+          expect(
+            wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
+          ).toBeDisabled();
+        });
+      });
+
+      test('should disable the "Add Endpoint exception" button if module is not endpoint', async () => {
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);
+        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['filebeat']);
+        mockUseEndpointExceptionsCapability.mockReturnValue(true);
+
+        render();
+
+        await waitFor(() => {
+          expect(
+            wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
+          ).toBeDisabled();
+        });
+      });
     });
 
     describe('should correctly enable/disable the "Add Endpoint event filter" button', () => {

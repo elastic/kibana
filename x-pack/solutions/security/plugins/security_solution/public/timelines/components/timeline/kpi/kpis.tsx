@@ -5,31 +5,41 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
-
-import { EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiBadge } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
+import { css } from '@emotion/react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import type { TimelineKpiStrategyResponse } from '../../../../../common/search_strategy';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import * as i18n from './translations';
 
-export const StatsContainer = styled.span`
-  font-size: ${euiThemeVars.euiFontSizeXS};
-  font-weight: ${euiThemeVars.euiFontWeightSemiBold};
-  padding-right: 16px;
-  .smallDot {
-    width: 3px !important;
-    display: inline-block;
-  }
-  .euiBadge__text {
-    text-align: center;
-    width: 100%;
-  }
-`;
+export const StatsContainer = memo(({ children }: { children: React.ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      css={css`
+        font-size: ${euiTheme.font.scale.xs};
+        font-weight: ${euiTheme.font.weight.semiBold};
+        padding-right: ${euiTheme.size.base};
+
+        .smallDot {
+          width: 3px !important;
+          display: inline-block;
+        }
+
+        .euiBadge__text {
+          text-align: center;
+          width: 100%;
+        }
+      `}
+    >
+      {children}
+    </span>
+  );
+});
+StatsContainer.displayName = 'StatsContainer';
 
 export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyResponse | null }) => {
   const kpiFormat = '0,0.[000]a';
@@ -61,7 +71,7 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
         <StatsContainer>
           {`${i18n.PROCESS_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.process}>
-            <EuiBadge color="hollow" data-test-subj={'siem-timeline-process-kpi'}>
+            <EuiBadge color="hollow" data-test-subj={'siem-timeline-process-kpi'} tabIndex={0}>
               {formattedKpis.process}
             </EuiBadge>
           </EuiToolTip>
@@ -71,7 +81,7 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
         <StatsContainer>
           {`${i18n.USER_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.user}>
-            <EuiBadge color="hollow" data-test-subj={'siem-timeline-user-kpi'}>
+            <EuiBadge color="hollow" data-test-subj={'siem-timeline-user-kpi'} tabIndex={0}>
               {formattedKpis.user}
             </EuiBadge>
           </EuiToolTip>
@@ -81,7 +91,7 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
         <StatsContainer>
           {`${i18n.HOST_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.host}>
-            <EuiBadge color="hollow" data-test-subj={'siem-timeline-host-kpi'}>
+            <EuiBadge color="hollow" data-test-subj={'siem-timeline-host-kpi'} tabIndex={0}>
               {formattedKpis.host}
             </EuiBadge>
           </EuiToolTip>
@@ -91,17 +101,21 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
         <StatsContainer>
           {`${i18n.SOURCE_IP_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.sourceIp}>
-            <EuiBadge color="hollow" data-test-subj={'siem-timeline-source-ip-kpi'}>
+            <EuiBadge color="hollow" data-test-subj={'siem-timeline-source-ip-kpi'} tabIndex={0}>
               {formattedKpis.sourceIp}
             </EuiBadge>
           </EuiToolTip>
         </StatsContainer>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ minWidth: 100 }}>
+      <EuiFlexItem grow={false} css={{ minWidth: 100 }}>
         <StatsContainer>
           {`${i18n.DESTINATION_IP_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.destinationIp}>
-            <EuiBadge color="hollow" data-test-subj={'siem-timeline-destination-ip-kpi'}>
+            <EuiBadge
+              color="hollow"
+              data-test-subj={'siem-timeline-destination-ip-kpi'}
+              tabIndex={0}
+            >
               {formattedKpis.destinationIp}
             </EuiBadge>
           </EuiToolTip>

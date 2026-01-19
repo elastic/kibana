@@ -5,53 +5,51 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { createDatasetQualityDetailsControllerStateMachine } from '../../state_machines/dataset_quality_details_controller/state_machine';
-import { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
-import { DataStreamDetailsServiceStart } from '../../services/data_stream_details';
-import { DatasetQualityStartDeps } from '../../types';
+import type { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
+import type { DataStreamDetailsServiceStart } from '../../services/data_stream_details';
+import type { DatasetQualityStartDeps } from '../../types';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
-import { DatasetQualityDetailsController, DatasetQualityDetailsPublicStateUpdate } from './types';
+import type {
+  DatasetQualityDetailsController,
+  DatasetQualityDetailsPublicStateUpdate,
+} from './types';
 
 interface Dependencies {
   core: CoreStart;
   plugins: DatasetQualityStartDeps;
   dataStreamStatsService: DataStreamsStatsServiceStart;
   dataStreamDetailsService: DataStreamDetailsServiceStart;
-  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityDetailsControllerFactory =
-  ({
-    core,
-    plugins,
-    dataStreamStatsService,
-    dataStreamDetailsService,
-    isFailureStoreEnabled,
-  }: Dependencies) =>
+  ({ core, plugins, dataStreamStatsService, dataStreamDetailsService }: Dependencies) =>
   async ({
     initialState,
+    streamsRepositoryClient,
+    refreshDefinition,
   }: {
     initialState: DatasetQualityDetailsPublicStateUpdate;
+    streamsRepositoryClient?: StreamsRepositoryClient;
+    refreshDefinition?: () => void;
   }): Promise<DatasetQualityDetailsController> => {
     const initialContext = getContextFromPublicState(initialState);
 
-    const [dataStreamStatsClient, dataStreamDetailsClient] = await Promise.all([
-      dataStreamStatsService.getClient(),
-      dataStreamDetailsService.getClient(),
-    ]);
+    const dataStreamDetailsClient = await dataStreamDetailsService.getClient();
 
     const machine = createDatasetQualityDetailsControllerStateMachine({
       initialContext,
       plugins,
       toasts: core.notifications.toasts,
-      dataStreamStatsClient,
       dataStreamDetailsClient,
-      isFailureStoreEnabled,
+      streamsRepositoryClient,
+      refreshDefinition,
     });
 
     const service = interpret(machine, {

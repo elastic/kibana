@@ -16,7 +16,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTextArea,
-  EuiToolTip,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { ContentEditorFlyoutWarningsCallOut } from './editor_flyout_warnings';
@@ -61,7 +61,12 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
   return (
     <EuiForm isInvalid={isSubmitted && !isValid} error={getErrors()} data-test-subj="metadataForm">
       <ContentEditorFlyoutWarningsCallOut warningMessages={getWarnings()} />
-
+      {isReadonly && (
+        <>
+          <EuiCallOut size="s" title={readonlyReason} iconType="info" announceOnMount={false} />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <EuiFormRow
         label={i18n.translate('contentManagement.contentEditor.metadataForm.nameInputLabel', {
           defaultMessage: 'Name',
@@ -69,23 +74,18 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
         error={title.errors}
         isInvalid={!isFormFieldValid(title)}
         fullWidth
+        isDisabled={isReadonly}
       >
-        <EuiToolTip
-          position="top"
-          content={isReadonly ? readonlyReason : undefined}
-          display="block"
-        >
-          <EuiFieldText
-            isInvalid={!isFormFieldValid(title)}
-            value={title.value}
-            onChange={(e) => {
-              setTitle(e.target.value);
-            }}
-            fullWidth
-            data-test-subj="nameInput"
-            readOnly={isReadonly}
-          />
-        </EuiToolTip>
+        <EuiFieldText
+          isInvalid={!isFormFieldValid(title)}
+          value={title.value}
+          onChange={(e) => {
+            setTitle(e.target.value);
+          }}
+          fullWidth
+          data-test-subj="nameInput"
+          readOnly={isReadonly}
+        />
       </EuiFormRow>
 
       <EuiSpacer />
@@ -100,23 +100,18 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
         error={description.errors}
         isInvalid={!isFormFieldValid(description)}
         fullWidth
+        isDisabled={isReadonly}
       >
-        <EuiToolTip
-          position="top"
-          content={isReadonly ? readonlyReason : undefined}
-          display="block"
-        >
-          <EuiTextArea
-            isInvalid={!isFormFieldValid(description)}
-            value={description.value}
-            onChange={(e) => {
-              setDescription(e.target.value);
-            }}
-            fullWidth
-            data-test-subj="descriptionInput"
-            readOnly={isReadonly}
-          />
-        </EuiToolTip>
+        <EuiTextArea
+          isInvalid={!isFormFieldValid(description)}
+          value={description.value}
+          onChange={(e) => {
+            setDescription(e.target.value);
+          }}
+          fullWidth
+          data-test-subj="descriptionInput"
+          readOnly={isReadonly}
+        />
       </EuiFormRow>
 
       {TagList && isReadonly && tagsReferences.length > 0 && (
@@ -127,6 +122,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
               defaultMessage: 'Tags',
             })}
             fullWidth
+            isDisabled={isReadonly}
           >
             <TagList references={tagsReferences} />
           </EuiFormRow>

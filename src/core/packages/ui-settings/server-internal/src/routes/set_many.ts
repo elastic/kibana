@@ -9,11 +9,11 @@
 
 import { schema, ValidationError } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { InternalUiSettingsRouter } from '../internal_types';
 import { CannotOverrideError } from '../ui_settings_errors';
-import { InternalUiSettingsRequestHandlerContext } from '../internal_types';
+import type { InternalUiSettingsRequestHandlerContext } from '../internal_types';
 
 const validate = {
   body: schema.object({
@@ -53,13 +53,32 @@ export function registerSetManyRoute(router: InternalUiSettingsRouter) {
       throw error;
     }
   };
-  router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
-    const uiSettingsClient = (await context.core).uiSettings.client;
-    return await setManyFromRequest(uiSettingsClient, context, request, response);
-  });
+  router.post(
+    {
+      path: '/api/kibana/settings',
+      validate,
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_advanced_settings'],
+        },
+      },
+    },
+    async (context, request, response) => {
+      const uiSettingsClient = (await context.core).uiSettings.client;
+      return await setManyFromRequest(uiSettingsClient, context, request, response);
+    }
+  );
 
   router.post(
-    { path: '/api/kibana/global_settings', validate },
+    {
+      path: '/api/kibana/global_settings',
+      validate,
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_advanced_settings'],
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setManyFromRequest(uiSettingsClient, context, request, response);

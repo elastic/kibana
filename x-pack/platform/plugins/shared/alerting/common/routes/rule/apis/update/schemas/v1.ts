@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import { ruleParamsSchemaWithDefaultValueV1 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
-import { flappingSchemaV1 } from '../../../common';
+import { flappingSchemaV2 } from '../../../common';
+import { artifactsSchemaV1 } from '../../../request';
+
+export const updateRuleParamsExamples = () => path.join(__dirname, 'examples_update_rule.yaml');
 
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean({
@@ -121,6 +125,8 @@ export const actionSchema = schema.object(
   }
 );
 
+export const findRuleParamsExamples = () => path.join(__dirname, 'examples_update_rule.yaml');
+
 export const updateBodySchema = schema.object({
   name: schema.string({
     meta: {
@@ -157,7 +163,8 @@ export const updateBodySchema = schema.object({
   actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),
-  flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
+  flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
+  artifacts: schema.maybe(artifactsSchemaV1),
 });
 
 export const updateParamsSchema = schema.object({

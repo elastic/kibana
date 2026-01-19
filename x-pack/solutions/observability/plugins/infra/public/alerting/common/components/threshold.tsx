@@ -31,6 +31,10 @@ export interface Props {
   };
 }
 
+const NO_DATA_VALUE = i18n.translate('xpack.infra.alerting.noDataValue', {
+  defaultMessage: 'No Data',
+});
+
 export const Threshold = ({
   chartProps: { theme, baseTheme },
   comparator,
@@ -85,7 +89,7 @@ export const Threshold = ({
                   </>
                 ),
                 color,
-                value,
+                value: value ?? NO_DATA_VALUE,
                 valueFormatter,
                 icon: ({ width, height, color: iconColor }) => (
                   <EuiIcon width={width} height={height} color={iconColor} type="alert" />

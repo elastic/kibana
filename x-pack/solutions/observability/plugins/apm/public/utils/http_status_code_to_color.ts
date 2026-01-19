@@ -13,7 +13,7 @@ export const useGetStatusColor = (status: string | number) => {
     1: euiTheme.colors.vis.euiColorVisGrey0,
     2: euiTheme.colors.vis.euiColorVisSuccess0,
     3: euiTheme.colors.vis.euiColorVisGrey0,
-    4: euiTheme.colors.vis.euiColorVisWarning0,
+    4: euiTheme.colors.vis.euiColorVisWarning1,
     5: euiTheme.colors.vis.euiColorVisDanger0,
   };
   const intStatus = typeof status === 'string' ? parseInt(status.replace(/\D/g, ''), 10) : status;

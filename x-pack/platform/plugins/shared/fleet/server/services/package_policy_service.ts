@@ -12,6 +12,9 @@ import type {
   RequestHandlerContext,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -26,11 +29,13 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
+import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
-  DeletePackagePoliciesResponse,
-  ExperimentalDataStreamFeature,
-} from '../../common/types';
-import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  PackagePolicy,
+  PackagePolicySOAttributes,
+} from '../types';
 import type { ExternalCallback } from '..';
 
 import type { NewPackagePolicyWithId } from './package_policy';
@@ -116,7 +121,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyUpdates: UpdatePackagePolicy[],
-    options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean },
+    options?: PackagePolicyClientBulkUpdateOptions,
     currentVersion?: string
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
@@ -126,18 +131,31 @@ export interface PackagePolicyClient {
     }>;
   }>;
 
-  get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
+  bulkUpgrade(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    options?: { user?: AuthenticatedUser; force?: boolean },
+    pkgVersion?: string
+  ): Promise<UpgradePackagePolicyResponse>;
+
+  get(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    options?: PackagePolicyClientGetOptions
+  ): Promise<PackagePolicy | null>;
 
   findAllForAgentPolicy(
     soClient: SavedObjectsClientContract,
-    agentPolicyId: string
+    agentPolicyId: string,
+    options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
 
   getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
-    options?: { ignoreMissing?: boolean }
-  ): Promise<PackagePolicy[] | null>;
+    options?: PackagePolicyClientGetByIdsOptions
+  ): Promise<PackagePolicy[]>;
 
   list(
     soClient: SavedObjectsClientContract,
@@ -146,7 +164,7 @@ export interface PackagePolicyClient {
 
   listIds(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: PackagePolicyClientListIdsOptions
   ): Promise<ListResult<string>>;
 
   update(
@@ -154,7 +172,12 @@ export interface PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean },
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    },
     currentVersion?: string
   ): Promise<PackagePolicy>;
 
@@ -162,12 +185,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: {
-      user?: AuthenticatedUser;
-      skipUnassignFromAgentPolicies?: boolean;
-      force?: boolean;
-      asyncDeploy?: boolean;
-    },
+    options?: PackagePolicyClientDeleteOptions,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse>;
@@ -175,7 +193,7 @@ export interface PackagePolicyClient {
   upgrade(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    ids: string[],
+    id: string,
     options?: { user?: AuthenticatedUser; force?: boolean },
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
@@ -224,15 +242,6 @@ export interface PackagePolicyClient {
     request?: KibanaRequest
   ): Promise<void>;
 
-  getUpgradePackagePolicyInfo(
-    soClient: SavedObjectsClientContract,
-    id: string
-  ): Promise<{
-    packagePolicy: PackagePolicy;
-    packageInfo: PackageInfo;
-    experimentalDataStreamFeatures: ExperimentalDataStreamFeature[];
-  }>;
-
   /**
    * Remove an output from all package policies that are using it, and replace the output by the default ones.
    * @param soClient
@@ -264,11 +273,90 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     options?: PackagePolicyClientFetchAllItemsOptions
   ): Promise<AsyncIterable<PackagePolicy[]>>;
+
+  getPackagePolicySavedObjects(
+    soClient: SavedObjectsClientContract,
+    options: PackagePolicyClientRollbackOptions
+  ): Promise<SavedObjectsFindResponse<PackagePolicySOAttributes, unknown>>;
+
+  rollback(
+    soClient: SavedObjectsClientContract,
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+  ): Promise<RollbackResult>;
+
+  restoreRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
+
+  cleanupRollbackSavedObjects(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
+
+  bumpAgentPolicyRevisionAfterRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
 }
 
-export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;
+interface WithSpaceIdsOption {
+  /**
+   * The space IDs that should be targeted for data retrieval. The SO client provided to the services
+   * still needs to have access to those spaces.
+   * When using an un-scoped so client (has access to all spaces) and wanting to retrieve data across
+   * all space, use a value of `*` (ex. `spaceIds: ['*']`)
+   */
+  spaceIds?: string[];
+}
+
+export interface RollbackResult {
+  updatedPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+  copiedPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+  previousVersionPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+}
+
+export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> &
+  WithSpaceIdsOption;
 
 export type PackagePolicyClientFetchAllItemsOptions = Pick<
   ListWithKuery,
   'perPage' | 'kuery' | 'sortField' | 'sortOrder'
->;
+> &
+  WithSpaceIdsOption;
+
+export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
+  ignoreMissing?: boolean;
+}
+
+export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
+  user?: AuthenticatedUser;
+  skipUnassignFromAgentPolicies?: boolean;
+  force?: boolean;
+  asyncDeploy?: boolean;
+}
+
+export interface PackagePolicyClientBulkUpdateOptions {
+  user?: AuthenticatedUser;
+  force?: boolean;
+  asyncDeploy?: boolean;
+  fromBulkUpgrade?: boolean;
+  oldPackagePolicies?: PackagePolicy[];
+}
+
+export type PackagePolicyClientFindAllForAgentPolicyOptions = WithSpaceIdsOption;
+
+export interface PackagePolicyClientGetOptions {
+  /**
+   * The space IDs that should be targeted for data retrieval. The SO client provided to the services
+   * still needs to have access to the space defined here.
+   * When using an un-scoped so client (has access to all spaces) and wanting to retrieve data across
+   * all space, use a value of `*` (ex. `spaceId: '*'`)
+   */
+  spaceId?: string;
+}
+
+export type PackagePolicyClientListIdsOptions = ListWithKuery & WithSpaceIdsOption;
+
+export type PackagePolicyClientRollbackOptions = Omit<SavedObjectsFindOptions, 'type'> &
+  WithSpaceIdsOption;

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FieldPopoverExpression } from './field_popover_expression';
-import { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
+import type { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
 import { FieldSelector } from './field_selector';
 
 interface FieldProps {

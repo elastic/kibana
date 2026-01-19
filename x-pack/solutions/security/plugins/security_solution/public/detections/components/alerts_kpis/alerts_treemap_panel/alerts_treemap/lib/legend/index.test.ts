@@ -60,7 +60,7 @@ describe('legend', () => {
           showColor: true,
           stackByField0: 'kibana.alert.rule.name',
         }).color
-      ).toEqual('#54b399');
+      ).toEqual('#54B399');
     });
 
     it('returns the expected count', () => {
@@ -73,18 +73,6 @@ describe('legend', () => {
           stackByField0: 'kibana.alert.rule.name',
         }).count
       ).toEqual(34);
-    });
-
-    it('returns the expected dataProviderId', () => {
-      expect(
-        getLegendItemFromRawBucket({
-          bucket: bucketsWithStackByField1[0],
-          colorPalette,
-          maxRiskSubAggregations,
-          showColor: true,
-          stackByField0: 'kibana.alert.rule.name',
-        }).dataProviderId
-      ).toContain('draggable-legend-item-treemap-kibana_alert_rule_name-matches everything-');
     });
 
     it('renders the expected label', () => {
@@ -170,7 +158,7 @@ describe('legend', () => {
           })
         )
       ).toEqual({
-        color: '#54b399',
+        color: '#54B399',
         count: 12,
         field: 'host.name',
         value: 'Host-k8iyfzraq9',
@@ -189,20 +177,6 @@ describe('legend', () => {
 
       expect(legendItem.render != null && legendItem.render()).toEqual('Host-k8iyfzraq9');
     });
-
-    it('returns the expected dataProviderId', () => {
-      const legendItem = getLegendItemFromFlattenedBucket({
-        colorPalette,
-        flattenedBucket,
-        maxRiskSubAggregations,
-        stackByField0: 'kibana.alert.rule.name',
-        stackByField1: 'host.name',
-      });
-
-      expect(legendItem.dataProviderId).toContain(
-        'draggable-legend-item-treemap-matches everything-Host-k8iyfzraq9-'
-      );
-    });
   });
 
   describe('getFirstGroupLegendItems', () => {
@@ -216,35 +190,35 @@ describe('legend', () => {
         }).map((x) => omit(['render', 'dataProviderId'], x))
       ).toEqual([
         {
-          color: '#54b399',
+          color: '#54B399',
           count: 34,
           field: 'kibana.alert.rule.name',
           value: 'matches everything',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#ff7e62',
+          color: '#DA8B45',
           count: 28,
           field: 'kibana.alert.rule.name',
           value: 'EQL process sequence',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#f1d86f',
+          color: '#D6BF57',
           count: 19,
           field: 'kibana.alert.rule.name',
           value: 'Endpoint Security',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#bd271e',
+          color: '#E7664C',
           count: 5,
           field: 'kibana.alert.rule.name',
           value: 'mimikatz process started',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#bd271e',
+          color: '#E7664C',
           count: 1,
           field: 'kibana.alert.rule.name',
           value: 'Threshold rule',

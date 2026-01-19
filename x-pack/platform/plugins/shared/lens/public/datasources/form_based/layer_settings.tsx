@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RandomSamplingSlider } from '@kbn/random-sampling';
-import type { DatasourceLayerSettingsProps } from '../../types';
-import type { FormBasedPrivateState } from './types';
+import type { DatasourceLayerSettingsProps, FormBasedPrivateState } from '@kbn/lens-common';
 import { isSamplingValueEnabled } from './utils';
 import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
@@ -79,7 +78,7 @@ export function LayerSettingsPanel({
                 values={{
                   link: (
                     <EuiLink
-                      href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-random-sampler-aggregation.html"
+                      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-random-sampler-aggregation.html"
                       target="_blank"
                       external
                     >

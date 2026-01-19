@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { ServiceParams, CaseConnector } from '@kbn/actions-plugin/server';
+import { i18n } from '@kbn/i18n';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { Type } from '@kbn/config-schema';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { SUB_ACTION } from '../../../common/thehive/constants';
+import type { z } from '@kbn/zod';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import {
+  SUB_ACTION,
   TheHiveIncidentResponseSchema,
   TheHiveUpdateIncidentResponseSchema,
   TheHiveAddCommentResponseSchema,
   TheHiveCreateAlertResponseSchema,
   ExecutorSubActionCreateAlertParamsSchema,
-} from '../../../common/thehive/schema';
+} from '@kbn/connector-schemas/thehive';
 import type {
   TheHiveConfig,
   TheHiveSecrets,
@@ -25,7 +27,7 @@ import type {
   ExternalServiceIncidentResponse,
   Incident,
   GetIncidentResponse,
-} from '../../../common/thehive/types';
+} from '@kbn/connector-schemas/thehive';
 
 export const API_VERSION = 'v1';
 
@@ -37,12 +39,12 @@ export class TheHiveConnector extends CaseConnector<
 > {
   private url: string;
   private apiKey: string;
-  private organisation: string | null;
+  private organisation: string | null | undefined;
   private urlWithoutTrailingSlash: string;
 
   constructor(
     params: ServiceParams<TheHiveConfig, TheHiveSecrets>,
-    pushToServiceParamsExtendedSchema: Record<string, Type<unknown>>
+    pushToServiceParamsExtendedSchema: Record<string, z.ZodType<unknown>>
   ) {
     super(params, pushToServiceParamsExtendedSchema);
 
@@ -153,15 +155,35 @@ export class TheHiveConnector extends CaseConnector<
     return res.data;
   }
 
+  private formatAlertBody(alert: ExecutorSubActionCreateAlertParams) {
+    try {
+      const { body, isRuleSeverity, ...restOfAlert } = alert;
+      const bodyJson = JSON.parse(body || '{}');
+      const mergedAlertBody = { ...bodyJson, ...restOfAlert };
+
+      return mergedAlertBody;
+    } catch (err) {
+      throw new Error(
+        i18n.translate('xpack.stackConnectors.thehive.alertBodyParsingError', {
+          defaultMessage: 'Error parsing alert body for thehive: {err}',
+          values: {
+            err: err.toString(),
+          },
+        })
+      );
+    }
+  }
+
   public async createAlert(
     alert: ExecutorSubActionCreateAlertParams,
     connectorUsageCollector: ConnectorUsageCollector
   ) {
+    const mergedAlertBody = this.formatAlertBody(alert);
     await this.request(
       {
         method: 'post',
         url: `${this.url}/api/${API_VERSION}/alert`,
-        data: alert,
+        data: mergedAlertBody,
         headers: this.getAuthHeaders(),
         responseSchema: TheHiveCreateAlertResponseSchema,
       },

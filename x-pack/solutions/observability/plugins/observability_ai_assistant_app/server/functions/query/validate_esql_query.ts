@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { validateQuery } from '@kbn/esql-language';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
+import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { splitIntoCommands } from '@kbn/inference-plugin/common';
 
 export async function runAndValidateEsqlQuery({
   query,
   client,
+  signal,
 }: {
   query: string;
   client: ElasticsearchClient;
+  signal: AbortSignal;
 }): Promise<{
   columns?: DatatableColumn[];
   rows?: ESQLRow[];
@@ -27,10 +28,7 @@ export async function runAndValidateEsqlQuery({
 }> {
   const queryWithoutLineBreaks = query.replaceAll(/\n/g, '');
 
-  const { errors } = await validateQuery(queryWithoutLineBreaks, getAstAndSyntaxErrors, {
-    // setting this to true, we don't want to validate the index / fields existence
-    ignoreOnMissingCallbacks: true,
-  });
+  const { errors } = await validateQuery(queryWithoutLineBreaks);
 
   const asCommands = splitIntoCommands(queryWithoutLineBreaks);
 
@@ -47,30 +45,25 @@ export async function runAndValidateEsqlQuery({
     return 'text' in error ? error.text : error.message;
   });
 
-  return client.transport
-    .request({
-      method: 'POST',
-      path: '_query',
-      body: {
-        query,
-      },
-    })
-    .then((res) => {
-      const esqlResponse = res as ESQLSearchResponse;
+  try {
+    const res = await client.esql.query(
+      { query, drop_null_columns: true },
+      { signal, requestTimeout: '10s' }
+    );
+    const esqlResponse = res as unknown as ESQLSearchResponse;
 
-      const columns =
-        esqlResponse.columns?.map(({ name, type }) => ({
-          id: name,
-          name,
-          meta: { type: esFieldTypeToKibanaFieldType(type) as DatatableColumnType },
-        })) ?? [];
+    const columns =
+      esqlResponse.columns?.map(({ name, type }) => ({
+        id: name,
+        name,
+        meta: { type: esFieldTypeToKibanaFieldType(type) as DatatableColumnType },
+      })) ?? [];
 
-      return { columns, rows: esqlResponse.values };
-    })
-    .catch((error) => {
-      return {
-        error,
-        ...(errorMessages.length ? { errorMessages } : {}),
-      };
-    });
+    return { columns, rows: esqlResponse.values };
+  } catch (error) {
+    return {
+      error,
+      ...(errorMessages.length ? { errorMessages } : {}),
+    };
+  }
 }

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { ChartsConfigMap } from '../../../../shared/metrics/types';
 import { node } from './node';
 
 export const charts = {
   node,
-} as const;
+} satisfies ChartsConfigMap;

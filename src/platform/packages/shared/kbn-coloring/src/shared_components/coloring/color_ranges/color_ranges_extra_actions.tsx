@@ -10,7 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import React, { useCallback, Dispatch, useContext } from 'react';
+import type { Dispatch } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { EuiFlexGroup, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 
 import { DistributeEquallyIcon } from '../assets/distribute_equally';

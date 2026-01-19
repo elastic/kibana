@@ -8,18 +8,19 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { IAggConfig, AggParam, IFieldParamType, IAggType } from '@kbn/data-plugin/public';
+import type { IAggConfig, AggParam, IFieldParamType, IAggType } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
-import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
-import { AggTypeState, AggParamsState } from './agg_params_state';
-import { AggParamEditorProps } from './agg_param_props';
+import type { ComboBoxGroupedOptions } from '../utils';
+import { groupAndSortBy } from '../utils';
+import type { AggTypeState, AggParamsState } from './agg_params_state';
+import type { AggParamEditorProps } from './agg_param_props';
 import { aggParamsMap } from './agg_params_map';
-import { EditorConfig } from './utils';
+import type { EditorConfig } from './utils';
 import { getSchemaByName } from '../schemas';
-import { EditorVisState } from './sidebar/state/reducers';
+import type { EditorVisState } from './sidebar/state/reducers';
 
 interface ParamInstanceBase {
   agg: IAggConfig;

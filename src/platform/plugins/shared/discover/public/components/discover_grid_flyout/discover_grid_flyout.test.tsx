@@ -12,21 +12,22 @@ import { EuiButtonIcon, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+import type { DiscoverGridFlyoutProps } from './discover_grid_flyout';
+import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { DiscoverServices } from '../../build_services';
+import type { DiscoverServices } from '../../build_services';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
-import { FlyoutCustomization, useDiscoverCustomization } from '../../customizations';
+import type { FlyoutCustomization } from '../../customizations';
+import { useDiscoverCustomization } from '../../customizations';
 import { discoverServiceMock } from '../../__mocks__/services';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
 const mockFlyoutCustomization: FlyoutCustomization = {
   id: 'flyout',
@@ -68,14 +69,6 @@ describe('Discover flyout', function () {
   const getServices = () => {
     return {
       ...discoverServiceMock,
-      filterManager: createFilterManagerMock(),
-      addBasePath: (path: string) => `/base${path}`,
-      history: () => ({ location: {} }),
-      locator: {
-        useUrl: jest.fn(() => ''),
-        navigate: jest.fn(),
-        getUrl: jest.fn(() => Promise.resolve('mock-referrer')),
-      },
       contextLocator: { getRedirectUrl: jest.fn(() => 'mock-context-redirect-url') },
       singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url') },
       toastNotifications: {
@@ -120,9 +113,9 @@ describe('Discover flyout', function () {
     };
 
     const Proxy = (newProps: DiscoverGridFlyoutProps) => (
-      <KibanaContextProvider services={services}>
+      <DiscoverTestProvider services={services}>
         <DiscoverGridFlyout {...newProps} />
-      </KibanaContextProvider>
+      </DiscoverTestProvider>
     );
 
     const component = mountWithIntl(<Proxy {...props} />);
@@ -498,10 +491,13 @@ describe('Discover flyout', function () {
             _source: { date: '2020-20-01T12:12:12.124', name: 'test2', extension: 'jpg' },
           },
         ];
+        const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
+          scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+        });
         const records = buildDataTableRecordList({
           records: hits as EsHitRecord[],
           dataView: dataViewMock,
-          processRecord: (record) => services.profilesManager.resolveDocumentProfile({ record }),
+          processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
         });
         const { component } = await mountComponent({ records, services });
         const title = findTestSubject(component, 'docViewerRowDetailsTitle');

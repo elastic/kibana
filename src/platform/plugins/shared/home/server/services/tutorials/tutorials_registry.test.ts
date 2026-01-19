@@ -10,16 +10,16 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { TutorialsRegistry } from './tutorials_registry';
 import { coreMock } from '@kbn/core/server/mocks';
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import {
+import type {
   TutorialProvider,
   TutorialSchema,
   TutorialsCategory,
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 
 const INVALID_TUTORIAL: TutorialSchema = {
@@ -32,16 +32,14 @@ const INVALID_TUTORIAL: TutorialSchema = {
   longDescription: 'long description with lots of text',
   completionTimeMinutes: 10,
   previewImagePath: 'path',
-  onPrem: { instructionSets: [], params: [] },
-  elasticCloud: { instructionSets: [], params: [] },
-  onPremElasticCloud: { instructionSets: [], params: [] },
+  onPrem: { instructionSets: [] },
+  elasticCloud: { instructionSets: [] },
+  onPremElasticCloud: { instructionSets: [] },
   artifacts: {
     exportedFields: { documentationUrl: 'url' },
     dashboards: [],
     application: { path: 'path', label: 'path' },
   },
-  savedObjects: [],
-  savedObjectsInstallMsg: 'testMsg',
 };
 const VALID_TUTORIAL: TutorialSchema = {
   id: 'test',
@@ -54,16 +52,14 @@ const VALID_TUTORIAL: TutorialSchema = {
   longDescription: 'long description with lots of text',
   completionTimeMinutes: 10,
   previewImagePath: 'path',
-  onPrem: { instructionSets: [], params: [] },
-  elasticCloud: { instructionSets: [], params: [] },
-  onPremElasticCloud: { instructionSets: [], params: [] },
+  onPrem: { instructionSets: [] },
+  elasticCloud: { instructionSets: [] },
+  onPremElasticCloud: { instructionSets: [] },
   artifacts: {
     exportedFields: { documentationUrl: 'url' },
     dashboards: [],
     application: { path: 'path', label: 'path' },
   },
-  savedObjects: [],
-  savedObjectsInstallMsg: 'testMsg',
 };
 const invalidTutorialProvider = INVALID_TUTORIAL;
 const validTutorialProvider = VALID_TUTORIAL;

@@ -8,9 +8,9 @@
  */
 
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
-import { OptionsListControlState } from '@kbn/controls-plugin/public';
+import type { OptionsListControlState, PinnedControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
-import { FilterControlConfig } from './types';
+import type { FilterControlConfig } from './types';
 
 export const DEFAULT_CONTROLS: FilterControlConfig[] = [
   {
@@ -19,16 +19,15 @@ export const DEFAULT_CONTROLS: FilterControlConfig[] = [
     }),
     fieldName: ALERT_STATUS,
     selectedOptions: ['active'],
-    hideActionBar: true,
+    displaySettings: { hideActionBar: true, hideExists: true },
     persist: true,
-    hideExists: true,
   },
   {
     title: i18n.translate('alertsUIShared.alertFilterControls.defaultControlDisplayNames.rule', {
       defaultMessage: 'Rule',
     }),
     fieldName: ALERT_RULE_NAME,
-    hideExists: true,
+    displaySettings: { hideExists: true },
   },
   {
     title: i18n.translate('alertsUIShared.alertFilterControls.defaultControlDisplayNames.group', {
@@ -65,10 +64,9 @@ export const TEST_IDS = {
   },
 };
 
-export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<OptionsListControlState> = {
-  hideExclude: true,
-  hideSort: true,
-  placeholder: '',
+export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<PinnedControlState> &
+  Partial<OptionsListControlState> = {
+  displaySettings: { hideExclude: true, hideSort: true, placeholder: '' },
   width: 'small',
   grow: true,
 };

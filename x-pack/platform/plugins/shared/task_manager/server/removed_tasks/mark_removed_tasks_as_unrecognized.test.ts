@@ -8,7 +8,7 @@
 import { mockLogger } from '../test_utils';
 import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SCHEDULE_INTERVAL, taskRunner } from './mark_removed_tasks_as_unrecognized';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 const createTaskDoc = (id: string = '1'): SearchHit<unknown> => ({
   _index: '.kibana_task_manager_9.0.0_001',

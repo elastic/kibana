@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { FIELD_ORIGIN } from '../../../common/constants';
-import { IField, AbstractField } from './field';
-import { IVectorSource } from '../sources/vector_source';
-import { IEmsFileSource } from '../sources/ems_file_source';
+import type { FIELD_ORIGIN } from '../../../common/constants';
+import type { IField } from './field';
+import { AbstractField } from './field';
+import type { IVectorSource } from '../sources/vector_source';
+import type { IEmsFileSource } from '../sources/ems_file_source';
 
 export class EMSFileField extends AbstractField implements IField {
   private readonly _source: IEmsFileSource;

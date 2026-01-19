@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
-import { FindGapsRequestBodyV1 } from '../../../../../../../common/routes/gaps/apis/find';
-import { FindGapsParams } from '../../../../../../lib/rule_gaps/types';
+import type { FindGapsRequestBodyV1 } from '../../../../../../../common/routes/gaps/apis/find';
+import type { FindGapsParams } from '../../../../../../application/gaps/types';
 
 export const transformRequest = ({
   page,

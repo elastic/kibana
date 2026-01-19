@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DefaultLogViewsStaticConfig, LogViewAttributes } from './types';
+import type { DefaultLogViewsStaticConfig, LogViewAttributes } from './types';
 
 export const defaultLogViewId = 'default';
 export const defaultFilterStateKey = 'logFilter';
@@ -17,8 +17,7 @@ export const defaultLogViewAttributes: LogViewAttributes = {
   name: 'Log View',
   description: 'A default log view',
   logIndices: {
-    type: 'index_name',
-    indexName: 'logs-*,filebeat-*',
+    type: 'kibana_advanced_setting',
   },
   logColumns: [
     {

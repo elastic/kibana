@@ -7,95 +7,84 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { monaco } from '@kbn/monaco';
-import { ESQLControlsFlyout } from './control_flyout';
+import {
+  type ESQLControlVariable,
+  type ESQLControlState,
+  type ESQLVariableType,
+  type ControlTriggerSource,
+} from '@kbn/esql-types';
+import type { monaco } from '@kbn/monaco';
+import type { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import { untilPluginStartServicesReady } from '../../kibana_services';
-import type { ESQLControlState } from './types';
+import { ESQLControlsFlyout } from './control_flyout';
 
 interface Context {
   queryString: string;
   core: CoreStart;
   search: ISearchGeneric;
+  timefilter: TimefilterContract;
   variableType: ESQLVariableType;
   esqlVariables: ESQLControlVariable[];
   onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
+  closeFlyout?: () => void;
+  ariaLabelledBy: string;
+  currentApp?: string;
+  triggerSource?: ControlTriggerSource;
+  telemetryService: ESQLEditorTelemetryService;
 }
 
-export async function isActionCompatible(queryString: string) {
-  return Boolean(queryString && queryString.trim().length > 0);
-}
-
-export async function executeAction({
+export async function loadESQLControlFlyout({
   queryString,
   core,
   search,
+  timefilter,
   variableType,
   esqlVariables,
   onSaveControl,
   onCancelControl,
   cursorPosition,
   initialState,
+  closeFlyout = () => {},
+  ariaLabelledBy,
+  currentApp,
+  triggerSource,
+  telemetryService,
 }: Context) {
-  const isCompatibleAction = await isActionCompatible(queryString);
-  if (!isCompatibleAction) {
-    throw new IncompatibleActionError();
-  }
-
+  const timeRange = timefilter.getTime();
   const deps = await untilPluginStartServicesReady();
-  const handle = core.overlays.openFlyout(
-    toMountPoint(
-      React.cloneElement(
-        <KibanaRenderContextProvider {...core}>
-          <KibanaContextProvider
-            services={{
-              ...deps,
-            }}
-          >
-            <ESQLControlsFlyout
-              queryString={queryString}
-              search={search}
-              variableType={variableType}
-              closeFlyout={() => {
-                handle.close();
-              }}
-              onSaveControl={onSaveControl}
-              onCancelControl={onCancelControl}
-              cursorPosition={cursorPosition}
-              initialState={initialState}
-              esqlVariables={esqlVariables}
-            />
-          </KibanaContextProvider>
-        </KibanaRenderContextProvider>,
-        {
-          closeFlyout: () => {
-            handle.close();
-          },
-        }
-      ),
-      core
-    ),
-    {
-      size: 's',
-      'data-test-subj': 'create_esql_control_flyout',
-      isResizable: true,
-      type: 'push',
-      paddingSize: 'm',
-      hideCloseButton: true,
-      onClose: (overlayRef) => {
-        overlayRef.close();
-      },
-      outsideClickCloses: true,
-      maxWidth: 800,
-    }
+
+  return (
+    <KibanaRenderContextProvider {...core}>
+      <KibanaContextProvider
+        services={{
+          ...deps,
+        }}
+      >
+        <ESQLControlsFlyout
+          ariaLabelledBy={ariaLabelledBy}
+          queryString={queryString}
+          search={search}
+          initialVariableType={variableType}
+          closeFlyout={closeFlyout}
+          onSaveControl={onSaveControl}
+          onCancelControl={onCancelControl}
+          cursorPosition={cursorPosition}
+          initialState={initialState}
+          esqlVariables={esqlVariables}
+          timeRange={timeRange}
+          currentApp={currentApp}
+          telemetryTriggerSource={triggerSource}
+          telemetryService={telemetryService}
+        />
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 }

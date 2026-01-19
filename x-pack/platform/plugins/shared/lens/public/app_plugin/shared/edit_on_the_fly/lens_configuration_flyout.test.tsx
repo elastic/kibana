@@ -5,17 +5,35 @@
  * 2.0.
  */
 import React from 'react';
-import { renderWithReduxStore } from '../../../mocks';
+
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
+
+import { renderWithReduxStore } from '../../../mocks';
 import { mockVisualizationMap, mockDatasourceMap, mockDataPlugin } from '../../../mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
+import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
+import * as getApplicationUserMessagesModule from '../../get_application_user_messages';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+
+const createAddContextMock = () => {
+  return jest
+    .fn()
+    .mockImplementation((element) => (
+      <CoreEnvContextProvider value={coreContextMock.create().env}>
+        {element}
+      </CoreEnvContextProvider>
+    ));
+};
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -97,6 +115,8 @@ const lensAttributes = {
 const mockStartDependencies =
   createMockStartDependencies() as unknown as LensPluginStartDependencies;
 
+jest.spyOn(getApplicationUserMessagesModule, 'useApplicationUserMessages');
+
 const data = {
   ...mockDataPlugin(),
   query: {
@@ -129,20 +149,24 @@ describe('LensEditConfigurationFlyout', () => {
     propsOverrides: Partial<EditConfigPanelProps> = {},
     query?: Query | AggregateQuery
   ) {
+    const mockCoreStart = coreMock.createStart();
+    mockCoreStart.rendering.addContext = createAddContextMock();
     const { container, ...rest } = renderWithReduxStore(
-      <LensEditConfigurationFlyout
-        attributes={lensAttributes}
-        updatePanelState={jest.fn()}
-        coreStart={coreMock.createStart()}
-        startDependencies={startDependencies}
-        datasourceMap={datasourceMap}
-        visualizationMap={visualizationMap}
-        closeFlyout={jest.fn()}
-        datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
-        onApply={jest.fn()}
-        onCancel={jest.fn()}
-        {...propsOverrides}
-      />,
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        {mockCoreStart.rendering.addContext(
+          <LensEditConfigurationFlyout
+            attributes={lensAttributes}
+            updatePanelState={jest.fn()}
+            coreStart={mockCoreStart}
+            startDependencies={startDependencies}
+            closeFlyout={jest.fn()}
+            datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
+            onApply={jest.fn()}
+            onCancel={jest.fn()}
+            {...propsOverrides}
+          />
+        )}
+      </EditorFrameServiceProvider>,
       {},
       {
         preloadedState: {
@@ -154,6 +178,11 @@ describe('LensEditConfigurationFlyout', () => {
           },
           activeDatasourceId: 'testDatasource',
           query: query as Query,
+          visualization: {
+            state: {},
+            activeId: 'testVis',
+            selectedLayerId: 'layer1',
+          },
         },
       }
     );
@@ -177,9 +206,7 @@ describe('LensEditConfigurationFlyout', () => {
       displayFlyoutHeader: true,
       isNewPanel: true,
     });
-    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe(
-      'Create ES|QL visualization'
-    );
+    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe('Configuration');
   });
 
   it('should call the closeFlyout callback if cancel button is clicked', async () => {
@@ -321,8 +348,9 @@ describe('LensEditConfigurationFlyout', () => {
     // @ts-ignore
     newProps.attributes.state.datasourceStates.testDatasource = 'state';
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
   });
+
   it('save button should be disabled if expression cannot be generated', async () => {
     const updateByRefInputSpy = jest.fn();
     const saveByRefSpy = jest.fn();
@@ -341,6 +369,23 @@ describe('LensEditConfigurationFlyout', () => {
     };
 
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+  });
+
+  it('should use correct activeVisualization', async () => {
+    const visualizationType = 'testVis';
+
+    await renderConfigFlyout({
+      attributes: {
+        ...lensAttributes,
+        visualizationType,
+      },
+    });
+
+    expect(getApplicationUserMessagesModule.useApplicationUserMessages).toHaveBeenCalledWith(
+      expect.objectContaining({
+        visualizationType,
+      })
+    );
   });
 });

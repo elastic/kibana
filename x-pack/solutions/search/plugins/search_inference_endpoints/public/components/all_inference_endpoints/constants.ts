@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  SortFieldInferenceEndpoint,
-  QueryParams,
-  AllInferenceEndpointsTableState,
-  SortOrder,
-  FilterOptions,
-} from './types';
+import type { QueryParams, AllInferenceEndpointsTableState, FilterOptions } from './types';
+import { SortFieldInferenceEndpoint, SortOrder } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 25;
@@ -19,7 +14,7 @@ export const DEFAULT_TABLE_LIMIT = 25;
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
   page: DEFAULT_TABLE_ACTIVE_PAGE,
   perPage: DEFAULT_TABLE_LIMIT,
-  sortField: SortFieldInferenceEndpoint.endpoint,
+  sortField: SortFieldInferenceEndpoint.inference_id,
   sortOrder: SortOrder.asc,
 };
 

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosHeaders, AxiosInstance, AxiosResponse } from 'axios';
+import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosHeaders } from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { TestSubActionConnector } from './mocks';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 import * as utils from '../lib/axios_utils';
 import { ConnectorUsageCollector } from '../usage';
 
@@ -211,9 +212,19 @@ describe('SubActionConnector', () => {
       requestMock.mockReturnValue({ data: { invalidField: 'test' } });
       await expect(async () =>
         service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
-      ).rejects.toThrow(
-        'Response validation failed (Error: [status]: expected value of type [string] but got [undefined])'
-      );
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "Response validation failed ([
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"string\\",
+            \\"received\\": \\"undefined\\",
+            \\"path\\": [
+              \\"status\\"
+            ],
+            \\"message\\": \\"Required\\"
+          }
+        ])"
+      `);
     });
 
     it('formats the response error correctly', async () => {

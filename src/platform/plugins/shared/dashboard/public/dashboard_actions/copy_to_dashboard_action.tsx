@@ -9,20 +9,24 @@
 
 import React from 'react';
 
-import {
+import type {
   EmbeddableApiContext,
   HasParentApi,
   HasType,
   HasUniqueId,
   PublishesSavedObjectId,
+} from '@kbn/presentation-publishing';
+import {
   apiHasParentApi,
   apiHasUniqueId,
   apiIsOfType,
   apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
+import { apiCanBeDuplicated } from '@kbn/presentation-containers';
 import { type DashboardApi, DASHBOARD_API_TYPE } from '../dashboard_api/types';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
@@ -44,6 +48,7 @@ export type CopyToDashboardAPI = HasType &
 
 const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
   return (
+    apiCanBeDuplicated(api) &&
     apiHasUniqueId(api) &&
     apiHasParentApi(api) &&
     apiIsOfType(api.parentApi, DASHBOARD_API_TYPE) &&

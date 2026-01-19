@@ -35,6 +35,8 @@
           "\"kbn-ui-shared-deps-src.css\""
         ],
         "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+        "lineNumber": 32,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -49,6 +51,8 @@
           "\nAbsolute path to the distributable directory"
         ],
         "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+        "lineNumber": 22,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -66,6 +70,8 @@
           "\"kbn-ui-shared-deps-src.js\""
         ],
         "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+        "lineNumber": 27,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -82,6 +88,8 @@
           "\nExternals mapping intended to be used in a webpack config"
         ],
         "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+        "lineNumber": 37,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -95,6 +103,8 @@
               "/**\n   * stateful deps\n   */"
             ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -106,6 +116,8 @@
             "label": "'@kbn/i18n'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -117,6 +129,8 @@
             "label": "'@kbn/i18n-react'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -128,6 +142,8 @@
             "label": "'@emotion/cache'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -139,6 +155,8 @@
             "label": "'@emotion/react'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -150,6 +168,8 @@
             "label": "jquery",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -161,6 +181,8 @@
             "label": "moment",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -172,6 +194,8 @@
             "label": "'moment-timezone'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -183,6 +207,8 @@
             "label": "react",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -194,6 +220,8 @@
             "label": "'react-dom'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -205,6 +233,8 @@
             "label": "'react-dom/server'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -216,6 +246,8 @@
             "label": "'react-router'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -227,6 +259,8 @@
             "label": "'react-router-dom'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -238,6 +272,21 @@
             "label": "'react-router-dom-v5-compat'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reactuse",
+            "type": "string",
+            "tags": [],
+            "label": "'react-use'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -249,6 +298,8 @@
             "label": "'styled-components'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -260,6 +311,8 @@
             "label": "'@kbn/monaco'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,6 +326,125 @@
               "// this is how plugins/consumers from npm load monaco"
             ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fptsOption",
+            "type": "string",
+            "tags": [],
+            "label": "'fp-ts/Option'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fptspipeable",
+            "type": "string",
+            "tags": [],
+            "label": "'fp-ts/pipeable'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fptsTaskEither",
+            "type": "string",
+            "tags": [],
+            "label": "'fp-ts/TaskEither'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fptsEither",
+            "type": "string",
+            "tags": [],
+            "label": "'fp-ts/Either'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fptsfunction",
+            "type": "string",
+            "tags": [],
+            "label": "'fp-ts/function'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fptsTask",
+            "type": "string",
+            "tags": [],
+            "label": "'fp-ts/Task'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fptsSet",
+            "type": "string",
+            "tags": [],
+            "label": "'fp-ts/Set'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fptsOrd",
+            "type": "string",
+            "tags": [],
+            "label": "'fp-ts/Ord'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fptsArray",
+            "type": "string",
+            "tags": [],
+            "label": "'fp-ts/Array'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -284,6 +456,47 @@
             "label": "'io-ts'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.iotslibReporter",
+            "type": "string",
+            "tags": [],
+            "label": "'io-ts/lib/Reporter'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.iotslibPathReporter",
+            "type": "string",
+            "tags": [],
+            "label": "'io-ts/lib/PathReporter'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.iotslibThrowReporter",
+            "type": "string",
+            "tags": [],
+            "label": "'io-ts/lib/ThrowReporter'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -295,6 +508,8 @@
             "label": "'@reduxjs/toolkit'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -306,6 +521,8 @@
             "label": "'react-redux'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -317,6 +534,8 @@
             "label": "redux",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -328,6 +547,8 @@
             "label": "immer",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -339,6 +560,8 @@
             "label": "reselect",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -350,6 +573,39 @@
             "label": "'fastest-levenshtein'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.chromajs",
+            "type": "string",
+            "tags": [],
+            "label": "'chroma-js'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "// cache some used methods of the react-use library"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -363,6 +619,8 @@
               "/**\n   * big deps which are locked to a single version\n   */"
             ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -374,6 +632,8 @@
             "label": "numeral",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -385,6 +645,8 @@
             "label": "'@elastic/numeral'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -396,6 +658,8 @@
             "label": "'@elastic/charts'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -407,6 +671,8 @@
             "label": "'@kbn/datemath'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -418,6 +684,8 @@
             "label": "'@elastic/eui'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -429,28 +697,21 @@
             "label": "'@elastic/eui/lib/components/provider/nested'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.elasticeuilibservices",
+            "id": "def-common.externals.elasticeuilibservicesthemewarning",
             "type": "string",
             "tags": [],
-            "label": "'@elastic/eui/lib/services'",
+            "label": "'@elastic/eui/lib/services/theme/warning'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.elasticeuilibservicesformat",
-            "type": "string",
-            "tags": [],
-            "label": "'@elastic/eui/lib/services/format'",
-            "description": [],
-            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -462,6 +723,8 @@
             "label": "'@elastic/eui-theme-borealis'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -475,6 +738,8 @@
               "// transient dep of eui"
             ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -486,6 +751,8 @@
             "label": "lodash",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -497,17 +764,8 @@
             "label": "'lodash/fp'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.fflate",
-            "type": "string",
-            "tags": [],
-            "label": "fflate",
-            "description": [],
-            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -521,6 +779,8 @@
               "/**\n   * runtime deps which don't need to be copied across all bundles\n   */"
             ],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -532,6 +792,8 @@
             "label": "uuid",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -543,6 +805,8 @@
             "label": "'@kbn/analytics'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -554,6 +818,8 @@
             "label": "'@kbn/crypto-browser'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -565,6 +831,8 @@
             "label": "'@kbn/es-query'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -576,6 +844,8 @@
             "label": "'@kbn/search-errors'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -587,6 +857,8 @@
             "label": "'@kbn/std'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -598,6 +870,8 @@
             "label": "'@kbn/safer-lodash-set'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -609,6 +883,8 @@
             "label": "'@kbn/shared-ux-error-boundary'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -620,6 +896,8 @@
             "label": "'@kbn/rison'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -631,6 +909,8 @@
             "label": "history",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -642,17 +922,21 @@
             "label": "classnames",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.tanstackreactquery",
+            "id": "def-common.externals.kbnreactquery",
             "type": "string",
             "tags": [],
-            "label": "'@tanstack/react-query'",
+            "label": "'@kbn/react-query'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -664,6 +948,8 @@
             "label": "'@tanstack/react-query-devtools'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -675,17 +961,21 @@
             "label": "'@kbn/code-editor'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.kbnesqlast",
+            "id": "def-common.externals.kbnesqllanguage",
             "type": "string",
             "tags": [],
-            "label": "'@kbn/esql-ast'",
+            "label": "'@kbn/esql-language'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -697,6 +987,8 @@
             "label": "'@kbn/ebt-tools'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -708,6 +1000,8 @@
             "label": "'@elastic/apm-rum-core'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -719,6 +1013,8 @@
             "label": "'@kbn/react-kibana-context-common'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -730,6 +1026,8 @@
             "label": "'@kbn/react-kibana-context-root'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -741,6 +1039,8 @@
             "label": "'@kbn/react-kibana-context-render'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -752,6 +1052,21 @@
             "label": "'@kbn/react-kibana-context-theme'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnreactkibanacontextenv",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/react-kibana-context-env'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -763,6 +1078,34 @@
             "label": "'@kbn/shared-ux-router'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnreactkibanamount",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/react-kibana-mount'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnvisualizationscommon",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/visualizations-common'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

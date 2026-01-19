@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
-import { EditPanelAction, EditPanelActionApi } from './edit_panel_action';
+import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import { BehaviorSubject, take } from 'rxjs';
+import type { EditPanelActionApi } from './edit_panel_action';
+import { EditPanelAction } from './edit_panel_action';
 
 describe('Edit panel action', () => {
   let action: EditPanelAction;
@@ -63,10 +64,11 @@ describe('Edit panel action', () => {
     expect(await action.getHref(context)).toBe(href);
   });
 
-  it('calls onChange when view mode changes', () => {
-    const onChange = jest.fn();
-    action.subscribeToCompatibilityChanges(context, onChange);
+  it('getCompatibilityChangesSubject emits when view mode changes', (done) => {
+    const subject = action.getCompatibilityChangesSubject(context);
+    subject?.pipe(take(1)).subscribe(() => {
+      done();
+    });
     setViewMode('view');
-    expect(onChange).toHaveBeenCalledWith(false, action);
   });
 });

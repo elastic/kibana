@@ -8,31 +8,29 @@
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { SubSteps } from '../../../../../common/components';
+import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { OnResourcesCreated, OnMissingResourcesFetched } from '../../types';
-import { getStatus } from '../common/get_status';
+import type { OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
-import { DataInputStep } from '../constants';
-import { SubSteps } from '../common/sub_step';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
+import type { MigrationStepProps, OnMissingResourcesFetched } from '../../../../../common/types';
+import { SplunkDataInputStep } from '../../../../../common/types';
 
 interface MacrosDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
   missingMacros: string[];
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }
-interface MacrosDataInputProps
-  extends Omit<MacrosDataInputSubStepsProps, 'migrationStats' | 'missingMacros'> {
-  dataInputStep: DataInputStep;
-  migrationStats?: RuleMigrationTaskStats;
-  missingMacros?: string[];
-}
-export const MacrosDataInput = React.memo<MacrosDataInputProps>(
-  ({ dataInputStep, migrationStats, missingMacros, onMissingResourcesFetched }) => {
+
+export const MacrosDataInput = React.memo<MigrationStepProps>(
+  ({ dataInputStep, migrationStats, missingResourcesIndexed, onMissingResourcesFetched }) => {
+    const missingMacros = useMemo(() => missingResourcesIndexed?.macros, [missingResourcesIndexed]);
     const dataInputStatus = useMemo(
-      () => getStatus(DataInputStep.Macros, dataInputStep),
+      () => getEuiStepStatus(SplunkDataInputStep.Macros, dataInputStep),
       [dataInputStep]
     );
 
@@ -43,13 +41,14 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
             <EuiFlexGroup direction="row" justifyContent="center" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiStepNumber
+                  data-test-subj="macrosUploadStepNumber"
                   titleSize="xs"
-                  number={DataInputStep.Macros}
+                  number={SplunkDataInputStep.Macros}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
+                <EuiTitle size="xs" data-test-subj="macrosUploadTitle">
                   <b>{i18n.MACROS_DATA_INPUT_TITLE}</b>
                 </EuiTitle>
               </EuiFlexItem>
@@ -75,20 +74,25 @@ const END = 10 as const;
 type SubStep = 1 | 2 | 3 | typeof END;
 export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
   ({ migrationStats, missingMacros, onMissingResourcesFetched }) => {
+    const { telemetry } = useKibana().services.siemMigrations.rules;
     const [subStep, setSubStep] = useState<SubStep>(missingMacros.length ? 1 : 3);
 
     // Copy query step
     const onCopied = useCallback(() => {
       setSubStep(2);
-    }, []);
-    const copyStep = useCopyExportQueryStep({ status: getStatus(1, subStep), onCopied });
+      telemetry.reportSetupMacrosQueryCopied({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+      });
+    }, [telemetry, migrationStats.id, migrationStats.vendor]);
+    const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(1, subStep), onCopied });
 
     // Upload macros step
     const onMacrosCreatedStep = useCallback<OnResourcesCreated>(() => {
       setSubStep(3);
     }, []);
     const uploadStep = useMacrosFileUploadStep({
-      status: getStatus(2, subStep),
+      status: getEuiStepStatus(2, subStep),
       migrationStats,
       missingMacros,
       onMacrosCreated: onMacrosCreatedStep,
@@ -103,7 +107,7 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
       [onMissingResourcesFetched]
     );
     const resourcesStep = useCheckResourcesStep({
-      status: getStatus(3, subStep),
+      status: getEuiStepStatus(3, subStep),
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
     });

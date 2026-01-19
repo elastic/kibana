@@ -8,7 +8,7 @@
  */
 
 import type { WeekdayStr, Options } from '@kbn/rrule';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 export enum MaintenanceWindowStatus {
   Running = 'running',
@@ -63,6 +63,6 @@ export interface KibanaServices {
   application: {
     capabilities: Record<string, any>;
   };
-  http: Pick<CoreStart['http'], 'fetch'>;
+  http: Pick<CoreStart['http'], 'fetch' | 'basePath'>;
   notifications: Pick<CoreStart['notifications'], 'toasts'>;
 }

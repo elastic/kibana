@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import type { Geometry } from 'geojson';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import type { TooltipFeature } from '@kbn/maps-plugin/common';
 import type { MapToolTipProps } from '../types';
 import { ToolTipFooter } from './tooltip_footer';
 import { LineToolTipContent } from './line_tool_tip_content';
@@ -21,9 +22,11 @@ import { PointToolTipContent } from './point_tool_tip_content';
 import { Loader } from '../../../../../common/components/loader';
 import * as i18n from '../translations';
 
+const DEFAULT_FEATURE: TooltipFeature[] = [];
+
 export const MapToolTipComponent = ({
   closeTooltip,
-  features = [],
+  features = DEFAULT_FEATURE,
   getLayerName,
   loadFeatureProperties,
   loadFeatureGeometry,
@@ -35,7 +38,6 @@ export const MapToolTipComponent = ({
   const [featureProps, setFeatureProps] = useState<ITooltipProperty[]>([]);
   const [featureGeometry, setFeatureGeometry] = useState<Geometry | null>(null);
   const [, setLayerName] = useState<string>('');
-
   const handleCloseTooltip = useCallback(() => {
     if (closeTooltip != null) {
       closeTooltip();
@@ -74,24 +76,28 @@ export const MapToolTipComponent = ({
 
     return (
       <div>
-        {featureGeometry != null && featureGeometry.type === 'LineString' ? (
-          <LineToolTipContent
-            contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
-            featureProps={featureProps}
-          />
-        ) : (
-          <PointToolTipContent
-            contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
-            featureProps={featureProps}
-          />
-        )}
         {features.length > 1 && (
-          <ToolTipFooter
-            featureIndex={featureIndex}
-            totalFeatures={features.length}
-            previousFeature={handlePreviousFeature}
-            nextFeature={handleNextFeature}
-          />
+          <>
+            {featureGeometry != null && featureGeometry.type === 'LineString' ? (
+              <LineToolTipContent
+                data-test-subj="line-tool-tip-content"
+                contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
+                featureProps={featureProps}
+              />
+            ) : (
+              <PointToolTipContent
+                data-test-subj="point-tool-tip-content"
+                contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
+                featureProps={featureProps}
+              />
+            )}
+            <ToolTipFooter
+              featureIndex={featureIndex}
+              totalFeatures={features.length}
+              previousFeature={handlePreviousFeature}
+              nextFeature={handleNextFeature}
+            />
+          </>
         )}
         {isLoadingNextFeature && <Loader data-test-subj="loading-panel" overlay size="m" />}
       </div>

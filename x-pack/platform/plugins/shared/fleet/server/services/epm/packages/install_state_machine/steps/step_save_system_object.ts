@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semverLt from 'semver/functions/lt';
 
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -13,7 +14,7 @@ import {
 } from '../../../../../constants';
 import type { Installation } from '../../../../../types';
 
-import { packagePolicyService } from '../../../..';
+import { packagePolicyService } from '../../../../package_policy';
 
 import { auditLoggingService } from '../../../../audit_logging';
 
@@ -38,9 +39,9 @@ export async function stepSaveSystemObject(context: InstallContext) {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
   await withPackageSpan('Update install status', () =>
     savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       version: pkgVersion,
@@ -52,6 +53,9 @@ export async function stepSaveSystemObject(context: InstallContext) {
         pkgVersion,
         installedPkg?.attributes.latest_install_failed_attempts ?? []
       ),
+      rolled_back:
+        !!installedPkg?.attributes.version &&
+        semverLt(pkgVersion, installedPkg?.attributes.version),
     })
   );
 
@@ -73,7 +77,11 @@ export async function stepSaveSystemObject(context: InstallContext) {
       logger.debug(
         `Package install - Package is flagged with keep_policies_up_to_date, upgrading its associated package policies ${policyIdsToUpgrade}`
       );
-      await packagePolicyService.upgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
+      await packagePolicyService.bulkUpgrade(
+        savedObjectsClient,
+        esClient,
+        policyIdsToUpgrade.items
+      );
     });
   }
   logger.debug(

@@ -1,13 +1,15 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "__mocks__/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",
@@ -42,13 +44,10 @@
     "@kbn/config-schema",
     "@kbn/utils",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-rendering-server-internal",
-    "@kbn/ui-shared-deps-src",
     "@kbn/core-saved-objects-server",
     "@kbn/utility-types-jest",
     "@kbn/es-errors",
     "@kbn/logging",
-    "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/core-saved-objects-utils-server",
@@ -73,7 +72,6 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
-    "@kbn/react-kibana-context-render",
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-analytics-browser-mocks",
@@ -92,8 +90,13 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server-utils",
     "@kbn/core-user-profile-browser-mocks",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/css-utils",
+    "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/licensing-types",
+    "@kbn/lazy-object",
+    "@kbn/scout",
+    "@kbn/mock-idp-utils"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

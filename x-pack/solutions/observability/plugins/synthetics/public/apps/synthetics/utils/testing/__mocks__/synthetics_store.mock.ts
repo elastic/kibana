@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SyntheticsAppState } from '../../../state/root_reducer';
+import type { SyntheticsAppState } from '../../../state/root_reducer';
+import type { TLSVersion } from '../../../../../../common/runtime_types';
 import {
   ConfigKey,
   MonitorTypeEnum,
@@ -14,9 +15,8 @@ import {
   ScheduleUnit,
   SourceType,
   VerificationMode,
-  TLSVersion,
 } from '../../../../../../common/runtime_types';
-import { MonitorDetailsState } from '../../../state';
+import type { MonitorDetailsState } from '../../../state';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
@@ -104,6 +104,7 @@ export const mockState: SyntheticsAppState = {
       field: 'none',
       order: 'asc',
     },
+    view: 'cardView',
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
@@ -115,21 +116,17 @@ export const mockState: SyntheticsAppState = {
     data: null,
   },
   privateLocations: {
-    isCreatePrivateLocationFlyoutVisible: false,
+    isPrivateLocationFlyoutVisible: false,
     loading: false,
     error: null,
     data: [],
-  },
-  settings: {
-    loading: false,
-    error: null,
-    success: null,
   },
   dynamicSettings: {
     loading: false,
     locationMonitors: [],
   },
   defaultAlerting: {
+    inspectLoading: false,
     loading: false,
     error: null,
     success: null,
@@ -145,6 +142,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     status: null,
     error: null,
+    isInitialLoad: true,
   },
   globalParams: {
     addError: null,
@@ -165,6 +163,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     error: null,
   },
+  maintenanceWindows: {},
 };
 
 function getBrowserJourneyMockSlice() {
@@ -197,6 +196,9 @@ function getBrowserJourneyMockSlice() {
 
 function getMonitorDetailsMockSlice() {
   return {
+    lastErrorRun: {
+      loading: false,
+    },
     lastRun: {
       loading: false,
       loaded: true,
@@ -237,6 +239,7 @@ function getMonitorDetailsMockSlice() {
           full: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
         },
         observer: {
+          name: 'us-central',
           geo: {
             continent_name: 'North America',
             city_name: 'Iowa',
@@ -303,6 +306,7 @@ function getMonitorDetailsMockSlice() {
             full: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
           },
           observer: {
+            name: 'us-central',
             geo: {
               continent_name: 'North America',
               city_name: 'Iowa',
@@ -339,7 +343,7 @@ function getMonitorDetailsMockSlice() {
             version: '8.3.0',
           },
           synthetics: {
-            journey: { name: 'inline', id: 'inline', tags: null },
+            journey: { name: 'inline', id: 'inline' },
             type: 'heartbeat/summary',
           },
           monitor: {
@@ -358,6 +362,7 @@ function getMonitorDetailsMockSlice() {
             full: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
           },
           observer: {
+            name: 'us-central',
             geo: {
               continent_name: 'North America',
               city_name: 'Iowa',
@@ -373,7 +378,6 @@ function getMonitorDetailsMockSlice() {
           ecs: { version: '8.0.0' },
           config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
           data_stream: { namespace: 'default', type: 'synthetics', dataset: 'browser' },
-          timestamp: '2022-07-24T17:04:03.769Z',
           docId: 'mkYqMYIBqL6WCtughFUq',
         },
         {
@@ -413,6 +417,7 @@ function getMonitorDetailsMockSlice() {
             full: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
           },
           observer: {
+            name: 'us-central',
             geo: {
               continent_name: 'North America',
               city_name: 'Iowa',
@@ -428,7 +433,6 @@ function getMonitorDetailsMockSlice() {
           ecs: { version: '8.0.0' },
           config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
           data_stream: { namespace: 'default', type: 'synthetics', dataset: 'browser' },
-          timestamp: '2022-07-24T17:01:48.326Z',
           docId: 'kUYoMYIBqL6WCtugc1We',
         },
       ],

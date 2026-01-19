@@ -9,7 +9,7 @@
 
 import { isPlainObject } from 'lodash';
 import { ReadStream } from 'fs';
-import { Zlib } from 'zlib';
+import type { Zlib } from 'zlib';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';

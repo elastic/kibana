@@ -7,24 +7,25 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css, ThemeProvider } from '@emotion/react';
-import { Story } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
+import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { NodeProps, NodeViewModel } from '..';
 import { Graph } from '..';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { GraphPopover } from './graph_popover';
-import { ExpandButtonClickCallback } from '../types';
+import type { ExpandButtonClickCallback } from '../types';
 import { useGraphPopover } from './use_graph_popover';
 import { ExpandPopoverListItem } from '../styles';
-import largeGraph from '../mock/large_graph.json';
+import largeGraph700n from '../mock/large_graph_700n_900e.json';
+import largeGraph2000n from '../mock/large_graph_2000n_2000e.json';
 import { GraphPerfMonitor } from './graph_perf_monitor';
 
 export default {
   title: 'Graph Benchmark',
-  description: 'CDR - Graph visualization',
   argTypes: {},
   decorators: [GlobalStylesStorybookDecorator],
-};
+} satisfies Meta<typeof Graph>;
 
 const useExpandButtonPopover = () => {
   const { id, state, actions } = useGraphPopover('node-expand-popover');
@@ -154,7 +155,7 @@ const useNodePopover = () => {
   );
 };
 
-const Template: Story = () => {
+const Template = ({ nodes, edges }: GraphResponse) => {
   const expandNodePopover = useExpandButtonPopover();
   const nodePopover = useNodePopover();
   const popovers = [expandNodePopover, nodePopover];
@@ -181,9 +182,8 @@ const Template: Story = () => {
     []
   );
 
-  const nodes = useMemo(() => {
-    return largeGraph.nodes.map((node) => {
-      // @ts-expect-error
+  const nodesWithHandlers = useMemo(() => {
+    return nodes.map((node) => {
       const nodeViewModel: NodeViewModel = { ...node };
       if (nodeViewModel.shape !== 'group') {
         nodeViewModel.nodeClick = nodeClickHandler;
@@ -192,7 +192,7 @@ const Template: Story = () => {
 
       return nodeViewModel;
     });
-  }, [expandButtonClickHandler, nodeClickHandler]);
+  }, [expandButtonClickHandler, nodeClickHandler, nodes]);
 
   return (
     <ThemeProvider theme={{ darkMode: false }}>
@@ -202,9 +202,8 @@ const Template: Story = () => {
           height: 100%;
           width: 100%;
         `}
-        nodes={nodes}
-        // @ts-expect-error
-        edges={largeGraph.edges}
+        nodes={nodesWithHandlers}
+        edges={edges}
         interactive={true}
         isLocked={isPopoverOpen}
       />
@@ -213,4 +212,10 @@ const Template: Story = () => {
   );
 };
 
-export const LargeGraphWithPopovers = Template.bind({});
+export const GraphOf700NodesAnd900Edges: StoryObj = {
+  render: () => Template(largeGraph700n as GraphResponse),
+};
+
+export const GraphOf2000NodesAnd2000Edges: StoryObj = {
+  render: () => Template(largeGraph2000n as GraphResponse),
+};

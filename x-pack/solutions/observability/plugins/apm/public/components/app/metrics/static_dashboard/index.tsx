@@ -7,15 +7,15 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import type { NotificationsStart } from '@kbn/core/public';
+import { controlGroupStateBuilder } from '@kbn/control-group-renderer';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -35,6 +35,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   const {
     core: { notifications },
+    uiActions,
   } = useApmPluginContext();
 
   const { serviceName } = useApmServiceContext();
@@ -53,7 +54,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   return (
     <DashboardRenderer
-      getCreationOptions={() => getCreationOptions(dashboardProps, notifications, dataView)}
+      getCreationOptions={() => getCreationOptions(dashboardProps, notifications, uiActions)}
       onApiAvailable={setDashboard}
     />
   );
@@ -62,19 +63,24 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 async function getCreationOptions(
   dashboardProps: MetricsDashboardProps,
   notifications: NotificationsStart,
-  dataView: DataView
+  uiActions: UiActionsStart
 ): Promise<DashboardCreationOptions> {
   try {
+    const { dataView } = dashboardProps;
     const controlGroupState = {};
 
-    await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
-      dataViewId: dataView.id ?? '',
-      title: 'Node name',
-      fieldName: 'service.node.name',
-      width: 'medium',
-      grow: true,
-    });
-    const panels = await convertSavedDashboardToPanels(dashboardProps, dataView);
+    await controlGroupStateBuilder.addDataControlFromField(
+      controlGroupState,
+      {
+        dataViewId: dataView.id ?? '',
+        title: 'Node name',
+        fieldName: 'service.node.name',
+        width: 'medium',
+        grow: true,
+      },
+      uiActions
+    );
+    const panels = await convertSavedDashboardToPanels(dashboardProps);
 
     if (!panels) {
       throw new Error('Failed parsing dashboard panels.');
@@ -82,7 +88,7 @@ async function getCreationOptions(
 
     return {
       getInitialInput: () => ({
-        viewMode: ViewMode.VIEW,
+        viewMode: 'view',
         panels,
         controlGroupState,
       }),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TooltipWithKeyboardShortcut } from '.';
@@ -18,24 +18,24 @@ const props = {
 
 describe('TooltipWithKeyboardShortcut', () => {
   test('it renders the provided content', () => {
-    const wrapper = mount(<TooltipWithKeyboardShortcut {...props} />);
-
-    expect(wrapper.find('[data-test-subj="content"]').text()).toBe('To pay respect');
+    render(<TooltipWithKeyboardShortcut {...props} />);
+    expect(screen.getByTestId('content')).toHaveTextContent('To pay respect');
   });
 
   test('it renders the additionalScreenReaderOnlyContext', () => {
-    const wrapper = mount(
+    render(
       <TooltipWithKeyboardShortcut {...props} additionalScreenReaderOnlyContext={'field.name'} />
     );
 
-    expect(wrapper.find('[data-test-subj="additionalScreenReaderOnlyContext"]').text()).toBe(
-      'field.name'
-    );
+    const screenOnlyEl = screen.getByTestId('additionalScreenReaderOnlyContext');
+
+    expect(screenOnlyEl).toHaveTextContent('field.name');
+    expect(screenOnlyEl.className).toContain('euiScreenReaderOnly');
   });
 
   test('it renders the expected shortcut', () => {
-    const wrapper = mount(<TooltipWithKeyboardShortcut {...props} />);
+    render(<TooltipWithKeyboardShortcut {...props} />);
 
-    expect(wrapper.find('[data-test-subj="shortcut"]').first().text()).toBe('Press\u00a0F');
+    expect(screen.getByTestId('shortcut')).toHaveTextContent('Press F');
   });
 });

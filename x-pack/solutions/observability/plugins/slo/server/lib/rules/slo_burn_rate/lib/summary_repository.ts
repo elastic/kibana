@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { SLODefinition } from '../../../../domain/models';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SLODefinition } from '../../../../domain/models';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
-import { EsSummaryDocument } from '../../../../services/summary_transform_generator/helpers/create_temp_summary';
+import type { EsSummaryDocument } from '../../../../services/summary_transform_generator/helpers/create_temp_summary';
 
 export async function getSloSummary(
   esClient: ElasticsearchClient,
@@ -18,18 +18,16 @@ export async function getSloSummary(
   try {
     const res = await esClient.search<EsSummaryDocument>({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { term: { 'slo.id': slo.id } },
-              { term: { 'slo.revision': slo.revision } },
-              { term: { 'slo.instanceId': instanceId } },
-            ],
-          },
+      query: {
+        bool: {
+          filter: [
+            { term: { 'slo.id': slo.id } },
+            { term: { 'slo.revision': slo.revision } },
+            { term: { 'slo.instanceId': instanceId } },
+          ],
         },
-        size: 1,
       },
+      size: 1,
     });
 
     if (res.hits.hits.length === 0) {

@@ -6,13 +6,13 @@
  */
 
 import type { IRouter, CustomRequestHandlerContext, IScopedClusterClient } from '@kbn/core/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { License } from './services';
-import { wrapEsError } from './lib';
-import { handleEsError } from './shared_imports';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { License } from './services';
+import type { wrapEsError } from './lib';
+import type { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;

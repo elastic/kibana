@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 
 const createRuleTypeRegistryMock = () => ({
   getFormatter: () => () => 'a reason',

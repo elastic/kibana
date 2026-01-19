@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type * as React from 'react';
+import type { CoreStart } from '@kbn/core/public';
 
 export interface KibanaReactOverlays {
   openFlyout: (

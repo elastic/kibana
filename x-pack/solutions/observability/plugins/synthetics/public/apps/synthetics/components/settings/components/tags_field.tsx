@@ -7,18 +7,21 @@
 
 import React from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { Control, Controller, FieldErrors } from 'react-hook-form';
+import type { Control, FieldErrors } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 
 export function TagsField({
   tagsList,
   control,
   errors,
+  isDisabled,
 }: {
   tagsList: string[];
   errors: FieldErrors;
   control: Control<PrivateLocation, any>;
+  isDisabled?: boolean;
 }) {
   return (
     <EuiFormRow fullWidth label={TAGS_LABEL}>
@@ -27,6 +30,7 @@ export function TagsField({
         control={control}
         render={({ field }) => (
           <EuiComboBox
+            isDisabled={isDisabled}
             fullWidth
             aria-label={TAGS_LABEL}
             placeholder={TAGS_LABEL}

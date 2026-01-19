@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import type { OperationMetadata, SuggestionRequest, Visualization } from '@kbn/lens-plugin/public';
 import { IconRegionMap } from '@kbn/chart-icons';
@@ -93,7 +93,7 @@ export const getVisualization = ({
           supportsMoreColumns: !state.regionAccessor,
           filterOperations: (op: OperationMetadata) => op.isBucketed && op.dataType === 'string',
           enableDimensionEditor: true,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsChoropleth_regionKeyDimensionPanel',
         },
         {
@@ -106,7 +106,8 @@ export const getVisualization = ({
           supportsMoreColumns: !state.valueAccessor,
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
           enableDimensionEditor: true,
-          required: true,
+          isMetricDimension: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsChoropleth_valueDimensionPanel',
         },
       ],

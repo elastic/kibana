@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { InferencePipeline } from '../../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { IndexNameLogic } from '../index_name_logic';

@@ -1,0 +1,26 @@
+{
+  "inference.chat_completion_unified": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_inference/chat_completion/{inference_id}/_stream"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-unified-inference",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

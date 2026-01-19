@@ -10,13 +10,13 @@ import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetEndpointDetails } from './use_get_endpoint_details';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';
-import { useQuery as _useQuery } from '@tanstack/react-query';
+import { useQuery as _useQuery } from '@kbn/react-query';
 import { endpointMetadataHttpMocks } from '../../pages/endpoint_hosts/mocks';
 
 const useQueryMock = _useQuery as jest.Mock;
 
-jest.mock('@tanstack/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,
@@ -24,8 +24,7 @@ jest.mock('@tanstack/react-query', () => {
   };
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/192435
-describe.skip('useGetEndpointDetails hook', () => {
+describe('useGetEndpointDetails hook', () => {
   let renderReactQueryHook: ReactQueryHookRenderer<
     Parameters<typeof useGetEndpointDetails>[number],
     ReturnType<typeof useGetEndpointDetails>
@@ -43,7 +42,7 @@ describe.skip('useGetEndpointDetails hook', () => {
   });
 
   it('should call the proper API', async () => {
-    await renderReactQueryHook(() => useGetEndpointDetails('123'));
+    await renderReactQueryHook(() => useGetEndpointDetails('123'), 'isSuccess', {}, 5000);
 
     expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalledWith({
       path: resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: '123' }),
@@ -52,7 +51,7 @@ describe.skip('useGetEndpointDetails hook', () => {
   });
 
   it('should call api with `undefined` for endpoint id if it was not defined on input', async () => {
-    await renderReactQueryHook(() => useGetEndpointDetails(''));
+    await renderReactQueryHook(() => useGetEndpointDetails(''), 'isSuccess', {}, 5000);
 
     expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalledWith({
       path: resolvePathVariables(HOST_METADATA_GET_ROUTE, {

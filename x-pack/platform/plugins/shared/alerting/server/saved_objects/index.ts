@@ -11,34 +11,35 @@ import type {
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
 } from '@kbn/core/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { triggersActionsRoute, createRuleFromTemplateRoute } from '@kbn/rule-data-utils';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
-import { maintenanceWindowMappings } from './maintenance_window_mapping';
+import { ruleTemplateMappings } from './rule_template_mappings';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
-import { RawRule } from '../types';
+import type { RawRule, RawRuleTemplate } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
-import { RuleTypeRegistry } from '../rule_type_registry';
+import type { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateRule, partiallyUpdateRuleWithEs } from './partially_update_rule';
-import {
-  RULES_SETTINGS_SAVED_OBJECT_TYPE,
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-} from '../../common';
+import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 import {
   adHocRunParamsModelVersions,
   apiKeyPendingInvalidationModelVersions,
-  maintenanceWindowModelVersions,
   ruleModelVersions,
+  ruleTemplateModelVersions,
   rulesSettingsModelVersions,
+  gapAutoFillSchedulerModelVersions,
 } from './model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
+export const RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'alerting_rule_template';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
+export const GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE = 'gap_auto_fill_scheduler';
 
 export const RuleAttributesToEncrypt = ['apiKey'];
 
@@ -123,13 +124,10 @@ export function setupSavedObjects(
           warnings: getImportWarnings(ruleSavedObjects),
         };
       },
-      onExport<RawRule>(
-        context: SavedObjectsExportTransformContext,
-        objects: Array<SavedObject<RawRule>>
-      ) {
+      onExport(context: SavedObjectsExportTransformContext, objects: Array<SavedObject<RawRule>>) {
         return transformRulesForExport(objects);
       },
-      isExportable<RawRule>(ruleSavedObject: SavedObject<RawRule>) {
+      isExportable(ruleSavedObject: SavedObject<RawRule>) {
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },
@@ -155,21 +153,34 @@ export function setupSavedObjects(
   });
 
   savedObjects.registerType({
+    name: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'single',
+    mappings: {
+      dynamic: false,
+      properties: {
+        name: { type: 'keyword' },
+        enabled: { type: 'boolean' },
+        // For searching by exact (type, consumer) pair
+        ruleTypeConsumerPairs: { type: 'keyword' },
+        createdAt: { type: 'date' },
+        updatedAt: { type: 'date' },
+      },
+    },
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: gapAutoFillSchedulerModelVersions,
+  });
+
+  savedObjects.registerType({
     name: RULES_SETTINGS_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'single',
     mappings: rulesSettingsMappings,
     modelVersions: rulesSettingsModelVersions,
-  });
-
-  savedObjects.registerType({
-    name: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'multiple-isolated',
-    mappings: maintenanceWindowMappings,
-    modelVersions: maintenanceWindowModelVersions,
   });
 
   savedObjects.registerType({
@@ -185,6 +196,12 @@ export function setupSavedObjects(
         },
         createdAt: {
           type: 'date',
+        },
+        initiator: {
+          type: 'keyword',
+        },
+        initiatorId: {
+          type: 'keyword',
         },
         end: {
           type: 'date',
@@ -212,6 +229,30 @@ export function setupSavedObjects(
       importableAndExportable: false,
     },
     modelVersions: adHocRunParamsModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    management: {
+      importableAndExportable: true,
+      getTitle(ruleTemplateSavedObject: SavedObject<RawRuleTemplate>) {
+        return `${ruleTemplateSavedObject.attributes.name}`;
+      },
+      getInAppUrl: (savedObject: SavedObject<RawRuleTemplate>) => {
+        return {
+          path: `${triggersActionsRoute}${createRuleFromTemplateRoute.replace(
+            ':templateId',
+            encodeURIComponent(savedObject.id)
+          )}`,
+          uiCapabilitiesPath: '',
+        };
+      },
+    },
+    mappings: ruleTemplateMappings,
+    modelVersions: ruleTemplateModelVersions,
   });
 
   // Encrypted attributes

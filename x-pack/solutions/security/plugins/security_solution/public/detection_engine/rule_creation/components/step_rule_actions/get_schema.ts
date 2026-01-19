@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { debouncedValidateRuleActionsField } from '../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
+import type {
+  ActionConnector,
+  ActionTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { debouncedValidateRuleActionsField } from '../../../../common/containers/rule_actions/validate_rule_actions_field';
 
 import type { FormSchema } from '../../../../shared_imports';
-import type { ActionsStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { ActionsStepRule } from '../../../common/types';
 
 export const getSchema = ({
   actionTypeRegistry,
+  connectors,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
+  connectors?: ActionConnector[];
 }): FormSchema<ActionsStepRule> => ({
   actions: {
     validations: [
       {
         // Debounced validator is necessary here to prevent error validation
         // flashing when first adding an action. Also prevents additional renders
-        validator: debouncedValidateRuleActionsField(actionTypeRegistry),
+        validator: debouncedValidateRuleActionsField(actionTypeRegistry, connectors),
       },
     ],
   },

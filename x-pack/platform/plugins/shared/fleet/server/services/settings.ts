@@ -29,6 +29,9 @@ function mapSettingsSO(settingsSo: SavedObject<SettingsSOAttributes>): Settings 
     secret_storage_requirements_met: settingsSo.attributes.secret_storage_requirements_met,
     output_secret_storage_requirements_met:
       settingsSo.attributes.output_secret_storage_requirements_met,
+    action_secret_storage_requirements_met:
+      settingsSo.attributes.action_secret_storage_requirements_met,
+    ssl_secret_storage_requirements_met: settingsSo.attributes.ssl_secret_storage_requirements_met,
     has_seen_add_data_notice: settingsSo.attributes.has_seen_add_data_notice,
     prerelease_integrations_enabled: settingsSo.attributes.prerelease_integrations_enabled,
     use_space_awareness_migration_status:
@@ -37,6 +40,8 @@ function mapSettingsSO(settingsSo: SavedObject<SettingsSOAttributes>): Settings 
       settingsSo.attributes.use_space_awareness_migration_started_at ?? undefined,
     preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
     delete_unenrolled_agents: settingsSo.attributes.delete_unenrolled_agents,
+    ilm_migration_status: settingsSo.attributes.ilm_migration_status,
+    integration_knowledge_enabled: settingsSo.attributes.integration_knowledge_enabled,
   };
 }
 
@@ -72,7 +77,23 @@ export async function getSettingsOrUndefined(
 
 export async function settingsSetup(soClient: SavedObjectsClientContract) {
   try {
-    await getSettings(soClient);
+    const config = appContextService.getConfig();
+    const settings = await getSettings(soClient);
+
+    const updatedSettings = {} as Partial<Settings>;
+    if (config?.prereleaseEnabledByDefault && !settings.prerelease_integrations_enabled) {
+      updatedSettings.prerelease_integrations_enabled = config?.prereleaseEnabledByDefault;
+    }
+    if (
+      (config?.experimentalFeatures?.integrationKnowledge ??
+        appContextService.getExperimentalFeatures().installIntegrationsKnowledge) &&
+      settings.integration_knowledge_enabled === undefined
+    ) {
+      updatedSettings.integration_knowledge_enabled = true;
+    }
+    if (Object.keys(updatedSettings).length > 0) {
+      await saveSettings(soClient, updatedSettings);
+    }
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
@@ -166,5 +187,21 @@ function getConfigFleetServerHosts() {
 }
 
 export function createDefaultSettings(): BaseSettings {
-  return { prerelease_integrations_enabled: false };
+  const config = appContextService.getConfig();
+  const settings: BaseSettings = {
+    prerelease_integrations_enabled: !!config?.prereleaseEnabledByDefault,
+  };
+
+  if (appContextService.getExperimentalFeatures().useSpaceAwareness) {
+    settings.use_space_awareness_migration_status = 'success';
+  }
+
+  if (
+    config?.experimentalFeatures?.integrationKnowledge ??
+    appContextService.getExperimentalFeatures().installIntegrationsKnowledge
+  ) {
+    settings.integration_knowledge_enabled = true;
+  }
+
+  return settings;
 }

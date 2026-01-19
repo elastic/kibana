@@ -1,0 +1,88 @@
+{
+  "id": "@kbn/deeplinks-chat",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-chat",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"workplace_ai\" | \"workplace_ai:integrations\" | \"workplace_ai:agents\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/chat/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-chat",
+        "id": "def-common.WORKPLACE_AI_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKPLACE_AI_APP_ID",
+        "description": [],
+        "signature": [
+          "\"workplace_ai\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/chat/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-chat",
+        "id": "def-common.WorkplaceAIApp",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkplaceAIApp",
+        "description": [],
+        "signature": [
+          "\"workplace_ai\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/chat/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-chat",
+        "id": "def-common.WorkplaceAILinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkplaceAILinkId",
+        "description": [],
+        "signature": [
+          "\"integrations\" | \"agents\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/chat/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

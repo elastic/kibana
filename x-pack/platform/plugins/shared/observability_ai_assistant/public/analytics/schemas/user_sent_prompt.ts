@@ -6,22 +6,22 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/public';
-import { AssistantScope } from '@kbn/ai-assistant-common';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
+import {
+  type Connector,
+  type Scope,
+  connectorSchema,
+  scopeSchema,
+} from '../../../common/analytics';
 
-export interface UserSentPrompt {
-  scopes: AssistantScope[];
-}
+export interface UserSentPrompt extends Connector, Scope {}
 
 export const userSentPromptEventSchema: EventTypeOpts<UserSentPrompt> = {
   eventType: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat,
   schema: {
-    scopes: {
-      type: 'array',
-      items: {
-        type: 'text',
-        _meta: { description: 'Scope of the AI Assistant' },
-      },
+    scopes: scopeSchema,
+    connector: {
+      properties: connectorSchema,
     },
   },
 };

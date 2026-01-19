@@ -32,10 +32,12 @@ export function SimpleRuleScheduleAdapter(): JSX.Element {
 
 const INTERVAL_COMPONENT_PROPS = {
   minValue: 1,
+  dataTestSubj: 'intervalFormRow',
 };
 
 const LOOKBACK_COMPONENT_PROPS = {
   minValue: 0,
+  dataTestSubj: 'lookbackFormRow',
 };
 
 const INTERVAL_FIELD_CONFIG: FieldConfig<string> = {

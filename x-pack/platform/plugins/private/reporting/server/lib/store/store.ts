@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ILM_POLICY_NAME, JOB_STATUS } from '@kbn/reporting-common';
 import type {
@@ -25,6 +25,7 @@ import type { ReportingCore } from '../..';
 import type { ReportTaskParams } from '../tasks';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { MIGRATION_VERSION } from './report';
+import { rollDataStreamIfRequired } from './rollover';
 
 type UpdateResponse<T> = estypes.UpdateResponse<T>;
 type IndexResponse = estypes.IndexResponse;
@@ -53,6 +54,11 @@ export type ReportCompletedFields = Required<{
   output: Omit<ReportOutput, 'content'> | null;
 }>;
 
+export interface ReportWarningFields {
+  output: Omit<ReportOutput, 'content'>;
+  warning: string;
+}
+
 /*
  * When searching for long-pending reports, we get a subset of fields
  */
@@ -72,7 +78,7 @@ const sourceDoc = (doc: Partial<ReportSource>): Partial<ReportSource> => {
   return {
     ...doc,
     migration_version: MIGRATION_VERSION,
-    '@timestamp': new Date(0).toISOString(), // required for data streams compatibility
+    '@timestamp': doc.created_at || new Date().toISOString(),
   };
 };
 
@@ -141,12 +147,12 @@ export class ReportingStore {
       id: report._id,
       refresh: 'wait_for' as estypes.Refresh,
       op_type: 'create' as const,
-      body: {
+      document: {
         ...report.toReportSource(),
         ...sourceDoc({
           process_expiration: new Date(0).toISOString(),
-          attempts: 0,
-          status: JOB_STATUS.PENDING,
+          attempts: report.attempts || 0,
+          status: report.status || JOB_STATUS.PENDING,
         }),
       },
     };
@@ -165,9 +171,19 @@ export class ReportingStore {
         await this.createIlmPolicy();
       }
     } catch (e) {
-      this.logger.error('Error in start phase');
-      this.logger.error(e);
+      this.logger.error(`Error creating ILM policy: ${e.message}`, {
+        error: { stack_trace: e.stack },
+      });
       throw e;
+    }
+
+    try {
+      await rollDataStreamIfRequired(this.logger, await this.getClient());
+    } catch (e) {
+      this.logger.error(`Error rolling over data stream: ${e.message}`, {
+        error: { stack_trace: e.stack },
+      });
+      // not rethrowing, as this is not a fatal error
     }
   }
 
@@ -176,7 +192,6 @@ export class ReportingStore {
       report.updateWithEsDoc(await this.indexReport(report));
       return report as SavedReport;
     } catch (err) {
-      this.reportingCore.getEventLogger(report).logError(err);
       this.logError(`Error in adding a report!`, err, report);
       throw err;
     }
@@ -225,9 +240,9 @@ export class ReportingStore {
     } catch (err) {
       this.logger.error(
         `Error in finding the report from the scheduled task info! ` +
-          `[id: ${taskJson.id}] [index: ${taskJson.index}]`
+          `[id: ${taskJson.id}] [index: ${taskJson.index}]`,
+        { error: { stack_trace: err.stack } }
       );
-      this.logger.error(err);
       this.reportingCore.getEventLogger({ _id: taskJson.id }).logError(err);
       throw err;
     }
@@ -260,8 +275,7 @@ export class ReportingStore {
   }
 
   private logError(message: string, err: Error, report: Report) {
-    this.logger.error(message);
-    this.logger.error(err);
+    this.logger.error(message, { error: { stack_trace: err.stack } });
     this.reportingCore.getEventLogger(report).logError(err);
   }
 
@@ -334,6 +348,33 @@ export class ReportingStore {
     }
 
     this.reportingCore.getEventLogger(report).logReportSaved();
+
+    return body;
+  }
+
+  public async setReportWarning(
+    report: SavedReport,
+    warningInfo: ReportWarningFields
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const { output, warning } = warningInfo;
+    const warnings: string[] = output.warnings ?? [];
+    warnings.push(warning);
+    const doc = sourceDoc({
+      output: {
+        ...output,
+        warnings,
+      },
+      status: JOB_STATUS.WARNINGS,
+    } as ReportSource);
+
+    let body: UpdateResponse<ReportDocument>;
+    try {
+      const client = await this.getClient();
+      body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
+    } catch (err) {
+      this.logError(`Error in updating status to warning! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
+      throw err;
+    }
 
     return body;
   }

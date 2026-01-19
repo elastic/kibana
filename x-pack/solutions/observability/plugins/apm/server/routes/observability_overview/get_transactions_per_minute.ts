@@ -6,13 +6,13 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { isDefaultTransactionType } from '../../../common/transaction_types';
-import { TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import {
   getBackwardCompatibleDocumentTypeFilter,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+  calculateThroughputWithRange,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import { isDefaultTransactionType } from '../../../common/transaction_types';
+import { TRANSACTION_TYPE } from '../../../common/es_fields/apm';
+import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTransactionsPerMinute({
@@ -36,32 +36,30 @@ export async function getTransactionsPerMinute({
       apm: {
         events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
-            ],
-          },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
+          ],
         },
-        aggs: {
-          transactionType: {
-            terms: {
-              field: TRANSACTION_TYPE,
-            },
-            aggs: {
-              timeseries: {
-                date_histogram: {
-                  field: '@timestamp',
-                  fixed_interval: intervalString,
-                  min_doc_count: 0,
-                },
-                aggs: {
-                  throughput: { rate: { unit: 'minute' as const } },
-                },
+      },
+      aggs: {
+        transactionType: {
+          terms: {
+            field: TRANSACTION_TYPE,
+          },
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+              },
+              aggs: {
+                throughput: { rate: { unit: 'minute' as const } },
               },
             },
           },

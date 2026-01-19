@@ -8,14 +8,9 @@
  */
 
 export const DEFAULT_THEME_NAME = 'borealis';
-export const SUPPORTED_THEME_NAMES = ['amsterdam', 'borealis'] as const;
+export const SUPPORTED_THEME_NAMES = ['borealis'] as const;
 
 export type ThemeName = (typeof SUPPORTED_THEME_NAMES)[number];
-
-/**
- * Theme tags of the Amsterdam theme
- */
-export const ThemeAmsterdamTags = ['v8light', 'v8dark'] as const;
 
 /**
  * Theme tags of the experimental Borealis theme
@@ -26,7 +21,7 @@ export const ThemeBorealisTags = ['borealislight', 'borealisdark'] as const;
  * An array of all theme tags supported by Kibana. Note that this list doesn't
  * reflect what theme tags are available in a Kibana build.
  */
-export const SUPPORTED_THEME_TAGS = [...ThemeAmsterdamTags, ...ThemeBorealisTags] as const;
+export const SUPPORTED_THEME_TAGS = [...ThemeBorealisTags] as const;
 
 export type ThemeTag = (typeof SUPPORTED_THEME_TAGS)[number];
 export type ThemeTags = readonly ThemeTag[];
@@ -35,7 +30,7 @@ export type ThemeTags = readonly ThemeTag[];
  * An array of theme tags available in Kibana by default when not customized
  * using KBN_OPTIMIZER_THEMES environment variable.
  */
-export const DEFAULT_THEME_TAGS: ThemeTags = SUPPORTED_THEME_TAGS;
+export const DEFAULT_THEME_TAGS: ThemeTags = ThemeBorealisTags;
 
 export const FALLBACK_THEME_TAG: ThemeTag = 'borealislight';
 
@@ -44,12 +39,6 @@ const isValidTag = (tag: unknown) =>
 
 export function parseThemeTags(input?: unknown): ThemeTags {
   if (!input || input === '*') {
-    return DEFAULT_THEME_TAGS;
-  }
-
-  // TODO: remove when Borealis is in public beta
-  // This is left here for backwards compatibility during Borealis testing.
-  if (input === 'experimental') {
     return DEFAULT_THEME_TAGS;
   }
 

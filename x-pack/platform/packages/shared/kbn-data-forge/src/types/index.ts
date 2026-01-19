@@ -6,9 +6,9 @@
  */
 
 import type { Moment } from 'moment';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
-import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK, SERVICE_LOGS } from '../constants';
+import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK, SERVICE_LOGS, DATABASE_LOGS } from '../constants';
 
 export interface Doc {
   namespace: string;
@@ -27,6 +27,7 @@ export const DatasetRT = rt.keyof({
   [FAKE_LOGS]: null,
   [FAKE_STACK]: null,
   [SERVICE_LOGS]: null,
+  [DATABASE_LOGS]: null,
 });
 
 export type Dataset = rt.TypeOf<typeof DatasetRT>;
@@ -127,6 +128,7 @@ export const ConfigRT = rt.type({
     ephemeralProjectIds: rt.number,
     alignEventsToInterval: rt.boolean,
     artificialIndexDelay: rt.number,
+    slashLogs: rt.boolean,
   }),
   schedule: rt.array(ScheduleRT),
 });
@@ -187,4 +189,5 @@ export interface CliOptions {
   ephemeralProjectIds: number;
   alignEventsToInterval: boolean;
   scheduleEnd?: string;
+  slashLogs: boolean;
 }

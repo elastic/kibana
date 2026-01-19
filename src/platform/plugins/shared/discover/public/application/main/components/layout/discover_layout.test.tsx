@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { EuiProvider } from '@elastic/eui';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, ReplaySubject } from 'rxjs';
 import { EuiPageSidebar } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
@@ -22,24 +21,24 @@ import {
 } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import {
+import type {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
+  DiscoverLatestFetchDetails,
 } from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { internalStateActions } from '../../state_management/redux';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -79,6 +78,10 @@ async function mountComponent(
 
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
+  const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails>(1);
+  fetchChart$.next({});
+  stateContainer.dataState.fetchChart$ = fetchChart$;
+
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
@@ -99,23 +102,34 @@ async function mountComponent(
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
-  stateContainer.appState.update({
-    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
-    interval: 'auto',
-    query,
-  });
-  stateContainer.internalState.transitions.setDataView(dataView);
-  stateContainer.internalState.transitions.setDataRequestParams({
-    timeRangeAbsolute: time,
-    timeRangeRelative: time,
-  });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+      appState: {
+        dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        interval: 'auto',
+        query,
+      },
+    })
+  );
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView })
+  );
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+      dataRequestParams: {
+        timeRangeAbsolute: time,
+        timeRangeRelative: time,
+        searchSessionId: '123',
+        isSearchSessionRestored: false,
+      },
+    })
+  );
 
   const props = {
     dataView,
     inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: jest.fn(),
     onChangeDataView: jest.fn(),
-    onUpdateQuery: jest.fn(),
     savedSearch: savedSearchMock,
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },
@@ -123,16 +137,16 @@ async function mountComponent(
     setExpandedDoc: jest.fn(),
     updateDataViewList: jest.fn(),
   };
-  stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
-      <DiscoverMainProvider value={stateContainer}>
-        <EuiProvider>
-          <DiscoverLayout {...props} />
-        </EuiProvider>
-      </DiscoverMainProvider>
-    </KibanaContextProvider>,
+    <DiscoverTestProvider
+      services={services}
+      stateContainer={stateContainer}
+      runtimeState={{ currentDataView: dataView, adHocDataViews: [] }}
+      usePortalsRenderer
+    >
+      <DiscoverLayout {...props} />
+    </DiscoverTestProvider>,
     mountOptions
   );
 

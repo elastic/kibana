@@ -5,18 +5,31 @@
  * 2.0.
  */
 
+import type { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiToolTip } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { some } from 'lodash';
+import { noop } from 'lodash/fp';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import { SetupKnowledgeBaseButton } from '@kbn/elastic-assistant/impl/knowledge_base/setup_knowledge_base_button';
 import {
   DEFEND_INSIGHTS_STORAGE_KEY,
   ConnectorSelectorInline,
   DEFAULT_ASSISTANT_NAMESPACE,
   useLoadConnectors,
+  AssistantSpaceIdProvider,
 } from '@kbn/elastic-assistant';
-import { noop } from 'lodash/fp';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { some } from 'lodash';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
@@ -31,25 +44,36 @@ interface WorkflowInsightsScanSectionProps {
     actionTypeId: string;
     connectorId: string;
   }) => void;
+  inferenceEnabled: boolean;
+  kbStatus?: ReadKnowledgeBaseResponse;
+  defendInsightsPolicyResponseFailureEnabled: boolean;
 }
 
 export const WorkflowInsightsScanSection = ({
   isScanButtonDisabled,
   onScanButtonClick,
+  inferenceEnabled,
+  kbStatus,
+  defendInsightsPolicyResponseFailureEnabled,
 }: WorkflowInsightsScanSectionProps) => {
   const CONNECTOR_ID_LOCAL_STORAGE_KEY = 'connectorId';
 
-  const spaceId = useSpaceId() ?? 'default';
-  const { http } = useKibana().services;
+  const spaceId = useSpaceId();
+  const { http, settings, docLinks } = useKibana().services;
   const { data: aiConnectors } = useLoadConnectors({
     http,
+    settings,
   });
   const { canWriteWorkflowInsights } = useUserPrivileges().endpointPrivileges;
+
+  const { setupKB, setupOngoing, docsLinkText } = WORKFLOW_INSIGHTS.knowledgeBase;
 
   // Store the selected connector id in local storage so that it persists across page reloads
   const [localStorageWorkflowInsightsConnectorId, setLocalStorageWorkflowInsightsConnectorId] =
     useLocalStorage<string>(
-      `${DEFAULT_ASSISTANT_NAMESPACE}.${DEFEND_INSIGHTS_STORAGE_KEY}.${spaceId}.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
+      `${DEFAULT_ASSISTANT_NAMESPACE}.${DEFEND_INSIGHTS_STORAGE_KEY}.${
+        spaceId || 'default'
+      }.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
     );
 
   const [connectorId, setConnectorId] = React.useState<string | undefined>(
@@ -84,6 +108,7 @@ export const WorkflowInsightsScanSection = ({
     const button = (
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="workflowInsightsScanButton"
           size="s"
           isLoading={isScanButtonDisabled}
           isDisabled={!canWriteWorkflowInsights}
@@ -91,6 +116,7 @@ export const WorkflowInsightsScanSection = ({
             if (!connectorId || !selectedConnectorActionTypeId) return;
             onScanButtonClick({ connectorId, actionTypeId: selectedConnectorActionTypeId });
           }}
+          fill
         >
           {isScanButtonDisabled ? WORKFLOW_INSIGHTS.scan.loading : WORKFLOW_INSIGHTS.scan.button}
         </EuiButton>
@@ -116,31 +142,67 @@ export const WorkflowInsightsScanSection = ({
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <AssistantIcon />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <h4>{WORKFLOW_INSIGHTS.scan.title}</h4>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <ConnectorSelectorInline
-                onConnectorSelected={noop}
-                onConnectorIdSelected={onConnectorIdSelected}
-                selectedConnectorId={connectorId}
-              />
-            </EuiFlexItem>
-            {scanButton}
-          </EuiFlexGroup>
-        </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="sparkles" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <h4>{WORKFLOW_INSIGHTS.scan.title}</h4>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                {spaceId && (
+                  <AssistantSpaceIdProvider spaceId={spaceId}>
+                    <ConnectorSelectorInline
+                      onConnectorSelected={noop}
+                      onConnectorIdSelected={onConnectorIdSelected}
+                      selectedConnectorId={connectorId}
+                    />
+                  </AssistantSpaceIdProvider>
+                )}
+              </EuiFlexItem>
+              {scanButton}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {defendInsightsPolicyResponseFailureEnabled &&
+          !!kbStatus &&
+          !kbStatus?.defend_insights_exists && (
+            <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  {kbStatus?.is_setup_in_progress ? (
+                    setupOngoing
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpointDetails.workflowInsights.knowledgeBase.setupRequired"
+                      defaultMessage="This scan is for incompatible antiviruses. To also scan for Policy Response issues, you should first {setupKB}. This may take a while."
+                      values={{ setupKB: <b>{setupKB}</b> }}
+                    />
+                  )}
+                  {!kbStatus?.is_setup_in_progress && (
+                    <EuiLink
+                      href={docLinks.links.securitySolution.aiAssistant.knowledgeBaseHome}
+                      target="_blank"
+                    >
+                      {` ${docsLinkText}`}
+                    </EuiLink>
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <SetupKnowledgeBaseButton fill={false} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
       </EuiFlexGroup>
     </EuiPanel>
   );

@@ -9,8 +9,8 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { ConnectorSelector } from './form';
 import { useKibana } from '../../common/lib/kibana';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FormTestComponent } from '../../common/test_utils';
 import { connectorsMock } from '../../containers/mock';
@@ -30,10 +30,7 @@ describe('ConnectorSelector', () => {
     isLoading: false,
   };
 
-  let appMock: AppMockRenderer;
-
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -44,12 +41,8 @@ describe('ConnectorSelector', () => {
     });
   });
 
-  afterEach(async () => {
-    await appMock.clearQueryCache();
-  });
-
   it('should render', async () => {
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent>
         <UseField
           path="connectorId"
@@ -65,7 +58,7 @@ describe('ConnectorSelector', () => {
   });
 
   it('should set the selected connector to none if the connector is not available', async () => {
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={{ connectorId: 'foo' }}>
         <UseField
           path="connectorId"
@@ -81,7 +74,7 @@ describe('ConnectorSelector', () => {
   });
 
   it('should set the selected connector correctly', async () => {
-    appMock.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={{ connectorId: connectorsMock[0].id }}>
         <UseField
           path="connectorId"

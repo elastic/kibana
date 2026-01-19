@@ -32,7 +32,9 @@ export function SpanLinks({ spanLinksCount, traceId, spanId, processorEvent }: P
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer/waterfall',
+    '/dependencies/operation'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -120,6 +122,9 @@ export function SpanLinks({ spanLinksCount, traceId, spanId, processorEvent }: P
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSelect
+              aria-label={i18n.translate('xpack.apm.spanLinks.select.ariaLabel', {
+                defaultMessage: 'Span link type selector',
+              })}
               data-test-subj="spanLinkTypeSelect"
               options={selectOptions}
               value={selectedLinkType}

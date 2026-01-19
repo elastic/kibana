@@ -35,7 +35,6 @@ export {
   DuplicateField,
 } from '../common/errors';
 export {
-  RenderCompleteListener,
   RenderCompleteDispatcher,
   dispatchRenderComplete,
   dispatchRenderStart,

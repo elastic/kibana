@@ -6,7 +6,8 @@
  */
 
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
-import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { handleEsError } from '../../../shared_imports';
 import { mockRouteContext, mockLicense } from '../test_lib';
@@ -52,11 +53,9 @@ describe('[CCR API] Update auto-follow pattern', () => {
 
     expect(response.payload).toEqual({
       name: 'foo',
-      body: {
-        remote_cluster: 'bar1',
-        leader_index_patterns: ['bar2'],
-        follow_index_pattern: 'bar3',
-      },
+      remote_cluster: 'bar1',
+      leader_index_patterns: ['bar2'],
+      follow_index_pattern: 'bar3',
     });
   });
 });

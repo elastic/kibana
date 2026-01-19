@@ -9,9 +9,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { ConnectorsAPISyncJobResponse } from '..';
-import { ConnectorSyncJob, SyncStatus } from '../types/connectors';
-import { Paginate } from '../types/pagination';
+import type { ConnectorsAPISyncJobResponse } from '..';
+import type { ConnectorSyncJob, SyncStatus } from '../types/connectors';
+import type { Paginate } from '../types/pagination';
 
 export const fetchSyncJobs = async (
   client: ElasticsearchClient,

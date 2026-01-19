@@ -10,7 +10,7 @@ import type {
   AggregationsAggregationContainer,
   AggregationsSamplerAggregate,
   AggregationsSingleBucketAggregateBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   CommonCorrelationsQueryParams,
   FieldValuePair,
@@ -72,18 +72,16 @@ export const fetchFieldValueFieldStats = async ({
     apm: {
       events: [eventType],
     },
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: getCommonCorrelationsQuery({
-        start,
-        end,
-        environment,
-        kuery,
-        query,
-      }),
-      aggs,
-    },
+    size: 0,
+    track_total_hits: false,
+    query: getCommonCorrelationsQuery({
+      start,
+      end,
+      environment,
+      kuery,
+      query,
+    }),
+    aggs,
   });
 
   const results = (

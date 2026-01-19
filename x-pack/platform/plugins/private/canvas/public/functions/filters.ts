@@ -9,7 +9,7 @@ import { fromExpression } from '@kbn/interpreter';
 import { get } from 'lodash';
 import type { FiltersFunction } from '../../common/functions';
 import { buildFiltersFunction } from '../../common/functions';
-import { InitializeArguments } from '.';
+import type { InitializeArguments } from '.';
 import { getCanvasFiltersService } from '../services/canvas_filters_service';
 import { getCanvasExpressionService } from '../services/canvas_expressions_service';
 

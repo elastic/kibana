@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { isEmpty, some } from 'lodash';
-import { AIConnector } from '../connectorland/connector_selector';
-import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
-import { Conversation } from '../..';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import type { AIConnector } from '../connectorland/connector_selector';
+import type { FetchConnectorExecuteResponse } from './api';
 import type { ClientMessage } from '../assistant_context/types';
+import { OpenAiProviderType } from '../connectorland/helpers';
 
 export const getMessageFromRawResponse = (
   rawResponse: FetchConnectorExecuteResponse
@@ -25,6 +26,7 @@ export const getMessageFromRawResponse = (
       timestamp: dateTimeString,
       isError,
       traceData: rawResponse.traceData,
+      metadata: rawResponse.metadata,
     };
   } else {
     return {
@@ -36,35 +38,52 @@ export const getMessageFromRawResponse = (
   }
 };
 
-export const mergeBaseWithPersistedConversations = (
-  baseConversations: Record<string, Conversation>,
-  conversationsData: FetchConversationsResponse
-): Record<string, Conversation> => {
-  return [...(conversationsData?.data ?? []), ...Object.values(baseConversations)].reduce<
-    Record<string, Conversation>
-  >((transformed, conversation) => {
-    if (!isEmpty(conversation.id)) {
-      transformed[conversation.id] = conversation;
-    } else {
-      if (!some(Object.values(transformed), ['title', conversation.title])) {
-        transformed[conversation.title] = conversation;
-      }
-    }
-    return transformed;
-  }, {});
-};
+const ELASTIC_LLM_CONNECTOR_IDS = ['Elastic-Managed-LLM', 'Anthropic-Claude-Sonnet-3-7'];
+
 /**
  * Returns a default connector if there is only one connector
  * @param connectors
  */
 export const getDefaultConnector = (
-  connectors: AIConnector[] | undefined
+  connectors: AIConnector[] | undefined,
+  settings: SettingsStart
 ): AIConnector | undefined => {
+  const defaultAiConnectorId = settings.client.get<string>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+    undefined
+  );
+
   const validConnectors = connectors?.filter((connector) => !connector.isMissingSecrets);
-  if (validConnectors?.length) {
-    return validConnectors[0];
+  const defaultConnector = validConnectors?.find(
+    (connector) => connector.id === defaultAiConnectorId
+  );
+
+  if (defaultConnector) {
+    // If the user has set a default connector setting, and that connector exists, use it
+    return defaultConnector;
   }
 
+  if (validConnectors?.length) {
+    // In case the default connector is not set or is invalid, return the prioritized connector
+    const prioritizedConnectors = [...validConnectors].sort((a, b) => {
+      const priority = (connector: (typeof validConnectors)[number]) => {
+        if (ELASTIC_LLM_CONNECTOR_IDS.includes(connector.id)) return 0;
+        if (
+          connector.apiProvider === OpenAiProviderType.OpenAi ||
+          connector.apiProvider === OpenAiProviderType.AzureAi
+        ) {
+          return 1;
+        }
+        return 2;
+      };
+
+      return priority(a) - priority(b);
+    });
+
+    return prioritizedConnectors[0];
+  }
+
+  // If no valid connectors are available, return undefined
   return undefined;
 };
 

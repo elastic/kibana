@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
-import {
-  LogEntryAfterCursor,
-  logEntryAfterCursorRT,
-  LogEntryBeforeCursor,
-  logEntryBeforeCursorRT,
-} from '../../../../common/log_entry';
-import { jsonArrayRT, JsonObject } from '../../../../common/typed_json';
+import type { LogEntryAfterCursor, LogEntryBeforeCursor } from '../../../../common/log_entry';
+import { logEntryAfterCursorRT, logEntryBeforeCursorRT } from '../../../../common/log_entry';
+import type { JsonObject } from '../../../../common/typed_json';
+import { jsonArrayRT } from '../../../../common/typed_json';
 import {
   commonHitFieldsRT,
   commonSearchSuccessResponseFieldsRT,
@@ -39,26 +36,24 @@ export const createGetLogEntriesQuery = (
   return {
     index: logEntriesIndex,
     allow_no_indices: true,
-    body: {
-      size,
-      track_scores: false,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            ...(query ? [query] : []),
-            ...(highlightQuery ? [highlightQuery] : []),
-            ...createTimeRangeFilterClauses(startTimestamp, endTimestamp, timestampField),
-          ],
-        },
+    size,
+    track_scores: false,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          ...(query ? [query] : []),
+          ...(highlightQuery ? [highlightQuery] : []),
+          ...createTimeRangeFilterClauses(startTimestamp, endTimestamp, timestampField),
+        ],
       },
-      fields,
-      runtime_mappings: runtimeMappings,
-      _source: false,
-      ...createSortClause(sortDirection, timestampField, tiebreakerField),
-      ...createSearchAfterClause(cursor),
-      ...createHighlightClause(highlightQuery, fields),
     },
+    fields,
+    runtime_mappings: runtimeMappings,
+    _source: false,
+    ...createSortClause(sortDirection, timestampField, tiebreakerField),
+    ...createSearchAfterClause(cursor),
+    ...createHighlightClause(highlightQuery, fields),
   };
 };
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { isEmpty } from 'lodash';
@@ -15,21 +16,25 @@ import {
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
+import { buildIndexNameWithNamespace } from '../../../../../utils/build_index_name_with_namespace';
 
 export const buildActionResultsQuery = ({
   actionId,
+  agentIds,
   kuery,
   startDate,
   sort,
+  pagination,
   componentTemplateExists,
   useNewDataStream,
+  integrationNamespaces,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   let filter = `action_id: ${actionId}`;
   if (!isEmpty(kuery)) {
     filter = filter + ` AND ${kuery}`;
   }
 
-  const timeRangeFilter =
+  const timeRangeFilter: estypes.QueryDslQueryContainer[] =
     startDate && !isEmpty(startDate)
       ? [
           {
@@ -43,70 +48,96 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
+  const agentIdsFilter: estypes.QueryDslQueryContainer[] =
+    agentIds && agentIds.length > 0
+      ? [
+          {
+            bool: {
+              should: [
+                { terms: { 'agent.id': agentIds } },
+                { terms: { agent_id: agentIds } },
+              ] as estypes.QueryDslQueryContainer[],
+              minimum_should_match: 1,
+            },
+          },
+        ]
+      : [];
+
+  const filterQuery: estypes.QueryDslQueryContainer[] = [
+    ...timeRangeFilter,
+    ...agentIdsFilter,
+    getQueryFilter({ filter }),
+  ];
+
+  let baseIndex: string;
+  if (useNewDataStream) {
+    baseIndex = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
+  } else if (componentTemplateExists) {
+    baseIndex = `${ACTION_RESPONSES_INDEX}*`;
+  } else {
+    baseIndex = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
+  }
 
   let index: string;
-  if (useNewDataStream) {
-    index = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
-  } else if (componentTemplateExists) {
-    index = `${ACTION_RESPONSES_INDEX}*`;
+  if (integrationNamespaces && integrationNamespaces.length > 0) {
+    index = integrationNamespaces
+      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
+      .join(',');
   } else {
-    index = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
+    index = baseIndex;
   }
 
   return {
     allow_no_indices: true,
     index,
     ignore_unavailable: true,
-    body: {
+    aggs: {
       aggs: {
+        global: {},
         aggs: {
-          global: {},
-          aggs: {
-            responses_by_action_id: {
-              filter: {
-                bool: {
-                  must: [
-                    {
-                      match: {
-                        action_id: actionId,
-                      },
+          responses_by_action_id: {
+            filter: {
+              bool: {
+                must: [
+                  {
+                    match: {
+                      action_id: actionId,
                     },
-                  ],
+                  },
+                ],
+              },
+            },
+            aggs: {
+              rows_count: {
+                sum: {
+                  field: 'action_response.osquery.count',
                 },
               },
-              aggs: {
-                rows_count: {
-                  sum: {
-                    field: 'action_response.osquery.count',
-                  },
-                },
-                responses: {
-                  terms: {
-                    script: {
-                      lang: 'painless',
-                      source:
-                        "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-                    } as const,
-                  },
+              responses: {
+                terms: {
+                  script: {
+                    lang: 'painless',
+                    source:
+                      "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
+                  } as const,
                 },
               },
             },
           },
         },
       },
-      query: { bool: { filter: filterQuery } },
-      // from: activePage * querySize,
-      size: 10000, // querySize,
-      track_total_hits: true,
-      fields: ['*'],
-      sort: [
-        {
-          [sort.field]: {
-            order: sort.direction,
-          },
-        },
-      ],
     },
+    query: { bool: { filter: filterQuery } },
+    from: pagination ? pagination.activePage * pagination.querySize : 0,
+    size: pagination?.querySize ?? 100,
+    track_total_hits: true,
+    fields: ['*'],
+    sort: [
+      {
+        [sort.field]: {
+          order: sort.direction,
+        },
+      },
+    ],
   };
 };

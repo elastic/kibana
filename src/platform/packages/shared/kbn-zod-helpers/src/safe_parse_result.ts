@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
+import type * as z from '@kbn/zod';
 
 /**
  * Safely parse a payload against a schema, returning the output or undefined.

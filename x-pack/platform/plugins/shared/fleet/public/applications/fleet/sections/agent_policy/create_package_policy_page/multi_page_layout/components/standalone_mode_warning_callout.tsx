@@ -17,7 +17,7 @@ export const StandaloneModeWarningCallout: React.FC<{
     <EuiCallOut
       title="Setting up to run Elastic Agent in standalone mode"
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
     >
       <EuiText>
         <FormattedMessage

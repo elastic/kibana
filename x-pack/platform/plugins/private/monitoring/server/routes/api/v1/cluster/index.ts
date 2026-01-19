@@ -7,7 +7,7 @@
 
 import { clusterRoute } from './cluster';
 import { clustersRoute } from './clusters';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 
 export function registerV1ClusterRoutes(server: MonitoringCore) {
   clusterRoute(server);

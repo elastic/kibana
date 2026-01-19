@@ -11,11 +11,12 @@ import assert from 'assert';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Semaphore } from '@kbn/std';
-import { Readable, Transform } from 'stream';
+import type { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
 import { lastValueFrom, defer, firstValueFrom } from 'rxjs';
-import { PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { memoize } from 'lodash';
 import { FilesPlugin } from '../../../plugin';
 import { FILE_UPLOAD_PERFORMANCE_EVENT_NAME } from '../../../performance';
@@ -112,13 +113,11 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
         await esClient.indices.create({
           index,
           wait_for_active_shards: 'all',
-          body: {
-            settings: {
-              number_of_shards: 1,
-              auto_expand_replicas: '0-1',
-            },
-            mappings,
+          settings: {
+            number_of_shards: 1,
+            auto_expand_replicas: '0-1',
           },
+          mappings,
         });
       } catch (e) {
         if (e instanceof errors.ResponseError && e.statusCode === 400) {

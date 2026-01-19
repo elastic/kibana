@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from '@kbn/core/server';
-import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
-import { ElasticsearchSource } from '../../../common/types/es';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AlertCluster, AlertVersions } from '../../../common/types/alerts';
+import type { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
@@ -33,49 +33,47 @@ export async function fetchElasticsearchVersions(
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.elasticsearch.cluster.id',
     ],
-    body: {
-      size: clusters.length,
-      sort: [
-        {
-          timestamp: {
-            order: 'desc' as const,
-            unmapped_type: 'long' as const,
+    size: clusters.length,
+    sort: [
+      {
+        timestamp: {
+          order: 'desc' as const,
+          unmapped_type: 'long' as const,
+        },
+      },
+    ],
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
+            },
           },
-        },
-      ],
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
+          createDatasetFilter(
+            'cluster_stats',
+            'cluster_stats',
+            getElasticsearchDataset('cluster_stats')
+          ),
+          {
+            range: {
+              timestamp: {
+                gte: 'now-2m',
               },
             },
-            createDatasetFilter(
-              'cluster_stats',
-              'cluster_stats',
-              getElasticsearchDataset('cluster_stats')
-            ),
-            {
-              range: {
-                timestamp: {
-                  gte: 'now-2m',
-                },
-              },
-            },
-          ],
-        },
+          },
+        ],
       },
-      collapse: {
-        field: 'cluster_uuid',
-      },
+    },
+    collapse: {
+      field: 'cluster_uuid',
     },
   };
 
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

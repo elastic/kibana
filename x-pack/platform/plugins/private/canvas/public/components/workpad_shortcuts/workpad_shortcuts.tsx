@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Component, KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
+import React, { Component } from 'react';
 
 import isEqual from 'react-fast-compare';
 // @ts-expect-error no @types definition

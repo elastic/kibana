@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../lib';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
-import { ActionsRequestHandlerContext } from '../types';
+import type { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 
 const oauthJwtBodySchema = schema.object({
@@ -35,7 +36,6 @@ const oauthClientCredentialsBodySchema = schema.object({
   scope: schema.string(),
   config: schema.object({
     clientId: schema.string(),
-    tenantId: schema.string(),
   }),
   secrets: schema.object({
     clientSecret: schema.string(),

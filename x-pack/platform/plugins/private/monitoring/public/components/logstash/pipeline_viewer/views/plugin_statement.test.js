@@ -9,8 +9,6 @@ import React from 'react';
 import { PluginStatement } from './plugin_statement';
 import { shallow } from 'enzyme';
 
-import { EuiButtonEmpty, EuiBadge } from '@elastic/eui';
-
 describe('PluginStatement component', () => {
   let props;
   let onShowVertexDetails;
@@ -82,18 +80,22 @@ describe('PluginStatement component', () => {
   });
 
   it('handles name button click', () => {
-    const { vertex } = props.statement;
+    const { vertex, pluginType, name } = props.statement;
     const wrapper = render(props);
-    wrapper.find(EuiButtonEmpty).simulate('click');
+    wrapper
+      .find(`[data-test-subj="pluginStatement-${pluginType}-${name}-EmptyButton"]`)
+      .simulate('click');
 
     expect(onShowVertexDetails).toHaveBeenCalledTimes(1);
     expect(onShowVertexDetails).toHaveBeenCalledWith(vertex);
   });
 
   it('handles id badge click', () => {
-    const { vertex } = props.statement;
+    const { vertex, pluginType, name } = props.statement;
     const wrapper = render(props);
-    wrapper.find(EuiBadge).simulate('click');
+    wrapper
+      .find(`[data-test-subj="pluginStatement-${pluginType}-${name}-Badge"]`)
+      .simulate('click');
 
     expect(onShowVertexDetails).toHaveBeenCalledTimes(1);
     expect(onShowVertexDetails).toHaveBeenCalledWith(vertex);

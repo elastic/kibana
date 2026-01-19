@@ -1,6 +1,6 @@
 # AVG
 
-The AVG function calculates the average of a numeric field.
+The `AVG` function calculates the average of a numeric field.
 
 ## Syntax
 
@@ -8,22 +8,26 @@ The AVG function calculates the average of a numeric field.
 
 ### Parameters
 
-#### number
+#### `number`
 
-The numeric field for which the average is calculated.
+A numeric field to calculate the average.
 
 ## Examples
 
-Calculate the average height of employees:
+Basic Usage
 
 ```esql
 FROM employees
 | STATS AVG(height)
 ```
 
-The AVG function can be used with inline functions. For example:
+Calculate the average height of employees.
+
+Using Inline Functions
 
 ```esql
 FROM employees
 | STATS avg_salary_change = ROUND(AVG(MV_AVG(salary_change)), 10)
 ```
+
+Calculate the average salary change by first averaging multiple values per row using `MV_AVG`, and then applying the `AVG` function with rounding to 10 decimal places.

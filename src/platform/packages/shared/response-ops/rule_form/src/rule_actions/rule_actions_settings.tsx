@@ -10,21 +10,17 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  AlertsFilter,
-  AlertsFilterTimeframe,
-  RecoveredActionGroup,
-  RuleActionFrequency,
-} from '@kbn/alerting-types';
+import type { AlertsFilter, AlertsFilterTimeframe, RuleActionFrequency } from '@kbn/alerting-types';
+import { RecoveredActionGroup } from '@kbn/alerting-types';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { useRuleFormState } from '../hooks';
-import { RuleAction, RuleTypeWithDescription } from '../common';
+import type { RuleAction, RuleTypeWithDescription } from '../common';
 import {
   getActionGroups,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
   getSelectedActionGroup,
-  hasFieldsForAad,
+  hasAlertsFields,
   parseDuration,
 } from '../utils';
 import { DEFAULT_VALID_CONSUMERS } from '../constants';
@@ -176,6 +172,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     ? getDurationUnitValue(action.frequency?.throttle)
     : 'h';
 
+  // @ts-expect-error upgrade typescript v5.9.3
   const [minimumActionThrottle = -1, minimumActionThrottleUnit] = [
     intervalNumber,
     intervalUnit,
@@ -191,7 +188,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
   const ruleTypeId = selectedRuleType.id;
 
   const showActionAlertsFilter =
-    hasFieldsForAad({
+    hasAlertsFields({
       ruleType: selectedRuleType,
       consumer,
       validConsumers,
@@ -217,13 +214,17 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
             {showSelectActionGroup && (
               <EuiSuperSelect
                 prepend={
-                  <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${action.actionTypeId}`}>
+                  <EuiFormLabel
+                    id={`addNewActionConnectorActionGroupLabel-${action.actionTypeId}`}
+                    htmlFor={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
+                  >
                     {ACTION_GROUP_RUN_WHEN}
                   </EuiFormLabel>
                 }
                 data-test-subj="ruleActionsSettingsSelectActionGroup"
                 fullWidth
                 id={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
+                aria-labelledby={`addNewActionConnectorActionGroupLabel-${action.actionTypeId}`}
                 options={actionGroups.map(({ id: value, name }) => ({
                   value,
                   ['data-test-subj']: `addNewActionConnectorActionGroup-${value}`,

@@ -1,0 +1,71 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { Plugin as ExpressionsPlugin } from '@kbn/expressions-plugin/public';
+
+import { SelfChangingEditor } from './self_changing_vis/self_changing_editor';
+import type { SelfChangingVisParams } from './self_changing_vis_fn';
+import { selfChangingVisFn } from './self_changing_vis_fn';
+import { getSelfChangingVisRenderer } from './self_changing_vis_renderer';
+import { toExpressionAst } from './to_ast';
+
+export interface SetupDependencies {
+  expressions: ReturnType<ExpressionsPlugin['setup']>;
+  visualizations: VisualizationsSetup;
+}
+
+export class CustomVisualizationsPublicPlugin
+  implements Plugin<CustomVisualizationsSetup, CustomVisualizationsStart>
+{
+  public setup(core: CoreSetup, { expressions, visualizations }: SetupDependencies) {
+    /**
+     * Register an expression function with type "render" for your visualization
+     */
+    expressions.registerFunction(selfChangingVisFn);
+
+    /**
+     * Register a renderer for your visualization
+     */
+    expressions.registerRenderer(getSelfChangingVisRenderer(core));
+
+    /**
+     * Create the visualization type with definition
+     */
+    visualizations.createBaseVisualization<SelfChangingVisParams>({
+      name: 'self_changing_vis',
+      title: 'Self Changing Vis',
+      icon: 'controlsHorizontal',
+      description:
+        'This visualization is able to change its own settings, that you could also set in the editor.',
+      visConfig: {
+        defaults: {
+          counter: 0,
+        },
+      },
+      editorConfig: {
+        optionTabs: [
+          {
+            name: 'options',
+            title: 'Options',
+            editor: SelfChangingEditor,
+          },
+        ],
+      },
+      toExpressionAst,
+    });
+  }
+
+  public start() {}
+  public stop() {}
+}
+
+export type CustomVisualizationsSetup = ReturnType<CustomVisualizationsPublicPlugin['setup']>;
+export type CustomVisualizationsStart = ReturnType<CustomVisualizationsPublicPlugin['start']>;

@@ -7,15 +7,11 @@
 
 import moment from 'moment';
 import { isEmpty } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
-import {
-  fetchHighLevelStats,
-  handleHighLevelStatsResponse,
-  ClustersHighLevelStats,
-  ClusterHighLevelStats,
-} from './get_high_level_stats';
+import type { ClustersHighLevelStats, ClusterHighLevelStats } from './get_high_level_stats';
+import { fetchHighLevelStats, handleHighLevelStatsResponse } from './get_high_level_stats';
 
 export function rollUpTotals(
   rolledUp: ClusterUsageStats,
@@ -103,10 +99,8 @@ export function getUsageStats(rawStats: estypes.SearchResponse<KibanaUsageStats>
       dashboard,
       visualization,
       search,
-      /* eslint-disable @typescript-eslint/naming-convention */
       index_pattern,
       graph_workspace,
-      /* eslint-enable @typescript-eslint/naming-convention */
       xpack,
       ...pluginsTop
     } = currUsage;

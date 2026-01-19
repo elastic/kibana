@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component } from 'react';
-import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiForm,
   EuiFormRow,
@@ -19,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { getEsSpatialRelationLabel } from '../../../../common/i18n_getters';
 import { ActionSelect } from '../../action_select';
 

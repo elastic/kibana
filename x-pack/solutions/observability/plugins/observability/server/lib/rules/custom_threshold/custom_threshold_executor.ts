@@ -11,21 +11,25 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
   ALERT_GROUP,
+  ALERT_GROUPING,
 } from '@kbn/rule-data-utils';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
-import { IBasePath, Logger } from '@kbn/core/server';
-import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
+import type { IBasePath, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { getEcsGroups, getFormattedGroups, unflattenGrouping } from '@kbn/alerting-rule-utils';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
-import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
+import type { AlertsLocatorParams } from '../../../../common';
+import { getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
-import { ObservabilityConfig } from '../../..';
+import type { ObservabilityConfig } from '../../..';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
-import {
-  AlertStates,
+import type {
   CustomThresholdRuleTypeParams,
   CustomThresholdRuleTypeState,
   CustomThresholdAlertState,
@@ -34,19 +38,20 @@ import {
   CustomThresholdActionGroup,
   CustomThresholdAlert,
 } from './types';
+import { AlertStates } from './types';
 import { buildFiredAlertReason, buildNoDataAlertReason } from './messages';
 import {
   createScopedLogger,
   hasAdditionalContext,
   validGroupByForContext,
   flattenAdditionalContext,
-  getFormattedGroupBy,
   getContextForRecoveredAlerts,
 } from './utils';
 
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
-import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
-import { MissingGroupsRecord } from './lib/check_missing_group';
+import type { EvaluatedRuleParams } from './lib/evaluate_rule';
+import { evaluateRule } from './lib/evaluate_rule';
+import type { MissingGroupsRecord } from './lib/check_missing_group';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
@@ -123,9 +128,19 @@ export const createCustomThresholdExecutor = ({
           )
         : [];
 
-    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+    let initialSearchSource;
+    try {
+      initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        throw createTaskRunError(err, TaskErrorSource.USER);
+      }
+      throw err;
+    }
+
     const dataView = initialSearchSource.getField('index')!;
     const { id: dataViewId, timeFieldName } = dataView;
+    const runtimeMappings = dataView.getRuntimeMappings();
     const dataViewIndexPattern = dataView.getIndexPattern();
     const dataViewName = dataView.getName();
     if (!dataViewIndexPattern) {
@@ -147,6 +162,7 @@ export const createCustomThresholdExecutor = ({
       logger,
       { end: dateEnd, start: dateStart },
       esQueryConfig,
+      runtimeMappings,
       state.lastRunTimestamp,
       previousMissingGroups
     );
@@ -158,7 +174,6 @@ export const createCustomThresholdExecutor = ({
       }
     }
 
-    const groupByKeysObjectMapping = getFormattedGroupBy(params.groupBy, resultGroupSet);
     const groupArray = [...resultGroupSet];
     const nextMissingGroups = new Set<MissingGroupsRecord>();
     const hasGroups = !isEqual(groupArray, [UNGROUPED_FACTORY_KEY]);
@@ -229,6 +244,12 @@ export const createCustomThresholdExecutor = ({
         const timestamp = startedAt.toISOString();
         const threshold = getThreshold(criteria);
         const evaluationValues = getEvaluationValues(alertResults, group);
+        // alertResults is an array since there can be multiple conditions
+        // we use the first result as the group information is the same between different conditions
+        // and we should always have at least one condition
+        const flattenGrouping = alertResults[0][group].flattenGrouping;
+        const groups = getFormattedGroups(flattenGrouping);
+        const grouping = unflattenGrouping(flattenGrouping);
         const actionGroupId: CustomThresholdActionGroup =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
@@ -246,8 +267,6 @@ export const createCustomThresholdExecutor = ({
           new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
         );
 
-        const groups = groupByKeysObjectMapping[group];
-
         const { uuid, start } = alertsClient.report({
           id: `${group}`,
           actionGroup: actionGroupId,
@@ -255,7 +274,10 @@ export const createCustomThresholdExecutor = ({
             [ALERT_REASON]: reason,
             [ALERT_EVALUATION_VALUES]: evaluationValues,
             [ALERT_EVALUATION_THRESHOLD]: threshold,
+            // Array of Group, example: [ { field: 'host.name', value: 'host-0' }]
             [ALERT_GROUP]: groups,
+            // Object, example: { host: { name: 'host-0' } }
+            [ALERT_GROUPING]: grouping,
             ...flattenAdditionalContext(additionalContext),
             ...getEcsGroups(groups),
           },
@@ -263,12 +285,18 @@ export const createCustomThresholdExecutor = ({
 
         const indexedStartedAt = start ?? startedAt.toISOString();
         scheduledActionsCount++;
-
+        const dataViewIdTitle =
+          typeof params.searchConfiguration?.index === 'string'
+            ? params.searchConfiguration?.index
+            : params.searchConfiguration?.index?.title;
         alertsClient.setAlertData({
           id: `${group}`,
           context: {
             alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, uuid),
-            group: groupByKeysObjectMapping[group],
+            // Array of Group, example: [ { field: 'host.name', value: 'host-0' }]
+            group: groups,
+            // Object, example: { host: { name: 'host-0' } }
+            grouping,
             reason,
             timestamp,
             value: alertResults.map((result) => {
@@ -279,7 +307,7 @@ export const createCustomThresholdExecutor = ({
               return formatAlertResult(evaluation).currentValue;
             }),
             viewInAppUrl: getViewInAppUrl({
-              dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
+              dataViewId: dataViewIdTitle ?? dataViewId,
               groups,
               logsLocator,
               metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
@@ -296,23 +324,19 @@ export const createCustomThresholdExecutor = ({
     alertsClient.setAlertLimitReached(hasReachedLimit);
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
-    const groupByKeysObjectForRecovered = getFormattedGroupBy(
-      params.groupBy,
-      new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
-    );
-
     for (const recoveredAlert of recoveredAlerts) {
       const recoveredAlertId = recoveredAlert.alert.getId();
       const alertUuid = recoveredAlert.alert.getUuid();
       const indexedStartedAt = recoveredAlert.alert.getStart() ?? startedAt.toISOString();
-      const group = groupByKeysObjectForRecovered[recoveredAlertId];
-
+      const group = recoveredAlert.hit?.[ALERT_GROUP];
+      const grouping = recoveredAlert.hit?.[ALERT_GROUPING];
       const alertHits = recoveredAlert.hit;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
 
       const context = {
         alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
         group,
+        grouping,
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getViewInAppUrl({
           dataViewId,
@@ -322,6 +346,7 @@ export const createCustomThresholdExecutor = ({
           searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
         }),
+        reason: alertHits?.[ALERT_REASON],
         ...additionalContext,
       };
 

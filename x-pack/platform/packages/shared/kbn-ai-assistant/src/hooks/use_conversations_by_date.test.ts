@@ -8,19 +8,23 @@
 import { renderHook } from '@testing-library/react';
 import { useConversationsByDate } from './use_conversations_by_date';
 import { getAbsoluteTime, isValidDateMath } from '../utils/date';
-import { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 
 jest.mock('../utils/date', () => ({
   getAbsoluteTime: jest.fn(),
   isValidDateMath: jest.fn(),
 }));
 
-const getDisplayedConversation = (conversation: Conversation) => {
+jest.unmock('./use_conversations_by_date');
+
+export const getDisplayedConversation = (conversation: Conversation) => {
   return {
     id: conversation.conversation.id,
     label: conversation.conversation.title,
     lastUpdated: conversation.conversation.last_updated,
     href: `/conversation/${conversation.conversation.id}`,
+    public: conversation.public,
+    conversation,
   };
 };
 

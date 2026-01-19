@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { getVirtualVersionsFromMappings } from '@kbn/core-saved-objects-base-server-internal';
 
+import { initialModelVersion } from '@kbn/core-saved-objects-base-server-internal/src/model_version/constants';
 import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';
@@ -42,12 +44,12 @@ import {
   throwBadControlState,
   throwBadResponse,
   versionMigrationCompleted,
-  buildRemoveAliasActions,
   MigrationType,
   increaseBatchSize,
   hasLaterVersionAlias,
   aliasVersion,
   REINDEX_TEMP_SUFFIX,
+  getPrepareCompatibleMigrationStateProperties,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -71,7 +73,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
-  if (Either.isLeft<unknown, unknown>(resW)) {
+  if (Either.isLeft<unknown>(resW)) {
     if (isTypeof(resW.left, 'retryable_es_client_error')) {
       // Retry the same step after an exponentially increasing delay.
       return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);
@@ -137,10 +139,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // The target index .kibana WILL be pointing to if we reindex. E.g: ".kibana_8.8.0_001"
     const newVersionTarget = stateP.versionIndex;
 
+    let mappings = source ? indices[source]?.mappings : undefined;
+
+    if (mappings) {
+      const mappingVersions = getVirtualVersionsFromMappings({
+        mappings,
+        source: 'mappingVersions',
+        minimumVirtualVersion: initialModelVersion,
+      });
+
+      if (mappingVersions) {
+        mappings = {
+          ...mappings,
+          _meta: {
+            ...mappings._meta,
+            mappingVersions,
+          },
+        };
+      }
+    }
+
     const postInitState = {
       aliases,
       sourceIndex: Option.fromNullable(source),
-      sourceIndexMappings: Option.fromNullable(source ? indices[source]?.mappings : undefined),
+      sourceIndexMappings: Option.fromNullable(mappings),
       versionIndexReadyActions: Option.none,
     };
 
@@ -236,7 +258,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         ...postInitState,
-        controlState: 'CREATE_REINDEX_TEMP',
+        controlState: 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION',
         sourceIndex: Option.none as Option.None,
         targetIndex: newVersionTarget,
         versionIndexReadyActions: Option.some([
@@ -250,7 +272,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         ...postInitState,
-        controlState: 'CREATE_NEW_TARGET',
+        controlState: 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
         sourceIndex: Option.none as Option.None,
         targetIndex: newVersionTarget,
         versionIndexReadyActions: Option.some([
@@ -258,6 +280,38 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           { add: { index: newVersionTarget, alias: stateP.versionAlias } },
         ]) as Option.Some<AliasAction[]>,
       };
+    }
+  } else if (stateP.controlState === 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CREATE_NEW_TARGET',
+      };
+    } else {
+      const left = res.left;
+      if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
+        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else {
+        throwBadResponse(stateP, left);
+      }
+    }
+  } else if (stateP.controlState === 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CREATE_REINDEX_TEMP',
+      };
+    } else {
+      const left = res.left;
+      if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
+        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else {
+        throwBadResponse(stateP, left);
+      }
     }
   } else if (stateP.controlState === 'WAIT_FOR_MIGRATION_COMPLETION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -462,7 +516,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // we must reindex and synchronize with other migrators
         return {
           ...stateP,
-          controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION',
+          controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
         };
       } else {
         // this migrator is not involved in a relocation, we can proceed with the standard flow
@@ -507,7 +561,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       case MigrationType.Incompatible:
         return {
           ...stateP,
-          controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION',
+          controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
         };
       case MigrationType.Unnecessary:
         return {
@@ -537,27 +591,39 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (res.right.unknownDocs.length) {
+      if (res.right.type === 'cleanup_started') {
+        if (res.right.unknownDocs.length) {
+          logs = [
+            ...stateP.logs,
+            { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
+          ];
+        }
+
         logs = [
-          ...stateP.logs,
-          { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
+          ...logs,
+          ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
+            level: 'warning' as const,
+            message: `Ignored excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
+          })),
         ];
+
+        return {
+          ...stateP,
+          logs,
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
+          deleteByQueryTaskId: res.right.taskId,
+        };
+      } else if (res.right.type === 'cleanup_not_needed') {
+        // let's move to the step after CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
+        return {
+          ...stateP,
+          logs,
+          controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+          ...getPrepareCompatibleMigrationStateProperties(stateP),
+        };
+      } else {
+        throwBadResponse(stateP, res.right);
       }
-
-      logs = [
-        ...logs,
-        ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
-          level: 'warning' as const,
-          message: `Ignored excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
-        })),
-      ];
-
-      return {
-        ...stateP,
-        logs,
-        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
-        deleteByQueryTaskId: res.right.taskId,
-      };
     } else {
       const reason = extractUnknownDocFailureReason(
         stateP.migrationDocLinks.resolveMigrationFailures,
@@ -579,27 +645,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      const source = stateP.sourceIndex.value;
       return {
         ...stateP,
         logs,
         controlState: 'PREPARE_COMPATIBLE_MIGRATION',
         mustRefresh:
           stateP.mustRefresh || typeof res.right.deleted === 'undefined' || res.right.deleted > 0,
-        targetIndexMappings: mergeMappingMeta(
-          stateP.targetIndexMappings,
-          stateP.sourceIndexMappings.value
-        ),
-        preTransformDocsActions: [
-          // Point the version alias to the source index. This let's other Kibana
-          // instances know that a migration for the current version is "done"
-          // even though we may be waiting for document transformations to finish.
-          { add: { index: source!, alias: stateP.versionAlias } },
-          ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
-            stateP.currentAlias,
-            stateP.versionAlias,
-          ]),
-        ],
+        ...getPrepareCompatibleMigrationStateProperties(stateP),
       };
     } else {
       if (isTypeof(res.left, 'wait_for_task_completion_timeout')) {
@@ -687,7 +739,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'CHECK_CLUSTER_ROUTING_ALLOCATION') {
+  } else if (stateP.controlState === 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
@@ -1558,6 +1610,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // exponential delay.  We will basically keep polling forever until the
         // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
+      } else if (isTypeof(left, 'task_completed_with_retriable_error')) {
+        return delayRetryState(
+          {
+            ...stateP,
+            controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+            skipRetryReset: true,
+          },
+          left.message,
+          stateP.retryAttempts
+        );
       } else {
         throwBadResponse(stateP, left);
       }

@@ -14,7 +14,9 @@
         "tags": [],
         "label": "loggingSystemMock",
         "description": [],
-        "path": "packages/core/logging/core-logging-browser-mocks/src/logging_system.mock.ts",
+        "path": "src/core/packages/logging/browser-mocks/src/logging_system.mock.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +32,9 @@
               "IBrowserLoggingSystem",
               ">"
             ],
-            "path": "packages/core/logging/core-logging-browser-mocks/src/logging_system.mock.ts",
+            "path": "src/core/packages/logging/browser-mocks/src/logging_system.mock.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -53,7 +57,9 @@
                 "text": "MockedLogger"
               }
             ],
-            "path": "packages/core/logging/core-logging-browser-mocks/src/logging_system.mock.ts",
+            "path": "src/core/packages/logging/browser-mocks/src/logging_system.mock.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -69,6 +75,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
+                "lineNumber": 15,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false
               }

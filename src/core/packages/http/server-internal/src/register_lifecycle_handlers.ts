@@ -8,7 +8,7 @@
  */
 
 import type { Env } from '@kbn/config';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { HttpConfig } from './http_config';
 import type { LifecycleRegistrar } from './http_server';
 import {

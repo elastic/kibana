@@ -17,7 +17,7 @@
     "patterns": [
       "_xpack/usage"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/usage-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-xpack",
     "availability": {
       "stack": true,
       "serverless": false

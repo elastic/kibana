@@ -13,8 +13,8 @@ import {
   getIndexPatternFromESQLQuery,
   getTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DiscoverServices } from '../../../../build_services';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverServices } from '../../../../build_services';
 
 export async function getEsqlDataView(
   query: AggregateQuery,
@@ -22,15 +22,30 @@ export async function getEsqlDataView(
   services: DiscoverServices
 ) {
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
-  const newTimeField = getTimeFieldFromESQLQuery(query.esql);
+  // Convert undefined time fields to a string since '' and undefined are equivalent here
+  const currentTimeField = currentDataView?.timeFieldName ?? '';
+  const newTimeField = getTimeFieldFromESQLQuery(query.esql) ?? '';
+  const onlyTimeFieldChanged =
+    indexPatternFromQuery === currentDataView?.getIndexPattern() &&
+    newTimeField !== currentTimeField;
+
   if (
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern() ||
     // here the pattern hasn't changed but the time field has
-    (newTimeField !== currentDataView?.timeFieldName &&
-      indexPatternFromQuery === currentDataView?.getIndexPattern())
+    onlyTimeFieldChanged
   ) {
-    return await getESQLAdHocDataview(query.esql, services.dataViews);
+    return await getESQLAdHocDataview({
+      dataViewsService: services.dataViews,
+      query: query.esql,
+      options: {
+        // make sure that data view service cache is not used when creating the ES|QL data view,
+        // otherwise a single mutated data view instance would be used across tabs (inside currentDataView$) which would be incorrect
+        // https://github.com/elastic/kibana/issues/234719
+        createNewInstanceEvenIfCachedOneAvailable: !currentDataView || onlyTimeFieldChanged,
+      },
+      http: services.http,
+    });
   }
   return currentDataView;
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedVis } from '../vis';
+import type { SerializedVis } from '../vis';
 import { createVisAsync } from '../vis_async';
 import { getSavedSearch } from '../services';
 

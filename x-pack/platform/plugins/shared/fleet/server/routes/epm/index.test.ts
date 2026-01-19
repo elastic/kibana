@@ -35,6 +35,7 @@ import type {
   InstallableSavedObject,
   PackageInfo,
   AssetsGroupedByServiceByType,
+  UpdateCustomIntegrationResponse,
 } from '../../../common/types';
 
 import {
@@ -68,9 +69,10 @@ import {
   reauthorizeTransformsHandler,
   getDataStreamsHandler,
   getInputsHandler,
+  updateCustomIntegrationHandler,
 } from './handlers';
 
-import { installPackageKibanaAssetsHandler } from './kibana_assets_handler';
+import { installPackageKibanaAssetsHandler } from './install_assets_handler';
 
 jest.mock('./handlers', () => ({
   ...jest.requireActual('./handlers'),
@@ -90,10 +92,11 @@ jest.mock('./handlers', () => ({
   reauthorizeTransformsHandler: jest.fn(),
   getDataStreamsHandler: jest.fn(),
   createCustomIntegrationHandler: jest.fn(),
+  updateCustomIntegrationHandler: jest.fn(),
   getInputsHandler: jest.fn(),
 }));
 
-jest.mock('./kibana_assets_handler', () => ({
+jest.mock('./install_assets_handler', () => ({
   installPackageKibanaAssetsHandler: jest.fn(),
 }));
 
@@ -167,6 +170,7 @@ describe('schema validation', () => {
         started_at: 'now',
         error: 'error',
       },
+      previous_version: '0.0.1',
     };
     savedObject = {
       type: 'type',
@@ -186,6 +190,8 @@ describe('schema validation', () => {
     };
     const assets: AssetsGroupedByServiceByType = {
       kibana: {
+        alerting_rule_template: [],
+        slo_template: [],
         dashboard: [],
         visualization: [],
         search: [],
@@ -208,6 +214,8 @@ describe('schema validation', () => {
         ingest_pipeline: [],
         data_stream_ilm_policy: [],
         ml_model: [],
+        knowledge_base: [],
+        esql_view: [],
       },
     };
     packageInfo = {
@@ -460,6 +468,7 @@ describe('schema validation', () => {
     const expectedResponse: GetStatsResponse = {
       response: {
         agent_policy_count: 0,
+        package_policy_count: 0,
       },
     };
     (getStatsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
@@ -524,6 +533,53 @@ describe('schema validation', () => {
     expect(validationResp).toEqual(expectedResponse);
   });
 
+  it('get package info should return valid response with new type', async () => {
+    const expectedResponse: GetInfoResponse = {
+      item: {
+        ...packageInfo,
+        type: 'new_type',
+        installationInfo: {
+          ...(packageInfo as any).installationInfo,
+          installed_kibana: [
+            ...(packageInfo as any).installationInfo.installed_kibana,
+            {
+              id: 'id',
+              originId: 'originId',
+              type: 'new_type',
+            },
+          ],
+        },
+        unknown: 'test',
+        conditions: {
+          other: 'test',
+        },
+        owner: {
+          other: 'test',
+        },
+        source: {
+          other: 'test',
+          license: 'basic',
+        },
+        discovery: {
+          other: 'test',
+        },
+      } as any,
+      metadata: {
+        has_policies: true,
+      },
+    };
+    (getInfoHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await getInfoHandler(context, {} as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
+    const validationResp = GetInfoResponseSchema.validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
   it('update package should return valid response', async () => {
     const expectedResponse: UpdatePackageResponse = {
       item: packageInfo,
@@ -551,6 +607,7 @@ describe('schema validation', () => {
       ],
       _meta: {
         install_source: 'registry',
+        name: 'test',
       },
     };
     (installPackageFromRegistryHandler as jest.Mock).mockImplementation((ctx, request, res) => {
@@ -683,5 +740,23 @@ describe('schema validation', () => {
     });
     const validationResp = ReauthorizeTransformResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('update custom integration should return valid response', async () => {
+    const expectedResponse: UpdateCustomIntegrationResponse = {
+      id: 'test-integration',
+      result: {
+        version: '1.0.1',
+        status: 'installed',
+      },
+    };
+    (updateCustomIntegrationHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await updateCustomIntegrationHandler(context, {} as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
   });
 });

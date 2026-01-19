@@ -31,7 +31,12 @@
         ],
         "label": "ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION",
         "description": [],
+        "signature": [
+          "\"Endpoint Security Blocklists List\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 151,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -63,7 +68,12 @@
         ],
         "label": "ENDPOINT_BLOCKLISTS_LIST_ID",
         "description": [],
+        "signature": [
+          "\"endpoint_blocklists\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 145,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -77,39 +87,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/blocklists/index.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/blocklists/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -123,7 +105,12 @@
         ],
         "label": "ENDPOINT_BLOCKLISTS_LIST_NAME",
         "description": [],
+        "signature": [
+          "\"Endpoint Security Blocklists List\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 148,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -155,7 +142,12 @@
         ],
         "label": "ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION",
         "description": [],
+        "signature": [
+          "\"Endpoint Security Event Filters List\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 129,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -166,14 +158,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/event_filters/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
           },
           {
             "plugin": "securitySolution",
@@ -195,7 +179,12 @@
         ],
         "label": "ENDPOINT_EVENT_FILTERS_LIST_ID",
         "description": [],
+        "signature": [
+          "\"endpoint_event_filters\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 123,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -241,51 +230,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
           },
           {
             "plugin": "securitySolution",
@@ -297,23 +246,59 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           }
         ],
         "initialIsOpen": false
@@ -327,7 +312,12 @@
         ],
         "label": "ENDPOINT_EVENT_FILTERS_LIST_NAME",
         "description": [],
+        "signature": [
+          "\"Endpoint Security Event Filters List\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 126,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -338,14 +328,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/event_filters/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
           },
           {
             "plugin": "securitySolution",
@@ -367,7 +349,12 @@
         ],
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION",
         "description": [],
+        "signature": [
+          "\"Endpoint Security Host isolation exceptions List\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 141,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -399,7 +386,12 @@
         ],
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID",
         "description": [],
+        "signature": [
+          "\"endpoint_host_isolation_exceptions\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 133,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -413,14 +405,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/host_isolation_exceptions_validator.ts"
           },
           {
@@ -450,18 +434,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/host_isolation_exceptions/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -475,7 +447,12 @@
         ],
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME",
         "description": [],
+        "signature": [
+          "\"Endpoint Security Host isolation exceptions List\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 137,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -496,40 +473,331 @@
             "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/host_isolation_exceptions/index.ts"
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-list-constants",
-        "id": "def-common.ENDPOINT_LIST_DESCRIPTION",
-        "type": "string",
-        "tags": [],
-        "label": "ENDPOINT_LIST_DESCRIPTION",
-        "description": [
-          "The description of the single global space agnostic endpoint list"
-        ],
-        "signature": [
-          "\"Endpoint Security Exception List\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_LIST_ID",
         "type": "string",
-        "tags": [],
-        "label": "ENDPOINT_LIST_ID",
-        "description": [
-          "\nThis ID is used for _both_ the Saved Object ID and for the list_id\nfor the single global space agnostic endpoint list"
+        "tags": [
+          "deprecated"
         ],
+        "label": "ENDPOINT_LIST_ID",
+        "description": [],
         "signature": [
           "\"endpoint_list\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
-        "deprecated": false,
+        "lineNumber": 110,
+        "columnNumber": 14,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/routes/find_endpoint_list_item_route.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/routes/find_endpoint_list_item_route.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/migrations/space_awareness_migration.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/migrations/space_awareness_migration.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_rule_exceptions.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_rule_exceptions.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/item_conditions/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/item_conditions/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/add_exception_flyout/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/add_exception_flyout/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/exceptions/components/import_exceptions_list_flyout/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/exceptions/components/import_exceptions_list_flyout/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/pages/rule_creation/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/pages/rule_creation/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/pages/rule_creation/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/detection_engine/schemas/types/lists.mock.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/detection_engine/schemas/types/lists.mock.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/detection_engine/schemas/types/lists.mock.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/common/lists/index.mock.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/common/lists/index.mock.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/common/lists/index.mock.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/response/exception_list_schema/index.mock.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/response/exception_list_schema/index.mock.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/migrations/space_awareness_migration.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/migrations/space_awareness_migration.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_rule_exceptions.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_rule_exceptions.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/export/get_export_rule_exceptions.test.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -545,23 +813,8 @@
           "\"/api/endpoint_list/items\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-list-constants",
-        "id": "def-common.ENDPOINT_LIST_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "ENDPOINT_LIST_NAME",
-        "description": [
-          "The name of the single global space agnostic endpoint list"
-        ],
-        "signature": [
-          "\"Endpoint Security Exception List\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -579,6 +832,8 @@
           "\"/api/endpoint_list\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -592,7 +847,12 @@
         ],
         "label": "ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION",
         "description": [],
+        "signature": [
+          "\"Endpoint Security Trusted Apps List\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 119,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -603,14 +863,6 @@
           {
             "plugin": "lists",
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
           },
           {
             "plugin": "lists",
@@ -648,7 +900,12 @@
         ],
         "label": "ENDPOINT_TRUSTED_APPS_LIST_ID",
         "description": [],
+        "signature": [
+          "\"endpoint_trusted_apps\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 113,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -666,42 +923,6 @@
           },
           {
             "plugin": "lists",
-            "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "lists",
             "path": "x-pack/solutions/security/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
           {
@@ -781,64 +1002,28 @@
             "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/trusted_apps/index.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "plugin": "@kbn/test-suites-security-solution-apis",
+            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           }
         ],
         "initialIsOpen": false
@@ -852,7 +1037,12 @@
         ],
         "label": "ENDPOINT_TRUSTED_APPS_LIST_NAME",
         "description": [],
+        "signature": [
+          "\"Endpoint Security Trusted Apps List\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 116,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -863,14 +1053,6 @@
           {
             "plugin": "lists",
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
           },
           {
             "plugin": "lists",
@@ -910,6 +1092,8 @@
           "\"/api/exception_lists/items\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -925,6 +1109,8 @@
           "\"exception-list\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -942,6 +1128,8 @@
           "\"exception-list-agnostic\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -959,6 +1147,8 @@
           "\"/api/exception_lists\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -974,6 +1164,8 @@
           "\"/internal/lists/_create_filter\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -988,6 +1180,8 @@
           "\nInternal exception list routes"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1000,6 +1194,8 @@
         "label": "INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1015,6 +1211,8 @@
           "\"/internal/lists/_find_lists_by_size\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1032,6 +1230,8 @@
           "\"/internal/lists\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1044,6 +1244,8 @@
         "label": "LIST_INDEX",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1056,6 +1258,8 @@
         "label": "LIST_ITEM_URL",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1068,6 +1272,8 @@
         "label": "LIST_PRIVILEGES_URL",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1085,6 +1291,8 @@
           "\"/api/lists\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1100,6 +1308,8 @@
           "10000"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1115,6 +1325,8 @@
           "200"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1130,6 +1342,8 @@
           "65536"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1146,9 +1360,11 @@
           "\nThe IDs of all Endpoint artifact lists"
         ],
         "signature": [
-          "readonly string[]"
+          "readonly (\"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\" | \"endpoint_list\" | \"endpoint_event_filters\")[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 101,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1163,9 +1379,11 @@
           "\nList definitions for Endpoint Artifact"
         ],
         "signature": [
-          "{ readonly trustedApps: Readonly<{ id: string; name: string; description: string; }>; readonly eventFilters: Readonly<{ id: string; name: string; description: string; }>; readonly hostIsolationExceptions: Readonly<{ id: string; name: string; description: string; }>; readonly blocklists: Readonly<{ id: string; name: string; description: string; }>; }"
+          "{ readonly endpointExceptions: Readonly<{ readonly id: \"endpoint_list\"; readonly name: \"Endpoint Security Exception List\"; readonly description: \"Endpoint Security Exception List\"; }>; readonly trustedApps: Readonly<{ readonly id: \"endpoint_trusted_apps\"; readonly name: \"Endpoint Security Trusted Apps List\"; readonly description: \"Endpoint Security Trusted Apps List\"; }>; readonly trustedDevices: Readonly<{ readonly id: \"endpoint_trusted_devices\"; readonly name: \"Endpoint Security Trusted Devices List\"; readonly description: \"Endpoint Security Trusted Devices List\"; }>; readonly eventFilters: Readonly<{ readonly id: \"endpoint_event_filters\"; readonly name: \"Endpoint Security Event Filters List\"; readonly description: \"Endpoint Security Event Filters List\"; }>; readonly hostIsolationExceptions: Readonly<{ readonly id: \"endpoint_host_isolation_exceptions\"; readonly name: \"Endpoint Security Host isolation exceptions List\"; readonly description: \"Endpoint Security Host isolation exceptions List\"; }>; readonly blocklists: Readonly<{ readonly id: \"endpoint_blocklists\"; readonly name: \"Endpoint Security Blocklists List\"; readonly description: \"Endpoint Security Blocklists List\"; }>; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

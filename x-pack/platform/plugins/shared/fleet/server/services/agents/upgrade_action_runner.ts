@@ -9,17 +9,19 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
+import semverGte from 'semver/functions/gte';
 
 import {
   getRecentUpgradeInfoForAgent,
   getNotUpgradeableMessage,
   isAgentUpgradeableToVersion,
+  AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION,
 } from '../../../common/services';
 
 import type { Agent } from '../../types';
 
 import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
-
+import { getValidSpaceId } from '../spaces/helpers';
 import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
@@ -39,7 +41,7 @@ export class UpgradeActionRunner extends ActionRunner {
       agents,
       {},
       this.actionParams! as any,
-      this.actionParams?.spaceId
+      this.actionParams?.spaceId ? [this.actionParams?.spaceId] : undefined
     );
   }
 
@@ -70,10 +72,11 @@ export async function upgradeBatch(
     upgradeDurationSeconds?: number;
     startTime?: string;
     total?: number;
+    isAutomatic?: boolean;
   },
-  spaceId?: string
+  spaceIds?: string[]
 ): Promise<{ actionId: string }> {
-  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(getValidSpaceId(spaceIds));
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -167,6 +170,10 @@ export async function upgradeBatch(
       data: {
         upgraded_at: null,
         upgrade_started_at: now,
+        ...(options.isAutomatic &&
+        semverGte(agent.agent?.version ?? '0.0.0', AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION)
+          ? { upgrade_attempts: [now, ...(agent.upgrade_attempts ?? [])] }
+          : {}),
       },
     })),
     errors
@@ -174,9 +181,9 @@ export async function upgradeBatch(
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
-  const namespaces = spaceId ? [spaceId] : [];
+  const namespaces = spaceIds ? spaceIds : [];
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     created_at: now,
     data,
@@ -186,6 +193,8 @@ export async function upgradeBatch(
     agents: agentsToUpdate.map((agent) => agent.id),
     ...rollingUpgradeOptions,
     namespaces,
+    is_automatic: options.isAutomatic,
+    policyId: agentsToUpdate[0]?.policy_id,
   });
 
   await createErrorActionResults(
@@ -205,35 +214,28 @@ export const EXPIRATION_DURATION_SECONDS = 60 * 60 * 24 * 30; // 1 month
 
 export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
   const now = new Date().toISOString();
+  // Expiration time is set to a very long value (1 month) to allow upgrading agents staying offline for long time
+  const expiration = moment(startTime).add(EXPIRATION_DURATION_SECONDS, 'seconds').toISOString();
   // Perform a rolling upgrade
   if (upgradeDurationSeconds) {
     const minExecutionDuration = Math.min(
       MINIMUM_EXECUTION_DURATION_SECONDS,
       upgradeDurationSeconds
     );
+
     return {
       start_time: startTime ?? now,
       rollout_duration_seconds: upgradeDurationSeconds,
       minimum_execution_duration: minExecutionDuration,
-      // expiration will not be taken into account with Fleet Server version >=8.7, it is kept for BWC
-      // in the next major, expiration and minimum_execution_duration should be removed
-      expiration: moment(startTime ?? now)
-        .add(
-          upgradeDurationSeconds <= MINIMUM_EXECUTION_DURATION_SECONDS
-            ? minExecutionDuration * 2
-            : upgradeDurationSeconds,
-          'seconds'
-        )
-        .toISOString(),
+      expiration,
     };
   }
   // Schedule without rolling upgrade (Immediately after start_time)
-  // Expiration time is set to a very long value (1 month) to allow upgrading agents staying offline for long time
   if (startTime && !upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
       minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-      expiration: moment(startTime).add(EXPIRATION_DURATION_SECONDS, 'seconds').toISOString(),
+      expiration,
     };
   } else {
     // Regular bulk upgrade (non scheduled, non rolling)

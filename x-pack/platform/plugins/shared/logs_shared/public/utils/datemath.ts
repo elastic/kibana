@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import dateMath, { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
+import dateMath from '@kbn/datemath';
 
 const JS_MAX_DATE = 8640000000000000;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
@@ -13,6 +13,8 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_GROUP,
+  ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -31,10 +33,17 @@ import type {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
-
+import {
+  getEcsGroupsFromFlattenGrouping,
+  getFormattedGroups,
+  unflattenGrouping,
+  type Group,
+  getFlattenGrouping,
+} from '@kbn/alerting-rule-utils';
+import { unflattenObject } from '@kbn/object-utils';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
-import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { isLeft } from 'fp-ts/Either';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import type {
   RuleParams,
@@ -65,8 +74,6 @@ import type { AdditionalContext } from '../common/utils';
 import {
   flattenAdditionalContext,
   getContextForRecoveredAlerts,
-  getGroupByObject,
-  unflattenObject,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
 import {
@@ -101,7 +108,8 @@ export type LogThresholdAlertReporter = (
   value: number,
   threshold: number,
   actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>,
-  rootLevelContext?: AdditionalContext
+  rootLevelContext?: AdditionalContext,
+  flattenGrouping?: Record<string, string>
 ) => void;
 
 const COMPOSITE_GROUP_SIZE = 2000;
@@ -138,77 +146,17 @@ export const createLogThresholdExecutor =
       throw new AlertsClientError();
     }
 
-    const alertReporter: LogThresholdAlertReporter = async (
-      id,
-      reason,
-      value,
-      threshold,
-      actions,
-      rootLevelContext
-    ) => {
-      const alertContext =
-        actions != null
-          ? actions.reduce((next, action) => Object.assign(next, action.context), {})
-          : {};
-
-      if (actions && actions.length > 0) {
-        actions.forEach((actionSet) => {
-          const { actionGroup, context: actionContext } = actionSet;
-          const alertInstanceId = (actionContext.group || id) as string;
-          const { uuid, start } = alertsClient.report({
-            id: alertInstanceId,
-            actionGroup,
-            state: {
-              alertState: AlertStates.ALERT,
-            },
-          });
-          const indexedStartedAt = start ?? startedAt.toISOString();
-          const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
-          const viewInAppUrl = addSpaceIdToPath(
-            basePath.publicBaseUrl,
-            spaceId,
-            relativeViewInAppUrl
-          );
-
-          const context = {
-            ...actionContext,
-            timestamp: startedAt.toISOString(),
-            viewInAppUrl,
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
-          };
-
-          const instances = alertInstanceId.split(',');
-          const groups =
-            alertInstanceId !== '*'
-              ? params.groupBy?.reduce<Group[]>((resultGroups, groupByItem, index) => {
-                  resultGroups.push({ field: groupByItem, value: instances[index].trim() });
-                  return resultGroups;
-                }, [])
-              : undefined;
-
-          const payload = {
-            [ALERT_EVALUATION_THRESHOLD]: threshold,
-            [ALERT_EVALUATION_VALUE]: value,
-            [ALERT_REASON]: reason,
-            [ALERT_CONTEXT]: alertContext,
-            [ALERT_GROUP]: groups,
-            ...flattenAdditionalContext(rootLevelContext),
-            ...getEcsGroups(groups),
-          };
-
-          alertsClient.setAlertData({
-            id: alertInstanceId,
-            payload,
-            context,
-          });
-        });
-      }
-    };
-
     const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
 
     try {
-      const validatedParams = decodeOrThrow(ruleParamsRT)(params);
+      const decoded = ruleParamsRT.decode(params);
+
+      if (isLeft(decoded)) {
+        const errorMessages = formatErrors(decoded.left);
+        throw new Error(`Invalid rule parameters: ${errorMessages.join(', ')}`);
+      }
+
+      const validatedParams = decoded.right;
 
       const logSourcesService =
         logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
@@ -216,6 +164,71 @@ export const createLogThresholdExecutor =
       const { indices, timestampField, runtimeMappings } = await logsShared.logViews
         .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser, logSourcesService)
         .getResolvedLogView(validatedParams.logView);
+
+      const alertReporter: LogThresholdAlertReporter = (
+        id,
+        reason,
+        value,
+        threshold,
+        actions,
+        rootLevelContext,
+        flattenGrouping
+      ) => {
+        const alertContext =
+          actions != null
+            ? actions.reduce((next, action) => Object.assign(next, action.context), {})
+            : {};
+
+        if (actions && actions.length > 0) {
+          actions.forEach((actionSet) => {
+            const { actionGroup, context: actionContext } = actionSet;
+            const alertInstanceId = (actionContext.group || id) as string;
+            const { uuid, start } = alertsClient.report({
+              id: alertInstanceId,
+              actionGroup,
+              state: {
+                alertState: AlertStates.ALERT,
+              },
+            });
+            const indexedStartedAt = start ?? startedAt.toISOString();
+            const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
+            const viewInAppUrl = addSpaceIdToPath(
+              basePath.publicBaseUrl,
+              spaceId,
+              relativeViewInAppUrl
+            );
+
+            const groups = getFormattedGroups(flattenGrouping);
+            const grouping = unflattenGrouping(flattenGrouping);
+
+            const context = {
+              ...actionContext,
+              timestamp: startedAt.toISOString(),
+              viewInAppUrl,
+              alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
+              grouping,
+            };
+
+            const payload = {
+              [ALERT_EVALUATION_THRESHOLD]: threshold,
+              [ALERT_EVALUATION_VALUE]: value,
+              [ALERT_REASON]: reason,
+              [ALERT_CONTEXT]: alertContext,
+              [ALERT_GROUP]: groups,
+              [ALERT_GROUPING]: grouping,
+              [ALERT_INDEX_PATTERN]: indices,
+              ...flattenAdditionalContext(rootLevelContext),
+              ...getEcsGroupsFromFlattenGrouping(flattenGrouping),
+            };
+
+            alertsClient.setAlertData({
+              id: alertInstanceId,
+              payload,
+              context,
+            });
+          });
+        }
+      };
 
       if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(
@@ -518,12 +531,14 @@ interface ReducedGroupByResult {
   name: string;
   documentCount: number;
   context?: AdditionalContext;
+  flattenGrouping?: Record<string, string>;
 }
 
 type ReducedGroupByResults = ReducedGroupByResult[];
 
 const getReducedGroupByResults = (
-  results: GroupedSearchQueryResponse['aggregations']['groups']['buckets']
+  results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
+  groupBy: LogThresholdRuleTypeParams['groupBy']
 ): ReducedGroupByResults => {
   const getGroupName = (
     key: GroupedSearchQueryResponse['aggregations']['groups']['buckets'][0]['key']
@@ -538,6 +553,7 @@ const getReducedGroupByResults = (
         name: groupName,
         documentCount: groupBucket.doc_count,
         context: formatFields(additionalContextHits?.[0]?.fields),
+        flattenGrouping: getFlattenGrouping({ groupBy, bucketKey: groupBucket.key }),
       });
     }
   } else {
@@ -548,6 +564,7 @@ const getReducedGroupByResults = (
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
         context: formatFields(additionalContextHits?.[0]?.fields),
+        flattenGrouping: getFlattenGrouping({ groupBy, bucketKey: groupBucket.key }),
       });
     }
   }
@@ -565,9 +582,9 @@ export const processGroupByResults = (
     LogThresholdActionGroups
   >
 ) => {
-  const { count, criteria, timeSize, timeUnit } = params;
+  const { count, criteria, timeSize, timeUnit, groupBy } = params;
 
-  const groupResults = getReducedGroupByResults(results);
+  const groupResults = getReducedGroupByResults(results, groupBy);
 
   let remainingAlertCount = alertsClient.getAlertLimitValue();
 
@@ -589,11 +606,6 @@ export const processGroupByResults = (
         timeUnit
       );
 
-      const groupByKeysObjectMapping = getGroupByObject(
-        params.groupBy,
-        new Set<string>(groupResults.map((groupResult) => groupResult.name))
-      );
-
       const actions = [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -601,14 +613,22 @@ export const processGroupByResults = (
             matchingDocuments: documentCount,
             conditions: createConditionsMessageForCriteria(criteria),
             group: group.name,
-            groupByKeys: groupByKeysObjectMapping[group.name],
+            groupByKeys: unflattenGrouping(group.flattenGrouping),
             isRatio: false,
             reason: reasonMessage,
             ...group.context,
           },
         },
       ];
-      alertReporter(group.name, reasonMessage, documentCount, count.value, actions, group.context);
+      alertReporter(
+        group.name,
+        reasonMessage,
+        documentCount,
+        count.value,
+        actions,
+        group.context,
+        group.flattenGrouping
+      );
     }
   }
 
@@ -627,10 +647,10 @@ export const processGroupByRatioResults = (
     LogThresholdActionGroups
   >
 ) => {
-  const { count, criteria, timeSize, timeUnit } = params;
+  const { count, criteria, timeSize, timeUnit, groupBy } = params;
 
-  const numeratorGroupResults = getReducedGroupByResults(numeratorResults);
-  const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
+  const numeratorGroupResults = getReducedGroupByResults(numeratorResults, groupBy);
+  const denominatorGroupResults = getReducedGroupByResults(denominatorResults, groupBy);
 
   let remainingAlertCount = alertsClient.getAlertLimitValue();
 
@@ -661,11 +681,6 @@ export const processGroupByRatioResults = (
         timeUnit
       );
 
-      const groupByKeysObjectMapping = getGroupByObject(
-        params.groupBy,
-        new Set<string>(numeratorGroupResults.map((groupResult) => groupResult.name))
-      );
-
       const actions = [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -674,7 +689,7 @@ export const processGroupByRatioResults = (
             numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
             denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
             group: numeratorGroup.name,
-            groupByKeys: groupByKeysObjectMapping[numeratorGroup.name],
+            groupByKeys: unflattenGrouping(numeratorGroup.flattenGrouping),
             isRatio: true,
             reason: reasonMessage,
             ...numeratorGroup.context,
@@ -687,7 +702,8 @@ export const processGroupByRatioResults = (
         ratio,
         count.value,
         actions,
-        numeratorGroup.context
+        numeratorGroup.context,
+        numeratorGroup.flattenGrouping
       );
     }
   }
@@ -748,7 +764,7 @@ export const getGroupedESQuery = (
       },
     };
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       query: {
         bool: {
           filter: [rangeFilter, ...mustFilters],
@@ -764,7 +780,7 @@ export const getGroupedESQuery = (
       index,
       allow_no_indices: true,
       ignore_unavailable: true,
-      body,
+      ...body,
     };
   } else {
     const aggregations = {
@@ -794,7 +810,7 @@ export const getGroupedESQuery = (
       },
     };
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       query: {
         bool: {
           filter: [groupedRangeFilter],
@@ -809,7 +825,7 @@ export const getGroupedESQuery = (
       index,
       allow_no_indices: true,
       ignore_unavailable: true,
-      body,
+      ...body,
     };
   }
 };
@@ -820,14 +836,14 @@ export const getUngroupedESQuery = (
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   executionTimeRange?: ExecutionTimeRange
-): object => {
+): estypes.SearchRequest => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField,
     executionTimeRange
   );
 
-  const body: estypes.SearchRequest['body'] = {
+  const body: estypes.SearchRequest = {
     // Ensure we accurately track the hit count for the ungrouped case, otherwise we can only ensure accuracy up to 10,000.
     track_total_hits: true,
     query: {
@@ -847,12 +863,20 @@ export const getUngroupedESQuery = (
     index,
     allow_no_indices: true,
     ignore_unavailable: true,
-    body,
+    ...body,
   };
 };
 
 const getUngroupedResults = async (query: object, esClient: ElasticsearchClient) => {
-  return decodeOrThrow(UngroupedSearchQueryResponseRT)(await esClient.search(query));
+  const searchResponse = await esClient.search(query);
+  const decoded = UngroupedSearchQueryResponseRT.decode(searchResponse);
+
+  if (isLeft(decoded)) {
+    const errorMessages = formatErrors(decoded.left);
+    throw new Error(`Failed to parse ungrouped search response: ${errorMessages.join(', ')}`);
+  }
+
+  return decoded.right;
 };
 
 const getGroupedResults = async (query: object, esClient: ElasticsearchClient) => {
@@ -861,10 +885,18 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
 
   while (true) {
     const queryWithAfterKey: any = { ...query };
-    queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
-    const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
-      await esClient.search(queryWithAfterKey)
-    );
+    queryWithAfterKey.aggregations.groups.composite.after = lastAfterKey;
+
+    const searchResponse = await esClient.search(queryWithAfterKey);
+    const decoded = GroupedSearchQueryResponseRT.decode(searchResponse);
+
+    if (isLeft(decoded)) {
+      const errorMessages = formatErrors(decoded.left);
+      throw new Error(`Failed to parse grouped search response: ${errorMessages.join(', ')}`);
+    }
+
+    const groupResponse = decoded.right;
+
     compositeGroupBuckets = [
       ...compositeGroupBuckets,
       ...groupResponse.aggregations.groups.buckets,
@@ -900,11 +932,6 @@ const processRecoveredAlerts = ({
   startedAt: Date;
   validatedParams: RuleParams;
 }) => {
-  const groupByKeysObjectForRecovered = getGroupByObject(
-    validatedParams.groupBy,
-    new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
-  );
-
   for (const recoveredAlert of recoveredAlerts) {
     const recoveredAlertId = recoveredAlert.alert.getId();
     const indexedStartedAt = recoveredAlert.alert.getStart() ?? startedAt.toISOString();
@@ -917,9 +944,11 @@ const processRecoveredAlerts = ({
     const baseContext = {
       alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
-      groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
+      groupByKeys: alertHits?.[ALERT_GROUPING],
       timestamp: startedAt.toISOString(),
       viewInAppUrl,
+      reason: alertHits?.[ALERT_REASON],
+      grouping: alertHits?.[ALERT_GROUPING],
       ...additionalContext,
     };
 

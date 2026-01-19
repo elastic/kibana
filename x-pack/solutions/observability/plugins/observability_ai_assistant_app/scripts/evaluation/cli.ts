@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { format, parse } from 'url';
-import { Argv } from 'yargs';
+import type { Argv } from 'yargs';
 import { readKibanaConfig } from './read_kibana_config';
 
 export enum EvaluateWith {
@@ -26,7 +26,10 @@ export const elasticsearchOption = {
   string: true as const,
   default: format({
     ...parse(config.elasticsearch.hosts || 'http://localhost:9200'),
-    auth: `${config.elasticsearch.username}:${config.elasticsearch.password}`,
+    auth:
+      config.elasticsearch.username && config.elasticsearch.password
+        ? `${config.elasticsearch.username}:${config.elasticsearch.password}`
+        : '',
   }),
 };
 

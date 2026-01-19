@@ -6,21 +6,31 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  type EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiLink,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import {
-  uiMetricService,
   type CloudSecurityUiCounters,
+  uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { InsightDistributionBar } from './insight_distribution_bar';
-import { getFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
+import { useGetFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import { PreviewLink } from '../../../shared/components/preview_link';
-import { useDocumentDetailsContext } from '../context';
+import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../entity_details/shared/components/left_panel/left_panel_header';
 
 interface MisconfigurationsInsightProps {
   /**
@@ -43,6 +53,10 @@ interface MisconfigurationsInsightProps {
    * used to track the instance of this component, prefer kebab-case
    */
   telemetryKey?: CloudSecurityUiCounters;
+  /**
+   * The function to open the details panel.
+   */
+  openDetailsPanel: (path: EntityDetailsPath) => void;
 }
 
 /*
@@ -54,9 +68,9 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   direction,
   'data-test-subj': dataTestSubj,
   telemetryKey,
+  openDetailsPanel,
 }) => {
   const renderingId = useGeneratedHtmlId();
-  const { scopeId, isPreview } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
   const { data } = useMisconfigurationPreview({
     query: buildGenericEntityFlyoutPreviewQuery(fieldName, name),
@@ -65,24 +79,21 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     pageSize: 1,
   });
 
-  useEffect(() => {
-    if (telemetryKey) {
-      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
-    }
-  }, [telemetryKey, renderingId]);
-
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;
   const totalFindings = useMemo(
     () => passedFindings + failedFindings,
     [passedFindings, failedFindings]
   );
-  const hasMisconfigurationFindings = totalFindings > 0;
+  const shouldRender = totalFindings > 0; // this component only renders if there are findings
 
-  const misconfigurationsStats = useMemo(
-    () => getFindingsStats(passedFindings, failedFindings),
-    [passedFindings, failedFindings]
-  );
+  useEffect(() => {
+    if (shouldRender && telemetryKey) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
+    }
+  }, [shouldRender, telemetryKey, renderingId]);
+
+  const misconfigurationsStats = useGetFindingsStats(passedFindings, failedFindings);
 
   const count = useMemo(
     () => (
@@ -92,21 +103,33 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
           margin-bottom: ${euiTheme.size.xs};
         `}
       >
-        <PreviewLink
-          field={fieldName}
-          value={name}
-          scopeId={scopeId}
-          isPreview={isPreview}
-          data-test-subj={`${dataTestSubj}-count`}
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.insights.misconfiguration.misconfigurationCountTooltip"
+              defaultMessage="Opens {count, plural, one {this misconfiguration} other {these misconfigurations}} in a new flyout"
+              values={{ count: totalFindings }}
+            />
+          }
         >
-          <FormattedCount count={totalFindings} />
-        </PreviewLink>
+          <EuiLink
+            data-test-subj={`${dataTestSubj}-count`}
+            onClick={() =>
+              openDetailsPanel({
+                tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+                subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+              })
+            }
+          >
+            <FormattedCount count={totalFindings} />
+          </EuiLink>
+        </EuiToolTip>
       </div>
     ),
-    [totalFindings, fieldName, name, scopeId, isPreview, dataTestSubj, euiTheme.size]
+    [totalFindings, dataTestSubj, euiTheme.size, openDetailsPanel]
   );
 
-  if (!hasMisconfigurationFindings) return null;
+  if (!shouldRender) return null;
 
   return (
     <EuiFlexItem data-test-subj={dataTestSubj}>

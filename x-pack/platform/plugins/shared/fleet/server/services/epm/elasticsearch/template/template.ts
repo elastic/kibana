@@ -17,6 +17,9 @@ import { isResponseError } from '@kbn/es-errors';
 
 import {
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+  OTEL_LOGS_COMPONENT_TEMPLATES,
+  OTEL_METRICS_COMPONENT_TEMPLATES,
+  OTEL_TRACES_COMPONENT_TEMPLATES,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
 } from '../../../../constants/fleet_es_assets';
 import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../../../constants';
@@ -89,19 +92,19 @@ export function getTemplate({
   templatePriority,
   hidden,
   registryElasticsearch,
-  mappings,
   isIndexModeTimeSeries,
   type,
+  isOtelInputType,
 }: {
   templateIndexPattern: string;
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
-  mappings: IndexTemplateMappings;
   type: string;
   hidden?: boolean;
   registryElasticsearch?: RegistryElasticsearch | undefined;
   isIndexModeTimeSeries?: boolean;
+  isOtelInputType?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate({
     templateIndexPattern,
@@ -110,7 +113,6 @@ export function getTemplate({
     templatePriority,
     registryElasticsearch,
     hidden,
-    mappings,
     isIndexModeTimeSeries,
   });
   if (template.template.settings.index.final_pipeline) {
@@ -119,7 +121,7 @@ export function getTemplate({
     );
   }
 
-  const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
+  const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries, isOtelInputType);
 
   const isEventIngestedEnabled = (config?: FleetConfigType): boolean =>
     Boolean(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled);
@@ -127,7 +129,7 @@ export function getTemplate({
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
-    STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+    ...(isOtelInputType ? [] : [STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS]),
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
@@ -138,11 +140,18 @@ export function getTemplate({
   ];
 
   template.ignore_missing_component_templates = template.composed_of.filter(isUserSettingsTemplate);
-
   return template;
 }
 
-const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): string[] => {
+const getBaseEsComponents = (
+  type: string,
+  isIndexModeTimeSeries: boolean,
+  isOTelInputType?: boolean
+): string[] => {
+  if (isOTelInputType) {
+    return getOtelBaseComponents(type);
+  }
+
   if (type === 'metrics') {
     if (isIndexModeTimeSeries) {
       return [STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS];
@@ -153,6 +162,17 @@ const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): stri
     return [STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS, STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
   }
 
+  return [];
+};
+
+const getOtelBaseComponents = (type: string): string[] => {
+  if (type === 'metrics') {
+    return OTEL_METRICS_COMPONENT_TEMPLATES;
+  } else if (type === 'logs') {
+    return OTEL_LOGS_COMPONENT_TEMPLATES;
+  } else if (type === 'traces') {
+    return OTEL_TRACES_COMPONENT_TEMPLATES;
+  }
   return [];
 };
 
@@ -322,12 +342,25 @@ function _generateMappings(
         matchingType = field.object_type_mapping_type ?? '*';
         break;
       case 'ip':
+        dynProperties.type = field.object_type;
+        matchingType = field.object_type_mapping_type ?? 'string';
+        break;
       case 'keyword':
+        dynProperties = keyword(field, true);
+        matchingType = field.object_type_mapping_type ?? 'string';
+        if (field.multi_fields) {
+          dynProperties.fields = generateMultiFields(field.multi_fields);
+        }
+        break;
       case 'match_only_text':
       case 'text':
       case 'wildcard':
-        dynProperties.type = field.object_type;
         matchingType = field.object_type_mapping_type ?? 'string';
+        const textMapping = generateTextMappingForDynamic(field);
+        dynProperties = { ...dynProperties, ...textMapping, type: field.object_type };
+        if (field.multi_fields) {
+          dynProperties.fields = generateMultiFields(field.multi_fields);
+        }
         break;
       case 'scaled_float':
         dynProperties = scaledFloat(field);
@@ -612,6 +645,12 @@ function _generateMappings(
               type: 'aggregate_metric_double',
             };
             break;
+          case 'flattened':
+            fieldProps.type = type;
+            if (field.ignore_above) {
+              fieldProps.ignore_above = field.ignore_above;
+            }
+            break;
           default:
             fieldProps.type = type;
         }
@@ -736,6 +775,17 @@ function generateWildcardMapping(field: Field): IndexTemplateMapping {
   }
   return mapping;
 }
+//  This is a duplicate of the above function, but without the default 'ignore_above' value for dynamic mappings. We dont want to enforce due to backwards compatibility
+function generateTextMappingForDynamic(field: Field): IndexTemplateMapping {
+  const mapping: IndexTemplateMapping = {};
+  if (field.null_value) {
+    mapping.null_value = field.null_value;
+  }
+  if (field.ignore_above) {
+    mapping.ignore_above = field.ignore_above;
+  }
+  return mapping;
+}
 
 function generateDateMapping(field: Field): IndexTemplateMapping {
   const mapping: IndexTemplateMapping = {};
@@ -795,13 +845,16 @@ async function getIndexTemplate(
   return dataStream.data_streams[0].template;
 }
 
-export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
+export function generateTemplateIndexPattern(
+  dataStream: RegistryDataStream,
+  isOtelInputType?: boolean
+): string {
   // undefined or explicitly set to false
   // See also https://github.com/elastic/package-spec/pull/102
   if (!dataStream.dataset_is_prefix) {
-    return getRegistryDataStreamAssetBaseName(dataStream) + '-*';
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '-*';
   } else {
-    return getRegistryDataStreamAssetBaseName(dataStream) + '.*-*';
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '.*-*';
   }
 }
 
@@ -867,7 +920,6 @@ function getBaseTemplate({
   templatePriority,
   hidden,
   registryElasticsearch,
-  mappings,
   isIndexModeTimeSeries,
 }: {
   templateIndexPattern: string;
@@ -876,7 +928,6 @@ function getBaseTemplate({
   templatePriority: number;
   hidden?: boolean;
   registryElasticsearch: RegistryElasticsearch | undefined;
-  mappings: IndexTemplateMappings;
   isIndexModeTimeSeries?: boolean;
 }): IndexTemplate {
   const _meta = getESAssetMetadata({ packageName });
@@ -1063,7 +1114,6 @@ const updateExistingDataStream = async ({
   const existingDsConfig = Object.values(existingDs);
   const currentBackingIndexConfig = existingDsConfig.at(-1);
   const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
-  // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
   const currentSourceType = currentBackingIndexConfig?.settings?.index?.mapping?.source?.mode;
 
   let settings: IndicesIndexSettings;
@@ -1108,7 +1158,7 @@ const updateExistingDataStream = async ({
       () =>
         esClient.indices.putMapping({
           index: dataStreamName,
-          body: mappings || {},
+          ...mappings,
           write_index_only: true,
         }),
       { logger }
@@ -1140,9 +1190,11 @@ const updateExistingDataStream = async ({
     }
   }
 
-  const filterDimensionMappings = (templates?: Array<Record<string, MappingDynamicTemplate>>) =>
+  const filterDimensionMappings = (
+    templates?: Array<Record<string, MappingDynamicTemplate | undefined>>
+  ) =>
     templates?.filter(
-      (template) => (Object.values(template)[0].mapping as any)?.time_series_dimension
+      (template) => (Object.values(template)[0]?.mapping as any)?.time_series_dimension
     ) ?? [];
 
   const currentDynamicDimensionMappings = filterDimensionMappings(
@@ -1151,8 +1203,8 @@ const updateExistingDataStream = async ({
   const updatedDynamicDimensionMappings = filterDimensionMappings(mappings.dynamic_templates);
 
   const sortMappings = (
-    a: Record<string, MappingDynamicTemplate>,
-    b: Record<string, MappingDynamicTemplate>
+    a: Record<string, MappingDynamicTemplate | undefined>,
+    b: Record<string, MappingDynamicTemplate | undefined>
   ) => Object.keys(a)[0].localeCompare(Object.keys(b)[0]);
 
   const dynamicDimensionMappingsChanged = !deepEqual(
@@ -1160,11 +1212,14 @@ const updateExistingDataStream = async ({
     updatedDynamicDimensionMappings.sort(sortMappings)
   );
 
+  const packageDefinedIndexMode = settings?.index?.mode;
+  const packageDefinedSourceMode = settings?.index?.mapping?.source?.mode;
+
   // Trigger a rollover if the index mode or source type has changed
   if (
-    currentIndexMode !== settings?.index?.mode ||
-    // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
-    currentSourceType !== settings?.index?.mapping?.source?.mode ||
+    (packageDefinedIndexMode !== undefined && currentIndexMode !== settings?.index?.mode) ||
+    (packageDefinedSourceMode !== undefined &&
+      currentSourceType !== settings?.index?.mapping?.source?.mode) ||
     dynamicDimensionMappingsChanged
   ) {
     if (options?.skipDataStreamRollover === true) {
@@ -1212,19 +1267,22 @@ const updateExistingDataStream = async ({
   }
 
   try {
-    logger.debug(`Updating settings for ${dataStreamName}`);
+    logger.debug(`Updating index settings of data stream  ${dataStreamName}`);
 
     await retryTransientEsErrors(
       () =>
         esClient.indices.putSettings({
           index: dataStreamName,
-          body: { default_pipeline: settings!.index!.default_pipeline },
+          settings: { default_pipeline: settings!.index!.default_pipeline },
         }),
       { logger }
     );
   } catch (err) {
+    logger.error(`Error updating index settings of data stream ${dataStreamName}: ${err}`);
     // Same as above - Check if this error can happen because of invalid settings;
     // We are returning a 500 but in that case it should be a 400 instead
-    throw new PackageESError(`Could not update index template settings for ${dataStreamName}`);
+    throw new PackageESError(
+      `Could not update index settings of data stream ${dataStreamName}: ${err.message}`
+    );
   }
 };

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import type { ActionCreator } from 'typescript-fsa';
 
 import { TestProviders } from '../../../../common/mock';
@@ -18,11 +20,13 @@ import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
+import { PageScope } from '../../../../data_view_manager/constants';
+
 describe('IP Overview Component', () => {
   describe('rendering', () => {
     const mockProps = {
       anomaliesData: mockAnomalies,
-      data: mockData.IpOverview,
+      data: mockData.complete,
       endDate: '2019-06-18T06:00:00.000Z',
       flowTarget: FlowTargetSourceDest.source,
       loading: false,
@@ -38,16 +42,18 @@ describe('IP Overview Component', () => {
       }>,
       indexPatterns: [],
       jobNameById: {},
+      scopeId: PageScope.default,
+      isFlyoutOpen: false,
     };
 
     test('it renders the default IP Overview', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <TestProviders>
           <IpOverview {...mockProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('IpOverview')).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     test('it renders the side panel IP overview', () => {
@@ -55,13 +61,22 @@ describe('IP Overview Component', () => {
         ...mockProps,
         isInDetailsSidePanel: true,
       };
-      const wrapper = shallow(
+      const { container } = render(
         <TestProviders>
           <IpOverview {...panelViewProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('IpOverview')).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
+    });
+
+    test('it renders host id', () => {
+      const { container } = render(
+        <TestProviders>
+          <IpOverview {...mockProps} data={mockData.complete} />
+        </TestProviders>
+      );
+      expect(container).toHaveTextContent('b19a781f683541a7a25ee345133aa399');
     });
   });
 });

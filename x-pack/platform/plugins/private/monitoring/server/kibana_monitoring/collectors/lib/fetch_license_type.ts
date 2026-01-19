@@ -6,8 +6,8 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../common/constants';
 import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 

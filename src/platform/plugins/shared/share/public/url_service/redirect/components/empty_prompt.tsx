@@ -12,7 +12,7 @@ import * as React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ChromeDocTitle } from '@kbn/core-chrome-browser';
+import type { ChromeDocTitle } from '@kbn/core-chrome-browser';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 
 const defaultTitle = i18n.translate('share.urlService.redirect.components.Error.title', {

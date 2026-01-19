@@ -50,7 +50,27 @@ export const AgentStatuses = [
   'orphaned',
 ] as const;
 
+export const ActiveAgentStatuses = [
+  'online',
+  'offline',
+  'enrolling',
+  'updating',
+  'degraded',
+  'error',
+  'orphaned',
+]; // excluded: unenrolling, unenrolled, inactive, uninstalled
+
 // Kueries for finding unprivileged and privileged agents
 // Privileged is `not` because the metadata field can be undefined
 export const UNPRIVILEGED_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`;
 export const PRIVILEGED_AGENT_KUERY = `not ${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`;
+
+// Kuery to find fips agents
+export const FIPS_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.fips: true`;
+
+export const AGENT_STATUS_CHANGE_DATA_STREAM = {
+  type: 'logs',
+  dataset: 'elastic_agent.status_change',
+  namespace: 'default',
+};
+export const AGENT_STATUS_CHANGE_DATA_STREAM_NAME = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-${AGENT_STATUS_CHANGE_DATA_STREAM.namespace}`;

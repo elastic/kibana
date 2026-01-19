@@ -8,7 +8,6 @@
 import { AnomalyExplorerChartsService } from './anomaly_explorer_charts_service';
 import { of } from 'rxjs';
 import type { MlApi } from './ml_api_service';
-import type { MlResultsService } from './results_service';
 import { createTimefilterMock } from '../contexts/kibana/__mocks__/use_timefilter';
 import moment from 'moment';
 import { getDefaultChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
@@ -56,8 +55,7 @@ describe('AnomalyExplorerChartsService', () => {
 
     anomalyExplorerService = new AnomalyExplorerChartsService(
       timefilterMock,
-      mlApiServicesMock as unknown as MlApi,
-      mlResultsServiceMock as unknown as MlResultsService
+      mlApiServicesMock as unknown as MlApi
     ) as jest.Mocked<AnomalyExplorerChartsService>;
   });
 
@@ -69,7 +67,7 @@ describe('AnomalyExplorerChartsService', () => {
   test('fetches anomaly charts data', () => {
     let result;
     anomalyExplorerService
-      .getAnomalyData$([jobId], 1000, timeRange.earliestMs, timeRange.latestMs)
+      .getAnomalyData$([jobId], 1000, timeRange.earliestMs, timeRange.latestMs, [])
       .subscribe((d) => {
         result = d;
       });
@@ -77,7 +75,7 @@ describe('AnomalyExplorerChartsService', () => {
     expect(mlApiServicesMock.results.getAnomalyCharts$).toHaveBeenCalledWith(
       [jobId],
       [],
-      0,
+      [],
       1486656000000,
       1486670399999,
       { max: 1486670399999, min: 1486656000000 },

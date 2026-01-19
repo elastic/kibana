@@ -210,6 +210,7 @@ describe('stepSaveArchiveEntries', () => {
       packageAssetRefs: [
         {
           id: 'test',
+          path: 'some/path',
           type: 'epm-packages-assets',
         },
       ],

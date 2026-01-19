@@ -7,22 +7,21 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract, TaskCost } from '@kbn/task-manager-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { ActionType as CommonActionType, areValidFeatures } from '../common';
-import { ActionsConfigurationUtilities } from './actions_config';
-import {
-  getActionTypeFeatureUsageName,
-  TaskRunnerFactory,
-  ILicenseState,
-  ActionExecutionSourceType,
-} from './lib';
-import {
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { TaskCost } from '@kbn/task-manager-plugin/server';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import type { ActionType as CommonActionType } from '../common';
+import { areValidFeatures } from '../common';
+import type { ActionsConfigurationUtilities } from './actions_config';
+import type { ActionExecutionSourceType, ILicenseState, TaskRunnerFactory } from './lib';
+import { getActionTypeFeatureUsageName } from './lib';
+import type {
   ActionType,
-  InMemoryConnector,
   ActionTypeConfig,
-  ActionTypeSecrets,
   ActionTypeParams,
+  ActionTypeSecrets,
+  InMemoryConnector,
 } from './types';
 
 export interface ActionTypeRegistryOpts {
@@ -32,6 +31,11 @@ export interface ActionTypeRegistryOpts {
   actionsConfigUtils: ActionsConfigurationUtilities;
   licenseState: ILicenseState;
   inMemoryConnectors: InMemoryConnector[];
+}
+
+interface ListOpts {
+  featureId?: string;
+  exposeValidation?: boolean;
 }
 
 export class ActionTypeRegistry {
@@ -204,14 +208,18 @@ export class ActionTypeRegistry {
     });
 
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
-    this.taskManager.registerTaskDefinitions({
-      [`actions:${actionType.id}`]: {
-        title: actionType.name,
-        maxAttempts,
-        cost: TaskCost.Tiny,
-        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
-      },
-    });
+
+    // Skip task type registration for connectors without execute/params
+    if (actionType.executor && actionType.validate.params) {
+      this.taskManager.registerTaskDefinitions({
+        [`actions:${actionType.id}`]: {
+          title: actionType.name,
+          maxAttempts,
+          cost: TaskCost.Tiny,
+          createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
+        },
+      });
+    }
     // No need to notify usage on basic action types
     if (actionType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(
@@ -246,7 +254,9 @@ export class ActionTypeRegistry {
   /**
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
-  public list(featureId?: string): CommonActionType[] {
+  public list(
+    { featureId, exposeValidation }: ListOpts = { exposeValidation: false }
+  ): CommonActionType[] {
     return Array.from(this.actionTypes)
       .filter(([_, actionType]) => {
         return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
@@ -260,7 +270,17 @@ export class ActionTypeRegistry {
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
         supportedFeatureIds: actionType.supportedFeatureIds,
         isSystemActionType: !!actionType.isSystemActionType,
+        source: actionType.source || ACTION_TYPE_SOURCES.stack,
         subFeature: actionType.subFeature,
+        ...(exposeValidation === true && actionType.validate.params
+          ? {
+              validate: {
+                params: actionType.validate.params,
+              },
+            }
+          : {}),
+        isDeprecated: !!actionType.isDeprecated,
+        allowMultipleSystemActions: actionType.allowMultipleSystemActions,
       }));
   }
 
@@ -273,5 +293,9 @@ export class ActionTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.list().map(({ id }) => id)];
+  }
+
+  isDeprecated(actionTypeId: string): boolean {
+    return Boolean(this.actionTypes.get(actionTypeId)?.isDeprecated);
   }
 }

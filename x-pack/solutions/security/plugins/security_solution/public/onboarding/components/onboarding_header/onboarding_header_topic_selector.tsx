@@ -7,32 +7,19 @@
 
 import React, { useMemo } from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
-import { OnboardingTopicId } from '../../constants';
+import type { OnboardingTopicId } from '../../constants';
 import { useOnboardingContext } from '../onboarding_context';
-import { useTopic } from '../hooks/use_topic_id';
-import type { TopicConfig } from '../../types';
-import { SiemMigrationSetupTour } from '../../../siem_migrations/rules/components/tours/setup_guide';
-
-const getLabel = (topicConfig: TopicConfig) => {
-  if (topicConfig.id === OnboardingTopicId.siemMigrations) {
-    return (
-      <SiemMigrationSetupTour>
-        <>{topicConfig.title}</>
-      </SiemMigrationSetupTour>
-    );
-  }
-  return topicConfig.title;
-};
+import { useUrlDetail } from '../hooks/use_url_detail';
 
 export const OnboardingHeaderTopicSelector = React.memo(() => {
   const { config } = useOnboardingContext();
-  const [topicId, setTopicId] = useTopic();
+  const { topicId, setTopic } = useUrlDetail();
 
   const selectorOptions = useMemo(
     () =>
       [...config.values()].map((topicConfig) => ({
         id: topicConfig.id,
-        label: getLabel(topicConfig),
+        label: topicConfig.title,
       })),
     [config]
   );
@@ -49,7 +36,7 @@ export const OnboardingHeaderTopicSelector = React.memo(() => {
       legend="Topic selector"
       options={selectorOptions}
       idSelected={topicId}
-      onChange={(id) => setTopicId(id as OnboardingTopicId)}
+      onChange={(id) => setTopic(id as OnboardingTopicId)}
       isFullWidth
     />
   );

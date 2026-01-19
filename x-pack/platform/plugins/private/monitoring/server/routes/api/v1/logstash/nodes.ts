@@ -8,7 +8,7 @@
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getNodes } from '../../../../lib/logstash/get_nodes';
 import { handleError } from '../../../../lib/errors';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import {
   postLogstashNodesRequestParamsRT,
   postLogstashNodesRequestPayloadRT,
@@ -22,6 +22,12 @@ export function logstashNodesRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/nodes',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

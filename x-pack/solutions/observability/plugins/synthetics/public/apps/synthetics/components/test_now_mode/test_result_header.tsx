@@ -19,7 +19,7 @@ import * as React from 'react';
 import { getTestRunDetailLink } from '../common/links/test_details_link';
 import { useLocations } from '../../hooks';
 import { useSyntheticsSettingsContext } from '../../contexts';
-import { JourneyStep, Ping } from '../../../../../common/runtime_types';
+import type { JourneyStep, Ping } from '../../../../../common/runtime_types';
 import { formatDuration } from '../../utils/formatting';
 
 interface Props {

@@ -11,6 +11,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 
 import { Tokens } from './tokens';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { InvalidGrantError } from '../errors';
 import { securityMock } from '../mocks';
 
 describe('Tokens', () => {
@@ -82,21 +83,23 @@ describe('Tokens', () => {
 
       expect(mockElasticsearchClient.security.getToken).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.security.getToken).toHaveBeenCalledWith({
-        body: { grant_type: 'refresh_token', refresh_token: refreshToken },
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
       });
     });
 
-    it('returns `null` if refresh token is not valid', async () => {
+    it('returns `InvalidGrantError` if refresh token is not valid', async () => {
       const refreshFailureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 400, body: {} })
       );
       mockElasticsearchClient.security.getToken.mockRejectedValue(refreshFailureReason);
 
-      await expect(tokens.refresh(refreshToken)).resolves.toBe(null);
+      await expect(tokens.refresh(refreshToken)).rejects.toBeInstanceOf(InvalidGrantError);
 
       expect(mockElasticsearchClient.security.getToken).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.security.getToken).toHaveBeenCalledWith({
-        body: { grant_type: 'refresh_token', refresh_token: refreshToken },
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
       });
     });
 
@@ -119,7 +122,8 @@ describe('Tokens', () => {
 
       expect(mockElasticsearchClient.security.getToken).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.security.getToken).toHaveBeenCalledWith({
-        body: { grant_type: 'refresh_token', refresh_token: refreshToken },
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
       });
     });
   });
@@ -147,7 +151,7 @@ describe('Tokens', () => {
         const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
         mockElasticsearchClient.security.invalidateToken.mockImplementation((args: any) => {
-          if (args && args.body && args.body.token) {
+          if (args && args.token) {
             return Promise.reject(failureReason) as any;
           }
 
@@ -160,10 +164,10 @@ describe('Tokens', () => {
 
         expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledTimes(2);
         expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-          body: { token: tokenPair.accessToken },
+          token: tokenPair.accessToken,
         });
         expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-          body: { refresh_token: tokenPair.refreshToken },
+          refresh_token: tokenPair.refreshToken,
         });
       });
 
@@ -171,7 +175,7 @@ describe('Tokens', () => {
         const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
         mockElasticsearchClient.security.invalidateToken.mockImplementation((args: any) => {
-          if (args && args.body && args.body.refresh_token) {
+          if (args && args.refresh_token) {
             return Promise.reject(failureReason) as any;
           }
 
@@ -184,10 +188,10 @@ describe('Tokens', () => {
 
         expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledTimes(2);
         expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-          body: { token: tokenPair.accessToken },
+          token: tokenPair.accessToken,
         });
         expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-          body: { refresh_token: tokenPair.refreshToken },
+          refresh_token: tokenPair.refreshToken,
         });
       });
     }
@@ -206,10 +210,10 @@ describe('Tokens', () => {
 
       expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledTimes(2);
       expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-        body: { token: tokenPair.accessToken },
+        token: tokenPair.accessToken,
       });
       expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-        body: { refresh_token: tokenPair.refreshToken },
+        refresh_token: tokenPair.refreshToken,
       });
     });
 
@@ -227,7 +231,7 @@ describe('Tokens', () => {
 
       expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-        body: { token: tokenPair.accessToken },
+        token: tokenPair.accessToken,
       });
     });
 
@@ -245,7 +249,7 @@ describe('Tokens', () => {
 
       expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-        body: { refresh_token: tokenPair.refreshToken },
+        refresh_token: tokenPair.refreshToken,
       });
     });
 
@@ -270,10 +274,10 @@ describe('Tokens', () => {
 
         expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledTimes(2);
         expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-          body: { token: tokenPair.accessToken },
+          token: tokenPair.accessToken,
         });
         expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-          body: { refresh_token: tokenPair.refreshToken },
+          refresh_token: tokenPair.refreshToken,
         });
       });
     }
@@ -292,10 +296,10 @@ describe('Tokens', () => {
 
       expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledTimes(2);
       expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-        body: { token: tokenPair.accessToken },
+        token: tokenPair.accessToken,
       });
       expect(mockElasticsearchClient.security.invalidateToken).toHaveBeenCalledWith({
-        body: { refresh_token: tokenPair.refreshToken },
+        refresh_token: tokenPair.refreshToken,
       });
     });
   });

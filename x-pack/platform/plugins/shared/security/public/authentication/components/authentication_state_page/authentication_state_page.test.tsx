@@ -5,30 +5,44 @@
  * 2.0.
  */
 
+import { screen } from '@testing-library/react';
 import React from 'react';
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { AuthenticationStatePage } from './authentication_state_page';
 
 describe('AuthenticationStatePage', () => {
-  it('renders', () => {
-    expect(
-      shallowWithIntl(
-        <AuthenticationStatePage title={'foo'}>
-          <span>hello world</span>
-        </AuthenticationStatePage>
-      )
-    ).toMatchSnapshot();
-  });
+  it('renders the title, child content, and layout elements correctly', () => {
+    const { container } = renderWithI18n(
+      <AuthenticationStatePage title="foo">
+        <span>hello world</span>
+      </AuthenticationStatePage>
+    );
 
-  it('renders with custom CSS class', () => {
-    expect(
-      shallowWithIntl(
-        <AuthenticationStatePage className="customClassName" title={'foo'}>
-          <span>hello world</span>
-        </AuthenticationStatePage>
-      ).exists('.secAuthenticationStatePage.customClassName')
-    ).toBe(true);
+    // Page wrapper with expected class
+    const wrapper = container.querySelector('[data-test-subj="secAuthenticationStatePage"]');
+    expect(wrapper).toBeInTheDocument();
+
+    // Header section
+    const header = container.querySelector('[data-test-subj="secAuthenticationStatePageHeader"]');
+    expect(header).toBeInTheDocument();
+
+    // Title in <h1>
+    const title = screen.getByRole('heading', { level: 1, name: 'foo' });
+    expect(title).toBeInTheDocument();
+
+    // Child content
+    expect(screen.getByText('hello world')).toBeInTheDocument();
+
+    // Icon wrapper with logo class
+    const logoWrapper = container.querySelector(
+      '[data-test-subj="secAuthenticationStatePageLogo"]'
+    );
+    expect(logoWrapper).toBeInTheDocument();
+
+    // Check the EuiIcon is rendered with correct type
+    const icon = logoWrapper?.querySelector('[data-euiicon-type="logoElastic"]');
+    expect(icon).toBeInTheDocument();
   });
 });

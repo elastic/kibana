@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useItemsAction } from './use_items_action';
 
 import * as api from '../../containers/api';
 import { basicCase } from '../../containers/mock';
+import { TestProviders } from '../../common/mock';
+import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../containers/api');
 
 describe('useItemsAction', () => {
-  let appMockRender: AppMockRenderer;
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
   const successToasterTitle = jest.fn().mockReturnValue('My toaster title');
-  const fieldSelector = jest.fn().mockReturnValue(basicCase.tags);
+  const fieldSelector = jest.fn().mockImplementation((item) => item.tags);
   const itemsTransformer = jest.fn().mockImplementation((items) => items);
 
   const props = {
@@ -34,14 +34,13 @@ describe('useItemsAction', () => {
   };
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   describe('flyout', () => {
     it('opens the flyout', async () => {
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       expect(result.current.isFlyoutOpen).toBe(false);
@@ -55,7 +54,7 @@ describe('useItemsAction', () => {
 
     it('closes the flyout', async () => {
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       expect(result.current.isFlyoutOpen).toBe(false);
@@ -72,8 +71,9 @@ describe('useItemsAction', () => {
 
       await waitFor(() => {
         expect(result.current.isFlyoutOpen).toBe(false);
-        expect(onAction).toHaveBeenCalled();
       });
+
+      expect(onAction).toHaveBeenCalled();
     });
   });
 
@@ -82,7 +82,7 @@ describe('useItemsAction', () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -101,24 +101,25 @@ describe('useItemsAction', () => {
 
       await waitFor(() => {
         expect(result.current.isFlyoutOpen).toBe(false);
-        expect(onActionSuccess).toHaveBeenCalled();
-        expect(fieldSelector).toHaveBeenCalled();
-        expect(itemsTransformer).toHaveBeenCalled();
-        expect(updateSpy).toHaveBeenCalledWith({
-          cases: [
-            {
-              [props.fieldKey]: ['coke', 'one'],
-              id: basicCase.id,
-              version: basicCase.version,
-            },
-          ],
-        });
+      });
+
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(fieldSelector).toHaveBeenCalled();
+      expect(itemsTransformer).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({
+        cases: [
+          {
+            [props.fieldKey]: ['coke', 'one'],
+            id: basicCase.id,
+            version: basicCase.version,
+          },
+        ],
       });
     });
 
     it('calls fieldSelector correctly', async () => {
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -137,13 +138,14 @@ describe('useItemsAction', () => {
 
       await waitFor(() => {
         expect(result.current.isFlyoutOpen).toBe(false);
-        expect(fieldSelector).toHaveBeenCalledWith(basicCase);
       });
+
+      expect(fieldSelector).toHaveBeenCalledWith(basicCase);
     });
 
     it('calls itemsTransformer correctly', async () => {
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -162,15 +164,16 @@ describe('useItemsAction', () => {
 
       await waitFor(() => {
         expect(result.current.isFlyoutOpen).toBe(false);
-        expect(itemsTransformer).toHaveBeenCalledWith(['coke', 'one']);
       });
+
+      expect(itemsTransformer).toHaveBeenCalledWith(['coke', 'one']);
     });
 
     it('removes duplicates', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -189,22 +192,25 @@ describe('useItemsAction', () => {
 
       await waitFor(() => {
         expect(result.current.isFlyoutOpen).toBe(false);
-        expect(onActionSuccess).toHaveBeenCalled();
-        expect(updateSpy).toHaveBeenCalledWith({
-          cases: [
-            {
-              [props.fieldKey]: ['coke', 'one'],
-              id: basicCase.id,
-              version: basicCase.version,
-            },
-          ],
-        });
+      });
+
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({
+        cases: [
+          {
+            [props.fieldKey]: ['coke', 'one'],
+            id: basicCase.id,
+            version: basicCase.version,
+          },
+        ],
       });
     });
 
     it('shows the success toaster correctly when updating a case', async () => {
+      const coreStart = coreMock.createStart();
+
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (wrapperProps) => <TestProviders {...wrapperProps} coreStart={coreStart} />,
       });
 
       act(() => {
@@ -219,7 +225,7 @@ describe('useItemsAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
           title: 'My toaster title',
           className: 'eui-textBreakWord',
         });
@@ -230,7 +236,7 @@ describe('useItemsAction', () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -246,16 +252,17 @@ describe('useItemsAction', () => {
 
       await waitFor(() => {
         expect(result.current.isFlyoutOpen).toBe(false);
-        expect(onActionSuccess).not.toHaveBeenCalled();
-        expect(updateSpy).not.toHaveBeenCalled();
       });
+
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({ cases: [] });
     });
 
     it('do not update if the selected items are the same but with different order', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -271,16 +278,17 @@ describe('useItemsAction', () => {
 
       await waitFor(() => {
         expect(result.current.isFlyoutOpen).toBe(false);
-        expect(onActionSuccess).not.toHaveBeenCalled();
-        expect(updateSpy).not.toHaveBeenCalled();
       });
+
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({ cases: [] });
     });
 
     it('do not update if the selected items are the same', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -296,16 +304,17 @@ describe('useItemsAction', () => {
 
       await waitFor(() => {
         expect(result.current.isFlyoutOpen).toBe(false);
-        expect(onActionSuccess).not.toHaveBeenCalled();
-        expect(updateSpy).not.toHaveBeenCalled();
       });
+
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({ cases: [] });
     });
 
     it('do not update if selecting and unselecting the same item', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -321,16 +330,17 @@ describe('useItemsAction', () => {
 
       await waitFor(() => {
         expect(result.current.isFlyoutOpen).toBe(false);
-        expect(onActionSuccess).not.toHaveBeenCalled();
-        expect(updateSpy).not.toHaveBeenCalled();
       });
+
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({ cases: [] });
     });
 
     it('do not update with empty items and no selection', async () => {
       const updateSpy = jest.spyOn(api, 'updateCases');
 
       const { result } = renderHook(() => useItemsAction(props), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -346,9 +356,10 @@ describe('useItemsAction', () => {
 
       await waitFor(() => {
         expect(result.current.isFlyoutOpen).toBe(false);
-        expect(onActionSuccess).not.toHaveBeenCalled();
-        expect(updateSpy).not.toHaveBeenCalled();
       });
+
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({ cases: [] });
     });
   });
 });

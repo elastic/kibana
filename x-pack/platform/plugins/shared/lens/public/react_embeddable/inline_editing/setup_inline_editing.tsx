@@ -7,20 +7,21 @@
 
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React from 'react';
-import { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
-import { getActiveDatasourceIdFromDoc } from '../../utils';
-import { isTextBasedLanguage } from '../helper';
-import {
+import type {
   GetStateType,
-  LensEmbeddableStartServices,
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
   TypedLensSerializedState,
-} from '../types';
-import { PanelManagementApi } from './panel_management';
+} from '@kbn/lens-common';
+import type { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
+import { getActiveDatasourceIdFromDoc } from '../../utils';
+import { isTextBasedLanguage } from '../helper';
+import type { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
+import { saveUserChartTypeToSessionStorage } from '../../chart_type_session_storage';
+import type { LensEmbeddableStartServices } from '../types';
 
 export function prepareInlineEditPanel(
   initialState: LensRuntimeState,
@@ -31,6 +32,8 @@ export function prepareInlineEditPanel(
   inspectorApi: LensInspectorAdapters,
   {
     coreStart,
+    visualizationMap,
+    datasourceMap,
     ...startDependencies
   }: Omit<
     LensEmbeddableStartServices,
@@ -40,8 +43,6 @@ export function prepareInlineEditPanel(
     | 'expressionRenderer'
     | 'documentToExpression'
     | 'injectFilterReferences'
-    | 'visualizationMap'
-    | 'datasourceMap'
     | 'theme'
     | 'uiSettings'
     | 'attributeService'
@@ -53,19 +54,26 @@ export function prepareInlineEditPanel(
   uuid?: string,
   parentApi?: unknown
 ) {
-  return async function openConfigPanel({
+  return async function getConfigPanel({
+    closeFlyout,
     onApply,
     onCancel,
     hideTimeFilterInfo,
-  }: Partial<Pick<EditConfigPanelProps, 'onApply' | 'onCancel' | 'hideTimeFilterInfo'>> = {}) {
-    const { getEditLensConfiguration, getVisualizationMap, getDatasourceMap } = await import(
-      '../../async_services'
-    );
-    const visualizationMap = getVisualizationMap();
-    const datasourceMap = getDatasourceMap();
-
+    applyButtonLabel,
+  }: Partial<
+    Pick<
+      EditConfigPanelProps,
+      'closeFlyout' | 'onApply' | 'onCancel' | 'hideTimeFilterInfo' | 'applyButtonLabel'
+    >
+  > = {}) {
     const currentState = getState();
+    const isNewPanel = initialState.isNewPanel;
+
     const attributes = currentState.attributes as TypedLensSerializedState['attributes'];
+    // Save the user's preferred chart type to session storage
+    if (!isNewPanel && attributes) {
+      saveUserChartTypeToSessionStorage(attributes.visualizationType);
+    }
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
       'formBased') as EditLensConfigurationProps['datasourceId'];
 
@@ -86,6 +94,12 @@ export function prepareInlineEditPanel(
     const updateByRefInput = (savedObjectId: LensRuntimeState['savedObjectId']) => {
       updateState({ attributes, savedObjectId });
     };
+
+    if (attributes?.visualizationType == null) {
+      return null;
+    }
+
+    const { getEditLensConfiguration } = await import('../../async_services');
     const Component = await getEditLensConfiguration(
       coreStart,
       startDependencies,
@@ -93,11 +107,14 @@ export function prepareInlineEditPanel(
       datasourceMap
     );
 
-    if (attributes?.visualizationType == null) {
-      return null;
-    }
+    const canNavigateToFullEditor =
+      !isTextBasedLanguage(currentState) &&
+      panelManagementApi.isEditingEnabled() &&
+      navigateToLensEditor;
+
     return (
       <Component
+        closeFlyout={closeFlyout}
         attributes={attributes}
         updateByRefInput={updateByRefInput}
         updatePanelState={updatePanelState}
@@ -108,7 +125,7 @@ export function prepareInlineEditPanel(
         panelId={uuid}
         savedObjectId={currentState.savedObjectId}
         navigateToLensEditor={
-          !isTextBasedLanguage(currentState) && navigateToLensEditor
+          canNavigateToFullEditor
             ? navigateToLensEditor(
                 new EmbeddableStateTransfer(
                   coreStart.application.navigateToApp,
@@ -138,7 +155,9 @@ export function prepareInlineEditPanel(
           }
         }}
         hideTimeFilterInfo={hideTimeFilterInfo}
+        isReadOnly={panelManagementApi.canShowConfig() && !panelManagementApi.isEditingEnabled()}
         parentApi={parentApi}
+        applyButtonLabel={applyButtonLabel}
       />
     );
   };

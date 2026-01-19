@@ -6,7 +6,8 @@
  */
 
 import { OpenAiProviderType } from '../adapters/openai/types';
-import { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { isNativeFunctionCallingSupported } from './function_calling_support';
 
 const createConnector = (
@@ -16,6 +17,7 @@ const createConnector = (
     connectorId: 'connector-id',
     name: 'my connector',
     config: {},
+    capabilities: {},
     ...parts,
   };
 };
@@ -59,6 +61,30 @@ describe('isNativeFunctionCallingSupported', () => {
         config: { apiProvider: OpenAiProviderType.Other },
       });
       expect(isNativeFunctionCallingSupported(connector)).toBe(false);
+    });
+
+    it('returns true for "Other" provider when enableNativeFunctionCalling is true', () => {
+      const connector = createConnector({
+        type: InferenceConnectorType.OpenAI,
+        config: { apiProvider: OpenAiProviderType.Other, enableNativeFunctionCalling: true },
+      });
+      expect(isNativeFunctionCallingSupported(connector)).toBe(true);
+    });
+
+    it('returns false for "Other" provider when enableNativeFunctionCalling is false', () => {
+      const connector = createConnector({
+        type: InferenceConnectorType.OpenAI,
+        config: { apiProvider: OpenAiProviderType.Other, enableNativeFunctionCalling: false },
+      });
+      expect(isNativeFunctionCallingSupported(connector)).toBe(false);
+    });
+
+    it('returns true if the config is not exposed', () => {
+      const connector = createConnector({
+        type: InferenceConnectorType.OpenAI,
+        config: {},
+      });
+      expect(isNativeFunctionCallingSupported(connector)).toBe(true);
     });
   });
 });

@@ -7,10 +7,11 @@
 
 import { renderHook } from '@testing-library/react';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { useCapabilities, UseCapabilitiesParams } from './use_capabilities';
+import type { UseCapabilitiesParams } from './use_capabilities';
+import { useCapabilities } from './use_capabilities';
 import { API_VERSIONS, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const http = {

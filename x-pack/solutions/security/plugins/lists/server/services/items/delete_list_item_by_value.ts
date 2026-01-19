@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getQueryFilterFromTypeValue } from '../utils';
@@ -43,14 +43,12 @@ export const deleteListItemByValue = async ({
     value: values,
   });
   await esClient.deleteByQuery({
-    body: {
-      query: {
-        bool: {
-          filter,
-        },
+    index: listItemIndex,
+    query: {
+      bool: {
+        filter,
       },
     },
-    index: listItemIndex,
     refresh,
   });
   return listItems;

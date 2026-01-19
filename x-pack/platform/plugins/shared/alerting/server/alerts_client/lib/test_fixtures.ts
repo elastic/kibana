@@ -22,6 +22,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MUTED,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_STATUS,
   ALERT_UUID,
@@ -37,7 +38,7 @@ import {
   ALERT_END,
   ALERT_SEVERITY_IMPROVING,
 } from '@kbn/rule-data-utils';
-import { AlertRule } from '../types';
+import type { AlertRule } from '../types';
 import { expandFlattenedAlert } from './format_alert';
 
 export const rule = {
@@ -79,6 +80,7 @@ export const existingFlattenedNewAlert = {
   [ALERT_ACTION_GROUP]: 'error',
   [ALERT_DURATION]: '0',
   [ALERT_FLAPPING]: false,
+  [ALERT_MUTED]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: 'alert-A',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],

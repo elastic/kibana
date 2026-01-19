@@ -7,7 +7,7 @@
 
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
-import { ESProcessorItem } from '../../../common';
+import type { ESProcessorItem } from '../../../common';
 import type { KVState } from '../../types';
 import { handleKV } from './kv';
 import type { KVGraphParams, KVBaseNodeParams } from './types';

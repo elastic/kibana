@@ -38,28 +38,26 @@ describe('updateAlertsStatus', () => {
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "ids": Object {
-                  "values": Array [
-                    "alert-id-1",
-                  ],
-                },
-              },
-              "script": Object {
-                "lang": "painless",
-                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'closed';
-                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                      }
-                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                        ctx._source.signal.status = 'closed'
-                      }",
-              },
-            },
             "conflicts": "abort",
             "ignore_unavailable": true,
             "index": ".siem-signals",
+            "query": Object {
+              "ids": Object {
+                "values": Array [
+                  "alert-id-1",
+                ],
+              },
+            },
+            "script": Object {
+              "lang": "painless",
+              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                      ctx._source['kibana.alert.workflow_status'] = 'closed';
+                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
+                    }
+                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                      ctx._source.signal.status = 'closed'
+                    }",
+            },
           },
         ]
       `);
@@ -77,29 +75,27 @@ describe('updateAlertsStatus', () => {
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "ids": Object {
-                  "values": Array [
-                    "id1",
-                    "id2",
-                  ],
-                },
-              },
-              "script": Object {
-                "lang": "painless",
-                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'closed';
-                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                      }
-                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                        ctx._source.signal.status = 'closed'
-                      }",
-              },
-            },
             "conflicts": "abort",
             "ignore_unavailable": true,
             "index": "1",
+            "query": Object {
+              "ids": Object {
+                "values": Array [
+                  "id1",
+                  "id2",
+                ],
+              },
+            },
+            "script": Object {
+              "lang": "painless",
+              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                      ctx._source['kibana.alert.workflow_status'] = 'closed';
+                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
+                    }
+                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                      ctx._source.signal.status = 'closed'
+                    }",
+            },
           },
         ]
       `);
@@ -114,28 +110,27 @@ describe('updateAlertsStatus', () => {
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "ids": Object {
-                  "values": Array [
-                    "id1",
-                  ],
-                },
-              },
-              "script": Object {
-                "lang": "painless",
-                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'acknowledged';
-                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                      }
-                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                        ctx._source.signal.status = 'acknowledged'
-                      }",
-              },
-            },
             "conflicts": "abort",
             "ignore_unavailable": true,
             "index": "1",
+            "query": Object {
+              "ids": Object {
+                "values": Array [
+                  "id1",
+                ],
+              },
+            },
+            "script": Object {
+              "lang": "painless",
+              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                      ctx._source['kibana.alert.workflow_status'] = 'acknowledged';
+                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
+                    }
+                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                      ctx._source.signal.status = 'acknowledged'
+                    }
+                    ctx._source.remove('kibana.alert.workflow_reason')",
+            },
           },
         ]
       `);
@@ -154,28 +149,26 @@ describe('updateAlertsStatus', () => {
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "ids": Object {
-                  "values": Array [
-                    "id1",
-                  ],
-                },
-              },
-              "script": Object {
-                "lang": "painless",
-                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'closed';
-                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                      }
-                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                        ctx._source.signal.status = 'closed'
-                      }",
-              },
-            },
             "conflicts": "abort",
             "ignore_unavailable": true,
             "index": "1",
+            "query": Object {
+              "ids": Object {
+                "values": Array [
+                  "id1",
+                ],
+              },
+            },
+            "script": Object {
+              "lang": "painless",
+              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                      ctx._source['kibana.alert.workflow_status'] = 'closed';
+                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
+                    }
+                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                      ctx._source.signal.status = 'closed'
+                    }",
+            },
           },
         ]
       `);
@@ -184,28 +177,27 @@ describe('updateAlertsStatus', () => {
       expect(esClient.updateByQuery.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "ids": Object {
-                  "values": Array [
-                    "id2",
-                  ],
-                },
-              },
-              "script": Object {
-                "lang": "painless",
-                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'open';
-                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                      }
-                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                        ctx._source.signal.status = 'open'
-                      }",
-              },
-            },
             "conflicts": "abort",
             "ignore_unavailable": true,
             "index": "1",
+            "query": Object {
+              "ids": Object {
+                "values": Array [
+                  "id2",
+                ],
+              },
+            },
+            "script": Object {
+              "lang": "painless",
+              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                      ctx._source['kibana.alert.workflow_status'] = 'open';
+                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
+                    }
+                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                      ctx._source.signal.status = 'open'
+                    }
+                    ctx._source.remove('kibana.alert.workflow_reason')",
+            },
           },
         ]
       `);
@@ -224,28 +216,26 @@ describe('updateAlertsStatus', () => {
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "ids": Object {
-                  "values": Array [
-                    "id1",
-                  ],
-                },
-              },
-              "script": Object {
-                "lang": "painless",
-                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'closed';
-                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                      }
-                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                        ctx._source.signal.status = 'closed'
-                      }",
-              },
-            },
             "conflicts": "abort",
             "ignore_unavailable": true,
             "index": "1",
+            "query": Object {
+              "ids": Object {
+                "values": Array [
+                  "id1",
+                ],
+              },
+            },
+            "script": Object {
+              "lang": "painless",
+              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                      ctx._source['kibana.alert.workflow_status'] = 'closed';
+                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
+                    }
+                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                      ctx._source.signal.status = 'closed'
+                    }",
+            },
           },
         ]
       `);
@@ -254,28 +244,27 @@ describe('updateAlertsStatus', () => {
       expect(esClient.updateByQuery.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "body": Object {
-              "query": Object {
-                "ids": Object {
-                  "values": Array [
-                    "id2",
-                  ],
-                },
-              },
-              "script": Object {
-                "lang": "painless",
-                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'open';
-                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                      }
-                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                        ctx._source.signal.status = 'open'
-                      }",
-              },
-            },
             "conflicts": "abort",
             "ignore_unavailable": true,
             "index": "2",
+            "query": Object {
+              "ids": Object {
+                "values": Array [
+                  "id2",
+                ],
+              },
+            },
+            "script": Object {
+              "lang": "painless",
+              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                      ctx._source['kibana.alert.workflow_status'] = 'open';
+                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
+                    }
+                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                      ctx._source.signal.status = 'open'
+                    }
+                    ctx._source.remove('kibana.alert.workflow_reason')",
+            },
           },
         ]
       `);
@@ -318,14 +307,12 @@ describe('updateAlertsStatus', () => {
       ]);
 
       expect(esClient.mget).toHaveBeenCalledWith({
-        body: {
-          docs: [
-            {
-              _id: 'c3869d546717e8c581add9cbf7d24578f34cd3e72cbc8d8b8e9a9330a899f70f',
-              _index: '.internal.alerts-security.alerts-default-000001',
-            },
-          ],
-        },
+        docs: [
+          {
+            _id: 'c3869d546717e8c581add9cbf7d24578f34cd3e72cbc8d8b8e9a9330a899f70f',
+            _index: '.internal.alerts-security.alerts-default-000001',
+          },
+        ],
       });
 
       expect(res).toEqual({ docs });

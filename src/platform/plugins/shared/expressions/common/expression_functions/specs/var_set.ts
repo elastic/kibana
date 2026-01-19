@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Serializable } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from '../types';
+import type { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {
   name: string[];

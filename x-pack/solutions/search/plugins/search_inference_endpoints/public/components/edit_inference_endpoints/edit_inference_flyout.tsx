@@ -7,24 +7,26 @@
 
 import { InferenceFlyoutWrapper } from '@kbn/inference-endpoint-ui-common/src/components/inference_flyout_wrapper';
 import React, { useCallback } from 'react';
-import { InferenceEndpoint } from '@kbn/inference-endpoint-ui-common';
+import type { InferenceEndpoint } from '@kbn/inference-endpoint-ui-common';
 import { flattenObject } from '@kbn/object-utils';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
-import { InferenceEndpointUI } from '../all_inference_endpoints/types';
 
 interface EditInterfaceFlyoutProps {
   onFlyoutClose: () => void;
-  inferenceEndpointUI: InferenceEndpointUI;
+  selectedInferenceEndpoint: InferenceInferenceEndpointInfo;
 }
 export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
   onFlyoutClose,
-  inferenceEndpointUI,
+  selectedInferenceEndpoint,
 }) => {
   const {
     services: {
       http,
       notifications: { toasts },
+      serverless,
     },
   } = useKibana();
   const { refetch } = useQueryInferenceEndpoints();
@@ -34,10 +36,21 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
 
   const inferenceEndpoint: InferenceEndpoint = {
     config: {
-      inferenceId: inferenceEndpointUI.endpoint,
-      taskType: inferenceEndpointUI.type,
-      provider: inferenceEndpointUI.provider.service,
-      providerConfig: flattenObject(inferenceEndpointUI.provider.service_settings),
+      inferenceId: selectedInferenceEndpoint.inference_id,
+      taskType: selectedInferenceEndpoint.task_type,
+      provider: selectedInferenceEndpoint.service,
+      ...(selectedInferenceEndpoint.task_settings?.headers
+        ? { headers: selectedInferenceEndpoint.task_settings?.headers }
+        : {}),
+      providerConfig: {
+        ...flattenObject(selectedInferenceEndpoint.service_settings),
+        // NOTE: The below is a workaround for anthropic max_tokens handling.
+        // Anthropic is unique in that it requires max_tokens to be stored as part of the task_settings instead of the usual service_settings - which we populate the providerConfig from.
+        ...(selectedInferenceEndpoint.task_settings?.max_tokens &&
+        selectedInferenceEndpoint.service === ServiceProviderKeys.anthropic
+          ? { max_tokens: selectedInferenceEndpoint.task_settings?.max_tokens }
+          : {}),
+      },
     },
     secrets: {
       providerSecrets: {},
@@ -49,6 +62,7 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
       http={http}
       toasts={toasts}
       isEdit={true}
+      enforceAdaptiveAllocations={!!serverless}
       onSubmitSuccess={onEditSuccess}
       inferenceEndpoint={inferenceEndpoint}
     />

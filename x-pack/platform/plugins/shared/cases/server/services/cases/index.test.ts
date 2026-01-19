@@ -238,9 +238,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -249,6 +251,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -286,12 +289,16 @@ describe('CasesService', () => {
 
         await service.patchCase({
           caseId: '1',
-          updatedAttributes: createCasePostParams({
-            connector: createJiraConnector(),
-            externalService: createExternalService(),
-            severity: CaseSeverity.CRITICAL,
-            status: CaseStatuses['in-progress'],
-          }),
+          updatedAttributes: {
+            ...createCasePostParams({
+              connector: createJiraConnector(),
+              externalService: createExternalService(),
+              severity: CaseSeverity.CRITICAL,
+              status: CaseStatuses['in-progress'],
+            }),
+            total_alerts: 10,
+            total_comments: 5,
+          },
           originalCase: {} as CaseSavedObjectTransformed,
         });
 
@@ -318,6 +325,7 @@ describe('CasesService', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": 30,
@@ -326,6 +334,9 @@ describe('CasesService', () => {
               "defacement",
             ],
             "title": "Super Bad Security Issue",
+            "total_alerts": 10,
+            "total_comments": 5,
+            "total_observables": 0,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -582,9 +593,11 @@ describe('CasesService', () => {
           originalCase: {} as CaseSavedObjectTransformed,
         });
 
-        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
-          `Object {}`
-        );
+        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+          Object {
+            "total_observables": 0,
+          }
+        `);
         const updateOptions = unsecuredSavedObjectsClient.update.mock
           .calls[0][3] as SavedObjectsUpdateOptions<unknown>;
         expect(updateOptions.references).toBeUndefined();
@@ -608,6 +621,7 @@ describe('CasesService', () => {
               "name": "none",
               "type": ".none",
             },
+            "total_observables": 0,
           }
         `);
       });
@@ -660,6 +674,33 @@ describe('CasesService', () => {
           expect(patchAttributes.status).toEqual(expectedStatus);
         }
       );
+
+      it('updates the total attachment stats', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(
+          {} as SavedObjectsUpdateResponse<CasePersistedAttributes>
+        );
+
+        await service.patchCase({
+          caseId: '1',
+          updatedAttributes: {
+            ...createCasePostParams({
+              connector: createJiraConnector(),
+              externalService: createExternalService(),
+              severity: CaseSeverity.CRITICAL,
+              status: CaseStatuses['in-progress'],
+            }),
+            total_alerts: 10,
+            total_comments: 5,
+          },
+          originalCase: {} as CaseSavedObjectTransformed,
+        });
+
+        const patchAttributes = unsecuredSavedObjectsClient.update.mock
+          .calls[0][2] as CasePersistedAttributes;
+
+        expect(patchAttributes.total_alerts).toEqual(10);
+        expect(patchAttributes.total_comments).toEqual(5);
+      });
     });
 
     describe('bulkPatch', () => {
@@ -764,6 +805,39 @@ describe('CasesService', () => {
         expect(patchResults[1].attributes.status).toEqual(CasePersistedStatus.IN_PROGRESS);
         expect(patchResults[2].attributes.status).toEqual(CasePersistedStatus.CLOSED);
       });
+
+      it('updates the total attachment stats', async () => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+            createCaseSavedObjectResponse({ caseId: '3' }),
+          ],
+        });
+
+        await service.patchCases({
+          cases: [
+            {
+              caseId: '1',
+              updatedAttributes: {
+                ...createCasePostParams({
+                  connector: getNoneCaseConnector(),
+                  status: CaseStatuses.open,
+                }),
+                total_alerts: 10,
+                total_comments: 5,
+              },
+              originalCase: {} as CaseSavedObjectTransformed,
+            },
+          ],
+        });
+
+        const patchResults = unsecuredSavedObjectsClient.bulkUpdate.mock
+          .calls[0][0] as unknown as Array<SavedObject<CasePersistedAttributes>>;
+
+        expect(patchResults[0].attributes.total_alerts).toEqual(10);
+        expect(patchResults[0].attributes.total_comments).toEqual(5);
+      });
     });
 
     describe('createCase', () => {
@@ -843,6 +917,7 @@ describe('CasesService', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": 0,
@@ -851,8 +926,10 @@ describe('CasesService', () => {
               "defacement",
             ],
             "title": "Super Bad Security Issue",
-            "total_alerts": -1,
-            "total_comments": -1,
+            "total_alerts": 0,
+            "total_comments": 0,
+            "total_events": 0,
+            "total_observables": 0,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -894,8 +971,8 @@ describe('CasesService', () => {
         const postAttributes = unsecuredSavedObjectsClient.create.mock
           .calls[0][1] as CasePersistedAttributes;
 
-        expect(postAttributes.total_alerts).toEqual(-1);
-        expect(postAttributes.total_comments).toEqual(-1);
+        expect(postAttributes.total_alerts).toEqual(0);
+        expect(postAttributes.total_comments).toEqual(0);
       });
 
       it('moves the connector.id and connector_id to the references', async () => {
@@ -1064,6 +1141,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": true,
                     "syncAlerts": true,
                   },
                   "severity": 10,
@@ -1072,8 +1150,10 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
-                  "total_alerts": -1,
-                  "total_comments": -1,
+                  "total_alerts": 0,
+                  "total_comments": 0,
+                  "total_events": 0,
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -1111,8 +1191,8 @@ describe('CasesService', () => {
       const postAttributes = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0]
         .attributes as CasePersistedAttributes;
 
-      expect(postAttributes.total_alerts).toEqual(-1);
-      expect(postAttributes.total_comments).toEqual(-1);
+      expect(postAttributes.total_alerts).toEqual(0);
+      expect(postAttributes.total_comments).toEqual(0);
     });
   });
 
@@ -1347,7 +1427,9 @@ describe('CasesService', () => {
 
         expect(res).toMatchInlineSnapshot(`
           Object {
-            "attributes": Object {},
+            "attributes": Object {
+              "total_events": -1,
+            },
           }
         `);
       });
@@ -1694,9 +1776,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "medium",
@@ -1705,6 +1789,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2197,8 +2282,12 @@ describe('CasesService', () => {
      * - connector
      * - external_service
      * - category
+     * - settings
      *
-     * Decode is not expected to throw an error as they are defined.
+     * The following fields can be undefined:
+     * - total_alerts
+     * - total_comments
+     * - incremental_id
      */
     const attributesToValidateIfMissing = omit(
       caseTransformedAttributesProps,
@@ -2208,7 +2297,17 @@ describe('CasesService', () => {
       'external_service',
       'category',
       'customFields',
-      'observables'
+      'observables',
+      'total_observables',
+      'settings',
+      'incremental_id',
+      'settings',
+      'total_alerts',
+      'total_comments',
+      'in_progress_at',
+      'time_to_acknowledge',
+      'time_to_resolve',
+      'time_to_investigate'
     );
 
     describe('getCaseIdsByAlertId', () => {
@@ -2308,9 +2407,11 @@ describe('CasesService', () => {
               "description": "This is a brand new case of a bad meanie defacing data",
               "duration": null,
               "external_service": null,
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": false,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -2319,6 +2420,7 @@ describe('CasesService', () => {
                 "defacement",
               ],
               "title": "Super Bad Security Issue",
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -2411,9 +2513,11 @@ describe('CasesService', () => {
                     "username": "elastic",
                   },
                 },
+                "incremental_id": undefined,
                 "observables": Array [],
                 "owner": "securitySolution",
                 "settings": Object {
+                  "extractObservables": false,
                   "syncAlerts": true,
                 },
                 "severity": "low",
@@ -2422,6 +2526,7 @@ describe('CasesService', () => {
                   "defacement",
                 ],
                 "title": "Super Bad Security Issue",
+                "total_observables": 0,
                 "updated_at": "2019-11-25T21:54:48.952Z",
                 "updated_by": Object {
                   "email": "testemail@elastic.co",
@@ -2505,9 +2610,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2516,6 +2623,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2599,9 +2707,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2610,6 +2720,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2706,9 +2817,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2717,6 +2830,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2763,9 +2877,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2774,6 +2890,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2866,9 +2983,11 @@ describe('CasesService', () => {
                   "username": "elastic",
                 },
               },
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": false,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -2877,6 +2996,7 @@ describe('CasesService', () => {
                 "defacement",
               ],
               "title": "Super Bad Security Issue",
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -2985,9 +3105,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2996,6 +3118,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -3212,6 +3335,18 @@ describe('CasesService', () => {
         const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
         expect(persistedAttributes).not.toHaveProperty('foo');
       });
+
+      it('sets `incremental_id` field to undefined when it is passed', async () => {
+        const attributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(service.createCase({ id: 'a', attributes })).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
+      });
     });
 
     describe('bulkCreateCases', () => {
@@ -3253,6 +3388,22 @@ describe('CasesService', () => {
 
         expect(persistedAttributes).not.toHaveProperty('foo');
       });
+
+      it('sets `incremental_id` field to undefined when it is passed', async () => {
+        const attributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(
+          service.bulkCreateCases({ cases: [{ id: 'a', ...attributes }] })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes =
+          unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes;
+
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
+      });
     });
 
     describe('patch case', () => {
@@ -3293,6 +3444,24 @@ describe('CasesService', () => {
 
         const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
         expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+
+      it('removes incremental_id value', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes,
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
       });
     });
 
@@ -3344,6 +3513,30 @@ describe('CasesService', () => {
           unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
 
         expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+
+      it('removes incremental_id values', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes,
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes =
+          unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
+
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
       });
     });
   });

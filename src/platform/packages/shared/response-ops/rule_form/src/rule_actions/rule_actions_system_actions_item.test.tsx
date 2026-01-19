@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { RuleType } from '@kbn/alerting-types';
+import type { RuleType } from '@kbn/alerting-types';
 import userEvent from '@testing-library/user-event';
 import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
@@ -19,7 +19,7 @@ import {
   getActionTypeModel,
   getConnector,
 } from '../common/test_utils/actions_test_utils';
-import { RuleActionsMessageProps } from './rule_actions_message';
+import type { RuleActionsMessageProps } from './rule_actions_message';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -135,7 +135,6 @@ describe('ruleActionsSystemActionsItem', () => {
 
     expect(screen.getByTestId('ruleActionsSystemActionsItem')).toBeInTheDocument();
     expect(screen.getByText('connector-1')).toBeInTheDocument();
-    expect(screen.getByText('actionType: 1')).toBeInTheDocument();
 
     expect(screen.getByTestId('ruleActionsSystemActionsItemAccordionContent')).toBeVisible();
     expect(screen.getByText('RuleActionsMessage')).toBeInTheDocument();
@@ -222,7 +221,10 @@ describe('ruleActionsSystemActionsItem', () => {
       payload: { uuid: 'uuid-action-1', value: { param: { paramKey: 'someValue' } } },
       type: 'setActionParams',
     });
-    expect(mockValidate).toHaveBeenCalledWith({ param: { paramKey: 'someValue' } });
+    expect(mockValidate).toHaveBeenCalledWith(
+      { param: { paramKey: 'someValue' } },
+      { config: 'config-1' }
+    );
   });
 
   test('should set warning and error if params have errors', async () => {

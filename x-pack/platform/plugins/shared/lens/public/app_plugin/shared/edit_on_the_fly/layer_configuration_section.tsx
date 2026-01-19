@@ -6,34 +6,37 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 import { createIndexPatternService } from '../../../data_views_service/service';
 import { useLensDispatch, updateIndexPatterns } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import type { LayerConfigurationProps } from './types';
-import { useLensSelector } from '../../../state_management';
+import type { ConfigPanelWrapperProps } from '../../../editor_frame_service/editor_frame/config_panel/types';
 
 export function LayerConfiguration({
   attributes,
   coreStart,
   startDependencies,
-  visualizationMap,
-  datasourceMap,
   datasourceId,
   framePublicAPI,
   hasPadding,
   setIsInlineFlyoutVisible,
   getUserMessages,
   onlyAllowSwitchToSubtypes,
+  lensAdapters,
+  dataLoading$,
+  setCurrentAttributes,
+  updateSuggestion,
+  parentApi,
+  panelId,
+  closeFlyout,
+  canEditTextBasedQuery,
+  editorContainer,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
-  const { visualization } = useLensSelector((state) => state.lens);
-  const activeVisualization =
-    visualizationMap[visualization.activeId ?? attributes.visualizationType];
   const indexPatternService = useMemo(
     () =>
       createIndexPatternService({
@@ -50,10 +53,11 @@ export function LayerConfiguration({
     [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
   );
 
-  const layerPanelsProps = {
+  const configPanelWrapperProps: ConfigPanelWrapperProps = {
+    attributes,
+    lensAdapters,
+    dataLoading$,
     framePublicAPI,
-    datasourceMap,
-    visualizationMap,
     core: coreStart,
     dataViews: startDependencies.dataViews,
     uiActions: startDependencies.uiActions,
@@ -63,6 +67,14 @@ export function LayerConfiguration({
     indexPatternService,
     setIsInlineFlyoutVisible,
     getUserMessages,
+    data: startDependencies.data,
+    setCurrentAttributes,
+    updateSuggestion,
+    parentApi,
+    panelId,
+    closeFlyout,
+    canEditTextBasedQuery,
+    editorContainer,
   };
   return (
     <div
@@ -70,13 +82,7 @@ export function LayerConfiguration({
         padding: ${hasPadding ? euiTheme.size.s : 0};
       `}
     >
-      <EuiSpacer size="xs" />
-      <VisualizationToolbar
-        activeVisualization={activeVisualization}
-        framePublicAPI={framePublicAPI}
-      />
-      <EuiSpacer size="m" />
-      <ConfigPanelWrapper {...layerPanelsProps} />
+      <ConfigPanelWrapper {...configPanelWrapperProps} />
     </div>
   );
 }

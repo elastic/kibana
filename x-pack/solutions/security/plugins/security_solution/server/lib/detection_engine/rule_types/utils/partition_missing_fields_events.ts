@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import pick from 'lodash/pick';
-import get from 'lodash/get';
-import partition from 'lodash/partition';
+import { pick, get, partition } from 'lodash';
 
 import type { SignalSourceHit } from '../types';
 

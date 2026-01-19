@@ -1,0 +1,25 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "@testing-library/jest-dom",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
+      "@emotion/react/types/css-prop",
+      "../../../../../typings/emotion.d.ts"
+    ]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core-chrome-layout-components",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-chrome-layout-utils"
+  ]
+}

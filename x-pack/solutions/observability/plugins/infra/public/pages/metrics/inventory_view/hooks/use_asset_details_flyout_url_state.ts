@@ -6,14 +6,14 @@
  */
 
 import * as rt from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/pipeable';
+import { fold } from 'fp-ts/Either';
+import { constant, identity } from 'fp-ts/function';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 
 export const GET_DEFAULT_PROPERTIES: AssetDetailsFlyoutProperties = {
   detailsItemId: null,
-  assetType: null,
+  entityType: null,
 };
 
 const ASSET_DETAILS_FLYOUT_URL_STATE_KEY = 'assetDetailsFlyout';
@@ -36,7 +36,7 @@ export const useAssetDetailsFlyoutState = (): [
 
 const AssetDetailsFlyoutStateRT = rt.type({
   detailsItemId: rt.union([rt.string, rt.null]),
-  assetType: rt.union([rt.string, rt.null]),
+  entityType: rt.union([rt.string, rt.null]),
 });
 
 export type AssetDetailsFlyoutState = rt.TypeOf<typeof AssetDetailsFlyoutStateRT>;

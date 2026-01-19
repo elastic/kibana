@@ -5,25 +5,23 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBasicTableColumn,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiSkeletonRectangle,
-  EuiTableHeader,
   EuiText,
-  EuiToolTip,
   formatNumber,
 } from '@elastic/eui';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
 import {
   BYTE_NUMBER_FORMAT,
@@ -33,12 +31,13 @@ import {
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { TimeRangeConfig } from '../../../../common/types';
+import type { TimeRangeConfig } from '../../../../common/types';
 import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { IntegrationIcon, PrivilegesWarningIconWrapper } from '../../common';
 import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
 import { QualityStatPercentageLink } from './quality_stat_percentage_link';
+import { FailureStoreHoverLink } from './failure_store_link';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Data set name',
@@ -121,7 +120,7 @@ const degradedDocsColumnTooltip = (
 const failedDocsColumnTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.failedDocsColumnTooltip"
-    defaultMessage="The percentage of docs sent to failure store due to an issue during ingestion."
+    defaultMessage="The percentage of docs sent to failure store due to an issue during ingestion. Failed documents are only captured if the failure store is explicitly enabled."
   />
 );
 
@@ -169,7 +168,7 @@ const datasetQualityColumnTooltip = (
 
 export const getDatasetQualityTableColumns = ({
   fieldFormats,
-  canUserMonitorDataset,
+  canUserMonitorAnyDataset,
   canUserMonitorAnyDataStream,
   loadingDataStreamStats,
   loadingDocStats,
@@ -179,10 +178,10 @@ export const getDatasetQualityTableColumns = ({
   isActiveDataset,
   timeRange,
   urlService,
-  isFailureStoreEnabled,
+  canReadFailureStore,
 }: {
   fieldFormats: FieldFormatsStart;
-  canUserMonitorDataset: boolean;
+  canUserMonitorAnyDataset: boolean;
   canUserMonitorAnyDataStream: boolean;
   loadingDataStreamStats: boolean;
   loadingDocStats: boolean;
@@ -192,13 +191,12 @@ export const getDatasetQualityTableColumns = ({
   isActiveDataset: (lastActivity: number) => boolean;
   timeRange: TimeRangeConfig;
   urlService: BrowserUrlService;
-  isFailureStoreEnabled: boolean;
+  canReadFailureStore: boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
-      name: (
-        <EuiTableHeader data-test-subj="datasetQualityNameColumn">{nameColumnName}</EuiTableHeader>
-      ),
+      name: nameColumnName,
+      'data-test-subj': 'datasetQualityNameColumn',
       field: 'title',
       sortable: true,
       render: (title: string, dataStreamStat: DataStreamStat) => {
@@ -226,11 +224,8 @@ export const getDatasetQualityTableColumns = ({
       },
     },
     {
-      name: (
-        <EuiTableHeader data-test-subj="datasetQualityNamespaceColumn">
-          {namespaceColumnName}
-        </EuiTableHeader>
-      ),
+      name: namespaceColumnName,
+      'data-test-subj': 'datasetQualityNamespaceColumn',
       field: 'namespace',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -247,14 +242,11 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
-    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
+    ...(canUserMonitorAnyDataset && canUserMonitorAnyDataStream
       ? [
           {
-            name: (
-              <EuiTableHeader data-test-subj="datasetQualitySizeColumn">
-                {sizeColumnName}
-              </EuiTableHeader>
-            ),
+            name: sizeColumnName,
+            'data-test-subj': 'datasetQualitySizeColumn',
             field: 'sizeBytes',
             sortable: true,
             render: (_: any, dataStreamStat: DataStreamStat) => {
@@ -282,16 +274,12 @@ export const getDatasetQualityTableColumns = ({
         ]
       : []),
     {
-      name: (
-        <EuiTableHeader data-test-subj="datasetQualityQualityColumn">
-          <EuiToolTip content={datasetQualityColumnTooltip}>
-            <span>
-              {`${datasetQualityColumnName} `}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        </EuiTableHeader>
-      ),
+      name: datasetQualityColumnName,
+      'data-test-subj': 'datasetQualityQualityColumn',
+      nameTooltip: {
+        content: datasetQualityColumnTooltip,
+        icon: 'question',
+      },
       field: 'quality',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -303,16 +291,12 @@ export const getDatasetQualityTableColumns = ({
       width: '140px',
     },
     {
-      name: (
-        <EuiTableHeader data-test-subj="datasetQualityPercentageColumn">
-          <EuiToolTip content={degradedDocsColumnTooltip}>
-            <span>
-              {`${degradedDocsColumnName} `}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        </EuiTableHeader>
-      ),
+      name: degradedDocsColumnName,
+      'data-test-subj': 'datasetQualityPercentageColumn',
+      nameTooltip: {
+        content: degradedDocsColumnTooltip,
+        icon: 'question',
+      },
       field: 'degradedDocs.percentage',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -335,56 +319,57 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '140px',
     },
-    ...(isFailureStoreEnabled
+    ...(canReadFailureStore
       ? [
           {
-            name: (
-              <EuiTableHeader data-test-subj="datasetQualityFailedPercentageColumn">
-                <EuiToolTip content={failedDocsColumnTooltip}>
-                  <span>
-                    {`${failedDocsColumnName} `}
-                    <EuiIcon
-                      size="s"
-                      color="subdued"
-                      type="questionInCircle"
-                      className="eui-alignTop"
-                    />
-                  </span>
-                </EuiToolTip>
-              </EuiTableHeader>
-            ),
+            name: failedDocsColumnName,
+            'data-test-subj': 'datasetQualityFailedPercentageColumn',
+            nameTooltip: {
+              content: failedDocsColumnTooltip,
+              icon: 'question',
+            },
             field: 'failedDocs.percentage',
             sortable: true,
-            render: (_: any, dataStreamStat: DataStreamStat) => (
-              <QualityStatPercentageLink
-                isLoading={loadingFailedStats}
-                dataStreamStat={dataStreamStat}
-                timeRange={timeRange}
-                accessor="failedDocs"
-                selector={FAILURE_STORE_SELECTOR}
-                fewDocStatsTooltip={(failedDocsCount: number) =>
-                  i18n.translate('xpack.datasetQuality.fewFailedDocsTooltip', {
-                    defaultMessage: '{failedDocsCount} failed docs in this data set.',
-                    values: {
-                      failedDocsCount,
-                    },
-                  })
-                }
-                dataTestSubj="datasetQualityFailedDocsPercentageLink"
-              />
-            ),
+            render: (_: any, dataStreamStat: DataStreamStat) => {
+              if (
+                !dataStreamStat.hasFailureStore &&
+                dataStreamStat.userPrivileges?.canReadFailureStore
+              ) {
+                return <FailureStoreHoverLink dataStreamStat={dataStreamStat} />;
+              }
+              return (
+                <PrivilegesWarningIconWrapper
+                  title={`sizeBytes-${dataStreamStat.title}`}
+                  hasPrivileges={dataStreamStat.userPrivileges?.canReadFailureStore ?? true}
+                >
+                  <QualityStatPercentageLink
+                    isLoading={loadingFailedStats}
+                    dataStreamStat={dataStreamStat}
+                    timeRange={timeRange}
+                    accessor="failedDocs"
+                    selector={FAILURE_STORE_SELECTOR}
+                    fewDocStatsTooltip={(failedDocsCount: number) =>
+                      i18n.translate('xpack.datasetQuality.fewFailedDocsTooltip', {
+                        defaultMessage: '{failedDocsCount} failed docs in this data set.',
+                        values: {
+                          failedDocsCount,
+                        },
+                      })
+                    }
+                    dataTestSubj="datasetQualityFailedDocsPercentageLink"
+                  />
+                </PrivilegesWarningIconWrapper>
+              );
+            },
             width: '140px',
           },
         ]
       : []),
-    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
+    ...(canUserMonitorAnyDataset && canUserMonitorAnyDataStream
       ? [
           {
-            name: (
-              <EuiTableHeader data-test-subj="datasetQualityLastActivityColumn">
-                {lastActivityColumnName}
-              </EuiTableHeader>
-            ),
+            name: lastActivityColumnName,
+            'data-test-subj': 'datasetQualityLastActivityColumn',
             field: 'lastActivity',
             render: (timestamp: number) => (
               <EuiSkeletonRectangle
@@ -396,9 +381,12 @@ export const getDatasetQualityTableColumns = ({
                 {!isActiveDataset(timestamp) ? (
                   <EuiFlexGroup gutterSize="xs" alignItems="center">
                     <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
-                    <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                      <EuiIcon tabIndex={0} type="iInCircle" size="s" />
-                    </EuiToolTip>
+                    <EuiIconTip
+                      position="top"
+                      content={inactiveDatasetActivityColumnTooltip}
+                      type="info"
+                      size="s"
+                    />
                   </EuiFlexGroup>
                 ) : (
                   fieldFormats
@@ -437,7 +425,7 @@ const RedirectLink = ({
 }) => {
   const { sendTelemetry } = useDatasetRedirectLinkTelemetry({ rawName: dataStreamStat.rawName });
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat,
+    dataStreamStat: `${dataStreamStat.rawName},${dataStreamStat.rawName}${FAILURE_STORE_SELECTOR}`,
     sendTelemetry,
     timeRangeConfig: timeRange,
   });

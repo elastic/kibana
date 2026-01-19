@@ -5,47 +5,66 @@
  * 2.0.
  */
 
-import { noop } from 'lodash';
-import {
+import type {
   HasLibraryTransforms,
   PublishesWritableTitle,
   PublishesWritableDescription,
   SerializedTitles,
   StateComparators,
-  getUnchangingComparator,
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
+import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
-import { buildObservableVariable, isTextBasedLanguage } from '../helper';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type {
   LensComponentProps,
   LensPanelProps,
   LensRuntimeState,
-  LensEmbeddableStartServices,
   LensOverrides,
   LensSharedProps,
   IntegrationCallbacks,
   LensInternalApi,
-  LensApi,
-  LensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
+import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
+
+import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
-import { StateManagementConfig } from './initialize_state_management';
+import type { StateManagementConfig } from './initialize_state_management';
 
 // Convenience type for the serialized props of this initializer
 type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;
 
+export const dashboardServicesComparators: StateComparators<SerializedProps> = {
+  ...titleComparators,
+  disableTriggers: 'referenceEquality',
+  overrides: 'referenceEquality',
+  id: 'skip',
+  palette: 'skip',
+  renderMode: 'skip',
+  syncColors: 'skip',
+  syncCursor: 'skip',
+  syncTooltips: 'skip',
+  executionContext: 'skip',
+  noPadding: 'skip',
+  viewMode: 'skip',
+  style: 'skip',
+  className: 'skip',
+  forceDSL: 'skip',
+  esqlVariables: 'skip',
+};
+
 export interface DashboardServicesConfig {
   api: PublishesWritableTitle &
     PublishesWritableDescription &
-    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
+    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
     Pick<LensApi, 'parentApi'> &
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
-  serialize: () => SerializedProps;
-  comparators: StateComparators<
-    SerializedProps & Pick<LensApi, 'parentApi'> & { isNewPanel?: boolean }
-  >;
-  cleanup: () => void;
+  anyStateChange$: Observable<void>;
+  getLatestState: () => SerializedProps;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 }
 
 /**
@@ -62,22 +81,12 @@ export function initializeDashboardServices(
 ): DashboardServicesConfig {
   // For some legacy reason the title and description default value is picked differently
   // ( based on existing FTR tests ).
-  const [defaultTitle$] = buildObservableVariable<string | undefined>(
-    initialState.title || internalApi.attributes$.getValue().title
-  );
-  const [defaultDescription$] = buildObservableVariable<string | undefined>(
+  const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState.attributes.title);
+  const defaultDescription$ = new BehaviorSubject<string | undefined>(
     initialState.savedObjectId
       ? internalApi.attributes$.getValue().description || initialState.description
       : initialState.description
   );
-  // The observable references here are the same to the internalApi,
-  // the buildObservableVariable re-uses the same observable when detected but it builds the right comparator
-  const [overrides$, overridesComparator] = buildObservableVariable<LensOverrides['overrides']>(
-    internalApi.overrides$
-  );
-  const [disableTriggers$, disabledTriggersComparator] = buildObservableVariable<
-    boolean | undefined
-  >(internalApi.disableTriggers$);
 
   return {
     api: {
@@ -123,15 +132,22 @@ export function initializeDashboardServices(
       canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
-        currentState.savedObjectId = newId;
-        return attributeService.extractReferences(currentState);
+        return {
+          ...currentState,
+          savedObjectId: newId,
+        };
       },
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return attributeService.extractReferences(byValueRuntimeState);
+        return transformToApiConfig(byValueRuntimeState);
       },
     },
-    serialize: () => {
+    anyStateChange$: merge(
+      titleManager.anyStateChange$,
+      internalApi.overrides$,
+      internalApi.disableTriggers$
+    ).pipe(map(() => undefined)),
+    getLatestState: () => {
       const { style, className } = apiHasLensComponentProps(parentApi)
         ? parentApi
         : ({} as LensComponentProps);
@@ -143,34 +159,19 @@ export function initializeDashboardServices(
           }
         : {};
       return {
-        ...titleManager.serialize(),
+        ...titleManager.getLatestState(),
         style,
         className,
         ...settings,
         palette: initialState.palette,
-        overrides: overrides$.getValue(),
-        disableTriggers: disableTriggers$.getValue(),
+        overrides: internalApi.overrides$.getValue(),
+        disableTriggers: internalApi.disableTriggers$.getValue(),
       };
     },
-    comparators: {
-      ...titleManager.comparators,
-      id: getUnchangingComparator<SerializedTitles & LensPanelProps, 'id'>(),
-      palette: getUnchangingComparator<SerializedTitles & LensPanelProps, 'palette'>(),
-      renderMode: getUnchangingComparator<SerializedTitles & LensPanelProps, 'renderMode'>(),
-      syncColors: getUnchangingComparator<SerializedTitles & LensPanelProps, 'syncColors'>(),
-      syncCursor: getUnchangingComparator<SerializedTitles & LensPanelProps, 'syncCursor'>(),
-      syncTooltips: getUnchangingComparator<SerializedTitles & LensPanelProps, 'syncTooltips'>(),
-      executionContext: getUnchangingComparator<LensSharedProps, 'executionContext'>(),
-      noPadding: getUnchangingComparator<LensSharedProps, 'noPadding'>(),
-      viewMode: getUnchangingComparator<LensSharedProps, 'viewMode'>(),
-      style: getUnchangingComparator<LensSharedProps, 'style'>(),
-      className: getUnchangingComparator<LensSharedProps, 'className'>(),
-      overrides: overridesComparator,
-      disableTriggers: disabledTriggersComparator,
-      forceDSL: getUnchangingComparator<LensSharedProps, 'forceDSL'>(),
-      isNewPanel: getUnchangingComparator<{ isNewPanel?: boolean }, 'isNewPanel'>(),
-      parentApi: getUnchangingComparator<Pick<LensApi, 'parentApi'>, 'parentApi'>(),
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
+      titleManager.reinitializeState(lastSaved);
+      internalApi.updateDisabledTriggers(lastSaved?.disableTriggers);
+      internalApi.updateOverrides(lastSaved?.overrides);
     },
-    cleanup: noop,
   };
 }

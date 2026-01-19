@@ -5,32 +5,57 @@
  * 2.0.
  */
 
-import { EuiHealth, EuiText } from '@elastic/eui';
-import React, { ReactNode } from 'react';
-import type { QualityIndicators, InfoIndicators } from '../../../common/types';
+import type { IconType } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { css } from '@emotion/react';
+import type { QualityIndicators } from '../../../common/types';
 
 export function QualityIndicator({
   quality,
   description,
-  isColoredDescription,
-  textSize = 's',
+  dataTestSubj,
 }: {
   quality: QualityIndicators;
   description: string | ReactNode;
-  isColoredDescription?: boolean;
-  textSize?: 'xs' | 's' | 'm';
+  dataTestSubj?: string;
 }) {
-  const qualityColors: Record<QualityIndicators, InfoIndicators> = {
-    poor: 'danger',
-    degraded: 'warning',
-    good: 'success',
+  const { euiTheme } = useEuiTheme();
+  const qualityColors: Record<QualityIndicators, string> = {
+    poor: euiTheme.colors.backgroundLightDanger,
+    degraded: euiTheme.colors.backgroundLightWarning,
+    good: euiTheme.colors.backgroundLightSuccess,
   };
 
+  const qualityTextColors: Record<QualityIndicators, string> = {
+    poor: euiTheme.colors.textDanger,
+    degraded: euiTheme.colors.textWarning,
+    good: euiTheme.colors.textSuccess,
+  };
+
+  const qualityIcons: Record<QualityIndicators, IconType> = {
+    poor: 'error',
+    degraded: 'warning',
+    good: 'checkCircle',
+  };
+
+  const BadgeIconType = () => (
+    <EuiIcon size="s" type={qualityIcons[quality]} color={qualityTextColors[quality]} />
+  );
+
   return (
-    <EuiHealth color={qualityColors[quality]} textSize={textSize}>
-      <EuiText size="relative" color={isColoredDescription ? qualityColors[quality] : 'white'}>
+    <EuiBadge color={qualityColors[quality]} iconType={BadgeIconType}>
+      <EuiText
+        color={qualityTextColors[quality]}
+        size="xs"
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+        data-test-subj={dataTestSubj}
+      >
         {description}
       </EuiText>
-    </EuiHealth>
+    </EuiBadge>
   );
 }

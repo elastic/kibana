@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
 const homeBreadcrumbText = i18n.translate('xpack.ingestPipelines.breadcrumb.pipelinesLabel', {
-  defaultMessage: 'Ingest Pipelines',
+  defaultMessage: 'Ingest pipelines',
 });
 
 export class BreadcrumbService {

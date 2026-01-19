@@ -10,17 +10,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 
-import type {
-  OptionsListControlState,
-  OptionsListSearchTechnique,
-} from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
-import { CustomOptionsComponentProps } from '../../types';
+import type { CustomOptionsComponentProps } from '../../types';
 import { DEFAULT_SEARCH_TECHNIQUE } from '../constants';
 import { OptionsListStrings } from '../options_list_strings';
+import { CustomOptionsAdditionalSettings } from '../../components';
 
 const selectionOptions = [
   {
@@ -72,23 +69,19 @@ export const OptionsListEditorOptions = ({
   initialState,
   field,
   updateState,
-  controlGroupApi,
-}: CustomOptionsComponentProps<OptionsListControlState>) => {
-  const allowExpensiveQueries = useStateFromPublishingSubject(
-    controlGroupApi.allowExpensiveQueries$
-  );
-
+}: CustomOptionsComponentProps<OptionsListDSLControlState>) => {
   const [singleSelect, setSingleSelect] = useState<boolean>(initialState.singleSelect ?? false);
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
     initialState.runPastTimeout ?? false
   );
+
   const [searchTechnique, setSearchTechnique] = useState<OptionsListSearchTechnique>(
     initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
   );
 
   const compatibleSearchTechniques = useMemo(
-    () => getCompatibleSearchTechniques(field.type),
-    [field.type]
+    () => getCompatibleSearchTechniques(field?.type),
+    [field?.type]
   );
 
   const searchOptions = useMemo(() => {
@@ -139,9 +132,10 @@ export const OptionsListEditorOptions = ({
             setSingleSelect(newSingleSelect);
             updateState({ singleSelect: newSingleSelect });
           }}
+          name="selectionType"
         />
       </EuiFormRow>
-      {allowExpensiveQueries && compatibleSearchTechniques.length > 1 && (
+      {compatibleSearchTechniques.length > 1 && (
         <EuiFormRow
           label={OptionsListStrings.editor.getSearchOptionsTitle()}
           data-test-subj="optionsListControl__searchOptionsRadioGroup"
@@ -155,10 +149,11 @@ export const OptionsListEditorOptions = ({
               setSearchTechnique(newSearchTechnique);
               updateState({ searchTechnique: newSearchTechnique });
             }}
+            name="searchTechnique"
           />
         </EuiFormRow>
       )}
-      <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
+      <CustomOptionsAdditionalSettings initialState={initialState} updateState={updateState}>
         <EuiSwitch
           compressed
           label={
@@ -175,7 +170,7 @@ export const OptionsListEditorOptions = ({
           }}
           data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
         />
-      </EuiFormRow>
+      </CustomOptionsAdditionalSettings>
     </>
   );
 };

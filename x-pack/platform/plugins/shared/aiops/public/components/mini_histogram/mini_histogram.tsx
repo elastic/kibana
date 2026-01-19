@@ -79,7 +79,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
   if (isLoading) {
     return (
       <div css={[cssChartSize, cssCenter]}>
-        <EuiLoadingChart mono />
+        <EuiLoadingChart />
       </div>
     );
   }
@@ -111,6 +111,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
         />
         <BarSeries
           id="doc_count_overall"
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'key'}
@@ -121,6 +122,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
         />
         <BarSeries
           id={label}
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'key'}

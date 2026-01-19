@@ -20,7 +20,7 @@ export function ApmCustomAssetsExtension() {
   const views: CustomAssetsAccordionProps['views'] = [
     {
       name: i18n.translate('xpack.apm.fleetIntegration.assets.name', {
-        defaultMessage: 'Services',
+        defaultMessage: 'Service inventory',
       }),
       url: `${basePath}/app/apm`,
       description: i18n.translate('xpack.apm.fleetIntegration.assets.description', {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SyntheticsEsClient } from '../lib';
-import { ScreenshotBlockDoc } from '../../common/runtime_types';
+import type { SyntheticsEsClient } from '../lib';
+import type { ScreenshotBlockDoc } from '../../common/runtime_types';
 
 interface ScreenshotBlockResultType {
   _id: string;
@@ -41,7 +41,7 @@ export const getJourneyScreenshotBlocks = async ({
     size: 1000,
   };
 
-  const fetchScreenshotBlocksResult = await syntheticsEsClient.search({ body });
+  const fetchScreenshotBlocksResult = await syntheticsEsClient.search(body);
 
   return (fetchScreenshotBlocksResult.body.hits.hits as ScreenshotBlockResultType[]).map(
     ({ _id, _source }) => ({

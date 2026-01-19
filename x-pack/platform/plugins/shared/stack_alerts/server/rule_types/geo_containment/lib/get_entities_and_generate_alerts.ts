@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type {
   GeoContainmentAlertInstanceState,
   GeoContainmentAlertInstanceContext,

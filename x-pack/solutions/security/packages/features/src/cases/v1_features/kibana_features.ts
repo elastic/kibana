@@ -8,17 +8,13 @@
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { BaseKibanaFeatureConfig } from '../../types';
-import { APP_ID, CASES_FEATURE_ID, CASES_FEATURE_ID_V2 } from '../../constants';
+import { APP_ID, CASES_FEATURE_ID, CASES_FEATURE_ID_V3 } from '../../constants';
 import type { CasesFeatureParams } from '../types';
 
-/**
- * @deprecated Use getCasesBaseKibanaFeatureV2 instead
- */
 export const getCasesBaseKibanaFeature = ({
-  uiCapabilities,
   apiTags,
+  uiCapabilities,
   savedObjects,
 }: CasesFeatureParams): BaseKibanaFeatureConfig => {
   return {
@@ -30,7 +26,7 @@ export const getCasesBaseKibanaFeature = ({
             'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
           values: {
             currentId: CASES_FEATURE_ID,
-            casesFeatureIdV2: CASES_FEATURE_ID_V2,
+            casesFeatureIdV2: CASES_FEATURE_ID_V3,
           },
         }
       ),
@@ -42,15 +38,14 @@ export const getCasesBaseKibanaFeature = ({
         defaultMessage: 'Cases (Deprecated)',
       }
     ),
-    order: 1100,
+    order: 1200,
     category: DEFAULT_APP_CATEGORIES.security,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [CASES_FEATURE_ID, 'kibana'],
     catalogue: [APP_ID],
     cases: [APP_ID],
     privileges: {
       all: {
-        api: [...apiTags.all, ...apiTags.createComment],
+        api: [...apiTags.default.all, ...apiTags.default.createComment],
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -60,24 +55,30 @@ export const getCasesBaseKibanaFeature = ({
           push: [APP_ID],
           createComment: [APP_ID],
           reopenCase: [APP_ID],
+          assign: [APP_ID],
         },
         savedObject: {
           all: [...savedObjects.files],
           read: [...savedObjects.files],
         },
-        ui: uiCapabilities.all,
+        ui: [
+          ...uiCapabilities.default.all,
+          ...uiCapabilities.default.createComment,
+          ...uiCapabilities.default.reopenCase,
+          ...uiCapabilities.default.assignCase,
+        ],
         replacedBy: {
-          default: [{ feature: CASES_FEATURE_ID_V2, privileges: ['all'] }],
+          default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['all'] }],
           minimal: [
             {
-              feature: CASES_FEATURE_ID_V2,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen'],
+              feature: CASES_FEATURE_ID_V3,
+              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
             },
           ],
         },
       },
       read: {
-        api: apiTags.read,
+        api: apiTags.default.read,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -87,10 +88,10 @@ export const getCasesBaseKibanaFeature = ({
           all: [],
           read: [...savedObjects.files],
         },
-        ui: uiCapabilities.read,
+        ui: uiCapabilities.default.read,
         replacedBy: {
-          default: [{ feature: CASES_FEATURE_ID_V2, privileges: ['read'] }],
-          minimal: [{ feature: CASES_FEATURE_ID_V2, privileges: ['minimal_read'] }],
+          default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['read'] }],
+          minimal: [{ feature: CASES_FEATURE_ID_V3, privileges: ['minimal_read'] }],
         },
       },
     },

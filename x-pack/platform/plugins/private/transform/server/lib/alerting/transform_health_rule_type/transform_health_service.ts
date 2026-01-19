@@ -7,11 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { keyBy, memoize, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { TransformHealthRuleParams } from '@kbn/response-ops-rule-params/transform_health';
 import type { TransformStats } from '../../../../common/types/transform_stats';
 import {
   ALL_TRANSFORMS_SELECTION,
@@ -22,7 +23,6 @@ import {
   TRANSFORM_RULE_TYPE,
   TRANSFORM_STATE,
 } from '../../../../common/constants';
-import type { TransformHealthRuleParams } from './schema';
 import { getResultTestConfig } from '../../../../common/utils/alerts';
 import type {
   ErrorMessagesTransformResponse,

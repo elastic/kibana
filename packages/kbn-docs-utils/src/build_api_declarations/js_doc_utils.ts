@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { JSDoc, JSDocTag, Node } from 'ts-morph';
-import { TextWithLinks } from '../types';
+import type { JSDoc, JSDocTag } from 'ts-morph';
+import { Node } from 'ts-morph';
+import type { TextWithLinks } from '../types';
 
 /**
  * Extracts comments out of the node to use as the description.

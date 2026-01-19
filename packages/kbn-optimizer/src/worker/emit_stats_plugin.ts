@@ -10,9 +10,9 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import webpack from 'webpack';
-
-import { Bundle } from '../common';
+import type webpack from 'webpack';
+import { STATS_OPTIONS_DEFAULT_USEFUL_FILTER } from '@kbn/optimizer-webpack-helpers';
+import type { Bundle } from '../common';
 
 export class EmitStatsPlugin {
   constructor(private readonly bundle: Bundle) {}
@@ -27,7 +27,7 @@ export class EmitStatsPlugin {
       (stats) => {
         Fs.writeFileSync(
           Path.resolve(this.bundle.outputDir, 'stats.json'),
-          JSON.stringify(stats.toJson(), null, 2)
+          JSON.stringify(stats.toJson(STATS_OPTIONS_DEFAULT_USEFUL_FILTER), null, 2)
         );
       }
     );

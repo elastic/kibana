@@ -5,33 +5,36 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import qs from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { parse } from 'query-string';
 
+import type {
+  EuiInMemoryTableProps,
+  EuiTableFieldDataColumnType,
+  EuiSelectableOption,
+} from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiLink,
   EuiButton,
   EuiButtonIcon,
-  EuiInMemoryTableProps,
-  EuiTableFieldDataColumnType,
   EuiPopover,
-  EuiBadge,
+  EuiBetaBadge,
   EuiToolTip,
   EuiFilterGroup,
   EuiSelectable,
   EuiFilterButton,
-  EuiSelectableOption,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
-import { Pipeline } from '../../../../common/types';
+import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
 export interface Props {
@@ -41,6 +44,7 @@ export interface Props {
   onEditPipelineClick: (pipelineName: string) => void;
   onClonePipelineClick: (pipelineName: string) => void;
   onDeletePipelineClick: (pipelineName: Pipeline[]) => void;
+  openFlyout: (pipelineName: string) => void;
 }
 
 export const deprecatedPipelineBadge = {
@@ -111,6 +115,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onEditPipelineClick,
   onClonePipelineClick,
   onDeletePipelineClick,
+  openFlyout,
 }) => {
   const [queryText, setQueryText] = useState<string>('');
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>(defaultFilterOptions);
@@ -118,13 +123,14 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<Pipeline>({
     tableId: 'ingestPipelines',
     initialPageSize: 10,
     initialSort: { field: 'name', direction: 'asc' },
     pageSizeOptions: PAGE_SIZE_OPTIONS,
   });
-
   const filteredPipelines = useMemo(() => {
     // Filter pipelines list by whatever the user entered in the search bar
     const pipelinesAfterSearch = (pipelines || []).filter((pipeline) => {
@@ -152,7 +158,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
       deprecated,
       managed,
     } = qs.parse(history?.location?.search || '');
-
     if (searchQuery) {
       setQueryText(searchQuery as string);
     }
@@ -172,12 +177,8 @@ export const PipelineTable: FunctionComponent<Props> = ({
     const isDefaultFilters = isDefaultFilterOptions(serializedFilterOptions);
     const isDefaultFilterConfiguration = isQueryEmpty && isDefaultFilters;
 
-    // When the default filters are set, clear them up from the url
-    if (isDefaultFilterConfiguration) {
-      history.push('');
-    } else {
-      // Otherwise, we can go ahead and update the query params with whatever
-      // the user has set.
+    if (!isDefaultFilterConfiguration) {
+      const { pipeline } = parse(location.search.substring(1));
       history.push({
         pathname: '',
         search:
@@ -186,6 +187,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
             {
               ...(!isQueryEmpty ? { queryText } : {}),
               ...(!isDefaultFilters ? serializedFilterOptions : {}),
+              ...(pipeline ? { pipeline } : {}),
             },
             { strict: false, arrayFormat: 'index' }
           ),
@@ -199,12 +201,17 @@ export const PipelineTable: FunctionComponent<Props> = ({
   };
   const closePopover = () => {
     setIsPopoverOpen(false);
+    // Return focus to the filter button when popover closes
+    if (filterButtonRef.current) {
+      filterButtonRef.current.focus?.();
+    }
   };
 
   const button = (
     <EuiFilterButton
       iconType="arrowDown"
       badgeColor="success"
+      buttonRef={filterButtonRef}
       data-test-subj="filtersDropdown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
@@ -319,17 +326,8 @@ export const PipelineTable: FunctionComponent<Props> = ({
         }),
         sortable: true,
         render: (name: string) => {
-          const currentSearch = history.location.search;
-          const prependSearch = isEmpty(currentSearch) ? '?' : `${currentSearch}&`;
-
           return (
-            <EuiLink
-              data-test-subj="pipelineDetailsLink"
-              {...reactRouterNavigate(history, {
-                pathname: '',
-                search: `${prependSearch}pipeline=${encodeURIComponent(name)}`,
-              })}
-            >
+            <EuiLink data-test-subj="pipelineDetailsLink" onClick={() => openFlyout(name)}>
               {name}
             </EuiLink>
           );
@@ -342,19 +340,26 @@ export const PipelineTable: FunctionComponent<Props> = ({
             <EuiFlexGroup direction="column" gutterSize="xs" alignItems="center">
               {pipeline.isManaged && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow" data-test-subj="isManagedBadge">
-                    {i18n.translate('xpack.ingestPipelines.list.table.managedBadgeLabel', {
+                  <EuiBetaBadge
+                    label={i18n.translate('xpack.ingestPipelines.list.table.managedBadgeLabel', {
                       defaultMessage: 'Managed',
                     })}
-                  </EuiBadge>
+                    color="hollow"
+                    size="s"
+                    data-test-subj="isManagedBadge"
+                  />
                 </EuiFlexItem>
               )}
               {pipeline.deprecated && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
-                    <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
-                      {deprecatedPipelineBadge.badge}
-                    </EuiBadge>
+                    <EuiBetaBadge
+                      label={deprecatedPipelineBadge.badge}
+                      color="subdued"
+                      size="s"
+                      data-test-subj="isDeprecatedBadge"
+                      tabIndex={0}
+                    />
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
@@ -402,10 +407,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
           },
           {
             name: i18n.translate('xpack.ingestPipelines.list.table.cloneActionLabel', {
-              defaultMessage: 'Clone',
+              defaultMessage: 'Duplicate',
             }),
             description: i18n.translate('xpack.ingestPipelines.list.table.cloneActionDescription', {
-              defaultMessage: 'Clone this pipeline',
+              defaultMessage: 'Duplicate this pipeline',
             }),
             type: 'icon',
             icon: 'copy',

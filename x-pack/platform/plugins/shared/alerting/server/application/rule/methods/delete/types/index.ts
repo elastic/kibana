@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './delete_rule_params';
+export type * from './delete_rule_params';

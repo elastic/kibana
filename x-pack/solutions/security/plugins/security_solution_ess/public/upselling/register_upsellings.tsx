@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   ALERT_SUPPRESSION_RULE_DETAILS,
   ALERT_SUPPRESSION_RULE_FORM,
+  PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION,
   UPGRADE_ALERT_ASSIGNMENTS,
   UPGRADE_INVESTIGATION_GUIDE,
   UPGRADE_NOTES_MANAGEMENT_USER_FILTER,
-  UPGRADE_PREBUILT_RULE_CUSTOMIZATION,
+  PREBUILT_RULE_CUSTOMIZATION,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   MessageUpsellings,
@@ -28,8 +29,11 @@ import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 import {
   AttackDiscoveryUpsellingPageLazy,
+  AIValueUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
+  SiemMigrationsStartUpsellSectionLazy,
+  SiemMigrationsTranslatedRulesUpsellPageLazy,
 } from './lazy_upselling';
 
 interface UpsellingsConfig {
@@ -100,6 +104,17 @@ export const upsellingPages: UpsellingPages = [
     minimumLicenseRequired: 'enterprise',
     component: AttackDiscoveryUpsellingPageLazy,
   },
+  {
+    pageName: SecurityPageName.aiValue,
+    minimumLicenseRequired: 'enterprise',
+    component: AIValueUpsellingPageLazy,
+  },
+
+  {
+    pageName: SecurityPageName.siemMigrationsRules,
+    minimumLicenseRequired: 'enterprise',
+    component: SiemMigrationsTranslatedRulesUpsellPageLazy,
+  },
 ];
 
 // Upsellings for sections, linked by arbitrary ids
@@ -109,6 +124,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'entity_analytics_panel',
     minimumLicenseRequired: 'platinum',
     component: EntityAnalyticsUpsellingSectionLazy,
+  },
+  {
+    id: 'siem_migrations_start',
+    minimumLicenseRequired: 'enterprise',
+    component: SiemMigrationsStartUpsellSectionLazy,
   },
 ];
 
@@ -142,6 +162,11 @@ export const upsellingMessages: UpsellingMessages = [
   {
     id: 'prebuilt_rule_customization',
     minimumLicenseRequired: 'enterprise',
-    message: UPGRADE_PREBUILT_RULE_CUSTOMIZATION('Enterprise'),
+    message: PREBUILT_RULE_CUSTOMIZATION('Enterprise', 'subscription'),
+  },
+  {
+    id: 'prebuilt_rule_customization_description',
+    minimumLicenseRequired: 'enterprise',
+    message: PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION('Enterprise', 'subscription'),
   },
 ];

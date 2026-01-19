@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Unified alerts (detection and attack alerts) search API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/unified_alerts/search:
+    post:
+      x-labels: [serverless, ess]
+      operationId: SearchUnifiedAlerts
+      x-codegen-enabled: true
+      summary: Find and/or aggregate detection and attack alerts
+      description: Find and/or aggregate detection and attack alerts that match the given query.
+      tags:
+        - Unified Alerts API
+      requestBody:
+        description: Search and/or aggregation query
+        required: true
+        content:
+          application/json:
+            schema:
+              description: Elasticsearch query and aggregation request
+              $ref: '../../signals/query_signals/query_signals_route.schema.yaml#/components/schemas/QueryAlertsBodyParams'
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                description: Elasticsearch search response
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

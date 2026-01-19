@@ -43,9 +43,13 @@
             "section": "def-public.AppSetupUIPluginDependencies",
             "text": "AppSetupUIPluginDependencies"
           },
-          ", never>"
+          ", ",
+          "AppPluginSetupDependencies",
+          ">"
         ],
         "path": "src/platform/plugins/shared/console/public/plugin.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,6 +64,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/console/public/plugin.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -75,6 +81,8 @@
                   "<object>"
                 ],
                 "path": "src/platform/plugins/shared/console/public/plugin.ts",
+                "lineNumber": 46,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -92,7 +100,9 @@
             "signature": [
               "({ notifications, getStartServices, http }: ",
               "CoreSetup",
-              "<{}, unknown>, { devTools, home, share, usageCollection }: ",
+              "<",
+              "AppPluginSetupDependencies",
+              ", unknown>, { devTools, home, share, usageCollection }: ",
               {
                 "pluginId": "console",
                 "scope": "public",
@@ -110,6 +120,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/console/public/plugin.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -122,9 +134,13 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<{}, unknown>"
+                  "<",
+                  "AppPluginSetupDependencies",
+                  ", unknown>"
                 ],
                 "path": "src/platform/plugins/shared/console/public/plugin.ts",
+                "lineNumber": 56,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -146,6 +162,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/console/public/plugin.ts",
+                "lineNumber": 57,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -181,6 +199,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/console/public/plugin.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -195,6 +215,8 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/console/public/plugin.ts",
+                "lineNumber": 138,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -216,6 +238,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/console/public/plugin.ts",
+                "lineNumber": 138,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -237,6 +261,8 @@
         "label": "AppSetupUIPluginDependencies",
         "description": [],
         "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -258,6 +284,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -278,54 +306,30 @@
               }
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "console",
             "id": "def-public.AppSetupUIPluginDependencies.share",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "share",
             "description": [],
             "signature": [
-              "{ register: (shareMenuProvider: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShareMenuProvider",
-                "text": "ShareMenuProvider"
-              },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.AnonymousAccessServiceContract",
-                "text": "AnonymousAccessServiceContract"
-              },
-              ") => void; }"
+                "section": "def-public.SharePublicSetup",
+                "text": "SharePublicSetup"
+              }
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -347,6 +351,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -361,6 +367,8 @@
         "label": "AppStartUIPluginDependencies",
         "description": [],
         "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -382,6 +390,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -401,7 +411,25 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => void; } & { url: ",
+              ") => Promise<void>; getExportHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "IntlShape",
+              ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -419,9 +447,13 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -443,6 +475,52 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppStartUIPluginDependencies.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppStartUIPluginDependencies.licensing",
+            "type": "Object",
+            "tags": [],
+            "label": "licensing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "public",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-public.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              }
+            ],
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -474,6 +552,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/console/public/types/locator.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -488,6 +568,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/console/public/types/locator.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -502,6 +584,8 @@
         "label": "EmbeddedConsoleView",
         "description": [],
         "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -532,6 +616,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -546,6 +632,8 @@
               "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
             "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -560,6 +648,8 @@
         "label": "EmbeddedConsoleViewButtonProps",
         "description": [],
         "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -571,6 +661,8 @@
             "label": "activeView",
             "description": [],
             "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -585,6 +677,8 @@
               "(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void"
             ],
             "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -600,6 +694,8 @@
                   "E"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 2292,
+                "columnNumber": 73,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -622,6 +718,8 @@
         "\nConsole plugin's setup service object"
       ],
       "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+      "lineNumber": 57,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -653,6 +751,8 @@
             "> | undefined"
           ],
           "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+          "lineNumber": 61,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -670,6 +770,8 @@
         "\nConsole plugin's start service object"
       ],
       "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+      "lineNumber": 67,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -686,6 +788,8 @@
             "(() => boolean) | undefined"
           ],
           "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+          "lineNumber": 71,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -704,6 +808,8 @@
             "((content?: string | undefined) => void) | undefined"
           ],
           "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+          "lineNumber": 76,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -718,6 +824,8 @@
                 "string | undefined"
               ],
               "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+              "lineNumber": 80,
+              "columnNumber": 26,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -738,6 +846,8 @@
             "(() => void) | undefined"
           ],
           "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+          "lineNumber": 81,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -756,6 +866,8 @@
             "React.FC<{}> | undefined"
           ],
           "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+          "lineNumber": 87,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -780,6 +892,8 @@
             " | null) => void) | undefined"
           ],
           "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+          "lineNumber": 91,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -801,6 +915,8 @@
                 " | null"
               ],
               "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+              "lineNumber": 96,
+              "columnNumber": 43,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -816,23 +932,129 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "console",
+        "id": "def-server.SpecDefinitionsJson",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpecDefinitionsJson",
+        "description": [],
+        "path": "src/platform/plugins/shared/console/server/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "console",
+            "id": "def-server.SpecDefinitionsJson.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/plugins/shared/console/server/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-server.SpecDefinitionsJson.globals",
+            "type": "Object",
+            "tags": [],
+            "label": "globals",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/plugins/shared/console/server/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-server.SpecDefinitionsJson.endpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "endpoints",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/plugins/shared/console/server/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
-    "start": {
+    "setup": {
       "parentPluginId": "console",
-      "id": "def-server.ConsoleStart",
+      "id": "def-server.ConsoleSetup",
       "type": "Type",
       "tags": [],
-      "label": "ConsoleStart",
+      "label": "ConsoleSetup",
       "description": [],
       "signature": [
         "void"
       ],
       "path": "src/platform/plugins/shared/console/server/types.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "console",
+      "id": "def-server.ConsoleStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ConsoleStart",
+      "description": [],
+      "path": "src/platform/plugins/shared/console/server/types.ts",
+      "lineNumber": 24,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "console",
+          "id": "def-server.ConsoleStart.getSpecJson",
+          "type": "Function",
+          "tags": [],
+          "label": "getSpecJson",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "console",
+              "scope": "server",
+              "docId": "kibConsolePluginApi",
+              "section": "def-server.SpecDefinitionsJson",
+              "text": "SpecDefinitionsJson"
+            }
+          ],
+          "path": "src/platform/plugins/shared/console/server/types.ts",
+          "lineNumber": 26,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

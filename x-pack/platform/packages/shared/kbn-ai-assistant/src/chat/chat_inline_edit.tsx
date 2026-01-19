@@ -28,7 +28,7 @@ export function ChatInlineEditingContent({
   return (
     <EuiFlexGroup
       className="lnsConfigPanel__overlay"
-      style={{ ...style, padding: 0, position: 'relative', blockSize: visible ? '100%' : 0 }}
+      css={{ ...style, padding: 0, position: 'relative', blockSize: visible ? '100%' : 0 }}
       direction="column"
       ref={containerRef}
       gutterSize="none"

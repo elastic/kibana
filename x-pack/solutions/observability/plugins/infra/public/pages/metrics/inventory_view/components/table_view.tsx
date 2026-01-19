@@ -15,7 +15,6 @@ import { EuiPopover } from '@elastic/eui';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
 import type { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../common/inventory/types';
-import { fieldToName } from '../lib/field_to_display_name';
 import { NodeContextMenu } from './waffle/node_context_menu';
 import type { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
 import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
@@ -56,7 +55,7 @@ export const TableView = (props: Props) => {
 
   const toggleAssetPopover = (uniqueID: string, nodeId: string) => {
     if (isFlyoutMode) {
-      setFlyoutUrlState({ detailsItemId: nodeId, assetType: nodeType });
+      setFlyoutUrlState({ detailsItemId: nodeId, entityType: nodeType });
     } else {
       setOpenPopoverId(uniqueID);
     }
@@ -80,6 +79,13 @@ export const TableView = (props: Props) => {
         const button = (
           <EuiToolTip content={tooltipText}>
             <EuiButtonEmpty
+              aria-label={i18n.translate(
+                'xpack.infra.tableView.columnName.openNodeDetailsButton.ariaLabel',
+                {
+                  defaultMessage: 'Open host details {nodeName}',
+                  values: { nodeName: value },
+                }
+              )}
               data-test-subj="infraColumnsButton"
               onClick={() => toggleAssetPopover(uniqueID, item.node.id)}
             >
@@ -110,7 +116,7 @@ export const TableView = (props: Props) => {
     },
     ...options.groupBy.map((grouping, index) => ({
       field: `group_${index}`,
-      name: fieldToName((grouping && grouping.field) || ''),
+      name: grouping.field,
       sortable: true,
       truncateText: true,
       textOnly: true,
@@ -118,7 +124,17 @@ export const TableView = (props: Props) => {
         const handleClick = () => props.onFilter(`${grouping.field}:"${value}"`);
         return (
           <EuiToolTip content="Set Filter">
-            <EuiButtonEmpty data-test-subj="infraColumnsButton" onClick={handleClick}>
+            <EuiButtonEmpty
+              aria-label={i18n.translate(
+                'xpack.infra.tableView.groupByColumn.setFilterButton.ariaLabel',
+                {
+                  defaultMessage: 'Set Filter {groupByName} to {value}',
+                  values: { groupByName: grouping.field, value },
+                }
+              )}
+              data-test-subj="infraColumnsButton"
+              onClick={handleClick}
+            >
               {value}
             </EuiButtonEmpty>
           </EuiToolTip>
@@ -128,7 +144,7 @@ export const TableView = (props: Props) => {
     {
       field: 'value',
       name: i18n.translate('xpack.infra.tableView.columnName.last1m', {
-        defaultMessage: 'Last 1m',
+        defaultMessage: 'Last 1 min.',
       }),
       sortable: true,
       truncateText: true,
@@ -137,7 +153,7 @@ export const TableView = (props: Props) => {
     },
     {
       field: 'avg',
-      name: i18n.translate('xpack.infra.tableView.columnName.avg', { defaultMessage: 'Avg' }),
+      name: i18n.translate('xpack.infra.tableView.columnName.avg', { defaultMessage: 'Avg.' }),
       sortable: true,
       truncateText: true,
       dataType: 'number',

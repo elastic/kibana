@@ -5,55 +5,47 @@
  * 2.0.
  */
 
-import './toolbar.scss';
-import React from 'react';
+import React, { useCallback } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import {
-  CategoricalColorMapping,
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  PaletteRegistry,
-  ColorMapping,
-  SPECIAL_TOKENS_STRING_CONVERSION,
-} from '@kbn/coloring';
+import type { PaletteRegistry, ColorMapping } from '@kbn/coloring';
+import type { FormatFactory } from '@kbn/visualization-ui-components';
 import { ColorPicker } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
-import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
-import { PieVisualizationState } from '../../../common/types';
-import { VisualizationDimensionEditorProps } from '../../types';
-import {
-  PalettePanelContainer,
-  PalettePicker,
-  getPaletteDisplayColors,
-} from '../../shared_components';
+import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+
+import type {
+  LensPartitionVisualizationState,
+  VisualizationDimensionEditorProps,
+} from '@kbn/lens-common';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
+import { getSortedAccessorsForGroup } from './to_expression';
+import { ColorMappingByTerms } from '../../shared_components/coloring/color_mapping_by_terms';
 import {
   getDefaultColorForMultiMetricDimension,
   hasNonCollapsedSliceBy,
   isCollapsed,
 } from './visualization';
-import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
-type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
-  paletteService: PaletteRegistry;
-  palettes: KbnPalettes;
-  isDarkMode: boolean;
-};
+export type DimensionEditorProps =
+  VisualizationDimensionEditorProps<LensPartitionVisualizationState> & {
+    formatFactory: FormatFactory;
+    paletteService: PaletteRegistry;
+    palettes: KbnPalettes;
+    isDarkMode: boolean;
+  };
 
 export function DimensionEditor(props: DimensionEditorProps) {
   const { inputValue: localState, handleInputChange: setLocalState } =
-    useDebouncedValue<PieVisualizationState>({
+    useDebouncedValue<LensPartitionVisualizationState>({
       value: props.state,
       onChange: props.setState,
     });
 
   const currentLayer = localState.layers.find((layer) => layer.layerId === props.layerId);
-
-  const canUseColorMapping = currentLayer && currentLayer.colorMapping ? true : false;
-  const [useNewColorMapping, setUseNewColorMapping] = useState(canUseColorMapping);
-
   const setConfig = useCallback(
     ({ color }: { color?: string }) => {
       if (!currentLayer) {
@@ -103,9 +95,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
     return null;
   }
 
-  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
-    (id) => !isCollapsed(id, currentLayer)
+  const originalGroupOrder = getSortedAccessorsForGroup(
+    props.datasource,
+    currentLayer,
+    'primaryGroups'
   );
+  const firstNonCollapsedColumnId = originalGroupOrder.find((id) => !isCollapsed(id, currentLayer));
 
   const showColorPicker =
     currentLayer.metrics.includes(props.accessor) && currentLayer.allowMultipleMetrics;
@@ -122,99 +117,34 @@ export function DimensionEditor(props: DimensionEditorProps) {
         })
     : undefined;
 
-  const colors = getPaletteDisplayColors(
-    props.paletteService,
-    props.palettes,
-    props.isDarkMode,
-    props.state.palette,
-    currentLayer.colorMapping
-  );
-  const table = props.frame.activeData?.[currentLayer.layerId];
-  const splitCategories = getColorCategories(table?.rows ?? [], props.accessor);
+  const currentData = props.frame.activeData?.[currentLayer.layerId];
+  const columnMeta = getDatatableColumn(currentData, props.accessor)?.meta;
+  const formatter = props.formatFactory(columnMeta?.params);
+  const categories = getColorCategories(currentData?.rows, props.accessor);
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       {props.accessor === firstNonCollapsedColumnId && (
-        <EuiFormRow
-          display="columnCompressed"
-          label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
-            defaultMessage: 'Color mapping',
-          })}
-          style={{ alignItems: 'center' }}
-          fullWidth
-        >
-          <PalettePanelContainer
-            palette={colors}
-            siblingRef={props.panelRef}
-            title={
-              useNewColorMapping
-                ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
-                    defaultMessage: 'Assign colors to terms',
-                  })
-                : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
-                    defaultMessage: 'Edit colors',
-                  })
-            }
-            isInlineEditing={props.isInlineEditing}
-          >
-            <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
-              <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
-                <EuiFlexItem>
-                  <EuiSwitch
-                    label={
-                      <EuiText size="xs">
-                        <span>
-                          {i18n.translate('xpack.lens.colorMapping.tryLabel', {
-                            defaultMessage: 'Use the new Color Mapping feature',
-                          })}{' '}
-                          <EuiBadge color="hollow">
-                            {i18n.translate('xpack.lens.colorMapping.techPreviewLabel', {
-                              defaultMessage: 'Tech preview',
-                            })}
-                          </EuiBadge>
-                        </span>
-                      </EuiText>
-                    }
-                    data-test-subj="lns_colorMappingOrLegacyPalette_switch"
-                    compressed
-                    checked={useNewColorMapping}
-                    onChange={({ target: { checked } }) => {
-                      trackUiCounterEvents(
-                        `color_mapping_switch_${checked ? 'enabled' : 'disabled'}`
-                      );
-                      setColorMapping(checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined);
-                      setUseNewColorMapping(checked);
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {canUseColorMapping || useNewColorMapping ? (
-                    <CategoricalColorMapping
-                      isDarkMode={props.isDarkMode}
-                      model={currentLayer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
-                      onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                      palettes={props.palettes}
-                      data={{
-                        type: 'categories',
-                        categories: splitCategories,
-                      }}
-                      specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
-                    />
-                  ) : (
-                    <PalettePicker
-                      palettes={props.paletteService}
-                      activePalette={props.state.palette}
-                      setPalette={(newPalette) => {
-                        setLocalState({ ...props.state, palette: newPalette });
-                      }}
-                    />
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-          </PalettePanelContainer>
-        </EuiFormRow>
+        <ColorMappingByTerms
+          isDarkMode={props.isDarkMode}
+          panelRef={props.panelRef}
+          palettes={props.palettes}
+          palette={localState.palette}
+          setPalette={(newPalette) => {
+            setLocalState({ ...localState, palette: newPalette });
+          }}
+          onModeChange={(isLegacy) => {
+            if (isLegacy) setColorMapping();
+          }}
+          colorMapping={currentLayer.colorMapping}
+          setColorMapping={setColorMapping}
+          categories={categories}
+          paletteService={props.paletteService}
+          formatter={formatter}
+          isInlineEditing={props.isInlineEditing}
+        />
       )}
+
       {/* TODO: understand how this works  */}
       {showColorPicker && (
         <ColorPicker
@@ -226,18 +156,18 @@ export function DimensionEditor(props: DimensionEditorProps) {
             columnId: props.accessor,
             paletteService: props.paletteService,
             datasource: props.datasource,
-            palette: props.state.palette,
+            palette: localState.palette,
           })}
           disabledMessage={colorPickerDisabledMessage}
           setConfig={setConfig}
         />
       )}
-    </>
+    </div>
   );
 }
 
 export function DimensionDataExtraEditor(
-  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
+  props: VisualizationDimensionEditorProps<LensPartitionVisualizationState> & {
     paletteService: PaletteRegistry;
   }
 ) {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RequestMock, routeDependencies, RouterMock } from '../test/helpers';
+import type { RequestMock } from '../test/helpers';
+import { routeDependencies, RouterMock } from '../test/helpers';
 import { addBasePath } from '../routes/api';
 import { registerIndicesRoutes } from '../routes/api/indices';
 import {

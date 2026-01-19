@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { BehaviorSubject } from 'rxjs';
@@ -15,6 +15,7 @@ import type { INPUT_TYPE } from '../inference_base';
 import { InferenceBase, type InferResponse } from '../inference_base';
 import { getTextExpansionOutputComponent } from './text_expansion_output';
 import { getTextExpansionInput } from './text_expansion_input';
+import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 export interface TextExpansionPair {
   token: string;
@@ -53,9 +54,10 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    telemetryClient: ITelemetryClient
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, telemetryClient);
 
     this.initialize(
       [this.queryText$.pipe(map((questionText) => questionText !== ''))],

@@ -15,6 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
 
@@ -58,10 +59,12 @@ export interface SearchAndFilterBarProps {
   onClickAddFleetServer: () => void;
   agentsOnCurrentPage: Agent[];
   onClickAgentActivity: () => void;
-  showAgentActivityTour: { isOpen: boolean };
+  shouldShowAgentActivityTour?: boolean;
   latestAgentActionErrors: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
+  unsupportedMigrateAgents: Agent[];
+  unsupportedPrivilegeLevelChangeAgents: Agent[];
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -89,17 +92,22 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   onClickAddFleetServer,
   agentsOnCurrentPage,
   onClickAgentActivity,
-  showAgentActivityTour,
+  shouldShowAgentActivityTour,
   latestAgentActionErrors,
   sortField,
   sortOrder,
+  unsupportedMigrateAgents,
+  unsupportedPrivilegeLevelChangeAgents,
 }) => {
   const authz = useAuthz();
 
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
     useIsFirstTimeAgentUserQuery();
   const { cloud } = useStartServices();
-
+  const NO_TAGS_VALUE = i18n.translate('xpack.fleet.agentList.noTagsValue', {
+    defaultMessage: 'No Tags',
+  });
+  const tagsWithNoTagsIncluded = [...tags, NO_TAGS_VALUE];
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -118,7 +126,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
             <EuiFlexItem grow={false}>
               <AgentActivityButton
                 onClickAgentActivity={onClickAgentActivity}
-                showAgentActivityTour={showAgentActivityTour}
+                shouldShowTour={shouldShowAgentActivityTour}
               />
             </EuiFlexItem>
             {authz.fleet.addFleetServers && !cloud?.isServerlessEnabled ? (
@@ -187,7 +195,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   disabled={agentPolicies.length === 0}
                 />
                 <TagsFilter
-                  tags={tags}
+                  tags={tagsWithNoTagsIncluded}
                   selectedTags={selectedTags}
                   onSelectedTagsChange={onSelectedTagsChange}
                 />
@@ -197,6 +205,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   agentPolicies={agentPolicies}
                 />
                 <EuiFilterButton
+                  isToggle
+                  isSelected={showUpgradeable}
                   hasActiveFilters={showUpgradeable}
                   onClick={() => {
                     onShowUpgradeableChange(!showUpgradeable);
@@ -225,6 +235,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   agentPolicies={agentPolicies}
                   sortField={sortField}
                   sortOrder={sortOrder}
+                  unsupportedMigrateAgents={unsupportedMigrateAgents}
+                  unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
                 />
               </EuiFlexItem>
             ) : null}

@@ -7,9 +7,9 @@
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
-import { merge, omit } from 'lodash';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
+import { merge } from 'lodash';
 import { maybe } from '../../../../common/utils/maybe';
 import { SPAN_ID, SPAN_STACKTRACE, TRACE_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -38,20 +38,18 @@ export async function getSpan({
       apm: {
         events: [ProcessorEvent.span],
       },
-      body: {
-        track_total_hits: false,
-        size: 1,
-        terminate_after: 1,
-        fields: ['*'],
-        _source: [SPAN_STACKTRACE],
-        query: {
-          bool: {
-            filter: asMutableArray([
-              { term: { [SPAN_ID]: spanId } },
-              ...termQuery(TRACE_ID, traceId),
-              ...rangeQuery(start, end),
-            ]),
-          },
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      fields: ['*'],
+      _source: [SPAN_STACKTRACE],
+      query: {
+        bool: {
+          filter: asMutableArray([
+            { term: { [SPAN_ID]: spanId } },
+            ...termQuery(TRACE_ID, traceId),
+            ...rangeQuery(start, end),
+          ]),
         },
       },
     }),
@@ -69,11 +67,16 @@ export async function getSpan({
   const hit = maybe(spanResp.hits.hits[0]);
   const spanFromSource = hit && 'span' in hit._source ? hit._source : undefined;
 
-  const event = unflattenKnownApmEventFields(hit?.fields as undefined | FlattenedApmEvent);
+  const { span, ...event } =
+    (hit?.fields &&
+      accessKnownApmEventFields(hit.fields as Partial<FlattenedApmEvent>).unflatten()) ??
+    {};
+
+  const { links, ...rest } = span ?? {};
 
   return {
-    span: event
-      ? merge({}, omit(event, 'span.links'), spanFromSource, {
+    span: hit
+      ? merge(event, { span: rest }, spanFromSource, {
           processor: { event: 'span' as const, name: 'transaction' as const },
         })
       : undefined,

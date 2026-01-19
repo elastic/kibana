@@ -8,31 +8,41 @@
 import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SecurityPageName } from '../../../../../common';
 
-export const CATEGORIES: SeparatorLinkCategory[] = [
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.dashboards],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [
-      SecurityPageName.rulesLanding,
-      SecurityPageName.alerts,
-      SecurityPageName.attackDiscovery,
-      SecurityPageName.cloudSecurityPostureFindings,
-      SecurityPageName.case,
-    ],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [
-      SecurityPageName.timelines,
-      SecurityPageName.threatIntelligence,
-      SecurityPageName.exploreLanding,
-    ],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.assetInventory],
-  },
-];
+export const getNavCategories = (
+  attacksAlertsAlignmentEnabled?: boolean
+): SeparatorLinkCategory[] => {
+  return [
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [SecurityPageName.dashboards],
+    },
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [
+        SecurityPageName.rulesLanding,
+        attacksAlertsAlignmentEnabled ? SecurityPageName.alertDetections : SecurityPageName.alerts,
+        SecurityPageName.attackDiscovery,
+        SecurityPageName.cloudSecurityPostureFindings,
+        SecurityPageName.case,
+      ],
+    },
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [
+        SecurityPageName.entityAnalyticsLanding,
+        SecurityPageName.exploreLanding,
+        SecurityPageName.timelines,
+        SecurityPageName.threatIntelligence,
+        SecurityPageName.assetInventory,
+      ],
+    },
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [
+        SecurityPageName.siemReadiness,
+        SecurityPageName.aiValue,
+        SecurityPageName.siemMigrationsLanding,
+      ],
+    },
+  ];
+};

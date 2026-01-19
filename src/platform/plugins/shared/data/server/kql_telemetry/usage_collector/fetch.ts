@@ -8,7 +8,7 @@
  */
 
 import { get } from 'lodash';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
@@ -32,7 +32,7 @@ export function fetchProvider(getIndexForType: (type: string) => Promise<string>
       esClient.search(
         {
           index: await getIndexForType('config'),
-          body: { query: { term: { type: 'config' } } },
+          query: { term: { type: 'config' } },
         },
         { ignore: [404] }
       ),

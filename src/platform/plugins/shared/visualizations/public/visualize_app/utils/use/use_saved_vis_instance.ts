@@ -8,10 +8,11 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import { getVisualizationInstance } from '../get_visualization_instance';
 import {
   getEditBreadcrumbs,
@@ -19,8 +20,7 @@ import {
   getCreateServerlessBreadcrumbs,
   getEditServerlessBreadcrumbs,
 } from '../breadcrumbs';
-import { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
-import { VisualizeConstants } from '../../../../common/constants';
+import type { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { getTypes } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';
 import type { VisualizeInput } from '../../..';

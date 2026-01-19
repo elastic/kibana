@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { registerGetMappingRoute } from './register_mapping_route';
 import { registerUpdateMappingRoute } from './register_update_mapping_route';
+import { registerUserStatusPrivilegeRoutes } from './register_user_status_route';
 
 export function registerIndexMappingRoutes(dependencies: RouteDependencies) {
   registerGetMappingRoute(dependencies);
   registerUpdateMappingRoute(dependencies);
+  registerUserStatusPrivilegeRoutes(dependencies);
 }

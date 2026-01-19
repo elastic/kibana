@@ -7,9 +7,9 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
+import { EuiSelect, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { usePageUrlState } from '@kbn/ml-url-state';
+import { usePageUrlState, type UrlStateService } from '@kbn/ml-url-state';
 
 interface TableIntervalPageUrlState {
   pageKey: 'mlSelectInterval';
@@ -60,12 +60,14 @@ function optionValueToInterval(value: string) {
 
 export const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
 
-export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] => {
-  const [interval, updateCallback] = usePageUrlState<TableIntervalPageUrlState>(
-    'mlSelectInterval',
-    TABLE_INTERVAL_DEFAULT
-  );
-  return [interval, updateCallback];
+export const useTableInterval = (): [
+  TableInterval,
+  (v: TableInterval) => void,
+  UrlStateService<TableInterval>
+] => {
+  const [interval, updateCallback, tableIntervalUrlStateService] =
+    usePageUrlState<TableIntervalPageUrlState>('mlSelectInterval', TABLE_INTERVAL_DEFAULT);
+  return [interval, updateCallback, tableIntervalUrlStateService];
 };
 
 /*
@@ -93,14 +95,14 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange
         defaultMessage: 'Interval',
       })}
       append={
-        <EuiToolTip
+        <EuiIconTip
           content={i18n.translate('xpack.ml.controls.selectInterval.intervalTooltip', {
             defaultMessage:
               'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
           })}
-        >
-          <EuiIcon type="questionInCircle" color="subdued" />
-        </EuiToolTip>
+          type="question"
+          color="subdued"
+        />
       }
       compressed
       options={OPTIONS}

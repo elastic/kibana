@@ -38,7 +38,10 @@ describe('SavedObjects /_migrate endpoint', () => {
       .expect(200);
 
     expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
-    expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith({ rerun: true });
+    expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith({
+      rerun: true,
+      skipVersionCheck: true,
+    });
   });
 
   it('calls runMigrations multiple time when multiple access', async () => {

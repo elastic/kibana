@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupRuntimeState, OptionsListControlState } from '@kbn/controls-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { Filter } from '@kbn/es-query';
 import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 export interface ControlGroupOutput {
@@ -38,7 +39,7 @@ export const sampleOutputData: ControlGroupOutput = {
   ],
 };
 
-export const initialInputData: ControlGroupRuntimeState<OptionsListControlState> = {
+export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlState> = {
   initialChildControlState: {
     '0': {
       type: 'optionsListControl',
@@ -47,12 +48,14 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
       dataViewId: 'alert-filters-test-dv',
       fieldName: ALERT_STATUS,
       title: 'Status',
-      hideExclude: true,
-      hideSort: true,
-      placeholder: '',
       selectedOptions: [],
       existsSelected: false,
       exclude: false,
+      displaySettings: {
+        hideExclude: true,
+        hideSort: true,
+        placeholder: '',
+      },
     },
     '1': {
       type: 'optionsListControl',
@@ -61,12 +64,14 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
       dataViewId: 'alert-filters-test-dv',
       fieldName: ALERT_RULE_NAME,
       title: 'Rule',
-      hideExclude: true,
-      hideSort: true,
-      placeholder: '',
       selectedOptions: [],
       existsSelected: false,
       exclude: false,
+      displaySettings: {
+        hideExclude: true,
+        hideSort: true,
+        placeholder: '',
+      },
     },
     '2': {
       type: 'optionsListControl',
@@ -75,12 +80,14 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
       dataViewId: 'alert-filters-test-dv',
       fieldName: ALERT_START,
       title: 'Started at',
-      hideExclude: true,
-      hideSort: true,
-      placeholder: '',
       selectedOptions: [],
       existsSelected: true,
       exclude: true,
+      displaySettings: {
+        hideExclude: true,
+        hideSort: true,
+        placeholder: '',
+      },
     },
     '3': {
       type: 'optionsListControl',
@@ -89,12 +96,14 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
       dataViewId: 'alert-filters-test-dv',
       fieldName: ALERT_DURATION,
       title: 'Duration',
-      hideExclude: true,
-      hideSort: true,
-      placeholder: '',
       selectedOptions: [],
       existsSelected: false,
       exclude: false,
+      displaySettings: {
+        hideExclude: true,
+        hideSort: true,
+        placeholder: '',
+      },
     },
     '4': {
       type: 'optionsListControl',
@@ -103,17 +112,16 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
       dataViewId: 'alert-filters-test-dv',
       fieldName: 'host.name',
       title: 'Host',
-      hideExclude: true,
-      hideSort: true,
-      placeholder: '',
       selectedOptions: [],
       existsSelected: false,
       exclude: false,
+      displaySettings: {
+        hideExclude: true,
+        hideSort: true,
+        placeholder: '',
+      },
     },
   },
-  labelPosition: 'oneLine',
-  chainingSystem: 'HIERARCHICAL',
-  autoApplySelections: true,
   ignoreParentSettings: {
     ignoreFilters: false,
     ignoreQuery: false,

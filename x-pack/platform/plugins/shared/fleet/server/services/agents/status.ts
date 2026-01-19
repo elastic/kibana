@@ -15,6 +15,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { ALL_SPACES_ID } from '../../../common/constants';
 import { agentStatusesToSummary } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
@@ -22,6 +23,8 @@ import { FleetError, FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '../app_context';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
+
+import { DEFAULT_NAMESPACES_FILTER } from '../spaces/agent_namespaces';
 
 import { getAgentById, removeSOAttributes } from './crud';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
@@ -39,6 +42,7 @@ export async function getAgentStatusById(
 ): Promise<AgentStatus> {
   return (await getAgentById(esClient, soClient, agentId)).status!;
 }
+const AGENT_STATUS_TIMEOUT = '3s';
 
 /**
  * getAgentStatusForAgentPolicy
@@ -66,13 +70,13 @@ export async function getAgentStatusForAgentPolicy(
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (useSpaceAwareness && spaceId) {
     if (spaceId === DEFAULT_SPACE_ID) {
+      clauses.push(toElasticsearchQuery(fromKueryExpression(DEFAULT_NAMESPACES_FILTER)));
+    } else {
       clauses.push(
         toElasticsearchQuery(
-          fromKueryExpression(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`)
+          fromKueryExpression(`namespaces:"${spaceId}" or namespaces:"${ALL_SPACES_ID}"`)
         )
       );
-    } else {
-      clauses.push(toElasticsearchQuery(fromKueryExpression(`namespaces:"${spaceId}"`)));
     }
   }
 
@@ -143,6 +147,7 @@ export async function getAgentStatusForAgentPolicy(
             },
           },
           ignore_unavailable: true,
+          timeout: AGENT_STATUS_TIMEOUT,
         }),
       { logger }
     );
@@ -194,14 +199,12 @@ export async function getIncomingDataByAgentsId({
 
   try {
     const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
-      body: {
-        index: [
-          {
-            names: [dataStreamPattern],
-            privileges: ['read'],
-          },
-        ],
-      },
+      index: [
+        {
+          names: dataStreamPattern.split(','),
+          privileges: ['read'],
+        },
+      ],
     });
 
     if (!hasAllPrivileges) {
@@ -216,32 +219,30 @@ export async function getIncomingDataByAgentsId({
           _source: returnDataPreview,
           timeout: '5s',
           size: returnDataPreview ? MAX_AGENT_DATA_PREVIEW_SIZE : 0,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      'agent.id': agentsIds,
-                    },
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'agent.id': agentsIds,
                   },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: 'now-5m',
-                        lte: 'now',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            aggs: {
-              agent_ids: {
-                terms: {
-                  field: 'agent.id',
-                  size: agentsIds.length,
                 },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            agent_ids: {
+              terms: {
+                field: 'agent.id',
+                size: agentsIds.length,
               },
             },
           },
@@ -251,19 +252,16 @@ export async function getIncomingDataByAgentsId({
 
     if (!searchResult.aggregations?.agent_ids) {
       return {
-        items: agentsIds.map((id) => {
-          return { [id]: { data: false } };
-        }),
+        items: agentsIds.map((id) => ({ [id]: { data: false } })),
         dataPreview: [],
       };
     }
 
-    // @ts-expect-error aggregation type is not specified
-    const agentIdsWithData: string[] = searchResult.aggregations.agent_ids.buckets.map(
-      (bucket: any) => bucket.key as string
-    );
-
     const dataPreview = searchResult.hits?.hits || [];
+
+    const agentIdsWithData: string[] =
+      // @ts-expect-error aggregation type is not specified
+      searchResult.aggregations.agent_ids.buckets.map((bucket: any) => bucket.key as string) ?? [];
 
     const items = agentsIds.map((id) =>
       agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }

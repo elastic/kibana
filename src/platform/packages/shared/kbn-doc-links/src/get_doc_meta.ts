@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocLinksMeta, BuildFlavor } from './types';
+import type { DocLinksMeta, BuildFlavor } from './types';
 
 export interface GetDocLinksMetaOptions {
   kibanaBranch: string;
@@ -19,11 +19,12 @@ export const getDocLinksMeta = ({
   buildFlavor,
 }: GetDocLinksMetaOptions): DocLinksMeta => {
   return {
-    version: kibanaBranch === 'main' ? 'master' : kibanaBranch,
+    version: kibanaBranch === 'main' ? 'current' : kibanaBranch,
     ecs_version: 'current',
     elasticWebsiteUrl: 'https://www.elastic.co/',
     elasticGithubUrl: 'https://github.com/elastic/',
-    docsWebsiteUrl: 'https://docs.elastic.co/',
+    docsWebsiteUrl: 'https://www.elastic.co/docs/',
     searchLabsUrl: 'https://search-labs.elastic.co/',
+    apiDocsUrl: 'https://www.elastic.co/docs/api/',
   };
 };

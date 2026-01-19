@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useRouteMatch, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiErrorBoundary,
+  EuiOverlayMask,
 } from '@elastic/eui';
 
 import { useSetIsReadOnly } from '../../../../integrations/hooks/use_read_only_context';
@@ -25,8 +26,8 @@ import {
   useStartServices,
   useConfig,
   useUIExtension,
-  sendGetAgentStatus,
   useAuthz,
+  sendBulkGetAgentPoliciesForRq,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
@@ -78,10 +79,20 @@ export const EditPackagePolicyPage = memo(() => {
     'package-policy-edit'
   );
 
+  // Parse the 'from' query parameter to determine navigation after save
+  const { search } = useLocation();
+  const qs = new URLSearchParams(search);
+  const fromQs = qs.get('from');
+  let from: EditPackagePolicyFrom | undefined;
+  if (fromQs === 'installed-integrations') {
+    from = 'installed-integrations';
+  }
+
   return (
     <EditPackagePolicyForm
       packagePolicyId={packagePolicyId}
       policyId={policyId}
+      from={from}
       // If an extension opts in to this `useLatestPackageVersion` flag, we want to display
       // the edit form in an "upgrade" state regardless of whether the user intended to
       // "edit" their policy or "upgrade" it. This ensures the new policy generated will be
@@ -159,36 +170,83 @@ export const EditPackagePolicyForm = memo<{
 
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
+  const agentPoliciesToAdd = useMemo(
+    () => [
+      ...agentPolicies
+        .filter(
+          (policy) =>
+            !existingAgentPolicies.find((existingPolicy) => existingPolicy.id === policy.id)
+        )
+        .map((policy) => policy.name),
+      ...(newAgentPolicyName ? [newAgentPolicyName] : []),
+    ],
+    [agentPolicies, existingAgentPolicies, newAgentPolicyName]
+  );
+  const agentPoliciesToRemove = useMemo(
+    () =>
+      existingAgentPolicies.filter(
+        (existingPolicy) => !agentPolicies.find((policy) => policy.id === existingPolicy.id)
+      ),
+    [agentPolicies, existingAgentPolicies]
+  );
+
+  const agentPoliciesToRemoveIds = useMemo(
+    () => agentPoliciesToRemove.map((policy) => policy.id),
+    [agentPoliciesToRemove]
+  );
+
+  const agentPoliciesToRemoveName = useMemo(
+    () => agentPoliciesToRemove.map((policy) => policy.name),
+    [agentPoliciesToRemove]
+  );
+
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
+  const [impactedAgentCount, setImpactedAgentCount] = useState<number>(0);
   useEffect(() => {
     const getAgentCount = async () => {
-      let count = 0;
-      for (const id of packagePolicy.policy_ids) {
-        const { data } = await sendGetAgentStatus({ policyId: id });
-        if (data?.results.active) {
-          count += data.results.active;
+      const policiesToFetchIds = [...packagePolicy.policy_ids, ...agentPoliciesToRemoveIds];
+      try {
+        const bulkGetAgentPoliciesResponse = await sendBulkGetAgentPoliciesForRq(
+          policiesToFetchIds,
+          {
+            ignoreMissing: true,
+          }
+        );
+
+        let count = 0;
+        let impactedCount = 0;
+        for (const item of bulkGetAgentPoliciesResponse.items) {
+          if (packagePolicy.policy_ids.includes(item.id)) {
+            count += item.agents ?? 0;
+          }
+
+          impactedCount += item.agents ?? 0;
         }
+        setAgentCount(count);
+        setImpactedAgentCount(impactedCount);
+      } catch (err) {
+        setAgentCount(0);
+        setImpactedAgentCount(0);
       }
-      setAgentCount(count);
     };
 
-    if (isFleetEnabled && packagePolicy.policy_ids.length > 0) {
+    if (
+      isFleetEnabled &&
+      (packagePolicy.policy_ids.length > 0 || agentPoliciesToRemoveIds.length > 0)
+    ) {
       getAgentCount();
     }
-  }, [packagePolicy.policy_ids, isFleetEnabled]);
+  }, [packagePolicy.policy_ids, agentPoliciesToRemoveIds, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
   >(
     ({ isValid, updatedPolicy }) => {
       updatePackagePolicy(updatedPolicy);
-      setFormState((prevState) => {
-        if (prevState === 'VALID' && !isValid) {
-          return 'INVALID';
-        }
-        return prevState;
-      });
+      if (isValid !== undefined) {
+        setFormState(isValid ? 'VALID' : 'INVALID');
+      }
     },
     [updatePackagePolicy, setFormState]
   );
@@ -196,7 +254,11 @@ export const EditPackagePolicyForm = memo<{
   // Cancel url + Success redirect Path:
   //  if `from === 'edit'` then it links back to Policy Details
   //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
+  //  if `from === 'installed-integrations'` then it links back to the Installed Integrations tab
   const cancelUrl = useMemo((): string => {
+    if (from === 'installed-integrations') {
+      return getHref('integrations_installed', {});
+    }
     return from === 'package-edit' && packageInfo
       ? getHref('integration_details_policies', {
           pkgkey: pkgKeyFromPackageInfo(packageInfo!),
@@ -206,6 +268,9 @@ export const EditPackagePolicyForm = memo<{
       : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
+    if (from === 'installed-integrations') {
+      return getHref('integrations_installed', {});
+    }
     return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
       packageInfo
       ? getHref('integration_details_policies', {
@@ -224,28 +289,6 @@ export const EditPackagePolicyForm = memo<{
       setAgentPolicies(existingAgentPolicies);
     }
   }, [existingAgentPolicies, isFirstLoad]);
-
-  const agentPoliciesToAdd = useMemo(
-    () => [
-      ...agentPolicies
-        .filter(
-          (policy) =>
-            !existingAgentPolicies.find((existingPolicy) => existingPolicy.id === policy.id)
-        )
-        .map((policy) => policy.name),
-      ...(newAgentPolicyName ? [newAgentPolicyName] : []),
-    ],
-    [agentPolicies, existingAgentPolicies, newAgentPolicyName]
-  );
-  const agentPoliciesToRemove = useMemo(
-    () =>
-      existingAgentPolicies
-        .filter(
-          (existingPolicy) => !agentPolicies.find((policy) => policy.id === existingPolicy.id)
-        )
-        .map((policy) => policy.name),
-    [agentPolicies, existingAgentPolicies]
-  );
 
   const onSubmit = async () => {
     if (formState === 'VALID' && hasErrors) {
@@ -518,12 +561,12 @@ export const EditPackagePolicyForm = memo<{
             />
             {formState === 'CONFIRM' && (
               <ConfirmDeployAgentPolicyModal
-                agentCount={agentCount}
+                agentCount={impactedAgentCount}
                 agentPolicies={agentPolicies}
                 onConfirm={onSubmit}
                 onCancel={() => setFormState('VALID')}
                 agentPoliciesToAdd={agentPoliciesToAdd}
-                agentPoliciesToRemove={agentPoliciesToRemove}
+                agentPoliciesToRemove={agentPoliciesToRemoveName}
               />
             )}
             {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
@@ -543,6 +586,11 @@ export const EditPackagePolicyForm = memo<{
             ) : (
               replaceConfigurePackage || configurePackage
             )}
+            {formState === 'LOADING' ? (
+              <EuiOverlayMask headerZindexLocation="below">
+                <Loading />
+              </EuiOverlayMask>
+            ) : null}
             {/* Extra space to accomodate the EuiBottomBar height */}
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />
@@ -657,6 +705,8 @@ const Breadcrumb = memo<{
     );
   } else if (from === 'upgrade-from-fleet-policy-list') {
     breadcrumb = <UpgradeBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
+  } else if (from === 'installed-integrations') {
+    breadcrumb = <InstalledIntegrationsBreadcrumb policyName={packagePolicyName} />;
   }
 
   return breadcrumb;
@@ -695,3 +745,10 @@ const UpgradeBreadcrumb: React.FunctionComponent<{
   useBreadcrumbs('upgrade_package_policy', { policyName, policyId });
   return null;
 };
+
+const InstalledIntegrationsBreadcrumb = memo<{
+  policyName: string;
+}>(({ policyName }) => {
+  useIntegrationsBreadcrumbs('integration_policy_edit_from_installed', { policyName });
+  return null;
+});

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { buildNode as buildLiteralNode } from '../node_types/literal';
 import { type KqlFunctionNode, type KqlLiteralNode, nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { getRangeScript, RangeFilterParams } from '../../filters';
+import type { RangeFilterParams } from '../../filters';
+import { getRangeScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';

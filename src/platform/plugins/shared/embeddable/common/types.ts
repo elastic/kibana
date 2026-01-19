@@ -7,98 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { KibanaExecutionContext } from '@kbn/core/public';
-import type {
-  PersistableStateService,
-  PersistableState,
-  PersistableStateDefinition,
-} from '@kbn/kibana-utils-plugin/common';
+import type { Type } from '@kbn/config-schema';
+import type { Reference } from '@kbn/content-management-utils';
 
-export enum ViewMode {
-  EDIT = 'edit',
-  PREVIEW = 'preview',
-  PRINT = 'print',
-  VIEW = 'view',
-}
-
-export type EmbeddableInput = {
-  version?: string;
-  viewMode?: ViewMode;
-  title?: string;
-  description?: string;
+export type EmbeddableTransforms<
+  StoredEmbeddableState extends object = object,
+  EmbeddableState extends object = object
+> = {
   /**
-   * Note this is not a saved object id. It is used to uniquely identify this
-   * Embeddable instance from others (e.g. inside a container).  It's possible to
-   * have two Embeddables where everything else is the same but the id.
+   * Converts StoredEmbeddableState and injects references into EmbeddableState
+   * @param storedState
+   * @param panelReferences Panel references - BWC issue where panel references can not be determined for by-value panels created in 7.12
+   *                                           Use containerReferences to look for missing panel references
+   * @param containerReferences Container references
+   * @returns EmbeddableState
    */
-  id: string;
-  lastReloadRequestTime?: number;
-  hidePanelTitles?: boolean;
-
+  transformOut?: (
+    storedState: StoredEmbeddableState,
+    panelReferences?: Reference[],
+    containerReferences?: Reference[],
+    /**
+     * @deprecated ID is passed as an argument for legacy reference names that require it
+     * to fetch their old references. It should not be used for new reference names.
+     */
+    id?: string
+  ) => EmbeddableState;
   /**
-   * Reserved key for enhancements added by other plugins.
+   * Converts EmbeddableState into StoredEmbeddableState and extracts references
    */
-  enhancements?: SerializableRecord;
-
+  transformIn?: (state: EmbeddableState) => {
+    state: StoredEmbeddableState;
+    references?: Reference[];
+  };
   /**
-   * List of action IDs that this embeddable should not render.
+   * Embeddable containers that include embeddable state in REST APIs, such as dashboard,
+   * use schemas to
+   * 1) Include embeddable state schemas in OpenAPI Specification (OAS) documenation.
+   * 2) Validate embeddable state, failing requests when schema validation fails.
+   *
+   * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
    */
-  disabledActions?: string[];
-
+  schema?: Type<object>;
   /**
-   * Whether this embeddable should not execute triggers.
+   * Throws error when panel config is not supported.
    */
-  disableTriggers?: boolean;
-
-  /**
-   * Search session id to group searches
-   */
-  searchSessionId?: string;
-
-  /**
-   * Flag whether colors should be synced with other panels
-   */
-  syncColors?: boolean;
-
-  /**
-   * Flag whether cursor should be synced with other panels on hover
-   */
-  syncCursor?: boolean;
-
-  /**
-   * Flag whether tooltips should be synced with other panels on hover
-   */
-  syncTooltips?: boolean;
-
-  executionContext?: KibanaExecutionContext;
+  throwOnUnmappedPanel?: (config: EmbeddableState) => void;
 };
-
-export interface PanelState<
-  E extends EmbeddableInput & { id: string } = { id: string; version?: string }
-> {
-  // The type of embeddable in this panel. Will be used to find the factory in which to
-  // load the embeddable.
-  type: string;
-
-  // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
-  // will be derived from the container's input. **State in here will override state derived from the container.**
-  explicitInput: Partial<E> & { id: string };
-}
-
-export type EmbeddableStateWithType = EmbeddableInput & { type: string };
-
-export interface EmbeddableRegistryDefinition<
-  P extends EmbeddableStateWithType = EmbeddableStateWithType
-> extends PersistableStateDefinition<P> {
-  id: string;
-}
-
-export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
-
-export interface CommonEmbeddableStartContract {
-  getEmbeddableFactory?: (
-    embeddableFactoryId: string
-  ) => PersistableState & { isContainerType: boolean };
-  getEnhancement: (enhancementId: string) => PersistableState;
-}

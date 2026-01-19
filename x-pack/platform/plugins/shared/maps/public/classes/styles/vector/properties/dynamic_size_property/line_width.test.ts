@@ -6,9 +6,10 @@
  */
 
 import { DynamicSizeProperty } from './dynamic_size_property';
-import { FIELD_ORIGIN, RawValue, VECTOR_STYLES } from '../../../../../../common/constants';
-import { IField } from '../../../../fields/field';
-import { IVectorLayer } from '../../../../layers/vector_layer';
+import type { RawValue } from '../../../../../../common/constants';
+import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../../common/constants';
+import type { IField } from '../../../../fields/field';
+import type { IVectorLayer } from '../../../../layers/vector_layer';
 
 describe('getMbSizeExpression', () => {
   test('Should return interpolation expression', async () => {

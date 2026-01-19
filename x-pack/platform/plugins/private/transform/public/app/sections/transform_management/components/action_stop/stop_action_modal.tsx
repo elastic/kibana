@@ -8,12 +8,14 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, useGeneratedHtmlId } from '@elastic/eui';
 import type { StopAction } from './use_stop_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
 export const StopActionModal: FC<StopAction> = ({ closeModal, items, stopAndCloseModal }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
 
   const isBulkAction = items.length > 1;
@@ -30,7 +32,9 @@ export const StopActionModal: FC<StopAction> = ({ closeModal, items, stopAndClos
   return (
     <EuiConfirmModal
       data-test-subj="transformStopModal"
+      aria-labelledby={confirmModalTitleId}
       title={isBulkAction === true ? bulkStopModalTitle : stopModalTitle}
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={closeModal}
       onConfirm={() => stopAndCloseModal(items)}
       cancelButtonText={i18n.translate('xpack.transform.transformList.startModalCancelButton', {

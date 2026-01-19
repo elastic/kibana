@@ -7,7 +7,6 @@
 
 // These register helper functions have no async imports themselves, so they
 // can be bundled together for a single async chunk.
-export { registerEmbeddables } from '../embeddables';
 export { registerMlUiActions } from '../ui_actions';
 export { registerSearchLinks } from './register_search_links';
 export { registerCasesAttachments } from '../cases';

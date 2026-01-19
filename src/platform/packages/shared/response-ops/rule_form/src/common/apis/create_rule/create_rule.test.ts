@@ -8,9 +8,9 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { RuleTypeParams } from '../../types';
+import type { RuleTypeParams } from '../../types';
 import { createRule } from './create_rule';
-import { CreateRuleBody } from './types';
+import type { CreateRuleBody } from './types';
 
 const http = httpServiceMock.createStartContract();
 

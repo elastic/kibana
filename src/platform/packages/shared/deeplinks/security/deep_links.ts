@@ -10,10 +10,16 @@
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
-  assets = 'assets',
+  attacks = 'attacks',
+  aiValue = 'ai_value',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
+
+  // TODO: https://github.com/elastic/kibana/issues/242434
+  // Investigate possibility of using `detections` instead
+  alertDetections = 'alert_detections',
+
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All Cases page names must match `CasesDeepLinkId` in x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts
@@ -27,12 +33,9 @@ export enum SecurityPageName {
    */
   cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
+  cloudSecurityPostureVulnerabilityDashboard = 'cloud_security_posture-vulnerability_dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
   cloudSecurityPostureRules = 'cloud_security_posture-rules',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud defend page names must match `CloudDefendPageId` in x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/types.ts
-   */
   cloudDefend = 'cloud_defend',
   cloudDefendPolicies = 'cloud_defend-policies',
   dashboards = 'dashboards',
@@ -40,6 +43,7 @@ export enum SecurityPageName {
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
+  endpointExceptions = 'endpoint_exceptions',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
   exploreLanding = 'explore',
@@ -51,10 +55,8 @@ export enum SecurityPageName {
   hostsEvents = 'hosts-events',
   hostsSessions = 'hosts-sessions',
   hostsUncommonProcesses = 'hosts-uncommon_processes',
-  investigations = 'investigations',
   kubernetes = 'kubernetes',
   landing = 'get_started',
-  mlLanding = 'machine_learning-landing', // serverless only
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
@@ -70,7 +72,12 @@ export enum SecurityPageName {
   rulesAdd = 'rules-add',
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
+  rulesManagement = 'rules-management',
+  scriptsLibrary = 'scripts_library',
+  siemReadiness = 'siem_readiness',
+  siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
+  siemMigrationsDashboards = 'siem_migrations-dashboards',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All threat intelligence page names must match `TIPageId` in x-pack/solutions/security/plugins/threat_intelligence/public/common/navigation/types.ts
@@ -79,16 +86,25 @@ export enum SecurityPageName {
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
+  trustedDevices = 'trusted_devices',
   users = 'users',
   usersAll = 'users-all',
   usersAnomalies = 'users-anomalies',
   usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
   usersRisk = 'users-risk',
-  entityAnalytics = 'entity_analytics',
+  entityAnalytics = 'entity_analytics', // This is the first Entity Analytics page, that is why the name is too generic.
   entityAnalyticsManagement = 'entity_analytics-management',
-  entityAnalyticsAssetClassification = 'entity_analytics-asset-classification',
+  entityAnalyticsLanding = 'entity_analytics-landing',
+  entityAnalyticsPrivilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
+  entityAnalyticsOverview = 'entity_analytics-overview',
+  entityAnalyticsThreatHunting = 'entity_analytics-threat_hunting',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
   coverageOverview = 'coverage-overview',
   notes = 'notes',
+  alertSummary = 'alert_summary',
+  configurations = 'configurations',
+  configurationsIntegrations = 'configurations-integrations',
+  configurationsAiSettings = 'configurations-ai_settings',
+  configurationsBasicRules = 'configurations-basic_rules',
 }

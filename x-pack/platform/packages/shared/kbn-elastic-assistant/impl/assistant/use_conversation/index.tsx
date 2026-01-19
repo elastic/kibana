@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type React from 'react';
 import { useCallback } from 'react';
-import { ApiConfig } from '@kbn/elastic-assistant-common';
-import { useAssistantContext } from '../../assistant_context';
-import { Conversation, ClientMessage } from '../../assistant_context/types';
+import type { ApiConfig, User } from '@kbn/elastic-assistant-common';
+import type { DataStreamApis } from '../use_data_stream_apis';
 import * as i18n from './translations';
+import { useAssistantContext } from '../../assistant_context';
+import type { Conversation, ClientMessage } from '../../assistant_context/types';
 import { getDefaultSystemPrompt } from './helpers';
 import {
   createConversation as createConversationApi,
@@ -17,23 +19,7 @@ import {
   getConversationById,
   updateConversation,
 } from '../api/conversations';
-import { WELCOME_CONVERSATION } from './sample_conversations';
 import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
-
-export const DEFAULT_CONVERSATION_STATE: Conversation = {
-  id: '',
-  messages: [],
-  replacements: {},
-  category: 'assistant',
-  title: i18n.DEFAULT_CONVERSATION_TITLE,
-};
-
-interface CreateConversationProps {
-  cTitle: string;
-  messages?: ClientMessage[];
-  conversationIds?: string[];
-  apiConfig?: Conversation['apiConfig'];
-}
 
 interface SetApiConfigProps {
   conversation: Conversation;
@@ -45,9 +31,19 @@ interface UpdateConversationTitleProps {
   updatedTitle: string;
 }
 
+interface UpdateConversationUsersProps {
+  conversationId: string;
+  updatedUsers: User[];
+}
+
 export interface UseConversation {
   clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
-  getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
+  copyConversationUrl: (conversation?: Conversation) => Promise<void>;
+  duplicateConversation: (args: {
+    refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
+    selectedConversation?: Conversation;
+    setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
+  }) => Promise<void>;
   deleteConversation: (conversationId: string) => void;
   removeLastMessage: (conversationId: string) => Promise<ClientMessage[] | undefined>;
   setApiConfig: ({
@@ -60,6 +56,10 @@ export interface UseConversation {
     conversationId,
     updatedTitle,
   }: UpdateConversationTitleProps) => Promise<Conversation>;
+  updateConversationUsers: ({
+    conversationId,
+    updatedUsers,
+  }: UpdateConversationUsersProps) => Promise<Conversation>;
 }
 
 export const useConversation = (): UseConversation => {
@@ -122,26 +122,6 @@ export const useConversation = (): UseConversation => {
   );
 
   /**
-   * Create a new conversation with the given conversationId, and optionally add messages
-   */
-  const getDefaultConversation = useCallback(
-    ({ cTitle, messages }: CreateConversationProps): Conversation => {
-      const newConversation: Conversation =
-        cTitle === i18n.WELCOME_CONVERSATION_TITLE
-          ? WELCOME_CONVERSATION
-          : {
-              ...DEFAULT_CONVERSATION_STATE,
-              id: '',
-              title: cTitle,
-              messages: messages != null ? messages : [],
-            };
-
-      return newConversation;
-    },
-    []
-  );
-
-  /**
    * Create a new conversation with the given conversation
    */
   const createConversation = useCallback(
@@ -167,20 +147,8 @@ export const useConversation = (): UseConversation => {
   const setApiConfig = useCallback(
     async ({ conversation, apiConfig }: SetApiConfigProps) => {
       if (conversation.id === '') {
-        return createConversationApi({
-          http,
-          conversation: {
-            apiConfig,
-            category: 'assistant',
-            title: conversation.title,
-            replacements: conversation.replacements,
-            excludeFromLastConversationStorage: conversation.excludeFromLastConversationStorage,
-            isDefault: conversation.isDefault,
-            id: '',
-            messages: conversation.messages ?? [],
-          },
-          toasts,
-        });
+        // Conversation ID is required to set API config, return empty conversation
+        return { ...conversation, apiConfig };
       } else {
         return updateConversation({
           http,
@@ -203,14 +171,106 @@ export const useConversation = (): UseConversation => {
     [http]
   );
 
+  const updateConversationUsers = useCallback(
+    ({ conversationId, updatedUsers }: UpdateConversationUsersProps): Promise<Conversation> =>
+      updateConversation({
+        http,
+        conversationId,
+        users: updatedUsers,
+      }),
+    [http]
+  );
+
+  /**
+   * Duplicates the selected conversation by creating a new conversation
+   * Refetches the current user conversations and sets the new conversation as the current one
+   */
+  const duplicateConversation = useCallback(
+    async ({
+      refetchCurrentUserConversations,
+      selectedConversation,
+      setCurrentConversation,
+    }: {
+      refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
+      selectedConversation?: Conversation;
+      setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
+    }) => {
+      try {
+        if (!selectedConversation || selectedConversation.id === '') {
+          throw new Error('No conversation available to duplicate');
+        }
+        let conversation = selectedConversation;
+        if ((selectedConversation.messages ?? []).length === 0) {
+          // Fetch conversation details if the messages array is empty
+          // This is necessary because conversation lists don't include message content
+          const conversationWithMessages = await getConversation(selectedConversation.id, true);
+          if (conversationWithMessages) {
+            conversation = conversationWithMessages;
+          }
+        }
+        const newConversation = await createConversation({
+          title: `[${i18n.DUPLICATE}] ${conversation.title}`,
+          apiConfig: conversation.apiConfig,
+          messages: conversation.messages,
+          replacements: conversation.replacements,
+        });
+        if (newConversation) {
+          await refetchCurrentUserConversations();
+          setCurrentConversation(newConversation);
+          toasts?.addSuccess({
+            title: i18n.DUPLICATE_SUCCESS(newConversation.title),
+          });
+        } else {
+          throw new Error('Failed to duplicate conversation');
+        }
+      } catch (error) {
+        toasts?.addError(error, {
+          title: i18n.DUPLICATE_ERROR,
+        });
+      }
+    },
+    [createConversation, getConversation, toasts]
+  );
+
+  const copyConversationUrl = useCallback(
+    async (conversation?: Conversation) => {
+      try {
+        if (!conversation) {
+          throw new Error('No conversation id available to copy');
+        }
+        const conversationUrl = http?.basePath.prepend(
+          `/app/security/get_started?assistant=${conversation.id}`
+        );
+
+        if (!conversationUrl) {
+          throw new Error('Conversation URL does not exist');
+        }
+
+        const urlToCopy = new URL(conversationUrl, window.location.origin).toString();
+        navigator.clipboard?.writeText(urlToCopy);
+
+        toasts?.addSuccess({
+          title: i18n.COPY_URL_SUCCESS,
+        });
+      } catch (error) {
+        toasts?.addError(error, {
+          title: i18n.COPY_URL_ERROR,
+        });
+      }
+    },
+    [http?.basePath, toasts]
+  );
+
   return {
     clearConversation,
-    getDefaultConversation,
     deleteConversation,
     removeLastMessage,
     setApiConfig,
     updateConversationTitle,
     createConversation,
     getConversation,
+    updateConversationUsers,
+    copyConversationUrl,
+    duplicateConversation,
   };
 };

@@ -8,7 +8,7 @@
 import { EuiSpacer, EuiText, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { RecentTimelineHeader } from './header';
 import type {
   OnOpenTimeline,
@@ -57,6 +57,7 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
                   ? i18n.OPEN_AS_DUPLICATE
                   : i18n.OPEN_AS_DUPLICATE_TEMPLATE
               }
+              disableScreenReaderOutput
             >
               <EuiButtonIcon
                 aria-label={

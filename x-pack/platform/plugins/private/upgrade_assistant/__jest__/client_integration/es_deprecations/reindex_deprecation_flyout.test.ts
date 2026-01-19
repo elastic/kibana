@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import '@testing-library/jest-dom';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 
-import { ReindexStatus, ReindexStep, ReindexStatusResponse } from '../../../common/types';
-import { setupEnvironment } from '../helpers';
-import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
+import type { ReindexStatusResponse } from '@kbn/reindex-service-plugin/common';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { setupEnvironment } from '../helpers/setup_environment';
+import { setupElasticsearchPage } from './es_deprecations.helpers';
 import {
   esDeprecationsMockResponse,
   MOCK_SNAPSHOT_ID,
@@ -19,23 +22,48 @@ import {
 
 const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
   indexName: 'foo',
-  reindexName: 'reindexed-foo',
   aliases: [],
+  isFrozen: false,
+  isReadonly: false,
+  isInDataStream: false,
+  isFollowerIndex: false,
 };
 
 describe('Reindex deprecation flyout', () => {
-  let testBed: ElasticsearchTestBed;
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
+  afterEach(async () => {
+    const flyout = screen.queryByTestId('reindexDetails');
+    if (flyout) {
+      const closeButton = within(flyout).getByRole('button', { name: 'Close' });
+      fireEvent.click(closeButton);
+      await waitFor(() => {
+        expect(screen.queryByTestId('reindexDetails')).toBeNull();
+      });
+    }
   });
 
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+
+  const openReindexFlyout = async () => {
+    fireEvent.click(screen.getAllByTestId('deprecation-reindex-reindex')[0]);
+    return await screen.findByTestId('reindexDetails');
+  };
+
+  const proceedToReindexProgress = async () => {
+    fireEvent.click(screen.getByTestId('startReindexingButton'));
+
+    const warningCheckbox = screen.queryByTestId('warninStepCheckbox');
+    if (warningCheckbox) {
+      fireEvent.click(within(warningCheckbox).getByRole('checkbox'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('startReindexingButton')).toBeEnabled();
+      });
+
+      fireEvent.click(screen.getByTestId('startReindexingButton'));
+    }
+  };
+
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
@@ -60,44 +88,20 @@ describe('Reindex deprecation flyout', () => {
     });
     httpRequestsMockHelpers.setLoadNodeDiskSpaceResponse([]);
 
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
-
-    testBed.component.update();
-  });
-
-  it('renders a flyout with reindexing details', async () => {
-    const reindexDeprecation = esDeprecationsMockResponse.migrationsDeprecations[3];
-    const { actions, find, exists } = testBed;
-
-    await actions.table.clickDeprecationRowAt('reindex', 0);
-
-    expect(exists('reindexDetails')).toBe(true);
-    expect(find('reindexDetails.flyoutTitle').text()).toContain(
-      `Reindex ${reindexDeprecation.index}`
-    );
+    await setupElasticsearchPage(httpSetup);
   });
 
   it('renders error callout when reindex fails', async () => {
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
-
-    testBed.component.update();
-
-    const { actions, exists } = testBed;
-
-    await actions.table.clickDeprecationRowAt('reindex', 0);
-
     httpRequestsMockHelpers.setStartReindexingResponse(MOCK_REINDEX_DEPRECATION.index!, undefined, {
       statusCode: 404,
       message: 'no such index [test]',
     });
 
-    await actions.reindexDeprecationFlyout.clickReindexButton();
+    const flyout = await openReindexFlyout();
+    await proceedToReindexProgress();
 
-    expect(exists('reindexDetails.reindexingFailedCallout')).toBe(true);
+    expect(flyout).toBeInTheDocument();
+    expect(await within(flyout).findByTestId('reindexingFailedCallout')).toBeInTheDocument();
   });
 
   it('renders error callout when fetch status fails', async () => {
@@ -106,28 +110,23 @@ describe('Reindex deprecation flyout', () => {
       message: 'no such index [test]',
     });
 
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
+    const flyout = await openReindexFlyout();
+    await proceedToReindexProgress();
 
-    testBed.component.update();
-
-    const { actions, exists } = testBed;
-
-    await actions.table.clickDeprecationRowAt('reindex', 0);
-
-    expect(exists('reindexDetails.fetchFailedCallout')).toBe(true);
+    expect(flyout).toBeInTheDocument();
+    expect(await within(flyout).findByTestId('fetchFailedCallout')).toBeInTheDocument();
   });
 
   describe('reindexing progress', () => {
-    it('has not started yet', async () => {
-      const { actions, find, exists } = testBed;
+    it('renders a flyout with index confirm step for reindex', async () => {
+      const reindexDeprecation = esDeprecationsMockResponse.migrationsDeprecations[3];
+      const flyout = await openReindexFlyout();
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
-      expect(find('reindexChecklistTitle').text()).toEqual('Reindexing process');
-      expect(exists('cancelReindexingDocumentsButton')).toBe(false);
+      expect(flyout).toBeInTheDocument();
+      expect(within(flyout).getByTestId('flyoutTitle')).toHaveTextContent(
+        `Reindex ${reindexDeprecation.index}`
+      );
     });
-
     it('has started but not yet reindexing documents', async () => {
       httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
         reindexOp: {
@@ -140,17 +139,15 @@ describe('Reindex deprecation flyout', () => {
         meta: defaultReindexStatusMeta,
       });
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
+      await openReindexFlyout();
+      await proceedToReindexProgress();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('reindexChecklistTitle')).toHaveTextContent(
+          'Reindexing in progress… 5%'
+        );
       });
-
-      testBed.component.update();
-      const { actions, find, exists } = testBed;
-
-      await actions.table.clickDeprecationRowAt('reindex', 0);
-
-      expect(find('reindexChecklistTitle').text()).toEqual('Reindexing in progress… 5%');
-      expect(exists('cancelReindexingDocumentsButton')).toBe(false);
+      expect(screen.queryByTestId('cancelReindexingDocumentsButton')).toBeNull();
     });
 
     it('has started reindexing documents', async () => {
@@ -165,17 +162,15 @@ describe('Reindex deprecation flyout', () => {
         meta: defaultReindexStatusMeta,
       });
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
+      await openReindexFlyout();
+      await proceedToReindexProgress();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('reindexChecklistTitle')).toHaveTextContent(
+          'Reindexing in progress… 30%'
+        );
       });
-
-      testBed.component.update();
-      const { actions, find, exists } = testBed;
-
-      await actions.table.clickDeprecationRowAt('reindex', 0);
-
-      expect(find('reindexChecklistTitle').text()).toEqual('Reindexing in progress… 30%');
-      expect(exists('cancelReindexingDocumentsButton')).toBe(true);
+      expect(await screen.findByTestId('cancelReindexingDocumentsButton')).toBeInTheDocument();
     });
 
     it('has completed reindexing documents', async () => {
@@ -190,17 +185,15 @@ describe('Reindex deprecation flyout', () => {
         meta: defaultReindexStatusMeta,
       });
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
+      await openReindexFlyout();
+      await proceedToReindexProgress();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('reindexChecklistTitle')).toHaveTextContent(
+          'Reindexing in progress… 90%'
+        );
       });
-
-      testBed.component.update();
-      const { actions, find, exists } = testBed;
-
-      await actions.table.clickDeprecationRowAt('reindex', 0);
-
-      expect(find('reindexChecklistTitle').text()).toEqual('Reindexing in progress… 90%');
-      expect(exists('cancelReindexingDocumentsButton')).toBe(false);
+      expect(screen.queryByTestId('cancelReindexingDocumentsButton')).toBeNull();
     });
 
     it('has completed', async () => {
@@ -215,27 +208,15 @@ describe('Reindex deprecation flyout', () => {
         meta: defaultReindexStatusMeta,
       });
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
+      await openReindexFlyout();
+      await proceedToReindexProgress();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('reindexChecklistTitle')).toHaveTextContent(
+          'Reindexing in progress… 95%'
+        );
       });
-
-      const { actions, find, exists, component } = testBed;
-      component.update();
-
-      await actions.table.clickDeprecationRowAt('reindex', 0);
-
-      expect(find('reindexChecklistTitle').text()).toEqual('Reindexing in progress… 95%');
-      expect(exists('cancelReindexingDocumentsButton')).toBe(false);
-
-      // We have put in place a "fake" fifth step to delete the original index
-      // In reality that was done in the last step (when the alias was created),
-      // but for the user we will display it as a separate reindex step
-      await act(async () => {
-        jest.advanceTimersByTime(1000);
-      });
-      component.update();
-
-      expect(find('reindexChecklistTitle').text()).toEqual('Reindexing process');
+      expect(screen.queryByTestId('cancelReindexingDocumentsButton')).toBeNull();
     });
   });
 
@@ -246,22 +227,17 @@ describe('Reindex deprecation flyout', () => {
           nodeId: '9OFkjpAKS_aPzJAuEOSg7w',
           nodeName: 'MacBook-Pro.local',
           available: '25%',
-          lowDiskWatermarkSetting: '50%',
         },
       ]);
 
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
-      });
+      const flyout = await openReindexFlyout();
+      await proceedToReindexProgress();
 
-      testBed.component.update();
-      const { actions, find } = testBed;
-
-      await actions.table.clickDeprecationRowAt('reindex', 0);
-
-      expect(find('lowDiskSpaceCallout').text()).toContain('Nodes with low disk space');
-      expect(find('impactedNodeListItem').length).toEqual(1);
-      expect(find('impactedNodeListItem').at(0).text()).toContain(
+      expect(await within(flyout).findByTestId('lowDiskSpaceCallout')).toHaveTextContent(
+        'Nodes with low disk space'
+      );
+      expect(within(flyout).getAllByTestId('impactedNodeListItem')).toHaveLength(1);
+      expect(within(flyout).getAllByTestId('impactedNodeListItem')[0]).toHaveTextContent(
         'MacBook-Pro.local (25% available)'
       );
     });

@@ -137,6 +137,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
                   isInvalid={(keyErrors?.length ?? 0) > 0}
                 >
                   <EuiFieldText
+                    isInvalid={(keyErrors?.length ?? 0) > 0}
                     data-test-subj={`settingsOutputsFlyout.kafkaHeadersKeyInput${index}`}
                     fullWidth
                     value={pair.key}
@@ -159,6 +160,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
                   isInvalid={(valueErrors?.length ?? 0) > 0}
                 >
                   <EuiFieldText
+                    isInvalid={(valueErrors?.length ?? 0) > 0}
                     data-test-subj={`settingsOutputsFlyout.kafkaHeadersValueInput${index}`}
                     fullWidth
                     value={pair.value}

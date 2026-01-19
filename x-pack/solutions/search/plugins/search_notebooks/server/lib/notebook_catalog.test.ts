@@ -19,17 +19,17 @@ const mockLogger: Logger = {
   error: jest.fn(),
 } as Partial<Logger> as Logger;
 
+import type { NotebookCatalogFetchOptions } from './notebook_catalog';
 import {
   getNotebook,
   getNotebookCatalog,
   DEFAULT_NOTEBOOKS,
   NOTEBOOKS_MAP,
-  NotebookCatalogFetchOptions,
   getNotebookMetadata,
 } from './notebook_catalog';
 import { createNotebooksCache } from '../utils';
-import { RemoteNotebookCatalog, SearchNotebooksConfig } from '../config';
-import { NotebookDefinition } from '@kbn/ipynb';
+import type { RemoteNotebookCatalog, SearchNotebooksConfig } from '../config';
+import type { NotebookDefinition } from '@kbn/ipynb';
 
 const emptyNotebookCache = createNotebooksCache();
 const baseConfig: SearchNotebooksConfig = { enabled: true };
@@ -67,18 +67,6 @@ describe('Notebook Catalog', () => {
     describe('static notebooks', () => {
       it('returns default notebooks when theres an empty catalog config', async () => {
         await expect(getNotebookCatalog(staticOptions)).resolves.toMatchObject(DEFAULT_NOTEBOOKS);
-      });
-      it.skip('returns requested list of notebooks when it exists', async () => {
-        // Re-enable this with actual list when we implement them
-        await expect(
-          getNotebookCatalog({ ...staticOptions, notebookList: 'ml' })
-        ).resolves.toMatchObject({
-          notebooks: [
-            NOTEBOOKS_MAP['03_elser'],
-            NOTEBOOKS_MAP['02_hybrid_search'],
-            NOTEBOOKS_MAP['04_multilingual'],
-          ],
-        });
       });
       it('returns default list if requested list doesnt exist', async () => {
         await expect(

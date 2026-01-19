@@ -6,7 +6,7 @@
  */
 
 import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { SLODefinition } from '../../../domain/models';
+import type { SLODefinition } from '../../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../../domain/services/get_delay_in_seconds_from_slo';
 
 const FIVE_MINUTES_IN_SECONDS = 300;

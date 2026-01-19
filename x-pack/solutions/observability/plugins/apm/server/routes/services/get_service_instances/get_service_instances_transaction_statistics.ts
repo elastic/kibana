@@ -6,6 +6,10 @@
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
+  getDurationFieldForTransactions,
+  calculateThroughputWithRange,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
@@ -18,10 +22,8 @@ import type { Coordinate } from '../../../../typings/timeseries';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getBackwardCompatibleDocumentTypeFilter,
-  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
@@ -148,7 +150,10 @@ export async function getServiceInstancesTransactionStatistics<T extends true | 
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: { size: 0, track_total_hits: false, query, aggs },
+    size: 0,
+    track_total_hits: false,
+    query,
+    aggs,
   });
 
   const bucketSizeInMinutes = bucketSize / 60;

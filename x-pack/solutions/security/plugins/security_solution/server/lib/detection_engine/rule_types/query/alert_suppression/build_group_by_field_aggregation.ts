@@ -11,9 +11,7 @@ import type { SignalSource } from '../../types';
 export type EventGroupingMultiBucketAggregationResult = ESSearchResponse<
   SignalSource,
   {
-    body: {
-      aggregations: ReturnType<typeof buildGroupByFieldAggregation>;
-    };
+    aggregations: ReturnType<typeof buildGroupByFieldAggregation>;
   }
 >;
 

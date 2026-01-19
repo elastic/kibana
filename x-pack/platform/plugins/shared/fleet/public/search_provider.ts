@@ -15,6 +15,10 @@ import type {
   GlobalSearchProviderResult,
 } from '@kbn/global-search-plugin/public';
 
+import type { CustomIntegrationsSetup } from '@kbn/custom-integrations-plugin/public';
+
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import { filterPolicyTemplatesTiles } from '../common/services';
 
@@ -143,6 +147,48 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
       return combineLatest([coreStart$, getPackages$()]).pipe(
         takeUntil(aborted$),
         map(([coreStart, data]) => (data ? toSearchResults(coreStart, data) : []))
+      );
+    },
+  };
+};
+
+const toCustomItegrationSearchResult = (customIntegration: CustomIntegration) => ({
+  id: customIntegration.id,
+  type: packageType,
+  title: customIntegration.title,
+  score: 80,
+  url: customIntegration.uiInternalPath,
+  icon: customIntegration.icons.find(({ src }) => Boolean(src))?.src,
+});
+
+export const createCustomIntegrationsSearchProvider = (
+  customIntegrations: CustomIntegrationsSetup
+): GlobalSearchResultProvider => {
+  return {
+    id: 'customIntegrations',
+    getSearchableTypes: () => [packageType],
+    find: ({ term, types }, { maxResults, aborted$ }) => {
+      if (types?.includes(packageType) === false) {
+        return of([]);
+      }
+
+      if (!term) {
+        return of([]);
+      }
+
+      const customIntegrations$ = from(customIntegrations.getReplacementCustomIntegrations()).pipe(
+        map((integrations) => integrations),
+        shareReplay(1)
+      );
+
+      return customIntegrations$.pipe(
+        takeUntil(aborted$),
+        map((customIntegrationsData) =>
+          customIntegrationsData
+            .map(toCustomItegrationSearchResult)
+            .filter((res) => term && res.title.toLowerCase().includes(term.toLowerCase()))
+            .slice(0, maxResults)
+        )
       );
     },
   };

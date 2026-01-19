@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportRequestParams } from '@elastic/elasticsearch';
-import { CoreSetup, IRouter, RouteMethod } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { TransportRequestParams } from '@elastic/elasticsearch';
+import type { CoreSetup, IRouter, RouteMethod } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type {
   LogsSharedPluginRequestHandlerContext,
   LogsSharedServerPluginSetupDeps,
   LogsSharedServerPluginStartDeps,
 } from '../../../types';
-import {
+import type {
   CallWithRequestParams,
   LogsSharedDatabaseGetIndicesAliasResponse,
   LogsSharedDatabaseGetIndicesResponse,
@@ -139,7 +139,7 @@ export class KibanaFramework {
         apiResult = elasticsearch.client.asCurrentUser.search({
           ...params,
           ...frozenIndicesParams,
-        });
+        } as estypes.SearchRequest);
         break;
       case 'msearch':
         apiResult = elasticsearch.client.asCurrentUser.msearch({

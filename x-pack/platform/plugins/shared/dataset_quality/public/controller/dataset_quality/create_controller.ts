@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
-import { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
+import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../../../common/constants';
+import type { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
 import {
   createDatasetQualityControllerStateMachine,
   DEFAULT_CONTEXT,
 } from '../../state_machines/dataset_quality_controller';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
-import { DatasetQualityController, DatasetQualityPublicStateUpdate } from './types';
+import type { DatasetQualityController, DatasetQualityPublicStateUpdate } from './types';
 
 type InitialState = DatasetQualityPublicStateUpdate;
 
 interface Dependencies {
   core: CoreStart;
   dataStreamStatsService: DataStreamsStatsServiceStart;
-  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityControllerFactory =
-  ({ core, dataStreamStatsService, isFailureStoreEnabled }: Dependencies) =>
+  ({ core, dataStreamStatsService }: Dependencies) =>
   async ({
     initialState = DEFAULT_CONTEXT,
   }: {
@@ -41,7 +41,9 @@ export const createDatasetQualityControllerFactory =
       initialContext,
       toasts: core.notifications.toasts,
       dataStreamStatsClient,
-      isFailureStoreEnabled,
+      isDatasetQualityAllSignalsAvailable: core.pricing.isFeatureAvailable(
+        DATASET_QUALITY_ALL_SIGNALS_ID
+      ),
     });
 
     const service = interpret(machine, {

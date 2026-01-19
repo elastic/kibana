@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -70,61 +70,57 @@ export const buildPreviousThresholdAlertRequest = ({
   bucketByFields: string[];
 }): estypes.SearchRequest => {
   return {
-    // We should switch over to @elastic/elasticsearch/lib/api/types instead of typesWithBodyKey where possible,
-    // but api/types doesn't have a complete type for `sort`
-    body: {
-      size: 10000,
-      sort: [
-        {
-          '@timestamp': 'desc',
-        },
-      ],
-      query: {
-        bool: {
-          must: [
-            {
-              range: {
-                '@timestamp': {
-                  lte: to,
-                  gte: from,
-                  format: 'strict_date_optional_time',
-                },
+    size: 10000,
+    sort: [
+      {
+        '@timestamp': 'desc',
+      },
+    ],
+    query: {
+      bool: {
+        must: [
+          {
+            range: {
+              '@timestamp': {
+                lte: to,
+                gte: from,
+                format: 'strict_date_optional_time',
               },
             },
-            {
-              term: {
-                [ALERT_RULE_UUID]: frameworkRuleId,
+          },
+          {
+            term: {
+              [ALERT_RULE_UUID]: frameworkRuleId,
+            },
+          },
+          // We might find a signal that was generated on the interval for old data... make sure to exclude those.
+          {
+            range: {
+              'signal.original_time': {
+                gte: from,
               },
             },
-            // We might find a signal that was generated on the interval for old data... make sure to exclude those.
-            {
-              range: {
-                'signal.original_time': {
-                  gte: from,
-                },
-              },
-            },
-            ...bucketByFields.map((field) => {
-              return {
-                bool: {
-                  should: [
-                    {
-                      term: {
-                        'signal.rule.threshold.field': field,
-                      },
+          },
+          ...bucketByFields.map((field) => {
+            return {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'signal.rule.threshold.field': field,
                     },
-                    {
-                      term: {
-                        'kibana.alert.rule.parameters.threshold.field': field,
-                      },
+                  },
+                  {
+                    term: {
+                      'kibana.alert.rule.parameters.threshold.field': field,
                     },
-                  ],
-                  minimum_should_match: 1,
-                },
-              };
-            }),
-          ],
-        },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            };
+          }),
+        ],
       },
     },
   };

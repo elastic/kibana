@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
-import { NumberOrNull } from '../../../../..';
+import type { NumberOrNull } from '../../../../..';
 import { useChartThemes } from '../../../../../hooks/use_chart_themes';
 
 interface Props {
@@ -19,11 +19,10 @@ interface Props {
   value: NumberOrNull;
   timeseries: any[];
   formatter: (value: NumberOrNull) => string;
-  color: number;
+  color: string;
 }
 export function MetricWithSparkline({ id, formatter, value, timeseries, color }: Props) {
   const { baseTheme, sparklineTheme } = useChartThemes();
-  const colors = baseTheme.colors?.vizColors ?? [];
 
   if (!value) {
     return (
@@ -53,7 +52,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
             data={timeseries}
             xAccessor={'timestamp'}
             yAccessors={[id]}
-            color={colors[color] || '#006BB4'}
+            color={color}
           />
         </Chart>
       </EuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Id, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { waitUntilDocumentIndexed } from '../utils';
@@ -30,28 +30,24 @@ export const deleteList = async ({
     return null;
   } else {
     await esClient.deleteByQuery({
-      body: {
-        query: {
-          term: {
-            list_id: id,
-          },
-        },
-      },
       conflicts: 'proceed',
       index: listItemIndex,
+      query: {
+        term: {
+          list_id: id,
+        },
+      },
       refresh: false,
     });
 
     const response = await esClient.deleteByQuery({
-      body: {
-        query: {
-          ids: {
-            values: [id],
-          },
-        },
-      },
       conflicts: 'proceed',
       index: listIndex,
+      query: {
+        ids: {
+          values: [id],
+        },
+      },
       refresh: false,
     });
 

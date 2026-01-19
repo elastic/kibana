@@ -1,0 +1,7 @@
+lang: Curl
+# label:
+source: |
+  curl -X GET "http://localhost:5601/api/apm/sourcemaps" \
+  -H 'Content-Type: application/json' \
+  -H 'kbn-xsrf: true' \
+  -H 'Authorization: ApiKey ${YOUR_API_KEY}'

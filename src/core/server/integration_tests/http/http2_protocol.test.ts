@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Server } from 'http';
+import type { Server } from 'http';
 import supertest from 'supertest';
 import { of } from 'rxjs';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
@@ -85,26 +85,38 @@ describe('Http2 - Smoke tests', () => {
         },
       });
 
-      router.post({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({
-          body: { protocol: req.protocol, httpVersion: req.httpVersion },
-        });
-      });
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({
-          body: { protocol: req.protocol, httpVersion: req.httpVersion },
-        });
-      });
-      router.put({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({
-          body: { protocol: req.protocol, httpVersion: req.httpVersion },
-        });
-      });
-      router.delete({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({
-          body: { protocol: req.protocol, httpVersion: req.httpVersion },
-        });
-      });
+      router.post(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          return res.ok({
+            body: { protocol: req.protocol, httpVersion: req.httpVersion },
+          });
+        }
+      );
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          return res.ok({
+            body: { protocol: req.protocol, httpVersion: req.httpVersion },
+          });
+        }
+      );
+      router.put(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          return res.ok({
+            body: { protocol: req.protocol, httpVersion: req.httpVersion },
+          });
+        }
+      );
+      router.delete(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          return res.ok({
+            body: { protocol: req.protocol, httpVersion: req.httpVersion },
+          });
+        }
+      );
 
       registerRouter(router);
 
@@ -188,14 +200,21 @@ describe('Http2 - Smoke tests', () => {
         },
       });
 
-      router.get({ path: '/illegal_headers', validate: false }, async (context, req, res) => {
-        return res.ok({
-          headers: {
-            connection: 'close',
-          },
-          body: { protocol: req.protocol },
-        });
-      });
+      router.get(
+        {
+          path: '/illegal_headers',
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+        },
+        async (context, req, res) => {
+          return res.ok({
+            headers: {
+              connection: 'close',
+            },
+            body: { protocol: req.protocol },
+          });
+        }
+      );
 
       registerRouter(router);
 

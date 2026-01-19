@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
-import { IStyle } from '../style';
-import { EMSVectorTileStyleDescriptor, StyleDescriptor } from '../../../../common/descriptor_types';
+import type { IStyle } from '../style';
+import type {
+  EMSVectorTileStyleDescriptor,
+  StyleDescriptor,
+} from '../../../../common/descriptor_types';
 import { LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { EMSVectorTileStyleEditor } from './components/ems_vector_tile_style_editor';
 
@@ -18,7 +21,7 @@ export class EMSVectorTileStyle implements IStyle {
     this._descriptor = EMSVectorTileStyle.createDescriptor(descriptor.color);
   }
 
-  static createDescriptor(color?: string) {
+  static createDescriptor(color?: string): EMSVectorTileStyleDescriptor {
     return {
       type: LAYER_STYLE_TYPE.EMS_VECTOR_TILE,
       color: color ?? '',

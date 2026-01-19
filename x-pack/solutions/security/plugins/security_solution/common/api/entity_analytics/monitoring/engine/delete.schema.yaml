@@ -1,0 +1,33 @@
+openapi: 3.0.0
+
+info:
+  title: Delete Privilege Monitoring Engine
+  version: "2023-10-31"
+paths:
+  /api/entity_analytics/monitoring/engine/delete:
+    delete:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: DeleteMonitoringEngine
+      summary: Delete the Privilege Monitoring Engine
+      parameters:
+        - in: query
+          name: data
+          schema:
+            type: boolean
+            default: false
+          required: false
+          description: Whether to delete all the privileged user data
+
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                required:
+                  - deleted

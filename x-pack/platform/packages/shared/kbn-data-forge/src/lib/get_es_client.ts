@@ -6,9 +6,9 @@
  */
 
 import * as Fs from 'fs';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { Config } from '../types';
+import type { Config } from '../types';
 
 let esClient: Client;
 
@@ -35,6 +35,8 @@ export const getEsClient = (config: Config) => {
           rejectUnauthorized: false,
         }
       : undefined,
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 
   return esClient;

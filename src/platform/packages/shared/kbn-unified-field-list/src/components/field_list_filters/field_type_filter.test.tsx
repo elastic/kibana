@@ -8,132 +8,141 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { EuiContextMenuItem } from '@elastic/eui';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
+import { screen, within } from '@testing-library/react';
+import { render } from '@elastic/eui/lib/test/rtl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { userEvent } from '@testing-library/user-event';
+
+const DATA_TEST_SUBJ = 'filters';
+const TOGGLE_TEST_SUBJ = `${DATA_TEST_SUBJ}FieldTypeFilterToggle`;
+const OPTIONS_TEST_SUBJ = `${DATA_TEST_SUBJ}FieldTypeFilterOptions`;
 
 const docLinks = coreMock.createStart().docLinks;
 
-describe('UnifiedFieldList <FieldTypeFilter />', () => {
-  async function openPopover(wrapper: ReactWrapper, props: FieldTypeFilterProps<DataViewField>) {
-    act(() => {
-      wrapper
-        .find(`[data-test-subj="${props['data-test-subj']}FieldTypeFilterToggle"]`)
-        .last()
-        .simulate('click');
+const setup = (props: Partial<FieldTypeFilterProps<DataViewField>> = {}) => {
+  const user = userEvent.setup();
+
+  const finalProps = {
+    selectedFieldTypes: [],
+    allFields: dataView.fields,
+    docLinks,
+    'data-test-subj': DATA_TEST_SUBJ,
+    getCustomFieldType: jest.fn((field) => field.type),
+    onChange: jest.fn(),
+    ...props,
+  };
+
+  render(
+    <IntlProvider locale="en">
+      <FieldTypeFilter {...finalProps} />
+    </IntlProvider>
+  );
+
+  return { user, props: finalProps };
+};
+
+describe('<FieldTypeFilter />', () => {
+  describe('when the popover is closed', () => {
+    it('should not calculate the counts', () => {
+      const { props } = setup();
+      expect(props.getCustomFieldType).not.toHaveBeenCalled();
     });
-
-    // wait for lazy modules if any
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    await wrapper.update();
-  }
-
-  async function toggleType(wrapper: ReactWrapper, fieldType: string) {
-    act(() => {
-      wrapper.find(`[data-test-subj="typeFilter-${fieldType}"]`).first().simulate('click');
-    });
-
-    await wrapper.update();
-  }
-
-  function findClearAllButton(wrapper: ReactWrapper, props: FieldTypeFilterProps<DataViewField>) {
-    return wrapper.find(`[data-test-subj="${props['data-test-subj']}FieldTypeFilterClearAll"]`);
-  }
-
-  it("should render correctly and don't calculate counts unless opened", async () => {
-    const props: FieldTypeFilterProps<DataViewField> = {
-      selectedFieldTypes: [],
-      allFields: dataView.fields,
-      docLinks,
-      'data-test-subj': 'filters',
-      getCustomFieldType: jest.fn((field) => field.type),
-      onChange: jest.fn(),
-    };
-    const wrapper = await mountWithIntl(<FieldTypeFilter {...props} />);
-    expect(wrapper.find(EuiContextMenuItem)?.length).toBe(0);
-    expect(props.getCustomFieldType).not.toBeCalled();
-
-    await openPopover(wrapper, props);
-
-    expect(wrapper.find(EuiContextMenuItem)?.length).toBe(10);
-    expect(
-      wrapper
-        .find(EuiContextMenuItem)
-        .map((item) => item.text())
-        .join(', ')
-    ).toBe(
-      // format:type_icon type_name help_icon count
-      'BooleanBooleanInfo1, ConflictConflictInfo1, DateDateInfo4, Geo pointGeo pointInfo2, Geo shapeGeo shapeInfo1, IP addressIP addressInfo1, KeywordKeywordInfo5, Murmur3Murmur3Info2, NumberNumberInfo3, TextTextInfo5'
-    );
-    expect(props.getCustomFieldType).toHaveBeenCalledTimes(props.allFields?.length ?? 0);
-    expect(props.onChange).not.toBeCalled();
-    expect(findClearAllButton(wrapper, props)?.length).toBe(0);
   });
 
-  it('should exclude custom unsupported fields', async () => {
-    const props: FieldTypeFilterProps<DataViewField> = {
-      selectedFieldTypes: [],
-      allFields: dataView.fields,
-      docLinks,
-      'data-test-subj': 'filters',
-      onSupportedFieldFilter: (field) => ['number', 'date'].includes(field.type),
-      onChange: jest.fn(),
-    };
-    const wrapper = await mountWithIntl(<FieldTypeFilter {...props} />);
-    expect(wrapper.find(EuiContextMenuItem)?.length).toBe(0);
+  describe('when the popover is opened', () => {
+    it.each([
+      { type: 'Boolean', count: 1 },
+      { type: 'Conflict', count: 1 },
+      { type: 'Date', count: 4 },
+      { type: 'Geo point', count: 2 },
+      { type: 'Geo shape', count: 1 },
+      { type: 'IP address', count: 1 },
+      { type: 'Keyword', count: 5 },
+      { type: 'Number', count: 3 },
+      { type: 'Text', count: 5 },
+    ])('should show $type count', async ({ type, count }) => {
+      // When
+      const { user, props } = setup();
 
-    await openPopover(wrapper, props);
+      const button = screen.getByTestId(TOGGLE_TEST_SUBJ);
+      await user.click(button);
 
-    expect(wrapper.find(EuiContextMenuItem)?.length).toBe(2);
-    expect(
-      wrapper
-        .find(EuiContextMenuItem)
-        .map((item) => item.text())
-        .join(', ')
-    ).toBe('DateDateInfo4, NumberNumberInfo3');
-  });
+      // Then
+      expect(props.getCustomFieldType).toHaveBeenCalledTimes(props.allFields?.length ?? 0);
 
-  it('should select items correctly', async () => {
-    const props: FieldTypeFilterProps<DataViewField> = {
-      selectedFieldTypes: ['date', 'number'],
-      allFields: dataView.fields,
-      docLinks,
-      'data-test-subj': 'filters',
-      onChange: jest.fn(),
-    };
-    const wrapper = await mountWithIntl(<FieldTypeFilter {...props} />);
-    expect(wrapper.find(EuiContextMenuItem)?.length).toBe(0);
+      expect(
+        within(screen.getByTestId(OPTIONS_TEST_SUBJ)).getByLabelText(
+          `${type} field count: ${count}`
+        )
+      ).toBeVisible();
+    });
 
-    await openPopover(wrapper, props);
+    describe('when there are supported fields', () => {
+      it('should just include them', async () => {
+        // Given
+        const onSupportedFieldFilter = jest.fn((field) => ['number', 'date'].includes(field.type));
 
-    const clearAllButton = findClearAllButton(wrapper, props)?.first();
-    expect(wrapper.find(EuiContextMenuItem)?.length).toBe(10);
-    expect(clearAllButton?.length).toBe(1);
-    expect(
-      wrapper
-        .find(EuiContextMenuItem)
-        .map((item) => `${item.prop('icon')}-${item.text()}`)
-        .join(', ')
-    ).toBe(
-      // format:selection_icon type_icon type_name help_icon count
-      'empty-BooleanBooleanInfo1, empty-ConflictConflictInfo1, check-DateDateInfo4, empty-Geo pointGeo pointInfo2, empty-Geo shapeGeo shapeInfo1, empty-IP addressIP addressInfo1, empty-KeywordKeywordInfo5, empty-Murmur3Murmur3Info2, check-NumberNumberInfo3, empty-TextTextInfo5'
-    );
+        // When
+        const { user } = setup({
+          onSupportedFieldFilter,
+        });
 
-    await toggleType(wrapper, 'boolean');
+        await user.click(screen.getByTestId(TOGGLE_TEST_SUBJ));
 
-    expect(props.onChange).toHaveBeenCalledWith(['date', 'number', 'boolean']);
+        // Then
+        expect(
+          within(screen.getByTestId(OPTIONS_TEST_SUBJ)).getByLabelText('Date field count: 4')
+        ).toBeVisible();
+        expect(
+          within(screen.getByTestId(OPTIONS_TEST_SUBJ)).getByLabelText('Number field count: 3')
+        ).toBeVisible();
+      });
+    });
 
-    await toggleType(wrapper, 'date');
+    it('should select items correctly', async () => {
+      // Given
+      const { user, props } = setup({
+        selectedFieldTypes: ['date', 'number'],
+      });
 
-    expect(props.onChange).toHaveBeenNthCalledWith(2, ['number']);
+      // When
+      await user.click(screen.getByTestId(TOGGLE_TEST_SUBJ));
 
-    clearAllButton.simulate('click');
+      // Then
+      await user.click(screen.getByLabelText('Boolean field count: 1'));
+      expect(props.onChange).toHaveBeenCalledWith(['date', 'number', 'boolean']);
+    });
 
-    expect(props.onChange).toHaveBeenNthCalledWith(3, []);
+    it('should deselect items correctly', async () => {
+      // Given
+      const { user, props } = setup({
+        selectedFieldTypes: ['date', 'number', 'boolean'],
+      });
+
+      // When
+      await user.click(screen.getByTestId(TOGGLE_TEST_SUBJ));
+
+      // Then
+      await user.click(screen.getByLabelText('Boolean field count: 1'));
+      expect(props.onChange).toHaveBeenCalledWith(['date', 'number']);
+    });
+
+    it('should clear all items correctly', async () => {
+      // Given
+      const { user, props } = setup({
+        selectedFieldTypes: ['date', 'number', 'boolean'],
+      });
+
+      // When
+      await user.click(screen.getByTestId(TOGGLE_TEST_SUBJ));
+
+      // Then
+      await user.click(screen.getByText('Clear all'));
+      expect(props.onChange).toHaveBeenCalledWith([]);
+    });
   });
 });

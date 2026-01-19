@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SemVer } from 'semver';
 import type { IndexMapping, IndexMappingMeta } from '../mappings';
 import type { VirtualVersionMap } from './version_map';
 import { assertValidVirtualVersion } from './conversion';
@@ -16,6 +17,7 @@ export interface GetModelVersionsFromMappingsOpts {
   source: 'mappingVersions' | 'docVersions';
   /** if specified, will filter the types with the provided list */
   knownTypes?: string[];
+  minimumVirtualVersion?: string;
 }
 
 /**
@@ -25,6 +27,7 @@ export const getVirtualVersionsFromMappings = ({
   mappings,
   source,
   knownTypes,
+  minimumVirtualVersion,
 }: GetModelVersionsFromMappingsOpts): VirtualVersionMap | undefined => {
   if (!mappings._meta) {
     return undefined;
@@ -34,6 +37,7 @@ export const getVirtualVersionsFromMappings = ({
     meta: mappings._meta,
     source,
     knownTypes,
+    minimumVirtualVersion,
   });
 };
 
@@ -42,6 +46,7 @@ export interface GetModelVersionsFromMappingMetaOpts {
   source: 'mappingVersions' | 'docVersions';
   /** if specified, will filter the types with the provided list */
   knownTypes?: string[];
+  minimumVirtualVersion?: string;
 }
 
 /**
@@ -51,16 +56,23 @@ export const getVirtualVersionsFromMappingMeta = ({
   meta,
   source,
   knownTypes,
+  minimumVirtualVersion,
 }: GetModelVersionsFromMappingMetaOpts): VirtualVersionMap | undefined => {
   const indexVersions = source === 'mappingVersions' ? meta.mappingVersions : meta.docVersions;
   if (!indexVersions) {
     return undefined;
   }
+
+  const minVersion = minimumVirtualVersion ? new SemVer(minimumVirtualVersion) : undefined;
   const typeSet = knownTypes ? new Set(knownTypes) : undefined;
 
   return Object.entries(indexVersions).reduce<VirtualVersionMap>((map, [type, rawVersion]) => {
     if (!typeSet || typeSet.has(type)) {
-      map[type] = assertValidVirtualVersion(rawVersion);
+      const validatedVersion = assertValidVirtualVersion(rawVersion);
+      map[type] =
+        minimumVirtualVersion && minVersion!.compare(validatedVersion) === 1
+          ? minimumVirtualVersion
+          : validatedVersion;
     }
     return map;
   }, {});

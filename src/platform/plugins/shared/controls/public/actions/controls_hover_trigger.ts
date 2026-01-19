@@ -8,11 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import { CONTROL_HOVER_TRIGGER_ID } from '@kbn/controls-constants';
 
-export const CONTROL_HOVER_TRIGGER = 'CONTROL_HOVER_TRIGGER';
 export const controlHoverTrigger: Trigger = {
-  id: CONTROL_HOVER_TRIGGER,
+  id: CONTROL_HOVER_TRIGGER_ID,
   title: i18n.translate('controls.hoverTrigger.title', {
     defaultMessage: 'Control hover',
   }),

@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { LensAppLocatorParams } from '../../common/locator/locator';
-import type { LensAppState } from '../state_management';
-import type { LensAppServices } from './types';
-import type { LensDocument } from '../persistence/saved_object_store';
-import type { DatasourceMap, VisualizationMap } from '../types';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type {
+  LensAppState,
+  LensDocument,
+  DatasourceMap,
+  VisualizationMap,
+  LensAppLocatorParams,
+  LensAppServices,
+} from '@kbn/lens-common';
 import { extractReferencesFromState, getResolvedDateRange } from '../utils';
 import { getEditPath } from '../../common/constants';
 
-interface ShareableConfiguration
+export interface ShareableConfiguration
   extends Pick<
     LensAppState,
     'activeDatasourceId' | 'datasourceStates' | 'visualization' | 'filters' | 'query'
   > {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  currentDoc: LensDocument | undefined;
+  currentDoc?: LensDocument;
   adHocDataViews?: DataViewSpec[];
 }
 
@@ -37,7 +40,7 @@ export const DEFAULT_LENS_LAYOUT_DIMENSIONS = {
 
 function getShareURLForSavedObject(
   { application, data }: Pick<LensAppServices, 'application' | 'data'>,
-  currentDoc: LensDocument | undefined
+  currentDoc?: LensDocument
 ) {
   return new URL(
     `${application.getUrlForApp('lens', { absolute: true })}${
@@ -69,6 +72,7 @@ export function getLocatorParams(
   isDirty: boolean
 ) {
   const references = extractReferencesFromState({
+    activeDatasourceId,
     activeDatasources: Object.keys(datasourceStates).reduce(
       (acc, datasourceId) => ({
         ...acc,
@@ -81,7 +85,7 @@ export function getLocatorParams(
     activeVisualization: visualization.activeId
       ? visualizationMap[visualization.activeId]
       : undefined,
-  }) as Array<SavedObjectReference & SerializableRecord>;
+  }) as Array<Reference & SerializableRecord>;
 
   const serializableVisualization = visualization as LensAppState['visualization'] &
     SerializableRecord;
@@ -116,21 +120,15 @@ export function getLocatorParams(
   };
 }
 
-export async function getShareURL(
+export function getShareURL(
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>,
+  shareLocatorParams: LensAppLocatorParams,
   services: Pick<LensAppServices, 'application' | 'data'>,
   configuration: ShareableConfiguration,
-  shareUrlEnabled: boolean,
-  isDirty: boolean
+  shareUrlEnabled: boolean
 ) {
-  const { shareURL: locatorParams, reporting: reportingLocatorParams } = getLocatorParams(
-    services.data,
-    configuration,
-    isDirty
-  );
   return {
-    shareableUrl: await (shareUrlEnabled ? shortUrlService(locatorParams) : undefined),
+    shareableUrl: shareUrlEnabled ? shortUrlService(shareLocatorParams) : undefined,
     savedObjectURL: getShareURLForSavedObject(services, configuration.currentDoc),
-    reportingLocatorParams,
   };
 }

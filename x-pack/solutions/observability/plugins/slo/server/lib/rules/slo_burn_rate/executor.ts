@@ -6,20 +6,24 @@
  */
 
 import numeral from '@elastic/numeral';
-import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
-import { IBasePath } from '@kbn/core/server';
+import type { ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { getEcsGroupsFromFlattenGrouping, getFormattedGroups } from '@kbn/alerting-rule-utils';
+import type { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
+import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
+import { flattenObject } from '@kbn/object-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_GROUP,
+  ALERT_GROUPING,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { upperCase } from 'lodash';
 import {
   ALERT_ACTION,
@@ -29,18 +33,19 @@ import {
   SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 import {
+  SLO_DATA_VIEW_ID_FIELD,
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
-} from '../../../../common/field_names/slo';
-import { Duration } from '../../../domain/models';
-import { KibanaSavedObjectsSLORepository } from '../../../services';
+} from '../../../../common/burn_rate_rule/field_names';
+import type { Duration, SLODefinition } from '../../../domain/models';
+import { DefaultSLODefinitionRepository } from '../../../services';
+import type { EsSummaryDocument } from '../../../services/summary_transform_generator/helpers/create_temp_summary';
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import { getSloSummary } from './lib/summary_repository';
-import {
-  AlertStates,
+import type {
   BurnRateAlertContext,
   BurnRateAlertState,
   BurnRateAllowedActionGroups,
@@ -49,6 +54,7 @@ import {
   Group,
   WindowSchema,
 } from './types';
+import { AlertStates } from './types';
 
 export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & {
   [ALERT_GROUP]?: Group[];
@@ -81,8 +87,18 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       throw new AlertsClientError();
     }
 
-    const sloRepository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const slo = await sloRepository.findById(params.sloId);
+    const sloRepository = new DefaultSLODefinitionRepository(soClient, logger);
+    let slo: SLODefinition;
+    try {
+      slo = await sloRepository.findById(params.sloId);
+    } catch (err) {
+      throw createTaskRunError(
+        new Error(
+          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`
+        ),
+        TaskErrorSource.USER
+      );
+    }
 
     if (!slo.enabled) {
       return { state: {} };
@@ -113,6 +129,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       for (const result of results) {
         const {
           instanceId,
+          groupings,
           shouldAlert,
           longWindowDuration,
           longWindowBurnRate,
@@ -121,14 +138,8 @@ export const getRuleExecutor = (basePath: IBasePath) =>
           window: windowDef,
         } = result;
 
-        const instances = instanceId.split(',');
-        const groups =
-          instanceId !== ALL_VALUE
-            ? [slo.groupBy].flat().reduce<Group[]>((resultGroups, groupByItem, index) => {
-                resultGroups.push({ field: groupByItem, value: instances[index].trim() });
-                return resultGroups;
-              }, [])
-            : undefined;
+        const groupingsFlattened = flattenObject(groupings ?? {});
+        const groups = getFormattedGroups(groupingsFlattened);
 
         const urlQuery = instanceId === ALL_VALUE ? '' : `?instanceId=${instanceId}`;
         const viewInAppUrl = addSpaceIdToPath(
@@ -162,6 +173,8 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             ? SUPPRESSED_PRIORITY_ACTION.id
             : windowDef.actionGroup;
 
+          const apmFields = extractApmFieldsFromSLOSummary(sloSummary);
+
           const { uuid } = alertsClient.report({
             id: alertId,
             actionGroup,
@@ -173,10 +186,13 @@ export const getRuleExecutor = (basePath: IBasePath) =>
               [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
               [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
               [ALERT_GROUP]: groups,
+              [ALERT_GROUPING]: groupings, // Object, example: { host: { name: 'host-0' } }
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
-              ...getEcsGroups(groups),
+              [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId,
+              ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
+              ...apmFields,
             },
           });
 
@@ -199,6 +215,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             sloErrorBudgetRemaining: sloSummary?.errorBudgetRemaining ?? 1,
             sloErrorBudgetConsumed: sloSummary?.errorBudgetConsumed ?? 0,
             suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
+            grouping: groupings,
           };
 
           alertsClient.setAlertData({ id: alertId, context });
@@ -210,6 +227,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     }
 
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+
     for (const recoveredAlert of recoveredAlerts) {
       const alertId = recoveredAlert.alert.getId();
       const alertUuid = recoveredAlert.alert.getUuid();
@@ -229,6 +247,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         sloId: slo.id,
         sloName: slo.name,
         sloInstanceId: alertId,
+        grouping: recoveredAlert.hit?.[ALERT_GROUPING],
       };
 
       alertsClient.setAlertData({
@@ -295,4 +314,27 @@ function buildReason(
       instanceId,
     },
   });
+}
+
+function extractApmFieldsFromSLOSummary(
+  sloSummary: EsSummaryDocument | undefined
+): Record<string, string> {
+  const apmFields: Record<string, string> = {};
+
+  if (sloSummary) {
+    if (sloSummary.service?.name) {
+      apmFields['service.name'] = sloSummary.service.name;
+    }
+    if (sloSummary.service?.environment) {
+      apmFields['service.environment'] = sloSummary.service.environment;
+    }
+    if (sloSummary.transaction?.name) {
+      apmFields['transaction.name'] = sloSummary.transaction.name;
+    }
+    if (sloSummary.transaction?.type) {
+      apmFields['transaction.type'] = sloSummary.transaction.type;
+    }
+  }
+
+  return apmFields;
 }

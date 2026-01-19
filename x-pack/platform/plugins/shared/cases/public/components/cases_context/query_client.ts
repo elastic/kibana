@@ -5,6 +5,15 @@
  * 2.0.
  */
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 
-export const casesQueryClient = new QueryClient();
+export const casesQueryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      networkMode: 'always',
+    },
+    mutations: {
+      networkMode: 'always',
+    },
+  },
+});

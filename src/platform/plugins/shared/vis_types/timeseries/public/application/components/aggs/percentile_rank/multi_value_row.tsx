@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
 
 import { AddDeleteButtons } from '../../add_delete_buttons';
-import { ColorPicker, ColorProps } from '../../color_picker';
+import type { ColorProps } from '../../color_picker';
+import { ColorPicker } from '../../color_picker';
 
 interface MultiValueRowProps {
   model: {

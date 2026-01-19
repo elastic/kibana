@@ -10,6 +10,10 @@ export enum ManualRuleRunEventTypes {
   ManualRuleRunOpenModal = 'Manual Rule Run Open Modal',
   ManualRuleRunExecute = 'Manual Rule Run Execute',
   ManualRuleRunCancelJob = 'Manual Rule Run Cancel Job',
+  FillGap = 'Fill Gap',
+  FillRemainingGap = 'Fill Remaining Gap',
+  FilterGaps = 'Filter Gaps',
+  ShowOnlyRulesWithGaps = 'Show Only Rules With Gaps',
 }
 interface ReportManualRuleRunOpenModalParams {
   type: 'single' | 'bulk';
@@ -27,10 +31,30 @@ interface ReportManualRuleRunCancelJobParams {
   errorTasks: number;
 }
 
+interface ReportFillGapParams {
+  rangeInMs: number;
+}
+
+interface ReportFillRemainingGapParams {
+  rangeInMs: number;
+}
+
+interface ReportFilterGapsParams {
+  status: string;
+}
+
+interface ReportShowOnlyRulesWithGapsParams {
+  dateRange: string;
+}
+
 export interface ManualRuleRunTelemetryEventsMap {
   [ManualRuleRunEventTypes.ManualRuleRunOpenModal]: ReportManualRuleRunOpenModalParams;
   [ManualRuleRunEventTypes.ManualRuleRunExecute]: ReportManualRuleRunExecuteParams;
   [ManualRuleRunEventTypes.ManualRuleRunCancelJob]: ReportManualRuleRunCancelJobParams;
+  [ManualRuleRunEventTypes.FillGap]: ReportFillGapParams;
+  [ManualRuleRunEventTypes.FillRemainingGap]: ReportFillRemainingGapParams;
+  [ManualRuleRunEventTypes.FilterGaps]: ReportFilterGapsParams;
+  [ManualRuleRunEventTypes.ShowOnlyRulesWithGaps]: ReportShowOnlyRulesWithGapsParams;
 }
 
 export interface ManualRuleRunTelemetryEvent {

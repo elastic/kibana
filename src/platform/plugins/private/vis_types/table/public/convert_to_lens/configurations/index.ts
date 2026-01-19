@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   CollapseFunction,
-  Column,
   PagingState,
-  TableVisConfiguration,
-} from '@kbn/visualizations-plugin/common';
-import { TableVisParams } from '../../../common';
+  DatatableVisualizationState as TableVisConfiguration,
+} from '@kbn/lens-common';
+import type { Column } from '@kbn/visualizations-plugin/common';
+import type { TableVisParams } from '../../../common';
 
 enum RowHeightMode {
   auto = 'auto',
-  single = 'single',
   custom = 'custom',
 }
 
@@ -55,8 +54,8 @@ const getRowHeight = (
 ): Pick<TableVisConfiguration, 'rowHeight' | 'headerRowHeight'> => {
   const { autoFitRowToContent } = params;
   return {
-    rowHeight: autoFitRowToContent ? RowHeightMode.auto : RowHeightMode.single,
-    headerRowHeight: autoFitRowToContent ? RowHeightMode.auto : RowHeightMode.single,
+    rowHeight: autoFitRowToContent ? RowHeightMode.auto : RowHeightMode.custom,
+    headerRowHeight: autoFitRowToContent ? RowHeightMode.auto : RowHeightMode.custom,
   };
 };
 

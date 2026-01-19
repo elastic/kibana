@@ -57,7 +57,6 @@ export {
   isIndexNotFoundException,
 } from './src/actions/es_errors';
 export {
-  REMOVED_TYPES,
   deterministicallyRegenerateObjectId,
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,

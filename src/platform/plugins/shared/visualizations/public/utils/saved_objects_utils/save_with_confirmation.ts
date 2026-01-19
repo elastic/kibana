@@ -9,13 +9,12 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsCreateOptions } from '@kbn/core/public';
 import { OVERWRITE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
-import type { StartServices } from '../../types';
+import type { StartServices, VisSavedObject } from '../../types';
 import { visualizationsClient } from '../../content_management';
-import { VisualizationSavedObjectAttributes, VisualizationSavedObject } from '../../../common';
-import { VisualizeOutputState } from '../../embeddable/types';
+import type { VisualizationSavedObjectAttributes, VisualizationSavedObject } from '../../../common';
+import type { CreateOptions } from '../../../common/content_management';
 
 /**
  * Attempts to create the current object using the serialized source. If an object already
@@ -32,8 +31,8 @@ import { VisualizeOutputState } from '../../embeddable/types';
  */
 export async function saveWithConfirmation(
   source: VisualizationSavedObjectAttributes,
-  savedObject: Pick<VisualizeOutputState, 'title' | 'displayName'>,
-  options: SavedObjectsCreateOptions,
+  savedObject: Pick<VisSavedObject, 'title' | 'displayName'>,
+  options: CreateOptions,
   services: StartServices
 ): Promise<{ item: VisualizationSavedObject }> {
   try {

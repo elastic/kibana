@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { act } from '@testing-library/react';
-import { mount } from 'enzyme';
+import { act, fireEvent, render } from '@testing-library/react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { AlertsCountPanel } from '.';
 
@@ -60,160 +59,136 @@ const defaultProps = {
   extraActions: [{ id: 'resetGroupByFields' }] as Action[],
 };
 
+const MockedVisualizationEmbeddable = VisualizationEmbeddable as jest.MockedFunction<
+  typeof VisualizationEmbeddable
+>;
+
 describe('AlertsCountPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders correctly', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="alertsCountPanel"]').exists()).toBeTruthy();
-    });
-  });
-
-  it('renders with the specified `alignHeader` alignment', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} alignHeader="flexEnd" />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
-      ).toContain('flexEnd');
-    });
-  });
-
-  it('renders the inspect button by default', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} alignHeader="flexEnd" />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
-        true
-      );
-    });
-  });
-
-  it('it does NOT render the inspect button when a `chartOptionsContextMenu` is provided', async () => {
-    const chartOptionsContextMenu = (queryId: string) => (
-      <ChartContextMenu
-        defaultStackByField={DEFAULT_STACK_BY_FIELD}
-        defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
-        queryId={queryId}
-        setStackBy={jest.fn()}
-        setStackByField1={jest.fn()}
-      />
+  it('renders correctly', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} />
+      </TestProviders>
     );
 
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} chartOptionsContextMenu={chartOptionsContextMenu} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
-        false
-      );
-    });
+    expect(getByTestId('alertsCountPanel')).toBeInTheDocument();
   });
 
-  describe('toggleQuery', () => {
-    it('toggles', async () => {
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} />
-          </TestProviders>
-        );
-        wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-        expect(mockSetIsExpanded).toBeCalledWith(false);
-      });
-    });
+  it('renders with the specified `alignHeader` alignment', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} alignHeader="flexEnd" />
+      </TestProviders>
+    );
 
-    it('when isExpanded is true, render counts panel', async () => {
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(true);
-      });
-    });
-    it('when isExpanded is false, hide counts panel', async () => {
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} isExpanded={false} />
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(false);
-      });
-    });
+    expect(getByTestId('headerSectionInnerFlexGroup').className).toContain('flexEnd');
   });
 
-  describe('Visualization', () => {
-    it('should render embeddable', async () => {
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toBeTruthy();
-      });
+  it('renders the inspect button by default', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} alignHeader="flexEnd" />
+      </TestProviders>
+    );
+
+    expect(getByTestId('inspect-icon-button')).toBeInTheDocument();
+  });
+});
+
+it('it does NOT render the inspect button when a `chartOptionsContextMenu` is provided', () => {
+  const chartOptionsContextMenu = (queryId: string) => (
+    <ChartContextMenu
+      defaultStackByField={DEFAULT_STACK_BY_FIELD}
+      defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
+      queryId={queryId}
+      setStackBy={jest.fn()}
+      setStackByField1={jest.fn()}
+    />
+  );
+
+  const { queryByTestId } = render(
+    <TestProviders>
+      <AlertsCountPanel {...defaultProps} chartOptionsContextMenu={chartOptionsContextMenu} />
+    </TestProviders>
+  );
+
+  expect(queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
+});
+
+describe('toggleQuery', () => {
+  it('toggles', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} />
+      </TestProviders>
+    );
+    act(() => {
+      fireEvent.click(getByTestId('query-toggle-header'));
     });
 
-    it('should render with provided height', async () => {
-      await act(async () => {
-        mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(
-          218
-        );
-      });
-    });
+    expect(mockSetIsExpanded).toBeCalledWith(false);
+  });
 
-    it('should render with extra actions', async () => {
-      await act(async () => {
-        mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(
-          (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
-        ).toEqual('resetGroupByFields');
-      });
-    });
+  it('when isExpanded is true, render counts panel', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(getByTestId('visualization-embeddable')).toBeInTheDocument();
+  });
+  it('when isExpanded is false, hide counts panel', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} isExpanded={false} />
+      </TestProviders>
+    );
+    expect(queryByTestId('visualization-embeddable')).not.toBeInTheDocument();
+  });
+});
 
-    it('should render with extra options', async () => {
-      await act(async () => {
-        mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(
-          (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraOptions
-            .breakdownField
-        ).toEqual(defaultProps.stackByField1);
-      });
-    });
+describe('Visualization', () => {
+  it('should render embeddable', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(getByTestId('visualization-embeddable')).toBeInTheDocument();
+  });
+
+  it('should render with provided height', () => {
+    render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(MockedVisualizationEmbeddable.mock.calls[0][0].height).toEqual(218);
+  });
+
+  it('should render with extra actions', () => {
+    render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(MockedVisualizationEmbeddable.mock.calls[0][0].extraActions?.[0]?.id).toEqual(
+      'resetGroupByFields'
+    );
+  });
+
+  it('should render with extra options', () => {
+    render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(MockedVisualizationEmbeddable.mock.calls[0][0].extraOptions?.breakdownField).toEqual(
+      defaultProps.stackByField1
+    );
   });
 });

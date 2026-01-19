@@ -40,7 +40,19 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.inference",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.jira",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.jira-service-management",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.mcp",
   },
   Object {
     "cost": 1,
@@ -116,7 +128,15 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.workflows",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.xmatters",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.xsoar",
   },
   Object {
     "cost": 10,

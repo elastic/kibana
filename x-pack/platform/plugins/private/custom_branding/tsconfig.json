@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true,
@@ -19,6 +19,7 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-ui-settings-common",
     "@kbn/config-schema",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

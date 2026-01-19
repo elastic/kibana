@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
+import type { estypes } from '@elastic/elasticsearch';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { Filter, EsQueryConfig } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import type { STATUS_VALUES } from '@kbn/rule-data-utils';
 import {
   ALERT_TIME_RANGE,
   ALERT_STATUS,
   getEsQueryConfig,
   getSafeSortIds,
-  STATUS_VALUES,
   ALERT_STATUS_RECOVERED,
   ALERT_END,
   ALERT_STATUS_ACTIVE,
@@ -24,46 +26,56 @@ import {
   isSiemRuleType,
 } from '@kbn/rule-data-utils';
 
-import {
+import type {
   AggregateName,
   AggregationsAggregate,
   MappingRuntimeFields,
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleTypeParams, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type {
+  RuleTypeParams,
+  AlertingServerStart,
+  AlertingAuthorization,
+} from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
-  AlertingAuthorization,
   WriteOperations,
   AlertingAuthorizationEntity,
 } from '@kbn/alerting-plugin/server';
-import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
-import { AuditLogger } from '@kbn/security-plugin/server';
-import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
-import { isEmpty } from 'lodash';
-import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import { TypeOf } from 'io-ts';
-import { BrowserFields } from '../../common';
-import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
+import type { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
+import { isEmpty, partition } from 'lodash';
+import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
+import type { TypeOf } from 'io-ts';
+import { alertAuditEvent, operationAlertAuditActionMap } from '@kbn/alerting-plugin/server/lib';
+import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
-import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { IRuleDataService } from '../rule_data_plugin_service';
+import type { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+import type { IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
 import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
-import { alertsAggregationsSchema } from '../../common/types';
+import type { alertsAggregationsSchema } from '../../common/types';
 import {
   MAX_ALERTS_GROUPING_QUERY_SIZE,
   MAX_ALERTS_PAGES,
+  MAX_ALERT_IDS_PER_REQUEST,
   MAX_PAGINATED_ALERTS,
 } from './constants';
 import { getRuleTypeIdsFilter } from '../lib/get_rule_type_ids_filter';
 import { getConsumersFilter } from '../lib/get_consumers_filter';
+import { mergeUniqueFieldsByName } from '../utils/unique_fields';
+import { getAlertFieldsFromIndexFetcher } from '../utils/get_alert_fields_from_index_fetcher';
+import type { GetAlertFieldsResponseV1 } from '../routes/get_alert_fields';
+import { getBulkUpdateTagsPainlessScript } from '../lib/bulk_update_tags_scripts';
+import type { BulkUpdateApiResponse } from '../lib/transform_update_by_query_response';
+import { transformUpdateByQueryResponse } from '../lib/transform_update_by_query_response';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -90,6 +102,7 @@ export interface ConstructorOptions {
   authorization: PublicMethodsOf<AlertingAuthorization>;
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
+  esClientScoped: ElasticsearchClient;
   ruleDataService: IRuleDataService;
   getRuleType: RuleTypeRegistry['get'];
   getRuleList: RuleTypeRegistry['list'];
@@ -103,6 +116,26 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
   index: string;
 }
 
+export interface BulkUpdateTagArgs {
+  alertIds?: string[] | null;
+  add?: string[] | null;
+  remove?: string[] | null;
+  index: string;
+  query?: string | null;
+}
+
+interface BulkUpdateTagsByIdsArgs {
+  alertIds: string[];
+  index: string;
+  script: estypes.Script;
+}
+
+interface BulkUpdateTagsByQueryArgs {
+  query: string;
+  index: string;
+  script: estypes.Script;
+}
+
 export interface BulkUpdateOptions<Params extends RuleTypeParams> {
   ids?: string[] | null;
   status: STATUS_VALUES;
@@ -113,6 +146,17 @@ export interface BulkUpdateOptions<Params extends RuleTypeParams> {
 interface MgetAndAuditAlert {
   id: string;
   index: string;
+}
+
+interface EnsureAllAlertsAuthorizedArgs {
+  alerts: MgetAndAuditAlert[];
+  operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
+}
+
+interface EnsureAllAlertsAuthorizedByAggsArgs {
+  alertIds: string[];
+  index: string;
+  operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
 }
 
 export interface BulkUpdateCasesOptions {
@@ -156,6 +200,15 @@ interface SearchAlertsParams {
   runtimeMappings?: MappingRuntimeFields;
 }
 
+interface RuleTypeIdsConsumersAggsResponse {
+  ruleTypeIds: {
+    buckets: Array<{
+      key: string;
+      consumers: { buckets: Array<{ key: string }> };
+    }>;
+  };
+}
+
 /**
  * Provides apis to interact with alerts as data
  * ensures the request is authorized to perform read / write actions
@@ -166,9 +219,9 @@ export class AlertsClient {
   private readonly auditLogger?: AuditLogger;
   private readonly authorization: PublicMethodsOf<AlertingAuthorization>;
   private readonly esClient: ElasticsearchClient;
+  private readonly esClientScoped: ElasticsearchClient;
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
-  private readonly getRuleType: RuleTypeRegistry['get'];
   private readonly getRuleList: RuleTypeRegistry['list'];
   private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
 
@@ -176,12 +229,12 @@ export class AlertsClient {
     this.logger = options.logger;
     this.authorization = options.authorization;
     this.esClient = options.esClient;
+    this.esClientScoped = options.esClientScoped;
     this.auditLogger = options.auditLogger;
     // If spaceId is undefined, it means that spaces is disabled
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
-    this.getRuleType = options.getRuleType;
     this.getRuleList = options.getRuleList;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
   }
@@ -307,7 +360,7 @@ export class AlertsClient {
 
       const config = getEsQueryConfig();
 
-      let queryBody: estypes.SearchRequest['body'] = {
+      let queryBody: estypes.SearchRequest = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(
           query,
@@ -343,7 +396,7 @@ export class AlertsClient {
       const result = await this.esClient.search<ParsedTechnicalFields, TAggregations>({
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
-        body: queryBody,
+        ...queryBody,
         seq_no_primary_term: true,
       });
 
@@ -515,7 +568,7 @@ export class AlertsClient {
     query: object | string;
     operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   }) {
-    let lastSortIds;
+    let lastSortIds: Array<string | number> | undefined;
     let hasSortIds = true;
     const alertSpaceId = this.spaceId;
     if (alertSpaceId == null) {
@@ -574,13 +627,7 @@ export class AlertsClient {
    * Ensures that the user has access to the alerts
    * for a given operation
    */
-  private async ensureAllAlertsAuthorized({
-    alerts,
-    operation,
-  }: {
-    alerts: MgetAndAuditAlert[];
-    operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
-  }) {
+  private async ensureAllAlertsAuthorized({ alerts, operation }: EnsureAllAlertsAuthorizedArgs) {
     try {
       const mgetRes = await this.esClient.mget<ParsedTechnicalFields>({
         docs: alerts.map(({ id, index }) => ({ _id: id, _index: index })),
@@ -781,10 +828,8 @@ export class AlertsClient {
         ...decodeVersion(_version),
         id,
         index,
-        body: {
-          doc: {
-            ...fieldToUpdate,
-          },
+        doc: {
+          ...fieldToUpdate,
         },
         refresh: 'wait_for',
       });
@@ -850,9 +895,283 @@ export class AlertsClient {
         throw err;
       }
     } else {
-      throw Boom.badRequest('no ids or query were provided for updating');
+      throw Boom.badRequest('no alert ids or query were provided for updating');
     }
   }
+
+  public async bulkUpdateTags({
+    alertIds,
+    query,
+    index,
+    add,
+    remove,
+  }: BulkUpdateTagArgs): Promise<BulkUpdateApiResponse> {
+    if (alertIds && alertIds.length > MAX_ALERT_IDS_PER_REQUEST) {
+      throw Boom.badRequest(`Cannot use more than ${MAX_ALERT_IDS_PER_REQUEST} ids`);
+    }
+
+    if (
+      (isEmpty(add) && isEmpty(remove)) ||
+      (add != null && isEmpty(add)) ||
+      (remove != null && isEmpty(remove))
+    ) {
+      throw Boom.badRequest('No tags to add or remove were provided');
+    }
+
+    const script = getBulkUpdateTagsPainlessScript(add, remove);
+
+    if (alertIds && alertIds.length > 0) {
+      const bulkUpdateTagsByIdsResponse = await this.bulkUpdateTagsByIds({
+        alertIds,
+        script,
+        index,
+      });
+
+      return transformUpdateByQueryResponse(bulkUpdateTagsByIdsResponse);
+    }
+
+    if (query) {
+      const bulkUpdateTagsByQueryResponse = await this.bulkUpdateTagsByQuery({
+        query,
+        script,
+        index,
+      });
+
+      return transformUpdateByQueryResponse(bulkUpdateTagsByQueryResponse);
+    }
+
+    throw Boom.badRequest('No alert ids or query were provided for updating');
+  }
+
+  private async bulkUpdateTagsByIds({
+    alertIds,
+    script,
+    index,
+  }: BulkUpdateTagsByIdsArgs): Promise<estypes.UpdateByQueryResponse> {
+    await this.ensureAllAlertsAuthorizedByAggs({
+      alertIds,
+      operation: WriteOperations.Update,
+      index,
+    });
+
+    const bulkUpdateResponse = await this.esClient.updateByQuery({
+      query: { ids: { values: alertIds } },
+      index,
+      script,
+      refresh: true,
+      conflicts: 'proceed',
+      ignore_unavailable: true,
+    });
+
+    return bulkUpdateResponse;
+  }
+
+  private async bulkUpdateTagsByQuery({
+    query,
+    script,
+    index,
+  }: BulkUpdateTagsByQueryArgs): Promise<estypes.UpdateByQueryResponse> {
+    try {
+      const config = getEsQueryConfig();
+      const authzFilter = (await getAuthzFilter(
+        this.authorization,
+        WriteOperations.Update
+      )) as Filter;
+
+      const finalQuery = buildEsQuery(
+        undefined,
+        { query, language: 'kuery' },
+        [authzFilter],
+        config
+      );
+
+      const auditEvent = alertAuditEvent({
+        action: operationAlertAuditActionMap[WriteOperations.Update],
+        ...this.getOutcome(WriteOperations.Update),
+      });
+
+      const finalAuditMessage = `${auditEvent.message}. Bulk updating tags for alerts matching query: ${query}`;
+
+      this.auditLogger?.log({
+        ...auditEvent,
+        message: finalAuditMessage,
+      });
+
+      const bulkUpdateResponse = await this.esClient.updateByQuery({
+        query: finalQuery,
+        index,
+        script,
+        refresh: true,
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+      });
+
+      return bulkUpdateResponse;
+    } catch (error) {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: operationAlertAuditActionMap[WriteOperations.Update],
+          error,
+        })
+      );
+
+      throw error;
+    }
+  }
+
+  private async ensureAllAlertsAuthorizedByAggs({
+    alertIds,
+    operation,
+    index,
+  }: EnsureAllAlertsAuthorizedByAggsArgs) {
+    const res = await this.getAuthorizedRuleTypeIdsConsumersPairs({ alertIds, index });
+    const ruleTypeIdConsumersPairs = this.parseRuleTypeIdsConsumersAggsResponse(res);
+
+    this.validateRuleTypeIdConsumersPairs(ruleTypeIdConsumersPairs);
+
+    await this.bulkEnsureAuthorizedAndAuditLog({ alertIds, operation, ruleTypeIdConsumersPairs });
+  }
+
+  private getAuthorizedRuleTypeIdsConsumersPairs = async ({
+    alertIds,
+    index,
+    query,
+  }: {
+    alertIds?: string[];
+    query?: string;
+    index: string;
+  }) => {
+    const spacesFilter = getSpacesFilter(this.spaceId);
+    const filters: estypes.QueryDslBoolQuery['filter'] = [];
+    const finalQuery: {
+      bool: Omit<NonNullable<estypes.QueryDslBoolQuery>, 'filter'> & {
+        filter: estypes.QueryDslQueryContainer[];
+      };
+    } = {
+      bool: { filter: [] },
+    };
+
+    if (spacesFilter != null) {
+      filters.push(spacesFilter);
+    }
+
+    if (alertIds != null) {
+      filters.push({
+        ids: {
+          values: alertIds,
+        },
+      });
+    }
+
+    if (query != null) {
+      const config = getEsQueryConfig();
+      const kqlQueryAsDsl = buildEsQuery(undefined, { query, language: 'kuery' }, [], config);
+
+      finalQuery.bool = { ...finalQuery.bool, ...kqlQueryAsDsl.bool };
+    }
+
+    finalQuery.bool.filter = [...finalQuery.bool.filter, ...filters];
+
+    /**
+     * Here we are using the internal user to perform the aggregation query
+     * to retrieve the ruleTypeId and consumer for the provided alertIds.
+     *
+     * We do this because the scoped user may not have access to all the
+     * alerts being checked, which would lead to incomplete aggregation results
+     * and incorrect authorization decisions.
+     */
+    return this.esClient.search<unknown, RuleTypeIdsConsumersAggsResponse>({
+      index,
+      query: finalQuery,
+      aggs: {
+        ruleTypeIds: {
+          terms: { field: ALERT_RULE_TYPE_ID, size: 100 },
+          aggs: { consumers: { terms: { field: ALERT_RULE_CONSUMER, size: 100 } } },
+        },
+      },
+      // We do not need any hits back. We care about the aggs only.
+      size: 0,
+    });
+  };
+
+  private parseRuleTypeIdsConsumersAggsResponse = (
+    res: estypes.SearchResponse<unknown, RuleTypeIdsConsumersAggsResponse>
+  ) => {
+    const ruleTypeIdConsumersMap: Map<string, string[]> = new Map(
+      res.aggregations?.ruleTypeIds.buckets.map((bucket) => [
+        bucket.key,
+        bucket.consumers.buckets.map((consumerBucket) => consumerBucket.key),
+      ])
+    );
+
+    const ruleTypeIdConsumersPairs = Array.from(ruleTypeIdConsumersMap.entries()).map(
+      ([ruleTypeId, consumers]) => ({
+        ruleTypeId,
+        consumers,
+      })
+    );
+
+    return ruleTypeIdConsumersPairs;
+  };
+
+  /**
+   * Rule type id and consumers pairs should always have at least one entry
+   * In the rare scenario where the alert documents do not have the info needed
+   * to perform authorization, we throw a forbidden error
+   */
+  private validateRuleTypeIdConsumersPairs = (
+    ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>
+  ) => {
+    if (ruleTypeIdConsumersPairs.length === 0) {
+      throw Boom.notFound('No alerts found');
+    }
+
+    for (const { consumers } of ruleTypeIdConsumersPairs) {
+      if (consumers.length === 0) {
+        throw Boom.forbidden('Not authorized to access any of the requested alerts');
+      }
+    }
+  };
+
+  private bulkEnsureAuthorizedAndAuditLog = async ({
+    ruleTypeIdConsumersPairs,
+    operation,
+    alertIds,
+  }: {
+    ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>;
+    operation: EnsureAllAlertsAuthorizedByAggsArgs['operation'];
+    alertIds: string[];
+  }) => {
+    try {
+      await this.authorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs,
+        operation,
+        entity: AlertingAuthorizationEntity.Alert,
+      });
+
+      for (const alertId of alertIds) {
+        this.auditLogger?.log(
+          alertAuditEvent({
+            action: operationAlertAuditActionMap[operation],
+            id: alertId,
+            ...this.getOutcome(operation),
+          })
+        );
+      }
+    } catch (error) {
+      for (const alertId of alertIds) {
+        this.auditLogger?.log(
+          alertAuditEvent({
+            action: operationAlertAuditActionMap[operation],
+            id: alertId,
+            error,
+          })
+        );
+      }
+
+      throw error;
+    }
+  };
 
   /**
    * This function updates the case ids of multiple alerts per index.
@@ -1206,29 +1525,24 @@ export class AlertsClient {
     indices,
     metaFields,
     allowNoIndex,
+    includeEmptyFields,
+    indexFilter,
   }: {
     ruleTypeIds: string[];
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
-  }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
+    includeEmptyFields: boolean;
+    indexFilter?: estypes.QueryDslQueryContainer;
+  }): Promise<GetBrowserFieldsResponse> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const ruleTypeList = this.getRuleList();
-    const fieldsForAAD = new Set<string>();
-
-    for (const rule of ruleTypeList.values()) {
-      if (ruleTypeIds.includes(rule.id) && rule.hasFieldsForAAD) {
-        (rule.fieldsForAAD ?? []).forEach((f) => {
-          fieldsForAAD.add(f);
-        });
-      }
-    }
 
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
       metaFields,
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
-      fields: [...fieldsForAAD, 'kibana.*'],
+      includeEmptyFields,
+      indexFilter,
     });
 
     return {
@@ -1237,21 +1551,50 @@ export class AlertsClient {
     };
   }
 
-  public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
-    const { fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
-    if (isSiemRuleType(ruleTypeId)) {
-      throw Boom.badRequest(`Security solution rule type is not supported`);
+  private getRuleTypeIds(ruleTypeIds: string[]): string[] {
+    // fetch all rule types if no specific rule type Ids are provided
+    if (ruleTypeIds.length === 0) {
+      const registeredRuleTypes = this.getRuleList();
+
+      if (!registeredRuleTypes) {
+        return [];
+      }
+
+      return Array.from(registeredRuleTypes.keys());
     }
 
-    const indices = await this.getAuthorizedAlertsIndices([ruleTypeId]);
-    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const { fields = [] } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-      pattern: indices ?? [],
-      metaFields: ['_id', '_index'],
-      fieldCapsOptions: { allow_no_indices: true },
-      fields: [...fieldsForAAD, 'kibana.*'],
-    });
+    return ruleTypeIds;
+  }
 
-    return fields;
+  public async getAlertFields(ruleTypeIds: string[]): Promise<GetAlertFieldsResponseV1> {
+    const allRuleTypesIds = this.getRuleTypeIds(ruleTypeIds);
+
+    const authorizedRuleTypes = await this.authorization.getAllAuthorizedRuleTypesFindOperation({
+      authorizationEntity: AlertingAuthorizationEntity.Alert,
+      ruleTypeIds: allRuleTypesIds,
+    });
+    const authorizedRuleTypesIds = Array.from(authorizedRuleTypes.keys());
+
+    const [siemRuleTypeIds, otherRuleTypeIds] = partition(authorizedRuleTypesIds, (ruleTypeId) =>
+      isSiemRuleType(ruleTypeId)
+    );
+
+    const siemIndices = siemRuleTypeIds ? this.getAlertIndicesAlias(siemRuleTypeIds) : [];
+    const otherIndices = otherRuleTypeIds ? this.getAlertIndicesAlias(otherRuleTypeIds) : [];
+    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const indexPatternsFetcherAsScoped = new IndexPatternsFetcher(this.esClientScoped);
+
+    const [specFields, descriptorFields] = await Promise.all([
+      getAlertFieldsFromIndexFetcher(indexPatternsFetcherAsScoped, siemIndices),
+      getAlertFieldsFromIndexFetcher(indexPatternsFetcherAsInternalUser, otherIndices),
+    ]);
+
+    const uniqueFields = mergeUniqueFieldsByName(descriptorFields, specFields);
+
+    const mappedFields = {
+      fields: uniqueFields,
+    };
+
+    return mappedFields;
   }
 }

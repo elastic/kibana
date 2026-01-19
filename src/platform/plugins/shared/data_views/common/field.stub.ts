@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldSpec, DataViewField } from '.';
+import type { FieldSpec } from '.';
+import { DataViewField } from '.';
 
 export const createIndexPatternFieldStub = ({ spec }: { spec: FieldSpec }): DataViewField => {
   return new DataViewField(spec);
@@ -76,6 +77,21 @@ export const stubFieldSpecMap: Record<string, FieldSpec> = {
 export const stubFields: DataViewField[] = Object.values(stubFieldSpecMap).map((spec) =>
   createIndexPatternFieldStub({ spec })
 );
+
+export const stubFieldSpecWithDateNanosMap: Record<string, FieldSpec> = {
+  ...stubFieldSpecMap,
+  '@timestamp': {
+    name: '@timestamp',
+    type: 'date',
+    esTypes: ['date_nanos'],
+    aggregatable: true,
+    searchable: true,
+  },
+};
+
+export const stubFieldsWithDateNanos: DataViewField[] = Object.values(
+  stubFieldSpecWithDateNanosMap
+).map((spec) => createIndexPatternFieldStub({ spec }));
 
 export const stubLogstashFieldSpecMap: Record<string, FieldSpec> = {
   bytes: {

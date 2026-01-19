@@ -8,16 +8,18 @@
  */
 
 import type { Config } from '@kbn/config';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type ConfigMock = jest.Mocked<Config>;
 
-const createConfigMock = (): ConfigMock => ({
-  has: jest.fn(),
-  get: jest.fn(),
-  set: jest.fn(),
-  getFlattenedPaths: jest.fn(),
-  toRaw: jest.fn(),
-});
+const createConfigMock = (): ConfigMock =>
+  lazyObject({
+    has: jest.fn(),
+    get: jest.fn(),
+    set: jest.fn(),
+    getFlattenedPaths: jest.fn(),
+    toRaw: jest.fn(),
+  });
 
 export const configMock = {
   create: createConfigMock,

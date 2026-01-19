@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { isAllowed, isAnonymized, isDenied, Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
 
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { Stats } from '../helpers';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { Stats } from '../helpers';
 
 export const getStats = ({
+  anonymizationFieldsStatus,
   anonymizationFields = [],
   rawData,
   replacements,
 }: {
+  anonymizationFieldsStatus?: {
+    allowed?: { doc_count: number };
+    anonymized?: { doc_count: number };
+    denied?: { doc_count: number };
+  };
   anonymizationFields?: AnonymizationFieldResponse[];
   rawData?: string | Record<string, string[]>;
   replacements?: Replacements;
@@ -26,14 +33,15 @@ export const getStats = ({
     total: 0,
   };
 
-  if (!rawData) {
+  if (!anonymizationFieldsStatus && !rawData) {
+    return ZERO_STATS;
+  }
+
+  if (!rawData && anonymizationFieldsStatus) {
     return {
-      allowed: anonymizationFields.reduce((acc, data) => (data.allowed ? acc + 1 : acc), 0),
-      anonymized: anonymizationFields.reduce((acc, data) => (data.anonymized ? acc + 1 : acc), 0),
-      denied: anonymizationFields.reduce(
-        (acc, data) => (data.allowed === false ? acc + 1 : acc),
-        0
-      ),
+      allowed: anonymizationFieldsStatus.allowed?.doc_count ?? 0,
+      anonymized: anonymizationFieldsStatus.anonymized?.doc_count ?? 0,
+      denied: anonymizationFieldsStatus.denied?.doc_count ?? 0,
       total: anonymizationFields.length,
     };
   } else if (typeof rawData === 'string') {
@@ -46,7 +54,7 @@ export const getStats = ({
       };
     }
   } else {
-    const rawFields = Object.keys(rawData);
+    const rawFields = Object.keys(rawData ?? {});
 
     return rawFields.reduce<Stats>(
       (acc, field) => ({

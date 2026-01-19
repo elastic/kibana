@@ -8,7 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import {
+import { type UseEuiTheme, useEuiShadow, euiFontSize } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type {
   ControlType,
   TermIntersect,
   UrlTemplate,
@@ -24,8 +26,10 @@ import { SelectedNodeEditor } from './selected_node_editor';
 import { MergeCandidates } from './merge_candidates';
 import { DrillDowns } from './drill_downs';
 import { DrillDownIconLinks } from './drill_down_icon_links';
-import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
+import type { GraphState } from '../../state_management';
+import { liveResponseFieldsSelector, templatesSelector } from '../../state_management';
 import { SelectedNodeItem } from './selected_node_item';
+import { gphSidebarHeaderStyles } from '../../styles';
 
 export interface TargetOptions {
   toFields: WorkspaceField[];
@@ -78,7 +82,15 @@ const ControlPanelComponent = ({
   };
 
   return (
-    <div id="sidebar" className="gphSidebar">
+    <div
+      id="sidebar"
+      css={[
+        css`
+          ${useEuiShadow('m')};
+        `,
+        styles.gphSidebar,
+      ]}
+    >
       <ControlPanelToolBar
         workspace={workspace}
         liveResponseFields={liveResponseFields}
@@ -86,13 +98,13 @@ const ControlPanelComponent = ({
       />
 
       <div>
-        <div className="gphSidebar__header">
+        <div css={gphSidebarHeaderStyles}>
           {i18n.translate('xpack.graph.sidebar.selectionsTitle', {
             defaultMessage: 'Selections',
           })}
         </div>
         <SelectionToolBar workspace={workspace} onSetControl={onSetControl} />
-        <div className="gphSelectionList">
+        <div css={styles.gphSelectionList}>
           {workspace.selectedNodes.length === 0 && (
             <p className="help-block">
               {i18n.translate('xpack.graph.sidebar.selections.noSelectionsHelpText', {
@@ -135,6 +147,35 @@ const ControlPanelComponent = ({
       )}
     </div>
   );
+};
+
+const styles = {
+  gphSidebar: (euiThemeContext: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      right: euiThemeContext.euiTheme.size.s,
+      top: euiThemeContext.euiTheme.size.s,
+      width: `calc(${euiThemeContext.euiTheme.size.xl} * 10)`,
+      zIndex: euiThemeContext.euiTheme.levels.flyout, // https://eui.elastic.co/#/theming/more-tokens#levels
+      backgroundColor: euiThemeContext.euiTheme.colors.emptyShade,
+      border: euiThemeContext.euiTheme.border.thin,
+      padding: euiThemeContext.euiTheme.size.xs,
+      borderRadius: euiThemeContext.euiTheme.border.radius.medium,
+      opacity: 0.9,
+
+      '.help-block': {
+        fontSize: euiFontSize(euiThemeContext, 'xs', { unit: 'px' }).fontSize,
+        color: euiThemeContext.euiTheme.colors.text,
+      },
+    }),
+
+  gphSelectionList: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      height: `calc(${euiTheme.size.l} * 10)`,
+      backgroundColor: euiTheme.colors.lightestShade,
+      overflow: 'auto',
+      marginBottom: 0,
+    }),
 };
 
 export const ControlPanel = connect((state: GraphState) => ({

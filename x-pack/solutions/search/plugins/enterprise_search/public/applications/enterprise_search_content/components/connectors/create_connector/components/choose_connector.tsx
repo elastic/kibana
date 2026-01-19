@@ -10,12 +10,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexItem,
   EuiIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiText,
   useEuiTheme,
@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { EuiIconPlugs } from '@kbn/search-shared-ui';
 
 import {
   BETA_LABEL,
@@ -33,7 +32,7 @@ import {
 } from '../../../../../shared/constants';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
-import { SelfManagePreference } from '../create_connector';
+import type { SelfManagePreference } from '../create_connector';
 
 interface ChooseConnectorSelectableProps {
   selfManaged: SelfManagePreference;
@@ -151,7 +150,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
         'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
         { defaultMessage: 'Select a data source for your connector to use.' }
       )}
-      prepend={<EuiIcon type={selectedConnector?.iconPath ?? EuiIconPlugs} size="l" />}
+      prepend={<EuiIcon type={selectedConnector?.iconPath ?? 'plugs'} size="l" />}
       singleSelection
       fullWidth
       placeholder={i18n.translate(

@@ -9,12 +9,11 @@
 
 import { EventEmitter } from 'node:events';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
+import type { Span } from 'elastic-apm-node';
 import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
-import {
-  isUnauthorizedError as isElasticsearchUnauthorizedError,
-  UnauthorizedError as EsNotAuthorizedError,
-} from '@kbn/es-errors';
+import type { UnauthorizedError as EsNotAuthorizedError } from '@kbn/es-errors';
+import { isUnauthorizedError as isElasticsearchUnauthorizedError } from '@kbn/es-errors';
 import type {
   KibanaRequest,
   ErrorHttpResponseOptions,
@@ -30,15 +29,18 @@ import type {
   IKibanaResponse,
 } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
-import { Env } from '@kbn/config';
+import type { Env } from '@kbn/config';
+import { context, defaultTextMapGetter, propagation } from '@opentelemetry/api';
 import { CoreVersionedRouter } from './versioned_router';
-import { CoreKibanaRequest, getProtocolFromRequest } from './request';
+import type { CoreKibanaRequest } from './request';
+import { getProtocolFromRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { formatErrorMeta } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
-import { InternalRouteConfig, buildRoute } from './route';
+import type { InternalRouteConfig } from './route';
+import { buildRoute } from './route';
 
 export type ContextEnhancer<
   P,
@@ -183,8 +185,20 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   public registerRoute(route: InternalRouterRoute) {
     this.routes.push({
       ...route,
-      handler: async (request, responseToolkit) =>
-        await this.handle({ request, responseToolkit, handler: route.handler }),
+      handler: async (request, responseToolkit) => {
+        /**
+         * Read incoming traceparent headers and create a new context with the traceparent set.
+         * This allows OpenTelemetry spans created in the next context to re-use the traceparent
+         * headers (and thus belonging to the same trace). It does not interfere with Elastic APM,
+         * and is temporary until we fully migrate to [OpenTelemetry
+         * tracing](https://github.com/elastic/kibana/issues/220914).
+         */
+        const ctx = propagation.extract(context.active(), request.headers, defaultTextMapGetter);
+        return context.with(
+          ctx,
+          async () => await this.handle({ request, responseToolkit, handler: route.handler })
+        );
+      },
     });
   }
 
@@ -198,8 +212,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     handler: InternalRouteHandler;
   }) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+    let apmSpan: Span | null | undefined;
     try {
+      apmSpan = apm.startSpan('route handler');
       const kibanaResponse = await handler(request);
+      apmSpan?.end();
       if (getProtocolFromRequest(request) === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({
           headers: kibanaResponse.options.headers,
@@ -212,6 +229,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     } catch (error) {
       // capture error
       apm.captureError(error);
+      apmSpan?.end();
 
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(error)) {

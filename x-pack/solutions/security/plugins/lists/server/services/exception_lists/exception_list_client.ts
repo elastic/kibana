@@ -11,13 +11,16 @@ import type {
   SavedObjectsClosePointInTimeResponse,
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core/server';
-import {
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   ImportExceptionsResponseSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   createExceptionListItemSchema,
   updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -62,10 +65,8 @@ import type {
   UpdateExceptionListOptions,
 } from './exception_list_client_types';
 import { getExceptionList } from './get_exception_list';
-import {
-  ExportExceptionListAndItemsReturn,
-  exportExceptionListAndItems,
-} from './export_exception_list_and_items';
+import type { ExportExceptionListAndItemsReturn } from './export_exception_list_and_items';
+import { exportExceptionListAndItems } from './export_exception_list_and_items';
 import { getExceptionListSummary } from './get_exception_list_summary';
 import { createExceptionList } from './create_exception_list';
 import { getExceptionListItem } from './get_exception_list_item';
@@ -79,7 +80,8 @@ import { findExceptionList } from './find_exception_list';
 import { findExceptionListsItem } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
-import { PromiseFromStreams, importExceptions } from './import_exception_list_and_items';
+import type { PromiseFromStreams } from './import_exception_list_and_items';
+import { importExceptions } from './import_exception_list_and_items';
 import {
   transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema,
   transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema,
@@ -183,35 +185,27 @@ export class ExceptionListClient {
 
   /**
    * Fetch an exception list parent container
-   * @param options
    * @param options.filter kql "filter" expression
    * @param options.listId the "list_id" of an exception list
    * @param options.id the "id" of an exception list
    * @param options.namespaceType saved object namespace (single | agnostic)
+   *
    * @returns Summary of exception list item os types
    */
-  public getExceptionListSummary = async ({
-    filter,
-    listId,
-    id,
-    namespaceType,
-  }: GetExceptionListSummaryOptions): Promise<ExceptionListSummarySchema | null> => {
+  public getExceptionListSummary = async (
+    options: GetExceptionListSummaryOptions
+  ): Promise<ExceptionListSummarySchema | null> => {
     const { savedObjectsClient } = this;
 
     if (this.enableServerExtensionPoints) {
       await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreSummary',
-        {
-          filter,
-          id,
-          listId,
-          namespaceType,
-        },
+        options,
         this.getServerExtensionCallbackContext()
       );
     }
 
-    return getExceptionListSummary({ filter, id, listId, namespaceType, savedObjectsClient });
+    return getExceptionListSummary({ ...options, savedObjectsClient });
   };
 
   /**
@@ -297,7 +291,8 @@ export class ExceptionListClient {
   }: CreateEndpointListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
     await this.createEndpointList();
-    return createExceptionListItem({
+
+    let itemData: CreateExceptionListItemOptions = {
       comments,
       description,
       entries,
@@ -308,9 +303,27 @@ export class ExceptionListClient {
       name,
       namespaceType: 'agnostic',
       osTypes,
-      savedObjectsClient,
       tags,
       type,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      itemData = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreCreateItem',
+        itemData,
+        this.getServerExtensionCallbackContext(),
+        (data) => {
+          return validateData(
+            createExceptionListItemSchema,
+            transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema(data)
+          );
+        }
+      );
+    }
+
+    return createExceptionListItem({
+      ...itemData,
+      savedObjectsClient,
       user,
     });
   };
@@ -371,7 +384,8 @@ export class ExceptionListClient {
   }: UpdateEndpointListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
     await this.createEndpointList();
-    return updateExceptionListItem({
+
+    let updatedItem: UpdateExceptionListItemOptions = {
       _version,
       comments,
       description,
@@ -383,9 +397,27 @@ export class ExceptionListClient {
       name,
       namespaceType: 'agnostic',
       osTypes,
-      savedObjectsClient,
       tags,
       type,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      updatedItem = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreUpdateItem',
+        updatedItem,
+        this.getServerExtensionCallbackContext(),
+        (data) => {
+          return validateData(
+            updateExceptionListItemSchema,
+            transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema(data)
+          );
+        }
+      );
+    }
+
+    return updateExceptionListItem({
+      ...updatedItem,
+      savedObjectsClient,
       user,
     });
   };
@@ -402,6 +434,15 @@ export class ExceptionListClient {
     id,
   }: GetEndpointListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreGetOneItem',
+        { id, itemId, namespaceType: 'agnostic' },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return getExceptionListItem({ id, itemId, namespaceType: 'agnostic', savedObjectsClient });
   };
 
@@ -800,6 +841,15 @@ export class ExceptionListClient {
     itemId,
   }: DeleteEndpointListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreDeleteItem',
+        { id, itemId, namespaceType: 'agnostic' },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return deleteExceptionListItem({
       id,
       itemId,
@@ -836,36 +886,30 @@ export class ExceptionListClient {
   }: FindExceptionListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
 
-    if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
-        'exceptionsListPreSingleListFind',
-        {
-          filter,
-          listId,
-          namespaceType,
-          page,
-          perPage,
-          pit,
-          searchAfter,
-          sortField,
-          sortOrder,
-        },
-        this.getServerExtensionCallbackContext()
-      );
-    }
-
-    return findExceptionListItem({
+    const findOptions = {
       filter,
       listId,
       namespaceType,
       page,
       perPage,
       pit,
-      savedObjectsClient,
-      search,
       searchAfter,
       sortField,
       sortOrder,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreSingleListFind',
+        findOptions,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return findExceptionListItem({
+      ...findOptions,
+      savedObjectsClient,
+      search,
     });
   };
 
@@ -1032,19 +1076,41 @@ export class ExceptionListClient {
     sortOrder,
   }: FindEndpointListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
-    await this.createEndpointList();
-    return findExceptionListItem({
+
+    // Attempt to auto-create the endpoint list for users with write access.
+    // Silently ignore forbidden errors for read-only users - they can still query existing lists.
+    try {
+      await this.createEndpointList();
+    } catch (err) {
+      if (!SavedObjectsErrorHelpers.isForbiddenError(err)) {
+        throw err;
+      }
+    }
+
+    const findOptions = {
       filter,
       listId: ENDPOINT_LIST_ID,
-      namespaceType: 'agnostic',
+      namespaceType: 'agnostic' as const,
       page,
       perPage,
       pit,
-      savedObjectsClient,
-      search,
       searchAfter,
       sortField,
       sortOrder,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreSingleListFind',
+        findOptions,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return findExceptionListItem({
+      ...findOptions,
+      savedObjectsClient,
+      search,
     });
   };
 
@@ -1057,32 +1123,21 @@ export class ExceptionListClient {
    * @param options.includeExpiredExceptions include or exclude expired TTL exception items
    * @returns the ndjson of the list and items to export or null if none exists
    */
-  public exportExceptionListAndItems = async ({
-    listId,
-    id,
-    namespaceType,
-    includeExpiredExceptions,
-  }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
+  public exportExceptionListAndItems = async (
+    options: ExportExceptionListAndItemsOptions
+  ): Promise<ExportExceptionListAndItemsReturn | null> => {
     const { savedObjectsClient } = this;
 
     if (this.enableServerExtensionPoints) {
       await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreExport',
-        {
-          id,
-          includeExpiredExceptions,
-          listId,
-          namespaceType,
-        },
+        options,
         this.getServerExtensionCallbackContext()
       );
     }
 
     return exportExceptionListAndItems({
-      id,
-      includeExpiredExceptions,
-      listId,
-      namespaceType,
+      ...options,
       savedObjectsClient,
     });
   };

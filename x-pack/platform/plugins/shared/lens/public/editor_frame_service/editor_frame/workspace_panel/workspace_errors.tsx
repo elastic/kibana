@@ -14,7 +14,8 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { UserMessage } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import type { UserMessage } from '@kbn/lens-common';
 import { getLongMessage } from '../../../user_messages_utils';
 
 interface Props {
@@ -43,6 +44,9 @@ export function WorkspaceErrors({ errors, title, onRender }: Props) {
                 pageCount={errors.length}
                 activePage={activePage}
                 onPageClick={setActivePage}
+                aria-label={i18n.translate('xpack.lens.workspaceErrors.pagination.ariaLabel', {
+                  defaultMessage: 'Workspace errors pagination',
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

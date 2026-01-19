@@ -8,7 +8,8 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { search } from '@kbn/data-plugin/public';

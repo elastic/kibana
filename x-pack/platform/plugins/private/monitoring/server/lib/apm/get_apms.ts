@@ -11,8 +11,8 @@ import { checkParam } from '../error_missing_required';
 import { createApmQuery } from './create_apm_query';
 import { calculateRate } from '../calculate_rate';
 import { getDiffCalculation } from './_apm_stats';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
 
 export function handleResponse(response: ElasticsearchResponse, start: number, end: number) {
   const initial = { ids: new Set(), beats: [] };
@@ -153,28 +153,26 @@ export async function getApms(req: LegacyRequest, apmIndexPattern: string, clust
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.read.errors',
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
     ],
-    body: {
-      query: createApmQuery({
-        start,
-        end,
-        clusterUuid,
-      }),
-      collapse: {
-        field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restarts
-        inner_hits: {
-          name: 'earliest',
-          size: 1,
-          sort: [
-            { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
-            { '@timestamp': { order: 'asc', unmapped_type: 'long' } },
-          ],
-        },
+    query: createApmQuery({
+      start,
+      end,
+      clusterUuid,
+    }),
+    collapse: {
+      field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restarts
+      inner_hits: {
+        name: 'earliest',
+        size: 1,
+        sort: [
+          { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
+          { '@timestamp': { order: 'asc', unmapped_type: 'long' } },
+        ],
       },
-      sort: [
-        { 'beats_stats.beat.uuid': { order: 'asc', unmapped_type: 'long' } }, // need to keep duplicate uuids grouped
-        { timestamp: { order: 'desc', unmapped_type: 'long' } }, // need oldest timestamp to come first for rate calcs to work
-      ],
     },
+    sort: [
+      { 'beats_stats.beat.uuid': { order: 'asc', unmapped_type: 'long' } }, // need to keep duplicate uuids grouped
+      { timestamp: { order: 'desc', unmapped_type: 'long' } }, // need oldest timestamp to come first for rate calcs to work
+    ],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

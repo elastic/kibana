@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { Writable } from 'stream';
 import { Duplex } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
+import { finished } from 'stream/promises';
+import { setTimeout } from 'timers/promises';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -27,6 +30,7 @@ interface ContentStreamDocument {
   index: string;
   if_primary_term?: number;
   if_seq_no?: number;
+  created_at?: string;
 }
 
 interface ChunkOutput {
@@ -60,6 +64,7 @@ export class ContentStream extends Duplex {
   private parameters: Required<ContentStreamParameters>;
   private primaryTerm?: number;
   private seqNo?: number;
+  private createdAt?: string;
 
   /**
    * The number of bytes written so far.
@@ -83,6 +88,7 @@ export class ContentStream extends Duplex {
   ) {
     super();
     this.parameters = { encoding };
+    this.createdAt = document.created_at;
   }
 
   private decode(content: string) {
@@ -111,7 +117,7 @@ export class ContentStream extends Duplex {
 
     this.logger.debug(`Reading report contents.`);
 
-    const response = await this.client.search<ReportSource>({ body, index });
+    const response = await this.client.search<ReportSource>({ ...body, index });
     const hits = response?.hits?.hits?.[0];
 
     this.jobSize = hits?._source?.output?.size;
@@ -139,7 +145,7 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Reading chunk #${this.chunksRead}.`);
 
     const response = await this.client.search<ChunkSource>({
-      body,
+      ...body,
       index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
     });
     const hits = response?.hits?.hits?.[0];
@@ -179,10 +185,8 @@ export class ContentStream extends Duplex {
 
     await this.client.deleteByQuery({
       index,
-      body: {
-        query: {
-          match: { parent_id: id },
-        },
+      query: {
+        match: { parent_id: id },
       },
     });
   }
@@ -192,10 +196,8 @@ export class ContentStream extends Duplex {
 
     const body = await this.client.update<ReportSource>({
       ...this.document,
-      body: {
-        doc: {
-          output: { content },
-        },
+      doc: {
+        output: { content },
       },
     });
 
@@ -212,9 +214,9 @@ export class ContentStream extends Duplex {
       id,
       index: REPORTING_DATA_STREAM_ALIAS,
       op_type: 'create',
-      body: {
+      document: {
         parent_id: parentId,
-        '@timestamp': new Date(0).toISOString(), // required for data streams compatibility
+        '@timestamp': this.createdAt || new Date().toISOString(), // use report creation time for better diagnosis
         output: {
           content,
           chunk: this.chunksWritten,
@@ -322,4 +324,25 @@ export async function getContentStream(
     document,
     parameters
   );
+}
+
+const MAX_RECURSION = 100;
+
+export async function finishedWithNoPendingCallbacks(stream: Writable) {
+  await finished(stream, { readable: false });
+
+  // Race condition workaround:
+  // `finished(...)` will resolve while there's still pending callbacks in the writable part of the `stream`.
+  // This introduces a race condition where the code continues before the writable part has completely finished.
+  // The `pendingCallbacks` function is a hack to ensure that all pending callbacks have been called before continuing.
+  // For more information, see: https://github.com/nodejs/node/issues/46170
+  await (async function pendingCallbacks(delay = 1, attempts = 1) {
+    if ((stream as any)._writableState.pendingcb > 0) {
+      await setTimeout(delay);
+
+      if (attempts < MAX_RECURSION) {
+        await pendingCallbacks(delay < 32 ? delay * 2 : delay, attempts + 1);
+      }
+    }
+  })();
 }

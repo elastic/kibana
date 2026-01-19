@@ -10,7 +10,7 @@ import { getCountsAndMaxAlertsData } from './utils';
 
 export const getAlertsTelemetryData = async ({
   savedObjectsClient,
-}: CollectTelemetryDataParams): Promise<CasesTelemetry['comments']> => {
+}: CollectTelemetryDataParams): Promise<CasesTelemetry['alerts']> => {
   const res = await getCountsAndMaxAlertsData({
     savedObjectsClient,
   });

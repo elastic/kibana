@@ -22,7 +22,7 @@ import {
 import type { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { SolutionId } from '@kbn/core-chrome-browser';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 
 import { createDefaultSpace } from './create_default_space';
 import type { SpacesLicense } from '../../common/licensing';

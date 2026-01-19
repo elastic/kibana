@@ -5,34 +5,33 @@
  * 2.0.
  */
 
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 
-import { ResilientConfig, ResilientSecrets } from './types';
-import { RESILIENT_CONNECTOR_ID } from './constants';
-import * as i18n from './translations';
+import type { ResilientConfig, ResilientSecrets } from '@kbn/connector-schemas/resilient';
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
   PushToServiceIncidentSchema,
-} from './schema';
+} from '@kbn/connector-schemas/resilient';
 import { ResilientConnector } from './resilient';
 
 export const getResilientConnectorType = (): SubActionConnectorType<
   ResilientConfig,
   ResilientSecrets
 > => ({
-  id: RESILIENT_CONNECTOR_ID,
+  id: CONNECTOR_ID,
   minimumLicenseRequired: 'platinum',
-  name: i18n.NAME,
+  name: CONNECTOR_NAME,
   getService: (params) => new ResilientConnector(params, PushToServiceIncidentSchema),
   schema: {
     config: ExternalIncidentServiceConfigurationSchema,
@@ -42,6 +41,7 @@ export const getResilientConnectorType = (): SubActionConnectorType<
     AlertingConnectorFeatureId,
     CasesConnectorFeatureId,
     SecurityConnectorFeatureId,
+    WorkflowsConnectorFeatureId,
   ],
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('apiUrl') }],
 });

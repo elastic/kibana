@@ -23,7 +23,7 @@ interface Props {
   secondary: string | null | undefined;
   workingDirectory: string | null | undefined;
   session: string | null | undefined;
-  isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const SessionUserHostWorkingDir = React.memo<Props>(
@@ -36,7 +36,7 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
     secondary,
     workingDirectory,
     session,
-    isDraggable,
+    scopeId,
   }) => (
     <>
       <TokensFlexItem grow={false} component="span">
@@ -44,24 +44,24 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           field="auditd.session"
           value={session}
           iconType="number"
-          isDraggable={isDraggable}
           isAggregatable={true}
           fieldType="keyword"
         />
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           userName={userName}
           primary={primary}
           secondary={secondary}
-          isDraggable={isDraggable}
         />
       </TokensFlexItem>
       {hostName != null && (
@@ -70,11 +70,11 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
         </TokensFlexItem>
       )}
       <HostWorkingDir
+        scopeId={scopeId}
         contextId={contextId}
         eventId={eventId}
         workingDirectory={workingDirectory}
         hostName={hostName}
-        isDraggable={isDraggable}
       />
     </>
   )

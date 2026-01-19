@@ -14,7 +14,7 @@ import * as monitorDetailLocatorModule from '../../../../hooks/use_monitor_detai
 import * as monitorEnableHandlerModule from '../../../../hooks/use_monitor_enable_handler';
 import * as enablementHook from '../../../../hooks/use_enablement';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import { OverviewStatusMetaData } from '../types';
+import type { OverviewStatusMetaData } from '../types';
 
 describe('ActionsPopover', () => {
   let testMonitor: OverviewStatusMetaData;

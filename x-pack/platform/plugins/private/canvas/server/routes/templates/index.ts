@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteInitializerDeps } from '..';
+import type { RouteInitializerDeps } from '..';
 import { initializeListTemplates } from './list';
 
 export function initTemplateRoutes(deps: RouteInitializerDeps) {

@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 
 export const registerHitsStatusRoute = (router: IRouter) => {
   router.post(
@@ -35,9 +35,7 @@ export const registerHitsStatusRoute = (router: IRouter) => {
         const body = await client.asCurrentUser.search({
           index,
           size: 1,
-          body: {
-            query,
-          },
+          query,
         });
         const count = body.hits.hits.length;
 

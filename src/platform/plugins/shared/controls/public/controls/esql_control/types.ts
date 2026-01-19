@@ -6,11 +6,41 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { PublishesESQLVariable } from '@kbn/esql-variables-types';
-import type { HasEditCapabilities, PublishesTitle } from '@kbn/presentation-publishing';
-import type { DefaultControlApi } from '../types';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { ESQLControlState, PublishesESQLVariable } from '@kbn/esql-types';
+import type {
+  HasEditCapabilities,
+  PublishesDataLoading,
+  TitlesApi,
+} from '@kbn/presentation-publishing';
+import type { Filter } from '@kbn/es-query';
+import type { OptionsListComponentState } from '../data_controls/options_list_control/types';
 
-export type ESQLControlApi = DefaultControlApi &
+export type ESQLControlApi = DefaultEmbeddableApi<ESQLControlState> &
   PublishesESQLVariable &
   HasEditCapabilities &
-  Pick<PublishesTitle, 'defaultTitle$'>;
+  TitlesApi &
+  PublishesDataLoading;
+
+type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;
+type HideExistsUnusedState = Pick<OptionsListComponentState, 'existsSelected'>;
+type HideSortUnusedState = Pick<OptionsListComponentState, 'sort'>;
+type DisableLoadSuggestionsUnusedState = Pick<
+  OptionsListComponentState,
+  'requestSize' | 'runPastTimeout'
+>;
+type DisableInvalidSelectionsUnusedState = Pick<OptionsListComponentState, 'invalidSelections'>;
+
+export type OptionsListESQLUnusedState = HideExcludeUnusedState &
+  HideExistsUnusedState &
+  HideSortUnusedState &
+  DisableLoadSuggestionsUnusedState &
+  DisableInvalidSelectionsUnusedState &
+  Pick<OptionsListComponentState, 'fieldName'> & {
+    useGlobalFilters?: boolean;
+    ignoreValidations?: boolean;
+    dataViewId: string;
+    blockingError?: Error;
+    filtersLoading: boolean;
+    appliedFilters: Filter[] | undefined;
+  };

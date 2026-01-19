@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { MissingResultsPrivilegesPrompt } from '../../../components/logging/log_analysis_setup';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
@@ -46,12 +45,10 @@ export const LogEntryCategoriesPage = () => {
   }
 
   return (
-    <EuiErrorBoundary>
-      <LogMlJobIdFormatsShimProvider>
-        <LogEntryCategoriesPageProviders>
-          <LogEntryCategoriesPageContent />
-        </LogEntryCategoriesPageProviders>
-      </LogMlJobIdFormatsShimProvider>
-    </EuiErrorBoundary>
+    <LogMlJobIdFormatsShimProvider>
+      <LogEntryCategoriesPageProviders>
+        <LogEntryCategoriesPageContent />
+      </LogEntryCategoriesPageProviders>
+    </LogMlJobIdFormatsShimProvider>
   );
 };

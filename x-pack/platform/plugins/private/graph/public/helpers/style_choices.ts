@@ -60,7 +60,7 @@ export const iconChoices: GenericIcon[] = [
     label: i18n.translate('xpack.graph.icon.home', { defaultMessage: 'Home' }),
   },
   {
-    id: 'questionInCircle',
+    id: 'question',
     prevName: 'fa-question',
     package: 'eui',
     patterns: [/query/i, /search/i],
@@ -263,7 +263,7 @@ export const urlTemplateIconChoices: GenericIcon[] = [
     label: i18n.translate('xpack.graph.icon.tachometer', { defaultMessage: 'Tachometer' }),
   },
   {
-    id: 'iInCircle',
+    id: 'info',
     prevName: 'fa-info',
     package: 'eui',
     label: i18n.translate('xpack.graph.icon.info', { defaultMessage: 'Info' }),

@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { UseChatSend } from './use_chat_send';
+import type { UseChatSend } from './use_chat_send';
 import { ChatActions } from '../chat_actions';
 import { PromptTextArea } from '../prompt_textarea';
 import { useAutosizeTextArea } from './use_autosize_textarea';
@@ -48,10 +48,6 @@ export const ChatSend: React.FC<Props> = ({
   }, [handleChatSend, promptTextAreaRef, setUserPrompt]);
 
   useAutosizeTextArea(promptTextAreaRef?.current, promptValue);
-
-  useEffect(() => {
-    setUserPrompt(promptValue);
-  }, [setUserPrompt, promptValue]);
 
   return (
     <EuiFlexGroup

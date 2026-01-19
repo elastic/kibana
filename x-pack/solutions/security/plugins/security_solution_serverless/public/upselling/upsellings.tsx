@@ -10,7 +10,8 @@ import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   UPGRADE_INVESTIGATION_GUIDE,
   UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
-  UPGRADE_PREBUILT_RULE_CUSTOMIZATION,
+  PREBUILT_RULE_CUSTOMIZATION,
+  PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
@@ -23,15 +24,17 @@ import {
   EndpointCustomNotificationLazy,
   EndpointPolicyProtectionsLazy,
   EndpointProtectionUpdatesLazy,
+  EndpointDeviceControlLazy,
   RuleDetailsEndpointExceptionsLazy,
 } from './sections/endpoint_management';
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
   AttackDiscoveryUpsellingPageLazy,
-  EndpointExceptionsDetailsUpsellingLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
+  SiemMigrationsStartUpsellSectionLazy,
+  SiemMigrationsTranslatedRulesUpsellPageLazy,
   ThreatIntelligencePaywallLazy,
 } from './lazy_upselling';
 import * as i18n from './translations';
@@ -73,16 +76,14 @@ export const upsellingPages: UpsellingPages = [
     ),
   },
   {
-    pageName: SecurityPageName.exceptions,
-    pli: ProductFeatureKey.endpointExceptions,
-    component: () => (
-      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={ProductFeatureKey.endpointExceptions} />
-    ),
-  },
-  {
     pageName: SecurityPageName.attackDiscovery,
     pli: ProductFeatureKey.attackDiscovery,
     component: () => <AttackDiscoveryUpsellingPageLazy />,
+  },
+  {
+    pageName: SecurityPageName.siemMigrationsRules,
+    pli: ProductFeatureKey.siemMigrations,
+    component: () => <SiemMigrationsTranslatedRulesUpsellPageLazy />,
   },
 ];
 
@@ -121,6 +122,11 @@ export const upsellingSections: UpsellingSections = [
     component: RuleDetailsEndpointExceptionsLazy,
   },
   {
+    id: 'endpoint_device_control',
+    pli: ProductFeatureKey.endpointTrustedDevices,
+    component: EndpointDeviceControlLazy,
+  },
+  {
     id: 'endpoint_protection_updates',
     pli: ProductFeatureKey.endpointProtectionUpdates,
     component: EndpointProtectionUpdatesLazy,
@@ -139,6 +145,11 @@ export const upsellingSections: UpsellingSections = [
         upgradeMessage={i18n.UPGRADE_PRODUCT_MESSAGE(entityAnalyticsProductType)}
       />
     ),
+  },
+  {
+    id: 'siem_migrations_start',
+    pli: ProductFeatureKey.siemMigrations,
+    component: SiemMigrationsStartUpsellSectionLazy,
   },
   {
     id: 'automatic_import',
@@ -166,8 +177,17 @@ export const upsellingMessages: UpsellingMessages = [
   {
     id: 'prebuilt_rule_customization',
     pli: ProductFeatureKey.prebuiltRuleCustomization,
-    message: UPGRADE_PREBUILT_RULE_CUSTOMIZATION(
-      getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? ''
+    message: PREBUILT_RULE_CUSTOMIZATION(
+      getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? '',
+      'feature tier'
+    ),
+  },
+  {
+    id: 'prebuilt_rule_customization_description',
+    pli: ProductFeatureKey.prebuiltRuleCustomization,
+    message: PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION(
+      getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? '',
+      'feature tier'
     ),
   },
 ];

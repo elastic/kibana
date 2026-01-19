@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ProcessTreeNode } from '../process_tree_node';
 import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
@@ -15,7 +15,7 @@ import type { AlertStatusEventEntityIdMap, Process, ProcessEventsPage } from '..
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 import { PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
-import { SessionViewTelemetryKey } from '../../types';
+import type { SessionViewTelemetryKey } from '../../types';
 
 type FetchFunction = () => void;
 
@@ -52,7 +52,7 @@ export interface ProcessTreeDeps {
 
   // currently selected process
   selectedProcess?: Process | null;
-  onProcessSelected: (process: Process | null) => void;
+  onProcessSelected: (process: Process | null, isManualSelection?: boolean) => void;
   setSearchResults?: (results: Process[]) => void;
 
   // a map for alerts with updated status and process.entity_id

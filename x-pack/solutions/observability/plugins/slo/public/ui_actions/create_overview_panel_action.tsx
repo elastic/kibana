@@ -8,17 +8,18 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { SLOPublicPluginsStart } from '..';
+import type { SLOPublicPluginsStart } from '..';
 import {
   ADD_SLO_OVERVIEW_ACTION_ID,
   SLO_OVERVIEW_EMBEDDABLE_ID,
 } from '../embeddable/slo/overview/constants';
-import { SLORepositoryClient } from '../types';
+import type { SLORepositoryClient } from '../types';
+import { openSloConfiguration } from '../embeddable/slo/overview/slo_overview_open_configuration';
 
 export function createOverviewPanelAction(
   coreStart: CoreStart,
@@ -37,16 +38,15 @@ export function createOverviewPanelAction(
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
       try {
-        const { openSloConfiguration } = await import(
-          '../embeddable/slo/overview/slo_overview_open_configuration'
-        );
         const initialState = await openSloConfiguration(coreStart, pluginsStart, sloClient);
         embeddable.addNewPanel(
           {
             panelType: SLO_OVERVIEW_EMBEDDABLE_ID,
-            initialState,
+            serializedState: initialState,
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       } catch (e) {
         return Promise.reject();

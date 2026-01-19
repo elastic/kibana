@@ -1,0 +1,40 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/tooling-log",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/ci-stats-reporter",
+    "@kbn/repo-info",
+    "@kbn/es",
+    "@kbn/dev-proc-runner",
+    "@kbn/test",
+    "@kbn/es-archiver",
+    "@kbn/dev-utils",
+    "@kbn/mock-idp-utils",
+    "@kbn/test-subj-selector",
+    "@kbn/scout-info",
+    "@kbn/scout-reporting",
+    "@kbn/synthtrace",
+    "@kbn/synthtrace-client",
+    "@kbn/zod",
+    "@kbn/core-http-common",
+    "@kbn/streams-schema",
+    "@kbn/streamlang",
+    "@kbn/axe-config",
+    "@kbn/peggy"
+  ]
+}

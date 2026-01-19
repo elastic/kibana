@@ -38,7 +38,7 @@ printArgs() {
   else
     echo "Received enrollment token: ${ENROLLMENT_TOKEN}"
   fi
-  
+
   if [[ $TAGS != "" ]]; then
     echo "Received tags: ${TAGS}"
   fi
@@ -62,7 +62,7 @@ if [[ $CMD == "fleet_server" ]]; then
     -e FLEET_SERVER_POLICY_ID=${FLEET_SERVER_POLICY_ID} \
     -e ELASTIC_AGENT_TAGS=${TAGS} \
     -p 8220:8220 \
-    --rm docker.elastic.co/beats/elastic-agent:${ELASTIC_AGENT_VERSION}
+    --rm docker.elastic.co/elastic-agent/elastic-agent:${ELASTIC_AGENT_VERSION}
 
 elif [[ $CMD == "agent" ]]; then
   echo "Starting Elastic Agent container..."
@@ -75,8 +75,8 @@ elif [[ $CMD == "agent" ]]; then
     -e FLEET_ENROLLMENT_TOKEN=${ENROLLMENT_TOKEN} \
     -e FLEET_INSECURE=1 \
     -e ELASTIC_AGENT_TAGS=${TAGS} \
-    --rm docker.elastic.co/beats/elastic-agent:${ELASTIC_AGENT_VERSION}
-    
+    --rm docker.elastic.co/elastic-agent/elastic-agent:${ELASTIC_AGENT_VERSION}
+
 elif [[ $CMD == "help" ]]; then
   echo "Usage: ./run_elastic_agent.sh <agent/fleet_server> -e <enrollment token> -v <version> -t <tags>"
 

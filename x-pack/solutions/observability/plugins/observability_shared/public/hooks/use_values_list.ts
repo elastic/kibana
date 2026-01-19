@@ -9,7 +9,7 @@ import { capitalize, uniqBy } from 'lodash';
 import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { ESFilter } from '@kbn/es-types';
-import { IInspectorInfo } from '@kbn/data-plugin/common';
+import type { IInspectorInfo } from '@kbn/data-plugin/common';
 import { TRANSACTION_URL } from '../../common';
 import { useEsSearch, createEsParams } from './use_es_search';
 
@@ -92,46 +92,44 @@ export const useValuesList = ({
   const { data, loading } = useEsSearch(
     createEsParams({
       index: dataViewTitle!,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              ...(filters ?? []),
-              ...(from && to
-                ? [
-                    {
-                      range: {
-                        '@timestamp': {
-                          gte: from,
-                          lte: to,
-                        },
-                      },
-                    },
-                  ]
-                : []),
-            ],
-          },
-        },
-        size: 0,
-        aggs: {
-          values: {
-            terms: {
-              field: sourceField,
-              size: 50,
-              ...(query ? { include: includeClause } : {}),
-            },
-            ...(cardinalityField
-              ? {
-                  aggs: {
-                    count: {
-                      cardinality: {
-                        field: cardinalityField,
+      query: {
+        bool: {
+          filter: [
+            ...(filters ?? []),
+            ...(from && to
+              ? [
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: from,
+                        lte: to,
                       },
                     },
                   },
-                }
-              : {}),
+                ]
+              : []),
+          ],
+        },
+      },
+      size: 0,
+      aggs: {
+        values: {
+          terms: {
+            field: sourceField,
+            size: 50,
+            ...(query ? { include: includeClause } : {}),
           },
+          ...(cardinalityField
+            ? {
+                aggs: {
+                  count: {
+                    cardinality: {
+                      field: cardinalityField,
+                    },
+                  },
+                },
+              }
+            : {}),
         },
       },
     }),

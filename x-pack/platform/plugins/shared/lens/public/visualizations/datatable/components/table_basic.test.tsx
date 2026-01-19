@@ -11,18 +11,19 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { faker } from '@faker-js/faker';
 import { act } from 'react-dom/test-utils';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
-import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
-import { DatatableRenderProps } from './types';
-import { PaletteOutput } from '@kbn/coloring';
+import { LENS_EDIT_PAGESIZE_ACTION } from '@kbn/lens-common';
+import type { DatatableRenderProps } from './types';
+import type { PaletteOutput } from '@kbn/coloring';
 import { getTransposeId } from '@kbn/transpose-utils';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
   const mod = jest.requireActual('../../../shared_components/coloring/get_cell_color_fn');
@@ -134,7 +135,6 @@ describe('DatatableComponent', () => {
       }),
       paletteService: chartPluginMock.createPaletteRegistry(),
       theme: setUpMockTheme,
-      renderMode: 'edit' as const,
       interactive: true,
       syncColors: false,
       renderComplete,
@@ -182,8 +182,8 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it should render hide, reset, and sort actions on header even when it is in read only mode', async () => {
-    renderDatatableComponent({ renderMode: 'view' });
+  test('it should render hide, reset, and sort actions on header', async () => {
+    renderDatatableComponent();
     await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-a'));
     const actionPopover = screen.getByRole('dialog');
     const actions = within(actionPopover)
@@ -305,7 +305,7 @@ describe('DatatableComponent', () => {
     renderDatatableComponent({
       data: {
         ...data,
-        rows: [{ a: undefined, b: undefined, c: undefined }],
+        rows: [],
       },
     });
     expect(screen.getByTestId('lnsVisualizationContainer')).toHaveTextContent('No results found');
@@ -518,7 +518,7 @@ describe('DatatableComponent', () => {
       expect(screen.queryByTestId('tablePaginationPopoverButton')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: `Page 1 of ${numberOfPages}` })).toHaveAttribute(
         'aria-current',
-        'true'
+        'page'
       );
       const newIndex = 3;
       await userEvent.click(
@@ -526,7 +526,7 @@ describe('DatatableComponent', () => {
       );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
     });
     it('dynamically toggles pagination', async () => {
       const argsWithoutPagination = copyData(args);
@@ -599,7 +599,7 @@ describe('DatatableComponent', () => {
       );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
 
       await act(async () => {
         rerender({
@@ -614,7 +614,7 @@ describe('DatatableComponent', () => {
       // keeps existing page if more data is added
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${newNumberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
     });
 
     it('resets page position if rows change so page will be empty', async () => {
@@ -639,7 +639,7 @@ describe('DatatableComponent', () => {
       );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
 
       await act(async () => {
         rerender({
@@ -760,6 +760,116 @@ describe('DatatableComponent', () => {
           ['3', 'red'],
         ]);
       });
+    });
+  });
+
+  describe('gridStyle', () => {
+    it('should apply default grid style when density is not provided', () => {
+      renderDatatableComponent();
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+    });
+    it('should apply normal grid style when density is normal', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.NORMAL,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+    });
+    it('should apply compact grid style when density is compact', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.COMPACT,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
+    });
+    it('should apply expanded grid style when density is expanded', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.EXPANDED,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-l-fontSize-l/);
+    });
+    it('should update grid style when density changes', () => {
+      const { rerender } = renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.NORMAL,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+      rerender({
+        args: {
+          ...args,
+          density: DataGridDensity.COMPACT,
+        },
+      });
+      expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
+    });
+  });
+
+  describe('row numbers', () => {
+    it('should show row numbers when enabled', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: true,
+        },
+      });
+
+      const rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells).toHaveLength(1);
+      expect(rowNumberCells[0]).toHaveTextContent('1');
+    });
+
+    it('should not show row numbers when disabled', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: false,
+        },
+      });
+
+      expect(screen.queryByRole('gridcell', { name: '' })).not.toBeInTheDocument();
+    });
+
+    it('should show correct row numbers with pagination', async () => {
+      const rowNumbers = 13;
+      const pageSize = 4;
+      data.rows = new Array(rowNumbers).fill({
+        a: 'shoes',
+        b: 1588024800000,
+        c: faker.number.int(),
+      });
+
+      args.pageSize = pageSize;
+
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: true,
+        },
+        data,
+      });
+
+      // Page 1
+      let rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
+
+      // Page 2
+      await userEvent.click(screen.getByRole('link', { name: `Page 2 of 4` }));
+      rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
     });
   });
 });

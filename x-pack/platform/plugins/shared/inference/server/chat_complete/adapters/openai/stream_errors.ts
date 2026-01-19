@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createInferenceInternalError } from '@kbn/inference-common';
+import { convertUpstreamError } from '../../utils';
 
 /**
  * Error line from standard openAI providers
@@ -37,10 +37,10 @@ export type ErrorLine = OpenAIErrorLine | ElasticInferenceErrorLine | UnknownErr
 
 export const convertStreamError = ({ error }: ErrorLine) => {
   if ('message' in error) {
-    return createInferenceInternalError(error.message);
+    return convertUpstreamError(error.message);
   } else if ('reason' in error) {
-    return createInferenceInternalError(`${error.type} - ${error.reason}`);
+    return convertUpstreamError(`${error.type} - ${error.reason}`);
   } else {
-    return createInferenceInternalError(JSON.stringify(error));
+    return convertUpstreamError(JSON.stringify(error));
   }
 };

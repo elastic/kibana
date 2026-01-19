@@ -25,7 +25,7 @@ import {
 
 import { documentationLinks } from '../../../services/documentation_links';
 import { FieldList } from '../../components';
-import { FieldChooser, StepError } from './components';
+import { FieldChooser, StepError, JobWizardStepAction } from './components';
 import { METRICS_CONFIG } from '../../../constants';
 
 const whiteListedMetricByFieldType = {
@@ -383,13 +383,13 @@ export class StepMetrics extends Component {
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
+          <JobWizardStepAction>
             <EuiButtonEmpty
               size="s"
               flush="right"
               href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="rollupJobCreateMetricsDocsButton"
             >
               <FormattedMessage
@@ -397,7 +397,7 @@ export class StepMetrics extends Component {
                 defaultMessage="Metrics docs"
               />
             </EuiButtonEmpty>
-          </EuiFlexItem>
+          </JobWizardStepAction>
         </EuiFlexGroup>
 
         <EuiSpacer />

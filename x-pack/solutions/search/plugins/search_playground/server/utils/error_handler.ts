@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { RequestHandlerWrapper } from '@kbn/core-http-server';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { RequestHandlerWrapper } from '@kbn/core-http-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import type { Logger } from '@kbn/logging';
 
 function isKibanaServerError(error: any): error is KibanaServerError {
@@ -21,6 +22,14 @@ export const errorHandler: (logger: Logger) => RequestHandlerWrapper = (logger) 
       logger.error(e);
       if (isKibanaServerError(e)) {
         return response.customError({ statusCode: e.statusCode, body: e.message });
+      }
+      if (SavedObjectsErrorHelpers.isSavedObjectsClientError(e)) {
+        return response.customError({
+          statusCode: e.output.statusCode,
+          body: {
+            message: e.message,
+          },
+        });
       }
       throw e;
     }

@@ -6,14 +6,13 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { RuleTypeModal } from '@kbn/response-ops-rule-form/src/rule_type_modal';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { lazy, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { RULES_LOGS_PATH, RULES_PATH, paths } from '../../../common/locators/paths';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -30,6 +29,7 @@ interface RulesPageProps {
   activeTab?: string;
 }
 export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
+  const { services } = useKibana();
   const {
     http,
     docLinks,
@@ -38,7 +38,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     application,
     triggersActionsUi: { ruleTypeRegistry, getRulesSettingsLink: RulesSettingsLink },
     serverless,
-  } = useKibana().services;
+  } = services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
   const [ruleTypeModalVisibility, setRuleTypeModalVisibility] = useState<boolean>(false);
@@ -63,16 +63,11 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   );
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
-  const {
-    ruleTypesState: { data: ruleTypes },
-  } = useLoadRuleTypesQuery({
+  const { authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
+    http,
+    toasts,
     filteredRuleTypes,
   });
-
-  const authorizedRuleTypes = [...ruleTypes.values()];
-  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTING_FEATURE_ID]?.all
-  );
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
@@ -145,7 +140,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     <EuiButtonEmpty
       data-test-subj="documentationLink"
       href={docLinks.links.observability.createAlerts}
-      iconType="help"
+      iconType="question"
       target="_blank"
     >
       <FormattedMessage
@@ -184,6 +179,12 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
             setRuleTypeModalVisibility(false);
             return application.navigateToUrl(
               http.basePath.prepend(paths.observability.createRule(ruleTypeId))
+            );
+          }}
+          onSelectTemplate={(templateId) => {
+            setRuleTypeModalVisibility(false);
+            return application.navigateToUrl(
+              http.basePath.prepend(paths.observability.createRuleFromTemplate(templateId))
             );
           }}
           http={http}

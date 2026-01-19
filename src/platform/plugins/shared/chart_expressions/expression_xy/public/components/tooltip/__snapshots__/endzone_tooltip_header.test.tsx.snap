@@ -4,7 +4,7 @@ exports[`EndzoneTooltipHeader should render endzone tooltip with value, if it is
 <Fragment>
   <EuiFlexGroup
     alignItems="center"
-    className="detailedTooltip__header--partial"
+    css="unknown styles"
     gutterSize="xs"
     responsive={false}
   >
@@ -12,7 +12,7 @@ exports[`EndzoneTooltipHeader should render endzone tooltip with value, if it is
       grow={false}
     >
       <EuiIcon
-        type="iInCircle"
+        type="info"
       />
     </EuiFlexItem>
     <EuiFlexItem>
@@ -32,7 +32,7 @@ exports[`EndzoneTooltipHeader should render endzone tooltip without value, if it
 <Fragment>
   <EuiFlexGroup
     alignItems="center"
-    className="detailedTooltip__header--partial"
+    css="unknown styles"
     gutterSize="xs"
     responsive={false}
   >
@@ -40,7 +40,7 @@ exports[`EndzoneTooltipHeader should render endzone tooltip without value, if it
       grow={false}
     >
       <EuiIcon
-        type="iInCircle"
+        type="info"
       />
     </EuiFlexItem>
     <EuiFlexItem>

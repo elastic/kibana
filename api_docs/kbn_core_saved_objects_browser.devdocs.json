@@ -50,40 +50,16 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/services.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/services.ts"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/types.ts"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/types.ts"
-          },
-          {
             "plugin": "@kbn/core",
             "path": "src/core/server/index.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
           }
         ],
         "children": [

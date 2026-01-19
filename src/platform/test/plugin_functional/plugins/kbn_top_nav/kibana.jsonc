@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kbn-top-nav-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "kbnTopNav",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "kbn_top_nav"
+    ],
+    "requiredPlugins": [
+      "navigation"
+    ]
+  }
+}

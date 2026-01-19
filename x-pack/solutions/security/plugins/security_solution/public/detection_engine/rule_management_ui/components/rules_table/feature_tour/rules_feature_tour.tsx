@@ -26,15 +26,15 @@ import React, { useEffect, useMemo } from 'react';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsElementMounted } from '../rules_table/guided_onboarding/use_is_element_mounted';
-import { PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR } from '../upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import * as i18n from './translations';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 export interface RulesFeatureTourContextType {
   steps: EuiTourStepProps[];
   actions: EuiTourActions;
 }
 
-export const PER_FIELD_UPGRADE_TOUR_ANCHOR = 'updates';
+export const CREATE_NEW_RULE_TOUR_ANCHOR = 'create-new-rule-tour-anchor';
 
 const TOUR_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.RULE_MANAGEMENT_PAGE;
 const TOUR_POPOVER_WIDTH = 400;
@@ -49,8 +49,8 @@ const tourConfig: EuiTourState = {
 const stepsConfig: EuiStatelessTourStep[] = [
   {
     step: 1,
-    title: i18n.UPDATE_TOUR_TITLE,
-    content: <EuiText>{i18n.UPDATE_TOUR_DESCRIPTION}</EuiText>,
+    title: i18n.IM_DOES_NOT_MATCH_TOUR_TITLE,
+    content: <EuiText>{i18n.IM_DOES_NOT_MATCH_TOUR_DESCRIPTION}</EuiText>,
     stepsTotal: 1,
     children: <></>,
     onFinish: noop,
@@ -76,9 +76,11 @@ export const RuleFeatureTour: FC = () => {
     storage.set(TOUR_STORAGE_KEY, { isTourActive, currentTourStep });
   }, [tourState, storage]);
 
-  const isTourAnchorMounted = useIsElementMounted(PER_FIELD_UPGRADE_TOUR_ANCHOR);
-  const isFlyoutOpen = useIsElementMounted(PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR);
-  const shouldShowRuleUpgradeTour = isTourAnchorMounted && !isFlyoutOpen;
+  const isTourAnchorMounted = useIsElementMounted(CREATE_NEW_RULE_TOUR_ANCHOR);
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  // Display the tour only if the user has permissions to create/edit rules,
+  // otherwise they could not follow the tour steps
+  const shouldShowRuleUpgradeTour = isTourAnchorMounted && canEditRules;
 
   const enhancedSteps = useMemo(
     () =>
@@ -127,7 +129,7 @@ export const RuleFeatureTour: FC = () => {
        */
       // eslint-disable-next-line react/no-children-prop
       children={undefined}
-      anchor={`#${PER_FIELD_UPGRADE_TOUR_ANCHOR}`}
+      anchor={`#${CREATE_NEW_RULE_TOUR_ANCHOR}`}
       anchorPosition="downCenter"
     />
   ) : null;

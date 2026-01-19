@@ -17,7 +17,7 @@ import type {
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import { GetOptInStatsRoutePathBasedV2 } from '../../common/routes';
 import type { v2 } from '../../common/types';
-import { EncryptedTelemetryPayload, UnencryptedTelemetryPayload } from '../../common/types';
+import type { EncryptedTelemetryPayload, UnencryptedTelemetryPayload } from '../../common/types';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 
@@ -68,16 +68,16 @@ export function registerTelemetryOptInStatsRoutes(
     .post({
       access: 'public', // It's not used across Kibana, and I didn't want to remove it in this PR just in case.
       path: GetOptInStatsRoutePathBasedV2,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     .addVersion(
       {
         version: '2023-10-31',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             body: schema.object({

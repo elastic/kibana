@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
-import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
-import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
+import type { PromptResponse, User } from '@kbn/elastic-assistant-common';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type {
+  InfiniteData,
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from '@kbn/react-query';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
-import { FetchConversationsResponse, useFetchPrompts } from './api';
-import {
-  Conversation,
-  mergeBaseWithPersistedConversations,
-  useFetchCurrentUserConversations,
-} from '../..';
+import type { ConversationWithOwner, FetchConversationsResponse } from './api';
+import { useFetchPrompts } from './api';
+import { useFetchCurrentUserConversations } from '../..';
 
 interface Props {
-  baseConversations: Record<string, Conversation>;
+  currentUser?: User;
   http: HttpSetup;
   isAssistantEnabled: boolean;
 }
@@ -28,10 +31,12 @@ export interface DataStreamApis {
   allPrompts: PromptResponse[];
   allSystemPrompts: PromptResponse[];
   anonymizationFields: FindAnonymizationFieldsResponse;
-  conversations: Record<string, Conversation>;
+  conversations: Record<string, ConversationWithOwner>;
+  currentUser?: User;
   isErrorAnonymizationFields: boolean;
   isFetchedAnonymizationFields: boolean;
   isFetchedCurrentUserConversations: boolean;
+  isFetchingCurrentUserConversations: boolean;
   isLoadingAnonymizationFields: boolean;
   isLoadingCurrentUserConversations: boolean;
   isLoadingPrompts: boolean;
@@ -39,33 +44,33 @@ export interface DataStreamApis {
   refetchPrompts: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
-  refetchCurrentUserConversations: () => Promise<
-    QueryObserverResult<Record<string, Conversation>, unknown>
-  >;
+  refetchCurrentUserConversations: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<InfiniteData<FetchConversationsResponse>, unknown>>;
   setIsStreaming: (isStreaming: boolean) => void;
+  setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
 export const useDataStreamApis = ({
+  currentUser,
   http,
-  baseConversations,
   isAssistantEnabled,
 }: Props): DataStreamApis => {
   const [isStreaming, setIsStreaming] = useState(false);
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
-    [baseConversations]
-  );
   const {
     data: conversations,
     isLoading: isLoadingCurrentUserConversations,
     refetch: refetchCurrentUserConversations,
+    isFetching: isFetchingCurrentUserConversations,
     isFetched: isFetchedCurrentUserConversations,
+    setPaginationObserver,
   } = useFetchCurrentUserConversations({
+    currentUser,
     http,
-    onFetch: onFetchedConversations,
+    perPage: 28,
     refetchOnWindowFocus: !isStreaming,
     isAssistantEnabled,
+    fields: ['id', 'title', 'apiConfig', 'updatedAt', 'users', 'createdBy'],
   });
 
   const {
@@ -87,6 +92,7 @@ export const useDataStreamApis = ({
     }
     return [];
   }, [allPrompts, isLoadingPrompts]);
+
   return {
     allPrompts,
     allSystemPrompts,
@@ -95,12 +101,14 @@ export const useDataStreamApis = ({
     isErrorAnonymizationFields,
     isFetchedAnonymizationFields,
     isFetchedCurrentUserConversations,
+    isFetchedPrompts,
+    isFetchingCurrentUserConversations,
     isLoadingAnonymizationFields,
     isLoadingCurrentUserConversations,
     isLoadingPrompts,
-    isFetchedPrompts,
-    refetchPrompts,
     refetchCurrentUserConversations,
+    refetchPrompts,
     setIsStreaming,
+    setPaginationObserver,
   };
 };

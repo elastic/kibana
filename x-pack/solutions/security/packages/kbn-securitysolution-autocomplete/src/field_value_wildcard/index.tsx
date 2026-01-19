@@ -6,24 +6,23 @@
  */
 
 import React, { useCallback, useMemo, useState, useEffect, memo } from 'react';
-import { EuiFormRow, EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox } from '@elastic/eui';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import { uniq } from 'lodash';
 
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
-// import { AutocompleteStart } from '../../../../../../../../../../src/plugins/unified_search/public';
+// import { AutocompleteStart } from '../../../../../../../../../../src/plugins/kql/public';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AutocompleteStart = any;
 
 import * as i18n from '../translations';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
-import {
-  getGenericComboBoxProps,
-  GetGenericComboBoxPropsReturn,
-} from '../get_generic_combo_box_props';
+import type { GetGenericComboBoxPropsReturn } from '../get_generic_combo_box_props';
+import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 import { paramIsValid } from '../param_is_valid';
 import { paramContainsSpace } from '../param_contains_space';
 

@@ -84,13 +84,14 @@ export const AlertsCard: OnboardingCardComponent = ({
             items={ALERTS_CARD_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
+            cardId={OnboardingCardId.alerts}
           />
           {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
               <CardCallOut
                 color="primary"
-                icon="iInCircle"
+                icon="info"
                 text={i18n.ALERTS_CARD_CALLOUT_INTEGRATIONS_TEXT}
                 action={
                   <EuiLink onClick={expandIntegrationsCard}>

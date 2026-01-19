@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import {
+import type {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
-import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
+import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
+import type { UserMessage, LensInspector } from '@kbn/lens-common';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
-import { LensInspector } from '../lens_inspector_service';
-import { UserMessage } from '../types';
+import { lnsExpressionRendererStyle } from '../expression_renderer_styles';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -76,12 +76,12 @@ export function ExpressionWrapper({
   if (!expression) return null;
   return (
     <div
-      className={classNames('lnsExpressionRenderer', className)}
+      className={classNames('lnsExpressionRenderer', 'eui-scrollBar', className)}
+      css={lnsExpressionRendererStyle}
       style={style}
       data-test-subj="lens-embeddable"
     >
       <ExpressionRendererComponent
-        className="lnsExpressionRenderer__component"
         padding={noPadding ? undefined : 's'}
         variables={variables}
         allowCache={true}

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { ObjectType } from '@kbn/config-schema';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ObjectType } from '@kbn/config-schema';
 import { isPlainObject, isArray } from 'lodash';
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';

@@ -7,11 +7,11 @@
 
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import moment from 'moment';
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { parseExpression } from '@kbn/expressions-plugin/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { collectFns } from './collector_helpers';
-import { TelemetryCollector, CanvasWorkpad } from '../../types';
+import type { TelemetryCollector, CanvasWorkpad } from '../../types';
 
 interface WorkpadSearch {
   [CANVAS_TYPE]: CanvasWorkpad;
@@ -384,7 +384,7 @@ const workpadCollector: TelemetryCollector = async function (getIndexForType, es
     index,
     ignore_unavailable: true,
     filter_path: ['hits.hits._source.canvas-workpad', '-hits.hits._source.canvas-workpad.assets'],
-    body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
+    query: { bool: { filter: { term: { type: CANVAS_TYPE } } } },
   };
 
   const esResponse = await esClient.search<WorkpadSearch>(searchParams);

@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiSuperDatePickerCommonRange } from '@elastic/eui';
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -18,11 +19,10 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiSuperDatePicker,
-  EuiSuperDatePickerCommonRange,
 } from '@elastic/eui';
-import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
+import type { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
 
-import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
+import type { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 
 import { i18n } from '@kbn/i18n';
 

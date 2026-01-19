@@ -4,29 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@kbn/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { EsHitRecord } from '@kbn/discover-utils/types';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import { MAX_FINDINGS_TO_LOAD, buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  LATEST_FINDINGS_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
+import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import { CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
-interface UseFindingsOptions extends FindingsBaseEsQuery {
+interface UseFindingsOptions extends BaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;
@@ -79,7 +79,7 @@ export const getFindingsQuery = (
           {
             range: {
               '@timestamp': {
-                gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+                gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
                 lte: 'now',
               },
             },
@@ -144,7 +144,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
    * the last loaded record to be used as a from parameter to fetch the next chunk of data.
    */
   return useInfiniteQuery(
-    ['csp_findings', { params: options }, rulesStates],
+    [CDR_MISCONFIGURATIONS_INDEX_PATTERN, 'csp_findings', { params: options }, rulesStates],
     async ({ pageParam }) => {
       const {
         rawResponse: { hits, aggregations },

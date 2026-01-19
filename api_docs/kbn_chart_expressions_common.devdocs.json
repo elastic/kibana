@@ -32,6 +32,8 @@
           " | undefined) => string | undefined"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+            "lineNumber": 12,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -68,6 +72,8 @@
           " | undefined) => string | undefined"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -83,9 +89,766 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+            "lineNumber": 50,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.findAccessor",
+        "type": "Function",
+        "tags": [],
+        "label": "findAccessor",
+        "description": [],
+        "signature": [
+          "(accessor: string, columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessor.$1",
+            "type": "string",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessor.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.findAccessor",
+        "type": "Function",
+        "tags": [],
+        "label": "findAccessor",
+        "description": [],
+        "signature": [
+          "(accessor: number, columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessor.$1",
+            "type": "number",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessor.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.findAccessor",
+        "type": "Function",
+        "tags": [],
+        "label": "findAccessor",
+        "description": [],
+        "signature": [
+          "(accessor: string | number, columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessor.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.findAccessor",
+        "type": "Function",
+        "tags": [],
+        "label": "findAccessor",
+        "description": [],
+        "signature": [
+          "(accessor: string | number, columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessor.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.findAccessorOrFail",
+        "type": "Function",
+        "tags": [],
+        "label": "findAccessorOrFail",
+        "description": [],
+        "signature": [
+          "(accessor: string, columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          }
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessorOrFail.$1",
+            "type": "string",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 43,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessorOrFail.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 43,
+            "columnNumber": 54,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.findAccessorOrFail",
+        "type": "Function",
+        "tags": [],
+        "label": "findAccessorOrFail",
+        "description": [],
+        "signature": [
+          "(accessor: number, columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          }
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessorOrFail.$1",
+            "type": "number",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessorOrFail.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.findAccessorOrFail",
+        "type": "Function",
+        "tags": [],
+        "label": "findAccessorOrFail",
+        "description": [],
+        "signature": [
+          "(accessor: string | number, columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          }
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessorOrFail.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessorOrFail.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.findAccessorOrFail",
+        "type": "Function",
+        "tags": [],
+        "label": "findAccessorOrFail",
+        "description": [],
+        "signature": [
+          "(accessor: string | number, columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          }
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessorOrFail.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.findAccessorOrFail.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getAccessor",
+        "type": "Function",
+        "tags": [],
+        "label": "getAccessor",
+        "description": [],
+        "signature": [
+          "(dimension: string | ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.ExpressionValueVisDimension",
+            "text": "ExpressionValueVisDimension"
+          },
+          ") => string | number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          }
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getAccessor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dimension",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              }
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 98,
+            "columnNumber": 29,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getAccessorByDimension",
+        "type": "Function",
+        "tags": [],
+        "label": "getAccessorByDimension",
+        "description": [],
+        "signature": [
+          "(dimension: string | ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.ExpressionValueVisDimension",
+            "text": "ExpressionValueVisDimension"
+          },
+          ", columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => string"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 71,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getAccessorByDimension.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dimension",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              }
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getAccessorByDimension.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -98,7 +861,7 @@
         "tags": [],
         "label": "getColorCategories",
         "description": [
-          "\nGet the stringified version of all the categories that needs to be colored in the chart.\nMultifield keys will return as array of string and simple fields (numeric, string) will be returned as a plain unformatted string."
+          "\nReturns all serialized categories of the dataset for color matching.\nAll non-serializable fields will be as a plain unformatted string.\n\nNote: This does **NOT** support transposed columns"
         ],
         "signature": [
           "(rows: ",
@@ -109,9 +872,11 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[], accessor: string | undefined, isTransposed: boolean | undefined, exclude: any[] | undefined) => (string | string[])[]"
+          "[], accessor: string | undefined, exclude: unknown[] | undefined, legacyMode: boolean) => unknown[]"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -133,6 +898,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -148,6 +915,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -155,14 +924,16 @@
           {
             "parentPluginId": "@kbn/chart-expressions-common",
             "id": "def-common.getColorCategories.$3",
-            "type": "CompoundType",
+            "type": "Array",
             "tags": [],
-            "label": "isTransposed",
+            "label": "exclude",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "unknown[] | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -170,14 +941,344 @@
           {
             "parentPluginId": "@kbn/chart-expressions-common",
             "id": "def-common.getColorCategories.$4",
+            "type": "boolean",
+            "tags": [],
+            "label": "legacyMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getColumnByAccessor",
+        "type": "Function",
+        "tags": [],
+        "label": "getColumnByAccessor",
+        "description": [],
+        "signature": [
+          "(accessor: string | ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.ExpressionValueVisDimension",
+            "text": "ExpressionValueVisDimension"
+          },
+          ", columns?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 112,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColumnByAccessor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              }
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColumnByAccessor.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getFormatByAccessor",
+        "type": "Function",
+        "tags": [],
+        "label": "getFormatByAccessor",
+        "description": [],
+        "signature": [
+          "(dimension: string | ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.ExpressionValueVisDimension",
+            "text": "ExpressionValueVisDimension"
+          },
+          ", columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[], defaultColumnFormat: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined) => ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getFormatByAccessor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dimension",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              }
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getFormatByAccessor.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getFormatByAccessor.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultColumnFormat",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "> | undefined"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getLegacyColorCategories",
+        "type": "Function",
+        "tags": [],
+        "label": "getLegacyColorCategories",
+        "description": [
+          "\nReturns all *stringified* categories of the dataset for color matching.\n\nShould **only** be used with legacy `palettes`"
+        ],
+        "signature": [
+          "(rows: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableRow",
+            "text": "DatatableRow"
+          },
+          "[] | undefined, accessor: string | undefined, exclude: unknown[] | undefined) => string[]"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getLegacyColorCategories.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rows",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableRow",
+                "text": "DatatableRow"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getLegacyColorCategories.$2",
+            "type": "string",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getLegacyColorCategories.$3",
             "type": "Array",
             "tags": [],
             "label": "exclude",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "unknown[] | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -199,6 +1300,8 @@
           "(overrides: O | undefined, componentName: K) => { [k: string]: unknown; }"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -215,6 +1318,8 @@
               "O | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -232,6 +1337,8 @@
               "K"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+            "lineNumber": 76,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -261,6 +1368,8 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -281,6 +1390,8 @@
               }
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -302,6 +1413,8 @@
           " | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -317,9 +1430,149 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+            "lineNumber": 38,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.isVisDimension",
+        "type": "Function",
+        "tags": [],
+        "label": "isVisDimension",
+        "description": [],
+        "signature": [
+          "(accessor: string | ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.ExpressionValueVisDimension",
+            "text": "ExpressionValueVisDimension"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.isVisDimension.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.validateAccessor",
+        "type": "Function",
+        "tags": [],
+        "label": "validateAccessor",
+        "description": [],
+        "signature": [
+          "(accessor: string | ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.ExpressionValueVisDimension",
+            "text": "ExpressionValueVisDimension"
+          },
+          " | undefined, columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => void"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.validateAccessor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.validateAccessor.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -352,6 +1605,8 @@
           }
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -366,6 +1621,8 @@
               "\"chartSize\""
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -386,6 +1643,8 @@
               }
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -400,6 +1659,8 @@
         "label": "ChartSizeSpec",
         "description": [],
         "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -414,6 +1675,8 @@
               "ChartSizeDimensions | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -428,6 +1691,8 @@
               "ChartSizeDimensions | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -442,6 +1707,163 @@
               "{ x: number; y: number; } | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.DateHistogramParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateHistogramParams",
+        "description": [],
+        "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.DateHistogramParams.date",
+            "type": "boolean",
+            "tags": [],
+            "label": "date",
+            "description": [],
+            "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.DateHistogramParams.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.DateHistogramParams.intervalESValue",
+            "type": "number",
+            "tags": [],
+            "label": "intervalESValue",
+            "description": [],
+            "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.DateHistogramParams.intervalESUnit",
+            "type": "string",
+            "tags": [],
+            "label": "intervalESUnit",
+            "description": [],
+            "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.DateHistogramParams.format",
+            "type": "string",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.DateHistogramParams.bounds",
+            "type": "Object",
+            "tags": [],
+            "label": "bounds",
+            "description": [],
+            "signature": [
+              "{ min: string | number; max: string | number; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.FakeParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "FakeParams",
+        "description": [],
+        "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.FakeParams.defaultValue",
+            "type": "string",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.HistogramParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "HistogramParams",
+        "description": [],
+        "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.HistogramParams.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -449,8 +1871,151 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.LegendLayout",
+        "type": "Enum",
+        "tags": [],
+        "label": "LegendLayout",
+        "description": [],
+        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.LegendSize",
+        "type": "Enum",
+        "tags": [],
+        "label": "LegendSize",
+        "description": [],
+        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.DEFAULT_LEGEND_SIZE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_LEGEND_SIZE",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.LegendSize",
+            "text": "LegendSize"
+          },
+          ".MEDIUM"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.ExpressionValueVisDimension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionValueVisDimension",
+        "description": [],
+        "signature": [
+          "{ type: \"vis_dimension\"; } & { accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: { id?: string | undefined; params?: Record<string, any> | undefined; }; }"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/expression_value_dimension.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.ExpressionValueXYDimension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionValueXYDimension",
+        "description": [],
+        "signature": [
+          "{ type: \"xy_dimension\"; } & { label: string; aggType: string; params: {} | ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.DateHistogramParams",
+            "text": "DateHistogramParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.HistogramParams",
+            "text": "HistogramParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.FakeParams",
+            "text": "FakeParams"
+          },
+          "; accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/chart-expressions-common",
         "id": "def-common.MakeOverridesSerializable",
@@ -470,6 +2035,8 @@
           "<T[KeyType]> : NonNullable<T[KeyType]>; }"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -485,11 +2052,50 @@
           "{ [KeyType in keyof T]: T[KeyType]; }"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.XYLegendValue",
+        "type": "Type",
+        "tags": [],
+        "label": "XYLegendValue",
+        "description": [
+          "\nThis is a shared type between XY Expression and Annotation plugins.\nWe've put it here to avoid a circular dependency between the two plugins."
+        ],
+        "signature": [
+          "\"count\" | \"min\" | \"max\" | \"median\" | \"stdDeviation\" | \"total\" | \"range\" | \"currentAndLastValue\" | \"lastValue\" | \"lastNonNullValue\" | \"average\" | \"firstValue\" | \"firstNonNullValue\" | \"distinctCount\" | \"variance\" | \"difference\" | \"differencePercent\""
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.LegendSizeToPixels",
+        "type": "Object",
+        "tags": [],
+        "label": "LegendSizeToPixels",
+        "description": [],
+        "signature": [
+          "{ readonly auto: undefined; readonly small: 80; readonly medium: 130; readonly large: 180; readonly xlarge: 230; }"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

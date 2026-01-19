@@ -56,7 +56,7 @@ import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
-import { SelectSeverity } from '../components/controls/select_severity/select_severity';
+import { SelectSeverity } from '../components/controls/select_severity';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesExplorerServiceFactory } from '../util/time_series_explorer_service';
 import { mlJobServiceFactory } from '../services/job_service';
@@ -82,7 +82,7 @@ import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
-import { ExplorerNoJobsSelected } from '../explorer/components';
+import { AnomalyDetectionNoJobsSelected } from '../components/anomaly_detection_no_jobs_selected';
 import { getDataViewsAndIndicesWithGeoFields } from '../explorer/explorer_utils';
 import { indexServiceFactory } from '../util/index_service';
 import { TimeSeriesExplorerControls } from './components/timeseriesexplorer_controls';
@@ -111,7 +111,7 @@ export class TimeSeriesExplorer extends React.Component {
     selectedEntities: PropTypes.object,
     selectedForecastId: PropTypes.string,
     tableInterval: PropTypes.string,
-    tableSeverity: PropTypes.number,
+    tableSeverity: PropTypes.object,
     zoom: PropTypes.object,
     handleJobSelectionChange: PropTypes.func,
   };
@@ -337,7 +337,7 @@ export class TimeSeriesExplorer extends React.Component {
         this.getCriteriaFields(selectedDetectorIndex, entityControls),
         [],
         tableInterval,
-        tableSeverity,
+        tableSeverity.val,
         earliestMs,
         latestMs,
         dateFormatTz,
@@ -443,6 +443,7 @@ export class TimeSeriesExplorer extends React.Component {
               contextForecastData: undefined,
               focusChartData: undefined,
               focusForecastData: undefined,
+              showForecastCheckbox: false,
               modelPlotEnabled:
                 isModelPlotChartableForDetector(currentSelectedJob, selectedDetectorIndex) &&
                 isModelPlotEnabled(currentSelectedJob, selectedDetectorIndex, entityControls),
@@ -849,6 +850,9 @@ export class TimeSeriesExplorer extends React.Component {
             showModelBoundsCheckbox: modelPlotEnabled && refreshFocusData.focusChartData.length > 0,
             zoomFromFocusLoaded: selection.from,
             zoomToFocusLoaded: selection.to,
+            showForecastCheckbox: Boolean(
+              this.props.selectedForecastId && refreshFocusData.showForecastCheckbox
+            ),
             ...refreshFocusData,
             ...tableData,
           });
@@ -1013,7 +1017,7 @@ export class TimeSeriesExplorer extends React.Component {
           dateFormatTz={dateFormatTz}
           resizeRef={this.resizeRef}
         >
-          <ExplorerNoJobsSelected />
+          <AnomalyDetectionNoJobsSelected />
         </TimeSeriesExplorerPage>
       );
     }
@@ -1051,6 +1055,7 @@ export class TimeSeriesExplorer extends React.Component {
         {fieldNamesWithEmptyValues.length > 0 && (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
@@ -1062,7 +1067,7 @@ export class TimeSeriesExplorer extends React.Component {
                   }}
                 />
               }
-              iconType="help"
+              iconType="question"
               size="s"
             />
             <EuiSpacer size="m" />
@@ -1231,6 +1236,7 @@ export class TimeSeriesExplorer extends React.Component {
                   </EuiTitle>
                   <EuiPanel>
                     <EuiCallOut
+                      announceOnMount
                       title={i18n.translate(
                         'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
                         {
@@ -1311,20 +1317,23 @@ export class TimeSeriesExplorer extends React.Component {
               <EuiSpacer size="m" />
             </div>
           )}
-        {arePartitioningFieldsProvided && jobs.length > 0 && hasResults === true && (
-          <AnomaliesTable
-            bounds={bounds}
-            tableData={tableData}
-            filter={this.tableFilter}
-            sourceIndicesWithGeoFields={this.state.sourceIndicesWithGeoFields}
-            selectedJobs={[
-              {
-                id: selectedJob.job_id,
-                modelPlotEnabled,
-              },
-            ]}
-          />
-        )}
+        {arePartitioningFieldsProvided &&
+          jobs.length > 0 &&
+          hasResults === true &&
+          tableData?.anomalies && (
+            <AnomaliesTable
+              bounds={bounds}
+              tableData={tableData}
+              filter={this.tableFilter}
+              sourceIndicesWithGeoFields={this.state.sourceIndicesWithGeoFields}
+              selectedJobs={[
+                {
+                  id: selectedJob.job_id,
+                  modelPlotEnabled,
+                },
+              ]}
+            />
+          )}
       </TimeSeriesExplorerPage>
     );
   }

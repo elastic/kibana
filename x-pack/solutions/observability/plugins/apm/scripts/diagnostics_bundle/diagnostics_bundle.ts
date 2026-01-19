@@ -7,11 +7,14 @@
 
 /* eslint-disable no-console */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import fs from 'fs/promises';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type {
+  APMIndices,
+  APIReturnType as SourcesAPIReturnType,
+} from '@kbn/apm-sources-access-plugin/server';
 import type { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import { getDiagnosticsBundle } from '../../server/routes/diagnostics/get_diagnostics_bundle';
 
@@ -47,10 +50,13 @@ export async function initDiagnosticsBundle({
     ...(cloudId ? { cloud: { id: cloudId } } : {}),
     auth,
     headers: { ...apiKeyHeader },
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 
   const kibanaClientOpts = {
     baseURL: kbHost ?? parsedCloudId.kibanaHost,
+    allowAbsoluteUrls: false,
     auth,
     headers: {
       'kbn-xsrf': 'true',
@@ -84,23 +90,15 @@ async function saveReportToFile(combinedReport: DiagnosticsBundle) {
   console.log(`Diagnostics report written to "${filename}"`);
 }
 
-async function getApmIndices(kbnClientOpts: AxiosRequestConfig) {
-  interface Response {
-    apmIndexSettings: Array<{
-      configurationName: string;
-      defaultValue: string;
-      savedValue?: string;
-    }>;
-  }
+async function getApmIndices(kbnClientOpts: AxiosRequestConfig): Promise<APMIndices> {
+  type Response = SourcesAPIReturnType<'GET /internal/apm-sources/settings/apm-indices'>;
 
-  const res = await axios.get<Response>('/internal/apm/settings/apm-index-settings', kbnClientOpts);
+  const res = await axios.get<Response>(
+    '/internal/apm-sources/settings/apm-indices',
+    kbnClientOpts
+  );
 
-  return Object.fromEntries(
-    res.data.apmIndexSettings.map(({ configurationName, defaultValue, savedValue }) => [
-      configurationName,
-      savedValue ?? defaultValue,
-    ])
-  ) as APMIndices;
+  return res.data;
 }
 
 async function getFleetPackageInfo(kbnClientOpts: AxiosRequestConfig) {

@@ -10,15 +10,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiText,
-  useEuiTheme,
-  useEuiFontSize,
   EuiSkeletonText,
+  EuiText,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
@@ -29,7 +32,7 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
@@ -38,27 +41,30 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import {
-  USER_DOMAIN,
   LAST_SEEN,
+  USER_DOMAIN,
   USER_RISK_LEVEL,
 } from '../../../../overview/components/user_overview/translations';
 import {
-  ENTITIES_USER_OVERVIEW_TEST_ID,
+  ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
   ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID,
-  ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
   ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
-  ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
+  ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
+  ENTITIES_USER_OVERVIEW_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const USER_ICON = 'user';
+const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
 
 export interface UserEntityOverviewProps {
   /**
@@ -81,7 +87,14 @@ export const USER_PREVIEW_BANNER = {
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
-  const { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns();
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const timerange = useMemo(
     () => ({
@@ -110,6 +123,30 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     filterQuery,
     riskEntity: EntityType.user,
     timerange,
+  });
+  const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+  const isRiskScoreExist = !!userRiskData?.user.risk;
+
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    EntityIdentifierFields.userName,
+    userName
+  );
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    field: EntityIdentifierFields.userName,
+    value: userName,
+    to,
+    from,
+    queryId: USER_ENTITY_OVERVIEW_ID,
+  });
+
+  const openDetailsPanel = useNavigateToUserDetails({
+    userName,
+    scopeId,
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasNonClosedAlerts,
+    isPreviewMode: true, // setting to true to always open a new user flyout
+    contextID: 'UserEntityOverview',
   });
 
   const userDomainValue = useMemo(
@@ -152,10 +189,8 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
-  const [userRiskLevel] = useMemo(() => {
-    const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-
-    return [
+  const [userRiskLevel] = useMemo(
+    () => [
       {
         title: (
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
@@ -175,8 +210,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
           </>
         ),
       },
-    ];
-  }, [userRisk]);
+    ],
+    [userRiskData]
+  );
 
   return (
     <EuiFlexGroup
@@ -245,11 +281,13 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       <AlertCountInsight
         fieldName={'user.name'}
         name={userName}
+        openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
         fieldName={'user.name'}
         name={userName}
+        openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
         telemetryKey={MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW}
       />

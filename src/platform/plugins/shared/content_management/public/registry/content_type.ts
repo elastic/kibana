@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentTypeDefinition } from './content_type_definition';
+import type { ContentTypeDefinition } from './content_type_definition';
 import type { CrudClient } from '../crud_client';
 
 export class ContentType {
@@ -26,7 +26,7 @@ export class ContentType {
   }
 
   public get icon(): string {
-    return this.definition.icon ?? 'questionInCircle';
+    return this.definition.icon ?? 'question';
   }
 
   public get crud(): CrudClient | undefined {

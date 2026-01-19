@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { ApiScope, PluginOrPackage } from '../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ApiScope, PluginOrPackage } from '../types';
 
 export interface BuildApiDecOpts {
   plugins: PluginOrPackage[];

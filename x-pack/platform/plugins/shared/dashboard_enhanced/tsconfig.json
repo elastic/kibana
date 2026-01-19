@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -21,7 +21,8 @@
     "@kbn/presentation-util-plugin",
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
-    "@kbn/react-kibana-mount"
+    "@kbn/deeplinks-analytics",
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }

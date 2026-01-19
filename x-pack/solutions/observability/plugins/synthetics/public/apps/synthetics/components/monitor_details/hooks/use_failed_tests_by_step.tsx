@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { useSelectedLocation } from './use_selected_location';
 import { createEsQuery } from '../../../../../../common/utils/es_search';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
@@ -24,50 +24,48 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
 
   const params = createEsQuery({
     index: SYNTHETICS_INDEX_PATTERN,
-    body: {
-      size: 0,
-      track_total_hits: true,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  lte: to,
-                  gte: from,
-                },
+    size: 0,
+    track_total_hits: true,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                lte: to,
+                gte: from,
               },
             },
-            STEP_END_FILTER,
-            {
-              term: {
-                'synthetics.step.status': 'failed',
-              },
-            },
-            {
-              term: {
-                'observer.geo.name': selectedLocation?.label,
-              },
-            },
-            {
-              term: {
-                config_id: monitorId,
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        steps: {
-          terms: {
-            field: 'synthetics.step.name.keyword',
-            size: 1000,
           },
-          aggs: {
-            doc: {
-              top_hits: {
-                size: 1,
-              },
+          STEP_END_FILTER,
+          {
+            term: {
+              'synthetics.step.status': 'failed',
+            },
+          },
+          {
+            term: {
+              'observer.geo.name': selectedLocation?.label,
+            },
+          },
+          {
+            term: {
+              config_id: monitorId,
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      steps: {
+        terms: {
+          field: 'synthetics.step.name.keyword',
+          size: 1000,
+        },
+        aggs: {
+          doc: {
+            top_hits: {
+              size: 1,
             },
           },
         },
@@ -93,6 +91,7 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
         index,
         count,
         name: key,
+        // @ts-expect-error upgrade typescript v5.4.5
         percent: (count / total) * 100,
       };
     });

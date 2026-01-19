@@ -6,10 +6,10 @@
  */
 
 import { get } from 'lodash';
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { parseExpression } from '@kbn/expressions-plugin/common';
 import { collectFns } from './collector_helpers';
-import {
+import type {
   TelemetryCollector,
   TelemetryCustomElement,
   TelemetryCustomElementDocument,
@@ -150,7 +150,7 @@ const customElementCollector: TelemetryCollector = async function customElementC
     index,
     ignore_unavailable: true,
     filter_path: [`hits.hits._source.${CUSTOM_ELEMENT_TYPE}.content`],
-    body: { query: { bool: { filter: { term: { type: CUSTOM_ELEMENT_TYPE } } } } },
+    query: { bool: { filter: { term: { type: CUSTOM_ELEMENT_TYPE } } } },
   };
 
   const esResponse = await esClient.search<CustomElementSearch>(customElementParams);

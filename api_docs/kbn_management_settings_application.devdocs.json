@@ -11,7 +11,7 @@
         "label": "KibanaSettingsApplication",
         "description": [],
         "signature": [
-          "({ docLinks, i18n, notifications, settings, userProfile, theme, history, sectionRegistry, application, chrome, }: ",
+          "({ docLinks, i18n, notifications, settings, userProfile, theme, history, sectionRegistry, application, chrome, spaces, }: ",
           {
             "pluginId": "@kbn/management-settings-application",
             "scope": "public",
@@ -21,7 +21,9 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/index.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/index.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +32,7 @@
             "id": "def-public.KibanaSettingsApplication.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  docLinks,\n  i18n,\n  notifications,\n  settings,\n  userProfile,\n  theme,\n  history,\n  sectionRegistry,\n  application,\n  chrome,\n}",
+            "label": "{\n  docLinks,\n  i18n,\n  notifications,\n  settings,\n  userProfile,\n  theme,\n  history,\n  sectionRegistry,\n  application,\n  chrome,\n  spaces,\n}",
             "description": [],
             "signature": [
               {
@@ -41,7 +43,9 @@
                 "text": "SettingsApplicationKibanaDependencies"
               }
             ],
-            "path": "src/platform/packages/private/kbn-management/settings/application/index.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/application/index.tsx",
+            "lineNumber": 23,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +66,9 @@
         "signature": [
           "() => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/application.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/application.tsx",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -89,7 +95,9 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+        "lineNumber": 135,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -111,7 +119,9 @@
               },
               ">"
             ],
-            "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+            "lineNumber": 137,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -140,7 +150,9 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+        "lineNumber": 82,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -162,7 +174,9 @@
               },
               ">"
             ],
-            "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+            "lineNumber": 82,
+            "columnNumber": 97,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -201,7 +215,9 @@
             "text": "FieldInputKibanaDependencies"
           }
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -234,7 +250,9 @@
           " & ",
           "Services"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

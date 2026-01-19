@@ -8,18 +8,19 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import {
+import type {
   InspectorSession,
-  RequestAdapter,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
-import { DiscoverStateContainer } from '../state_management/discover_state';
+import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
-
-export interface InspectorAdapters {
-  requests: RequestAdapter;
-  lensRequests?: RequestAdapter;
-}
+import {
+  internalStateActions,
+  useInternalStateSelector,
+  useCurrentTabAction,
+  useInternalStateDispatch,
+} from '../state_management/redux';
+import { useActiveContexts } from '../../../context_awareness/hooks';
 
 export function useInspector({
   inspector,
@@ -28,11 +29,23 @@ export function useInspector({
   inspector: InspectorPublicPluginStart;
   stateContainer: DiscoverStateContainer;
 }) {
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
+
+  const dispatch = useInternalStateDispatch();
+  const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
+
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
+
+  const getContextsAdapter = useActiveContexts({
+    dataDocuments$: stateContainer.dataState.data$.documents$,
+  });
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    stateContainer.internalState.transitions.setExpandedDoc(undefined);
+    dispatch(setExpandedDoc({ expandedDoc: undefined }));
+
     const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 
     const requestAdapters = inspectorAdapters.lensRequests
@@ -40,12 +53,27 @@ export function useInspector({
       : [inspectorAdapters.requests];
 
     const session = inspector.open(
-      { requests: new AggregateRequestAdapter(requestAdapters) },
-      { title: stateContainer.savedSearchState.getTitle() }
+      {
+        requests: new AggregateRequestAdapter(requestAdapters),
+        contexts: getContextsAdapter({
+          onOpenDocDetails: (record) => {
+            session?.close();
+            dispatch(setExpandedDoc({ expandedDoc: record }));
+          },
+        }),
+      },
+      { title: persistedDiscoverSession?.title }
     );
 
     setInspectorSession(session);
-  }, [stateContainer, inspector]);
+  }, [
+    dispatch,
+    setExpandedDoc,
+    stateContainer.dataState.inspectorAdapters,
+    inspector,
+    getContextsAdapter,
+    persistedDiscoverSession?.title,
+  ]);
 
   useEffect(() => {
     return () => {

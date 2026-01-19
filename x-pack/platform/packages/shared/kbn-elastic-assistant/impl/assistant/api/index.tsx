@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { API_VERSIONS, ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
+import type {
+  ApiConfig,
+  Replacements,
+  ScreenContext,
+  MessageMetadata,
+} from '@kbn/elastic-assistant-common';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
+import { i18n } from '@kbn/i18n';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
-import { TraceOptions } from '../types';
+import type { TraceOptions } from '../types';
 export * from './conversations';
 export * from './prompts';
 
@@ -24,6 +31,8 @@ export interface FetchConnectorExecuteAction {
   signal?: AbortSignal | undefined;
   size?: number;
   traceOptions?: TraceOptions;
+  toasts?: IToasts;
+  screenContext: ScreenContext;
 }
 
 export interface FetchConnectorExecuteResponse {
@@ -34,6 +43,7 @@ export interface FetchConnectorExecuteResponse {
     transactionId: string;
     traceId: string;
   };
+  metadata?: MessageMetadata;
 }
 
 export const fetchConnectorExecuteAction = async ({
@@ -46,9 +56,10 @@ export const fetchConnectorExecuteAction = async ({
   apiConfig,
   signal,
   size,
+  toasts,
   traceOptions,
+  screenContext,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
-  // TODO add streaming support for gemini with langchain on
   const isStream = assistantStreamingEnabled;
 
   const optionalRequestParams = getOptionalRequestParams({
@@ -57,7 +68,6 @@ export const fetchConnectorExecuteAction = async ({
   });
 
   const requestBody = {
-    model: apiConfig?.model,
     message,
     subAction: isStream ? 'invokeStream' : 'invokeAI',
     conversationId,
@@ -67,6 +77,7 @@ export const fetchConnectorExecuteAction = async ({
       traceOptions?.langSmithProject === '' ? undefined : traceOptions?.langSmithProject,
     langSmithApiKey:
       traceOptions?.langSmithApiKey === '' ? undefined : traceOptions?.langSmithApiKey,
+    screenContext,
     ...optionalRequestParams,
   };
 
@@ -110,6 +121,7 @@ export const fetchConnectorExecuteAction = async ({
         transaction_id: string;
         trace_id: string;
       };
+      metadata?: MessageMetadata;
     }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
       body: JSON.stringify(requestBody),
@@ -144,6 +156,7 @@ export const fetchConnectorExecuteAction = async ({
 
     return {
       response: response.data,
+      metadata: response.metadata,
       isError: false,
       isStream: false,
       traceData,
@@ -152,7 +165,32 @@ export const fetchConnectorExecuteAction = async ({
     const getReader = error?.response?.body?.getReader;
     const reader =
       isStream && typeof getReader === 'function' ? getReader.call(error.response.body) : null;
+    const defaultErrorMessage = i18n.translate('xpack.elasticAssistant.messageError.title', {
+      defaultMessage: 'An error occurred while sending the message',
+    });
 
+    if (error?.response.status === 403 && reader) {
+      // For streaming errors, we need to read the stream to get the actual error message
+      let errorMessage = error?.body?.message ?? error?.message;
+      if (reader) {
+        try {
+          const { value } = await reader.read();
+          if (value) {
+            const errorText = new TextDecoder().decode(value);
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorData.body || errorMessage;
+          }
+        } catch (streamError) {
+          errorMessage = defaultErrorMessage;
+        }
+      }
+      // if streaming and error is 403, show toast
+      const errorForToast = new Error(errorMessage);
+      errorForToast.name = error?.name || 'Error';
+      toasts?.addError(errorForToast, {
+        title: defaultErrorMessage,
+      });
+    }
     if (!reader) {
       return {
         response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,

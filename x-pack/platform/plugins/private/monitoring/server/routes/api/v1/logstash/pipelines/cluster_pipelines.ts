@@ -8,7 +8,7 @@
 import { getClusterStatus } from '../../../../../lib/logstash/get_cluster_status';
 import { handleError } from '../../../../../lib/errors';
 import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
-import { MonitoringCore, PipelineMetricKey } from '../../../../../types';
+import type { MonitoringCore, PipelineMetricKey } from '../../../../../types';
 import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import {
   postLogstashClusterPipelinesRequestParamsRT,
@@ -31,6 +31,12 @@ export function logstashClusterPipelinesRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipelines',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

@@ -35,6 +35,9 @@ export const MigrationFinalizationResult = z.object({
 
 export type FinalizeAlertsMigrationRequestBody = z.infer<typeof FinalizeAlertsMigrationRequestBody>;
 export const FinalizeAlertsMigrationRequestBody = z.object({
+  /**
+   * Array of `migration_id`s to finalize.
+   */
   migration_ids: z.array(z.string()).min(1),
 });
 export type FinalizeAlertsMigrationRequestBodyInput = z.input<

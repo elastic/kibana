@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { useQuery as _useQuery } from '@tanstack/react-query';
+import { useQuery as _useQuery } from '@kbn/react-query';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { allFleetHttpMocks } from '../../mocks';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { useFetchAgentByAgentPolicySummary } from './use_fetch_endpoint_policy_agent_summary';
+import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import { agentRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 
 const useQueryMock = _useQuery as jest.Mock;
 
-jest.mock('@tanstack/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,
@@ -59,8 +60,9 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
       query: { policyId: policy.policy_ids[0] },
       version: API_VERSIONS.public.v1,
     });
-    expect(data).toEqual({
-      total: 50,
+    const expectedData: GetAgentStatusResponse['results'] = {
+      active: 50,
+      all: 0,
       inactive: 5,
       online: 40,
       error: 0,
@@ -68,7 +70,9 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
       updating: 0,
       other: 0,
       events: 0,
-    });
+      unenrolled: 0,
+    };
+    expect(data).toEqual(expectedData);
   });
 
   it('should apply default values to api returned data', async () => {

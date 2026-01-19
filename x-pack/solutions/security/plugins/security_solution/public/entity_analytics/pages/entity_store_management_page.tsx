@@ -25,12 +25,14 @@ import {
   EuiTabs,
   EuiTab,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { i18n } from '@kbn/i18n';
 import { type StoreStatus } from '../../../common/api/entity_analytics';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
@@ -46,9 +48,10 @@ import {
 } from '../components/entity_store/hooks/use_entity_store';
 
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
-import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
+import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
-import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
+import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
+import { EntityStoreErrorCallout } from '../components/entity_store/components/entity_store_error_callout';
 
 enum TabId {
   Import = 'import',
@@ -62,7 +65,15 @@ const canDeleteEntityEngine = (status?: StoreStatus) =>
   !['not_installed', 'installing'].includes(status || '');
 const isEntityStoreInstalled = (status?: StoreStatus) => status && status !== 'not_installed';
 
+const entityStoreLabel = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title',
+  {
+    defaultMessage: 'Entity store',
+  }
+);
+
 export const EntityStoreManagementPage = () => {
+  const modalTitleId = useGeneratedHtmlId();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const {
@@ -73,7 +84,7 @@ export const EntityStoreManagementPage = () => {
   const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
   const [selectedTabId, setSelectedTabId] = useState(TabId.Import);
   const entityStoreStatus = useEntityStoreStatus({});
-  const entityTypes = useStoreEntityTypes();
+  const entityTypes = useEntityStoreTypes();
   const enableStoreMutation = useEnableEntityStoreMutation();
   const stopEntityEngineMutation = useStopEntityEngineMutation(entityTypes);
   const deleteEntityEngineMutation = useDeleteEntityEngineMutation({
@@ -122,37 +133,13 @@ export const EntityStoreManagementPage = () => {
 
   const callouts = (entityStoreStatus.data?.engines || [])
     .filter((engine) => engine.status === 'error')
-    .map((engine) => {
-      const err = engine.error as {
-        message: string;
-      };
-
-      return (
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.title"
-              defaultMessage={'An error occurred during entity store resource initialization'}
-            />
-          }
-          color="danger"
-          iconType="alert"
-        >
-          <p>{err?.message}</p>
-        </EuiCallOut>
-      );
-    });
+    .map((engine) => <EntityStoreErrorCallout engine={engine} />);
 
   return (
     <>
       <EuiPageHeader
         data-test-subj="entityStoreManagementPage"
-        pageTitle={
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title"
-            defaultMessage="Entity Store"
-          />
-        }
+        pageTitle={entityStoreLabel}
         alignItems="center"
         rightSideItems={
           !isEntityStoreFeatureFlagDisabled && privileges?.has_all_required
@@ -170,6 +157,7 @@ export const EntityStoreManagementPage = () => {
                       isClearModalVisible,
                       closeClearModal,
                       showClearModal,
+                      modalTitleId,
                     }}
                   />
                 ) : null,
@@ -181,14 +169,14 @@ export const EntityStoreManagementPage = () => {
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.subTitle"
-          defaultMessage="Store host and user entities observed in events."
+          defaultMessage="Store data for entities observed in events."
         />
       </EuiText>
       {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
       {!privileges || privileges.has_all_required ? null : (
         <>
           <EuiSpacer size="l" />
-          <MissingPrivilegesCallout privileges={privileges} />
+          <EntityStoreMissingPrivilegesCallout privileges={privileges} />
           <EuiSpacer size="l" />
         </>
       )}
@@ -235,6 +223,7 @@ export const EntityStoreManagementPage = () => {
           <EuiFlexGroup direction="column">
             {enableStoreMutation.isError && (
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.initErrorTitle"
@@ -249,6 +238,7 @@ export const EntityStoreManagementPage = () => {
             )}
             {deleteEntityEngineMutation.isError && (
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.deleteErrorTitle"
@@ -263,7 +253,7 @@ export const EntityStoreManagementPage = () => {
                 </p>
               </EuiCallOut>
             )}
-            {callouts}
+            {selectedTabId === TabId.Import && callouts}
             {selectedTabId === TabId.Import && <WhatIsAssetCriticalityPanel />}
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -286,7 +276,7 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
       />
       <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiIcon type="questionInCircle" size="xl" />
+        <EuiIcon type="question" size="xl" />
         <EuiTitle size="xxs">
           <h3>
             <FormattedMessage
@@ -340,7 +330,7 @@ const EntityStoreFeatureFlagNotAvailableCallout: React.FC = () => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <EuiText size="s">
           <FormattedMessage
@@ -381,12 +371,12 @@ const EnablementButton: React.FC<{
       )}
       <EntityStoreHealth currentEntityStoreStatus={status} />
       <EuiSwitch
-        showLabel={false}
-        label=""
+        label={entityStoreLabel}
         onChange={onSwitch}
         data-test-subj="entity-store-switch"
         checked={isEntityStoreEnabled(status)}
         disabled={isDisabled}
+        showLabel={false}
       />
     </EuiFlexGroup>
   );
@@ -402,7 +392,7 @@ const InsufficientAssetCriticalityPrivilegesCallout: React.FC = () => {
         />
       }
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
     >
       <EuiText size="s">
         <FormattedMessage
@@ -437,7 +427,7 @@ const AssetCriticalityIssueCallout: React.FC<{ errorMessage?: string | ReactNode
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <EuiText size="s">{msg}</EuiText>
       </EuiCallOut>
@@ -450,7 +440,14 @@ const ClearEntityDataButton: React.FC<{
   isClearModalVisible: boolean;
   closeClearModal: () => void;
   showClearModal: () => void;
-}> = ({ deleteEntityEngineMutation, isClearModalVisible, closeClearModal, showClearModal }) => {
+  modalTitleId: string;
+}> = ({
+  deleteEntityEngineMutation,
+  isClearModalVisible,
+  closeClearModal,
+  showClearModal,
+  modalTitleId,
+}) => {
   return (
     <>
       <EuiButtonEmpty
@@ -469,12 +466,14 @@ const ClearEntityDataButton: React.FC<{
       {isClearModalVisible && (
         <EuiConfirmModal
           isLoading={deleteEntityEngineMutation.isLoading}
+          aria-labelledby={modalTitleId}
           title={
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.clearEntitiesModal.title"
               defaultMessage="Clear Entity data?"
             />
           }
+          titleProps={{ id: modalTitleId }}
           onCancel={closeClearModal}
           onConfirm={() => {
             deleteEntityEngineMutation.mutate();

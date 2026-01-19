@@ -16,7 +16,6 @@ const useAddToTimeline = () => ({
 
 export const mockTimelines = {
   getLastUpdated: jest.fn(),
-  getLoadingPanel: jest.fn(),
   getFieldBrowser: jest.fn(),
   getUseAddToTimeline: () => useAddToTimeline,
 };

@@ -80,6 +80,7 @@ export const SearchBarWrapper: FC<SearchBarProps> = ({
         showDatePicker={false}
         showQueryInput
         query={resultQuery}
+        showSavedQueryControls={false}
         filters={filters ?? []}
         onQuerySubmit={onQuerySubmit}
         indexPatterns={[dataView]}

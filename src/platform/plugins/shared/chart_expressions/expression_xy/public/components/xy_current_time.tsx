@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
-import { DomainRange } from '@elastic/charts';
+import type { FC } from 'react';
+import React from 'react';
+import type { DomainRange } from '@elastic/charts';
 import { CurrentTime } from '@kbn/charts-plugin/public';
 
 interface XYCurrentTime {

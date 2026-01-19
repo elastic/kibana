@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SpecDefinitionsService } from '../../../services';
+import type { SpecDefinitionsService } from '../../../services';
 
-import { BOOLEAN } from './shared';
+import { BOOLEAN, ChunkingSettings } from './shared';
 
 export const mappings = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('put_mapping', {
@@ -47,24 +47,39 @@ export const mappings = (specService: SpecDefinitionsService) => {
         '*': {
           type: {
             __one_of: [
-              'text',
-              'keyword',
-              'float',
-              'half_float',
-              'scaled_float',
-              'double',
-              'byte',
-              'short',
-              'integer',
-              'long',
-              'date',
-              'boolean',
+              'alias',
               'binary',
-              'object',
-              'nested',
+              'boolean',
+              'completion',
+              'constant_keyword',
+              'date',
+              'date_nanos',
+              'dense_vector',
+              'flattened',
               'geo_point',
               'geo_shape',
-              'dense_vector',
+              'histogram',
+              'ip',
+              'join',
+              'keyword',
+              'match_only_text',
+              'nested',
+              'numeric',
+              'object',
+              'passthrough',
+              'percolator',
+              'point',
+              'range',
+              'rank_feature',
+              'rank_features',
+              'search_as_you_type',
+              'semantic_text',
+              'shape',
+              'sparse_vector',
+              'text',
+              'token_count',
+              'version',
+              'wildcard',
             ],
           },
 
@@ -94,17 +109,15 @@ export const mappings = (specService: SpecDefinitionsService) => {
               'freqs',
               'positions',
               'offsets',
-              // dense_vector type
+              // semantic_text type
               {
-                type: {
-                  __one_of: ['int8_hnsw', 'hnsw', 'int4_hnsw', 'flat', 'int8_flat', 'int4_flat'],
-                },
-                m: 16,
-                ef_construction: 100,
-                confidence_interval: 0,
+                dense_vector: DenseVectorIndexOptions,
               },
+              // dense_vector type
+              DenseVectorIndexOptions,
             ],
           },
+          chunking_settings: ChunkingSettings,
           analyzer: 'standard',
           search_analyzer: 'standard',
           include_in_all: {
@@ -273,4 +286,22 @@ export const mappings = (specService: SpecDefinitionsService) => {
       },
     },
   });
+};
+
+const DenseVectorIndexOptions = {
+  type: {
+    __one_of: [
+      'bbq_hnsw',
+      'bbq_flat',
+      'int8_hnsw',
+      'hnsw',
+      'int4_hnsw',
+      'flat',
+      'int8_flat',
+      'int4_flat',
+    ],
+  },
+  m: 16,
+  ef_construction: 100,
+  confidence_interval: 0,
 };

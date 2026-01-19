@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 
 import { checkLicense } from '../../lib/check_license';
@@ -36,6 +36,12 @@ export function registerPipelinesDeleteRoute(router: LogstashPluginRouter) {
   router.post(
     {
       path: '/api/logstash/pipelines/delete',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       options: {
         access: 'public',
         summary: `Delete managed Logstash pipelines`,

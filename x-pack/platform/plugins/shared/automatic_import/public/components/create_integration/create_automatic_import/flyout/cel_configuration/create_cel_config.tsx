@@ -18,10 +18,10 @@ import {
   EuiSpacer,
   EuiStepNumber,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CelInput } from '../../../../../../common';
-import { type CelAuthType } from '../../../../../../common';
+import { type CelAuthType, type CelInput } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import * as i18n from './translations';
 import { UploadSpecStep } from './steps/upload_spec_step';
@@ -120,12 +120,14 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
       setNeedsGeneration(updatedNeedsGeneration);
     }, []);
 
+    const flyoutTitleId = useGeneratedHtmlId();
+
     return (
-      <EuiFlyout onClose={() => setShowCelCreateFlyout(false)}>
+      <EuiFlyout onClose={() => setShowCelCreateFlyout(false)} aria-labelledby={flyoutTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiTitle size="m">
-              <h2>{i18n.OPEN_API_SPEC_TITLE}</h2>
+              <h2 id={flyoutTitleId}>{i18n.OPEN_API_SPEC_TITLE}</h2>
             </EuiTitle>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -138,6 +140,7 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
                 paddingSize="m"
                 forceState={isUploadStepExpanded ? 'open' : 'closed'}
                 onToggle={handleToggleStep}
+                data-test-subj="celGenStep1"
                 buttonContent={
                   <EuiFlexGroup alignItems="center" gutterSize="m">
                     <EuiStepNumber
@@ -174,6 +177,7 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
                 isDisabled={!isAnalyzeApiGenerationComplete}
                 forceState={isConfirmStepExpanded ? 'open' : 'closed'}
                 onToggle={handleToggleStep}
+                data-test-subj="celGenStep2"
                 buttonContent={
                   <EuiFlexGroup alignItems="center" gutterSize="m">
                     <EuiStepNumber

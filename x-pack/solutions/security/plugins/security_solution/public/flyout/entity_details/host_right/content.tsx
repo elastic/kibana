@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -25,13 +27,11 @@ interface HostPanelContentProps {
   riskScoreState: RiskScoreState<EntityType.host>;
   contextID: string;
   scopeId: string;
-  isDraggable: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   hostName: string;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
-  isPreviewMode?: boolean;
-  isLinkEnabled: boolean;
+  isPreviewMode: boolean;
 }
 
 export const HostPanelContent = ({
@@ -41,16 +41,21 @@ export const HostPanelContent = ({
   recalculatingScore,
   contextID,
   scopeId,
-  isDraggable,
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
-  isLinkEnabled,
 }: HostPanelContentProps) => {
   const observedFields = useObservedHostFields(observedHost);
 
+  const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
+    'entityDetailsHighlightsEnabled'
+  );
+
   return (
     <FlyoutBody>
+      {isEntityDetailsHighlightsAIEnabled && (
+        <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
+      )}
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
@@ -60,7 +65,6 @@ export const HostPanelContent = ({
             queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
-            isLinkEnabled={isLinkEnabled}
           />
           <EuiHorizontalRule />
         </>
@@ -74,13 +78,11 @@ export const HostPanelContent = ({
         field={EntityIdentifierFields.hostName}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
-        isLinkEnabled={isLinkEnabled}
       />
       <ObservedEntity
         observedData={observedHost}
         contextID={contextID}
         scopeId={scopeId}
-        isDraggable={isDraggable}
         observedFields={observedFields}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />

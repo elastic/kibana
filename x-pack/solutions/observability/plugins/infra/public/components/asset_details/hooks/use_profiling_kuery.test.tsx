@@ -14,10 +14,10 @@ import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_pr
 jest.mock('./use_asset_details_render_props');
 
 describe('useProfilingKuery', () => {
-  const asset = { name: 'test-host' };
+  const entity = { name: 'test-host' };
 
   beforeEach(() => {
-    (useAssetDetailsRenderPropsContext as jest.Mock).mockReturnValue({ asset });
+    (useAssetDetailsRenderPropsContext as jest.Mock).mockReturnValue({ entity });
   });
 
   afterEach(() => {

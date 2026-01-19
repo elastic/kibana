@@ -8,26 +8,26 @@
  */
 
 import apm from 'elastic-apm-node';
-import { Observable, fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
-import { Writable } from 'stream';
 
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import {
-  CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
-import {
+import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type {
   JobParamsPDFDeprecated,
-  PDF_JOB_TYPE,
   TaskPayloadPDF,
 } from '@kbn/reporting-export-types-pdf-common';
-import { ExportType, REPORTING_TRANSACTION_TYPE, decryptJobHeaders } from '@kbn/reporting-server';
+import { PDF_JOB_TYPE } from '@kbn/reporting-export-types-pdf-common';
+import type { RunTaskOpts } from '@kbn/reporting-server';
+import { ExportType, REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
 
 import { getCustomLogo } from './get_custom_logo';
 import { getFullUrls } from './get_full_urls';
@@ -70,26 +70,25 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
     };
   };
 
-  public runTask = async (
-    jobId: string,
-    job: TaskPayloadPDF,
-    taskInstanceFields: TaskInstanceFields,
-    cancellationToken: CancellationToken,
-    stream: Writable
-  ) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
+  public runTask = async ({
+    jobId,
+    payload: job,
+    request,
+    taskInstanceFields,
+    cancellationToken,
+    stream,
+  }: RunTaskOpts<TaskPayloadPDF>) => {
+    const logger = this.logger.get('execute-job');
     const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(this.config.encryptionKey, job.headers, logger)),
-      mergeMap(async (headers) => {
-        const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
-        const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
-        return getCustomLogo(uiSettingsClient, headers);
+      mergeMap(async () => {
+        const uiSettingsClient = await this.getUiSettingsClient(request);
+        return getCustomLogo(uiSettingsClient);
       }),
-      mergeMap(({ headers, logo }) => {
+      mergeMap((logo) => {
         const urls = getFullUrls(this.getServerInfo(), this.config, job);
 
         const { browserTimezone, layout, title } = job;
@@ -106,8 +105,8 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
             title,
             logo,
             urls,
+            request,
             browserTimezone,
-            headers,
             layout,
             taskInstanceFields,
             logger,
@@ -153,7 +152,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         warnings,
       })),
       catchError((err: any) => {
-        logger.error(err);
+        logger.debug(err, { tags: [jobId] });
         return throwError(err);
       })
     );

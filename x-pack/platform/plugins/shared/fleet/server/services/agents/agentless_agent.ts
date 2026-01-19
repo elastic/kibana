@@ -10,32 +10,56 @@ import https from 'https';
 import type { ElasticsearchClient, LogMeta, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
+import pRetry, { type FailedAttemptError } from 'p-retry';
+import { pick } from 'lodash';
 
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import apm from 'elastic-apm-node';
 
+import {
+  AgentlessAgentCreateOverProvisionedError,
+  AgentlessAgentCreateFleetUnreachableError,
+} from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
-import type { AgentPolicy } from '../../types';
-import type { AgentlessApiResponse } from '../../../common/types';
+import type { AgentPolicy, FullAgentPolicy } from '../../types';
+import type {
+  AgentlessApiDeploymentResponse,
+  AgentlessApiListDeploymentResponse,
+  FleetServerHost,
+} from '../../../common/types';
 import {
   AgentlessAgentConfigError,
   AgentlessAgentCreateError,
   AgentlessAgentDeleteError,
+  AgentlessAgentListError,
+  AgentlessAgentListNotFoundError,
+  AgentlessAgentUpgradeError,
 } from '../../errors';
 import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+  ECH_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
 } from '../../constants';
 
 import { appContextService } from '../app_context';
 
 import { listEnrollmentApiKeys } from '../api_keys';
-import { listFleetServerHosts } from '../fleet_server_host';
+import { fleetServerHostService } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
 import { prependAgentlessApiBasePathToEndpoint, isAgentlessEnabled } from '../utils/agentless';
+import {
+  AGENTLESS_API_ERROR_CODES,
+  MAXIMUM_RETRIES,
+  RETRYABLE_HTTP_STATUSES,
+  RETRYABLE_SERVER_CODES,
+} from '../../../common/constants/agentless';
+import { agentPolicyService } from '../agent_policy';
 
 interface AgentlessAgentErrorHandlingMessages {
   [key: string]: {
@@ -46,7 +70,41 @@ interface AgentlessAgentErrorHandlingMessages {
   };
 }
 
-class AgentlessAgentService {
+export interface AgentlessAgentService {
+  listAgentlessDeployments(opts?: {
+    perPage?: number;
+    nextPageToken?: string;
+  }): Promise<AgentlessApiListDeploymentResponse>;
+  createAgentlessAgent(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    agentlessAgentPolicy: AgentPolicy
+  ): Promise<AxiosResponse<AgentlessApiDeploymentResponse> | void>;
+  deleteAgentlessAgent(agentlessPolicyId: string): Promise<AxiosResponse | void>;
+}
+
+class AgentlessAgentServiceImpl implements AgentlessAgentService {
+  public getDefaultSettings() {
+    const cloudSetup = appContextService.getCloud();
+    const isCloud = cloudSetup?.isCloudEnabled;
+    const isServerless = cloudSetup?.isServerlessEnabled;
+    const outputId = isServerless
+      ? SERVERLESS_DEFAULT_OUTPUT_ID
+      : isCloud
+      ? ECH_AGENTLESS_OUTPUT_ID
+      : undefined;
+    const fleetServerId = isServerless
+      ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+      : isCloud
+      ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
+      : undefined;
+
+    return {
+      outputId,
+      fleetServerId,
+    };
+  }
+
   public async createAgentlessAgent(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
@@ -83,16 +141,20 @@ class AgentlessAgentService {
       );
     }
 
-    const policyId = agentlessAgentPolicy.id;
     const { fleetUrl, fleetToken } = await this.getFleetUrlAndTokenForAgentlessAgent(
       esClient,
-      policyId,
-      soClient
+      agentlessAgentPolicy
     );
 
     logger.debug(
       `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleet_token: [REDACTED]`
     );
+
+    if (agentlessAgentPolicy.agentless?.cloud_connectors?.enabled) {
+      logger.debug(
+        `[Agentless API] Creating agentless agent with ${agentlessAgentPolicy.agentless?.cloud_connectors?.target_csp} cloud connector enabled for agentless policy ${agentlessAgentPolicy.id}`
+      );
+    }
 
     logger.debug(
       `[Agentless API] Creating agentless agent with TLS cert: ${
@@ -101,17 +163,26 @@ class AgentlessAgentService {
       and TLS ca: ${agentlessConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
     );
     const tlsConfig = this.createTlsConfig(agentlessConfig);
-
     const labels = this.getAgentlessTags(agentlessAgentPolicy);
+    const secrets = this.getAgentlessSecrets();
+    const fullPolicy = await agentPolicyService.getFullAgentPolicy(
+      soClient,
+      agentlessAgentPolicy.id
+    );
+    const policyDetails = await this.getPolicyDetails(soClient, fullPolicy);
 
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       data: {
-        policy_id: policyId,
+        policy_id: agentlessAgentPolicy.id,
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
         resources: agentlessAgentPolicy.agentless?.resources,
+        cloud_connectors: agentlessAgentPolicy.agentless?.cloud_connectors,
         labels,
+        secrets,
+        policy_details: policyDetails,
+        agent_policy: fullPolicy,
       },
       method: 'POST',
       ...this.getHeaders(tlsConfig, traceId),
@@ -128,20 +199,33 @@ class AgentlessAgentService {
       `[Agentless API] Creating agentless agent with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await axios<AgentlessApiResponse>(requestConfig).catch(
-      (error: Error | AxiosError) => {
-        this.catchAgentlessApiError(
-          'create',
-          error,
-          logger,
-          agentlessAgentPolicy.id,
-          requestConfig,
-          requestConfigDebugStatus,
-          errorMetadata,
-          traceId
-        );
-      }
-    );
+    const response = await pRetry(() => axios<AgentlessApiDeploymentResponse>(requestConfig), {
+      retries: MAXIMUM_RETRIES,
+      minTimeout: 0,
+      maxTimeout: 100,
+      onFailedAttempt: (error: FailedAttemptError) => {
+        if (!this.isErrorRetryable(error as unknown as AxiosError)) {
+          throw error;
+        }
+        if (error.retriesLeft > 0) {
+          logger.warn(
+            `[Agentless API] Retrying creating agentless agent ${agentlessAgentPolicy.id}`,
+            { error }
+          );
+        }
+      },
+    }).catch((error: Error | AxiosError) => {
+      this.catchAgentlessApiError(
+        'create',
+        error,
+        logger,
+        agentlessAgentPolicy.id,
+        requestConfig,
+        requestConfigDebugStatus,
+        errorMetadata,
+        traceId
+      );
+    });
 
     logger.debug(`[Agentless API] Created an agentless agent ${response}`);
     return response;
@@ -205,6 +289,146 @@ class AgentlessAgentService {
     return response;
   }
 
+  public async upgradeAgentlessDeployment(policyId: string) {
+    const logger = appContextService.getLogger();
+    const traceId = apm.currentTransaction?.traceparent;
+    const agentlessConfig = appContextService.getConfig()?.agentless;
+    const kibanaVersion = appContextService.getKibanaVersion();
+    const tlsConfig = this.createTlsConfig(agentlessConfig);
+    const urlEndpoint = prependAgentlessApiBasePathToEndpoint(
+      agentlessConfig,
+      `/deployments/${policyId}`
+    ).split('/api')[1];
+    logger.info(
+      `[Agentless API] Call Agentless API endpoint ${urlEndpoint} to upgrade agentless deployment`
+    );
+    const requestConfig = {
+      url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, `/deployments/${policyId}`),
+      method: 'PUT',
+      data: {
+        stack_version: kibanaVersion,
+      },
+      ...this.getHeaders(tlsConfig, traceId),
+    };
+
+    const errorMetadata: LogMeta = {
+      trace: {
+        id: traceId,
+      },
+    };
+
+    const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
+
+    logger.info(
+      `[Agentless API] Start upgrading agentless deployment for agent policy ${requestConfigDebugStatus}`
+    );
+
+    if (!isAgentlessEnabled) {
+      logger.error(
+        '[Agentless API] Agentless API is not supported. Upgrading agentless agent is not supported in non-cloud'
+      );
+    }
+
+    if (!agentlessConfig) {
+      logger.error('[Agentless API] kibana.yml is currently missing Agentless API configuration');
+    }
+
+    logger.info(`[Agentless API] Upgrading agentless agent with TLS config with certificate`);
+
+    logger.info(
+      `[Agentless API] Upgrade agentless deployment with request config ${requestConfigDebugStatus}`
+    );
+
+    const response = await axios(requestConfig).catch(async (error: AxiosError) => {
+      await this.handleErrorsWithRetries(
+        error,
+        requestConfig,
+        'upgrade',
+        logger,
+        MAXIMUM_RETRIES,
+        policyId,
+        requestConfigDebugStatus,
+        errorMetadata,
+        traceId
+      );
+    });
+
+    return response;
+  }
+
+  public async listAgentlessDeployments(opts?: { perPage?: number; nextPageToken?: string }) {
+    const logger = appContextService.getLogger();
+
+    const traceId = apm.currentTransaction?.traceparent;
+    const agentlessConfig = appContextService.getConfig()?.agentless;
+    const tlsConfig = this.createTlsConfig(agentlessConfig);
+    const requestConfig: AxiosRequestConfig = {
+      url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
+      method: 'GET',
+      params: {
+        next_token: opts?.nextPageToken,
+        limit: opts?.perPage,
+      },
+      ...this.getHeaders(tlsConfig, traceId),
+    };
+
+    const errorMetadata: LogMeta = {
+      trace: {
+        id: traceId,
+      },
+    };
+
+    const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
+
+    logger.debug(`[Agentless API] Start listing agentless deployments`);
+
+    if (!isAgentlessEnabled) {
+      logger.error(
+        '[Agentless API] Agentless API is not supported. Listing agentless deployments is not supported in non-cloud or non-serverless environments'
+      );
+    }
+
+    if (!agentlessConfig) {
+      logger.error('[Agentless API] kibana.yml is currently missing Agentless API configuration');
+    }
+
+    logger.debug(`[Agentless API] Listing agentless deployments with TLS config with certificate`);
+
+    logger.debug(
+      `[Agentless API] Listing agentless deployments with request config ${requestConfigDebugStatus}`
+    );
+
+    const response = await axios(requestConfig).catch((error: AxiosError) => {
+      this.catchAgentlessApiError(
+        'list',
+        error,
+        logger,
+        undefined,
+        requestConfig,
+        requestConfigDebugStatus,
+        errorMetadata,
+        traceId
+      );
+    });
+
+    return response.data;
+  }
+
+  private getAgentlessSecrets() {
+    const deploymentSecrets = appContextService.getConfig()?.agentless?.deploymentSecrets;
+
+    if (!deploymentSecrets) return {};
+
+    return {
+      ...(deploymentSecrets?.fleetAppToken
+        ? { fleet_app_token: deploymentSecrets?.fleetAppToken }
+        : {}),
+      ...(deploymentSecrets?.elasticsearchAppToken
+        ? { elasticsearch_app_token: deploymentSecrets?.elasticsearchAppToken }
+        : {}),
+    };
+  }
+
   private getHeaders(tlsConfig: SslConfig, traceId: string | undefined) {
     return {
       headers: {
@@ -218,6 +442,15 @@ class AgentlessAgentService {
         key: tlsConfig.key,
         ca: tlsConfig.certificateAuthorities,
       }),
+    };
+  }
+
+  private async getPolicyDetails(
+    soClient: SavedObjectsClientContract,
+    fullPolicy: FullAgentPolicy | null
+  ) {
+    return {
+      output_name: Object.keys(fullPolicy?.outputs || {})?.[0], // Agentless policies only have one output
     };
   }
 
@@ -255,27 +488,30 @@ class AgentlessAgentService {
 
   private async getFleetUrlAndTokenForAgentlessAgent(
     esClient: ElasticsearchClient,
-    policyId: string,
-    soClient: SavedObjectsClientContract
+    policy: AgentPolicy
   ) {
     const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
       perPage: SO_SEARCH_LIMIT,
       showInactive: true,
-      kuery: `policy_id:"${policyId}"`,
+      kuery: `policy_id:"${policy.id}"`,
     });
 
-    const { items: fleetHosts } = await listFleetServerHosts(soClient);
-    // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
-    // https://github.com/elastic/security-team/issues/9695
-    const defaultFleetHost =
-      fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
-
-    if (!defaultFleetHost) {
-      throw new AgentlessAgentConfigError('missing default Fleet server host');
-    }
     if (!enrollmentApiKeys.length) {
       throw new AgentlessAgentConfigError('missing Fleet enrollment token');
     }
+
+    if (!policy.fleet_server_host_id) {
+      throw new AgentlessAgentConfigError('missing fleet_server_host_id');
+    }
+
+    let defaultFleetHost: FleetServerHost;
+
+    try {
+      defaultFleetHost = await fleetServerHostService.get(policy.fleet_server_host_id);
+    } catch (e) {
+      throw new AgentlessAgentConfigError('missing default Fleet server host');
+    }
+
     const fleetToken = enrollmentApiKeys[0].api_key;
     const fleetUrl = defaultFleetHost?.host_urls[0];
     return { fleetUrl, fleetToken };
@@ -285,7 +521,15 @@ class AgentlessAgentService {
     return JSON.stringify({
       ...requestConfig,
       data: {
-        ...requestConfig.data,
+        ...pick(
+          requestConfig.data,
+          'policy_id',
+          'fleet_url',
+          'labels',
+          'resources',
+          'cloud_connectors'
+        ),
+        agent_policy: '[REDACTED]',
         fleet_token: '[REDACTED]',
       },
       httpsAgent: {
@@ -301,21 +545,20 @@ class AgentlessAgentService {
   }
 
   private catchAgentlessApiError(
-    action: 'create' | 'delete',
+    action: 'create' | 'delete' | 'upgrade' | 'list',
     error: Error | AxiosError,
     logger: Logger,
-    agentlessPolicyId: string,
+    agentlessPolicyId: string | undefined,
     requestConfig: AxiosRequestConfig,
     requestConfigDebugStatus: string,
     errorMetadata: LogMeta,
     traceId?: string
-  ) {
+  ): never {
     const errorMetadataWithRequestConfig: LogMeta = {
       ...errorMetadata,
       http: {
         request: {
           id: traceId,
-          body: requestConfig.data,
         },
       },
     };
@@ -324,12 +567,23 @@ class AgentlessAgentService {
       `${axiosError.code}  ${this.convertCauseErrorsToString(axiosError)}`;
 
     if (!axios.isAxiosError(error)) {
+      let errorLogMessage;
+
+      if (action === 'create') {
+        errorLogMessage = `[Agentless API] Creating agentless failed with an error that is not an AxiosError for agentless policy`;
+      }
+      if (action === 'delete') {
+        errorLogMessage = `[Agentless API] Deleting agentless deployment failed with an error that is not an Axios error for agentless policy`;
+      }
+      if (action === 'upgrade') {
+        errorLogMessage = `[Agentless API] Upgrading agentless deployment failed with an error that is not an Axios error for agentless policy`;
+      }
+      if (action === 'list') {
+        errorLogMessage = `[Agentless API] Listing agentless deployments failed with an error that is not an Axios error for agentless policy`;
+      }
+
       logger.error(
-        `${
-          action === 'create'
-            ? `[Agentless API] Creating agentless failed with an error that is not an AxiosError for agentless policy`
-            : `[Agentless API] Deleting agentless deployment failed with an error that is not an Axios error for agentless policy`
-        } ${error} ${requestConfigDebugStatus}`,
+        `${errorLogMessage} ${error} ${requestConfigDebugStatus}`,
         errorMetadataWithRequestConfig
       );
 
@@ -340,32 +594,22 @@ class AgentlessAgentService {
       this.getErrorHandlingMessages(agentlessPolicyId);
 
     if (error.response) {
-      if (error.response.status in ERROR_HANDLING_MESSAGES) {
-        const handledResponseErrorMessage = ERROR_HANDLING_MESSAGES[error.response.status][action];
-        this.handleResponseError(
-          action,
-          error.response,
-          logger,
-          errorMetadataWithRequestConfig,
-          requestConfigDebugStatus,
-          handledResponseErrorMessage.log,
-          handledResponseErrorMessage.message,
-          traceId
-        );
-      } else {
-        const unhandledResponseErrorMessage = ERROR_HANDLING_MESSAGES.unhandled_response[action];
-        // The request was made and the server responded with a status code and error data
-        this.handleResponseError(
-          action,
-          error.response,
-          logger,
-          errorMetadataWithRequestConfig,
-          requestConfigDebugStatus,
-          unhandledResponseErrorMessage.log,
-          unhandledResponseErrorMessage.message,
-          traceId
-        );
-      }
+      // The request was made and the server responded with a status code and error data
+      const responseErrorMessage =
+        error.response.status in ERROR_HANDLING_MESSAGES
+          ? ERROR_HANDLING_MESSAGES[error.response.status][action]
+          : ERROR_HANDLING_MESSAGES.unhandled_response[action];
+
+      this.handleResponseError(
+        action,
+        error.response,
+        logger,
+        errorMetadataWithRequestConfig,
+        requestConfigDebugStatus,
+        responseErrorMessage.log,
+        responseErrorMessage.message,
+        traceId
+      );
     } else if (error.request) {
       // The request was made but no response was received
       const requestErrorMessage = ERROR_HANDLING_MESSAGES.request_error[action];
@@ -378,9 +622,9 @@ class AgentlessAgentService {
     } else {
       // Something happened in setting up the request that triggered an Error
       logger.error(
-        `[Agentless API] ${
-          action === 'create' ? 'Creating' : 'Deleting'
-        } the agentless agent failed ${errorLogCodeCause(error)} ${requestConfigDebugStatus}`,
+        `[Agentless API] ${action + 'ing'} the agentless agent failed ${errorLogCodeCause(
+          error
+        )} ${requestConfigDebugStatus}`,
         errorMetadataWithRequestConfig
       );
 
@@ -393,7 +637,7 @@ class AgentlessAgentService {
   }
 
   private handleResponseError(
-    action: 'create' | 'delete',
+    action: 'create' | 'delete' | 'upgrade' | 'list',
     response: AxiosResponse,
     logger: Logger,
     errorMetadataWithRequestConfig: LogMeta,
@@ -401,10 +645,10 @@ class AgentlessAgentService {
     logMessage: string,
     userMessage: string,
     traceId?: string
-  ) {
+  ): never {
     logger.error(
       `${logMessage} ${JSON.stringify(response.status)} ${JSON.stringify(
-        response.data
+        pick(response.data ?? {}, 'code', 'error')
       )}} ${requestConfigDebugStatus}`,
       {
         ...errorMetadataWithRequestConfig,
@@ -412,13 +656,18 @@ class AgentlessAgentService {
           ...errorMetadataWithRequestConfig.http,
           response: {
             status_code: response?.status,
-            body: response?.data,
           },
         },
       }
     );
 
-    throw this.getAgentlessAgentError(action, userMessage, traceId);
+    const responseData = {
+      code: response?.data?.code,
+      error: response?.data?.error,
+      statusCode: response?.status,
+    };
+
+    throw this.getAgentlessAgentError(action, userMessage, traceId, responseData);
   }
 
   private convertCauseErrorsToString = (error: AxiosError) => {
@@ -428,104 +677,303 @@ class AgentlessAgentService {
     return error.cause;
   };
 
-  private getAgentlessAgentError(action: string, userMessage: string, traceId: string | undefined) {
-    return action === 'create'
-      ? new AgentlessAgentCreateError(this.withRequestIdMessage(userMessage, traceId))
-      : new AgentlessAgentDeleteError(this.withRequestIdMessage(userMessage, traceId));
+  private getAgentlessAgentError(
+    action: string,
+    userMessage: string,
+    traceId: string | undefined,
+    responseData?: {
+      code?: string;
+      error?: string;
+      statusCode?: number;
+    }
+  ) {
+    if (action === 'create') {
+      if (responseData?.code === AGENTLESS_API_ERROR_CODES.OVER_PROVISIONED) {
+        const limitMatches = responseData?.error?.match(/limit: ([0-9]+)/);
+        const limit = limitMatches ? parseInt(limitMatches[1], 10) : undefined;
+
+        return new AgentlessAgentCreateOverProvisionedError(
+          this.withRequestIdMessage(userMessage, traceId),
+          limit
+        );
+      } else if (responseData?.code === AGENTLESS_API_ERROR_CODES.FLEET_UNREACHABLE) {
+        return new AgentlessAgentCreateFleetUnreachableError(
+          this.withRequestIdMessage(userMessage, traceId)
+        );
+      }
+
+      return new AgentlessAgentCreateError(this.withRequestIdMessage(userMessage, traceId));
+    }
+    if (action === 'delete') {
+      return new AgentlessAgentDeleteError(this.withRequestIdMessage(userMessage, traceId));
+    }
+    if (action === 'upgrade') {
+      return new AgentlessAgentUpgradeError(this.withRequestIdMessage(userMessage, traceId));
+    }
+    if (action === 'list') {
+      if (responseData?.statusCode === 404) {
+        return new AgentlessAgentListNotFoundError(this.withRequestIdMessage(userMessage, traceId));
+      }
+
+      return new AgentlessAgentListError(this.withRequestIdMessage(userMessage, traceId));
+    }
   }
 
-  private getErrorHandlingMessages(agentlessPolicyId: string): AgentlessAgentErrorHandlingMessages {
+  private getErrorHandlingMessages(
+    agentlessPolicyId?: string
+  ): AgentlessAgentErrorHandlingMessages {
     return {
       400: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 400, bad request for agentless policy.',
-          message: `the Agentless API could not create the agentless agent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `The Agentless API could not create the agentless agent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Agentless API] Deleting the agentless deployment failed with a status 400, bad request for agentless policy',
-          message: `the Agentless API could not create the agentless agent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Agentless API] Deleting the agentless deployment failed with a status 400, bad request for agentless policy.',
+          message: `The Agentless API could not delete the agentless deployment. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        upgrade: {
+          log: '[Agentless API] Upgrading the agentless agent failed with a status 400, bad request for agentless policy.',
+          message: `The Agentless API could not upgrade the agentless agent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        list: {
+          log: '[Agentless API] Listing agentless deployments failed with a status 400, bad request.',
+          message: `The Agentless API could not list the agentless deployments. Please try again or contact your administrator.`,
         },
       },
       401: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 401 unauthorized for agentless policy.',
-          message: `the Agentless API could not create the agentless agent because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `The Agentless API could not create the agentless agent because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Agentless API] Deleting the agentless deployment failed with a status 401 unauthorized for agentless policy.  Check the Kibana Agentless API tls configuration',
-          message: `the Agentless API could not delete the agentless deployment because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Agentless API] Deleting the agentless deployment failed with a status 401 unauthorized for agentless policy.',
+          message: `The Agentless API could not delete the agentless deployment because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        upgrade: {
+          log: '[Agentless API] Upgrading the agentless agent failed with a status 401 unauthorized for agentless policy.',
+          message: `The Agentless API could not upgrade the agentless agent because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        list: {
+          log: '[Agentless API] Listing agentless deployments failed with a status 401 unauthorized.',
+          message: `The Agentless API could not list the agentless deployments because an unauthorized request was sent. Please try again or contact your administrator.`,
         },
       },
       403: {
         create: {
-          log: '[Agentless API] Creating the agentless agent failed with a status 403 forbidden for agentless policy. Check the Kibana Agentless API configuration and endpoints.',
-          message: `the Agentless API could not create the agentless agent because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Agentless API] Creating the agentless agent failed with a status 403 forbidden for agentless policy.',
+          message: `The Agentless API could not create the agentless agent because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Agentless API] Deleting the agentless deployment failed with a status 403 forbidden for agentless policy. Check the Kibana Agentless API configuration and endpoints.',
-          message: `the Agentless API could not delete the agentless deployment because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Agentless API] Deleting the agentless deployment failed with a status 403 forbidden for agentless policy.',
+          message: `The Agentless API could not delete the agentless deployment because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        upgrade: {
+          log: '[Agentless API] Upgrading the agentless agent failed with a status 403 forbidden for agentless policy.',
+          message: `The Agentless API could not upgrade the agentless agent because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        list: {
+          log: '[Agentless API] Listing agentless deployments failed with a status 403 forbidden.',
+          message: `The Agentless API could not list the agentless deployments because a forbidden request was sent. Please try again or contact your administrator.`,
         },
       },
       404: {
-        // this is likely to happen when creating agentless agents, but covering it in case
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 404 not found.',
-          message: `the Agentless API could not create the agentless agent because it returned a 404 error not found. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `The Agentless API could not create the agentless agent because it returned a 404 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Agentless API] Deleting the agentless deployment failed with a status 404 not found',
-          message: `the Agentless API could not delete the agentless deployment ${agentlessPolicyId} because it could not be found.`,
+          log: '[Agentless API] Deleting the agentless deployment failed with a status 404 not found.',
+          message: `The Agentless API could not delete the agentless deployment because it could not be found. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        upgrade: {
+          log: '[Agentless API] Upgrading the agentless agent failed with a status 404 not found.',
+          message: `The Agentless API could not upgrade the agentless agent because it returned a 404 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        list: {
+          log: '[Agentless API] Listing agentless deployments failed with a status 404 not found.',
+          message: `The Agentless API could not list the agentless deployments because it could not be found. Please try again or contact your administrator.`,
         },
       },
       408: {
         create: {
-          log: '[Agentless API] Creating the agentless agent failed with a status 408, the request timed out',
-          message: `the Agentless API request timed out waiting for the agentless agent status to respond, please wait a few minutes for the agent to enroll with fleet. If agent fails to enroll with Fleet please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Agentless API] Creating the agentless agent failed with a status 408, the request timed out.',
+          message: `The Agentless API request timed out. Please wait a few minutes for the agent to enroll with Fleet. If the agent fails to enroll, delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Agentless API] Deleting the agentless deployment failed with a status 408, the request timed out',
-          message: `the Agentless API could not delete the agentless deployment because the request timed out, please wait a few minutes for the agentless agent deployment to be removed. If it continues to persist please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Agentless API] Deleting the agentless deployment failed with a status 408, the request timed out.',
+          message: `The Agentless API request timed out. Please wait a few minutes for the deployment to be removed. If it persists, delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        upgrade: {
+          log: '[Agentless API] Upgrading the agentless agent failed with a status 408, the request timed out.',
+          message: `The Agentless API request timed out during the upgrade process. Please try again later or contact your administrator.`,
+        },
+        list: {
+          log: '[Agentless API] Listing agentless deployments failed with a status 408 request timed out.',
+          message: `The Agentless API could not list the agentless deployments because the request timed out. Please try again or contact your administrator.`,
         },
       },
       429: {
         create: {
-          log: '[Agentless API] Creating the agentless agent failed with a status 429 for agentless policy, agentless agent limit has been reached for this deployment or project.',
+          log: '[Agentless API] Creating the agentless agent failed with a status 429, agentless agent limit reached.',
           message:
-            'you have reached the limit for agentless provisioning. Please remove some or switch to agent-based integration.',
+            'You have reached the limit for agentless provisioning. Please remove some or switch to agent-based integration.',
+        },
+        upgrade: {
+          log: '[Agentless API] Upgrading the agentless agent failed with a status 429, agentless agent limit reached.',
+          message:
+            'You have reached the limit for agentless provisioning. Please remove some or switch to agent-based integration.',
+        },
+        list: {
+          log: '[Agentless API] Listing agentless deployments failed with a status 429, agentless agent limit reached.',
+          message: `The Agentless API could not list the agentless deployments because the request timed out. Please try again or contact your administrator.`,
         },
       },
       500: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 500 internal service error.',
-          message: `the Agentless API could not create the agentless agent because it returned a 500 internal error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `The Agentless API could not create the agentless agent because it returned a 500 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
           log: '[Agentless API] Deleting the agentless deployment failed with a status 500 internal service error.',
-          message: `the Agentless API could not delete the agentless deployment because it returned a 500 internal error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `The Agentless API could not delete the agentless deployment because it returned a 500 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        upgrade: {
+          log: '[Agentless API] Upgrading the agentless agent failed with a status 500 internal service error.',
+          message: `The Agentless API could not upgrade the agentless agent because it returned a 500 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        list: {
+          log: '[Agentless API] Listing agentless deployments failed with a status 500 internal service error.',
+          message: `The Agentless API could not list the agentless deployments because it returned a 500 error. Please try again or contact your administrator.`,
         },
       },
       unhandled_response: {
         create: {
-          log: '[Agentless API] Creating agentless agent failed because the Agentless API responded with an unhandled status code that falls out of the range of 2xx:',
-          message: `the Agentless API could not create the agentless agent due to an unexpected error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Agentless API] Creating the agentless agent failed with an unhandled response.',
+          message: `The Agentless API could not create the agentless agent due to an unexpected error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Agentless API] Deleting agentless deployment failed because the Agentless API responded with an unhandled status code that falls out of the range of 2xx:',
-          message: `the Agentless API could not delete the agentless deployment. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Agentless API] Deleting the agentless deployment failed with an unhandled response.',
+          message: `The Agentless API could not delete the agentless deployment due to an unexpected error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        upgrade: {
+          log: '[Agentless API] Upgrading the agentless agent failed with an unhandled response.',
+          message: `The Agentless API could not upgrade the agentless agent due to an unexpected error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        list: {
+          log: '[Agentless API] Listing agentless deployments failed with an unhandled response.',
+          message: `The Agentless API could not list the agentless deployments due to an unexpected error. Please try again or contact your administrator.`,
         },
       },
       request_error: {
         create: {
-          log: '[Agentless API] Creating agentless agent failed with a request error:',
-          message: `the Agentless API could not create the agentless agent due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Agentless API] Creating the agentless agent failed with a request error.',
+          message: `The Agentless API could not create the agentless agent due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Agentless API] Deleting agentless deployment failed with a request error:',
-          message: `the Agentless API could not delete the agentless deployment due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Agentless API] Deleting the agentless deployment failed with a request error.',
+          message: `The Agentless API could not delete the agentless deployment due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        upgrade: {
+          log: '[Agentless API] Upgrading the agentless agent failed with a request error.',
+          message: `The Agentless API could not upgrade the agentless agent due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+        },
+        list: {
+          log: '[Agentless API] Listing agentless deployments failed with a request error.',
+          message: `The Agentless API could not list the agentless deployments due to a request error. Please try again or contact your administrator.`,
         },
       },
     };
   }
+
+  private isErrorRetryable = (error: AxiosError): boolean => {
+    const hasRetryableStatusError = this.hasRetryableStatusError(error, RETRYABLE_HTTP_STATUSES);
+    const hasRetryableCodeError = this.hasRetryableCodeError(error, RETRYABLE_SERVER_CODES);
+
+    return hasRetryableStatusError || hasRetryableCodeError;
+  };
+
+  private handleErrorsWithRetries = async (
+    error: AxiosError,
+    requestConfig: AxiosRequestConfig,
+    action: 'create' | 'delete' | 'upgrade',
+    logger: Logger,
+    retries: number,
+    id: string,
+    requestConfigDebugStatus: string,
+    errorMetadata: any,
+    traceId?: string
+  ) => {
+    if (this.isErrorRetryable(error)) {
+      await this.retry(
+        async () => await axios(requestConfig),
+        action,
+        requestConfigDebugStatus,
+        logger,
+        retries,
+        () =>
+          this.catchAgentlessApiError(
+            action,
+            error,
+            logger,
+            id,
+            requestConfig,
+            requestConfigDebugStatus,
+            errorMetadata,
+            traceId
+          )
+      );
+    } else {
+      this.catchAgentlessApiError(
+        action,
+        error,
+        logger,
+        id,
+        requestConfig,
+        requestConfigDebugStatus,
+        errorMetadata,
+        traceId
+      );
+    }
+  };
+
+  private retry = async <T>(
+    fn: () => Promise<unknown>,
+    action: 'create' | 'delete' | 'upgrade',
+    requestConfigDebugStatus: string,
+    logger: Logger,
+    retries = MAXIMUM_RETRIES,
+    throwAgentlessError: () => void
+  ) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        await fn();
+      } catch (e) {
+        logger.info(
+          `[Agentless API] Attempt ${i + 1} failed to ${action} agentless deployment, retrying...`
+        );
+        if (i === retries - 1) {
+          logger.error(
+            `[Agentless API] Reached maximum ${retries} attempts. Failed to ${action} agentless deployment with [REQUEST]: ${requestConfigDebugStatus}`
+          );
+          throwAgentlessError();
+        }
+      }
+    }
+  };
+
+  private hasRetryableStatusError = (
+    error: AxiosError,
+    retryableStatusErrors: number[]
+  ): boolean => {
+    const status = error?.response?.status;
+    return !!status && retryableStatusErrors.some((errorStatus) => errorStatus === status);
+  };
+
+  private hasRetryableCodeError = (error: AxiosError, retryableCodeErrors: string[]): boolean => {
+    const code = error?.code;
+    return !!code && retryableCodeErrors.includes(code);
+  };
 }
 
-export const agentlessAgentService = new AgentlessAgentService();
+export const agentlessAgentService = new AgentlessAgentServiceImpl();

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, Logger, SavedObjectsType } from '@kbn/core/server';
 
+import { promptType } from '@kbn/security-ai-prompts';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { scriptsLibrarySavedObjectType } from './endpoint/lib/scripts_library';
+import type { ExperimentalFeatures } from '../common';
+import { referenceDataSavedObjectType } from './endpoint/lib/reference_data';
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
@@ -16,6 +21,21 @@ import { type as signalsMigrationType } from './lib/detection_engine/migrations/
 import { manifestType, unifiedManifestType } from './endpoint/lib/artifacts/saved_object_mappings';
 import { riskEngineConfigurationType } from './lib/entity_analytics/risk_engine/saved_object';
 import { entityEngineDescriptorType } from './lib/entity_analytics/entity_store/saved_object';
+import {
+  privilegeMonitoringType,
+  monitoringEntitySourceType,
+} from './lib/entity_analytics/privilege_monitoring/saved_objects';
+import {
+  PrivilegeMonitoringApiKeyEncryptionParams,
+  PrivilegeMonitoringApiKeyType,
+} from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
+
+// Conditional Saved Object Types
+// Saved object types that will only be registered if the associated feature flag is enabled
+const typesTiedToFeatureFlags: Array<{
+  feature: keyof ExperimentalFeatures;
+  soType: SavedObjectsType;
+}> = [{ feature: 'responseActionsScriptLibraryManagement', soType: scriptsLibrarySavedObjectType }];
 
 const types = [
   noteType,
@@ -28,26 +48,53 @@ const types = [
   signalsMigrationType,
   riskEngineConfigurationType,
   entityEngineDescriptorType,
+  privilegeMonitoringType,
+  PrivilegeMonitoringApiKeyType,
+  monitoringEntitySourceType,
   protectionUpdatesNoteType,
+  promptType,
+  referenceDataSavedObjectType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);
-
-export const savedObjectTypesWithoutTimelineAndWithoutNotes = savedObjectTypes.filter((type) => {
-  switch (type) {
-    case noteType.name:
-    case pinnedEventType.name:
-    case timelineType.name:
-      return false;
-    default:
-      return true;
-  }
-});
 
 export const timelineSavedObjectTypes = [timelineType.name, pinnedEventType.name];
 
 export const notesSavedObjectTypes = [noteType.name];
 
-export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
-  types.forEach((type) => savedObjects.registerType(type));
+export const initSavedObjects = (
+  savedObjects: CoreSetup['savedObjects'],
+  experimentalFeatures: ExperimentalFeatures,
+  logger: Logger
+) => {
+  types.forEach((type) => {
+    logger.debug(`Registering SavedObject type [${type.name}]`);
+    savedObjects.registerType(type);
+  });
+
+  typesTiedToFeatureFlags.forEach(({ feature, soType }) => {
+    if (!experimentalFeatures[feature]) {
+      logger.debug(
+        `Skipping the registration of SavedObject type [${soType.name}] - feature flag not enabled`
+      );
+      return;
+    }
+
+    logger.debug(`Registering SavedObject type [${soType.name}]`);
+    savedObjects.registerType(soType);
+  });
+};
+
+export const initEncryptedSavedObjects = ({
+  encryptedSavedObjects,
+  logger,
+}: {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup | undefined;
+  logger: Logger;
+}) => {
+  if (!encryptedSavedObjects) {
+    logger.warn('EncryptedSavedObjects plugin not available; skipping registration.');
+    return;
+  }
+  encryptedSavedObjects.registerType(PrivilegeMonitoringApiKeyEncryptionParams);
 };

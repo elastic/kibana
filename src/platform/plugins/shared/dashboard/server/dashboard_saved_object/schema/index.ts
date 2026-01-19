@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardSavedObjectAttributes, GridData, SavedDashboardPanel } from './latest';
+export type {
+  DashboardSavedObjectAttributes,
+  GridData,
+  SavedDashboardPanel,
+  SavedDashboardSection,
+  StoredControlState,
+  StoredControlGroupInput,
+} from './latest';
 export { dashboardSavedObjectSchema } from './latest';

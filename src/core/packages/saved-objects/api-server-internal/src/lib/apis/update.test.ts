@@ -11,22 +11,24 @@
 
 import { mockGetCurrentTime, mockPreflightCheckForCreate } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,
-  SavedObjectsRawDocSource,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsSerializer,
-  encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaMigratorMock } from '../../mocks';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import type {
+  ISavedObjectsSecurityExtension,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
 import {
   NAMESPACE_AGNOSTIC_TYPE,
   MULTI_NAMESPACE_ISOLATED_TYPE,
@@ -45,7 +47,10 @@ import {
   createGenericNotFoundErrorPayload,
   updateSuccess,
   mockTimestampFieldsWithCreated,
+  ACCESS_CONTROL_TYPE,
+  MULTI_NAMESPACE_TYPE,
 } from '../../test_helpers/repository.test.common';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 describe('#update', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -53,6 +58,7 @@ describe('#update', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -75,6 +81,7 @@ describe('#update', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -92,6 +99,9 @@ describe('#update', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -523,7 +533,10 @@ describe('#update', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
+          namespace,
+        });
+        expect(res.namespaces).toEqual([namespace]);
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalledWith(
@@ -533,7 +546,10 @@ describe('#update', () => {
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { references });
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
+          references,
+        });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
           expect.anything()
@@ -541,14 +557,19 @@ describe('#update', () => {
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, {
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
           references,
           namespace: 'default',
         });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.index).toHaveBeenCalledWith(
-          expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
+          expect.objectContaining({
+            id: expect.stringMatching(`${type}:${id}`),
+          }),
           expect.anything()
         );
+        // Assert that 'namespace' does not exist at all
+        expect(client.index.mock.calls[0][0]).not.toHaveProperty('namespace');
       });
 
       it(`doesn't prepend namespace to the id when using agnostic-namespace type`, async () => {
@@ -790,6 +811,152 @@ describe('#update', () => {
           { originId }
         );
         expect(result).toMatchObject({ originId });
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeUpdate', async () => {
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          MULTI_NAMESPACE_ISOLATED_TYPE,
+          id,
+          attributes,
+          { references }
+        );
+
+        expect(securityExtension.authorizeUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            object: {
+              existingNamespaces: ['default'],
+              id: 'logstash-*',
+              name: 'Testing',
+              type: 'multiNamespaceIsolatedType',
+            },
+          })
+        );
+      });
+
+      describe('access control', () => {
+        it('should define access control metadata when upserting a supporting type', async () => {
+          securityExtension.getCurrentUser.mockReturnValue(
+            mockAuthenticatedUser({ profile_uid: 'u_test_user_version' })
+          );
+
+          const options = { upsert: { title: 'foo', description: 'bar' } };
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
+          await updateSuccess(
+            client,
+            repository,
+            registry,
+            ACCESS_CONTROL_TYPE,
+            id,
+            attributes,
+            {
+              upsert: {
+                title: 'foo',
+                description: 'bar',
+              },
+            },
+            {
+              mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+            }
+          );
+          await repository.update(ACCESS_CONTROL_TYPE, id, attributes, options);
+          expect(client.get).toHaveBeenCalledTimes(2);
+          const expectedType = {
+            accessControlType: { description: 'bar', title: 'foo' },
+            namespaces: ['default'],
+            type: 'accessControlType',
+            accessControl: {
+              accessMode: 'default',
+              owner: 'u_test_user_version',
+            },
+            created_by: 'u_test_user_version',
+            updated_by: 'u_test_user_version',
+            ...mockTimestampFieldsWithCreated,
+          };
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!
+          ).toEqual(expectedType);
+        });
+
+        it('should not define access control metadata when upserting a supporting type but there is no active user profile', async () => {
+          securityExtension.getCurrentUser.mockReturnValue(null);
+          const options = { upsert: { title: 'foo', description: 'bar' } };
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
+          await updateSuccess(
+            client,
+            repository,
+            registry,
+            ACCESS_CONTROL_TYPE,
+            id,
+            attributes,
+            {
+              upsert: {
+                title: 'foo',
+                description: 'bar',
+              },
+            },
+            {
+              mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+            }
+          );
+          await repository.update(ACCESS_CONTROL_TYPE, id, attributes, options);
+          expect(client.get).toHaveBeenCalledTimes(2);
+          const expectedType = {
+            accessControlType: { description: 'bar', title: 'foo' },
+            namespaces: ['default'],
+            type: 'accessControlType',
+            ...mockTimestampFieldsWithCreated,
+          };
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!
+          ).toEqual(expectedType);
+        });
+
+        it('should not define access control metadata when upserting a non-supporting type', async () => {
+          securityExtension.getCurrentUser.mockReturnValue(
+            mockAuthenticatedUser({ profile_uid: 'u_test_user_version' })
+          );
+
+          const options = { upsert: { title: 'foo', description: 'bar' } };
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
+          await updateSuccess(
+            client,
+            repository,
+            registry,
+            MULTI_NAMESPACE_TYPE,
+            id,
+            attributes,
+            {
+              upsert: {
+                title: 'foo',
+                description: 'bar',
+              },
+            },
+            {
+              mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+            }
+          );
+          await repository.update(MULTI_NAMESPACE_TYPE, id, attributes, options);
+          expect(client.get).toHaveBeenCalledTimes(2);
+          const expectedType = {
+            multiNamespaceType: { description: 'bar', title: 'foo' },
+            namespaces: ['default'],
+            type: 'multiNamespaceType',
+            created_by: 'u_test_user_version',
+            updated_by: 'u_test_user_version',
+            ...mockTimestampFieldsWithCreated,
+          };
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!
+          ).toEqual(expectedType);
+        });
       });
     });
   });

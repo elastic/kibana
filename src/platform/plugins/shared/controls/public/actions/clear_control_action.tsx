@@ -7,30 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { SyntheticEvent } from 'react';
+import { map } from 'rxjs';
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { HasParentApi, HasType } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasType,
   apiHasUniqueId,
-  apiIsOfType,
-  HasParentApi,
   type EmbeddableApiContext,
   type HasUniqueId,
-  HasType,
 } from '@kbn/presentation-publishing';
-import {
-  IncompatibleActionError,
-  FrequentCompatibilityChangeAction,
-  type Action,
-} from '@kbn/ui-actions-plugin/public';
-import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { CONTROL_GROUP_TYPE } from '../../common';
-import { CanClearSelections, isClearableControl } from '../types';
+import type { FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
+import type { CanClearSelections } from '../types';
+import { isClearableControl } from '../types';
 import { ACTION_CLEAR_CONTROL } from './constants';
 
 type ClearControlActionApi = HasType &
@@ -43,10 +37,9 @@ const compatibilityCheck = (api: unknown | null): api is ClearControlActionApi =
     apiHasType(api) &&
       apiHasUniqueId(api) &&
       isClearableControl(api) &&
+      api.hasSelections$.getValue() &&
       apiHasParentApi(api) &&
-      apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
-      apiIsPresentationContainer(api.parentApi)
+      apiCanAccessViewMode(api.parentApi)
   );
 
 export class ClearControlAction
@@ -54,34 +47,17 @@ export class ClearControlAction
 {
   public readonly type = ACTION_CLEAR_CONTROL;
   public readonly id = ACTION_CLEAR_CONTROL;
-  public order = 1;
+  public order = 60; // puts it before the edit action
 
   constructor() {}
 
-  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
-    return (
-      <EuiToolTip content={this.getDisplayName(context)}>
-        <EuiButtonIcon
-          data-test-subj={`control-action-${(context.embeddable as HasUniqueId).uuid}-erase`}
-          aria-label={this.getDisplayName(context)}
-          iconType={this.getIconType(context)}
-          onClick={(event: SyntheticEvent<HTMLButtonElement>) => {
-            (event.target as HTMLButtonElement).blur();
-            this.execute(context);
-          }}
-          color="text"
-        />
-      </EuiToolTip>
-    );
-  };
-
-  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+  public getDisplayName() {
     return i18n.translate('controls.controlGroup.floatingActions.clearTitle', {
-      defaultMessage: 'Clear',
+      defaultMessage: 'Clear control',
     });
   }
 
-  public getIconType({ embeddable }: EmbeddableApiContext) {
+  public getIconType() {
     return 'eraser';
   }
 
@@ -89,15 +65,10 @@ export class ClearControlAction
     return isClearableControl(embeddable);
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: ClearControlAction) => void
-  ) {
-    if (!isClearableControl(embeddable)) return;
-
-    return embeddable.hasSelections$.subscribe((selection) => {
-      onChange(Boolean(selection), this);
-    });
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return isClearableControl(embeddable)
+      ? embeddable.hasSelections$.pipe(map(() => undefined))
+      : undefined;
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
@@ -106,7 +77,6 @@ export class ClearControlAction
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-
     embeddable.clearSelections();
   }
 }

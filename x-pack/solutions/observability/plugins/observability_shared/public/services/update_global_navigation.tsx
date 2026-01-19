@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import { AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
+import type { Subject } from 'rxjs';
+import type {
+  AppUpdater,
+  ApplicationStart,
+  AppDeepLink,
+  AppDeepLinkLocations,
+} from '@kbn/core/public';
+import { type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../../common';
 
@@ -14,19 +20,29 @@ export function updateGlobalNavigation({
   capabilities,
   deepLinks,
   updater$,
+  pricing,
 }: {
   capabilities: ApplicationStart['capabilities'];
   deepLinks: AppDeepLink[];
   updater$: Subject<AppUpdater>;
+  pricing: PricingServiceStart;
 }) {
-  const { apm, logs, metrics, uptime, slo } = capabilities.navLinks;
-  const someVisible = Object.values({
-    apm,
-    logs,
-    metrics,
-    uptime,
-    slo,
-  }).some((visible) => visible);
+  const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
+
+  const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
+  /* logs is a special case.
+   * It is not a nav link but still exists as a
+   * Kibana feature privilege with attached rule types */
+  const logs = capabilities.logs?.show;
+  const someVisible =
+    Object.values({
+      apm,
+      logs,
+      metrics,
+      uptime,
+      synthetics,
+      slo,
+    }).some((visible) => visible) || !isCompleteOverviewEnabled;
 
   const updatedDeepLinks = deepLinks
     .map((link) => {
@@ -61,8 +77,18 @@ export function updateGlobalNavigation({
     })
     .filter((link): link is AppDeepLink => link !== null);
 
-  updater$.next(() => ({
-    deepLinks: updatedDeepLinks,
-    visibleIn: someVisible ? ['sideNav', 'globalSearch', 'home', 'kibanaOverview'] : [],
-  }));
+  updater$.next(() => {
+    const visibleIn: AppDeepLinkLocations[] = someVisible
+      ? ['sideNav', 'home', 'kibanaOverview']
+      : [];
+
+    if (isCompleteOverviewEnabled && someVisible) {
+      visibleIn.push('globalSearch');
+    }
+
+    return {
+      deepLinks: updatedDeepLinks,
+      visibleIn,
+    };
+  });
 }

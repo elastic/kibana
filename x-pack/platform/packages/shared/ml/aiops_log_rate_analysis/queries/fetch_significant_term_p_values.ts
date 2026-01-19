@@ -6,7 +6,7 @@
  */
 import { uniqBy } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -87,7 +87,6 @@ export const getSignificantTermRequest = (
             ],
           },
         },
-        // @ts-expect-error `p_value` is not yet part of `AggregationsAggregationContainer`
         p_value: { background_is_superset: false },
         size: 1000,
       },
@@ -104,7 +103,7 @@ export const getSignificantTermRequest = (
 
   return {
     ...getRequestBase(params),
-    body,
+    ...body,
   };
 };
 

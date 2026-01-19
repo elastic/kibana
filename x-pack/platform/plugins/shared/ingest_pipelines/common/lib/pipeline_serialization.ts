@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { Pipeline, Processor } from '../types';
+import type { estypes } from '@elastic/elasticsearch';
+import type { Pipeline, Processor } from '../types';
 
 export function deserializePipelines(pipelinesByName: {
   [key: string]: estypes.IngestPipeline;

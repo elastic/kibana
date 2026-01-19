@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { logViewsV1 } from '../../../common/http_api';
 import { LOG_VIEW_URL } from '../../../common/http_api/log_views';
 import { createValidationFunction } from '../../../common/runtime_types';
-import { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
+import type { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
 
 export const initPutLogViewRoute = ({ framework, getStartServices }: LogsSharedBackendLibs) => {
   framework

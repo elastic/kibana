@@ -7,7 +7,7 @@
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { APP_ID } from './application';
-import type { Owner } from './types';
+import type { ServerlessProjectType, Owner } from './types';
 
 /**
  * Owner
@@ -16,7 +16,14 @@ export const SECURITY_SOLUTION_OWNER = 'securitySolution' as const;
 export const OBSERVABILITY_OWNER = 'observability' as const;
 export const GENERAL_CASES_OWNER = APP_ID;
 
+export const SECURITY_PROJECT_TYPE_ID = 'security';
+export const OBSERVABILITY_PROJECT_TYPE_ID = 'observability';
+
 export const OWNERS = [GENERAL_CASES_OWNER, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER] as const;
+export const SERVERLESS_PROJECT_TYPES = [
+  SECURITY_PROJECT_TYPE_ID,
+  OBSERVABILITY_PROJECT_TYPE_ID,
+] as const;
 
 interface RouteInfo {
   id: Owner;
@@ -25,6 +32,7 @@ interface RouteInfo {
   iconType: string;
   appRoute: string;
   validRuleConsumers?: readonly AlertConsumers[];
+  serverlessProjectType?: ServerlessProjectType;
 }
 
 export const OWNER_INFO: Record<Owner, RouteInfo> = {
@@ -35,6 +43,7 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     iconType: 'logoSecurity',
     appRoute: '/app/security',
     validRuleConsumers: [AlertConsumers.SIEM],
+    serverlessProjectType: SECURITY_PROJECT_TYPE_ID,
   },
   [OBSERVABILITY_OWNER]: {
     id: OBSERVABILITY_OWNER,
@@ -51,7 +60,9 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
       AlertConsumers.SLO,
       AlertConsumers.UPTIME,
       AlertConsumers.MONITORING,
+      AlertConsumers.STREAMS,
     ],
+    serverlessProjectType: OBSERVABILITY_PROJECT_TYPE_ID,
   },
   [GENERAL_CASES_OWNER]: {
     id: GENERAL_CASES_OWNER,

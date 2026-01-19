@@ -8,14 +8,15 @@
  */
 
 import { FetchStatus } from '../../types';
-import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
-import { SearchSource } from '@kbn/data-plugin/public';
+import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
-import {
+import type {
   DataDocumentsMsg,
   DataMainMsg,
   DataTotalHitsMsg,
@@ -26,6 +27,9 @@ import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -53,8 +57,9 @@ const waitForNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe('test fetchAll', () => {
   let subjects: SavedSearchData;
-  let deps: Parameters<typeof fetchAll>[2];
+  let deps: Parameters<typeof fetchAll>[0];
   let searchSource: SearchSource;
+
   beforeEach(() => {
     subjects = {
       main$: new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
@@ -62,28 +67,19 @@ describe('test fetchAll', () => {
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
     };
     searchSource = savedSearchMock.searchSource.createChild();
-
+    const { internalState, runtimeStateManager, getCurrentTab } = getDiscoverStateMock({});
+    const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      getCurrentTab().id
+    );
     deps = {
+      dataSubjects: subjects,
+      reset: false,
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
-      getAppState: () => ({}),
-      getInternalState: () => ({
-        dataView: undefined,
-        isDataViewLoading: false,
-        savedDataViews: [],
-        adHocDataViews: [],
-        defaultProfileAdHocDataViewIds: [],
-        expandedDoc: undefined,
-        customFilters: [],
-        overriddenVisContextAfterInvalidation: undefined,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-        },
-        dataRequestParams: {},
-      }),
+      internalState,
+      scopedProfilesManager: scopedProfilesManager$.getValue(),
+      scopedEbtManager: scopedEbtManager$.getValue(),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       savedSearch: {
@@ -91,8 +87,8 @@ describe('test fetchAll', () => {
         searchSource,
       },
       services: discoverServiceMock,
+      getCurrentTab,
     };
-
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
     mockfetchEsql.mockReset().mockResolvedValue({ records: [] });
   });
@@ -102,7 +98,7 @@ describe('test fetchAll', () => {
 
     subjects.main$.subscribe((value) => stateArr.push(value.fetchStatus));
 
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
 
     expect(stateArr).toEqual([
@@ -120,13 +116,14 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue({ records: documents });
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING },
       {
         fetchStatus: FetchStatus.COMPLETE,
+        interceptedWarnings: [],
         result: documents,
       },
     ]);
@@ -138,14 +135,14 @@ describe('test fetchAll', () => {
       { _id: '1', _index: 'logs' },
       { _id: '2', _index: 'logs' },
     ];
-    searchSource.getField('index')!.isTimeBased = () => false;
+    searchSource.getField('index')!.isTimeBased = (() => false) as DataView['isTimeBased'];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue({ records: documents });
 
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
     });
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -162,11 +159,11 @@ describe('test fetchAll', () => {
 
   test('should use charts query to fetch total hit count when chart is visible', async () => {
     const collect = subjectCollector(subjects.totalHits$);
-    searchSource.getField('index')!.isTimeBased = () => true;
+    searchSource.getField('index')!.isTimeBased = (() => true) as DataView['isTimeBased'];
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
     });
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -184,14 +181,14 @@ describe('test fetchAll', () => {
   test('should only fail totalHits$ query not main$ for error from that query', async () => {
     const collectTotalHits = subjectCollector(subjects.totalHits$);
     const collectMain = subjectCollector(subjects.main$);
-    searchSource.getField('index')!.isTimeBased = () => false;
+    searchSource.getField('index')!.isTimeBased = (() => false) as DataView['isTimeBased'];
     const hits = [{ _id: '1', _index: 'logs' }];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue({ records: documents });
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
     });
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.ERROR,
@@ -218,12 +215,12 @@ describe('test fetchAll', () => {
 
   test('should not set COMPLETE if an ERROR has been set on main$', async () => {
     const collectMain = subjectCollector(subjects.main$);
-    searchSource.getField('index')!.isTimeBased = () => false;
+    searchSource.getField('index')!.isTimeBased = (() => false) as DataView['isTimeBased'];
     mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
     });
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -253,33 +250,13 @@ describe('test fetchAll', () => {
       esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
     const query = { esql: 'from foo' };
-    deps = {
-      abortController: new AbortController(),
-      inspectorAdapters: { requests: new RequestAdapter() },
-      searchSessionId: '123',
-      initialFetchStatus: FetchStatus.UNINITIALIZED,
-      savedSearch: savedSearchMock,
-      services: discoverServiceMock,
-      getAppState: () => ({ query }),
-      getInternalState: () => ({
-        dataView: undefined,
-        isDataViewLoading: false,
-        savedDataViews: [],
-        adHocDataViews: [],
-        defaultProfileAdHocDataViewIds: [],
-        expandedDoc: undefined,
-        customFilters: [],
-        overriddenVisContextAfterInvalidation: undefined,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-        },
-        dataRequestParams: {},
-      }),
-    };
-    fetchAll(subjects, false, deps);
+    deps.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: deps.getCurrentTab().id,
+        appState: { query },
+      })
+    );
+    fetchAll(deps);
     await waitForNextTick();
 
     expect(await collect()).toEqual([
@@ -287,6 +264,7 @@ describe('test fetchAll', () => {
       { fetchStatus: FetchStatus.LOADING, query },
       {
         fetchStatus: FetchStatus.PARTIAL,
+        interceptedWarnings: [],
         result: documents,
         esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
         query,
@@ -309,7 +287,7 @@ describe('test fetchAll', () => {
         fetchStatus: FetchStatus.COMPLETE,
         result: initialRecords,
       });
-      fetchMoreDocuments(subjects, deps);
+      fetchMoreDocuments(deps);
       await waitForNextTick();
 
       expect(await collectDocuments()).toEqual([
@@ -343,7 +321,7 @@ describe('test fetchAll', () => {
         fetchStatus: FetchStatus.COMPLETE,
         result: initialRecords,
       });
-      fetchMoreDocuments(subjects, deps);
+      fetchMoreDocuments(deps);
       await waitForNextTick();
 
       expect(await collectDocuments()).toEqual([
@@ -378,33 +356,13 @@ describe('test fetchAll', () => {
       const collect = subjectCollector(subjects.documents$);
       mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
       const query = { esql: 'from foo' };
-      deps = {
-        abortController: new AbortController(),
-        inspectorAdapters: { requests: new RequestAdapter() },
-        searchSessionId: '123',
-        initialFetchStatus: FetchStatus.UNINITIALIZED,
-        savedSearch: savedSearchMock,
-        services: discoverServiceMock,
-        getAppState: () => ({ query }),
-        getInternalState: () => ({
-          dataView: undefined,
-          isDataViewLoading: false,
-          savedDataViews: [],
-          adHocDataViews: [],
-          defaultProfileAdHocDataViewIds: [],
-          expandedDoc: undefined,
-          customFilters: [],
-          overriddenVisContextAfterInvalidation: undefined,
-          resetDefaultProfileState: {
-            resetId: 'test',
-            columns: false,
-            rowHeight: false,
-            breakdownField: false,
-          },
-          dataRequestParams: {},
-        }),
-      };
-      fetchAll(subjects, false, deps);
+      deps.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: deps.getCurrentTab().id,
+          appState: { query },
+        })
+      );
+      fetchAll(deps);
       deps.abortController.abort();
       await waitForNextTick();
 

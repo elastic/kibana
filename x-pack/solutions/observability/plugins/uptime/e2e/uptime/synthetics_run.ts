@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 import { SyntheticsRunner, argv } from '@kbn/observability-synthetics-test-data';
 
@@ -30,15 +30,7 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
         'browser',
       ]);
 
-      await syntheticsRunner.loadTestFiles(async (reload) => {
-        if (reload) {
-          const dirPath = require.resolve('./journeys').replace('index.ts', '');
-          Object.keys(require.cache).forEach(function (key) {
-            if (key.startsWith(dirPath)) {
-              delete require.cache[key];
-            }
-          });
-        }
+      await syntheticsRunner.loadTestFiles(async () => {
         require(path.join(__dirname, './journeys'));
       });
 

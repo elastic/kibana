@@ -104,8 +104,9 @@ describe('promiseFromStreams', () => {
           this.push('c');
           this.push(null);
         },
-        destroy() {
+        destroy(_err, done) {
           destroyCalled = true;
+          done();
         },
       });
       const transformStream = new Transform({

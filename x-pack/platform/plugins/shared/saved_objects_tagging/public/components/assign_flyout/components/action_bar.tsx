@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 
 export interface AssignFlyoutActionBarProps {
   resultCount: number;
@@ -27,7 +30,7 @@ export const AssignFlyoutActionBar: FC<AssignFlyoutActionBarProps> = ({
   onDeselectAll,
 }) => {
   return (
-    <div className="tagAssignFlyout__actionBar">
+    <div css={styles}>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
@@ -98,3 +101,12 @@ export const AssignFlyoutActionBar: FC<AssignFlyoutActionBarProps> = ({
     </div>
   );
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    marginTop: euiTheme.size.xs,
+    '.tagMgt__actionBarDivider': {
+      height: euiTheme.size.base,
+      borderRight: euiTheme.border.thin,
+    },
+  });

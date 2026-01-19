@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
-import { safeDecode, encode } from '@kbn/rison';
+import { encode, safeDecode } from '@kbn/rison';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store';
@@ -25,8 +25,9 @@ export const useResolveConflict = () => {
   const { search, pathname } = useLocation();
   const { spaces } = useKibana().services;
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { resolveTimelineConfig, savedObjectId, show, graphEventId, activeTab } =
-    useDeepEqualSelector((state) => getTimeline(state, TimelineId.active) ?? timelineDefaults);
+  const { resolveTimelineConfig, savedObjectId, show, activeTab } = useDeepEqualSelector(
+    (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
+  );
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
@@ -38,7 +39,6 @@ export const useResolveConflict = () => {
       id: savedObjectId ?? '',
       isOpen: !!show,
       activeTab,
-      graphEventId,
     };
     const timelineSearch =
       (safeDecode(timelineRison ?? '') as TimelineUrl | null) ?? currentTimelineState;
@@ -78,7 +78,6 @@ export const useResolveConflict = () => {
     );
   }, [
     activeTab,
-    graphEventId,
     pathname,
     resolveTimelineConfig?.alias_target_id,
     resolveTimelineConfig?.outcome,

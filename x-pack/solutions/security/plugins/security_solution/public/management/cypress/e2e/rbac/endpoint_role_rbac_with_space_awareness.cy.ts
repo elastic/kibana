@@ -22,6 +22,7 @@ import {
   setRoleName,
   setSecuritySolutionEndpointGroupPrivilege,
 } from '../../screens/stack_management/role_page';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 describe(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
@@ -33,11 +34,6 @@ describe(
         productTypes: [
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },
-        ],
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'endpointManagementSpaceAwarenessEnabled',
-          ])}`,
         ],
       },
     },
@@ -88,7 +84,7 @@ describe(
         .findByTestSubj(`space-avatar-${spaceId}`)
         .should('exist');
 
-      cy.get('#row_siemV2_expansion')
+      cy.get(`#row_${SECURITY_FEATURE_ID}_expansion`)
         .findByTestSubj('subFeatureEntry')
         .then(($element) => {
           const features: string[] = [];
@@ -99,14 +95,17 @@ describe(
 
           return features;
         })
-        // Using `include.members` here because in serverless, an additional privilege shows
-        // up in this list - `Endpoint exceptions`.
-        .should('include.members', [
+        .should('deep.equal', [
           'Endpoint ListAll',
+          'Automatic TroubleshootingNone',
+          'SOC ManagementNone',
+          'Global Artifact ManagementNone',
           'Trusted ApplicationsNone',
+          'Trusted DevicesNone',
           'Host Isolation ExceptionsNone',
           'BlocklistNone',
           'Event FiltersNone',
+          'Endpoint ExceptionsNone',
           'Elastic Defend Policy ManagementNone',
           'Response Actions HistoryNone',
           'Host IsolationAll',
@@ -119,10 +118,16 @@ describe(
 
     it('should not display the privilege tooltip', () => {
       ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS.forEach((subFeaturePrivilegeId) => {
-        cy.getByTestSubj(`securitySolution_siemV2_${subFeaturePrivilegeId}_nameTooltip`).should(
-          'not.exist'
-        );
+        cy.getByTestSubj(
+          `securitySolution_${SECURITY_FEATURE_ID}_${subFeaturePrivilegeId}_nameTooltip`
+        ).should('not.exist');
       });
+    });
+
+    it('should include new Global Artifact Management privilege', () => {
+      cy.getByTestSubj(`securitySolution_${SECURITY_FEATURE_ID}_global_artifact_management`).should(
+        'exist'
+      );
     });
   }
 );

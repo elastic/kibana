@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import {
-  MessageRole,
+import type {
   AssistantMessage,
   Message,
   ToolMessage,
   UserMessage,
   ToolChoice,
-  ToolChoiceType,
   ToolDefinition,
 } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 import { getSystemMessageInstructions } from './get_system_instructions';
 

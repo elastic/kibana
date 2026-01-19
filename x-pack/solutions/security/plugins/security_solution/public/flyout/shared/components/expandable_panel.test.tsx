@@ -16,6 +16,7 @@ import {
 } from './test_ids';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { ExpandablePanel } from './expandable_panel';
+import userEvent from '@testing-library/user-event';
 
 const TEST_ID = 'test-id';
 const defaultProps = {
@@ -131,7 +132,7 @@ describe('<ExpandablePanel />', () => {
       expect(queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).not.toBeInTheDocument();
     });
 
-    it('click toggle button should expand the panel', () => {
+    it('click toggle button should expand the panel', async () => {
       const { getByTestId } = render(
         <ThemeProvider>
           <ExpandablePanel {...expandableDefaultProps}>{children}</ExpandablePanel>
@@ -140,7 +141,7 @@ describe('<ExpandablePanel />', () => {
 
       const toggle = getByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(TEST_ID));
       expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowRight');
-      toggle.click();
+      await userEvent.click(toggle);
 
       expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).toHaveTextContent(
         'test content'
@@ -180,7 +181,7 @@ describe('<ExpandablePanel />', () => {
       expect(getByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(TEST_ID))).toBeInTheDocument();
     });
 
-    it('click toggle button should collapse the panel', () => {
+    it('click toggle button should collapse the panel', async () => {
       const { getByTestId, queryByTestId } = render(
         <ThemeProvider>
           <ExpandablePanel {...expandedDefaultProps}>{children}</ExpandablePanel>
@@ -191,7 +192,7 @@ describe('<ExpandablePanel />', () => {
       expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowDown');
       expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).toBeInTheDocument();
 
-      toggle.click();
+      await userEvent.click(toggle);
       expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowRight');
       expect(queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).not.toBeInTheDocument();
     });

@@ -1,0 +1,37 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/synthtrace-client",
+    "@kbn/evals",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/tooling-log",
+    "@kbn/ai-assistant-common",
+    "@kbn/core",
+    "@kbn/core-http-browser",
+    "@kbn/scout-oblt",
+    "@kbn/alerting-plugin",
+    "@kbn/inference-common",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/alerts-ui-shared",
+    "@kbn/alerting-comparators",
+    "@kbn/test",
+    "@kbn/scout",
+    "@kbn/some-dev-log",
+    "@kbn/synthtrace",
+    "@kbn/agent-builder-common",
+    "@kbn/es-snapshot-loader"
+  ]
+}

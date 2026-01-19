@@ -6,8 +6,8 @@
  */
 
 import pLimit from 'p-limit';
-import { ToolingLog } from '@kbn/tooling-log';
-import { ScriptInferenceClient } from '../util/kibana_client';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ScriptInferenceClient } from '../util/kibana_client';
 import type { ExtractionOutput } from './extract_doc_entries';
 import { createDocumentationPagePrompt, rewriteFunctionPagePrompt } from './prompts';
 import { bindOutput } from './utils/output_executor';
@@ -60,8 +60,9 @@ export const generateDoc = async ({
     })
   );
 
-  const pageContentByName = (pageName: string) =>
-    extraction.pages.find((page) => page.name === pageName)!.content;
+  const pageContentByName = (pageName: string) => {
+    return extraction.pages.find((page) => page.name === pageName)?.content;
+  };
 
   const pages: PageGeneration[] = [
     {
@@ -100,10 +101,12 @@ export const generateDoc = async ({
   await Promise.all(
     pages.map(async (page) => {
       return limiter(async () => {
+        const content = pageContentByName(page.sourceFile);
+        if (!content) return;
         const pageContent = await callOutput(
           createDocumentationPagePrompt({
             documentation,
-            content: pageContentByName(page.sourceFile),
+            content,
             specificInstructions: page.instructions,
           })
         );

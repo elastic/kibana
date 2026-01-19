@@ -19,6 +19,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
 import { sortPackageJson } from '@kbn/sort-package-json';
 
+import {
+  KIBANA_GROUPS,
+  type KibanaGroup,
+  type ModuleVisibility,
+} from '@kbn/projects-solutions-groups';
 import { validateElasticTeam } from '../lib/validate_elastic_team';
 import { PKG_TEMPLATE_DIR, determineDevPackageDir, determinePackageDir } from '../paths';
 import type { GenerateCommand } from '../generate_command';
@@ -32,17 +37,20 @@ export const PackageCommand: GenerateCommand = {
   description: 'Generate a basic package',
   usage: 'node scripts/generate package [pkgId]',
   flags: {
-    boolean: ['web', 'force', 'dev'],
-    string: ['dir', 'owner'],
+    boolean: ['force', 'dev'],
+    string: ['dir', 'owner', 'group', 'visibility', 'license', 'type'],
     help: `
       --dev          Generate a package which is intended for dev-only use and can access things like devDependencies
-      --web          Build webpack-compatible version of sources for this package. If your package is intended to be
-                      used in the browser and Node.js then you need to opt-into these sources being created.
+      --type         Package type: "server", "common", or "browser". Determines kibana.jsonc type field.
+                      If not specified, you will be asked interactively.
       --dir          Specify where this package will be written.
                       defaults to [./packages/{kebab-case-version-of-name}]
       --force        If the --dir already exists, delete it before generation
       --owner        Github username of the owner for this package, if this is not specified then you will be asked for
                       this value interactively.
+      --group        Group the package belongs to
+      --visibility   Visibility of the package (private or shared)
+      --license      License (oss or x-pack)
     `,
   },
   async run({ log, flags, render }) {
@@ -65,10 +73,29 @@ export const PackageCommand: GenerateCommand = {
       throw createFlagError(`package id must start with @kbn/ and have no spaces`);
     }
 
-    const web = !!flags.web;
     const dev = !!flags.dev;
-    let group: 'platform' | 'observability' | 'security' | 'search' = 'platform';
-    let visibility: 'private' | 'shared' = 'private';
+
+    type PackageType = 'server' | 'common' | 'browser';
+    const packageType =
+      (flags.type as PackageType | undefined) ||
+      (
+        await inquirer.prompt<{ type: PackageType }>({
+          type: 'list',
+          default: 'common',
+          choices: [
+            { name: 'Browser (shared-browser)', value: 'browser' },
+            { name: 'Common (shared-common)', value: 'common' },
+            { name: 'Server (shared-server)', value: 'server' },
+          ],
+          name: 'type',
+          message: 'What type of package is this?',
+        })
+      ).type;
+
+    let group = flags.group as KibanaGroup | undefined;
+    let visibility = flags.visibility as 'private' | 'shared' | undefined;
+
+    const license = flags.license as 'oss' | 'x-pack' | undefined;
     let calculatedPackageDir: string;
 
     const owner =
@@ -88,28 +115,53 @@ export const PackageCommand: GenerateCommand = {
       throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
     }
 
+    let isCliScript = false;
     if (dev) {
+      isCliScript = (
+        await inquirer.prompt<{ cli: boolean }>({
+          type: 'list',
+          default: false,
+          choices: [
+            { name: 'Yes, it can go in /packages', value: true },
+            { name: 'No, it will be used from platform / solutions code', value: false },
+          ],
+          name: 'cli',
+          message: `Is the package going to be used exclusively from tooling / CLI scripts?`,
+        })
+      ).cli;
+    }
+
+    if (isCliScript) {
+      group = 'platform';
       calculatedPackageDir = determineDevPackageDir(pkgId);
     } else {
-      group = (
-        await inquirer.prompt<{
-          group: 'platform' | 'observability' | 'security' | 'search';
-        }>({
-          type: 'list',
-          choices: [
-            { name: 'Platform', value: 'platform' },
-            { name: 'Observability', value: 'observability' },
-            { name: 'Security', value: 'security' },
-            { name: 'Search', value: 'search' },
-          ],
-          name: 'group',
-          message: `What group is this package part of?`,
-        })
-      ).group;
+      group =
+        group ||
+        (
+          await inquirer.prompt<{
+            group: KibanaGroup;
+          }>({
+            type: 'list',
+            choices: [
+              ...KIBANA_GROUPS.map((groupName) => ({
+                name: groupName,
+                value: groupName,
+              })),
+            ],
+            name: 'group',
+            message: `What group is this package part of?`,
+          })
+        ).group;
+
+      if (group !== 'platform') {
+        visibility = 'private';
+      }
 
       let xpack: boolean;
 
-      if (group === 'platform') {
+      if (!!license) {
+        xpack = license === 'x-pack';
+      } else if (group === 'platform') {
         const resXpack = await inquirer.prompt<{ xpack: boolean }>({
           type: 'list',
           default: false,
@@ -125,19 +177,21 @@ export const PackageCommand: GenerateCommand = {
         xpack = true;
       }
 
-      visibility = (
-        await inquirer.prompt<{
-          visibility: 'private' | 'shared';
-        }>({
-          type: 'list',
-          choices: [
-            { name: 'Private', value: 'private' },
-            { name: 'Shared', value: 'shared' },
-          ],
-          name: 'visibility',
-          message: `What visibility does this package have? "private" (used from within platform) or "shared" (used from solutions)`,
-        })
-      ).visibility;
+      visibility =
+        visibility ||
+        (
+          await inquirer.prompt<{
+            visibility: ModuleVisibility;
+          }>({
+            type: 'list',
+            choices: [
+              { name: 'Private', value: 'private' },
+              { name: 'Shared', value: 'shared' },
+            ],
+            name: 'visibility',
+            message: `What visibility does this package have? "private" (used from within platform) or "shared" (used from solutions)`,
+          })
+        ).visibility;
 
       calculatedPackageDir = determinePackageDir({ pkgId, group, visibility, xpack });
     }
@@ -198,10 +252,11 @@ export const PackageCommand: GenerateCommand = {
       await render.toFile(src, dest, {
         pkg: {
           id: pkgId,
-          web,
+          packageType,
           dev,
           owner,
           group,
+          web: packageType === 'browser',
           visibility,
           directoryName: Path.basename(normalizedRepoRelativeDir),
           normalizedRepoRelativeDir,

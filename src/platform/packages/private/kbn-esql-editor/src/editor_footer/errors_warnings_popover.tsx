@@ -7,26 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiText,
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
+  EuiSwitch,
+  EuiText,
   euiTextBreakWord,
+  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
-import type { MonacoMessage } from '../helpers';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useMemo } from 'react';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import { filterDataErrors } from '../helpers';
+import type { DataErrorsControl } from '../types';
 
-const getConstsByType = (type: 'error' | 'warning', count: number) => {
+interface TypeConsts {
+  color: 'danger' | 'warning' | 'text';
+  message: string;
+  label: string;
+}
+const getConstsByType = (type: 'error' | 'warning', count: number): TypeConsts => {
   if (type === 'error') {
     return {
-      color: 'danger',
+      color: count > 0 ? 'danger' : 'text',
       message: i18n.translate('esqlEditor.query.errorCount', {
         defaultMessage: '{count} {count, plural, one {error} other {errors}}',
         values: { count },
@@ -58,20 +69,36 @@ function ErrorsWarningsContent({
   type: 'error' | 'warning';
   onErrorClick: (error: MonacoMessage) => void;
 }) {
+  const { euiTheme } = useEuiTheme();
   const { color } = getConstsByType(type, items.length);
+
+  const handleClick = (item: MonacoMessage) => {
+    const selection = window.getSelection();
+    const selectedText = selection?.toString();
+
+    // If user has selected text, don't treat it as a normal click
+    if (selectedText && selectedText.length > 0) {
+      return;
+    }
+
+    onErrorClick(item);
+  };
+
   return (
-    <div style={{ width: 500 }}>
-      <EuiDescriptionList>
+    <div style={{ width: 500, padding: euiTheme.size.s, maxHeight: 300, overflow: 'auto' }}>
+      <EuiDescriptionList data-test-subj="ESQLEditor-errors-warnings-content">
         {items.map((item, index) => {
           return (
             <EuiDescriptionListDescription
               key={index}
               className={classNameCss`
-                                &:hover {
-                                  cursor: pointer;
-                                }
-                              `}
-              onClick={() => onErrorClick(item)}
+                &:hover {
+                  cursor: pointer;
+                }
+                white-space: pre-line;
+                user-select: text;
+              `}
+              onClick={() => handleClick(item)}
             >
               <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
                 <EuiFlexItem grow={false}>
@@ -79,7 +106,7 @@ function ErrorsWarningsContent({
                     <EuiFlexItem grow={false}>
                       <EuiIcon type={type} color={color} size="s" />
                     </EuiFlexItem>
-                    <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+                    <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
                       {i18n.translate('esqlEditor.query.lineNumber', {
                         defaultMessage: 'Line {lineNumber}',
                         values: { lineNumber: item.startLineNumber },
@@ -87,7 +114,12 @@ function ErrorsWarningsContent({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} css={euiTextBreakWord()}>
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    ${euiTextBreakWord()}
+                  `}
+                >
                   {item.message}
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -99,6 +131,49 @@ function ErrorsWarningsContent({
   );
 }
 
+function ErrorsWarningsFooter({
+  dataErrorsControl,
+  closePopover,
+}: {
+  dataErrorsControl: DataErrorsControl;
+  closePopover: () => void;
+}) {
+  const { euiTheme } = useEuiTheme();
+  const { onChange: onChangeDataErrors, enabled: dataErrorsEnabled } = dataErrorsControl;
+
+  const onChangeDataErrorsSwitch = useCallback(() => {
+    onChangeDataErrors(!dataErrorsEnabled);
+    closePopover();
+  }, [onChangeDataErrors, dataErrorsEnabled, closePopover]);
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      css={css`
+        padding: ${euiTheme.size.s};
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      `}
+    >
+      <EuiFlexItem>
+        <EuiSwitch
+          compressed
+          checked={dataErrorsEnabled}
+          onChange={onChangeDataErrorsSwitch}
+          label={
+            <EuiText size="xs">
+              <FormattedMessage
+                id="esqlEditor.query.dataErrorsLabel"
+                defaultMessage="Highlight data errors"
+              />
+            </EuiText>
+          }
+          data-test-subj="ESQLEditor-footerPopover-dataErrorsSwitch"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
 export function ErrorsWarningsFooterPopover({
   isPopoverOpen,
   items,
@@ -106,6 +181,7 @@ export function ErrorsWarningsFooterPopover({
   setIsPopoverOpen,
   onErrorClick,
   isSpaceReduced,
+  dataErrorsControl,
 }: {
   isPopoverOpen: boolean;
   items: MonacoMessage[];
@@ -113,50 +189,56 @@ export function ErrorsWarningsFooterPopover({
   setIsPopoverOpen: (flag: boolean) => void;
   onErrorClick: (error: MonacoMessage) => void;
   isSpaceReduced?: boolean;
+  dataErrorsControl?: DataErrorsControl;
 }) {
-  const { color, message } = getConstsByType(type, items.length);
+  // Visible items may be 0 if dataErrorsControl is enabled and there are only data errors.
+  // In this case, we still want to show the popover with the switch, so the user can disable it to see the errors.
+  const visibleItems = useMemo(() => {
+    if (dataErrorsControl?.enabled === false) {
+      return filterDataErrors(items);
+    }
+    return items;
+  }, [items, dataErrorsControl]);
+
+  const { color, message } = getConstsByType(type, visibleItems.length);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
+
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={type}
-            color={color}
-            size="s"
-            onClick={() => {
-              setIsPopoverOpen(!isPopoverOpen);
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            anchorPosition="downLeft"
-            hasArrow={false}
-            panelPaddingSize="s"
-            button={
-              <EuiText
-                size="xs"
-                color={color}
-                css={css`
-                  &:hover {
-                    cursor: pointer;
-                    text-decoration: underline;
-                  }
-                `}
-                onClick={() => {
-                  setIsPopoverOpen(!isPopoverOpen);
-                }}
-              >
-                <p>{isSpaceReduced ? items.length : message}</p>
-              </EuiText>
-            }
-            ownFocus={false}
-            isOpen={isPopoverOpen}
-            closePopover={() => setIsPopoverOpen(false)}
-          >
-            <ErrorsWarningsContent items={items} type={type} onErrorClick={onErrorClick} />
-          </EuiPopover>
-        </EuiFlexItem>
+        <EuiPopover
+          anchorPosition="downLeft"
+          hasArrow={false}
+          panelPaddingSize="none"
+          button={
+            <EuiButtonEmpty
+              iconType={type}
+              iconSize="s"
+              color={color}
+              size="xs"
+              iconSide="left"
+              onClick={() => {
+                setIsPopoverOpen(!isPopoverOpen);
+              }}
+              data-test-subj={`ESQLEditor-footerPopoverButton-${type}`}
+            >
+              {isSpaceReduced ? visibleItems.length : message}
+            </EuiButtonEmpty>
+          }
+          ownFocus={false}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+        >
+          {visibleItems.length > 0 && (
+            <ErrorsWarningsContent items={visibleItems} type={type} onErrorClick={onErrorClick} />
+          )}
+          {dataErrorsControl && (
+            <ErrorsWarningsFooter
+              dataErrorsControl={dataErrorsControl}
+              closePopover={closePopover}
+            />
+          )}
+        </EuiPopover>
       </EuiFlexGroup>
     </EuiFlexItem>
   );

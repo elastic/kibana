@@ -9,9 +9,9 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
+import type { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
 import { healthColorsMap } from '../../../shared/constants/health_colors';
 
@@ -124,7 +124,18 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EuiBasicTable items={indices} columns={columns} loading={isSearchApplicationLoading} />
+          <EuiBasicTable
+            tableCaption={i18n.translate(
+              'xpack.enterpriseSearch.searchApplications.list.indicesFlyout.tableCaption',
+              {
+                defaultMessage: 'Indices associated with {searchApplicationName}',
+                values: { searchApplicationName },
+              }
+            )}
+            items={indices}
+            columns={columns}
+            loading={isSearchApplicationLoading}
+          />
         </EuiFlyoutBody>
       </EuiFlyout>
     );

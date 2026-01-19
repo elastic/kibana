@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import {
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type {
   SearchSynonymsPluginSetup,
   SearchSynonymsPluginSetupDependencies,
   SearchSynonymsPluginStart,
@@ -44,27 +42,25 @@ export class SearchSynonymsPlugin
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       app: ['kibana', PLUGIN_ID],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       catalogue: [PLUGIN_ID],
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: ['synonyms:manage', 'synonyms:read'],
+          api: ['manage_synonyms'],
           catalogue: [PLUGIN_ID],
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['read', 'save'],
+          ui: ['manage'],
         },
         read: {
-          app: ['kibana', PLUGIN_ID],
-          api: ['synonyms:read'],
+          disabled: true,
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['read'],
+          ui: [],
         },
       },
     });
@@ -72,7 +68,7 @@ export class SearchSynonymsPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(_: CoreStart) {
     return {};
   }
 

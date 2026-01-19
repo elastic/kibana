@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createHash } from 'node:crypto';
+
 import type { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 
 /**
@@ -100,5 +102,21 @@ export class EncryptedSavedObjectAttributesDefinition {
       }
     }
     return aadAttributes;
+  }
+
+  /**
+   * Gets a unique hash value based on the ESO type properties
+   * @param typeName optional name of the type.
+   * @returns string - unique hash for the eso definition, including name if provided
+   */
+  public getDefinitionHash(typeName?: string) {
+    const hash = createHash('sha256');
+    const globalData = [
+      ...(typeName ? [typeName] : []),
+      ...Array.from(this.attributesToEncrypt),
+      ...Array.from(this.attributesToIncludeInAAD ?? []),
+      this.enforceRandomId.toString(),
+    ].join('|');
+    return hash.update(globalData).digest('hex');
   }
 }

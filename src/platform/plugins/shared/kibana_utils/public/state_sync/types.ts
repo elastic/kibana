@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BaseState, BaseStateContainer } from '../../common/state_containers/types';
-import { IStateStorage } from './state_sync_state_storage';
+import type { BaseState, BaseStateContainer } from '../../common/state_containers/types';
+import type { IStateStorage } from './state_sync_state_storage';
 
 /**
  * Extension of {@link BaseStateContainer} with one constraint: set state should handle `null` as incoming state

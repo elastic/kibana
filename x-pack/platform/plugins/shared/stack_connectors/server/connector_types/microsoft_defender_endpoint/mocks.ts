@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { ConnectorToken } from '@kbn/actions-plugin/server/types';
-import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
-import {
+import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
+import type { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
+import type {
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
   MicrosoftDefenderEndpointSecrets,
-} from '../../../common/microsoft_defender_endpoint/types';
-import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '../../../common/microsoft_defender_endpoint/constants';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
-import {
-  ConnectorInstanceMock,
-  createAxiosResponseMock,
-  createConnectorInstanceMock,
-} from '../lib/mocks';
+import type { ConnectorInstanceMock } from '../lib/mocks';
+import { createAxiosResponseMock, createConnectorInstanceMock } from '../lib/mocks';
 
 export interface CreateMicrosoftDefenderConnectorMockResponse {
   options: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>;
@@ -99,7 +96,7 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
   const apiUrl = 'https://api.mock__microsoft.com';
   const options: CreateMicrosoftDefenderConnectorMockResponse['options'] = {
     configurationUtilities: actionsConfigMock.create(),
-    connector: { id: '1', type: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID },
+    connector: { id: '1', type: CONNECTOR_ID },
     config: {
       clientId: 'app-1-2-3',
       tenantId: 'tenant_elastic',
@@ -150,6 +147,20 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
         '@odata.count': 1,
         value: [createMicrosoftMachineMock()],
       }),
+
+    // Machine RunScript
+    [`${apiUrl}/api/machines/1-2-3/runliveresponse`]: () =>
+      createAxiosResponseMock({
+        '@odata.context': 'https://api-us3.securitycenter.microsoft.com/api/$metadata#Machines',
+        value: [createMicrosoftMachineMock()],
+      }),
+
+    // GetActionResults - GetLiveResponseResultDownloadLink (default for test action IDs)
+    [`${apiUrl}/api/machineactions/test-action-123/GetLiveResponseResultDownloadLink(index=0)`]:
+      () =>
+        createAxiosResponseMock({
+          value: 'https://download.microsoft.com/mock-download-url/results.json',
+        }),
   };
 
   instanceMock.request.mockImplementation(
@@ -226,7 +237,19 @@ const createMicrosoftMachineAction = (
     creationDateTimeUtc: '2019-01-02T14:39:38.2262283Z',
     lastUpdateDateTimeUtc: '2019-01-02T14:40:44.6596267Z',
     externalID: 'abc',
-    commands: ['RunScript'],
+    commands: [
+      {
+        index: 0,
+        startTime: '2025-07-07T18:50:10.186354Z',
+        endTime: '2025-07-07T18:50:21.811356Z',
+        commandStatus: 'Completed',
+        errors: [],
+        command: {
+          type: 'RunScript',
+          params: [{ key: 'ScriptName', value: 'hello.sh' }],
+        },
+      },
+    ],
     cancellationRequestor: '',
     cancellationComment: '',
     cancellationDateTimeUtc: '',

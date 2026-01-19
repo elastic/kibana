@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { RANDOM_NUMBER_BETWEEN_ROUTE_PATH } from '../../common';
 
 /**
@@ -19,6 +19,13 @@ export function registerGetRandomNumberBetweenRoute(router: IRouter) {
   router.get(
     {
       path: RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
+        },
+      },
       validate: {
         query: schema.object({
           max: schema.number({ defaultValue: 10 }),

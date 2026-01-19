@@ -132,13 +132,9 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     metadata,
     tags,
     version,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     estimated_operations,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     estimated_heap_memory_usage_bytes,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     default_field_map,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     license_level,
     pipelines,
     description,
@@ -199,7 +195,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               average_inference_time_ms: 0,
               inference_count: 0,
               routing_state: {
-                routing_state: perDeploymentStat.state,
+                routing_state: perDeploymentStat.state!,
                 reason: perDeploymentStat.reason,
               },
               last_access: 0,
@@ -215,12 +211,11 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       }
 
       return perDeploymentStat.nodes.map((n) => {
-        const nodeName = Object.values(n.node)[0].name;
+        const nodeName = Object.values(n.node || {})[0]?.name;
         return {
           key: `${perDeploymentStat.deployment_id}_${nodeName}`,
           ...perDeploymentStat,
           ...modelSizeStats,
-          // @ts-expect-error `throughput_last_minute` is not declared in ES Types
           node: {
             ...pick(n, [
               'average_inference_time_ms',

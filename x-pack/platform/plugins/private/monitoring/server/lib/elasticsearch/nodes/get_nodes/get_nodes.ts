@@ -12,8 +12,8 @@ import { ElasticsearchMetric } from '../../../metrics';
 import { getMetricAggs } from './get_metric_aggs';
 import { handleResponse } from './handle_response';
 import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
-import { LegacyRequest } from '../../../../types';
-import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
+import type { LegacyRequest } from '../../../../types';
+import type { ElasticsearchModifiedSource } from '../../../../../common/types/es';
 import {
   getIndexPatterns,
   getElasticsearchDataset,
@@ -83,41 +83,39 @@ export async function getNodes(
     index: indexPatterns,
     size: maxBucketSize,
     ignore_unavailable: true,
-    body: {
-      query: createQuery({
-        type: dataset,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        clusterUuid,
-        filters,
-        metric: metricFields,
-      }),
-      collapse: {
-        field: 'source_node.uuid',
-      },
-      aggs: {
-        nodes: {
-          terms: {
-            field: `source_node.uuid`,
-            include: uuidsToInclude,
-            size: maxBucketSize,
-          },
-          aggs: {
-            by_date: {
-              date_histogram: {
-                field: 'timestamp',
-                min_doc_count: 0,
-                fixed_interval: bucketSize + 's',
-              },
-              aggs: getMetricAggs(LISTING_METRICS_NAMES),
+    query: createQuery({
+      type: dataset,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      clusterUuid,
+      filters,
+      metric: metricFields,
+    }),
+    collapse: {
+      field: 'source_node.uuid',
+    },
+    aggs: {
+      nodes: {
+        terms: {
+          field: `source_node.uuid`,
+          include: uuidsToInclude,
+          size: maxBucketSize,
+        },
+        aggs: {
+          by_date: {
+            date_histogram: {
+              field: 'timestamp',
+              min_doc_count: 0,
+              fixed_interval: bucketSize + 's',
             },
+            aggs: getMetricAggs(LISTING_METRICS_NAMES),
           },
         },
       },
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     filter_path: [
       'hits.hits._source.source_node',
       'hits.hits._source.service.address',

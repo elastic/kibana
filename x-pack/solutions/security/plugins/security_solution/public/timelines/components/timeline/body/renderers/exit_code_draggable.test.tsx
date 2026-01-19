@@ -9,6 +9,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
 import { ExitCodeDraggable } from './exit_code_draggable';
 
@@ -22,13 +23,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../common/components/cell_actions/cell_actions_renderer', () => {
+  return {
+    CellActionsRenderer: jest.fn(),
+  };
+});
+
+const MockedCellActionsRenderer = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-renderer">{children}</div>;
+});
+
 describe('ExitCodeDraggable', () => {
+  beforeEach(() => {
+    (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
+  });
   const mount = useMountAppended();
 
   test('it renders the expected text and exit codes, when text, processExitCode, and an endgameExitCode are provided', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameExitCode="0"
           eventId="1"
@@ -44,6 +59,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameExitCode={undefined}
           eventId="1"
@@ -59,6 +75,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameExitCode={null}
           eventId="1"
@@ -74,6 +91,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameExitCode=""
           eventId="1"
@@ -89,6 +107,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameExitCode="1"
           eventId="1"
@@ -104,6 +123,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameExitCode={undefined}
           eventId="1"
@@ -119,6 +139,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameExitCode="1"
           eventId="1"
@@ -134,6 +155,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameExitCode={undefined}
           eventId="1"
@@ -149,6 +171,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameExitCode="1"
           eventId="1"
@@ -164,6 +187,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameExitCode={undefined}
           eventId="1"
@@ -173,5 +197,27 @@ describe('ExitCodeDraggable', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('-1');
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <ExitCodeDraggable
+          scopeId="some_scope"
+          contextId="test"
+          endgameExitCode={undefined}
+          eventId="1"
+          processExitCode={-1}
+          text=""
+        />
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsRenderer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

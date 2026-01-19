@@ -90,7 +90,7 @@ describe('rulePageFooter', () => {
     render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
 
     fireEvent.click(screen.getByTestId('rulePageFooterSaveButton'));
-    expect(screen.getByTestId('rulePageConfirmCreateRule')).toBeInTheDocument();
+    expect(screen.getByTestId('confirmCreateRuleModal')).toBeInTheDocument();
   });
 
   test('should not show creat rule confirmation if user cannot read actions', () => {
@@ -113,7 +113,7 @@ describe('rulePageFooter', () => {
 
     render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
     fireEvent.click(screen.getByTestId('rulePageFooterSaveButton'));
-    expect(screen.queryByTestId('rulePageConfirmCreateRule')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('confirmCreateRuleModal')).not.toBeInTheDocument();
     expect(onSave).toHaveBeenCalled();
   });
 

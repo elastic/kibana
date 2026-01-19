@@ -4,21 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-} from '@kbn/core/server/mocks';
-import { AIAssistantKnowledgeBaseDataClient, KnowledgeBaseDataClientParams } from '.';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { KnowledgeBaseDataClientParams } from '.';
+import { AIAssistantKnowledgeBaseDataClient } from '.';
 import {
   getCreateKnowledgeBaseEntrySchemaMock,
   getKnowledgeBaseEntryMock,
   getKnowledgeBaseEntrySearchEsMock,
 } from '../../__mocks__/knowledge_base_entry_schema.mock';
 import { authenticatedUser } from '../../__mocks__/user';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { getMlNodeCount } from '@kbn/ml-plugin/server/lib/node_utils';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import pRetry from 'p-retry';
 
@@ -27,8 +24,18 @@ import {
   getSecurityLabsDocsCount,
 } from '../../lib/langchain/content_loaders/security_labs_loader';
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { KnowledgeBaseResource } from '@kbn/elastic-assistant-common';
+import { createTrainedModelsProviderMock } from '@kbn/ml-plugin/server/shared_services/providers/__mocks__/trained_models';
+import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
+import {
+  getDefendInsightsDocsCount,
+  loadDefendInsights,
+} from '../../lib/langchain/content_loaders/defend_insights_loader';
+
+jest.mock('@kbn/ml-plugin/server/lib/node_utils');
 jest.mock('../../lib/langchain/content_loaders/security_labs_loader');
+jest.mock('../../lib/langchain/content_loaders/defend_insights_loader');
 jest.mock('p-retry');
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
@@ -43,23 +50,17 @@ const telemetry = coreMock.createSetup().analytics;
 describe('AIAssistantKnowledgeBaseDataClient', () => {
   let mockOptions: KnowledgeBaseDataClientParams;
   let ml: MlPluginSetup;
-  let savedObjectClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
   const getElserId = jest.fn();
-  const trainedModelsProvider = jest.fn();
-  const installElasticModel = jest.fn();
   const mockLoadSecurityLabs = loadSecurityLabs as jest.Mock;
   const mockGetSecurityLabsDocsCount = getSecurityLabsDocsCount as jest.Mock;
+  const mockGetDefendInsightsDocsCount = getDefendInsightsDocsCount as jest.Mock;
   const mockGetIsKBSetupInProgress = jest.fn();
+  const trainedModelsProviderMock = createTrainedModelsProviderMock()();
   beforeEach(() => {
     jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
-    savedObjectClient = savedObjectsRepositoryMock.create();
     mockLoadSecurityLabs.mockClear();
     ml = mlPluginMock.createSetupContract() as unknown as MlPluginSetup; // Missing SharedServices mock, so manually mocking trainedModelsProvider
-    ml.trainedModelsProvider = trainedModelsProvider.mockImplementation(() => ({
-      getELSER: jest.fn().mockImplementation(() => '.elser_model_2'),
-      installElasticModel: installElasticModel.mockResolvedValue({}),
-    }));
     mockOptions = {
       logger,
       elasticsearchClientPromise: Promise.resolve(esClientMock),
@@ -69,15 +70,22 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       kibanaVersion: '8.8.0',
       ml,
       getElserId: getElserId.mockResolvedValue('elser-id'),
+      elserInferenceId: ASSISTANT_ELSER_INFERENCE_ID,
       getIsKBSetupInProgress: mockGetIsKBSetupInProgress.mockReturnValue(false),
+      getProductDocumentationStatus: jest.fn().mockResolvedValue('installed'),
       ingestPipelineResourceName: 'something',
       setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
       manageGlobalKnowledgeBaseAIAssistant: true,
+      getTrainedModelsProvider: () => trainedModelsProviderMock,
     };
     esClientMock.search.mockReturnValue(
       // @ts-expect-error not full response interface
       getKnowledgeBaseEntrySearchEsMock()
     );
+    esClientMock.count.mockResolvedValue({
+      count: 1,
+      _shards: { total: 1, successful: 1, failed: 0 },
+    });
   });
 
   beforeAll(() => {
@@ -128,7 +136,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
   describe('isModelInstalled', () => {
     it('should check if ELSER model is installed and return true if fully_defined', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      esClientMock.ml.getTrainedModels.mockResolvedValue({
+      trainedModelsProviderMock.getTrainedModels.mockResolvedValue({
         count: 1,
         trained_model_configs: [
           { fully_defined: true, model_id: '', tags: [], input: { field_names: ['content'] } },
@@ -136,7 +144,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       });
       const result = await client.isModelInstalled();
       expect(result).toBe(true);
-      expect(esClientMock.ml.getTrainedModels).toHaveBeenCalledWith({
+      expect(trainedModelsProviderMock.getTrainedModels).toHaveBeenCalledWith({
         model_id: 'elser-id',
         include: 'definition_status',
       });
@@ -144,7 +152,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
     it('should return false if model is not fully defined', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      esClientMock.ml.getTrainedModels.mockResolvedValue({
+      trainedModelsProviderMock.getTrainedModels.mockResolvedValue({
         count: 0,
         trained_model_configs: [
           { fully_defined: false, model_id: '', tags: [], input: { field_names: ['content'] } },
@@ -156,7 +164,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
     it('should return false and log error if getting model details fails', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      esClientMock.ml.getTrainedModels.mockRejectedValue(new Error('error happened'));
+      trainedModelsProviderMock.getTrainedModels.mockRejectedValue(new Error('error happened'));
       const result = await client.isModelInstalled();
       expect(result).toBe(false);
       expect(logger.error).toHaveBeenCalled();
@@ -165,13 +173,27 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
   describe('isInferenceEndpointExists', () => {
     it('returns true when the model is fully allocated and started in ESS', async () => {
+      esClientMock.inference.get.mockResolvedValue({
+        endpoints: [
+          {
+            service_settings: {
+              model_id: 'elser-id',
+              deployment_id: ASSISTANT_ELSER_INFERENCE_ID,
+              allocation_status: { state: 'fully_allocated' },
+            },
+            inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+            task_type: 'sparse_embedding',
+            service: 'elasticsearch',
+          },
+        ],
+      });
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      esClientMock.ml.getTrainedModelsStats.mockResolvedValueOnce({
+      trainedModelsProviderMock.getTrainedModelsStats.mockResolvedValueOnce({
         trained_model_stats: [
           {
             deployment_stats: {
               state: 'started',
-              // @ts-expect-error not full response interface
+              deployment_id: ASSISTANT_ELSER_INFERENCE_ID,
               allocation_status: { state: 'fully_allocated' },
             },
           },
@@ -185,11 +207,11 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
     it('returns true when the model is started in serverless', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      esClientMock.ml.getTrainedModelsStats.mockResolvedValueOnce({
+      trainedModelsProviderMock.getTrainedModelsStats.mockResolvedValueOnce({
         trained_model_stats: [
           {
             deployment_stats: {
-              // @ts-expect-error not full response interface
+              deployment_id: ASSISTANT_ELSER_INFERENCE_ID,
               nodes: [{ routing_state: { routing_state: 'started' } }],
             },
           },
@@ -203,12 +225,12 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
     it('returns false when the model is not fully allocated in ESS', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      esClientMock.ml.getTrainedModelsStats.mockResolvedValueOnce({
+      trainedModelsProviderMock.getTrainedModelsStats.mockResolvedValueOnce({
         trained_model_stats: [
           {
             deployment_stats: {
               state: 'started',
-              // @ts-expect-error not full response interface
+              deployment_id: ASSISTANT_ELSER_INFERENCE_ID,
               allocation_status: { state: 'partially_allocated' },
             },
           },
@@ -222,11 +244,11 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
     it('returns false when the model is not started in serverless', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      esClientMock.ml.getTrainedModelsStats.mockResolvedValueOnce({
+      trainedModelsProviderMock.getTrainedModelsStats.mockResolvedValueOnce({
         trained_model_stats: [
           {
             deployment_stats: {
-              // @ts-expect-error not full response interface
+              deployment_id: ASSISTANT_ELSER_INFERENCE_ID,
               nodes: [{ routing_state: { routing_state: 'stopped' } }],
             },
           },
@@ -240,7 +262,9 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
     it('returns false when an error occurs during the check', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      esClientMock.ml.getTrainedModelsStats.mockRejectedValueOnce(new Error('Mocked Error'));
+      trainedModelsProviderMock.getTrainedModelsStats.mockRejectedValueOnce(
+        new Error('Mocked Error')
+      );
 
       const result = await client.isInferenceEndpointExists();
 
@@ -265,33 +289,48 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
   describe('setupKnowledgeBase', () => {
     it('should install, deploy, and load docs if not already done', async () => {
+      (getMlNodeCount as jest.Mock).mockResolvedValue({ count: 1, lazyNodeCount: 0 });
       // @ts-expect-error not full response interface
       esClientMock.search.mockResolvedValue({});
+      trainedModelsProviderMock.startTrainedModelDeployment.mockResolvedValue({});
+      trainedModelsProviderMock.stopTrainedModelDeployment.mockResolvedValue({});
+      trainedModelsProviderMock.getTrainedModelsStats.mockResolvedValue({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'started',
+              deployment_id: ASSISTANT_ELSER_INFERENCE_ID,
+              allocation_status: {
+                state: 'fully_allocated',
+              },
+            },
+          },
+        ],
+      });
 
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      await client.setupKnowledgeBase({ soClient: savedObjectClient });
-
-      // install model
-      expect(trainedModelsProvider).toHaveBeenCalledWith({}, savedObjectClient);
-      expect(installElasticModel).toHaveBeenCalledWith('elser-id');
+      await client.setupKnowledgeBase({});
 
       expect(loadSecurityLabs).toHaveBeenCalled();
+      expect(loadDefendInsights).toHaveBeenCalled();
     });
 
     it('should skip installation and deployment if model is already installed and deployed', async () => {
+      (getMlNodeCount as jest.Mock).mockResolvedValue({ count: 1, lazyNodeCount: 0 });
       mockGetSecurityLabsDocsCount.mockResolvedValue(1);
-      esClientMock.ml.getTrainedModels.mockResolvedValue({
+      mockGetDefendInsightsDocsCount.mockResolvedValue(1);
+      trainedModelsProviderMock.getTrainedModels.mockResolvedValue({
         count: 1,
         trained_model_configs: [
           { fully_defined: true, model_id: '', tags: [], input: { field_names: ['content'] } },
         ],
       });
-      esClientMock.ml.getTrainedModelsStats.mockResolvedValue({
+      trainedModelsProviderMock.getTrainedModelsStats.mockResolvedValue({
         trained_model_stats: [
           {
             deployment_stats: {
+              deployment_id: ASSISTANT_ELSER_INFERENCE_ID,
               state: 'started',
-              // @ts-expect-error not full response interface
               allocation_status: {
                 state: 'fully_allocated',
               },
@@ -301,26 +340,27 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       });
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
 
-      await client.setupKnowledgeBase({ soClient: savedObjectClient });
+      await client.setupKnowledgeBase({});
 
-      expect(installElasticModel).not.toHaveBeenCalled();
-      expect(esClientMock.ml.startTrainedModelDeployment).not.toHaveBeenCalled();
+      expect(trainedModelsProviderMock.installElasticModel).not.toHaveBeenCalled();
+      expect(trainedModelsProviderMock.startTrainedModelDeployment).not.toHaveBeenCalled();
       expect(loadSecurityLabs).not.toHaveBeenCalled();
+      expect(loadDefendInsights).not.toHaveBeenCalled();
     });
 
     it('should handle errors during installation and deployment', async () => {
       // @ts-expect-error not full response interface
       esClientMock.search.mockResolvedValue({});
-      esClientMock.ml.getTrainedModels.mockResolvedValue({
+      trainedModelsProviderMock.getTrainedModels.mockResolvedValue({
         count: 0,
         trained_model_configs: [
           { fully_defined: false, model_id: '', tags: [], input: { field_names: ['content'] } },
         ],
       });
-      mockLoadSecurityLabs.mockRejectedValue(new Error('Installation error'));
+      (getMlNodeCount as jest.Mock).mockRejectedValue(new Error('Installation error'));
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
 
-      await expect(client.setupKnowledgeBase({ soClient: savedObjectClient })).rejects.toThrow(
+      await expect(client.setupKnowledgeBase({})).rejects.toThrow(
         'Error setting up Knowledge Base: Installation error'
       );
       expect(mockOptions.logger.error).toHaveBeenCalledWith(
@@ -333,7 +373,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
     const documents = [
       {
         pageContent: 'Document 1',
-        metadata: { kbResource: 'user', source: 'user', required: false },
+        metadata: { kbResource: KnowledgeBaseResource.enum.user, source: 'user', required: false },
       },
     ];
     it('should add documents to the knowledge base', async () => {
@@ -399,6 +439,41 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
     });
   });
 
+  describe('isDefendInsightsDocsLoaded', () => {
+    it('should resolve to true when docs exist', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+      mockGetDefendInsightsDocsCount.mockResolvedValue(1);
+
+      const results = await client.isDefendInsightsDocsLoaded();
+
+      expect(results).toEqual(true);
+    });
+
+    it('should resolve to false when docs do not exist', async () => {
+      esClientMock.count.mockResolvedValueOnce({
+        count: 0,
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      const results = await client.isDefendInsightsDocsLoaded();
+
+      expect(results).toEqual(false);
+    });
+
+    it('should resolve to false when docs error', async () => {
+      esClientMock.count.mockRejectedValueOnce(new Error('Search error'));
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      const results = await client.isDefendInsightsDocsLoaded();
+
+      expect(results).toEqual(false);
+    });
+  });
+
   describe('getKnowledgeBaseDocumentEntries', () => {
     it('should fetch documents based on query and filters', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
@@ -411,7 +486,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       expect(results).toHaveLength(1);
       expect(results[0].pageContent).toBe('test');
-      expect(results[0].metadata.kbResource).toBe('test');
+      expect(results[0].metadata.kbResource).toBe('user');
     });
 
     it('should swallow errors during search', async () => {
@@ -504,7 +579,10 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       mockOptions.manageGlobalKnowledgeBaseAIAssistant = false;
 
       await expect(
-        client.createKnowledgeBaseEntry({ telemetry, knowledgeBaseEntry, global: true })
+        client.createKnowledgeBaseEntry({
+          telemetry,
+          knowledgeBaseEntry: { ...knowledgeBaseEntry, global: true },
+        })
       ).rejects.toThrow('User lacks privileges to create global knowledge base entries');
     });
   });
@@ -521,7 +599,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const result = await client.getAssistantTools({
         esClient: esClientMock,
-        contentReferencesStore: contentReferencesStoreFactoryMock(),
+        contentReferencesStore: newContentReferencesStoreMock(),
       });
 
       expect(result).toHaveLength(1);
@@ -536,7 +614,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const result = await client.getAssistantTools({
         esClient: esClientMock,
-        contentReferencesStore: contentReferencesStoreFactoryMock(),
+        contentReferencesStore: newContentReferencesStoreMock(),
       });
 
       expect(result).toEqual([]);
@@ -549,7 +627,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const result = await client.getAssistantTools({
         esClient: esClientMock,
-        contentReferencesStore: contentReferencesStoreFactoryMock(),
+        contentReferencesStore: newContentReferencesStoreMock(),
       });
 
       expect(result).toEqual([]);

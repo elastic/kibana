@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 /** HTTP Warning headers have the following syntax:
@@ -71,6 +72,107 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
         }
 
         return response.ok({ body: { success: true } });
+      } catch (error) {
+        return handleEsError({ error, response });
+      }
+    }
+  );
+}
+
+export function registerPutDataStreamFailureStore({
+  router,
+  lib: { handleEsError },
+  config,
+}: RouteDependencies) {
+  const bodySchema = schema.object(
+    {
+      dataStreams: schema.arrayOf(schema.string()),
+      dsFailureStore: schema.boolean(),
+      customRetentionPeriod: schema.maybe(schema.string()),
+      retentionDisabled: schema.maybe(schema.boolean()),
+    },
+    {
+      validate: (value) => {
+        // Enforce mutual exclusivity between custom retention and disabled retention
+        if (value.customRetentionPeriod && value.retentionDisabled) {
+          return 'Cannot specify both customRetentionPeriod and retentionDisabled';
+        }
+      },
+    }
+  );
+
+  router.put(
+    {
+      path: addBasePath('/data_streams/configure_failure_store'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
+    async (context, request, response) => {
+      const { dataStreams, dsFailureStore, customRetentionPeriod, retentionDisabled } =
+        request.body as TypeOf<typeof bodySchema>;
+
+      const { client } = (await context.core).elasticsearch;
+
+      // Build lifecycle configuration for failure store
+      const buildFailureStoreLifecycle = () => {
+        // Case 1: Enable lifecycle with custom retention period
+        // Schema validation ensures customRetentionPeriod and retentionDisabled are mutually exclusive
+        if (customRetentionPeriod) {
+          return {
+            lifecycle: {
+              enabled: true,
+              data_retention: customRetentionPeriod,
+            },
+          };
+        }
+
+        // Case 2: Explicitly disable lifecycle retention (feature-flagged)
+        if (retentionDisabled && config.enableFailureStoreRetentionDisabling) {
+          return {
+            lifecycle: {
+              enabled: false,
+            },
+          };
+        }
+
+        // Case 3: No lifecycle configuration (use cluster defaults)
+        return {};
+      };
+
+      try {
+        // Configure failure store for each data stream
+        const promises = dataStreams.map(async (dataStreamName) => {
+          const { headers } = await client.asCurrentUser.indices.putDataStreamOptions(
+            {
+              name: dataStreamName,
+              failure_store: {
+                enabled: dsFailureStore,
+                ...(dsFailureStore && buildFailureStoreLifecycle()),
+              },
+            },
+            { meta: true }
+          );
+          return headers;
+        });
+
+        const results = await Promise.all(promises);
+        const warnings = results
+          .map((headers) =>
+            headers?.warning ? getEsWarningText(headers.warning) ?? headers.warning : null
+          )
+          .filter(Boolean);
+
+        return response.ok({
+          body: {
+            success: true,
+            ...(warnings.length > 0 ? { warning: warnings.join('; ') } : {}),
+          },
+        });
       } catch (error) {
         return handleEsError({ error, response });
       }

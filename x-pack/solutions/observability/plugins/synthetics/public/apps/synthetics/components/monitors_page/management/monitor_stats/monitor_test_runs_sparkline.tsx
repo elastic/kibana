@@ -8,7 +8,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ClientPluginsStart } from '../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useRefreshedRange } from '../../../../hooks';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';

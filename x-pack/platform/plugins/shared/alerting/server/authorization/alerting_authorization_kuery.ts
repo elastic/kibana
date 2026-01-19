@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { EsQueryConfig, KueryNode } from '@kbn/es-query';
+import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { remove } from 'lodash';
-import { EsQueryConfig, nodeBuilder, toElasticsearchQuery, KueryNode } from '@kbn/es-query';
-
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AuthorizedRuleTypes } from './alerting_authorization';
+import type { AuthorizedRuleTypes } from './alerting_authorization';
 
 export enum AlertingAuthorizationFilterType {
   KQL = 'kql',
@@ -101,8 +101,15 @@ export function asFiltersBySpaceId(
 }
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {
-  const invalid = value.match(/([>=<\*:()]+|\s+)/g);
-  if (invalid) {
+  const MAX_LENGTH = 1000;
+
+  if (value.length > MAX_LENGTH) {
+    throw new Error(`Input exceeds maximum allowed length of ${MAX_LENGTH} characters`);
+  }
+
+  const matches = value.match(/([>=<\*:()]|\s)/g);
+  if (matches) {
+    const invalid = Array.from(matches);
     const whitespace = remove(invalid, (chars) => chars.trim().length === 0);
     const errors = [];
     if (whitespace.length) {

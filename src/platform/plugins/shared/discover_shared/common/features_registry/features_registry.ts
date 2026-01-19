@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BaseFeature } from './types';
+import type { BaseFeature } from './types';
 
 export class FeaturesRegistry<Feature extends BaseFeature = BaseFeature> {
   private readonly features = new Map<Feature['id'], Feature>();

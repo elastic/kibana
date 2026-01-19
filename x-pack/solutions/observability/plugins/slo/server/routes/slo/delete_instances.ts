@@ -6,7 +6,6 @@
  */
 
 import { deleteSLOInstancesParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import { DeleteSLOInstances } from '../../services';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -20,13 +19,14 @@ export const deleteSloInstancesRoute = createSloServerRoute({
     },
   },
   params: deleteSLOInstancesParamsSchema,
-  handler: async ({ response, context, params, plugins }) => {
+  handler: async ({ request, logger, response, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const deleteSloInstances = new DeleteSLOInstances(esClient);
+    const { scopedClusterClient } = await getScopedClients({ request, logger });
 
-    await executeWithErrorHandler(() => deleteSloInstances.execute(params.body));
+    const deleteSloInstances = new DeleteSLOInstances(scopedClusterClient.asCurrentUser);
+    await deleteSloInstances.execute(params.body);
+
     return response.noContent();
   },
 });

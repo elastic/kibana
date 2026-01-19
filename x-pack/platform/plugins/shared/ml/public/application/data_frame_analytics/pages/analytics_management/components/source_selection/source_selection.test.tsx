@@ -71,6 +71,7 @@ jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
 });
 
 const mockNavigateToPath = jest.fn();
+const mockLocatorNavigate = jest.fn();
 jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
     services: {
@@ -88,6 +89,9 @@ jest.mock('../../../../../contexts/kibana', () => ({
       toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError: jest.fn() },
     };
   },
+  useMlManagementLocator: () => ({
+    navigate: mockLocatorNavigate,
+  }),
 }));
 
 jest.mock('../../../../../util/index_utils', () => {
@@ -168,9 +172,10 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       expect(
         screen.queryByText('Data views using cross-cluster search are not supported.')
       ).not.toBeInTheDocument();
-      expect(mockNavigateToPath).toHaveBeenCalledWith(
-        '/data_frame_analytics/new_job?index=the-plain-index-pattern-id'
-      );
+      expect(mockLocatorNavigate).toHaveBeenCalledWith({
+        appId: 'analytics/data_frame_analytics/new_job?index=the-plain-index-pattern-id',
+        sectionId: 'ml',
+      });
       expect(mockGetDataViewAndSavedSearchCallback).toHaveBeenCalledTimes(0);
     });
   });
@@ -225,9 +230,10 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       expect(
         screen.queryByText('Data views using cross-cluster search are not supported.')
       ).not.toBeInTheDocument();
-      expect(mockNavigateToPath).toHaveBeenCalledWith(
-        '/data_frame_analytics/new_job?savedSearchId=the-plain-saved-search-id'
-      );
+      expect(mockLocatorNavigate).toHaveBeenCalledWith({
+        appId: 'analytics/data_frame_analytics/new_job?index=the-plain-index-pattern-id',
+        sectionId: 'ml',
+      });
     });
   });
 });

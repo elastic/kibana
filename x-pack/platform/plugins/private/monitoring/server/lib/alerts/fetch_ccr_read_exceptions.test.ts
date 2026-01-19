@@ -42,82 +42,80 @@ describe('fetchCCReadExceptions', () => {
       index:
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.ccr-*,metrics-elasticsearch.stack_monitoring.ccr-*',
       filter_path: ['aggregations.remote_clusters.buckets'],
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      nested: {
-                        ignore_unmapped: true,
-                        path: 'ccr_stats.read_exceptions',
-                        query: {
-                          exists: {
-                            field: 'ccr_stats.read_exceptions.exception',
-                          },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    nested: {
+                      ignore_unmapped: true,
+                      path: 'ccr_stats.read_exceptions',
+                      query: {
+                        exists: {
+                          field: 'ccr_stats.read_exceptions.exception',
                         },
                       },
                     },
-                    {
-                      nested: {
-                        ignore_unmapped: true,
-                        path: 'elasticsearch.ccr.read_exceptions',
-                        query: {
-                          exists: {
-                            field: 'elasticsearch.ccr.read_exceptions.exception',
-                          },
+                  },
+                  {
+                    nested: {
+                      ignore_unmapped: true,
+                      path: 'elasticsearch.ccr.read_exceptions',
+                      query: {
+                        exists: {
+                          field: 'elasticsearch.ccr.read_exceptions.exception',
                         },
                       },
                     },
-                  ],
-                  minimum_should_match: 1,
-                },
+                  },
+                ],
+                minimum_should_match: 1,
               },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'ccr_stats' } },
-                    { term: { 'metricset.name': 'ccr' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.ccr' } },
-                  ],
-                  minimum_should_match: 1,
-                },
+            },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'ccr_stats' } },
+                  { term: { 'metricset.name': 'ccr' } },
+                  { term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.ccr' } },
+                ],
+                minimum_should_match: 1,
               },
-              {
-                range: {
-                  timestamp: { format: 'epoch_millis', gte: 1643306331418, lte: 1643309869056 },
-                },
+            },
+            {
+              range: {
+                timestamp: { format: 'epoch_millis', gte: 1643306331418, lte: 1643309869056 },
               },
-            ],
-          },
+            },
+          ],
         },
-        aggs: {
-          remote_clusters: {
-            terms: { field: 'ccr_stats.remote_cluster', size: 10000 },
-            aggs: {
-              follower_indices: {
-                terms: { field: 'ccr_stats.follower_index', size: 10000 },
-                aggs: {
-                  hits: {
-                    top_hits: {
-                      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-                      _source: {
-                        includes: [
-                          'cluster_uuid',
-                          'elasticsearch.cluster.id',
-                          'ccr_stats.read_exceptions',
-                          'elasticsearch.ccr.read_exceptions',
-                          'ccr_stats.shard_id',
-                          'elasticsearch.ccr.shard_id',
-                          'ccr_stats.leader_index',
-                          'elasticsearch.ccr.leader.index',
-                        ],
-                      },
-                      size: 1,
+      },
+      aggs: {
+        remote_clusters: {
+          terms: { field: 'ccr_stats.remote_cluster', size: 10000 },
+          aggs: {
+            follower_indices: {
+              terms: { field: 'ccr_stats.follower_index', size: 10000 },
+              aggs: {
+                hits: {
+                  top_hits: {
+                    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+                    _source: {
+                      includes: [
+                        'cluster_uuid',
+                        'elasticsearch.cluster.id',
+                        'ccr_stats.read_exceptions',
+                        'elasticsearch.ccr.read_exceptions',
+                        'ccr_stats.shard_id',
+                        'elasticsearch.ccr.shard_id',
+                        'ccr_stats.leader_index',
+                        'elasticsearch.ccr.leader.index',
+                      ],
                     },
+                    size: 1,
                   },
                 },
               },

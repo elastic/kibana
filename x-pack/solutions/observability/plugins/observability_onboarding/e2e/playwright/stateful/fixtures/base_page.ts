@@ -14,6 +14,10 @@ import { AutoDetectFlowPage } from '../pom/pages/auto_detect_flow.page';
 import { KubernetesEAFlowPage } from '../pom/pages/kubernetes_ea_flow.page';
 import { OtelKubernetesFlowPage } from '../pom/pages/otel_kubernetes_flow.page';
 import { OtelKubernetesOverviewDashboardPage } from '../pom/pages/otel_kubernetes_overview_dashboard.page';
+import { OtelHostFlowPage } from '../pom/pages/otel_host_flow.page';
+import { HostsOverviewPage } from '../pom/pages/hosts_overview.page';
+import { FirehoseFlowPage } from '../pom/pages/firehose_flow.page';
+import { FleetAgentsOverviewPage } from '../pom/pages/fleet_agents_overview.page';
 
 export const test = base.extend<{
   headerBar: HeaderBar;
@@ -24,6 +28,10 @@ export const test = base.extend<{
   otelKubernetesFlowPage: OtelKubernetesFlowPage;
   kubernetesOverviewDashboardPage: KubernetesOverviewDashboardPage;
   otelKubernetesOverviewDashboardPage: OtelKubernetesOverviewDashboardPage;
+  otelHostFlowPage: OtelHostFlowPage;
+  hostsOverviewPage: HostsOverviewPage;
+  firehoseFlowPage: FirehoseFlowPage;
+  fleetAgentsOverviewPage: FleetAgentsOverviewPage;
 }>({
   headerBar: async ({ page }, use) => {
     await use(new HeaderBar(page));
@@ -45,8 +53,8 @@ export const test = base.extend<{
     await use(new KubernetesEAFlowPage(page));
   },
 
-  otelKubernetesFlowPage: async ({ page }, use) => {
-    await use(new OtelKubernetesFlowPage(page));
+  otelKubernetesFlowPage: async ({ page, context }, use) => {
+    await use(new OtelKubernetesFlowPage(page, context));
   },
 
   kubernetesOverviewDashboardPage: async ({ page }, use) => {
@@ -55,5 +63,21 @@ export const test = base.extend<{
 
   otelKubernetesOverviewDashboardPage: async ({ page }, use) => {
     await use(new OtelKubernetesOverviewDashboardPage(page));
+  },
+
+  otelHostFlowPage: async ({ page }, use) => {
+    await use(new OtelHostFlowPage(page));
+  },
+
+  hostsOverviewPage: async ({ page }, use) => {
+    await use(new HostsOverviewPage(page));
+  },
+
+  firehoseFlowPage: async ({ page }, use) => {
+    await use(new FirehoseFlowPage(page));
+  },
+
+  fleetAgentsOverviewPage: async ({ page }, use) => {
+    await use(new FleetAgentsOverviewPage(page));
   },
 });

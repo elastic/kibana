@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
 import type { CoreSetup } from '@kbn/core/public';
@@ -146,10 +146,14 @@ export const useIndexData = (
   const [columns, setColumns] = useState<MLEuiDataGridColumn[]>([]);
   useEffect(() => {
     if (Array.isArray(dataViewFields)) {
-      setColumns([
+      const cols = [
         ...getDataViewColumns(dataView, dataViewFields),
         ...(combinedRuntimeMappings ? getRuntimeFieldColumns(combinedRuntimeMappings) : []),
-      ]);
+      ];
+
+      // de-duplicate columns by id to avoid runtime fields being added twice
+      const uniqueCols = Array.from(new Map(cols.map((item) => [item.id, item])).values());
+      setColumns(uniqueCols);
     }
   }, [dataView, dataViewFields, combinedRuntimeMappings]);
 

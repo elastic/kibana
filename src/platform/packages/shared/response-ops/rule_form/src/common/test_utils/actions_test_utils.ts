@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionType } from '@kbn/actions-types';
-import { RuleSystemAction } from '@kbn/alerting-types';
-import {
+import type { ActionType } from '@kbn/actions-types';
+import type { RuleSystemAction } from '@kbn/alerting-types';
+import type {
   ActionConnector,
   ActionTypeModel,
   GenericValidationResult,
@@ -30,6 +30,7 @@ export const getConnector = (
     isPreconfigured: false,
     isSystemAction: false,
     isDeprecated: false,
+    isConnectorTypeDeprecated: false,
     ...overwrites,
   };
 };
@@ -68,6 +69,7 @@ export const getActionType = (id: string, overwrites?: Partial<ActionType>): Act
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['stackAlerts'],
     isSystemActionType: false,
+    isDeprecated: false,
     ...overwrites,
   };
 };

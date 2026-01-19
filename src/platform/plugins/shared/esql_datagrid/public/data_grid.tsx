@@ -9,12 +9,12 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { zipObject } from 'lodash';
+import type { UnifiedDataTableRenderCustomToolbarProps } from '@kbn/unified-data-table';
 import {
   UnifiedDataTable,
   DataLoadingState,
   type SortOrder,
   renderCustomToolbar,
-  UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
@@ -155,6 +155,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           hasRoomForGridControls: true,
         },
         gridProps: {
+          inTableSearchControl: customToolbarProps.gridProps.inTableSearchControl,
           additionalControls: (
             <EuiLink
               href={discoverLink}
@@ -204,6 +205,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       rows={rows}
       columnsMeta={columnsMeta}
       services={services}
+      enableInTableSearch
       isPlainRecord
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}

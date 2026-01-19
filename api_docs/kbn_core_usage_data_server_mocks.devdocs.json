@@ -22,7 +22,9 @@
         "tags": [],
         "label": "coreUsageDataServiceMock",
         "description": [],
-        "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
+        "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+        "lineNumber": 179,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,7 +48,9 @@
               "CoreUsageDataService",
               ">>"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
+            "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -66,7 +70,9 @@
               "InternalCoreUsageDataSetup",
               ">"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
+            "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+            "lineNumber": 181,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -118,7 +124,9 @@
                   "], unknown>; } & ",
                   "ICoreUsageStatsClient"
                 ],
-                "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
+                "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+                "lineNumber": 18,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -136,7 +144,9 @@
               "CoreUsageDataStart",
               ">"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
+            "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -152,7 +162,9 @@
         "tags": [],
         "label": "coreUsageStatsClientMock",
         "description": [],
-        "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_stats_client.mock.ts",
+        "path": "src/core/packages/usage-data/server-mocks/src/core_usage_stats_client.mock.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,7 +180,9 @@
               "ICoreUsageStatsClient",
               ">"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_stats_client.mock.ts",
+            "path": "src/core/packages/usage-data/server-mocks/src/core_usage_stats_client.mock.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

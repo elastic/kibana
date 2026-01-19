@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../../../../lib';
+import { RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import {
-  cloneRuleRequestParamsSchemaV1,
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import type {
   CloneRuleRequestParamsV1,
   CloneRuleResponseV1,
 } from '../../../../../common/routes/rule/apis/clone';
+import { cloneRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/clone';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { Rule } from '../../../../application/rule/types';
+import type { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { validateInternalRuleType } from '../../../lib/validate_internal_rule_type';
 
 export const cloneRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -37,8 +40,18 @@ export const cloneRuleRoute = (
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
+          const ruleTypes = alertingContext.listTypes();
+
           const params: CloneRuleRequestParamsV1 = req.params;
           try {
+            const rule = await rulesClient.get({ id: params.id });
+
+            validateInternalRuleType({
+              ruleTypeId: rule.alertTypeId,
+              ruleTypes,
+              operationText: 'clone',
+            });
+
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const cloneRule: Rule<RuleParamsV1> = (await rulesClient.clone({

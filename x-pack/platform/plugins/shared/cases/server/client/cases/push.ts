@@ -31,7 +31,12 @@ import {
   OWNER_FIELD,
 } from '../../../common/constants';
 
-import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
+import {
+  createIncident,
+  getDurationInSeconds,
+  getTimingMetricsForUpdate,
+  getUserProfiles,
+} from './utils';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
@@ -195,7 +200,6 @@ export const push = async (
       }),
     ]);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email, profile_uid } = user;
     const pushedDate = new Date().toISOString();
     const externalServiceResponse = pushRes.data as ExternalServiceResponse;
@@ -228,6 +232,14 @@ export const push = async (
             ? getDurationInSeconds({
                 closedAt: pushedDate,
                 createdAt: theCase.created_at,
+              })
+            : {}),
+          ...(shouldMarkAsClosed
+            ? getTimingMetricsForUpdate({
+                status: CaseStatuses.closed,
+                stateTransitionTimestamp: pushedDate,
+                createdAt: theCase.created_at,
+                inProgressAt: theCase.in_progress_at,
               })
             : {}),
           external_service: externalService,

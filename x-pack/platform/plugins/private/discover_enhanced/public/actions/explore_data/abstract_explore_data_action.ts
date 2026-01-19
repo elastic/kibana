@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DOC_TYPE as LENS_DOC_TYPE } from '@kbn/lens-plugin/common/constants';
+import type {
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  HasType,
+  PublishesDataViews,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
@@ -19,13 +24,9 @@ import {
   apiIsOfType,
   apiPublishesDataViews,
   apiPublishesPartialUnifiedSearch,
-  CanAccessViewMode,
-  EmbeddableApiContext,
   getInheritedViewMode,
-  HasType,
-  PublishesDataViews,
 } from '@kbn/presentation-publishing';
-import { KibanaLocation } from '@kbn/share-plugin/public';
+import type { KibanaLocation } from '@kbn/share-plugin/public';
 
 import * as shared from './shared';
 
@@ -50,9 +51,7 @@ const isApiCompatible = (api: unknown | null): api is AbstractExploreDataActionA
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   return (
-    isApiCompatible(api) &&
-    getInheritedViewMode(api) === ViewMode.VIEW &&
-    !apiIsOfType(api, LENS_DOC_TYPE)
+    isApiCompatible(api) && getInheritedViewMode(api) === 'view' && !apiIsOfType(api, LENS_DOC_TYPE)
   );
 };
 

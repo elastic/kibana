@@ -8,14 +8,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Provider, useStore } from 'react-redux';
-import { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Start as InspectorPublicPluginStart, RequestAdapter } from '@kbn/inspector-plugin/public';
-import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import type {
+  Start as InspectorPublicPluginStart,
+  RequestAdapter,
+} from '@kbn/inspector-plugin/public';
+import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';
-import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
-import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';
+import type { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
+import type { AsObservable, SettingsWorkspaceProps } from '../settings';
+import { Settings } from '../settings';
 import { asSyncedObservable } from '../../helpers/as_observable';
 import { useInspector } from '../../helpers/use_inspector';
 

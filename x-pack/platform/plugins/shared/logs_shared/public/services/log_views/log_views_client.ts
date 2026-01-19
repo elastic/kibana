@@ -6,28 +6,32 @@
  */
 
 import * as rt from 'io-ts';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
 import { lastValueFrom } from 'rxjs';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { getLogViewResponsePayloadRT, putLogViewRequestPayloadRT } from '../../../common/http_api';
 import { getLogViewUrl } from '../../../common/http_api/log_views';
-import {
-  FetchLogViewError,
-  FetchLogViewStatusError,
+import type {
   LogView,
   LogViewAttributes,
-  logViewAttributesRT,
   LogViewReference,
   LogViewsStaticConfig,
   LogViewStatus,
-  PutLogViewError,
   ResolvedLogView,
+} from '../../../common/log_views';
+import {
+  FetchLogViewError,
+  FetchLogViewStatusError,
+  logViewAttributesRT,
+  PutLogViewError,
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { ILogViewsClient } from './types';
+import type { ILogViewsClient } from './types';
+import { excludeTiersQuery } from './exclude_tiers_query';
 
 export class LogViewsClient implements ILogViewsClient {
   constructor(
@@ -62,13 +66,35 @@ export class LogViewsClient implements ILogViewsClient {
     return data;
   }
 
-  public async getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView> {
+  public async getResolvedLogView(
+    logViewReference: LogViewReference
+  ): Promise<ResolvedLogView<DataView>> {
     const logView = await this.getLogView(logViewReference);
     const resolvedLogView = await this.resolveLogView(logView.id, logView.attributes);
     return resolvedLogView;
   }
 
-  public async getResolvedLogViewStatus(resolvedLogView: ResolvedLogView): Promise<LogViewStatus> {
+  public async unwrapDataViewLazy(
+    resolvedLogViewLazy: ResolvedLogView<DataViewLazy>
+  ): Promise<ResolvedLogView<DataView>> {
+    const dataViewReference = await this.dataViews.toDataView(
+      resolvedLogViewLazy.dataViewReference
+    );
+    return {
+      ...resolvedLogViewLazy,
+      dataViewReference,
+    };
+  }
+
+  public async getResolvedLogViewStatus(
+    resolvedLogView: ResolvedLogView<DataView>,
+    uiSettings?: IUiSettingsClient
+  ): Promise<LogViewStatus> {
+    const excludedDataTiers = uiSettings?.get('observability:searchExcludedDataTiers') ?? [];
+    const excludedQuery = excludedDataTiers.length
+      ? excludeTiersQuery(excludedDataTiers)
+      : undefined;
+
     const indexStatus = await lastValueFrom(
       this.search({
         params: {
@@ -78,6 +104,7 @@ export class LogViewsClient implements ILogViewsClient {
           size: 0,
           terminate_after: 1,
           track_total_hits: 1,
+          query: excludedQuery ? { bool: { filter: excludedQuery } } : undefined,
         },
       })
     ).then(
@@ -153,14 +180,16 @@ export class LogViewsClient implements ILogViewsClient {
   public async resolveLogView(
     logViewId: string,
     logViewAttributes: LogViewAttributes
-  ): Promise<ResolvedLogView> {
-    return await resolveLogView(
+  ): Promise<ResolvedLogView<DataView>> {
+    const resolvedDataViewLazy = await resolveLogView(
       logViewId,
       logViewAttributes,
       this.dataViews,
       this.logSourcesService,
       this.config
     );
+
+    return this.unwrapDataViewLazy(resolvedDataViewLazy);
   }
 }
 

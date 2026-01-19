@@ -10,18 +10,22 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
-import './help_popover.scss';
+import type { SerializedStyles } from '@emotion/react';
+import { useHelpPopoverStyles } from './help_popover_styles';
 
-export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> = ({ onClick }) => {
+export const HelpPopoverButton: FC<{
+  onClick: EuiLinkButtonProps['onClick'];
+  styles?: SerializedStyles;
+}> = ({ onClick, styles }) => {
   return (
     <EuiButtonIcon
-      className="mlHelpPopover__buttonIcon"
       size="s"
-      iconType="help"
+      iconType="question"
       aria-label={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
         defaultMessage: 'Help',
       })}
       onClick={onClick}
+      css={styles}
     />
   );
 };
@@ -29,29 +33,36 @@ export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> =
 interface HelpPopoverProps {
   anchorPosition?: EuiPopoverProps['anchorPosition'];
   title?: string;
+  buttonCss?: SerializedStyles;
 }
 
 export const HelpPopover: FC<PropsWithChildren<HelpPopoverProps>> = ({
   anchorPosition,
   children,
   title,
+  buttonCss,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { helpPopoverPanel, helpPopoverContent } = useHelpPopoverStyles();
 
   return (
     <EuiPopover
       anchorPosition={anchorPosition}
-      button={<HelpPopoverButton onClick={setIsPopoverOpen.bind(null, !isPopoverOpen)} />}
-      className="mlHelpPopover"
+      button={
+        <HelpPopoverButton
+          onClick={setIsPopoverOpen.bind(null, !isPopoverOpen)}
+          styles={buttonCss}
+        />
+      }
       closePopover={setIsPopoverOpen.bind(null, false)}
       isOpen={isPopoverOpen}
       ownFocus
-      panelClassName="mlHelpPopover__panel"
+      panelProps={{ css: helpPopoverPanel }}
       panelPaddingSize="none"
     >
       {title && <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>}
 
-      <EuiText className="mlHelpPopover__content eui-scrollBar" size="s" tabIndex={0}>
+      <EuiText css={helpPopoverContent} size="s" tabIndex={0}>
         {children}
       </EuiText>
     </EuiPopover>

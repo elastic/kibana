@@ -17,5 +17,5 @@ export * from './aggs_service';
 export * from './buckets';
 export * from './metrics';
 export * from './param_types';
-export * from './types';
+export type * from './types';
 export * from './utils';

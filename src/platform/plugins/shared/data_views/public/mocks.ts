@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsPlugin, DataViewsContract } from '.';
+import type { DataViewsPlugin, DataViewsContract } from '.';
 
 export type Setup = jest.Mocked<ReturnType<DataViewsPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataViewsPlugin['start']>>;
@@ -35,15 +35,26 @@ const createStartContract = (): Start => {
     },
     getDefaultDataView: jest.fn().mockReturnValue(Promise.resolve({})),
     getDefaultId: jest.fn().mockReturnValue(Promise.resolve('')),
-    get: jest.fn().mockReturnValue(Promise.resolve({})),
+    get: jest.fn().mockReturnValue(
+      Promise.resolve({
+        title: '',
+        fields: [],
+      })
+    ),
     clearCache: jest.fn(),
     getCanSaveSync: jest.fn(),
-    getIdsWithTitle: jest.fn(),
+    getIdsWithTitle: jest.fn().mockResolvedValue([]),
     getFieldsForIndexPattern: jest.fn(),
-    create: jest.fn().mockReturnValue(Promise.resolve({})),
+    create: jest.fn().mockReturnValue(
+      Promise.resolve({
+        title: '',
+        fields: [],
+      })
+    ),
     toDataView: jest.fn().mockReturnValue(Promise.resolve({})),
     toDataViewLazy: jest.fn().mockReturnValue(Promise.resolve({})),
     clearInstanceCache: jest.fn(),
+    refreshFields: jest.fn().mockReturnValue(Promise.resolve()),
   } as unknown as jest.Mocked<DataViewsContract>;
 };
 

@@ -6,61 +6,84 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Client } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { first } from 'rxjs';
 
+import type { TaskInstance, SerializedConcreteTaskInstance } from './task';
+import { TaskStatus, TaskLifecycleResult } from './task';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
-  TaskInstance,
-  TaskStatus,
-  TaskLifecycleResult,
-  SerializedConcreteTaskInstance,
-} from './task';
-import {
-  ElasticsearchClientMock,
+  coreMock,
   elasticsearchServiceMock,
+  httpServerMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import { TaskStore, SearchOpts, AggregationOpts, taskInstanceToAttributes } from './task_store';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { SearchOpts, AggregationOpts } from './task_store';
+import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SavedObjectAttributes, IBasePath, SavedObjectsServiceStart } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
-import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { MsearchError } from './lib/msearch_error';
+import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { MsearchError } from './lib/errors';
+import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsClientOptions,
+} from '@kbn/encrypted-saved-objects-shared';
+import { TaskValidator } from './task_validator';
+import { bulkMarkApiKeysForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
 
-const mockGetValidatedTaskInstanceFromReading = jest.fn();
-const mockGetValidatedTaskInstanceForUpdating = jest.fn();
-jest.mock('./task_validator', () => {
+let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
+let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
+
+jest.mock('./lib/api_key_utils', () => ({
+  getApiKeyAndUserScope: jest.fn(),
+}));
+
+jest.mock('./lib/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
+
+(bulkMarkApiKeysForInvalidation as jest.Mock).mockResolvedValue(void 0);
+
+function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
-    TaskValidator: jest.fn().mockImplementation(() => {
-      return {
-        getValidatedTaskInstanceFromReading: mockGetValidatedTaskInstanceFromReading,
-        getValidatedTaskInstanceForUpdating: mockGetValidatedTaskInstanceForUpdating,
-      };
-    }),
-  };
-});
+    getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn((findOptions, deps) =>
+      savedObjectsClientMock.create().createPointInTimeFinder(findOptions, deps)
+    ),
+  } as unknown as jest.Mocked<EncryptedSavedObjectsClient>;
+}
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
+const scopedSavedObjectsClient = savedObjectsRepositoryMock.create();
+const esoClient = createEncryptedSavedObjectsClientMock();
+
 const serializer = savedObjectsServiceMock.createSerializer();
 const adHocTaskCounter = new AdHocTaskCounter();
 
 const randomId = () => `id-${_.random(1, 20)}`;
 
+const coreStart = coreMock.createStart();
+
+const basePathMock = { get: () => '/', serverBasePath: '/' } as unknown as IBasePath;
+
 beforeEach(() => {
   jest.resetAllMocks();
-  jest.requireMock('./task_validator').TaskValidator.mockImplementation(() => {
-    return {
-      getValidatedTaskInstanceFromReading: mockGetValidatedTaskInstanceFromReading,
-      getValidatedTaskInstanceForUpdating: mockGetValidatedTaskInstanceForUpdating,
-    };
-  });
-  mockGetValidatedTaskInstanceFromReading.mockImplementation((task) => task);
-  mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => task);
+
+  mockGetValidatedTaskInstanceFromReading = jest
+    .spyOn(TaskValidator.prototype, 'getValidatedTaskInstanceFromReading')
+    .mockImplementation((task) => task);
+
+  mockGetValidatedTaskInstanceForUpdating = jest
+    .spyOn(TaskValidator.prototype, 'getValidatedTaskInstanceForUpdating')
+    .mockImplementation((task) => task);
 });
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
@@ -104,7 +127,7 @@ describe('TaskStore', () => {
   describe('schedule', () => {
     let store: TaskStore;
 
-    beforeAll(() => {
+    beforeEach(() => {
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -118,14 +141,22 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     afterEach(() => {
       adHocTaskCounter.reset();
+      jest.resetAllMocks();
     });
 
-    async function testSchedule(task: unknown) {
+    async function testSchedule(task: unknown, options?: Record<string, unknown>) {
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
         id: 'testid',
         type,
@@ -133,7 +164,7 @@ describe('TaskStore', () => {
         references: [],
         version: '123',
       }));
-      const result = await store.schedule(task as TaskInstance);
+      const result = await store.schedule(task as TaskInstance, options);
 
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
 
@@ -225,10 +256,222 @@ describe('TaskStore', () => {
       expect(attributes.state).toEqual('{}');
     });
 
+    test('schedule a task without API key if request is provided but security disabled', async () => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => false,
+        basePath: basePathMock,
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
+
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+
+      savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
+        id: 'testid',
+        type,
+        attributes,
+        references: [],
+        version: '123',
+      }));
+
+      await store.schedule(task as TaskInstance, { request });
+
+      expect(savedObjectsClient.create).toHaveBeenCalledWith(
+        'task',
+        {
+          attempts: 0,
+          params: '{"hello":"world"}',
+          retryAt: null,
+          runAt: '2019-02-12T21:01:22.479Z',
+          scheduledAt: '2019-02-12T21:01:22.479Z',
+          startedAt: null,
+          state: '{"foo":"bar"}',
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+        },
+        {
+          id: 'id',
+          refresh: false,
+        }
+      );
+    });
+
+    test('schedule a task with API key if request is provided', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+
+      const mockUserScope = {
+        apiKeyId: 'apiKeyId',
+        apiKeyCreatedBy: 'testUser',
+        spaceId: 'testSpace',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('id', {
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+
+      scopedSavedObjectsClient.create.mockImplementation(
+        async (type: string, attributes: unknown) => ({
+          id: 'testid',
+          type,
+          attributes,
+          references: [],
+          version: '123',
+        })
+      );
+
+      const result = await store.schedule(task as TaskInstance, { request });
+
+      expect(scopedSavedObjectsClient.create).toHaveBeenCalledWith(
+        'task',
+        {
+          attempts: 0,
+          params: '{"hello":"world"}',
+          retryAt: null,
+          runAt: '2019-02-12T21:01:22.479Z',
+          scheduledAt: '2019-02-12T21:01:22.479Z',
+          startedAt: null,
+          state: '{"foo":"bar"}',
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          apiKey: mockApiKey,
+          userScope: mockUserScope,
+        },
+        {
+          id: 'id',
+          refresh: false,
+        }
+      );
+
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [task],
+        request,
+        coreStart.security,
+        basePathMock
+      );
+
+      expect(savedObjectsClient.create).not.toHaveBeenCalled();
+
+      expect(result).toEqual({
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+        attempts: 0,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        runAt: mockedDate,
+        status: 'idle',
+        partition: 225,
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+        id: 'testid',
+        version: '123',
+      });
+    });
+
+    test('errors when scheduling a task with API key if unable to encrypt SO', async () => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: false,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
+      });
+
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.schedule(task as TaskInstance, { request })).rejects.toThrow(
+        'Unable to schedule task(s) with API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+      );
+    });
+
     test('errors if the task type is unknown', async () => {
       await expect(testSchedule({ taskType: 'nope', params: {}, state: {} })).rejects.toThrow(
         /Unsupported task type "nope"/i
       );
+    });
+
+    test('errors if API key could not be created', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      (getApiKeyAndUserScope as jest.Mock).mockRejectedValueOnce(
+        new Error('Something went wrong!')
+      );
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.schedule(task as TaskInstance, { request })).rejects.toThrow(
+        'Something went wrong!'
+      );
+
+      expect(getApiKeyAndUserScope).toHaveBeenCalled();
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -257,6 +500,21 @@ describe('TaskStore', () => {
       expect(adHocTaskCounter.count).toEqual(1);
     });
 
+    test('throws an error when an invalid interval is provided', async () => {
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
+
+      const task = {
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        schedule: { interval: 'invalid-interval' },
+      };
+      await expect(testSchedule(task)).rejects.toThrowError(
+        `[TaskValidator] Invalid interval "invalid-interval". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
+      );
+    });
+
     test('does not increment adHocTaskCounter if the task is recurring', async () => {
       const task: TaskInstance = {
         id: 'id',
@@ -274,14 +532,9 @@ describe('TaskStore', () => {
   describe('fetch', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let childEsClient: ReturnType<
-      typeof elasticsearchServiceMock.createClusterClient
-    >['asInternalUser'];
 
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -295,6 +548,10 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -303,17 +560,17 @@ describe('TaskStore', () => {
       hits: Array<estypes.SearchHit<unknown>> = [],
       limitResponse: boolean = false
     ) {
-      childEsClient.search.mockResponse({
+      esClient.search.mockResponse({
         hits: { hits, total: hits.length },
       } as estypes.SearchResponse);
 
       const result = await store.fetch(opts, limitResponse);
 
-      expect(childEsClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledTimes(1);
 
       return {
         result,
-        args: childEsClient.search.mock.calls[0][0],
+        args: esClient.search.mock.calls[0][0],
       };
     }
 
@@ -321,10 +578,8 @@ describe('TaskStore', () => {
       const { args } = await testFetch();
       expect(args).toMatchObject({
         index: 'tasky',
-        body: {
-          sort: [{ 'task.runAt': 'asc' }],
-          query: { term: { type: 'task' } },
-        },
+        sort: [{ 'task.runAt': 'asc' }],
+        query: { term: { type: 'task' } },
       });
     });
 
@@ -336,11 +591,9 @@ describe('TaskStore', () => {
       });
 
       expect(args).toMatchObject({
-        body: {
-          query: {
-            bool: {
-              must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'bar' } }],
-            },
+        query: {
+          bool: {
+            must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'bar' } }],
           },
         },
       });
@@ -348,7 +601,7 @@ describe('TaskStore', () => {
 
     test('pushes error from call cluster to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      childEsClient.search.mockRejectedValue(new Error('Failure'));
+      esClient.search.mockRejectedValue(new Error('Failure'));
       await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
@@ -357,10 +610,8 @@ describe('TaskStore', () => {
       const { args } = await testFetch({}, [], true);
       expect(args).toMatchObject({
         index: 'tasky',
-        body: {
-          sort: [{ 'task.runAt': 'asc' }],
-          query: { term: { type: 'task' } },
-        },
+        sort: [{ 'task.runAt': 'asc' }],
+        query: { term: { type: 'task' } },
         _source_excludes: ['task.state', 'task.params'],
       });
     });
@@ -369,19 +620,52 @@ describe('TaskStore', () => {
   describe('msearch', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let childEsClient: ReturnType<
-      typeof elasticsearchServiceMock.createClusterClient
-    >['asInternalUser'];
 
-    beforeAll(() => {
+    const mockTask = {
+      taskType: 'taskWithApiKey',
+      params: '{}',
+      state: '{}',
+      enabled: true,
+      schedule: {
+        interval: '30s',
+      },
+      traceparent: '',
+      attempts: 1,
+      scheduledAt: '2019-02-12T21:01:22.479Z',
+      startedAt: '2019-02-12T21:01:22.479Z',
+      retryAt: '2019-02-12T21:01:22.479Z',
+      runAt: '2019-02-12T21:01:22.479Z',
+      status: 'running',
+      partition: 237,
+      userScope: {
+        apiKeyId: 'EJYCtpUBGuyFd3FroZmZ',
+        spaceId: 'default',
+        apiKeyCreatedByUser: false,
+      },
+      ownerId: 'kibana:5b2de169-2785-441b-ae8c-186a1936b17d',
+      id: 'task1',
+      version: '123',
+    };
+
+    beforeEach(() => {
+      const mockSerializer = savedObjectsServiceMock.createSerializer();
+      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
+      mockSerializer.rawToSavedObject = jest.fn().mockImplementation((doc) => ({
+        id: 'task1',
+        version: '123',
+        type: 'task',
+        references: [],
+        attributes: {
+          ...doc._source.task,
+        },
+      }));
+
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
-        serializer,
+        serializer: mockSerializer,
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -390,14 +674,38 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
+
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield {
+            saved_objects: [
+              {
+                id: 'task1',
+                attributes: {
+                  ...mockTask,
+                  apiKey: 'decryptedApiKey',
+                },
+              },
+            ],
+          };
+        },
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     async function testMsearch(
       optsArray: SearchOpts[],
       hitsArray: Array<estypes.SearchHitsMetadata<unknown>> = []
     ) {
-      childEsClient.msearch.mockResponse({
+      esClient.msearch.mockResponse({
         took: 0,
         responses: hitsArray.map((hits) => ({
           hits,
@@ -414,11 +722,11 @@ describe('TaskStore', () => {
 
       const result = await store.msearch(optsArray);
 
-      expect(childEsClient.msearch).toHaveBeenCalledTimes(1);
+      expect(esClient.msearch).toHaveBeenCalledTimes(1);
 
       return {
         result,
-        args: childEsClient.msearch.mock.calls[0][0],
+        args: esClient.msearch.mock.calls[0][0],
       };
     }
 
@@ -426,7 +734,7 @@ describe('TaskStore', () => {
       const { args } = await testMsearch([{}], []);
       expect(args).toMatchObject({
         index: 'tasky',
-        body: [
+        searches: [
           {},
           {
             sort: [{ 'task.runAt': 'asc' }],
@@ -454,7 +762,7 @@ describe('TaskStore', () => {
       );
 
       expect(args).toMatchObject({
-        body: [
+        searches: [
           {},
           {
             query: {
@@ -475,9 +783,38 @@ describe('TaskStore', () => {
       });
     });
 
+    test('should return tasks with decrypted API keys', async () => {
+      const { result } = await testMsearch(
+        [{}],
+        [
+          {
+            hits: [
+              {
+                _index: '.kibana_task_manager_8.16.0_001',
+                _source: {
+                  task: { ...mockTask, apiKey: 'encryptedKey' },
+                },
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(result.docs[0]).toEqual({
+        ...mockTask,
+        retryAt: new Date(mockTask.retryAt),
+        runAt: new Date(mockTask.runAt),
+        scheduledAt: new Date(mockTask.scheduledAt),
+        startedAt: new Date(mockTask.startedAt),
+        state: {},
+        params: {},
+        apiKey: 'decryptedApiKey',
+      });
+    });
+
     test('pushes error from call cluster to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      childEsClient.msearch.mockResponse({
+      esClient.msearch.mockResponse({
         took: 0,
         responses: [
           {
@@ -525,6 +862,10 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -553,20 +894,18 @@ describe('TaskStore', () => {
       });
       expect(args).toMatchObject({
         index: 'tasky',
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: {
-                bool: {
-                  must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
-                  must_not: [{ term: { 'task.status': 'unrecognized' } }],
-                },
+        size: 0,
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                must_not: [{ term: { 'task.status': 'unrecognized' } }],
               },
             },
           },
-          aggs: { testAgg: { terms: { field: 'task.taskType' } } },
         },
+        aggs: { testAgg: { terms: { field: 'task.taskType' } } },
       });
     });
 
@@ -579,27 +918,25 @@ describe('TaskStore', () => {
       });
 
       expect(args).toMatchObject({
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              must: [
-                {
-                  bool: {
-                    filter: {
-                      bool: {
-                        must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
-                        must_not: [{ term: { 'task.status': 'unrecognized' } }],
-                      },
+        size: 0,
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  filter: {
+                    bool: {
+                      must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                      must_not: [{ term: { 'task.status': 'unrecognized' } }],
                     },
                   },
                 },
-                { term: { 'task.taskType': 'bar' } },
-              ],
-            },
+              },
+              { term: { 'task.taskType': 'bar' } },
+            ],
           },
-          aggs: { testAgg: { terms: { field: 'task.taskType' } } },
         },
+        aggs: { testAgg: { terms: { field: 'task.taskType' } } },
       });
     });
 
@@ -610,21 +947,19 @@ describe('TaskStore', () => {
       });
 
       expect(args).toMatchObject({
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: {
-                bool: {
-                  must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
-                  must_not: [{ term: { 'task.status': 'unrecognized' } }],
-                },
+        size: 0,
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                must_not: [{ term: { 'task.status': 'unrecognized' } }],
               },
             },
           },
-          aggs: { testAgg: { terms: { field: 'task.taskType' } } },
-          runtime_mappings: { testMapping: { type: 'long', script: { source: `` } } },
         },
+        aggs: { testAgg: { terms: { field: 'task.taskType' } } },
+        runtime_mappings: { testMapping: { type: 'long', script: { source: `` } } },
       });
     });
 
@@ -655,6 +990,10 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -792,13 +1131,81 @@ describe('TaskStore', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
+
+    test('throws an error when an invalid interval is provided', async () => {
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
+
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: 'myTraceparent',
+        partition: 99,
+        schedule: { interval: 'invalid-interval' },
+      };
+
+      savedObjectsClient.update.mockImplementation(
+        async (type: string, id: string, attributes: SavedObjectAttributes) => {
+          return {
+            id,
+            type,
+            attributes,
+            references: [],
+            version: '123',
+          };
+        }
+      );
+
+      await expect(store.update(task, { validate: true })).rejects.toThrowError(
+        `[TaskValidator] Invalid interval "invalid-interval". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
+      );
+    });
   });
 
   describe('bulkUpdate', () => {
     let store: TaskStore;
     const logger = mockLogger();
+    let mockGetScopedClient: jest.Mock;
 
-    beforeAll(() => {
+    const bulkUpdateTask = {
+      runAt: mockedDate,
+      scheduledAt: mockedDate,
+      startedAt: null,
+      retryAt: null,
+      id: 'task:324242',
+      params: { hello: 'world' },
+      state: { foo: 'bar' },
+      taskType: 'report',
+      attempts: 3,
+      status: 'idle' as TaskStatus,
+      version: '123',
+      ownerId: null,
+      traceparent: '',
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+    const mockUserScope = {
+      apiKeyId: 'apiKeyId',
+      apiKeyCreatedByUser: false,
+      spaceId: 'testSpace',
+    };
+
+    beforeEach(() => {
+      mockGetScopedClient = jest.fn();
+      const mockSavedObjectsService = {
+        getScopedClient: mockGetScopedClient,
+      };
       store = new TaskStore({
         logger,
         index: 'tasky',
@@ -812,33 +1219,27 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: mockSavedObjectsService as unknown as SavedObjectsServiceStart,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
+      store.registerEncryptedSavedObjectsClient(esoClient);
+    });
+
+    afterEach(() => {
+      adHocTaskCounter.reset();
+      jest.resetAllMocks();
     });
 
     test(`doesn't validate whenever validate:false is passed-in`, async () => {
-      const task = {
-        runAt: mockedDate,
-        scheduledAt: mockedDate,
-        startedAt: null,
-        retryAt: null,
-        id: 'task:324242',
-        params: { hello: 'world' },
-        state: { foo: 'bar' },
-        taskType: 'report',
-        attempts: 3,
-        status: 'idle' as TaskStatus,
-        version: '123',
-        ownerId: null,
-        traceparent: '',
-      };
-
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: '324242',
             type: 'task',
             attributes: {
-              ...task,
+              ...bulkUpdateTask,
               state: '{"foo":"bar"}',
               params: '{"hello":"world"}',
             },
@@ -848,19 +1249,20 @@ describe('TaskStore', () => {
         ],
       });
 
-      await store.bulkUpdate([task], { validate: false });
+      await store.bulkUpdate([bulkUpdateTask], { validate: false });
 
-      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(bulkUpdateTask, {
         validate: false,
       });
 
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         [
           {
-            id: task.id,
+            id: bulkUpdateTask.id,
+            mergeAttributes: true,
             type: 'task',
-            version: task.version,
-            attributes: taskInstanceToAttributes(task, task.id),
+            version: bulkUpdateTask.version,
+            attributes: taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
           },
         ],
         { refresh: false }
@@ -868,29 +1270,13 @@ describe('TaskStore', () => {
     });
 
     test(`validates whenever validate:true is passed-in`, async () => {
-      const task = {
-        runAt: mockedDate,
-        scheduledAt: mockedDate,
-        startedAt: null,
-        retryAt: null,
-        id: 'task:324242',
-        params: { hello: 'world' },
-        state: { foo: 'bar' },
-        taskType: 'report',
-        attempts: 3,
-        status: 'idle' as TaskStatus,
-        version: '123',
-        ownerId: null,
-        traceparent: '',
-      };
-
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: '324242',
             type: 'task',
             attributes: {
-              ...task,
+              ...bulkUpdateTask,
               state: '{"foo":"bar"}',
               params: '{"hello":"world"}',
             },
@@ -900,19 +1286,20 @@ describe('TaskStore', () => {
         ],
       });
 
-      await store.bulkUpdate([task], { validate: true });
+      await store.bulkUpdate([bulkUpdateTask], { validate: true });
 
-      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(bulkUpdateTask, {
         validate: true,
       });
 
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         [
           {
-            id: task.id,
+            id: bulkUpdateTask.id,
+            mergeAttributes: true,
             type: 'task',
-            version: task.version,
-            attributes: taskInstanceToAttributes(task, task.id),
+            version: bulkUpdateTask.version,
+            attributes: taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
           },
         ],
         { refresh: false }
@@ -920,12 +1307,40 @@ describe('TaskStore', () => {
     });
 
     test('pushes error from saved objects client to errors$', async () => {
-      const task = {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('Failure'));
+      await expect(
+        store.bulkUpdate([bulkUpdateTask], { validate: true })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test('skips the update with invalid interval', async () => {
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
+
+      const task1 = {
         runAt: mockedDate,
         scheduledAt: mockedDate,
         startedAt: null,
         retryAt: null,
-        id: 'task:324242',
+        id: 'task:1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'yawn',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      const task2 = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:2',
         params: { hello: 'world' },
         state: { foo: 'bar' },
         taskType: 'report',
@@ -934,14 +1349,360 @@ describe('TaskStore', () => {
         version: '123',
         ownerId: null,
         traceparent: '',
+        schedule: { interval: 'invalid' }, // Invalid interval
       };
 
-      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('Failure'));
-      await expect(
-        store.bulkUpdate([task], { validate: true })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
-      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'task:1',
+            type: 'task',
+            attributes: {
+              ...task1,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([task1, task2], { validate: true });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        '[TaskStore] An error occured. Task task:2 will not be updated. Error: [TaskValidator] Invalid interval "invalid". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.'
+      );
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: task1.id,
+            mergeAttributes: true,
+            type: 'task',
+            version: task1.version,
+            attributes: taskInstanceToAttributes(task1, task1.id),
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('forwards mergeAttributes as expected when defined', async () => {
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...bulkUpdateTask,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([bulkUpdateTask], { validate: false, mergeAttributes: false });
+
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(bulkUpdateTask, {
+        validate: false,
+      });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('bulk update task with API key when api key, user scope and request are available', async () => {
+      const mockScopedClient = {
+        bulkUpdate: jest.fn().mockResolvedValue({
+          saved_objects: [
+            {
+              id: '324242',
+              type: 'task',
+              attributes: {
+                ...bulkUpdateTask,
+                apiKey: mockApiKey,
+                userScope: mockUserScope,
+                state: '{"foo":"bar"}',
+                params: '{"hello":"world"}',
+              },
+              references: [],
+              version: '123',
+            },
+          ],
+        }),
+      };
+
+      mockGetScopedClient.mockReturnValue(mockScopedClient);
+
+      await store.bulkUpdate(
+        [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        }
+      );
+
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(
+        { ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope },
+        {
+          validate: false,
+        }
+      );
+
+      expect(mockGetScopedClient).toHaveBeenCalledWith(mockRequest, {
+        includedHiddenTypes: ['task'],
+        excludedExtensions: ['security', 'spaces'],
+      });
+      expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
+          },
+        ],
+        { refresh: false }
+      );
+
+      expect(logger.debug).not.toHaveBeenCalled();
+      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    test('uses regular repository when request is provided but docs have no apiKey', async () => {
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...bulkUpdateTask,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([bulkUpdateTask], {
+        validate: false,
+        mergeAttributes: false,
+        options: { request: mockRequest },
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Request is defined but none of the tasks have API key or user scope. Using regular saved objects repository to bulk update tasks.'
+        )
+      );
+
+      expect(mockGetScopedClient).not.toHaveBeenCalled();
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+            },
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('uses regular repository when request is provided but docs have no userScope', async () => {
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...bulkUpdateTask,
+              apiKey: mockApiKey,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([{ ...bulkUpdateTask, apiKey: mockApiKey }], {
+        validate: false,
+        mergeAttributes: false,
+        options: { request: mockRequest },
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Request is defined but none of the tasks have API key or user scope. Using regular saved objects repository to bulk update tasks.'
+        )
+      );
+
+      expect(mockGetScopedClient).not.toHaveBeenCalled();
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+              apiKey: mockApiKey,
+            },
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('uses regular repository when no request is provided even if docs have apiKey and userScope', async () => {
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...bulkUpdateTask,
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate(
+        [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: {},
+        }
+      );
+
+      expect(logger.debug).not.toHaveBeenCalled();
+
+      expect(mockGetScopedClient).not.toHaveBeenCalled();
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('uses regular repository when security is disabled even with request and encrypted fields', async () => {
+      // Create store with security disabled
+      const storeWithoutSecurity = new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: {
+          getScopedClient: mockGetScopedClient,
+        } as unknown as SavedObjectsServiceStart,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => false,
+        basePath: basePathMock,
+      });
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...bulkUpdateTask,
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await storeWithoutSecurity.bulkUpdate(
+        [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        }
+      );
+
+      expect(mockGetScopedClient).not.toHaveBeenCalled();
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
+          },
+        ],
+        { refresh: false }
+      );
     });
   });
 
@@ -965,6 +1726,10 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -1373,14 +2138,134 @@ describe('TaskStore', () => {
 
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: malformed response]`);
     });
+
+    test('skips the update with invalid interval', async () => {
+      const task1 = {
+        id: 'task1',
+        version: 'WzQsMV0=',
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        ownerId: 'testtest',
+        traceparent: '',
+      };
+
+      const task2 = {
+        id: 'task2',
+        version: 'WzQsMV0=',
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        ownerId: 'testtest',
+        traceparent: '',
+        schedule: { interval: 'invalid-interval' },
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:task1',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task1, task2]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:task1', if_primary_term: 1, if_seq_no: 4 } },
+          {
+            doc: {
+              task: {
+                attempts: 3,
+                ownerId: 'testtest',
+                params: '{"hello":"world"}',
+                retryAt: null,
+                runAt: '2019-02-12T21:01:22.479Z',
+                scheduledAt: '2019-02-12T21:01:22.479Z',
+                startedAt: null,
+                state: '{"foo":"bar"}',
+                status: 'idle',
+                taskType: 'report',
+                traceparent: '',
+              },
+            },
+          },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([
+        // New version returned after update
+        asOk({ ...task1, version: 'Wzg0LDFd' }),
+      ]);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        '[TaskStore] Invalid interval "invalid-interval". Task task2 will not be updated.'
+      );
+    });
   });
 
   describe('remove', () => {
     let store: TaskStore;
+    const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+    const logger = mockLogger();
+    const mockTask = {
+      id: 'task1',
+      type: 'test',
+      attributes: {
+        attempts: 0,
+        params: '{"hello":"world"}',
+        retryAt: null,
+        runAt: '2019-02-12T21:01:22.479Z',
+        scheduledAt: '2019-02-12T21:01:22.479Z',
+        startedAt: null,
+        state: '{"foo":"bar"}',
+        stateVersion: 1,
+        status: 'idle',
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+        partition: 225,
+        apiKey: mockApiKey,
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          apiKeyCreatedBy: 'testUser',
+          spaceId: 'testSpace',
+        },
+      },
+      references: [],
+      version: '123',
+    };
 
-    beforeAll(() => {
+    beforeEach(() => {
       store = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -1392,17 +2277,46 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
+
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockTask] };
+        },
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     test('removes the task with the specified id', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(mockTask);
       const id = randomId();
       const result = await store.remove(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
     });
 
+    test('invalidates API key of task with api key', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(mockTask);
+      const id = 'task1';
+      const result = await store.remove(id);
+      expect(result).toBeUndefined();
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
+        apiKeyIds: ['apiKeyId'],
+        logger,
+        savedObjectsClient,
+      });
+    });
+
     test('pushes error from saved objects client to errors$', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(mockTask);
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.delete.mockRejectedValue(new Error('Failure'));
       await expect(store.remove(randomId())).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1414,12 +2328,68 @@ describe('TaskStore', () => {
 
   describe('bulkRemove', () => {
     let store: TaskStore;
+    const mockApiKey1 = Buffer.from('apiKeyId1:apiKey').toString('base64');
+    const mockApiKey2 = Buffer.from('apiKeyId2:apiKey').toString('base64');
+    const logger = mockLogger();
+    const mockTask1 = {
+      id: 'task1',
+      type: 'test',
+      attributes: {
+        attempts: 0,
+        params: '{"hello":"world"}',
+        retryAt: null,
+        runAt: '2019-02-12T21:01:22.479Z',
+        scheduledAt: '2019-02-12T21:01:22.479Z',
+        startedAt: null,
+        state: '{"foo":"bar"}',
+        stateVersion: 1,
+        status: 'idle',
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+        partition: 225,
+        apiKey: mockApiKey1,
+        userScope: {
+          apiKeyId: 'apiKeyId1',
+          apiKeyCreatedBy: 'testUser',
+          spaceId: 'testSpace',
+        },
+      },
+      references: [],
+      version: '123',
+    };
+
+    const mockTask2 = {
+      id: 'task2',
+      type: 'test',
+      attributes: {
+        attempts: 0,
+        params: '{"hello":"world"}',
+        retryAt: null,
+        runAt: '2019-02-12T21:01:22.479Z',
+        scheduledAt: '2019-02-12T21:01:22.479Z',
+        startedAt: null,
+        state: '{"foo":"bar"}',
+        stateVersion: 1,
+        status: 'idle',
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+        partition: 225,
+        apiKey: mockApiKey2,
+        userScope: {
+          apiKeyId: 'apiKeyId2',
+          apiKeyCreatedBy: 'testUser',
+          spaceId: 'testSpace',
+        },
+      },
+      references: [],
+      version: '123',
+    };
 
     const tasksIdsToDelete = [randomId(), randomId()];
 
-    beforeAll(() => {
+    beforeEach(() => {
       store = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -1431,10 +2401,27 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
+
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockTask1, mockTask2] };
+        },
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     test('removes the tasks with the specified ids', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [mockTask1, mockTask2],
+      });
       const result = await store.bulkRemove(tasksIdsToDelete);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith(
@@ -1446,7 +2433,23 @@ describe('TaskStore', () => {
       );
     });
 
+    test('bulk marks API keys for invalidation for tasks with API keys', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [mockTask1, mockTask2],
+      });
+      const result = await store.bulkRemove(['task1', 'task2']);
+      expect(result).toBeUndefined();
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
+        apiKeyIds: ['apiKeyId1', 'apiKeyId2'],
+        logger,
+        savedObjectsClient,
+      });
+    });
+
     test('pushes error from saved objects client to errors$', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [mockTask1, mockTask2],
+      });
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.bulkDelete.mockRejectedValue(new Error('Failure'));
       await expect(store.bulkRemove(tasksIdsToDelete)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1473,6 +2476,10 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -1536,6 +2543,10 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -1634,6 +2645,10 @@ describe('TaskStore', () => {
             requestTimeouts: {
               update_by_query: 1000,
             },
+            savedObjectsService: coreStart.savedObjects,
+            security: coreStart.security,
+            getIsSecurityEnabled: () => true,
+            basePath: basePathMock,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -1659,6 +2674,10 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -1682,6 +2701,10 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -1690,10 +2713,11 @@ describe('TaskStore', () => {
 
   describe('bulkSchedule', () => {
     let store: TaskStore;
+    const logger = mockLogger();
 
-    beforeAll(() => {
+    beforeEach(() => {
       store = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -1705,11 +2729,19 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     afterEach(() => {
       adHocTaskCounter.reset();
+      jest.resetAllMocks();
     });
 
     async function testBulkSchedule(task: unknown) {
@@ -1774,7 +2806,10 @@ describe('TaskStore', () => {
             },
           },
         ],
-        { refresh: false }
+        {
+          overwrite: true,
+          refresh: false,
+        }
       );
 
       expect(result).toEqual([
@@ -1814,6 +2849,322 @@ describe('TaskStore', () => {
           id: 'testid',
         },
       ]);
+    });
+
+    test('bulk schedules tasks with API key if request is provided', async () => {
+      const task1 = {
+        id: 'task1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const task2 = {
+        id: 'task2',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+
+      const mockUserScope = {
+        apiKeyId: 'apiKeyId',
+        apiKeyCreatedBy: 'testUser',
+        spaceId: 'testSpace',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', {
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+      });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+
+      scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: 'task1',
+            type: 'test',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              stateVersion: 1,
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+              partition: 225,
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
+            references: [],
+            version: '123',
+          },
+          {
+            id: 'task2',
+            type: 'test',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              stateVersion: 1,
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+              partition: 225,
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      }));
+
+      const result = await store.bulkSchedule([task1, task2], { request });
+
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [task1, task2],
+        request,
+        coreStart.security,
+        basePathMock
+      );
+
+      expect(savedObjectsClient.create).not.toHaveBeenCalled();
+
+      expect(result).toEqual([
+        {
+          id: 'task1',
+          attempts: 0,
+          params: { hello: 'world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          startedAt: null,
+          state: { foo: 'bar' },
+          stateVersion: 1,
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          apiKey: mockApiKey,
+          userScope: mockUserScope,
+          version: '123',
+        },
+        {
+          id: 'task2',
+          attempts: 0,
+          params: { hello: 'world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          startedAt: null,
+          state: { foo: 'bar' },
+          stateVersion: 1,
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          apiKey: mockApiKey,
+          userScope: mockUserScope,
+          version: '123',
+        },
+      ]);
+    });
+
+    test('errors when bulk scheduling a task with API key if unable to encrypt SO', async () => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: false,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
+      });
+
+      const task1 = {
+        id: 'task1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task1 as TaskInstance], { request })).rejects.toThrow(
+        'Unable to schedule task(s) with API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+      );
+    });
+
+    test('bulk schedule tasks without API key if request is provided but security disabled', async () => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => false,
+        basePath: basePathMock,
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
+
+      const task1 = {
+        id: 'task1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const task2 = {
+        id: 'task2',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+
+      savedObjectsClient.bulkCreate.mockImplementation(async () => ({
+        saved_objects: [
+          {
+            id: 'task1',
+            type: 'test',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              stateVersion: 1,
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+              partition: 225,
+            },
+            references: [],
+            version: '123',
+          },
+          {
+            id: 'task2',
+            type: 'test',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              stateVersion: 1,
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+              partition: 225,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      }));
+
+      const result = await store.bulkSchedule([task1, task2], { request });
+
+      expect(result).toEqual([
+        {
+          id: 'task1',
+          attempts: 0,
+          params: { hello: 'world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          startedAt: null,
+          state: { foo: 'bar' },
+          stateVersion: 1,
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          version: '123',
+        },
+        {
+          id: 'task2',
+          attempts: 0,
+          params: { hello: 'world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          startedAt: null,
+          state: { foo: 'bar' },
+          stateVersion: 1,
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          version: '123',
+        },
+      ]);
+    });
+
+    test('errors if API key could not be created', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      (getApiKeyAndUserScope as jest.Mock).mockRejectedValueOnce(
+        new Error('Something went wrong!')
+      );
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task as TaskInstance], { request })).rejects.toThrow(
+        'Something went wrong!'
+      );
+
+      expect(getApiKeyAndUserScope).toHaveBeenCalled();
     });
 
     test('errors if the task type is unknown', async () => {
@@ -1862,13 +3213,77 @@ describe('TaskStore', () => {
       await testBulkSchedule([task]);
       expect(adHocTaskCounter.count).toEqual(0);
     });
+
+    test('skips the update with invalid interval', async () => {
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
+
+      const task1 = {
+        id: 'id1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const task2 = {
+        id: 'id2',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+        schedule: { interval: 'invalid' }, // Invalid interval
+      };
+      await testBulkSchedule([task1, task2]);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        '[TaskStore] An error occured. Task id2 will not be updated. Error: [TaskValidator] Invalid interval "invalid". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.'
+      );
+
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            id: 'id1',
+            type: 'task',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+              partition: 49,
+              stateVersion: 1,
+            },
+          },
+        ],
+        {
+          overwrite: true,
+          refresh: false,
+        }
+      );
+    });
   });
 
   describe('TaskValidator', () => {
-    test(`should pass allowReadingInvalidState:false accordingly`, () => {
+    test(`should pass allowReadingInvalidState:false accordingly`, async () => {
       const logger = mockLogger();
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
 
-      new TaskStore({
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const store = new TaskStore({
         logger,
         index: 'tasky',
         taskManagerId: '',
@@ -1881,19 +3296,46 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
-      expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
-        logger,
-        definitions: taskDefinitions,
-        allowReadingInvalidState: false,
-      });
+      savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
+        id: 'id',
+        type,
+        attributes: {
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          state: JSON.stringify({
+            foo: 1, // Invalid state
+          }),
+        },
+        references: [],
+        version: '123',
+      }));
+
+      // allowReadingInvalidState: false, should throw an error
+      await expect(store.schedule(task as TaskInstance)).rejects.toThrowError(
+        `[TaskValidator] failed to migrate to version 1 because the data returned from the up migration doesn't match the schema: [foo]: expected value of type [string] but got [number]`
+      );
     });
 
-    test(`should pass allowReadingInvalidState:true accordingly`, () => {
+    test(`should pass allowReadingInvalidState:true accordingly`, async () => {
       const logger = mockLogger();
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
 
-      new TaskStore({
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const store = new TaskStore({
         logger,
         index: 'tasky',
         taskManagerId: '',
@@ -1906,27 +3348,41 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
-      expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
-        logger,
-        definitions: taskDefinitions,
-        allowReadingInvalidState: true,
-      });
+      savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
+        id: 'id',
+        type,
+        attributes: {
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          state: JSON.stringify({
+            foo: 1, // Invalid state
+          }),
+        },
+        references: [],
+        version: '123',
+      }));
+
+      // allowReadingInvalidState: true, should not throw but log a debug message
+      await store.schedule(task as TaskInstance);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        "[report][id] Failed to validate the task's state. Allowing read operation to proceed because allow_reading_invalid_state is true. Error: [TaskValidator] failed to migrate to version 1 because the data returned from the up migration doesn't match the schema: [foo]: expected value of type [string] but got [number]"
+      );
     });
   });
 
   describe('updateByQuery', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let childEsClient: ReturnType<
-      typeof elasticsearchServiceMock.createClusterClient
-    >['asInternalUser'];
 
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -1940,15 +3396,20 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
-    test('should pass requestTimeout', async () => {
-      childEsClient.updateByQuery.mockResponse({
+    test('should pass requestTimeout and retryOnTimeout', async () => {
+      esClient.updateByQuery.mockResponse({
         hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
       } as UpdateByQueryResponse);
       await store.updateByQuery({ script: { source: '' } }, { max_docs: 10 });
-      expect(childEsClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
+      expect(esClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
         requestTimeout: 1000,
+        retryOnTimeout: false,
       });
     });
   });
@@ -1956,14 +3417,9 @@ describe('TaskStore', () => {
   describe('bulkGetVersions', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let childEsClient: ReturnType<
-      typeof elasticsearchServiceMock.createClusterClient
-    >['asInternalUser'];
 
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -1977,11 +3433,15 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
     test('should return the version of the tasks when found', async () => {
-      childEsClient.mget.mockResponse({
+      esClient.mget.mockResponse({
         docs: [
           {
             _index: 'ignored-1',
@@ -2020,7 +3480,7 @@ describe('TaskStore', () => {
     });
 
     test('should handle errors and missing tasks', async () => {
-      childEsClient.mget.mockResponse({
+      esClient.mget.mockResponse({
         docs: [
           {
             _index: 'ignored-1',
@@ -2074,14 +3534,9 @@ describe('TaskStore', () => {
   describe('getDocVersions', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let childEsClient: ReturnType<
-      typeof elasticsearchServiceMock.createClusterClient
-    >['asInternalUser'];
 
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -2095,11 +3550,15 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
     test('should return the version as expected, with errors included', async () => {
-      childEsClient.mget.mockResponse({
+      esClient.mget.mockResponse({
         docs: [
           {
             _index: 'ignored-1',

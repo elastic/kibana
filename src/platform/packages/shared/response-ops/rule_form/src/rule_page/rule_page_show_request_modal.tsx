@@ -18,7 +18,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { RequestCodeBlock } from '../request_code_block';
+import { RequestCodeBlock } from '../components';
 import { SHOW_REQUEST_MODAL_SUBTITLE, SHOW_REQUEST_MODAL_TITLE } from '../translations';
 import { useRuleFormScreenContext } from '../hooks';
 

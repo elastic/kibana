@@ -9,22 +9,24 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { AggregateQuery, Filter, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
-import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
+import type { DocViewerExtensionParams } from '../../context_awareness';
 import { useProfileAccessor } from '../../context_awareness';
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
-export interface DiscoverGridFlyoutProps {
+export interface DiscoverGridFlyoutProps extends Pick<DocViewerProps, 'onUpdateSelectedTabId'> {
   savedSearchId?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
@@ -33,11 +35,14 @@ export interface DiscoverGridFlyoutProps {
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
+  initialTabId?: string;
+  docViewerRef?: DocViewerProps['ref'];
+  docViewerExtensionActions?: DocViewerExtensionParams['actions'];
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
+  setExpandedDoc: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void;
 }
 
 /**
@@ -52,11 +57,15 @@ export function DiscoverGridFlyout({
   savedSearchId,
   filters,
   query,
+  initialTabId,
+  docViewerRef,
+  docViewerExtensionActions,
   onFilter,
   onClose,
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
+  onUpdateSelectedTabId,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
@@ -86,8 +95,8 @@ export function DiscoverGridFlyout({
           : registry,
     }));
 
-    return getDocViewer({ record: actualHit });
-  }, [flyoutCustomization, getDocViewerAccessor, actualHit]);
+    return getDocViewer({ actions: docViewerExtensionActions ?? {}, record: actualHit });
+  }, [actualHit, docViewerExtensionActions, flyoutCustomization, getDocViewerAccessor]);
 
   useEffect(() => {
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);
@@ -117,6 +126,9 @@ export function DiscoverGridFlyout({
       onClose={onClose}
       onFilter={onFilter}
       setExpandedDoc={setExpandedDoc}
+      initialTabId={initialTabId}
+      docViewerRef={docViewerRef}
+      onUpdateSelectedTabId={onUpdateSelectedTabId}
     />
   );
 }

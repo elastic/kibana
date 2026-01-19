@@ -6,29 +6,44 @@
  */
 
 import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
   apiHasParentApi,
   apiPublishesTimeRange,
+  apiPublishesTimeslice,
   fetch$,
-  initializeTimeRange,
+  initializeTimeRangeManager,
   initializeTitleManager,
+  timeRangeComparators,
+  titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map, of, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  merge,
+  of,
+  Subscription,
+} from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
@@ -43,13 +58,10 @@ import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
-import { initializeSwimLaneControls } from './initialize_swim_lane_controls';
+import { initializeSwimLaneControls, swimLaneComparators } from './initialize_swim_lane_controls';
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
-import type {
-  AnomalySwimLaneEmbeddableApi,
-  AnomalySwimLaneEmbeddableState,
-  AnomalySwimlaneRuntimeState,
-} from './types';
+import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+import { AnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
 
 /**
  * Provides the services required by the Anomaly Swimlane Embeddable.
@@ -62,13 +74,11 @@ export const getServices = async (
     { AnomalyDetectorService },
     { AnomalyTimelineService },
     { mlApiProvider },
-    { mlResultsServiceProvider },
   ] = await Promise.all([
     getStartServices(),
     import('../../application/services/anomaly_detector_service'),
     import('../../application/services/anomaly_timeline_service'),
     import('../../application/services/ml_api_service'),
-    import('../../application/services/results_service'),
   ]);
 
   const httpService = new HttpService(coreStart.http);
@@ -76,7 +86,7 @@ export const getServices = async (
   const anomalyTimelineService = new AnomalyTimelineService(
     pluginsStart.data.query.timefilter.timefilter,
     coreStart.uiSettings,
-    mlResultsServiceProvider(mlApiProvider(httpService))
+    mlApiProvider(httpService)
   );
 
   return [
@@ -89,14 +99,9 @@ export const getServices = async (
 export const getAnomalySwimLaneEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
 ) => {
-  const factory: ReactEmbeddableFactory<
-    AnomalySwimLaneEmbeddableState,
-    AnomalySwimlaneRuntimeState,
-    AnomalySwimLaneEmbeddableApi
-  > = {
+  const factory: EmbeddableFactory<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi> = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-    deserializeState: (state) => state.rawState,
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       if (!apiHasExecutionContext(parentApi)) {
         throw new Error('Parent API does not have execution context');
       }
@@ -111,98 +116,114 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-      const query$ =
-        // @ts-ignore
-        (state.query ? new BehaviorSubject(state.query) : parentApi?.query$) ??
-        new BehaviorSubject(undefined);
-      const filters$ =
-        // @ts-ignore
-        (state.query ? new BehaviorSubject(state.filters) : parentApi?.filters$) ??
-        new BehaviorSubject(undefined);
+      const query$ = ((initialState.query
+        ? new BehaviorSubject(initialState.query)
+        : (parentApi as Partial<PublishesUnifiedSearch>)?.query$) ??
+        new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
+      const filters$ = ((initialState.filters
+        ? new BehaviorSubject(initialState.filters)
+        : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
+        new BehaviorSubject(undefined)) as PublishesUnifiedSearch['filters$'];
 
       const refresh$ = new BehaviorSubject<void>(undefined);
 
-      const titleManager = initializeTitleManager(state);
-      const timeRangeManager = initializeTimeRange(state);
+      const titleManager = initializeTitleManager(initialState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
 
-      const {
-        swimLaneControlsApi,
-        serializeSwimLaneState,
-        swimLaneComparators,
-        onSwimLaneDestroy,
-      } = initializeSwimLaneControls(state, titleManager.api);
+      const swimlaneManager = initializeSwimLaneControls(initialState, titleManager.api);
 
       // Helpers for swim lane data fetching
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
 
-      const api = buildApi(
-        {
-          isEditingEnabled: () => true,
-          getTypeDisplayName: () =>
-            i18n.translate('xpack.ml.swimlaneEmbeddable.typeDisplayName', {
-              defaultMessage: 'swim lane',
-            }),
-          onEdit: async () => {
-            try {
-              const { resolveAnomalySwimlaneUserInput } = await import(
-                './anomaly_swimlane_setup_flyout'
-              );
+      function serializeState() {
+        return {
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...swimlaneManager.getLatestState(),
+        } as AnomalySwimLaneEmbeddableState;
+      }
 
-              const result = await resolveAnomalySwimlaneUserInput(
-                { ...coreStartServices, ...pluginsStartServices },
-                parentApi,
-                uuid,
-                {
-                  ...titleManager.serialize(),
-                  ...serializeSwimLaneState(),
-                }
-              );
-
-              swimLaneControlsApi.updateUserInput(result);
-            } catch (e) {
-              return Promise.reject();
-            }
-          },
-          ...titleManager.api,
-          ...timeRangeManager.api,
-          ...swimLaneControlsApi,
-          query$,
-          filters$,
-          interval,
-          setInterval: (v) => interval.next(v),
-          dataViews$: buildDataViewPublishingApi(
-            {
-              anomalyDetectorService: services[2].anomalyDetectorService,
-              dataViewsService: services[1].data.dataViews,
-            },
-            { jobIds: swimLaneControlsApi.jobIds },
-            subscriptions
-          ),
-          dataLoading$,
-          serializeState: () => {
-            return {
-              rawState: {
-                timeRange: undefined,
-                ...titleManager.serialize(),
-                ...timeRangeManager.serialize(),
-                ...serializeSwimLaneState(),
-              },
-              references: [],
-            };
-          },
+      const unsavedChangesApi = initializeUnsavedChanges<AnomalySwimLaneEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState,
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          timeRangeManager.anyStateChange$,
+          swimlaneManager.anyStateChange$
+        ),
+        getComparators: () => {
+          return {
+            ...titleComparators,
+            ...timeRangeComparators,
+            ...swimLaneComparators,
+            id: 'skip',
+            query: 'skip',
+            refreshConfig: 'skip',
+            filters: 'skip',
+          };
         },
-        {
-          ...timeRangeManager.comparators,
-          ...titleManager.comparators,
-          ...swimLaneComparators,
-        }
-      );
+        onReset: (lastSaved) => {
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) swimlaneManager.reinitializeState(lastSaved);
+        },
+      });
+
+      const api = finalizeApi({
+        isEditingEnabled: () => true,
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.ml.swimlaneEmbeddable.typeDisplayName', {
+            defaultMessage: 'swim lane',
+          }),
+        onEdit: async () => {
+          openLazyFlyout({
+            core: coreStartServices,
+            parentApi,
+            flyoutProps: {
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              return (
+                <AnomalySwimlaneUserInput
+                  coreStart={coreStartServices}
+                  pluginStart={pluginsStartServices}
+                  onConfirm={(result) => {
+                    swimlaneManager.api.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  onCancel={closeFlyout}
+                  input={{ ...titleManager.getLatestState(), ...swimlaneManager.getLatestState() }}
+                />
+              );
+            },
+          });
+        },
+        ...titleManager.api,
+        ...timeRangeManager.api,
+        ...swimlaneManager.api,
+        ...unsavedChangesApi,
+        query$,
+        filters$,
+        interval,
+        setInterval: (v) => interval.next(v),
+        dataViews$: buildDataViewPublishingApi(
+          {
+            anomalyDetectorService: services[2].anomalyDetectorService,
+            dataViewsService: services[1].data.dataViews,
+          },
+          { jobIds: swimlaneManager.api.jobIds },
+          subscriptions
+        ),
+        dataLoading$,
+        serializeState,
+      });
       const appliedTimeRange$: Observable<TimeRange | undefined> = combineLatest([
         api.timeRange$,
         apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
           ? api.parentApi.timeRange$
           : of(null),
-        apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
+        apiHasParentApi(api) && apiPublishesTimeslice(api.parentApi)
           ? api.parentApi.timeslice$
           : of(null),
       ]).pipe(
@@ -215,7 +236,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             return parentTimeRange;
           }
           if (parentTimeslice) {
-            return parentTimeRange;
+            return parentTimeslice;
           }
           return undefined;
         })
@@ -248,8 +269,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           })
       );
 
-      const onRenderComplete = () => {};
-
       return {
         api,
         Component: () => {
@@ -270,21 +289,46 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           );
 
           useUnmount(() => {
-            onSwimLaneDestroy();
+            swimlaneManager.cleanup();
             onDestroy();
             subscriptions.unsubscribe();
           });
 
-          const [fromPage, perPage, swimlaneType, swimlaneData, error] =
+          const [fromPage, perPage, swimlaneType, swimlaneData, error, isLoading] =
             useBatchedPublishingSubjects(
               api.fromPage,
               api.perPage,
               api.swimlaneType,
               swimLaneData$,
-              blockingError$
+              blockingError$,
+              dataLoading$
             );
-
           const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
+
+          const [hasRendered, setHasRendered] = useState<boolean>(false);
+          const wrapperRef = useRef<HTMLDivElement>(null);
+          useEffect(() => {
+            if (isLoading) setHasRendered(false);
+          }, [isLoading]);
+
+          useEffect(
+            function dispatchRenderMessages() {
+              const el = wrapperRef.current;
+              if (!el) return;
+              if (error) {
+                dispatchRenderComplete(el);
+                return;
+              }
+              if (isLoading) {
+                dispatchRenderStart(el);
+                return;
+              }
+              if (hasRendered) {
+                dispatchRenderComplete(el);
+              }
+            },
+            [isLoading, hasRendered, error]
+          );
 
           const onCellsSelection = useCallback(
             (update?: AppStateSelectedCells) => {
@@ -302,24 +346,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             [swimlaneData, perPage, setSelectedCells]
           );
 
-          if (error) {
-            return (
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="xpack.ml.swimlaneEmbeddable.errorMessage"
-                    defaultMessage="Unable to load the data for the swim lane"
-                  />
-                }
-                color="danger"
-                iconType="warning"
-                css={{ width: '100%' }}
-              >
-                <p>{error.message}</p>
-              </EuiCallOut>
-            );
-          }
-
           return (
             <KibanaRenderContextProvider {...coreStartServices}>
               <KibanaContextProvider services={{ ...coreStartServices }}>
@@ -330,48 +356,70 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                   `}
                   data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
                   data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
+                  data-render-complete={error ? true : hasRendered}
+                  ref={wrapperRef}
                 >
-                  <SwimlaneContainer
-                    id={uuid}
-                    data-test-subj={`mlSwimLaneEmbeddable_${uuid}`}
-                    timeBuckets={timeBuckets}
-                    swimlaneData={swimlaneData!}
-                    swimlaneType={swimlaneType}
-                    fromPage={fromPage}
-                    perPage={perPage}
-                    swimlaneLimit={
-                      isViewBySwimLaneData(swimlaneData) ? swimlaneData.cardinality : undefined
-                    }
-                    onResize={(size) => chartWidth$.next(size)}
-                    selection={selectedCells}
-                    onCellsSelection={onCellsSelection}
-                    onPaginationChange={(update) => {
-                      if (update.fromPage) {
-                        api.updatePagination({ fromPage: update.fromPage });
+                  {error ? (
+                    <EuiCallOut
+                      title={
+                        <FormattedMessage
+                          id="xpack.ml.swimlaneEmbeddable.errorMessage"
+                          defaultMessage="Unable to load the data for the swim lane"
+                        />
                       }
-                      if (update.perPage) {
-                        api.updatePagination({ perPage: update.perPage, fromPage: 1 });
+                      color="danger"
+                      iconType="warning"
+                      css={{ width: '100%' }}
+                    >
+                      <p>{error.message}</p>
+                    </EuiCallOut>
+                  ) : (
+                    <SwimlaneContainer
+                      id={uuid}
+                      data-test-subj={`mlSwimLaneEmbeddable_${uuid}`}
+                      timeBuckets={timeBuckets}
+                      swimlaneData={swimlaneData!}
+                      swimlaneType={swimlaneType}
+                      fromPage={fromPage}
+                      perPage={perPage}
+                      swimlaneLimit={
+                        isViewBySwimLaneData(swimlaneData) ? swimlaneData.cardinality : undefined
                       }
-                    }}
-                    isLoading={dataLoading$.value!}
-                    yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
-                    noDataWarning={
-                      <EuiEmptyPrompt
-                        titleSize="xxs"
-                        css={{ padding: 0 }}
-                        title={
-                          <h2>
-                            <FormattedMessage
-                              id="xpack.ml.swimlaneEmbeddable.noDataFound"
-                              defaultMessage="No anomalies found"
-                            />
-                          </h2>
+                      onResize={(size) => chartWidth$.next(size)}
+                      selection={selectedCells}
+                      onCellsSelection={onCellsSelection}
+                      onPaginationChange={(update) => {
+                        if (update.fromPage) {
+                          api.updatePagination({ fromPage: update.fromPage });
                         }
-                      />
-                    }
-                    chartsService={pluginsStartServices.charts}
-                    onRenderComplete={onRenderComplete}
-                  />
+                        if (update.perPage) {
+                          api.updatePagination({ perPage: update.perPage, fromPage: 1 });
+                        }
+                      }}
+                      isLoading={isLoading!}
+                      yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
+                      noDataWarning={
+                        <EuiEmptyPrompt
+                          titleSize="xxs"
+                          css={{ padding: 0 }}
+                          title={
+                            <h2>
+                              <FormattedMessage
+                                id="xpack.ml.swimlaneEmbeddable.noDataFound"
+                                defaultMessage="No anomalies found"
+                              />
+                            </h2>
+                          }
+                        />
+                      }
+                      chartsService={pluginsStartServices.charts}
+                      onRenderComplete={() => {
+                        if (!isLoading) {
+                          setHasRendered(true);
+                        }
+                      }}
+                    />
+                  )}
                 </div>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>

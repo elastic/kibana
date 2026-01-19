@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -16,12 +17,11 @@ import {
   EuiSpacer,
   EuiSelect,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { SectionLoading } from '../../../../../../shared_imports';
-import { ProcessorResult, Document } from '../../../types';
+import type { ProcessorResult, Document } from '../../../types';
 import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from '../../shared';
-
-import './processor_output.scss';
 
 export interface Props {
   processorOutput?: ProcessorResult;
@@ -82,6 +82,19 @@ const i18nTexts = {
   }),
 };
 
+const styles = {
+  callOut: css`
+    & .euiCallOutHeader {
+      align-items: center;
+    }
+  `,
+  codeBlock: css`
+    & > pre {
+      background: transparent;
+    }
+  `,
+};
+
 export const ProcessorOutput: FunctionComponent<Props> = ({
   processorOutput,
   documents,
@@ -94,7 +107,14 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
   }
 
   if (!processorOutput) {
-    return <EuiCallOut title={i18nTexts.noOutputCalloutTitle} color="danger" iconType="warning" />;
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={i18nTexts.noOutputCalloutTitle}
+        color="danger"
+        iconType="warning"
+      />
+    );
   }
 
   const {
@@ -116,7 +136,7 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
           <EuiCallOut
             title={i18nTexts.skippedCalloutTitle}
             iconType={SkippedIcon}
-            className="processorOutput__callOut processorOutput__callOut--customIcon"
+            css={styles.callOut}
           />
         );
       case 'dropped':
@@ -137,12 +157,12 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
             iconType={ErrorIcon}
             title={i18nTexts.processorErrorTitle}
             color="danger"
-            className="processorOutput__callOut processorOutput__callOut--customIcon"
+            css={styles.callOut}
           >
             <EuiCodeBlock
               language="json"
               paddingSize="none"
-              className="processorOutput__callOut__codeBlock"
+              css={styles.codeBlock}
               transparentBackground
             >
               {JSON.stringify(error, null, 2)}
@@ -155,10 +175,10 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
             iconType={ErrorIgnoredIcon}
             title={i18nTexts.processorIgnoredErrorTitle}
             color="warning"
-            className="processorOutput__callOut processorOutput__callOut--customIcon"
+            css={styles.callOut}
           >
             <EuiCodeBlock
-              className="processorOutput__callOut__codeBlock"
+              css={styles.codeBlock}
               language="json"
               paddingSize="none"
               transparentBackground
@@ -173,7 +193,7 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
   };
 
   return (
-    <div data-test-subj="processorOutputTabContent" className="processorOutput">
+    <div data-test-subj="processorOutputTabContent">
       <EuiText>
         <p>{i18nTexts.tabDescription}</p>
       </EuiText>

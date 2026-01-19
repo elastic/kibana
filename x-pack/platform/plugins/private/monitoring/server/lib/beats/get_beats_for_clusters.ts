@@ -9,7 +9,7 @@ import { BeatsClusterMetric } from '../metrics';
 import { createBeatsQuery } from './create_beats_query';
 import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
 import type { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest, Cluster } from '../../types';
+import type { LegacyRequest, Cluster } from '../../types';
 import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
@@ -51,15 +51,13 @@ export function getBeatsForClusters(req: LegacyRequest, clusters: Cluster[], ccs
         size: 0,
         ignore_unavailable: true,
         filter_path: beatsAggFilterPath,
-        body: {
-          query: createBeatsQuery({
-            start,
-            end,
-            clusterUuid,
-            metric: BeatsClusterMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
-          }),
-          aggs: beatsUuidsAgg(maxBucketSize),
-        },
+        query: createBeatsQuery({
+          start,
+          end,
+          clusterUuid,
+          metric: BeatsClusterMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
+        }),
+        aggs: beatsUuidsAgg(maxBucketSize),
       };
 
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

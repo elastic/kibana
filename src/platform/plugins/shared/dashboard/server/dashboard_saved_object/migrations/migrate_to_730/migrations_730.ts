@@ -8,11 +8,11 @@
  */
 
 import { inspect } from 'util';
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
 import { moveFiltersToQuery } from './move_filters_to_query';
 import { migratePanelsTo730 } from './migrate_to_730_panels';
-import { DashboardDoc730ToLatest, DashboardDoc700To720 } from './types';
+import type { DashboardDoc730ToLatest, DashboardDoc700To720 } from './types';
 
 function isDoc(
   doc: { [key: string]: unknown } | SavedObjectUnsanitizedDoc
@@ -49,10 +49,12 @@ export const migrations730 = (doc: DashboardDoc700To720, { log }: SavedObjectMig
   }
 
   try {
-    const searchSource = JSON.parse(doc.attributes.kibanaSavedObjectMeta.searchSourceJSON!);
-    doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
-      moveFiltersToQuery(searchSource)
-    );
+    if (doc.attributes.kibanaSavedObjectMeta.searchSourceJSON) {
+      const searchSource = JSON.parse(doc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+      doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
+        moveFiltersToQuery(searchSource)
+      );
+    }
   } catch (e) {
     log.warn(
       `Exception @ migrations730 while trying to migrate dashboard query filters!\n` +

@@ -7,7 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
-import type { GetInfraAssetCountRequestBodyPayload } from '../../../../../common/http_api';
+import type { GetInfraEntityCountRequestBodyPayload } from '../../../../../common/http_api';
 import type { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { assertQueryStructure } from '../utils';
@@ -19,34 +19,47 @@ export async function getHostsCount({
   query,
   from,
   to,
-}: GetInfraAssetCountRequestBodyPayload & {
+  schema = 'ecs',
+}: GetInfraEntityCountRequestBodyPayload & {
   infraMetricsClient: InfraMetricsClient;
   apmDataAccessServices?: ApmDataAccessServicesWrapper;
 }) {
   assertQueryStructure(query);
 
+  const apmDocumentSources = await apmDataAccessServices?.getDocumentSources({
+    start: from,
+    end: to,
+  });
+
   const documentsFilter = await getDocumentsFilter({
     apmDataAccessServices,
+    apmDocumentSources,
     from,
     to,
+    schema,
   });
 
   const response = await infraMetricsClient.search({
     allow_no_indices: true,
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [query, ...rangeQuery(from, to)],
-          should: [...documentsFilter],
-        },
-      },
-      aggs: {
-        totalCount: {
-          cardinality: {
-            field: HOST_NAME_FIELD,
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          query,
+          ...rangeQuery(from, to),
+          {
+            bool: {
+              should: [...documentsFilter],
+            },
           },
+        ],
+      },
+    },
+    aggs: {
+      totalCount: {
+        cardinality: {
+          field: HOST_NAME_FIELD,
         },
       },
     },

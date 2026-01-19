@@ -9,12 +9,15 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { BaseValidator } from './base_validator';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
+import { BaseValidator, GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE } from './base_validator';
+import type { ExceptionItemLikeOptions } from '../types';
 
 export class EndpointExceptionsValidator extends BaseValidator {
   static isEndpointException(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_LIST_ID;
+    return item.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id;
   }
 
   protected async validateHasReadPrivilege(): Promise<void> {
@@ -22,25 +25,74 @@ export class EndpointExceptionsValidator extends BaseValidator {
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
-    return this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
+    await this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
+
+    if (!this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      // With disabled FF, Endpoint Exceptions are ONLY global, so we need to make sure the user
+      // also has the new Global Artifacts privilege
+      try {
+        await this.validateHasPrivilege('canManageGlobalArtifacts');
+      } catch (error) {
+        // We provide a more detailed error here
+        throw new EndpointExceptionsValidationError(
+          `${error.message}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+          403
+        );
+      }
+    }
   }
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
     await this.validateHasWritePrivilege();
+
+    if (this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      await this.validateCanCreateByPolicyArtifacts(item);
+      await this.validateByPolicyItem(item);
+    }
+
+    await this.validateCanCreateGlobalArtifacts(item);
+    await this.validateCreateOwnerSpaceIds(item);
+
     return item;
   }
 
-  async validatePreUpdateItem(item: UpdateExceptionListItemOptions) {
+  async validatePreUpdateItem(
+    _updatedItem: UpdateExceptionListItemOptions,
+    currentItem: ExceptionListItemSchema
+  ) {
+    const updatedItem = _updatedItem as ExceptionItemLikeOptions;
+
     await this.validateHasWritePrivilege();
-    return item;
+
+    if (this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      try {
+        await this.validateCanCreateByPolicyArtifacts(updatedItem);
+      } catch (noByPolicyAuthzError) {
+        // Not allowed to create/update by policy data. Validate that the effective scope of the item
+        // remained unchanged with this update or was set to `global` (only allowed update). If not,
+        // then throw the validation error that was catch'ed
+        if (this.wasByPolicyEffectScopeChanged(updatedItem, currentItem)) {
+          throw noByPolicyAuthzError;
+        }
+      }
+
+      await this.validateByPolicyItem(updatedItem, currentItem);
+    }
+
+    await this.validateUpdateOwnerSpaceIds(updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(updatedItem, currentItem);
+
+    return _updatedItem;
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
-  async validatePreGetOneItem(): Promise<void> {
+  async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasReadPrivilege();
+    await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreMultiListFind(): Promise<void> {

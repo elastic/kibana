@@ -7,6 +7,3 @@
 
 export const PLUGIN_ID = 'serverless';
 export const PLUGIN_NAME = 'serverless';
-
-/** Internal API route responsible for switching between project configurations. */
-export const API_SWITCH_PROJECT = '/internal/serverless/switch_project';

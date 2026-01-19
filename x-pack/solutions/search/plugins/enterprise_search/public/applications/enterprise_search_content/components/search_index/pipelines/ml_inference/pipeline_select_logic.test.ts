@@ -7,18 +7,18 @@
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
-import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import type { MlModel } from '../../../../../../../common/types/ml';
+import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { TrainedModelState } from '../../../../../../../common/types/pipelines';
 
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
 import { CachedFetchModelsApiLogic } from '../../../../api/ml_models/cached_fetch_models_api_logic';
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../../api/pipelines/fetch_ml_inference_pipeline_processors';
-import {
-  FetchMlInferencePipelinesApiLogic,
-  FetchMlInferencePipelinesResponse,
-} from '../../../../api/pipelines/fetch_ml_inference_pipelines';
+import type { FetchMlInferencePipelinesResponse } from '../../../../api/pipelines/fetch_ml_inference_pipelines';
+import { FetchMlInferencePipelinesApiLogic } from '../../../../api/pipelines/fetch_ml_inference_pipelines';
 
-import { PipelineSelectLogic, PipelineSelectValues } from './pipeline_select_logic';
+import type { PipelineSelectValues } from './pipeline_select_logic';
+import { PipelineSelectLogic } from './pipeline_select_logic';
 import { AddInferencePipelineSteps } from './types';
 
 const DEFAULT_VALUES: PipelineSelectValues = {

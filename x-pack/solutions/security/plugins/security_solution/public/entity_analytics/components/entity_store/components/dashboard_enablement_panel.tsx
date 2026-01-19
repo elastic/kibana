@@ -15,7 +15,7 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
@@ -38,7 +38,7 @@ import {
 import type { Enablements } from './enablement_modal';
 import { EntityStoreEnablementModal } from './enablement_modal';
 import dashboardEnableImg from '../../../images/entity_store_dashboard.png';
-import { useStoreEntityTypes } from '../../../hooks/use_enabled_entity_types';
+import { useEntityStoreTypes } from '../../../hooks/use_enabled_entity_types';
 
 interface EnableEntityStorePanelProps {
   state: {
@@ -51,7 +51,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
   const riskEngineStatus = state.riskEngine.data?.risk_engine_status;
   const entityStoreStatus = state.entityStore.data?.status;
   const engines = state.entityStore.data?.engines;
-  const enabledEntityTypes = useStoreEntityTypes();
+  const enabledEntityTypes = useEntityStoreTypes();
 
   const [modal, setModalState] = useState({ visible: false });
   const [riskEngineInitializing, setRiskEngineInitializing] = useState(false);
@@ -96,6 +96,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
   if (storeEnablement.error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.entityStore.enablement.mutation.errorTitle"
@@ -187,7 +188,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
 
   if (
     riskEngineStatus !== RiskEngineStatusEnum.NOT_INSTALLED &&
-    (entityStoreStatus === 'running' || entityStoreStatus === 'stopped')
+    entityStoreStatus !== 'not_installed'
   ) {
     return null;
   }
@@ -224,14 +225,8 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
         visible={modal.visible}
         toggle={(visible) => setModalState({ visible })}
         enableStore={enableEntityStore}
-        riskScore={{
-          disabled: riskEngineStatus !== RiskEngineStatusEnum.NOT_INSTALLED,
-          checked: riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED,
-        }}
-        entityStore={{
-          disabled: entityStoreStatus === 'running',
-          checked: entityStoreStatus === 'not_installed',
-        }}
+        riskEngineStatus={riskEngineStatus}
+        entityStoreStatus={entityStoreStatus}
       />
     </>
   );

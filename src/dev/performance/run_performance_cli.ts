@@ -9,9 +9,9 @@
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
-import { ProcRunner } from '@kbn/dev-proc-runner';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import path from 'path';
 
@@ -109,7 +109,8 @@ async function startEs(props: EsRunProps) {
       'scripts/es',
       'snapshot',
       '--license=trial',
-      // Temporarily disabling APM
+      // Temporarily disabling APM because the token needs to be added to the keystore
+      // and cannot be set via command line
       // ...(JOURNEY_APM_CONFIG.active
       //   ? [
       //       '-E',
@@ -149,12 +150,6 @@ async function runFunctionalTest(props: TestRunProps) {
     cwd: REPO_ROOT,
     wait: true,
     env: {
-      // Reset all the ELASTIC APM env vars to undefined, FTR config might set it's own values.
-      ...Object.fromEntries(
-        Object.keys(process.env).flatMap((k) =>
-          k.startsWith('ELASTIC_APM_') ? [[k, undefined]] : []
-        )
-      ),
       TEST_PERFORMANCE_PHASE: phase,
       TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
       TEST_ES_DISABLE_STARTUP: 'true',

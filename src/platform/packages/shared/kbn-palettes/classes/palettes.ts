@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IKbnPalette } from './types';
+import type { IKbnPalette } from './types';
 
 export class KbnPalettes {
   #palettes: Map<string, IKbnPalette>;
@@ -37,7 +37,7 @@ export class KbnPalettes {
 function buildAliasMappings(palettes: IKbnPalette[]): Map<string, string> {
   return palettes.reduce((acc, { id, aliases }) => {
     aliases.forEach((alias) => {
-      acc.set(alias, id);
+      if (!acc.has(alias)) acc.set(alias, id);
     });
     return acc;
   }, new Map());

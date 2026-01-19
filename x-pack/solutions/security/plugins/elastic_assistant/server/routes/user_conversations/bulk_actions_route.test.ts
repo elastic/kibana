@@ -47,7 +47,7 @@ describe('Perform bulk action route', () => {
       docs_deleted: [],
       errors: [],
     });
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
     bulkActionConversationsRoute(server.router, logger);
   });
 

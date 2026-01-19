@@ -12,27 +12,33 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { once } from 'lodash';
 import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
-import { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../common/types';
+import type {
+  DiscoverSession,
+  SavedSearch,
+  SavedSearchAttributes,
+  SerializableSavedSearch,
+} from '../common/types';
 import { getKibanaContext } from './expressions/kibana_context';
-import {
-  getNewSavedSearch,
-  SavedSearchUnwrapResult,
-  saveSavedSearch,
-  SaveSavedSearchOptions,
-  byValueToSavedSearch,
-} from './services/saved_searches';
-import { checkForDuplicateTitle } from './services/saved_searches/check_for_duplicate_title';
-import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
+import type { SavedSearchesServiceDeps } from './service/saved_searches_service';
+import type { SaveSavedSearchOptions, saveSavedSearch } from './service/save_saved_searches';
+import type {
+  SaveDiscoverSessionOptions,
+  SaveDiscoverSessionParams,
+  saveDiscoverSession,
+} from './service/save_discover_session';
+import type { SavedSearchUnwrapResult } from './service/to_saved_search';
+import { getNewSavedSearch } from '../common/service/get_new_saved_search';
 
 /**
  * Saved search plugin public Setup contract
@@ -41,19 +47,24 @@ import { SavedSearchesService } from './services/saved_searches/saved_searches_s
 export interface SavedSearchPublicPluginSetup {}
 
 /**
- * Saved search plugin public Setup contract
+ * Saved search plugin public Start contract
  */
 export interface SavedSearchPublicPluginStart {
   get: <Serialized extends boolean = false>(
     savedSearchId: string,
     serialized?: Serialized
   ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
+  getDiscoverSession: (discoverSessionId: string) => Promise<DiscoverSession>;
   getNew: () => ReturnType<typeof getNewSavedSearch>;
   getAll: () => Promise<Array<SOWithMetadata<SavedSearchAttributes>>>;
   save: (
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
   ) => ReturnType<typeof saveSavedSearch>;
+  saveDiscoverSession: (
+    discoverSession: SaveDiscoverSessionParams,
+    options?: SaveDiscoverSessionOptions
+  ) => ReturnType<typeof saveDiscoverSession>;
   checkForDuplicateTitle: (
     props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
   ) => Promise<void>;
@@ -64,7 +75,7 @@ export interface SavedSearchPublicPluginStart {
 }
 
 /**
- * Saved search plugin public Setup contract
+ * Saved search plugin public Setup dependencies
  */
 export interface SavedSearchPublicSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -73,7 +84,7 @@ export interface SavedSearchPublicSetupDependencies {
 }
 
 /**
- * Saved search plugin public Setup contract
+ * Saved search plugin public Start dependencies
  */
 export interface SavedSearchPublicStartDependencies {
   data: DataPublicPluginStart;
@@ -94,7 +105,7 @@ export class SavedSearchPublicPlugin
 {
   public setup(
     { getStartServices }: CoreSetup,
-    { contentManagement, expressions, embeddable }: SavedSearchPublicSetupDependencies
+    { contentManagement, expressions }: SavedSearchPublicSetupDependencies
   ) {
     contentManagement.registry.register({
       id: SavedSearchType,
@@ -127,42 +138,52 @@ export class SavedSearchPublicPlugin
       spaces,
       savedObjectsTaggingOss,
       contentManagement: { client: contentManagement },
-      embeddable,
     }: SavedSearchPublicStartDependencies
   ): SavedSearchPublicPluginStart {
-    const deps = { search, spaces, savedObjectsTaggingOss, contentManagement, embeddable };
-    const service = new SavedSearchesService(deps);
+    const deps: SavedSearchesServiceDeps = {
+      search,
+      spaces,
+      savedObjectsTaggingOss,
+      contentManagement,
+    };
 
     return {
-      get: <Serialized extends boolean = false>(
-        savedSearchId: string,
-        serialized?: Serialized
-      ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> =>
-        service.get(savedSearchId, serialized),
-      getAll: () => service.getAll(),
-      getNew: () => service.getNew(),
-      save: (savedSearch: SavedSearch, options?: SaveSavedSearchOptions) => {
+      get: async (savedSearchId, serialized) => {
+        const service = await getSavedSearchesService(deps);
+        return service.get(savedSearchId, serialized);
+      },
+      getDiscoverSession: async (discoverSessionId) => {
+        const service = await getSavedSearchesService(deps);
+        return service.getDiscoverSession(discoverSessionId);
+      },
+      getAll: async () => {
+        const service = await getSavedSearchesService(deps);
+        return service.getAll();
+      },
+      getNew: () => {
+        return getNewSavedSearch({ searchSource: search.searchSource });
+      },
+      save: async (savedSearch, options) => {
+        const service = await getSavedSearchesService(deps);
         return service.save(savedSearch, options);
       },
-      checkForDuplicateTitle: (
-        props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
-      ) => {
-        return checkForDuplicateTitle({
-          title: props.newTitle,
-          isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-          onTitleDuplicate: props.onTitleDuplicate,
-          contentManagement: deps.contentManagement,
-        });
+      saveDiscoverSession: async (discoverSession, options) => {
+        const service = await getSavedSearchesService(deps);
+        return service.saveDiscoverSession(discoverSession, options);
       },
-      byValueToSavedSearch: async <
-        Serialized extends boolean = boolean,
-        ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
-      >(
-        result: SavedSearchUnwrapResult,
-        serialized?: Serialized
-      ): Promise<ReturnType> => {
-        return (await byValueToSavedSearch(result, deps, serialized)) as ReturnType;
+      checkForDuplicateTitle: async (props) => {
+        const service = await getSavedSearchesService(deps);
+        return service.checkForDuplicateTitle(props);
+      },
+      byValueToSavedSearch: async (result, serialized) => {
+        const service = await getSavedSearchesService(deps);
+        return service.byValueToSavedSearch(result, serialized);
       },
     };
   }
 }
+
+const getSavedSearchesService = once(async (deps: SavedSearchesServiceDeps) => {
+  const { SavedSearchesService } = await import('./service/saved_searches_service');
+  return new SavedSearchesService(deps);
+});

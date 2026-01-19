@@ -103,6 +103,11 @@ export const testFieldMap: FieldMap = {
     required: false,
     format: 'epoch_millis||strict_date_optional_time',
   },
+  // this field should be skipped in the mapping
+  unmapped_field: {
+    type: 'unmapped',
+    required: false,
+  },
 };
 export const expectedTestMapping = {
   properties: {
@@ -236,7 +241,13 @@ describe('mappingFromFieldMap', () => {
                 flapping_history: {
                   type: 'boolean',
                 },
+                index_pattern: {
+                  type: 'keyword',
+                },
                 maintenance_window_ids: {
+                  type: 'keyword',
+                },
+                maintenance_window_names: {
                   type: 'keyword',
                 },
                 instance: {
@@ -248,6 +259,12 @@ describe('mappingFromFieldMap', () => {
                 },
                 last_detected: {
                   type: 'date',
+                },
+                muted: {
+                  type: 'boolean',
+                },
+                pending_recovered_count: {
+                  type: 'long',
                 },
                 previous_action_group: {
                   type: 'keyword',
@@ -308,6 +325,16 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
+                scheduled_action: {
+                  properties: {
+                    date: {
+                      type: 'keyword',
+                    },
+                    group: {
+                      type: 'keyword',
+                    },
+                  },
+                },
                 severity_improving: {
                   type: 'boolean',
                 },
@@ -320,6 +347,23 @@ describe('mappingFromFieldMap', () => {
                 time_range: {
                   type: 'date_range',
                   format: 'epoch_millis||strict_date_optional_time',
+                },
+                updated_at: {
+                  type: 'date',
+                },
+                updated_by: {
+                  properties: {
+                    user: {
+                      properties: {
+                        id: {
+                          type: 'keyword',
+                        },
+                        name: {
+                          type: 'keyword',
+                        },
+                      },
+                    },
+                  },
                 },
                 url: {
                   ignore_above: 2048,

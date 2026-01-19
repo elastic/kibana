@@ -10,7 +10,8 @@ import { render } from '@testing-library/react';
 import { TestProvider } from './test/provider';
 import { UrlSynchronizer } from './provider';
 import * as actions from './store/actions';
-import { initialUiState, State } from './store/state';
+import type { State } from './store/state';
+import { initialUiState } from './store/state';
 import { of } from 'rxjs';
 
 const mockGet = jest.fn();
@@ -32,7 +33,7 @@ describe('UrlSynchronizer', () => {
             right: { id: 'key1' },
             left: { id: 'key11' },
             preview: undefined,
-            history: [{ id: 'key1' }],
+            history: [{ lastOpen: Date.now(), panel: { id: 'key1' } }],
           },
         },
         needsSync: true,
@@ -92,7 +93,7 @@ describe('UrlSynchronizer', () => {
             right: { id: 'key1' },
             left: { id: 'key2' },
             preview: undefined,
-            history: [{ id: 'key1' }],
+            history: [{ lastOpen: Date.now(), panel: { id: 'key1' } }],
           },
         },
         needsSync: true,

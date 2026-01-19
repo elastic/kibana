@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../../mocks';
-import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
+import type { DatasourceMock } from '../../mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import { getDatatableVisualization } from './visualization';
 import {
-  Operation,
-  DataType,
-  FramePublicAPI,
-  TableSuggestionColumn,
-  VisualizationDimensionGroupConfig,
-  VisualizationConfigProps,
-} from '../../types';
-import { RowHeightMode } from '../../../common/types';
+  type Operation,
+  type DataType,
+  type FramePublicAPI,
+  type TableSuggestionColumn,
+  type VisualizationDimensionGroupConfig,
+  type VisualizationConfigProps,
+  type DatatableVisualizationState,
+  LENS_DATAGRID_DENSITY,
+  LENS_ROW_HEIGHT_MODE,
+} from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { ColorMapping, CUSTOM_PALETTE, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import {
+import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
+import type {
   ColumnState,
   DatatableColumnFn,
   DatatableExpressionFunction,
@@ -63,6 +67,7 @@ describe('Datatable Visualization', () => {
         layerId: 'aaa',
         layerType: LayerTypes.DATA,
         columns: [],
+        showRowNumbers: true,
       });
     });
 
@@ -822,21 +827,14 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.single,
+          rowHeight: LENS_ROW_HEIGHT_MODE.custom,
         }).fitRowToContent
       ).toEqual([false]);
 
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.custom,
-        }).fitRowToContent
-      ).toEqual([false]);
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.auto,
+          rowHeight: LENS_ROW_HEIGHT_MODE.auto,
         }).fitRowToContent
       ).toEqual([true]);
     });
@@ -849,38 +847,22 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.single,
-        }).rowHeightLines
-      ).toEqual([1]);
-
-      // should ignore lines value based on mode
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.single,
-          rowHeightLines: 5,
-        }).rowHeightLines
-      ).toEqual([1]);
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.custom,
+          rowHeight: LENS_ROW_HEIGHT_MODE.custom,
           rowHeightLines: 5,
         }).rowHeightLines
       ).toEqual([5]);
 
-      // should fallback to 2 for custom in case it's not set
+      // should fallback to 1 for custom in case it's not set
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.custom,
+          rowHeight: LENS_ROW_HEIGHT_MODE.custom,
         }).rowHeightLines
-      ).toEqual([2]);
+      ).toEqual([1]);
     });
 
     it('sets headerRowHeight && headerRowHeightLines correctly', () => {
-      // should fallback to 3 lines in case it's not set
+      // should fallback to 3 line in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeightLines
       ).toEqual([3]);
@@ -888,19 +870,12 @@ describe('Datatable Visualization', () => {
       // should fallback to custom in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
-      ).toEqual([RowHeightMode.custom]);
+      ).toEqual([LENS_ROW_HEIGHT_MODE.custom]);
 
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          headerRowHeight: RowHeightMode.single,
-        }).headerRowHeightLines
-      ).toEqual([1]);
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          headerRowHeight: RowHeightMode.custom,
+          headerRowHeight: LENS_ROW_HEIGHT_MODE.custom,
           headerRowHeightLines: 5,
         }).headerRowHeightLines
       ).toEqual([5]);
@@ -909,7 +884,7 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          headerRowHeight: RowHeightMode.custom,
+          headerRowHeight: LENS_ROW_HEIGHT_MODE.custom,
         }).headerRowHeightLines
       ).toEqual([3]);
     });
@@ -953,6 +928,45 @@ describe('Datatable Visualization', () => {
           alignment: [],
         })
       );
+    });
+
+    it('sets density based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).density).toEqual([
+        LENS_DATAGRID_DENSITY.NORMAL,
+      ]);
+
+      for (const DENSITY of [
+        LENS_DATAGRID_DENSITY.COMPACT,
+        LENS_DATAGRID_DENSITY.NORMAL,
+        LENS_DATAGRID_DENSITY.EXPANDED,
+      ]) {
+        expect(
+          getDatatableExpressionArgs({
+            ...defaultExpressionTableState,
+            density: DENSITY,
+          }).density
+        ).toEqual([DENSITY]);
+      }
+    });
+
+    it('sets showRowNumbers based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).showRowNumbers).toEqual(
+        undefined
+      );
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          showRowNumbers: true,
+        }).showRowNumbers
+      ).toEqual([true]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          showRowNumbers: false,
+        }).showRowNumbers
+      ).toEqual([false]);
     });
 
     describe('palette/colorMapping/colorMode', () => {

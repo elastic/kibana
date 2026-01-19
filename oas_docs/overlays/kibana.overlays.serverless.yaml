@@ -15,41 +15,7 @@ actions:
         variables:
           kibana_url:
             default: <KIBANA_URL>
-# Mark all operations as beta
-  - target: "$.paths[*]['get','put','post','delete','options','head','patch','trace']"
-    description: Add x-beta
-    update:
-      x-beta: true
-# Add some tag descriptions and displayNames
-  - target: '$.tags[?(@.name=="alerting")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Alerting enables you to define rules, which detect complex conditions within your data.
-        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. 
-        Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
-      externalDocs:
-        description: Alerting documentation
-        url: https://www.elastic.co/docs/current/serverless/rules
-      x-displayName: "Alerting"
-  - target: '$.tags[?(@.name=="connectors")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
-        Alerting rules can use connectors to run actions when rule conditions are met.
-      externalDocs:
-        description: Connector documentation
-        url: https://www.elastic.co/docs/current/serverless/action-connectors
-      x-displayName: "Connectors"
-  - target: '$.tags[?(@.name=="data views")]'
-    description: Change displayName
-    update:
-      x-displayName: "Data views"
-  - target: '$.tags[?(@.name=="ml")]'
-    description: Change displayName
-    update:
-      x-displayName: "Machine learning"
+# Add some tag descriptions that are specific to the Serverless APIs
   - target: '$.tags[?(@.name=="roles")]'
     description: Change displayName and description
     update:
@@ -57,23 +23,39 @@ actions:
       description: Manage the roles that grant Elasticsearch and Kibana privileges.
       externalDocs:
         description: Kibana role management
-        url: https://www.elastic.co/guide/en/kibana/master/kibana-role-management.html
-  - target: '$.tags[?(@.name=="slo")]'
-    description: Change displayName
-    update:
-      x-displayName: "Service level objectives"
-  - target: '$.tags[?(@.name=="spaces")]'
-    description: Change displayName
-    update:
-      x-displayName: "Spaces"
-      description: Manage your Kibana spaces.
-  - target: '$.tags[?(@.name=="system")]'
+        url: https://www.elastic.co/docs/deploy-manage/users-roles/serverless-custom-roles
+  - target: '$.tags[?(@.name=="saved objects")]'
     description: Change displayName and description
     update:
-      x-displayName: "System"
+      x-displayName: "Saved objects"
+      description: |
+        Export or import sets of saved objects.
+
+        To manage a specific type of saved object, use the corresponding APIs.
+        For example, use:
+
+        [Data views](../group/endpoint-data-views).
+  - target: '$.tags[?(@.name=="agent builder")]'
+    description: Change tag description and displayName
+    update:
       description: >
-        Get information about the system status, resource usage, and installed plugins.
+        Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
+        
+        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+      externalDocs:
+        description: Learn about working with Agent Builder programmatically
+        url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
+      # externalDocs:
+        # description: 
+        # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
+      x-displayName: 'Agent Builder'
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
     remove: true
+  - target: '$.paths[*][*]'
+    description: Add x-metaTags for Kibana product name
+    update:
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name

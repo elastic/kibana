@@ -10,7 +10,7 @@
 import React, { useReducer } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { ruleFormStateReducer } from './rule_form_state_reducer';
-import { RuleFormState } from '../types';
+import type { RuleFormState } from '../types';
 import { getAction } from '../common/test_utils/actions_test_utils';
 
 jest.mock('../validation/validate_form', () => ({
@@ -41,7 +41,6 @@ const indexThresholdRuleType = {
   ruleTaskTimeout: '5m',
   doesSetRecoveryContext: true,
   hasAlertsMappings: true,
-  hasFieldsForAAD: false,
   id: '.index-threshold',
   name: 'Index threshold',
   category: 'management',
@@ -80,7 +79,7 @@ const initialState: RuleFormState = {
   validConsumers: [],
   connectors: [],
   connectorTypes: [],
-  aadTemplateFields: [],
+  alertFields: [],
 };
 
 describe('ruleFormStateReducer', () => {

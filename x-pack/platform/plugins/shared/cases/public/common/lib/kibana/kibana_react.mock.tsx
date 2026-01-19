@@ -13,7 +13,7 @@ import { AppStatus } from '@kbn/core/public';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type { StartServices } from '../../../types';
 import type { UseEuiTheme } from '@elastic/eui';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
@@ -22,6 +22,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
 import { connectorsMock } from '../../mock/connectors';
+import { lazyObject } from '@kbn/lazy-object';
 
 interface StartServiceArgs {
   license?: ILicense | null;
@@ -31,25 +32,31 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
   const licensingPluginMock = licensingMock.createStart();
   const triggersActionsUi = triggersActionsUiMock.createStart();
 
-  const services = {
-    ...coreMock.createStart(),
-    storage: { ...coreMock.createStorage(), get: jest.fn(), set: jest.fn(), remove: jest.fn() },
-    lens: {
+  const core = coreMock.createStart();
+
+  const services = lazyObject({
+    ...core,
+    storage: lazyObject({
+      ...coreMock.createStorage(),
+      get: jest.fn(),
+      set: jest.fn(),
+      remove: jest.fn(),
+    }),
+    lens: lazyObject({
       canUseEditor: jest.fn(),
       navigateToPrefilledEditor: jest.fn(),
-    },
+    }),
     security: securityMock.createStart(),
-    triggersActionsUi: {
+    triggersActionsUi: lazyObject({
       actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-      alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-      getAlertsStateTable: jest.fn().mockReturnValue(<div data-test-subj="alerts-table" />),
-    },
+      getAlertsStateTable: jest.fn(() => <div data-test-subj="alerts-table" />),
+    }),
     spaces: spacesPluginMock.createStartContract(),
     licensing:
       license != null
         ? { ...licensingPluginMock, license$: new BehaviorSubject(license) }
         : licensingPluginMock,
-  } as unknown as StartServices;
+  }) as unknown as StartServices;
 
   services.application.currentAppId$ = new BehaviorSubject<string>('testAppId');
   services.application.applications$ = new BehaviorSubject<Map<string, PublicAppInfo>>(
@@ -83,7 +90,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
   services.application.capabilities = {
     ...services.application.capabilities,
     actions: { save: true, show: true },
-    generalCasesV2: {
+    generalCasesV3: {
       create_cases: true,
       read_cases: true,
       update_cases: true,
@@ -93,6 +100,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
       cases_settings: true,
       case_reopen: true,
       create_comment: true,
+      cases_assign: true,
     },
     visualize_v2: { save: true, show: true },
     dashboard_v2: { show: true, createNew: true },

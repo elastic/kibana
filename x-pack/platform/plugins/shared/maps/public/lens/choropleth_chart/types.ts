@@ -5,22 +5,8 @@
  * 2.0.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
-
-export interface ChoroplethChartState {
-  layerId: string;
-  emsLayerId?: string;
-  emsField?: string;
-  regionAccessor?: string;
-  valueAccessor?: string;
-}
-
-export interface ChoroplethChartConfig extends ChoroplethChartState {
-  title: string;
-  description: string;
-}
-
-export interface ChoroplethChartProps {
-  data: Datatable;
-  args: ChoroplethChartConfig;
-}
+export type {
+  ChoroplethChartState,
+  ChoroplethChartConfig,
+  ChoroplethChartProps,
+} from '@kbn/lens-common';

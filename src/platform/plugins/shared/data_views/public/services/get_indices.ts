@@ -8,10 +8,12 @@
  */
 
 import { sortBy } from 'lodash';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Tag, INDEX_PATTERN_TYPE } from '../types';
-import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
+import type { Tag } from '../types';
+import { INDEX_PATTERN_TYPE } from '../types';
+import type { MatchedItem, ResolveIndexResponse } from '../types';
+import { ResolveIndexResponseItemIndexAttrs } from '../types';
 
 const aliasLabel = i18n.translate('dataViews.aliasLabel', { defaultMessage: 'Alias' });
 const dataStreamLabel = i18n.translate('dataViews.dataStreamLabel', {
@@ -119,6 +121,9 @@ export const responseToItemArray = (
     const isFrozen = (index.attributes || []).includes(ResolveIndexResponseItemIndexAttrs.FROZEN);
 
     tags.push(...getTags(index.name));
+    index.aliases?.forEach((alias) => {
+      tags.push(...getTags(alias));
+    });
     if (isFrozen) {
       tags.push({ name: frozenLabel, key: 'frozen', color: 'danger' });
     }
@@ -130,11 +135,15 @@ export const responseToItemArray = (
     });
   });
   (response.aliases || []).forEach((alias) => {
-    source.push({
+    const item = {
       name: alias.name,
       tags: [{ key: 'alias', name: aliasLabel, color: 'default' }],
       item: alias,
-    });
+    };
+    // we only need to check the first index to see if its a rollup since there can only be one alias match
+    item.tags.push(...getTags(alias.indices[0]));
+    item.tags.push(...getTags(alias.name));
+    source.push(item);
   });
   (response.data_streams || []).forEach((dataStream) => {
     source.push({

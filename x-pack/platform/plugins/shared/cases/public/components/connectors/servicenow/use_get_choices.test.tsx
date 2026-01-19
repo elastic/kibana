@@ -10,9 +10,9 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import type { ActionConnector } from '../../../../common/types/domain';
 import { useGetChoices } from './use_get_choices';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import * as api from './api';
+import { TestProviders } from '../../../common/mock';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('./api');
 jest.mock('../../../common/lib/kibana');
@@ -20,7 +20,7 @@ jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const fields = ['priority'];
 
-const connector = {
+const connector: ActionConnector = createMockActionConnector({
   secrets: {
     username: 'user',
     password: 'pass',
@@ -28,20 +28,14 @@ const connector = {
   id: 'test',
   actionTypeId: '.servicenow',
   name: 'ServiceNow',
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },
-} as ActionConnector;
-
+});
 describe('useGetChoices', () => {
   const { http } = useKibanaMock().services;
-  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -54,7 +48,7 @@ describe('useGetChoices', () => {
           connector,
           fields,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {
@@ -77,7 +71,7 @@ describe('useGetChoices', () => {
           http,
           fields,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(spy).not.toHaveBeenCalledWith();
@@ -99,7 +93,7 @@ describe('useGetChoices', () => {
           connector,
           fields,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {
@@ -125,7 +119,7 @@ describe('useGetChoices', () => {
           connector,
           fields,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {

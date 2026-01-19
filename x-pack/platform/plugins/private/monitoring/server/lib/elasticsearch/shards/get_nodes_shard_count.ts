@@ -8,8 +8,8 @@
 import { get } from 'lodash';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
-import { LegacyRequest } from '../../../types';
-import { ElasticsearchModifiedSource } from '../../../../common/types/es';
+import type { LegacyRequest } from '../../../types';
+import type { ElasticsearchModifiedSource } from '../../../../common/types/es';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
@@ -43,22 +43,20 @@ async function getShardCountPerNode(req: LegacyRequest, cluster: ElasticsearchMo
     index: indexPattern,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        type,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
-        metric,
-        filters,
-      }),
-      aggs: {
-        nodes: {
-          terms: {
-            field: 'shard.node',
-            size: maxBucketSize,
-          },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
+      metric,
+      filters,
+    }),
+    aggs: {
+      nodes: {
+        terms: {
+          field: 'shard.node',
+          size: maxBucketSize,
         },
       },
     },

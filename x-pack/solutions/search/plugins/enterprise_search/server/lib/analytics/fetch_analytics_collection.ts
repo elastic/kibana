@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { AnalyticsCollection } from '../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../common/types/analytics';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { isResourceNotFoundException } from '../../utils/identify_exceptions';

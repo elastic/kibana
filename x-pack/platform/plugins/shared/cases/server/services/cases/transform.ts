@@ -14,8 +14,10 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { estypes } from '@elastic/elasticsearch';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import type { CaseCustomFields, ExternalService } from '../../../common/types/domain';
+import type { Case, CaseCustomFields, ExternalService } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
@@ -32,7 +34,11 @@ import {
   transformESConnectorToExternalModel,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
-import type { CasePersistedAttributes, CaseTransformedAttributes } from '../../common/types/case';
+import type {
+  CasePersistedAttributes,
+  CaseTransformedAttributes,
+  CaseTransformedAttributesWithAttachmentStats,
+} from '../../common/types/case';
 import type { ExternalServicePersisted } from '../../common/types/external_service';
 
 export function transformUpdateResponseToExternalModel(
@@ -46,11 +52,13 @@ export function transformUpdateResponseToExternalModel(
     total_alerts,
     total_comments,
     customFields,
+    settings,
     ...restUpdateAttributes
   } =
     updatedCase.attributes ??
     ({
       total_alerts: -1,
+      total_events: -1,
       total_comments: -1,
     } as CasePersistedAttributes);
 
@@ -81,6 +89,12 @@ export function transformUpdateResponseToExternalModel(
       ...(customFields !== undefined && {
         customFields: customFields as CaseTransformedAttributes['customFields'],
       }),
+      ...(settings && {
+        settings: {
+          ...settings,
+          extractObservables: settings.extractObservables ?? false,
+        },
+      }),
     },
   };
 }
@@ -89,15 +103,27 @@ export function transformAttributesToESModel(caseAttributes: CaseTransformedAttr
   attributes: CasePersistedAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
-export function transformAttributesToESModel(caseAttributes: Partial<CaseTransformedAttributes>): {
+
+export function transformAttributesToESModel(
+  caseAttributes: Partial<CaseTransformedAttributesWithAttachmentStats>
+): {
   attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
+
 export function transformAttributesToESModel(caseAttributes: Partial<CaseTransformedAttributes>): {
   attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
-  const { connector, external_service, severity, status, ...restAttributes } = caseAttributes;
+  const {
+    connector,
+    external_service,
+    severity,
+    status,
+    incremental_id,
+    settings,
+    ...restAttributes
+  } = caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
 
   const transformedConnector = {
@@ -125,8 +151,70 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
       ...transformedExternalService,
       ...(severity && { severity: SEVERITY_EXTERNAL_TO_ESMODEL[severity] }),
       ...(status && { status: STATUS_EXTERNAL_TO_ESMODEL[status] }),
+      ...(settings && {
+        settings: {
+          ...settings,
+          extractObservables: settings.extractObservables ?? false,
+        },
+      }),
+      total_observables: restAttributes.observables?.length ?? 0,
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
+  };
+}
+
+export function transformESModelToCase(
+  caseId: string,
+  caseData: CasePersistedAttributes,
+  hit: estypes.SearchHit
+): Case {
+  const sourceWithRefs = hit._source as { references?: SavedObjectReference[] } | undefined;
+  const references = sourceWithRefs?.references;
+
+  const connector = transformESConnectorOrUseDefault({
+    connector: caseData.connector,
+    references,
+    referenceName: CONNECTOR_ID_REFERENCE_NAME,
+  });
+
+  const externalService = transformESExternalService(caseData.external_service, references);
+
+  const { total_alerts, total_comments, total_events, ...caseAttributes } = caseData;
+
+  const severity = SEVERITY_ESMODEL_TO_EXTERNAL[caseAttributes.severity] ?? CaseSeverity.LOW;
+  const status = STATUS_ESMODEL_TO_EXTERNAL[caseAttributes.status] ?? CaseStatuses.open;
+  const category = !caseAttributes.category ? null : caseAttributes.category;
+  const customFields = !caseAttributes.customFields
+    ? []
+    : (caseAttributes.customFields as CaseCustomFields);
+  const observables = caseAttributes.observables ?? [];
+  const total_observables = observables.length;
+  const incremental_id = caseAttributes.incremental_id ?? undefined;
+  const settings = {
+    syncAlerts: caseAttributes.settings?.syncAlerts ?? false,
+    extractObservables: caseAttributes.settings?.extractObservables ?? false,
+  };
+
+  const version = encodeHitVersion(hit);
+
+  return {
+    id: caseId,
+    version: version ?? '0',
+    totalComment: total_comments ?? 0,
+    totalAlerts: total_alerts ?? 0,
+    totalEvents: total_events ?? 0,
+    ...caseAttributes,
+    severity,
+    status,
+    connector,
+    external_service: externalService,
+    category,
+    customFields,
+    observables,
+    total_observables,
+    incremental_id,
+    settings,
+    comments: [],
   };
 }
 
@@ -171,6 +259,7 @@ export function transformSavedObjectToExternalModel(
     caseSavedObject.attributes ??
     ({
       total_alerts: -1,
+      total_events: -1,
       total_comments: -1,
     } as CasePersistedAttributes);
 
@@ -182,6 +271,12 @@ export function transformSavedObjectToExternalModel(
     ? []
     : (caseSavedObjectAttributes.customFields as CaseCustomFields);
   const observables = caseSavedObjectAttributes.observables ?? [];
+  const total_observables = observables.length;
+  const incremental_id = caseSavedObjectAttributes.incremental_id ?? undefined;
+  const settings = {
+    syncAlerts: caseSavedObjectAttributes.settings?.syncAlerts ?? false,
+    extractObservables: caseSavedObjectAttributes.settings?.extractObservables ?? false,
+  };
 
   return {
     ...caseSavedObject,
@@ -194,6 +289,9 @@ export function transformSavedObjectToExternalModel(
       category,
       customFields,
       observables,
+      total_observables,
+      incremental_id,
+      settings,
     },
   };
 }

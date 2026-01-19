@@ -7,19 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardStart, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
+import {
+  type PresentationUtilPluginStart,
+  PanelPlacementStrategy,
+} from '@kbn/presentation-util-plugin/public';
 import { FIELD_LIST_ID } from './constants';
-import { FieldListSerializedStateState } from './types';
 
-const getPanelPlacementSetting = (serializedState?: FieldListSerializedStateState) => {
+const getPanelSettings = () => ({
   // Consider using the serialized state to determine the width, height, and strategy
-  return {
+  placementSettings: {
     width: 12,
     height: 36,
     strategy: PanelPlacementStrategy.placeAtTop,
-  };
-};
+  },
+  resizeSettings: {
+    minWidth: 12,
+    minHeight: 4,
+  },
+});
 
-export function registerFieldListPanelPlacementSetting(dashboard: DashboardStart) {
-  dashboard.registerDashboardPanelPlacementSetting(FIELD_LIST_ID, getPanelPlacementSetting);
+export function registerFieldListPanelPlacementSetting(
+  presentationUtil: PresentationUtilPluginStart
+) {
+  presentationUtil.registerPanelPlacementSettings(FIELD_LIST_ID, getPanelSettings);
 }

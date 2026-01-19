@@ -9,8 +9,8 @@ import moment from 'moment';
 import { createQuery } from '../create_query';
 import { calculateAvailability } from '../calculate_availability';
 import { LogstashMetric } from '../metrics';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { getIndexPatterns, getLogstashDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
@@ -87,50 +87,48 @@ export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUui
     index: indexPatterns,
     size: config.ui.max_bucket_size,
     ignore_unavailable: true,
-    body: {
-      query: createQuery({
-        type,
-        dsDataset: getLogstashDataset(dataset),
-        metricset: dataset,
-        filters,
-        start,
-        end,
-        clusterUuid,
-        metric: LogstashMetric.getMetricFields(),
-      }),
-      collapse: {
-        field: 'logstash_stats.logstash.uuid',
-      },
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-      _source: [
-        'timestamp',
-        '@timestamp',
-        'logstash_stats.process.cpu.percent',
-        'logstash.node.stats.process.cpu.percent',
-        'logstash_stats.jvm.mem.heap_used_percent',
-        'logstash.node.stats.jvm.mem.heap_used_percent',
-        'logstash_stats.os.cpu.load_average.1m',
-        'logstash.node.stats.os.cpu.load_average.1m',
-        'logstash_stats.events.out',
-        'logstash.node.stats.events.out',
-        'logstash_stats.logstash.http_address',
-        'logstash.node.stats.logstash.http_address',
-        'logstash_stats.logstash.name',
-        'logstash.node.stats.logstash.name',
-        'logstash_stats.logstash.host',
-        'logstash.node.stats.logstash.host',
-        'logstash_stats.logstash.uuid',
-        'logstash.node.stats.logstash.uuid',
-        'logstash_stats.logstash.status',
-        'logstash.node.stats.logstash.status',
-        'logstash_stats.logstash.pipeline',
-        'logstash.node.stats.logstash.pipeline',
-        'logstash_stats.reloads',
-        'logstash.node.stats.reloads',
-        'logstash_stats.logstash.version',
-        'logstash.node.stats.logstash.version',
-      ],
+    query: createQuery({
+      type,
+      dsDataset: getLogstashDataset(dataset),
+      metricset: dataset,
+      filters,
+      start,
+      end,
+      clusterUuid,
+      metric: LogstashMetric.getMetricFields(),
+    }),
+    collapse: {
+      field: 'logstash_stats.logstash.uuid',
     },
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+    _source: [
+      'timestamp',
+      '@timestamp',
+      'logstash_stats.process.cpu.percent',
+      'logstash.node.stats.process.cpu.percent',
+      'logstash_stats.jvm.mem.heap_used_percent',
+      'logstash.node.stats.jvm.mem.heap_used_percent',
+      'logstash_stats.os.cpu.load_average.1m',
+      'logstash.node.stats.os.cpu.load_average.1m',
+      'logstash_stats.events.out',
+      'logstash.node.stats.events.out',
+      'logstash_stats.logstash.http_address',
+      'logstash.node.stats.logstash.http_address',
+      'logstash_stats.logstash.name',
+      'logstash.node.stats.logstash.name',
+      'logstash_stats.logstash.host',
+      'logstash.node.stats.logstash.host',
+      'logstash_stats.logstash.uuid',
+      'logstash.node.stats.logstash.uuid',
+      'logstash_stats.logstash.status',
+      'logstash.node.stats.logstash.status',
+      'logstash_stats.logstash.pipeline',
+      'logstash.node.stats.logstash.pipeline',
+      'logstash_stats.reloads',
+      'logstash.node.stats.reloads',
+      'logstash_stats.logstash.version',
+      'logstash.node.stats.logstash.version',
+    ],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

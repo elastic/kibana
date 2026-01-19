@@ -10,17 +10,19 @@ import type { Plugin } from '@kbn/core/public';
 
 import type { CoreSetup } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { ConfigSchema } from '@kbn/file-upload-common';
 import { getComponents } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { setStartServices } from './kibana_services';
 import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
-import type { ConfigSchema } from '../common/app';
 import type {
   DataVisualizerSetupDependencies,
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables/field_stats';
+import { registerUiActions } from './register_ui_actions';
+
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
 
@@ -57,7 +59,7 @@ export class DataVisualizerPlugin
     }
 
     if (plugins.home) {
-      registerHomeAddData(plugins.home, this.resultsLinks);
+      registerHomeAddData(core.getStartServices, plugins.home, this.resultsLinks);
       registerHomeFeatureCatalogue(plugins.home);
     }
 
@@ -66,14 +68,16 @@ export class DataVisualizerPlugin
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
     setStartServices(core, plugins);
-    const {
-      getFileDataVisualizerComponent,
-      getIndexDataVisualizerComponent,
-      getDataDriftComponent,
-    } = getComponents(this.resultsLinks);
+
+    if (plugins.uiActions) {
+      registerUiActions(core, plugins);
+    }
+
+    const { getIndexDataVisualizerComponent, getDataDriftComponent } = getComponents(
+      this.resultsLinks
+    );
 
     return {
-      getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,
       getDataDriftComponent,
       getMaxBytesFormatted,

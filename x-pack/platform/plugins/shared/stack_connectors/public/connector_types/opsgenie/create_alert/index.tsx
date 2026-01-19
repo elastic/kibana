@@ -6,12 +6,13 @@
  */
 
 import React, { lazy, Suspense, useCallback, useState } from 'react';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   SectionLoading,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiErrorBoundary,
   EuiFlexGroup,
@@ -19,20 +20,19 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
-  EuiText,
 } from '@elastic/eui';
 import type {
-  OpsgenieActionParams,
-  OpsgenieCreateAlertParams,
-} from '../../../../server/connector_types';
+  Params as OpsgenieActionParams,
+  CreateAlertParams as OpsgenieCreateAlertParams,
+} from '@kbn/connector-schemas/opsgenie';
 import * as i18n from './translations';
-import { EditActionCallback } from '../types';
+import type { EditActionCallback } from '../types';
 import { DisplayMoreOptions } from '../display_more_options';
 import { AdditionalOptions } from './additional_options';
 import { Tags } from './tags';
 import { Priority } from './priority';
 import type { JsonEditorProps } from './json_editor';
+import { OptionalFieldLabel } from '../../../common/optional_field_label';
 
 const JsonEditorLazy: React.FC<JsonEditorProps> = lazy(() => import('./json_editor'));
 
@@ -62,11 +62,7 @@ const FormView: React.FC<FormViewProps> = ({
         error={errors['subActionParams.message'] as string}
         label={i18n.MESSAGE_FIELD_LABEL}
         isInvalid={isMessageInvalid}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18n.REQUIRED_LABEL}
-          </EuiText>
-        }
+        aria-label={i18n.MESSAGE_FIELD_LABEL}
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -91,19 +87,24 @@ const FormView: React.FC<FormViewProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size={'m'} />
+
       <TextAreaWithMessageVariables
         index={index}
         editAction={editOptionalSubAction}
         messageVariables={messageVariables}
         paramsProperty={'description'}
-        inputTargetValue={subActionParams?.description}
         label={i18n.DESCRIPTION_FIELD_LABEL}
+        inputTargetValue={subActionParams?.description}
+        isOptionalField
       />
+      <EuiSpacer size={'m'} />
       <EuiFormRow
         data-test-subj="opsgenie-alias-row"
         fullWidth
         label={i18n.ALIAS_FIELD_LABEL}
         helpText={i18n.OPSGENIE_ALIAS_HELP}
+        labelAppend={OptionalFieldLabel}
+        aria-label={i18n.ALIAS_FIELD_LABEL}
       >
         <TextFieldWithMessageVariables
           index={index}

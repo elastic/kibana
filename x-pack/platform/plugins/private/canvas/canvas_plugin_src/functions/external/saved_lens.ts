@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Filter as DataFilter } from '@kbn/es-query';
+import type { Filter as DataFilter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionValueFilter, EmbeddableInput, TimeRange as TimeRangeArg } from '../../../types';
-import {
-  EmbeddableTypes,
-  EmbeddableExpressionType,
-  EmbeddableExpression,
-} from '../../expression_types';
+import type { ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
+import type { EmbeddableExpression } from '../../expression_types';
+import { EmbeddableTypes, EmbeddableExpressionType } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 interface Arguments {
   id: string;
@@ -25,25 +22,24 @@ interface Arguments {
   palette?: PaletteOutput;
 }
 
-export type SavedLensInput = EmbeddableInput & {
+export interface SavedLensInput {
+  title?: string;
   savedObjectId: string;
   timeRange?: TimeRange;
   filters: DataFilter[];
   palette?: PaletteOutput;
-};
+}
 
 const defaultTimeRange = {
   from: 'now-15m',
   to: 'now',
 };
 
-type Return = EmbeddableExpression<SavedLensInput>;
-
 export function savedLens(): ExpressionFunctionDefinition<
   'savedLens',
   ExpressionValueFilter | null,
   Arguments,
-  Return
+  EmbeddableExpression
 > {
   const { help, args: argHelp } = getFunctionHelp().savedLens;
   return {

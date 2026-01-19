@@ -203,7 +203,7 @@ export const AssetCriticalityTitle = () => (
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="iInCircle" color="subdued" />
+        <EuiIcon type="info" color="subdued" />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiToolTip>
@@ -221,21 +221,22 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({
   onSave,
 }) => {
   const basicSelectId = useGeneratedHtmlId({ prefix: 'basicSelect' });
+  const modalTitleId = useGeneratedHtmlId();
   const [value, setNewValue] = useState<CriticalityLevelWithUnassigned>(
     initialCriticalityLevel ?? 'unassigned'
   );
 
   return (
-    <EuiModal onClose={() => toggle(false)}>
+    <EuiModal onClose={() => toggle(false)} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="asset-criticality-modal-title">
+        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="asset-criticality-modal-title">
           {PICK_ASSET_CRITICALITY}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiSuperSelect
           id={basicSelectId}
-          options={options}
+          options={assetCriticalityOptions}
           valueOfSelected={value}
           onChange={setNewValue}
           aria-label={PICK_ASSET_CRITICALITY}
@@ -272,21 +273,21 @@ const option = (
   dropdownDisplay: (
     <AssetCriticalityBadge
       criticalityLevel={level}
-      style={{ lineHeight: 'inherit' }}
+      css={{ lineHeight: 'inherit' }}
       dataTestSubj="asset-criticality-modal-select-option"
     />
   ),
-  inputDisplay: (
-    <AssetCriticalityBadge criticalityLevel={level} style={{ lineHeight: 'inherit' }} />
-  ),
+  inputDisplay: <AssetCriticalityBadge criticalityLevel={level} css={{ lineHeight: 'inherit' }} />,
 });
-const options: Array<EuiSuperSelectOption<CriticalityLevelWithUnassigned>> = [
-  option('unassigned'),
-  option('low_impact'),
-  option('medium_impact'),
-  option('high_impact'),
-  option('extreme_impact'),
-];
+
+export const assetCriticalityOptions: Array<EuiSuperSelectOption<CriticalityLevelWithUnassigned>> =
+  [
+    option('unassigned'),
+    option('low_impact'),
+    option('medium_impact'),
+    option('high_impact'),
+    option('extreme_impact'),
+  ];
 
 export const AssetCriticalityAccordion = React.memo(AssetCriticalityAccordionComponent);
 AssetCriticalityAccordion.displayName = 'AssetCriticalityAccordion';

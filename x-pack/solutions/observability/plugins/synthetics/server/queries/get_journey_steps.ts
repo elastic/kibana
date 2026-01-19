@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SyntheticsEsClient } from '../lib';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsEsClient } from '../lib';
 import { asMutableArray } from '../../common/utils/as_mutable_array';
-import { JourneyStep } from '../../common/runtime_types/ping/synthetics';
+import type { JourneyStep } from '../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroup: string;
@@ -54,7 +54,7 @@ export const getJourneySteps = async ({
     },
     size: 500,
   };
-  const { body: result } = await syntheticsEsClient.search({ body: params }, 'getJourneySteps');
+  const { body: result } = await syntheticsEsClient.search(params, 'getJourneySteps');
 
   const steps = result.hits.hits.map(
     ({ _id, _source }) => Object.assign({ _id }, _source) as ResultType

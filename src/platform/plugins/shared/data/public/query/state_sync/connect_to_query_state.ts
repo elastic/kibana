@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs';
 import _ from 'lodash';
 import { COMPARE_ALL_OPTIONS, compareFilters, FilterStateStore } from '@kbn/es-query';
-import { BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
-import { QuerySetup, QueryStart } from '../query_service';
-import { QueryState } from '../query_state';
-import { QueryStateChange } from './types';
+import type { BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
+import type { QuerySetup, QueryStart } from '../query_service';
+import type { QueryState } from '../query_state';
+import type { QueryStateChange } from './types';
 import { validateTimeRange } from '../timefilter';
 
 /**

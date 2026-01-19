@@ -8,6 +8,10 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
+  getDurationFieldForTransactions,
+  calculateThroughputWithRange,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
   getApmDiskSpacedUsedPct,
@@ -23,10 +27,8 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
-  getDurationFieldForTransactions,
   isRootTransaction,
 } from '../../lib/helpers/transactions';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface SharedOptions {
@@ -55,28 +57,26 @@ async function getTracesPerMinute({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...rangeQuery(start, end),
-            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-              ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-              : []),
-            isRootTransaction(searchAggregatedTransactions),
-          ],
-        },
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...rangeQuery(start, end),
+          ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+            ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+            : []),
+          isRootTransaction(searchAggregatedTransactions),
+        ],
       },
-      aggs: {
-        traces_count: {
-          value_count: {
-            field: getDurationFieldForTransactions(searchAggregatedTransactions),
-          },
+    },
+    aggs: {
+      traces_count: {
+        value_count: {
+          field: getDurationFieldForTransactions(searchAggregatedTransactions),
         },
       },
     },
@@ -117,40 +117,38 @@ async function getMainSummaryStats({
           ProcessorEvent.metric,
         ],
       },
-      body: {
-        size: 0,
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...rangeQuery(start, end),
-              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-                : []),
-            ],
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...rangeQuery(start, end),
+            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+              ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+              : []),
+          ],
+        },
+      },
+      aggs: {
+        services_count: {
+          cardinality: {
+            field: SERVICE_NAME,
           },
         },
-        aggs: {
-          services_count: {
-            cardinality: {
-              field: SERVICE_NAME,
-            },
-          },
-          sample: {
-            random_sampler: randomSampler,
-            aggs: {
-              indices: {
-                terms: {
-                  field: INDEX,
-                  size: 500,
-                },
-                aggs: {
-                  number_of_metric_docs: {
-                    value_count: {
-                      field: INDEX,
-                    },
+        sample: {
+          random_sampler: randomSampler,
+          aggs: {
+            indices: {
+              terms: {
+                field: INDEX,
+                size: 500,
+              },
+              aggs: {
+                number_of_metric_docs: {
+                  value_count: {
+                    field: INDEX,
                   },
                 },
               },

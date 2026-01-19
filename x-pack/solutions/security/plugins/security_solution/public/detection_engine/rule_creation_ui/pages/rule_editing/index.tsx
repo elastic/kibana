@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiResizableContainer,
   EuiSpacer,
   EuiTab,
@@ -22,11 +23,11 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
-import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import type {
   RuleResponse,
   RuleUpdateProps,
@@ -34,10 +35,9 @@ import type {
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import {
-  getRuleDetailsUrl,
   getDetectionEngineUrl,
+  getRuleDetailsUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
@@ -49,53 +49,49 @@ import { StepScheduleRule } from '../../components/step_schedule_rule';
 import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
 import { formatRule } from '../rule_creation/helpers';
 import {
-  getStepsData,
-  redirectToDetections,
   getActionMessageParams,
+  getStepsData,
   MaxWidthEuiFlexItem,
-} from '../../../../detections/pages/detection_engine/rules/helpers';
-import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
+  redirectToDetections,
+} from '../../../common/helpers';
+import * as ruleI18n from '../../../common/translations';
+import type { DefineStepRule } from '../../../common/types';
+import { RuleStep } from '../../../common/types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
-import { ruleStepsOrder } from '../../../../detections/pages/detection_engine/rules/utils';
+import { ruleStepsOrder } from '../../../common/utils';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { APP_UI_ID, DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import { useGetSavedQuery } from '../../../common/use_get_saved_query';
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
 import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
+import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-    },
-  ] = useUserData();
+  const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
+    useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
   const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
 
-  const { isRulesCustomizationEnabled, customizationDisabledReason } =
-    usePrebuiltRulesCustomizationStatus();
+  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const canEditRule = isRulesCustomizationEnabled || !rule.immutable;
 
-  const prebuiltCustomizationUpsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage();
+  const prebuiltCustomizationUpsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
+    'prebuilt_rule_customization_description'
+  );
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
 
@@ -132,6 +128,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
+    handleNewConnectorCreated,
   } = useRuleForms({
     defineStepDefault: defineRuleData,
     aboutStepDefault: aboutRuleData,
@@ -150,24 +147,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
     [defineStepData.index, esqlIndex, defineStepData.ruleType]
   );
-
-  const defineStepFormFields = defineStepForm.getFields();
-  const isPreviewDisabled = getIsRulePreviewDisabled({
-    ruleType: defineStepData.ruleType,
-    isQueryBarValid,
-    isThreatQueryBarValid:
-      defineStepFormFields.threatIndex?.isValid &&
-      defineStepFormFields.threatQueryBar?.isValid &&
-      defineStepFormFields.threatMapping?.isValid,
-    index: memoizedIndex,
-    dataViewId: defineStepData.dataViewId,
-    dataSourceType: defineStepData.dataSourceType,
-    threatIndex: defineStepData.threatIndex,
-    threatMapping: defineStepData.threatMapping,
-    machineLearningJobId: defineStepData.machineLearningJobId,
-    queryBar: defineStepData.queryBar,
-    newTermsFields: defineStepData.newTermsFields,
-  });
 
   const loading = userInfoLoading || listsConfigLoading;
   const { isSavedQueryLoading, savedQuery } = useGetSavedQuery({
@@ -214,7 +193,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   });
 
   const customizationDisabledTooltip =
-    !canEditRule && customizationDisabledReason === PrebuiltRulesCustomizationDisabledReason.License
+    !canEditRule && !isRulesCustomizationEnabled
       ? prebuiltCustomizationUpsellingMessage
       : undefined;
 
@@ -336,12 +315,15 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
               {actionsStepData != null && (
                 <StepRuleActions
                   ruleId={rule?.id}
+                  ruleTypeId={ruleTypeMappings[rule?.type]}
                   isLoading={isLoading}
                   isUpdateView
                   actionMessageParams={actionMessageParams}
                   summaryActionMessageParams={actionMessageParams}
                   form={actionsStepForm}
                   key="actionsStep"
+                  ruleInterval={scheduleStepData.interval}
+                  onNewConnectorCreated={handleNewConnectorCreated}
                 />
               )}
               <EuiSpacer />
@@ -370,11 +352,13 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       esqlQueryForAboutStep,
       rule.rule_source,
       rule?.id,
+      rule?.type,
       scheduleStepData,
       scheduleStepForm,
       actionsStepData,
       actionMessageParams,
       actionsStepForm,
+      handleNewConnectorCreated,
     ]
   );
 
@@ -504,6 +488,21 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [navigateToApp, ruleId]
   );
 
+  const upgradeCallout = useRuleUpdateCallout({
+    rule,
+    message: ruleI18n.HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE,
+    actionButton: (
+      <EuiLink onClick={goToDetailsRule} data-test-subj="ruleEditingUpdateRuleCalloutButton">
+        {ruleI18n.HAS_RULE_UPDATE_EDITING_CALLOUT_BUTTON}
+      </EuiLink>
+    ),
+  });
+
+  const verifyRuleDefinitionForPreview = useCallback(
+    () => defineStepForm.validate(),
+    [defineStepForm]
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -517,7 +516,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!hasUserCRUDPermission(canUserCRUD)) {
+  } else if (!canEditRules) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),
@@ -545,8 +544,14 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
                       />
+                      {isRulesCustomizationEnabled && upgradeCallout}
                       {invalidSteps.length > 0 && (
-                        <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="warning">
+                        <EuiCallOut
+                          announceOnMount
+                          title={i18n.SORRY_ERRORS}
+                          color="danger"
+                          iconType="warning"
+                        >
                           <FormattedMessage
                             id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
                             defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
@@ -615,7 +620,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   onToggleCollapsed={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
                 >
                   <RulePreview
-                    isDisabled={isPreviewDisabled}
+                    verifyRuleDefinition={verifyRuleDefinitionForPreview}
                     defineRuleData={defineStepData}
                     aboutRuleData={aboutStepData}
                     scheduleRuleData={scheduleStepData}

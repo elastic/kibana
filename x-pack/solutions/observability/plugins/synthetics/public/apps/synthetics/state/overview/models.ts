@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FlyoutParamProps } from '../../components/monitors_page/overview/overview/types';
+import type { FlyoutParamProps } from '../../components/monitors_page/overview/overview/types';
 import type { TrendTable } from '../../../../../common/types';
 import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
-import { ConfigKey } from '../../../../../common/runtime_types';
+import type { ConfigKey } from '../../../../../common/runtime_types';
 
-import { MonitorFilterState } from '../monitor_list';
+import type { MonitorFilterState } from '../monitor_list';
 
 export interface MonitorOverviewPageState extends MonitorFilterState {
   perPage: number;
@@ -20,12 +20,22 @@ export interface MonitorOverviewPageState extends MonitorFilterState {
 
 export type MonitorOverviewFlyoutConfig = FlyoutParamProps | null;
 
+// The first view in the list is the default view
+export const overviewViews = ['cardView', 'compactView'] as const;
+
+export type OverviewView = (typeof overviewViews)[number];
+
+export const isOverviewView = (view: string): view is OverviewView => {
+  return Object.values<string>(overviewViews).includes(view);
+};
+
 export interface MonitorOverviewState {
   flyoutConfig: MonitorOverviewFlyoutConfig;
   pageState: MonitorOverviewPageState;
   isErrorPopoverOpen?: string | null;
   groupBy: GroupByState;
   trendStats: TrendTable;
+  view: OverviewView;
 }
 
 export interface GroupByState {

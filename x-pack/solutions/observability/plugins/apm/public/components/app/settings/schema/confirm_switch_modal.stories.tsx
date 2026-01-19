@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import type { ComponentType } from 'react';
 import React from 'react';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
@@ -29,13 +29,16 @@ interface ModalArgs {
   unsupportedConfigs: Array<{ key: string; value: string }>;
 }
 
-export const Modal: Story<ModalArgs> = ({ unsupportedConfigs }) => {
-  return (
-    <ConfirmSwitchModal
-      onCancel={() => {}}
-      onConfirm={() => {}}
-      unsupportedConfigs={unsupportedConfigs}
-    />
-  );
+export const Modal: StoryObj<ModalArgs> = {
+  render: ({ unsupportedConfigs }) => {
+    return (
+      <ConfirmSwitchModal
+        onCancel={() => {}}
+        onConfirm={() => {}}
+        unsupportedConfigs={unsupportedConfigs}
+      />
+    );
+  },
+
+  args: { unsupportedConfigs: [{ key: 'test', value: '123' }] },
 };
-Modal.args = { unsupportedConfigs: [{ key: 'test', value: '123' }] };

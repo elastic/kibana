@@ -18,13 +18,20 @@ describe('registerBootstrapRoute', () => {
     expect(router.get).toHaveBeenCalledTimes(2);
     expect(router.get).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ options: { access: 'public', tags: ['api'] } }),
+      expect.objectContaining({
+        options: { access: 'public', excludeFromRateLimiter: true, tags: ['api'] },
+      }),
       expect.any(Function)
     );
     expect(router.get).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        options: { access: 'public', tags: ['api'], authRequired: 'optional' },
+        options: {
+          access: 'public',
+          excludeFromRateLimiter: true,
+          tags: ['api'],
+          authRequired: 'optional',
+        },
       }),
       expect.any(Function)
     );

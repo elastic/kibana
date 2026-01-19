@@ -53,7 +53,6 @@ import { UninstallCommandFlyout } from '../../../../../../components';
 
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { useAgentPolicyFormContext } from '../agent_policy_form';
 import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
 import {
@@ -71,6 +70,7 @@ interface Props {
   allowedNamespacePrefixes?: string[];
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
+  setInvalidSpaceError?: (hasErrors: boolean) => void;
   disabled?: boolean;
 }
 
@@ -78,6 +78,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   agentPolicy,
   updateAgentPolicy,
   validation,
+  setInvalidSpaceError,
   disabled = false,
 }) => {
   const { docLinks } = useStartServices();
@@ -97,6 +98,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
 
   const {
     dataOutputOptions,
+    dataOutputValueOfSelected,
     monitoringOutputOptions,
     isLoading: isLoadingOptions,
   } = useOutputOptions(agentPolicy);
@@ -112,7 +114,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     maxAgentPoliciesWithInactivityTimeout !== undefined &&
     totalAgentPoliciesWithInactivityTimeout > (maxAgentPoliciesWithInactivityTimeout ?? 0);
   const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
-    useDownloadSourcesOptions(agentPolicy);
+    useDownloadSourcesOptions();
 
   const { fleetServerHostsOptions, isLoading: isLoadingFleetServerHostsOption } =
     useFleetServerHostsOptions(agentPolicy);
@@ -124,14 +126,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
   const isManagedPolicy = agentPolicy.is_managed === true;
-  const isManagedorAgentlessPolicy = isManagedPolicy || agentPolicy?.supports_agentless === true;
+  const isManagedOrAgentlessPolicy = isManagedPolicy || agentPolicy?.supports_agentless === true;
 
   const userHasAccessToAllPolicySpaces = useMemo(
     () => ('space_ids' in agentPolicy ? !agentPolicy.space_ids?.includes(UNKNOWN_SPACE) : true),
     [agentPolicy]
   );
-
-  const agentPolicyFormContext = useAgentPolicyFormContext();
 
   const AgentTamperProtectionSectionContent = useMemo(
     () => (
@@ -164,7 +164,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               {!policyHasElasticDefend && (
                 <span data-test-subj="tamperMissingIntegrationTooltip">
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                     content={i18n.translate(
                       'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
@@ -324,7 +324,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 ),
                 tooltip: !userHasAccessToAllPolicySpaces && (
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                     content={i18n.translate('xpack.fleet.agentPolicyForm.spaceTooltip', {
                       defaultMessage: 'Access to all policy spaces is required for edit.',
@@ -345,7 +345,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 ? agentPolicy.space_ids.filter((id) => id !== UNKNOWN_SPACE)
                 : [spaceId || 'default']
             }
-            setInvalidSpaceError={agentPolicyFormContext?.setInvalidSpaceError}
+            setInvalidSpaceError={setInvalidSpaceError}
             onChange={(newValue) => {
               if (newValue.length === 0) {
                 return;
@@ -389,12 +389,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           error={validation.namespace ? validation.namespace : null}
           isInvalid={Boolean(validation.namespace)}
           isDisabled={disabled}
+          aria-label="defaultNamespaceRow"
         >
           <EuiComboBox
+            data-test-subj="defaultNamespaceInput"
             fullWidth
             singleSelection
             noSuggestions
-            isDisabled={disabled}
+            isDisabled={disabled || agentPolicy.is_managed === true}
             selectedOptions={agentPolicy.namespace ? [{ label: agentPolicy.namespace }] : []}
             onCreateOption={(value: string) => {
               updateAgentPolicy({ namespace: value });
@@ -404,7 +406,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 namespace: (selectedOptions.length ? selectedOptions[0] : '') as string,
               });
             }}
-            isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+            isInvalid={Boolean(validation.namespace)}
             onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
           />
         </EuiFormRow>
@@ -438,7 +440,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       >
         <EuiSpacer size="l" />
         <EuiCheckboxGroup
-          disabled={disabled || isManagedorAgentlessPolicy}
+          disabled={disabled || isManagedOrAgentlessPolicy}
           options={[
             {
               id: `${dataTypes.Logs}_${monitoringCheckboxIdSuffix}`,
@@ -457,7 +459,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                       }
                     )}
                     position="right"
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                   />
                 </>
@@ -480,7 +482,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                       }
                     )}
                     position="right"
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                   />
                 </>
@@ -544,7 +546,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                     />
                   }
                 >
-                  <EuiBadge color="warning">
+                  <EuiBadge color="warning" tabIndex={0}>
                     <FormattedMessage
                       id="xpack.fleet.agentPolicyForm.inactivityTimeoutBadge"
                       defaultMessage="Warning"
@@ -574,7 +576,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiFieldNumber
             fullWidth
-            disabled={disabled || isManagedorAgentlessPolicy}
+            disabled={disabled || isManagedOrAgentlessPolicy}
             value={agentPolicy.inactivity_timeout || ''}
             min={0}
             onChange={(e) => {
@@ -613,9 +615,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isDisabled={disabled}
           isInvalid={Boolean(touchedFields.fleet_server_host_id && validation.fleet_server_host_id)}
+          aria-label="fleet server hosts options"
         >
           <EuiSuperSelect
-            disabled={disabled || isManagedorAgentlessPolicy}
+            disabled={disabled || isManagedOrAgentlessPolicy}
             valueOfSelected={agentPolicy.fleet_server_host_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingFleetServerHostsOption}
@@ -654,10 +657,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isInvalid={Boolean(touchedFields.data_output_id && validation.data_output_id)}
           isDisabled={disabled}
+          aria-label="outputs options for agent integrations"
         >
           <EuiSuperSelect
-            disabled={disabled || isManagedPolicy}
-            valueOfSelected={agentPolicy.data_output_id || DEFAULT_SELECT_VALUE}
+            disabled={disabled || isManagedOrAgentlessPolicy}
+            valueOfSelected={dataOutputValueOfSelected}
             fullWidth
             isLoading={isLoadingOptions}
             onChange={(e) => {
@@ -695,9 +699,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isInvalid={Boolean(touchedFields.monitoring_output_id && validation.monitoring_output_id)}
           isDisabled={disabled}
+          aria-label="outputs options for agent monitoring"
         >
           <EuiSuperSelect
-            disabled={disabled || isManagedorAgentlessPolicy}
+            disabled={disabled || isManagedOrAgentlessPolicy}
             valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
@@ -736,10 +741,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               : null
           }
           isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
-          isDisabled={disabled}
+          isDisabled={disabled || isManagedOrAgentlessPolicy}
+          aria-label="download source options for agent binaries"
         >
           <EuiSuperSelect
-            disabled={disabled || agentPolicy?.supports_agentless === true}
+            disabled={disabled || isManagedOrAgentlessPolicy}
             valueOfSelected={agentPolicy.download_source_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingDownloadSources}
@@ -770,9 +776,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
-        <EuiFormRow fullWidth isDisabled={disabled}>
+        <EuiFormRow fullWidth isDisabled={disabled || isManagedOrAgentlessPolicy}>
           <EuiRadioGroup
-            disabled={disabled || agentPolicy?.supports_agentless === true}
+            disabled={disabled || isManagedOrAgentlessPolicy}
             options={[
               {
                 id: 'hostname',
@@ -834,7 +840,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 agent_features: id === 'hostname' ? [] : [{ name: 'fqdn', enabled: true }],
               });
             }}
-            name="radio group"
+            name="hostNameFormat"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -863,11 +869,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               : null
           }
           isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
-          isDisabled={disabled}
+          isDisabled={disabled || isManagedOrAgentlessPolicy}
         >
           <EuiFieldNumber
             fullWidth
-            disabled={disabled || isManagedorAgentlessPolicy}
+            disabled={disabled || isManagedOrAgentlessPolicy}
             value={agentPolicy.unenroll_timeout || ''}
             min={0}
             onChange={(e) => {

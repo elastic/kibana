@@ -10,15 +10,15 @@ import type { NodeShape } from '@kbn/cloud-security-posture-common/types/graph/l
 export function getShapeHandlePosition(shape?: NodeShape) {
   switch (shape) {
     case 'hexagon':
-      return 14;
+      return 18;
     case 'pentagon':
-      return 14;
+      return 18;
     case 'ellipse':
-      return 13;
+      return 17;
     case 'rectangle':
-      return 16;
+      return 21;
     case 'diamond':
-      return 10;
+      return 14;
     case 'label':
       return 3;
     case 'group':

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { FlowDirection } from '../../../../../common/search_strategy';
 
 import { IsPtrIncluded } from './is_ptr_included';
 
@@ -16,22 +15,17 @@ describe('NetworkTopNFlow Select direction', () => {
 
   describe('rendering', () => {
     test('it renders the basic switch to include PTR in table', () => {
-      const wrapper = shallow(<IsPtrIncluded isPtrIncluded={true} onChange={mockOnChange} />);
+      const { container } = render(<IsPtrIncluded isPtrIncluded={true} onChange={mockOnChange} />);
 
-      expect(wrapper).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 
   describe('Functionality work as expected', () => {
     test('when you click on bi-directional, you trigger onChange function', () => {
-      const event = {
-        target: { name: 'switch-ptr-included', value: FlowDirection.biDirectional },
-      };
-      const wrapper = mount(<IsPtrIncluded isPtrIncluded={false} onChange={mockOnChange} />);
+      const { container } = render(<IsPtrIncluded isPtrIncluded={false} onChange={mockOnChange} />);
 
-      wrapper.find('button').first().simulate('click', event);
-
-      wrapper.update();
+      fireEvent.click(container.querySelector('button')!);
 
       expect(mockOnChange).toHaveBeenCalled();
     });

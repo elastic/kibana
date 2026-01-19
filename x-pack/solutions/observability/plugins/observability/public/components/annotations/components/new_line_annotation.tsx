@@ -10,10 +10,11 @@ import moment from 'moment';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { AnnotationIcon } from './annotation_icon';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { cloneDeep } from 'lodash';
+import { AnnotationIcon } from '.';
 import { AnnotationTooltip } from './annotation_tooltip';
-import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
 export function NewLineAnnotation({
   slo,
@@ -34,7 +35,7 @@ export function NewLineAnnotation({
 
   return (
     <ObsLineAnnotation
-      annotation={{
+      annotation={cloneDeep({
         ...values,
         annotation: {
           ...values.annotation,
@@ -42,7 +43,7 @@ export function NewLineAnnotation({
           type: annotationType,
         },
         ...(slo ? { slo: { id: slo.id, instanceId: slo.instanceId } } : {}),
-      }}
+      })}
     />
   );
 }
@@ -87,7 +88,11 @@ export function ObsLineAnnotation({
           <AnnotationIcon annotation={annotation} />
         </span>
       }
-      markerBody={<EuiText>{annotation.annotation?.title ?? annotation.message}</EuiText>}
+      markerBody={
+        <EuiText data-test-subj="annotation-marker-body">
+          {annotation.annotation?.title ?? annotation.message}
+        </EuiText>
+      }
       markerPosition={annotation.annotation.style?.line?.iconPosition ?? 'top'}
       customTooltip={() => <AnnotationTooltip annotation={annotation} />}
     />

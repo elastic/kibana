@@ -55,7 +55,8 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
 
 const isValidName = (name: string) => NAME_REGEX_PATTERN.test(name);
 const isValidDatastreamName = (name: string) => DATASTREAM_NAME_REGEX_PATTERN.test(name);
-const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-z0-9]/g, '_');
+export const getNameFromTitle = (title: string) =>
+  title.toLowerCase().replaceAll(/[^a-z0-9]/g, '_');
 
 interface DataStreamStepProps {
   integrationSettings: State['integrationSettings'];
@@ -132,7 +133,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
       // Only executed once when the packageNames are loaded
       if (packageNames != null && integrationSettings?.name == null && integrationSettings?.title) {
         const generatedName = getNameFromTitle(integrationSettings.title);
-        if (!packageNames.has(generatedName)) {
+        if (!packageNames.has(generatedName) && isValidName(generatedName)) {
           setName(generatedName);
           setIntegrationValues({ name: generatedName });
         }
@@ -197,7 +198,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                     data-test-subj="nameInput"
                     value={name}
                     onChange={onChange.name}
-                    isInvalid={invalidFields.name}
+                    isInvalid={!!nameInputError || invalidFields.name}
                     isLoading={isLoadingPackageNames}
                     disabled={isLoadingPackageNames}
                   />

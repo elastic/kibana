@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchIndexShardSize } from './fetch_index_shard_size';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -223,46 +223,44 @@ describe('fetchIndexShardSize', () => {
       index:
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.index-*,metrics-elasticsearch.stack_monitoring.index-*',
       filter_path: ['aggregations.clusters.buckets'],
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'index_stats' } },
-                    { term: { 'metricset.name': 'index' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.index' } },
-                  ],
-                  minimum_should_match: 1,
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { term: { type: 'index_stats' } },
+                  { term: { 'metricset.name': 'index' } },
+                  { term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.index' } },
+                ],
+                minimum_should_match: 1,
               },
-              { range: { timestamp: { gte: 'now-5m' } } },
-            ],
-          },
+            },
+            { range: { timestamp: { gte: 'now-5m' } } },
+          ],
         },
-        aggs: {
-          clusters: {
-            terms: { include: ['cluster123'], field: 'cluster_uuid', size: 10 },
-            aggs: {
-              index: {
-                terms: { field: 'index_stats.index', size: 10 },
-                aggs: {
-                  hits: {
-                    top_hits: {
-                      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-                      _source: {
-                        includes: [
-                          '_index',
-                          'index_stats.shards.primaries',
-                          'index_stats.primaries.store.size_in_bytes',
-                          'elasticsearch.index.shards.primaries',
-                          'elasticsearch.index.primaries.store.size_in_bytes',
-                        ],
-                      },
-                      size: 1,
+      },
+      aggs: {
+        clusters: {
+          terms: { include: ['cluster123'], field: 'cluster_uuid', size: 10 },
+          aggs: {
+            index: {
+              terms: { field: 'index_stats.index', size: 10 },
+              aggs: {
+                hits: {
+                  top_hits: {
+                    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+                    _source: {
+                      includes: [
+                        '_index',
+                        'index_stats.shards.primaries',
+                        'index_stats.primaries.store.size_in_bytes',
+                        'elasticsearch.index.shards.primaries',
+                        'elasticsearch.index.primaries.store.size_in_bytes',
+                      ],
                     },
+                    size: 1,
                   },
                 },
               },

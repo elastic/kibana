@@ -15,9 +15,10 @@ import {
   ImportExceptionListRequestQuery,
   ImportExceptionListResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
-import { ConfigType } from '../config';
+import type { ConfigType } from '../config';
 
 import { buildSiemResponse, getExceptionListClient } from './utils';
 
@@ -39,7 +40,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
       path: `${EXCEPTION_LIST_URL}/_import`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })

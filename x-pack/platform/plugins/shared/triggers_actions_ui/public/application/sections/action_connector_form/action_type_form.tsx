@@ -6,6 +6,7 @@
  */
 
 import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -24,7 +25,6 @@ import {
   EuiSuperSelect,
   EuiBadge,
   EuiErrorBoundary,
-  EuiToolTip,
   EuiBetaBadge,
   EuiSplitPanel,
   useEuiTheme,
@@ -32,7 +32,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
-import {
+import type {
   ActionVariable,
   RuleActionAlertsFilterProperty,
   RuleActionFrequency,
@@ -50,26 +50,27 @@ import {
   RuleActionsAlertsFilterTimeframe,
 } from '@kbn/response-ops-rule-form';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
-import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
-import {
+import type {
   IErrorObject,
   RuleAction,
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
-  ActionConnectorMode,
   NotifyWhenSelectOptions,
 } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionAccordionFormProps } from './action_form';
+import type { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { validateActionFilterQuery } from '../../lib/value_validators';
-import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
+import { useRuleTypeAlertFields } from '../../hooks/use_rule_alert_fields';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -98,7 +99,6 @@ export type ActionTypeFormProps = {
   featureId: string;
   producerId: string;
   ruleTypeId?: string;
-  hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
 } & Pick<
   ActionAccordionFormProps,
@@ -149,7 +149,6 @@ export const ActionTypeForm = ({
   producerId,
   featureId,
   ruleTypeId,
-  hasFieldsForAAD,
   disableErrorMessages,
 }: ActionTypeFormProps) => {
   const {
@@ -160,6 +159,7 @@ export const ActionTypeForm = ({
     unifiedSearch,
     data,
   } = useKibana().services;
+
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
@@ -188,23 +188,46 @@ export const ActionTypeForm = ({
 
   const isSummaryAction = actionItem.frequency?.summary;
 
-  const [useAadTemplateFields, setUseAadTemplateField] = useState(
+  const [useAlertTemplateFields, setUseAlertTemplateFields] = useState(
     actionItem?.useAlertDataForTemplate ?? false
   );
-  const [storedActionParamsForAadToggle, setStoredActionParamsForAadToggle] = useState<
-    Record<string, SavedObjectAttribute>
-  >({});
+  const [storedActionParamsForAlertFieldsToggle, setStoredActionParamsForAlertFieldsToggle] =
+    useState<Record<string, SavedObjectAttribute>>({});
 
-  const { fields: aadTemplateFields } = useRuleTypeAadTemplateFields(
+  const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, useAlertTemplateFields);
+
+  const { ruleTypesState } = useGetRuleTypesPermissions({
     http,
-    ruleTypeId,
-    useAadTemplateFields
-  );
+    toasts: notifications.toasts,
+    filteredRuleTypes: [],
+  });
 
   const templateFields = useMemo(
-    () => (useAadTemplateFields ? aadTemplateFields : availableActionVariables),
-    [aadTemplateFields, availableActionVariables, useAadTemplateFields]
+    () => (useAlertTemplateFields ? alertFields : availableActionVariables),
+    [alertFields, availableActionVariables, useAlertTemplateFields]
   );
+
+  const actAccordionActionFormCss = css`
+    .actAccordionActionForm {
+      background-color: ${euiTheme.colors.lightestShade};
+
+      .euiCard {
+        box-shador: none;
+      }
+      .actAccordionActionForm__button {
+        padding: ${euiTheme.size.m};
+        padding-left: ${euiTheme.size.l};
+      }
+
+      .euiAccordion__arrow {
+        transform: translateX(${euiTheme.size.m}) rotate(0deg) !important;
+      }
+
+      .euiAccordion__arrow[aria-expanded='true'] {
+        transform: translateX(${euiTheme.size.m}) rotate(90deg) !important;
+      }
+    }
+  `;
 
   let showMustacheAutocompleteSwitch;
   try {
@@ -214,8 +237,8 @@ export const ActionTypeForm = ({
     showMustacheAutocompleteSwitch = false;
   }
 
-  const handleUseAadTemplateFields = useCallback(() => {
-    setUseAadTemplateField((prevVal) => {
+  const handleUseAlertTemplateFields = useCallback(() => {
+    setUseAlertTemplateFields((prevVal) => {
       if (setActionUseAlertDataForTemplate) {
         setActionUseAlertDataForTemplate(!prevVal, index);
       }
@@ -223,13 +246,13 @@ export const ActionTypeForm = ({
     });
     const currentActionParams = { ...actionItem.params };
     for (const key of Object.keys(currentActionParams)) {
-      setActionParamsProperty(key, storedActionParamsForAadToggle[key] ?? '', index);
+      setActionParamsProperty(key, storedActionParamsForAlertFieldsToggle[key] ?? '', index);
     }
-    setStoredActionParamsForAadToggle(currentActionParams);
+    setStoredActionParamsForAlertFieldsToggle(currentActionParams);
   }, [
     setActionUseAlertDataForTemplate,
-    storedActionParamsForAadToggle,
-    setStoredActionParamsForAadToggle,
+    storedActionParamsForAlertFieldsToggle,
+    setStoredActionParamsForAlertFieldsToggle,
     setActionParamsProperty,
     actionItem.params,
     index,
@@ -292,7 +315,7 @@ export const ActionTypeForm = ({
               defaultAADParams[key] = paramValue;
             }
           }
-          setStoredActionParamsForAadToggle(defaultAADParams);
+          setStoredActionParamsForAlertFieldsToggle(defaultAADParams);
         }
       }
     })();
@@ -310,7 +333,7 @@ export const ActionTypeForm = ({
             defaultAADParams[key] = paramValue;
           }
         }
-        setStoredActionParamsForAadToggle(defaultAADParams);
+        setStoredActionParamsForAlertFieldsToggle(defaultAADParams);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -324,11 +347,14 @@ export const ActionTypeForm = ({
       }
       const res: { errors: IErrorObject } = await actionTypeRegistry
         .get(actionItem.actionTypeId)
-        ?.validateParams(actionItem.params);
+        ?.validateParams(
+          actionItem.params,
+          actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
+        );
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem, disableErrorMessages]);
+  }, [actionItem, disableErrorMessages, actionConnector]);
 
   const [queryError, setQueryError] = useState<string | null>(null);
   useEffect(() => {
@@ -342,10 +368,10 @@ export const ActionTypeForm = ({
   }, [actionItem, disableErrorMessages]);
 
   useEffect(() => {
-    if (isEmpty(storedActionParamsForAadToggle) && actionItem.params.subAction) {
-      setStoredActionParamsForAadToggle(actionItem.params);
+    if (isEmpty(storedActionParamsForAlertFieldsToggle) && actionItem.params.subAction) {
+      setStoredActionParamsForAlertFieldsToggle(actionItem.params);
     }
-  }, [actionItem.params, storedActionParamsForAadToggle]);
+  }, [actionItem.params, storedActionParamsForAlertFieldsToggle]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -420,7 +446,9 @@ export const ActionTypeForm = ({
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
 
-  const showActionAlertsFilter = hasFieldsForAAD || producerId === AlertConsumers.SIEM;
+  const ruleType = ruleTypeId ? ruleTypesState.data.get(ruleTypeId) : null;
+
+  const showActionAlertsFilter = ruleType?.hasAlertsMappings || producerId === AlertConsumers.SIEM;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -535,8 +563,8 @@ export const ActionTypeForm = ({
                 <EuiFlexItem>
                   <EuiSwitch
                     label="Use template fields from alerts index"
-                    checked={useAadTemplateFields}
-                    onChange={handleUseAadTemplateFields}
+                    checked={useAlertTemplateFields}
+                    onChange={handleUseAlertTemplateFields}
                     data-test-subj="mustacheAutocompleteSwitch"
                   />
                 </EuiFlexItem>
@@ -574,7 +602,7 @@ export const ActionTypeForm = ({
                   {warning ? (
                     <>
                       <EuiSpacer size="s" />
-                      <EuiCallOut size="s" color="warning" title={warning} />
+                      <EuiCallOut announceOnMount size="s" color="warning" title={warning} />
                     </>
                   ) : null}
                 </Suspense>
@@ -590,7 +618,7 @@ export const ActionTypeForm = ({
 
   return (
     <>
-      <EuiSplitPanel.Outer hasShadow={isOpen}>
+      <EuiSplitPanel.Outer hasShadow={isOpen} css={actAccordionActionFormCss}>
         <EuiAccordion
           initialIsOpen={true}
           key={index}
@@ -604,19 +632,18 @@ export const ActionTypeForm = ({
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {showActionGroupErrorIcon() ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
+                  <EuiIconTip
                     content={i18n.translate(
                       'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
                       { defaultMessage: 'Action contains errors.' }
                     )}
-                  >
-                    <EuiIcon
-                      data-test-subj="action-group-error-icon"
-                      type="warning"
-                      color="danger"
-                      size="m"
-                    />
-                  </EuiToolTip>
+                    type="warning"
+                    color="danger"
+                    size="m"
+                    iconProps={{
+                      'data-test-subj': 'action-group-error-icon',
+                    }}
+                  />
                 </EuiFlexItem>
               ) : (
                 <EuiFlexItem grow={false}>

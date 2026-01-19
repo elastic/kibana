@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import type { Query } from '@kbn/es-query';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
@@ -90,10 +90,9 @@ export const checkAggregatableFieldsExistRequest = (
 
   return {
     index,
-    // @ts-expect-error `track_total_hits` not allowed at top level for `typesWithBodyKey`
     track_total_hits: false,
     size,
-    body: searchBody,
+    ...searchBody,
   };
 };
 
@@ -241,9 +240,8 @@ export const checkNonAggregatableFieldExistsRequest = (
 
   return {
     index,
-    // @ts-expect-error `size` not allowed at top level for `typesWithBodyKey`
     size,
-    body: searchBody,
+    ...searchBody,
     // Small es optimization
     // Since we only need to know if at least 1 doc exists for the query
     track_total_hits: 1,
@@ -251,6 +249,10 @@ export const checkNonAggregatableFieldExistsRequest = (
 };
 
 const DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE = 1000;
+
+export const isUnsupportedVectorField = (fieldName: string) => {
+  return fieldName.endsWith('.chunks.embeddings') || fieldName.endsWith('.chunks.offset');
+};
 
 export const getSampleOfDocumentsForNonAggregatableFields = (
   nonAggregatableFields: string[],
@@ -266,17 +268,15 @@ export const getSampleOfDocumentsForNonAggregatableFields = (
 
   return {
     index,
-    body: {
-      fields: nonAggregatableFields.map((fieldName) => fieldName),
-      _source: false,
-      query: {
-        bool: {
-          filter: filterCriteria,
-        },
+    fields: nonAggregatableFields.map((fieldName) => fieldName),
+    _source: false,
+    query: {
+      bool: {
+        filter: filterCriteria,
       },
-      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
-      size: DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE,
     },
+    ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+    size: DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE,
   };
 };
 
@@ -305,6 +305,19 @@ export const processNonAggregatableFieldsExistResponse = (
       });
       return;
     }
+    if (isUnsupportedVectorField(fieldName)) {
+      stats.nonAggregatableExistsFields.push({
+        fieldName,
+        existsInDocs: true,
+        stats: {
+          count: undefined,
+          cardinality: undefined,
+          sampleCount: undefined,
+        },
+      });
+      return;
+    }
+
     const foundField = results.find((r) => r.rawResponse.fieldName === fieldName);
     const existsInDocs = foundField !== undefined && foundField.rawResponse.hits.total > 0;
 

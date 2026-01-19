@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiTabs, EuiTab, useEuiPaddingSize } from '@elastic/eui';
-import { EuiStepHorizontalProps } from '@elastic/eui/src/components/steps/step_horizontal';
+import type { EuiStepHorizontalProps } from '@elastic/eui/src/components/steps/step_horizontal';
 
 interface RuleFlyoutEditTabsProps {
   steps: Array<Omit<EuiStepHorizontalProps, 'step'>>;

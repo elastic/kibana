@@ -27,20 +27,19 @@ import { handleErrors } from './errors';
 import { handleInvalidCategorization } from './invalid';
 import { handleUpdateStableSamples } from './stable';
 import { testPipeline, combineProcessors } from '../../util';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import { handleValidatePipeline } from '../../util/graph';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const model = new FakeLLM({
   response: "I'll callback later.",
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 jest.mock('./errors');
 jest.mock('./review');
 jest.mock('./categorization');
 jest.mock('./invalid');
 jest.mock('./stable');
+jest.mock('../../util/graph');
 
 jest.mock('../../util/pipeline', () => ({
   testPipeline: jest.fn(),
@@ -66,6 +65,39 @@ describe('runCategorizationGraph', () => {
     // We do not care about ES in these tests, the mock is just to prevent errors.
 
     // After this is triggered, the mock of TestPipeline will trigger the expected error, to route to error handler
+    (handleValidatePipeline as jest.Mock)
+      .mockResolvedValueOnce({
+        previousPipelineResults: [],
+        pipelineResults: [{ event: { type: ['creation'], category: ['database'] } }],
+        lastExecutedChain: 'validate_pipeline',
+      })
+      .mockResolvedValueOnce({
+        previousPipelineResults: [],
+        errors: [{ error: 'Sample error message 1' }],
+        pipelineResults: [{ event: { type: ['change'], category: ['database'] } }],
+        lastExecutedChain: 'validate_pipeline',
+      })
+      .mockResolvedValueOnce({
+        previousPipelineResults: [],
+        errors: [],
+        pipelineResults: [{ event: { type: ['change'], category: ['database'] } }],
+        lastExecutedChain: 'validate_pipeline',
+      })
+      .mockResolvedValueOnce({
+        previousPipelineResults: [],
+        pipelineResults: [{ event: { type: ['change'], category: ['database'] } }],
+        lastExecutedChain: 'validate_pipeline',
+      })
+      .mockResolvedValueOnce({
+        previousPipelineResults: [],
+        pipelineResults: [{ event: { type: ['change'], category: ['database'] } }],
+        lastExecutedChain: 'validate_pipeline',
+      })
+      .mockResolvedValueOnce({
+        previousPipelineResults: [],
+        pipelineResults: [{ event: { type: ['change'], category: ['database'] } }],
+        lastExecutedChain: 'validate_pipeline',
+      });
     (handleCategorization as jest.Mock).mockImplementation(async () => {
       const currentProcessors = await mockInvokeCategorization();
       const processors = {
@@ -146,6 +178,11 @@ describe('runCategorizationGraph', () => {
         lastExecutedChain: 'handleUpdateStableSamples',
       })
       .mockResolvedValueOnce({
+        stableSamples: [],
+        finalized: false,
+        lastExecutedChain: 'handleUpdateStableSamples',
+      })
+      .mockResolvedValueOnce({
         stableSamples: [0],
         finalized: false,
         lastExecutedChain: 'handleUpdateStableSamples',
@@ -178,12 +215,13 @@ describe('runCategorizationGraph', () => {
       throw Error(`getCategorizationGraph threw an error: ${error}`);
     }
 
-    expect(response.results).toStrictEqual(categorizationExpectedResults);
-
     // Check if the functions were called
+    expect(handleValidatePipeline).toHaveBeenCalled();
     expect(handleCategorization).toHaveBeenCalled();
     expect(handleErrors).toHaveBeenCalled();
     expect(handleInvalidCategorization).toHaveBeenCalled();
     expect(handleReview).toHaveBeenCalled();
+
+    expect(response.results).toStrictEqual(categorizationExpectedResults);
   });
 });

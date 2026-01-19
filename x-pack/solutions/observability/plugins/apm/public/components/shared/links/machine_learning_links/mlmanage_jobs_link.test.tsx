@@ -16,6 +16,6 @@ test('MLManageJobsLink', async () => {
   } as Location);
 
   expect(href).toMatchInlineSnapshot(
-    `"/app/ml/jobs?_a=(jobs:(queryText:'groups:(apm)'))&_g=(refreshInterval:(pause:!t,value:10000),time:(from:now-5h,to:now-2h))"`
+    `"/app/management/ml/anomaly_detection?_a=(jobs:(queryText:'groups:(apm)'))&_g=(refreshInterval:(pause:!t,value:10000),time:(from:now-5h,to:now-2h))"`
   );
 });

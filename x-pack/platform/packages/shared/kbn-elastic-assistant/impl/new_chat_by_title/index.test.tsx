@@ -6,87 +6,43 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { NewChatByTitle } from '.';
+import { BUTTON_ICON_TEST_ID, BUTTON_TEST_ID, BUTTON_TEXT_TEST_ID, NewChatByTitle } from '.';
 
-const mockUseAssistantContext = {
+const testProps = {
   showAssistantOverlay: jest.fn(),
 };
-jest.mock('../assistant_context', () => ({
-  useAssistantContext: () => mockUseAssistantContext,
-}));
 
 describe('NewChatByTitle', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the default New Chat button with a discuss icon', () => {
-    render(<NewChatByTitle />);
+  it('should render icon only by default', () => {
+    const { getByTestId, queryByTestId } = render(<NewChatByTitle {...testProps} />);
 
-    const newChatButton = screen.getByTestId('newChatByTitle');
-
-    expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
+    expect(getByTestId(BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(BUTTON_ICON_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(BUTTON_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('renders the default "New Chat" text when children are NOT provided', () => {
-    render(<NewChatByTitle />);
+  it('should render the button with icon and text', () => {
+    const { getByTestId } = render(<NewChatByTitle {...testProps} text={'Ask AI Assistant'} />);
 
-    const newChatButton = screen.getByTestId('newChatByTitle');
-
-    expect(newChatButton.textContent).toContain('Chat');
-  });
-
-  it('renders custom children', async () => {
-    render(<NewChatByTitle>{'🪄✨'}</NewChatByTitle>);
-
-    const newChatButton = screen.getByTestId('newChatByTitle');
-
-    expect(newChatButton.textContent).toContain('🪄✨');
-  });
-
-  it('renders custom icons', async () => {
-    render(<NewChatByTitle iconType="help" />);
-
-    const newChatButton = screen.getByTestId('newChatByTitle');
-
-    expect(newChatButton.querySelector('[data-euiicon-type="help"]')).toBeInTheDocument();
-  });
-
-  it('does NOT render an icon when iconType is null', () => {
-    render(<NewChatByTitle iconType={null} />);
-
-    const newChatButton = screen.getByTestId('newChatByTitle');
-
-    expect(newChatButton.querySelector('.euiButtonContent__icon')).not.toBeInTheDocument();
-  });
-
-  it('renders button icon when iconOnly is true', async () => {
-    render(<NewChatByTitle iconOnly />);
-
-    const newChatButton = screen.getByTestId('newChatByTitle');
-
-    expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
-    expect(newChatButton.textContent).not.toContain('Chat');
+    expect(getByTestId(BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(BUTTON_ICON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(BUTTON_TEXT_TEST_ID)).toHaveTextContent('Ask AI Assistant');
   });
 
   it('calls showAssistantOverlay on click', async () => {
-    const conversationTitle = 'test-conversation-id';
-    const promptContextId = 'test-prompt-context-id';
+    const { getByTestId } = render(<NewChatByTitle {...testProps} />);
 
-    render(
-      <NewChatByTitle conversationTitle={conversationTitle} promptContextId={promptContextId} />
-    );
-    const newChatButton = screen.getByTestId('newChatByTitle');
+    const button = getByTestId(BUTTON_TEST_ID);
 
-    await userEvent.click(newChatButton);
+    await userEvent.click(button);
 
-    expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
-      conversationTitle,
-      promptContextId,
-      showOverlay: true,
-    });
+    expect(testProps.showAssistantOverlay).toHaveBeenCalledWith(true);
   });
 });

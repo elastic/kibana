@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -40,7 +40,14 @@
     "@kbn/core-chrome-browser",
     "@kbn/serverless",
     "@kbn/utility-types",
-    "@kbn/search-navigation"
+    "@kbn/search-navigation",
+    "@kbn/search-queries",
+    "@kbn/sample-data-ingest",
+    "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
+    "@kbn/react-query",
+    "@kbn/search-api-panels",
+    "@kbn/deeplinks-management",
   ],
   "exclude": [
     "target/**/*",

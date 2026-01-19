@@ -11,14 +11,15 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { isInternalURL } from '@kbn/std';
 
 import type { AuthenticationProviderOptions } from './base';
-import { BaseAuthenticationProvider } from './base';
+import { BaseAuthenticationProvider, ELASTIC_CLOUD_SSO_REALM_NAME } from './base';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
-import { getDetailedErrorMessage } from '../../errors';
+import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
+import type { UiamServicePublic } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -26,20 +27,16 @@ import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
 
+type RequestId = string;
+
 /**
  * The state supported by the provider (for the SAML handshake or established session).
  */
 interface ProviderState extends Partial<TokenPair> {
   /**
-   * Unique identifier of the SAML request initiated the handshake.
+   * Map of redirectURLs by requestId.
    */
-  requestId?: string;
-
-  /**
-   * Stores path component of the URL only or in a combination with URL fragment that was used to
-   * initiate SAML handshake and where we should redirect user after successful authentication.
-   */
-  redirectURL?: string;
+  requestIdMap?: Record<RequestId, { redirectURL: string }>;
 
   /**
    * The name of the SAML realm that was used to establish session (may not be known during URL
@@ -97,6 +94,10 @@ function canStartNewSession(request: KibanaRequest) {
 }
 
 /**
+ * SAML _requestId limit
+ */
+const samlRequestIdLimit = 50;
+/**
  * Provider that supports SAML request authentication.
  */
 export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
@@ -117,6 +118,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private readonly useRelayStateDeepLink: boolean;
 
+  /**
+   * Indicates if we should use UIAM service for this SAML provider.
+   */
+  private readonly useUiam: boolean;
+
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
     samlOptions?: Readonly<{ realm?: string; useRelayStateDeepLink?: boolean }>
@@ -125,6 +131,33 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     this.realm = samlOptions?.realm;
     this.useRelayStateDeepLink = samlOptions?.useRelayStateDeepLink ?? false;
+
+    // Switch SAML authentication provider to UIAM in case it's enabled, and we're using Elastic Cloud SSO realm.
+    this.useUiam = !!options.uiam && this.realm === ELASTIC_CLOUD_SSO_REALM_NAME;
+  }
+
+  /**
+   * Determines whether the intermediate session state should be invalidated after a successful login.
+   *
+   * For SAML authentication, multiple login attempts can occur concurrently (e.g., when a user opens
+   * multiple tabs and each initiates a SAML handshake). Each login attempt generates a unique requestId
+   * that is stored in the `requestIdMap` within the provider state. When a SAML response is received
+   * and successfully processed, the corresponding requestId is removed from the map.
+   *
+   * If there are remaining requestIds in the state after a successful login, it indicates that other
+   * pending SAML login attempts are still in progress. In this case, the intermediate session should
+   * NOT be invalidated, as it needs to persist to handle the responses for those outstanding requests.
+   *
+   * Only when all requestIds have been processed and removed from the map (i.e., the map is empty or
+   * doesn't exist) should the intermediate session be invalidated.
+   *
+   * @param state Optional state object associated with the provider.
+   * @returns `true` if the intermediate session should be invalidated (no pending requests remain),
+   *          `false` if there are remaining requestIds and the session must be preserved.
+   */
+  public shouldInvalidateIntermediateSessionAfterLogin(state?: unknown) {
+    const samlState = state as ProviderState | undefined;
+    return !(samlState?.requestIdMap && Object.keys(samlState.requestIdMap).length > 0);
   }
 
   /**
@@ -141,7 +174,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to perform a login.');
 
     // It may happen that Kibana is re-configured to use different realm for the same provider name,
-    // we should clear such session an log user out.
+    // we should clear such session and log user out.
     if (state && this.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
       this.logger.warn(message);
@@ -154,7 +187,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         this.logger.warn(message);
         return AuthenticationResult.failed(Boom.badRequest(message));
       }
-      return this.authenticateViaHandshake(request, attempt.redirectURL);
+      return this.authenticateViaHandshake(request, attempt.redirectURL, state);
     }
 
     const { samlResponse, relayState } = attempt;
@@ -213,7 +246,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     // It may happen that Kibana is re-configured to use different realm for the same provider name,
-    // we should clear such session an log user out.
+    // we should clear such session and log user out.
     if (state && this.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
       this.logger.warn(message);
@@ -234,12 +267,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // If we couldn't authenticate by means of all methods above, let's try to capture user URL and
     // initiate SAML handshake, otherwise just return authentication result we have.
     return authenticationResult.notHandled() && canStartNewSession(request)
-      ? this.initiateAuthenticationHandshake(request)
+      ? this.initiateAuthenticationHandshake(request, state)
       : authenticationResult;
   }
 
   /**
-   * Invalidates SAML access token if it exists.
+   * Invalidates SAML/UIAM access token if it exists.
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
@@ -266,11 +299,23 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.notHandled();
     }
 
-    if (state?.accessToken || isIdPInitiatedSLORequest || isSPInitiatedSLOResponse) {
+    // When the provider is in UIAM mode, the UIAM service is responsible for invalidating the user session tokens.
+    // Additionally, when in UIAM mode, SAML Single Logout (SLO) is not supported. Therefore, the code should never
+    // reach the `else if` branch below. However, even if it does, it will result in a no-op call to Elasticsearch.
+    if (state && this.isUiamToken(state.accessToken)) {
+      try {
+        await this.options.uiam.invalidateSessionTokens(state.accessToken!, state.refreshToken!);
+      } catch (err) {
+        this.logger.error(
+          () => `Failed to deauthenticate UIAM user: ${getDetailedErrorMessage(err)}`
+        );
+        return DeauthenticationResult.failed(err);
+      }
+    } else if (state?.accessToken || isIdPInitiatedSLORequest || isSPInitiatedSLOResponse) {
       try {
         // It may _theoretically_ (highly unlikely in practice though) happen that when user receives
         // logout response they may already have a new SAML session (isSPInitiatedSLOResponse == true
-        // and state !== undefined). In this case case it'd be safer to trigger SP initiated logout
+        // and state !== undefined). In this case it'd be safer to trigger SP initiated logout
         // for the new session as well.
         const redirect = isIdPInitiatedSLORequest
           ? await this.performIdPInitiatedSingleLogout(request, this.realm || state?.realm)
@@ -330,27 +375,34 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If we have a `SAMLResponse` and state, but state doesn't contain all the necessary information,
     // then something unexpected happened and we should fail.
-    const {
-      requestId: stateRequestId,
-      redirectURL: stateRedirectURL,
-      realm: stateRealm,
-    } = state || {
-      requestId: '',
-      redirectURL: '',
+    const { requestIdMap: stateRequestIdMap = {}, realm: stateRealm } = state || {
+      requestIdMap: {},
       realm: '',
     };
-    if (state && !stateRequestId) {
+
+    const stateRequestIds = Object.keys(stateRequestIdMap) || [];
+
+    this.logger.debug(`Current state: ${JSON.stringify(state)}`);
+
+    if (state && stateRequestIds.length === 0) {
       const message = 'SAML response state does not have corresponding request id.';
       this.logger.warn(message);
       return AuthenticationResult.failed(Boom.badRequest(message));
     }
 
-    // When we don't have state and hence request id we assume that SAMLResponse came from the IdP initiated login.
-    const isIdPInitiatedLogin = !stateRequestId;
+    // When we don't have requestIds we assume that SAMLResponse came from an IdP initiated login.
+    const isIdPInitiatedLogin = !stateRequestIds.length;
+
     this.logger.debug(
       !isIdPInitiatedLogin
-        ? 'Login has been previously initiated by Kibana.'
+        ? `Login has been previously initiated by Kibana. Current requestIds: ${stateRequestIds}`
         : 'Login has been initiated by Identity Provider.'
+    );
+
+    this.logger.debug(
+      `SAML RESPONSE: ${samlResponse}:::${JSON.stringify(
+        !isIdPInitiatedLogin ? [...stateRequestIds] : []
+      )}`
     );
 
     const providerRealm = this.realm || stateRealm;
@@ -370,13 +422,17 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         method: 'POST',
         path: '/_security/saml/authenticate',
         body: {
-          ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
+          ids: !isIdPInitiatedLogin ? stateRequestIds : [],
           content: samlResponse,
           ...(providerRealm ? { realm: providerRealm } : {}),
         },
       })) as any;
     } catch (err) {
-      this.logger.error(`Failed to log in with SAML response: ${getDetailedErrorMessage(err)}`);
+      this.logger.error(
+        `Failed to log in with SAML response, ${
+          !isIdPInitiatedLogin ? `current requestIds: ${stateRequestIds}, ` : ''
+        } error: ${getDetailedErrorMessage(err)}`
+      );
 
       // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
       // there is a chance that it failed because of realm mismatch and hence we should return
@@ -407,23 +463,84 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     this.logger.debug('Login has been performed with SAML response.');
+
+    let redirectURLForRequestId;
+    let areAnyRequestIdsRemaining = false;
+    let remainingRequestIdMap = stateRequestIdMap;
+
+    if (!isIdPInitiatedLogin) {
+      const inResponseToRequestId = this.parseRequestIdFromSAMLResponse(samlResponse);
+      this.logger.debug(`Login was performed with requestId: ${inResponseToRequestId}`);
+
+      if (stateRequestIds.length && inResponseToRequestId) {
+        redirectURLForRequestId = stateRequestIdMap[inResponseToRequestId].redirectURL;
+      } else {
+        this.logger.info(
+          'No requestId found in SAML response or state does not contain requestId.'
+        );
+      }
+
+      // Remove value of inResponseToRequestId from stateRequestIdMap and return a map of any
+      // requestIds that remain
+      [areAnyRequestIdsRemaining, remainingRequestIdMap] = this.updateRemainingRequestIds(
+        inResponseToRequestId,
+        stateRequestIdMap
+      );
+    }
+
     return AuthenticationResult.redirectTo(
-      redirectURLFromRelayState || stateRedirectURL || `${this.options.basePath.get(request)}/`,
+      redirectURLFromRelayState ||
+        redirectURLForRequestId ||
+        `${this.options.basePath.get(request)}/`,
       {
         user: this.authenticationInfoToAuthenticatedUser(result.authentication),
-        userProfileGrant: { type: 'accessToken', accessToken: result.access_token },
+        userProfileGrant: this.isUiamToken(result.access_token)
+          ? this.options.uiam.getUserProfileGrant(result.access_token)
+          : { type: 'accessToken', accessToken: result.access_token },
         state: {
           accessToken: result.access_token,
           refreshToken: result.refresh_token,
           realm: result.realm,
+          ...(areAnyRequestIdsRemaining && { requestIdMap: remainingRequestIdMap }),
         },
       }
     );
   }
 
+  private parseRequestIdFromSAMLResponse(samlResponse: string): string | null {
+    const samlResponseBuffer = Buffer.from(samlResponse, 'base64');
+    const samlResponseString = samlResponseBuffer.toString('utf-8');
+    const inResponseToRequestIdMatch = samlResponseString.match(/InResponseTo="([a-z0-9_]*)"/);
+
+    return inResponseToRequestIdMatch ? inResponseToRequestIdMatch[1] : null;
+  }
+
+  private updateRemainingRequestIds(
+    requestIdToRemove: string | null,
+    remainingRequestIds: Record<RequestId, { redirectURL: string }>
+  ): [boolean, Record<RequestId, { redirectURL: string }>] {
+    if (requestIdToRemove) {
+      this.logger.info(`Removing requestId ${requestIdToRemove} from the state.`);
+      delete remainingRequestIds[requestIdToRemove];
+    }
+
+    const areAnyRequestIdsRemaining =
+      remainingRequestIds && Object.keys(remainingRequestIds)?.length > 0;
+
+    if (areAnyRequestIdsRemaining) {
+      this.logger.info(
+        `The remaining requestIds in the state are ${Object.keys(remainingRequestIds)}`
+      );
+    } else {
+      this.logger.info(`There are no remaining requestIds in the state.`);
+    }
+
+    return [areAnyRequestIdsRemaining, remainingRequestIds];
+  }
+
   /**
    * Validates whether user retrieved using session is the same as the user defined in the SAML payload.
-   * If we can successfully exchange this SAML payload to access and refresh tokens, then we'll
+   * If we can successfully exchange this SAML payload for access and refresh tokens, then we'll
    * invalidate tokens from the existing session and use the new ones instead.
    *
    * The tokens are stored in the state and user is redirected to the default Kibana location, unless
@@ -442,12 +559,18 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   ) {
     this.logger.info('Trying to log in with SAML response payload and existing valid session.');
 
+    // If there are requestIds we want to pass the state
+    const shouldPassState =
+      existingState?.requestIdMap && Object.keys(existingState.requestIdMap).length > 0;
+
     // First let's try to authenticate via SAML Response payload.
     const payloadAuthenticationResult = await this.loginWithSAMLResponse(
       request,
       samlResponse,
-      relayState
+      relayState,
+      shouldPassState ? existingState : null
     );
+
     if (payloadAuthenticationResult.failed() || payloadAuthenticationResult.notHandled()) {
       return payloadAuthenticationResult;
     }
@@ -485,16 +608,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private async authenticateViaState(request: KibanaRequest, { accessToken }: ProviderState) {
     this.logger.debug('Trying to authenticate via state.');
-
     if (!accessToken) {
       this.logger.debug('Access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
+    const authHeaders: Record<string, string> | undefined = this.isUiamToken(accessToken)
+      ? this.options.uiam.getAuthenticationHeaders(accessToken)
+      : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() };
+
     try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -522,30 +645,50 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    let refreshTokenResult: RefreshTokenResult | null;
-    try {
-      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
-    } catch (err) {
-      this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
-      return AuthenticationResult.failed(err);
-    }
+    let refreshTokenResult: RefreshTokenResult;
 
-    // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
-    // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
-    // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
-    // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
-    // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
-    if (refreshTokenResult === null) {
-      if (canStartNewSession(request)) {
-        this.logger.warn(
-          'Both access and refresh tokens are expired. Capturing redirect URL and re-initiating SAML handshake.'
+    try {
+      if (this.isUiamToken(state.refreshToken)) {
+        this.logger.debug('SAML provider is in UIAM mode, calling UIAM service to refresh tokens.');
+
+        const { accessToken, refreshToken } = await this.options.uiam.refreshSessionTokens(
+          state.refreshToken
         );
-        return this.initiateAuthenticationHandshake(request);
+
+        const uiamAuthenticatedUser = await this.getUser(
+          request,
+          this.options.uiam.getAuthenticationHeaders(accessToken)!
+        );
+
+        this.logger.debug('SAML provider successfully refreshed tokens via UIAM service.');
+
+        refreshTokenResult = {
+          accessToken,
+          refreshToken,
+          authenticationInfo: uiamAuthenticatedUser,
+        };
+      } else {
+        refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+      }
+    } catch (err) {
+      // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
+      // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
+      // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
+      // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
+      // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
+      if (err instanceof InvalidGrantError) {
+        if (canStartNewSession(request)) {
+          this.logger.warn(
+            'Both access and refresh tokens are expired. Capturing redirect URL and re-initiating SAML handshake.'
+          );
+          return this.initiateAuthenticationHandshake(request);
+        }
+
+        return AuthenticationResult.failed(Boom.badRequest(err.message));
       }
 
-      return AuthenticationResult.failed(
-        Boom.badRequest('Both access and refresh tokens are expired.')
-      );
+      this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
+      return AuthenticationResult.failed(err);
     }
 
     this.logger.debug('Request has been authenticated via refreshed token.');
@@ -556,6 +699,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         authHeaders: {
           authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
         },
+        ...(this.isUiamToken(accessToken) && {
+          userProfileGrant: this.options.uiam.getUserProfileGrant(accessToken),
+        }),
         state: { accessToken, refreshToken, realm: this.realm || state.realm },
       }
     );
@@ -565,15 +711,20 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to start SAML handshake and eventually receive a token.
    * @param request Request instance.
    * @param redirectURL URL to redirect user to after successful SAML handshake.
+   * @param state Optional state object associated with the provider.
    */
-  private async authenticateViaHandshake(request: KibanaRequest, redirectURL: string) {
+  private async authenticateViaHandshake(
+    request: KibanaRequest,
+    redirectURL: string,
+    state?: ProviderState | null
+  ) {
     this.logger.debug('Trying to initiate SAML handshake.');
 
     try {
       // Prefer realm name if it's specified, otherwise fallback to ACS.
       const preparePayload = this.realm ? { realm: this.realm } : { acs: this.getACS() };
 
-      // This operation should be performed on behalf of the user with a privilege that normal
+      // This operation should be performed on behalf of the user with a privilege that a normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
@@ -587,16 +738,53 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         body: preparePayload,
       })) as any;
 
-      this.logger.debug('Redirecting to Identity Provider with SAML request.');
+      this.logger.debug(
+        `Redirecting to Identity Provider with SAML request, request id: ${requestId}`
+      );
 
       // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
       return AuthenticationResult.redirectTo(redirect, {
-        state: { requestId, redirectURL, realm },
+        state: {
+          requestIdMap: this.updateRequestIdMap(requestId, redirectURL, state?.requestIdMap),
+          realm,
+        },
       });
     } catch (err) {
       this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
+  }
+
+  private updateRequestIdMap(
+    newRequestID: string,
+    newRedirectURL: string,
+    existingRequestIdMap: Record<RequestId, { redirectURL: string }> | undefined
+  ): Record<RequestId, { redirectURL: string }> {
+    let result: Record<RequestId, { redirectURL: string }> = {};
+
+    if (existingRequestIdMap) {
+      result = existingRequestIdMap;
+    }
+
+    // We do not want to add an infinite number of requestIds to the state, so we limit it to `samlRequestIdLimit`(50)
+    // We remove the first requestId if we have 50
+    if (Object.keys(result).length >= samlRequestIdLimit) {
+      this.logger.debug(
+        `requestId limit reached, removing the oldest requestId ${result[0]} from the state.`
+      );
+
+      const oldestRequestId = Object.keys(result)[0];
+      delete result[oldestRequestId];
+    }
+
+    // We add the new requestId to the end of the array
+    result[newRequestID] = { redirectURL: newRedirectURL };
+
+    this.logger.debug(
+      `Adding new requestId ${newRequestID} to the state. Current state: ${JSON.stringify(result)}`
+    );
+
+    return result;
   }
 
   /**
@@ -667,13 +855,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * initiate handshake right away, otherwise we'll redirect user to a dedicated page where we capture URL hash fragment
    * first and only then initiate SAML handshake.
    * @param request Request instance.
+   * @param state Optional state object associated with the provider.
    */
-  private initiateAuthenticationHandshake(request: KibanaRequest) {
+  private initiateAuthenticationHandshake(request: KibanaRequest, state?: ProviderState | null) {
     const originalURLHash = request.url.searchParams.get(AUTH_URL_HASH_QUERY_STRING_PARAMETER);
+
     if (originalURLHash != null) {
       return this.authenticateViaHandshake(
         request,
-        `${this.options.getRequestOriginalURL(request)}${originalURLHash}`
+        `${this.options.getRequestOriginalURL(request)}${originalURLHash}`,
+        state
       );
     }
 
@@ -687,7 +878,24 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       )}`,
       // Here we indicate that current session, if any, should be invalidated. It is a no-op for the
       // initial handshake, but is essential when both access and refresh tokens are expired.
-      { state: null }
+      { state: state ? state : null }
     );
+  }
+
+  /**
+   * Determines whether the provided token is a UIAM token. Generally, we shouldn't rely on the
+   * shape of the UIAM tokens to trigger UIAM-specific logic, but this is necessary for the
+   * transition period while we support both SAML and UIAM tokens at the same time.
+   * @param token ES native or UIAM access or refresh token.
+   */
+  private isUiamToken(token?: string): this is { options: { uiam: UiamServicePublic } } {
+    const isUiamToken = !!token?.startsWith('essu_');
+    if (isUiamToken && !this.useUiam) {
+      this.logger.error('Detected UIAM token, but the provider is not configured to use UIAM.');
+    } else if (!isUiamToken && this.useUiam) {
+      this.logger.warn('Detected non-UIAM token, but the provider is configured to use UIAM.');
+    }
+
+    return this.useUiam && isUiamToken;
   }
 }

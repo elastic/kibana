@@ -89,7 +89,7 @@ interface EndpointRunningProcessesResultsProps {
   'data-test-subj'?: string;
 }
 
-/** @private */
+/** @internal */
 const EndpointRunningProcessesResults = memo<EndpointRunningProcessesResultsProps>(
   ({ action, agentId, 'data-test-subj': dataTestSubj }) => {
     const testId = useTestIdGenerator(dataTestSubj);
@@ -191,7 +191,7 @@ interface SentinelOneRunningProcessesResultsProps {
   'data-test-subj'?: string;
 }
 
-/** @private */
+/** @internal */
 const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResultsProps>(
   ({ action, agentId, 'data-test-subj': dataTestSubj }) => {
     const testId = useTestIdGenerator(dataTestSubj);

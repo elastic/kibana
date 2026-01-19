@@ -28,6 +28,8 @@
         "label": "ESQLColumn",
         "description": [],
         "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+        "lineNumber": 657,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 658,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,6 +54,24 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 659,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLColumn.original_types",
+            "type": "Array",
+            "tags": [],
+            "label": "original_types",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 660,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -64,6 +86,8 @@
         "label": "ESQLSearchParams",
         "description": [],
         "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+        "lineNumber": 677,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,6 +99,8 @@
             "label": "query",
             "description": [],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 682,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -89,6 +115,24 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 683,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchParams.project_routing",
+            "type": "string",
+            "tags": [],
+            "label": "project_routing",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 684,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -103,20 +147,24 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 685,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ESQLSearchParams.include_ccs_metadata",
+            "id": "def-common.ESQLSearchParams.include_execution_metadata",
             "type": "CompoundType",
             "tags": [],
-            "label": "include_ccs_metadata",
+            "label": "include_execution_metadata",
             "description": [],
             "signature": [
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 686,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -131,6 +179,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 687,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -143,9 +193,11 @@
             "description": [],
             "signature": [
               "ScalarValue",
-              "[] | Record<string, string | number | Record<string, string | number> | undefined>[] | undefined"
+              "[] | Record<string, string | number | (string | number)[] | Record<string, string | number> | undefined>[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 688,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -160,6 +212,8 @@
         "label": "ESQLSearchResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+        "lineNumber": 665,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -181,6 +235,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 666,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -202,6 +258,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 670,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -223,6 +281,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 671,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -237,6 +297,24 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 672,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchResponse.documents_found",
+            "type": "number",
+            "tags": [],
+            "label": "documents_found",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 673,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -252,6 +330,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 674,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -266,6 +346,8 @@
         "label": "ESSearchOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,6 +359,8 @@
             "label": "restTotalHitsAsInt",
             "description": [],
             "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -333,6 +417,8 @@
           "<TDocument>; }; }; top_metrics: { top: { sort: string[] | number[]; metrics: Record<TopMetricKeysOf<TAggregationContainer>, string | number | null>; }[]; }; weighted_avg: { value: number | null; }; value_count: { value: number; }; }, Exclude<ValidAggregationKeysOf<TAggregationContainer>, \"aggs\" | \"aggregations\"> & string>[Exclude<ValidAggregationKeysOf<TAggregationContainer>, \"aggs\" | \"aggregations\"> & string] : never"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -358,6 +444,8 @@
           "<TDocument>; }; }; top_metrics: { top: { sort: string[] | number[]; metrics: Record<TopMetricKeysOf<Required<TAggregationMap>[TAggregationName]>, string | number | null>; }[]; }; weighted_avg: { value: number | null; }; value_count: { value: number; }; }, Exclude<ValidAggregationKeysOf<Required<TAggregationMap>[TAggregationName]>, \"aggs\" | \"aggregations\"> & string>> : never; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+        "lineNumber": 610,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -535,6 +623,8 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -550,6 +640,8 @@
           "QueryDslQueryContainer"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -565,6 +657,8 @@
           "unknown[]"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+        "lineNumber": 663,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -577,11 +671,11 @@
         "label": "ESSearchRequest",
         "description": [],
         "signature": [
-          "SearchRequest",
-          " | ",
           "SearchRequest"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -598,13 +692,13 @@
           "SearchResponse",
           "<TDocument, Record<string, ",
           "AggregationsAggregate",
-          ">>, \"aggregations\" | \"hits\"> & (TSearchRequest[\"body\"] extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest[\"body\"], TDocument>> : TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
+          ">>, \"aggregations\" | \"hits\"> & (TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
           "SearchHitsMetadata",
-          "<TDocument>, \"total\" | \"hits\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest extends ",
-          "SearchRequest",
-          " ? TSearchRequest[\"body\"] : TSearchRequest, TDocument>; }; }"
+          "<TDocument>, \"total\" | \"hits\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest, TDocument>; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -620,6 +714,8 @@
           "string | boolean | string[]"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -636,13 +732,13 @@
           "SearchResponse",
           "<TDocument, Record<string, ",
           "AggregationsAggregate",
-          ">>, \"aggregations\" | \"hits\"> & (TSearchRequest[\"body\"] extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest[\"body\"], TDocument>> : TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
+          ">>, \"aggregations\" | \"hits\"> & (TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
           "SearchHitsMetadata",
-          "<TDocument>, \"total\" | \"hits\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest extends ",
-          "SearchRequest",
-          " ? TSearchRequest[\"body\"] : TSearchRequest, TDocument>; }; }"
+          "<TDocument>, \"total\" | \"hits\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest, TDocument>; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+        "lineNumber": 634,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -658,6 +754,8 @@
           "T[] | readonly T[]"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -674,6 +772,8 @@
           "QueryDslFieldAndFormat"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/index.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -690,9 +790,11 @@
           "SearchHit",
           "<unknown>, \"fields\" | \"_source\"> & (TSource extends false ? {} : { _source: TSource; }) & (TFields extends (string | ",
           "QueryDslFieldAndFormat",
-          ")[] ? { fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>; } : { fields?: Record<string, unknown[]> | undefined; }) & (TDocValueFields extends DocValueFields ? { fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>; } : {})"
+          ")[] ? { fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>; } : { fields?: Record<string, unknown[] | undefined> | undefined; }) & (TDocValueFields extends DocValueFields ? { fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>; } : {})"
         ],
         "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

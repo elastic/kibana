@@ -34,7 +34,7 @@ describe('MlUserJobDescription', () => {
         screen.getByText('ML Admin Permissions required to perform this action')
       ).toBeInTheDocument();
     });
-  });
+  }, 10000);
 
   it('should render job details correctly', async () => {
     render(<MlUserJobDescription job={mockOpenedJob} />, {
@@ -44,7 +44,6 @@ describe('MlUserJobDescription', () => {
     // link to job
     const linkElement = screen.getByTestId('machineLearningJobLink');
 
-    expect(linkElement).toHaveAttribute('href', expect.any(String));
     expect(linkElement).toHaveTextContent(mockOpenedJob.id);
 
     // audit icon is not present as auditMessage empty

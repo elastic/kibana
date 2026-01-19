@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { shallowWithI18nProvider, mountWithIntl } from '@kbn/test-jest-helpers';
-import { ImportModeControl, ImportModeControlProps } from './import_mode_control';
+import type { ImportModeControlProps } from './import_mode_control';
+import { ImportModeControl } from './import_mode_control';
 
 describe('ImportModeControl', () => {
   const initialValues = { createNewCopies: false, overwrite: true }; // some test cases below make assumptions based on these initial values

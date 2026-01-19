@@ -5,43 +5,107 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { MapToolTipComponent } from './map_tool_tip';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { TooltipFeature } from '@kbn/maps-plugin/common';
+import { MapToolTipComponent } from './map_tool_tip';
+import * as i18n from '../translations';
+import { TestProviders } from '../../../../../common/mock';
 
-describe('MapToolTip', () => {
-  test('placeholder component renders correctly against snapshot', () => {
-    const wrapper = shallow(<MapToolTipComponent />);
-    expect(wrapper).toMatchSnapshot();
+jest.mock('./line_tool_tip_content', () => ({
+  LineToolTipContent: jest.fn(() => <div data-test-subj="line-tool-tip-content" />),
+}));
+
+jest.mock('./point_tool_tip_content', () => ({
+  PointToolTipContent: jest.fn(() => <div data-test-subj="point-tool-tip-content" />),
+}));
+
+describe('MapToolTipComponent', () => {
+  const mockCloseTooltip = jest.fn();
+  const mockGetLayerName = jest.fn();
+  const mockLoadFeatureProperties = jest.fn();
+  const mockLoadFeatureGeometry = jest.fn();
+  const features = [
+    { layerId: 'layer1', id: 'feature1', mbProperties: {} },
+    { layerId: 'layer2', id: 'feature2', mbProperties: {} },
+  ] as TooltipFeature[];
+
+  const renderComponent = (props = {}) => {
+    return render(
+      <MapToolTipComponent
+        closeTooltip={mockCloseTooltip}
+        features={features}
+        getLayerName={mockGetLayerName}
+        loadFeatureProperties={mockLoadFeatureProperties}
+        loadFeatureGeometry={mockLoadFeatureGeometry}
+        {...props}
+      />,
+      { wrapper: TestProviders }
+    );
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetLayerName.mockResolvedValue('Layer Name');
+    mockLoadFeatureProperties.mockResolvedValue([{ name: 'property1', value: 'value1' }]);
+    mockLoadFeatureGeometry.mockResolvedValue({ type: 'Point' });
   });
 
-  test('full component renders correctly against snapshot', () => {
-    const addFilters = jest.fn();
-    const closeTooltip = jest.fn();
-    const features: TooltipFeature[] = [
-      {
-        id: 1,
-        layerId: 'layerId',
-        mbProperties: {},
-        actions: [],
-      },
-    ];
-    const getLayerName = jest.fn();
-    const loadFeatureProperties = jest.fn();
-    const loadFeatureGeometry = jest.fn();
+  it('should not render tooltips when features is empty', () => {
+    renderComponent({ features: [] });
+    expect(screen.queryByTestId('point-tool-tip-content')).toBeNull();
+  });
 
-    const wrapper = shallow(
-      <MapToolTipComponent
-        addFilters={addFilters}
-        closeTooltip={closeTooltip}
-        features={features}
-        isLocked={false}
-        getLayerName={getLayerName}
-        loadFeatureProperties={loadFeatureProperties}
-        loadFeatureGeometry={loadFeatureGeometry}
-      />
-    );
-    expect(wrapper).toMatchSnapshot();
+  it('shows a loading spinner initially', () => {
+    renderComponent();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('displays an error message when isError is true', async () => {
+    mockLoadFeatureProperties.mockRejectedValue(new Error('Load error'));
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText(i18n.MAP_TOOL_TIP_ERROR)).toBeInTheDocument();
+    });
+  });
+
+  it('displays PointToolTipContent and ToolTipFooter when feature geometry is Point', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('point-tool-tip-content')).toBeInTheDocument();
+      expect(screen.getByTestId('previous-feature-button')).toBeInTheDocument();
+      expect(screen.getByTestId('next-feature-button')).toBeInTheDocument();
+    });
+  });
+
+  it('navigates to the next and previous features correctly', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('previous-feature-button')).toBeInTheDocument();
+      expect(screen.getByTestId('next-feature-button')).toBeInTheDocument();
+    });
+
+    const nextButton = screen.getByTestId('next-feature-button');
+    fireEvent.click(nextButton);
+
+    await waitFor(() => {
+      expect(mockLoadFeatureProperties).toHaveBeenCalledWith({
+        layerId: 'layer2',
+        properties: {},
+      });
+    });
+
+    const previousButton = screen.getByTestId('previous-feature-button');
+    fireEvent.click(previousButton);
+
+    await waitFor(() => {
+      expect(mockLoadFeatureProperties).toHaveBeenCalledWith({
+        layerId: 'layer1',
+        properties: {},
+      });
+    });
   });
 });

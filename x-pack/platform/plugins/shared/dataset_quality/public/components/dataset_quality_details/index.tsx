@@ -6,15 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { DatasetQualityDetailsController } from '../../controller/dataset_quality_details';
-import { DatasetQualityStartDeps } from '../../types';
-import { ITelemetryClient } from '../../services/telemetry';
+import type { DatasetQualityDetailsController } from '../../controller/dataset_quality_details';
+import type { DatasetQualityStartDeps } from '../../types';
+import type { ITelemetryClient } from '../../services/telemetry';
 import { useKibanaContextForPluginProvider } from '../../utils';
 
-import { DatasetQualityDetailsContext, DatasetQualityDetailsContextValue } from './context';
+import type { DatasetQualityDetailsContextValue } from './context';
+import { DatasetQualityDetailsContext } from './context';
 
 const DatasetQualityDetails = dynamic(() => import('./dataset_quality_details'));
 
@@ -26,14 +27,12 @@ export interface CreateDatasetQualityArgs {
   core: CoreStart;
   plugins: DatasetQualityStartDeps;
   telemetryClient: ITelemetryClient;
-  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityDetails = ({
   core,
   plugins,
   telemetryClient,
-  isFailureStoreEnabled,
 }: CreateDatasetQualityArgs) => {
   return ({ controller }: DatasetQualityDetailsProps) => {
     const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
@@ -42,7 +41,6 @@ export const createDatasetQualityDetails = ({
       () => ({
         service: controller.service,
         telemetryClient,
-        isFailureStoreEnabled,
       }),
       [controller.service]
     );

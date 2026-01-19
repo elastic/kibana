@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiIcon, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
-import { type RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import { COLUMN_EMPTY_VALUE, type TableColumn } from './constants';
-import { TableHeader } from './header';
+import { TableHeader } from '../../../common/components';
 
 const Author = ({ isPrebuiltRule }: { isPrebuiltRule: boolean }) => {
   return (
@@ -58,7 +58,7 @@ export const createAuthorColumn = (): TableColumn => {
         }
       />
     ),
-    render: (_, rule: RuleMigration) => {
+    render: (_, rule: RuleMigrationRule) => {
       return rule.status === SiemMigrationStatus.FAILED ? (
         <>{COLUMN_EMPTY_VALUE}</>
       ) : (

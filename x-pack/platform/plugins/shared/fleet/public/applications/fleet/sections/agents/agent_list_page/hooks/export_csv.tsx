@@ -70,7 +70,6 @@ export function useExportCSV() {
     const sort = getSortConfig(sortField, sortOrder) as EsQuerySortValue[];
 
     const searchSource: SearchSourceFields = {
-      type: 'search',
       query: {
         query: '',
         language: 'kuery',

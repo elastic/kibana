@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { catchError, mergeMap, Observable, of, tap, from } from 'rxjs';
-import { Logger } from '@kbn/logging';
-import { ChatCompleteResponse } from '@kbn/inference-common';
+import type { Observable } from 'rxjs';
+import { catchError, mergeMap, of, tap, from } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { ChatCompleteResponse } from '@kbn/inference-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantClient } from '..';
-import { Message, MessageRole, StreamingChatResponseEventType } from '../../../../common';
-import { TokenCountEvent } from '../../../../common/conversation_complete';
-import { LangTracer } from '../instrumentation/lang_tracer';
+import type { Message } from '../../../../common';
+import { MessageRole } from '../../../../common';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
+export const getTitleSystemMessage = (scopes: AssistantScope[]) =>
+  `You are a helpful assistant for ${
+    scopes.includes('observability') ? 'Elastic Observability' : 'Elasticsearch'
+  }. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. DO NOT include any labels or prefixes like "Title:", "**Title:**", or similar. Only the actual title text should be returned. If the conversation content itself suggests a relevant prefix, that is acceptable, but do not add generic labels. This title is shown in a list of conversations to the user, so title it for the user, not for you.`;
 
 type ChatFunctionWithoutConnectorAndTokenCount = (
   name: string,
@@ -27,32 +32,24 @@ export function getGeneratedTitle({
   messages,
   chat,
   logger,
-  tracer,
+  scopes,
 }: {
   messages: Message[];
   chat: ChatFunctionWithoutConnectorAndTokenCount;
   logger: Pick<Logger, 'debug' | 'error'>;
-  tracer: LangTracer;
-}): Observable<string | TokenCountEvent> {
+  scopes: AssistantScope[];
+}): Observable<string> {
   return from(
     chat('generate_title', {
+      systemMessage: getTitleSystemMessage(scopes),
       messages: [
-        {
-          '@timestamp': new Date().toString(),
-          message: {
-            role: MessageRole.System,
-            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.`,
-          },
-        },
         {
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.User,
-            content: messages
-              .filter((msg) => msg.message.role !== MessageRole.System)
-              .reduce((acc, curr) => {
-                return `${acc} ${curr.message.role}: ${curr.message.content}`;
-              }, 'Generate a title, using the title_conversation_function, based on the following conversation:\n\n'),
+            content: messages.reduce((acc, curr) => {
+              return `${acc} ${curr.message.role}: ${curr.message.content}`;
+            }, 'Generate a title, using the title_conversation_function, based on the following conversation:\n\n'),
           },
         },
       ],
@@ -60,7 +57,7 @@ export function getGeneratedTitle({
         {
           name: TITLE_CONVERSATION_FUNCTION_NAME,
           description:
-            'Use this function to title the conversation. Do not wrap the title in quotes',
+            'Use this function to title the conversation. Return only the actual title text, without any generic labels, quotes, or prefixes like "Title:".',
           parameters: {
             type: 'object',
             properties: {
@@ -73,13 +70,12 @@ export function getGeneratedTitle({
         },
       ],
       functionCall: TITLE_CONVERSATION_FUNCTION_NAME,
-      tracer,
       stream: false,
     })
   ).pipe(
     mergeMap((response) => {
       let title: string =
-        (response.toolCalls[0].function.name
+        (response.toolCalls?.[0]?.function.name
           ? (response.toolCalls[0].function.arguments as { title: string }).title
           : response.content) || '';
 
@@ -91,21 +87,7 @@ export function getGeneratedTitle({
       // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
       title = title.replace(/^"(.*)"$/g, '$1').replace(/^'(.*)'$/g, '$1');
 
-      const tokenCount: TokenCountEvent | undefined = response.tokens
-        ? {
-            type: StreamingChatResponseEventType.TokenCount,
-            tokens: {
-              completion: response.tokens.completion,
-              prompt: response.tokens.prompt,
-              total: response.tokens.total,
-            },
-          }
-        : undefined;
-
-      const events: Array<string | TokenCountEvent> = [title];
-      if (tokenCount) events.push(tokenCount);
-
-      return from(events); // Emit each event separately
+      return of(title);
     }),
     tap((event) => {
       if (typeof event === 'string') {

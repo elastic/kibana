@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, TimeRange, type AggregateQuery, type Query } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import { type AggregateQuery, type Query } from '@kbn/es-query';
 
-import { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { BehaviorSubject, take } from 'rxjs';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 
 const mockTimeRange: TimeRange = { from: 'now-17m', to: 'now' };
@@ -45,11 +46,12 @@ describe('custom time range badge action', () => {
     expect(await action.isCompatible(emptyContext)).toBe(false);
   });
 
-  it('calls onChange when time range changes', () => {
-    const onChange = jest.fn();
+  it('getCompatibilityChangesSubject emits when time range changes', (done) => {
     updateTimeRange(mockTimeRange);
-    action.subscribeToCompatibilityChanges(context, onChange);
+    const subject = action.getCompatibilityChangesSubject(context);
+    subject?.pipe(take(1)).subscribe(() => {
+      done();
+    });
     updateTimeRange(undefined);
-    expect(onChange).toHaveBeenCalledWith(false, action);
   });
 });

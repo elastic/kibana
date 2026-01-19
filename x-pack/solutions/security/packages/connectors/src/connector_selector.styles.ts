@@ -8,8 +8,12 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const useConnectorSelectorStyles = () => {
+export const useConnectorSelectorStyles = (mode: 'combobox' | 'default') => {
   const { euiTheme } = useEuiTheme();
+
+  if (mode === 'combobox') {
+    return;
+  }
 
   return {
     placeholder: css`

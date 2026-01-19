@@ -7,7 +7,6 @@
 
 import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -27,12 +26,6 @@ export const StyledUnifiedTableFlexItem = styled(EuiFlexItem).attrs(({ className
 }))`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
   overflow: hidden;
-`;
-
-export const StyledSplitFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
-  className: `${className}`,
-}))`
-  border-right: ${euiThemeVars.euiBorderThin};
 `;
 
 export const StyledEuiProgress = styled(EuiProgress)`
@@ -66,6 +59,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   className: `unifiedDataTable ${className}`,
   role: 'rowgroup',
 }))`
+  height: 100%;
+
   .udtTimeline .euiDataGrid__virtualized {
     ${({ theme }) =>
       `scrollbar-color: ${theme.eui.euiColorMediumShade} ${theme.eui.euiColorLightShade}`};
@@ -74,16 +69,19 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline [data-gridcell-column-id|='select'] {
     border-right: none;
   }
+
   .udtTimeline [data-gridcell-column-id|='openDetails'] {
     /* custom row height based on number of lines */
+
     .euiDataGridRowCell__content--lineCountHeight,
 
-     /* auto row height */
+      /* auto row height */
     .euiDataGridRowCell__content--autoHeight {
       margin-top: 9px;
     }
 
     /* single row height */
+
     .euiDataGridRowCell__content--defaultHeight {
       margin-top: 3px;
     }
@@ -103,14 +101,16 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
 
   .udtTimeline [data-gridcell-column-id|='select'] {
     /* custom row height based on number of lines */
+
     .euiDataGridRowCell__content--lineCountHeight,
 
-    /* auto row height */
+      /* auto row height */
     .euiDataGridRowCell__content--autoHeight {
-      margin-top: 6px;
+      margin-top: 3px;
     }
 
     /* single row height */
+
     .euiDataGridRowCell__content--defaultHeight {
       margin-top: 3px;
     }
@@ -142,12 +142,14 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(245, 167, 0, 0.05) 10px
     );
   }
+
   .udtTimeline .euiDataGridRow:has(.eqlSequence),
   .udtTimeline .euiDataGridRow.eqlSequence {
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary}`};
     }
+
     background: repeating-linear-gradient(
       127deg,
       rgba(0, 107, 180, 0.2),
@@ -156,12 +158,14 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(0, 107, 180, 0.05) 10px
     );
   }
+
   .udtTimeline .euiDataGridRow:has(.eqlNonSequence),
   .udtTimeline .euiDataGridRow.eqlNonSequence {
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorAccent};`}
     }
+
     background: repeating-linear-gradient(
       127deg,
       rgba(221, 10, 115, 0.2),
@@ -170,6 +174,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(221, 10, 115, 0.05) 10px
     );
   }
+
   .udtTimeline .euiDataGridRow:has(.nonRawEvent),
   .udtTimeline .euiDataGridRow.nonRawEvent {
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
@@ -177,6 +182,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
     }
   }
+
   .udtTimeline .euiDataGridRow:has(.rawEvent),
   .udtTimeline .euiDataGridRow.rawEvent {
     .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
@@ -193,6 +199,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .rightPosition {
     position: absolute;
     right: 5px;
+
     button {
       ${({ theme }) => `color: ${theme.eui.euiColorDarkShade};`}
     }
@@ -214,8 +221,9 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   ${leadingActionsColumnStyles}
 `;
 
+// we need this flyout to be above the timeline flyout (which has a z-index of 1003)
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`
   body:has(.timeline-portal-overlay-mask) .unifiedDataTable__cellPopover {
-    z-index: 1001 !important;
+    z-index: 1004 !important;
   }
 `;

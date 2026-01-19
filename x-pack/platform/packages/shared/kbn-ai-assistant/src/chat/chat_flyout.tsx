@@ -16,9 +16,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { ApplicationStart } from '@kbn/core/public';
+import { navigateToConnectorsManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
 import { useConversationKey } from '../hooks/use_conversation_key';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useCurrentUser } from '../hooks/use_current_user';
@@ -42,7 +45,7 @@ export enum FlyoutPositionMode {
 
 export function ChatFlyout({
   initialTitle,
-  initialMessages,
+  initialMessages: initialMessagesFromProps,
   initialFlyoutPositionMode,
   onFlyoutPositionModeChange,
   isOpen,
@@ -69,6 +72,7 @@ export function ChatFlyout({
   const knowledgeBase = useKnowledgeBase();
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const [initialMessages, setInitialMessages] = useState(initialMessagesFromProps);
 
   const [flyoutPositionMode, setFlyoutPositionMode] = useState<FlyoutPositionMode>(
     initialFlyoutPositionMode || FlyoutPositionMode.OVERLAY
@@ -84,9 +88,21 @@ export function ChatFlyout({
       observabilityAIAssistant: { ObservabilityAIAssistantMultipaneFlyoutContext },
     },
   } = useKibana();
-  const conversationList = useConversationList();
+
+  const {
+    conversations,
+    isLoadingConversationList,
+    setIsUpdatingConversationList,
+    refreshConversations,
+  } = useConversationList();
 
   const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
+
+  const onConversationDuplicate = (conversation: Conversation) => {
+    refreshConversations();
+    setInitialMessages([]);
+    setConversationId(conversation.conversation.id);
+  };
 
   const flyoutClassName = css`
     max-inline-size: 100% !important;
@@ -140,6 +156,15 @@ export function ChatFlyout({
   const handleToggleFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
     setFlyoutPositionMode(newFlyoutPositionMode);
     onFlyoutPositionModeChange?.(newFlyoutPositionMode);
+  };
+
+  const updateDisplayedConversation = (id?: string) => {
+    setConversationId(id || undefined);
+  };
+
+  const navigateToConnectorsManagementAppHandler = (application: ApplicationStart) => {
+    onClose();
+    navigateToConnectorsManagementApp(application);
   };
 
   return isOpen ? (
@@ -216,19 +241,16 @@ export function ChatFlyout({
 
               {conversationsExpanded ? (
                 <ConversationList
-                  conversations={conversationList.conversations}
-                  isLoading={conversationList.isLoading}
+                  conversations={conversations}
+                  isLoading={isLoadingConversationList}
                   selectedConversationId={conversationId}
-                  onConversationDeleteClick={(deletedConversationId) => {
-                    conversationList.deleteConversation(deletedConversationId).then(() => {
-                      if (deletedConversationId === conversationId) {
-                        setConversationId(undefined);
-                      }
-                    });
-                  }}
+                  currentUser={currentUser as AuthenticatedUser}
                   onConversationSelect={(nextConversationId) => {
                     setConversationId(nextConversationId);
                   }}
+                  setIsUpdatingConversationList={setIsUpdatingConversationList}
+                  refreshConversations={refreshConversations}
+                  updateDisplayedConversation={updateDisplayedConversation}
                 />
               ) : (
                 <EuiPopover
@@ -276,7 +298,7 @@ export function ChatFlyout({
                   updateConversationIdInPlace(conversation.conversation.id);
                 }
                 setConversationId(conversation.conversation.id);
-                conversationList.conversations.refresh();
+                refreshConversations();
               }}
               onToggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
               navigateToConversation={
@@ -287,11 +309,16 @@ export function ChatFlyout({
                     }
                   : undefined
               }
+              setIsUpdatingConversationList={setIsUpdatingConversationList}
+              refreshConversations={refreshConversations}
+              updateDisplayedConversation={updateDisplayedConversation}
+              onConversationDuplicate={onConversationDuplicate}
+              navigateToConnectorsManagementApp={navigateToConnectorsManagementAppHandler}
             />
           </EuiFlexItem>
 
           <EuiFlexItem
-            style={{
+            css={{
               maxWidth: isSecondSlotVisible ? SIDEBAR_WIDTH : 0,
               paddingTop: '56px',
             }}

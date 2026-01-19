@@ -10,7 +10,7 @@ import {
   actionsMock,
   renderActionParameterTemplatesDefault,
 } from '@kbn/actions-plugin/server/mocks';
-import { SanitizedRule } from '../types';
+import type { SanitizedRule } from '../types';
 import { mockAAD } from './fixtures';
 
 const actionsPlugin = actionsMock.createStart();

@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import { AlertingAuthorization, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { IRuleDataService } from '../rule_data_plugin_service';
+import type { AlertingAuthorization, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { IRuleDataService } from '../rule_data_plugin_service';
 import { AlertsClient } from './alerts_client';
 
 export interface AlertsClientFactoryProps {
   logger: Logger;
   esClient: ElasticsearchClient;
+  getEsClientScoped: (request: KibanaRequest) => Promise<ElasticsearchClient>;
   getAlertingAuthorization: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
@@ -30,6 +31,7 @@ export class AlertsClientFactory {
   private isInitialized = false;
   private logger!: Logger;
   private esClient!: ElasticsearchClient;
+  private getEsClientScoped!: (request: KibanaRequest) => Promise<ElasticsearchClient>;
   private getAlertingAuthorization!: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
@@ -51,6 +53,7 @@ export class AlertsClientFactory {
     this.isInitialized = true;
     this.logger = options.logger;
     this.esClient = options.esClient;
+    this.getEsClientScoped = options.getEsClientScoped;
     this.securityPluginSetup = options.securityPluginSetup;
     this.ruleDataService = options.ruleDataService;
     this.getRuleType = options.getRuleType;
@@ -61,12 +64,14 @@ export class AlertsClientFactory {
   public async create(request: KibanaRequest): Promise<AlertsClient> {
     const { securityPluginSetup, getAlertingAuthorization, logger } = this;
     const authorization = await getAlertingAuthorization(request);
+    const esClientScoped = await this.getEsClientScoped(request);
 
     return new AlertsClient({
       logger,
       authorization,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       esClient: this.esClient,
+      esClientScoped,
       ruleDataService: this.ruleDataService!,
       getRuleType: this.getRuleType,
       getRuleList: this.getRuleList,

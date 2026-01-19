@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
-import { CodeEditor, YamlLang } from '@kbn/code-editor';
+import { CodeEditor, YAML_LANG_ID } from '@kbn/code-editor';
 import { monaco } from '@kbn/monaco';
 import { uniq } from 'lodash';
 import { INPUT_CONTROL } from '../../../common/constants';
@@ -22,8 +22,9 @@ import {
   getSelectorsAndResponsesFromYaml,
 } from '../../../common/utils/helpers';
 import * as i18n from './translations';
-import { ViewDeps, SelectorConditionsMap } from '../../types';
-import { SelectorCondition } from '../../../common';
+import type { ViewDeps } from '../../types';
+import { SelectorConditionsMap } from '../../types';
+import type { SelectorCondition } from '../../../common';
 
 const { editor } = monaco;
 
@@ -41,6 +42,12 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   const input = getInputFromPolicy(policy, INPUT_CONTROL);
   const configuration = input?.vars?.configuration?.value || '';
   const currentModel = useConfigModel(configuration);
+
+  useEffect(() => {
+    if (currentModel && currentModel.getValue() !== configuration) {
+      currentModel.setValue(configuration);
+    }
+  }, [currentModel, configuration]);
 
   // not all validations can be done via json-schema
   const validateAdditional = useCallback((value: any) => {
@@ -141,6 +148,19 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
     [editorErrors.length, input?.vars, onChange, policy, show, validateAdditional]
   );
 
+  // render loading state if currentModel is not ready, to prevent monaco from calling setLanguage on null object
+  if (!currentModel) {
+    return (
+      <EuiFlexGroup direction="column" css={!show && styles.hide}>
+        <EuiFlexItem>
+          <EuiText color="subdued" size="s">
+            {i18n.controlYamlLoading}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiFlexGroup direction="column" css={!show && styles.hide}>
       <EuiFlexItem>
@@ -158,7 +178,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
         <div css={styles.yamlEditor}>
           <CodeEditor
             width="100%"
-            languageId={YamlLang}
+            languageId={YAML_LANG_ID}
             options={{
               wordWrap: 'off',
               model: currentModel,

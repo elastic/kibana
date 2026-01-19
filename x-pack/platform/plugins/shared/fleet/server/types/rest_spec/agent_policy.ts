@@ -18,6 +18,7 @@ import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_MAPPINGS } from '..
 import { validateKuery } from '../../routes/utils/filter_utils';
 
 import { BulkRequestBodySchema } from './common';
+import { CreatePackagePolicyRequestSchema } from './package_policy';
 
 export const GetAgentPoliciesRequestSchema = {
   query: schema.object(
@@ -91,7 +92,7 @@ export const BulkGetAgentPoliciesRequestSchema = {
 };
 
 export const BulkGetAgentPoliciesResponseSchema = schema.object({
-  items: schema.arrayOf(AgentPolicyResponseSchema),
+  items: schema.arrayOf(AgentPolicyResponseSchema, { maxSize: 10000 }),
 });
 
 export const GetOneAgentPolicyRequestSchema = {
@@ -105,6 +106,12 @@ export const GetOneAgentPolicyRequestSchema = {
   }),
 };
 
+export const GetAutoUpgradeAgentsStatusRequestSchema = {
+  params: schema.object({
+    agentPolicyId: schema.string(),
+  }),
+};
+
 export const CreateAgentPolicyRequestSchema = {
   body: NewAgentPolicySchema,
   query: schema.object({
@@ -112,10 +119,21 @@ export const CreateAgentPolicyRequestSchema = {
   }),
 };
 
+export const CreateAgentAndPackagePolicyRequestSchema = {
+  body: CreateAgentPolicyRequestSchema.body.extends({
+    package_policies: schema.arrayOf(CreatePackagePolicyRequestSchema.body, { maxSize: 1000 }),
+  }),
+  query: schema.intersection([
+    CreateAgentPolicyRequestSchema.query,
+    CreatePackagePolicyRequestSchema.query,
+  ]),
+};
+
 export const UpdateAgentPolicyRequestSchema = {
   ...GetOneAgentPolicyRequestSchema,
   body: NewAgentPolicySchema.extends({
     force: schema.maybe(schema.boolean()),
+    bumpRevision: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -182,6 +200,31 @@ export const GetListAgentPolicyOutputsRequestSchema = {
   body: schema.object({
     ids: schema.arrayOf(schema.string(), {
       meta: { description: 'list of package policy ids' },
+      maxSize: 1000,
     }),
   }),
 };
+
+export const RunAgentPolicyRevisionsCleanupTaskRequestSchema = {
+  body: schema.object({
+    maxRevisions: schema.maybe(
+      schema.number({
+        min: 1,
+        meta: { description: 'maximum revisions to keep per policy' },
+      })
+    ),
+    maxPolicies: schema.maybe(
+      schema.number({
+        min: 1,
+        meta: { description: 'maximum number of policies to process for this task' },
+      })
+    ),
+  }),
+};
+
+export const RunAgentPolicyRevisionsCleanupTaskResponseSchema = schema.object({
+  success: schema.boolean({ meta: { description: 'whether the cleanup task ran successfully' } }),
+  totalDeletedRevisions: schema.number({
+    meta: { description: 'total number of deleted policy revisions' },
+  }),
+});

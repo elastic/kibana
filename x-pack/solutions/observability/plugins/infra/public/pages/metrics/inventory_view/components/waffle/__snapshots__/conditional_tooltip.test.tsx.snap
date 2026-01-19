@@ -1,16 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ConditionalToolTip renders correctly 1`] = `
+exports[`ConditionalToolTip renders correctly with node data 1`] = `
 <div
+  aria-label="host-01"
   data-test-subj="conditionalTooltipContent-host-01"
   style="min-width: 220px;"
 >
   <div
-    style="border-bottom: 1px solid #D3DAE6; border-bottom-color: #98A2B3; padding-bottom: 4px; margin-bottom: 4px;"
+    style="border-bottom: 1px solid #E3E8F2; border-bottom-color: #8E9FBC; padding-bottom: 4px; margin-bottom: 4px;"
   >
     host-01
   </div>
   <div
+    aria-label="CPU usage : 10%"
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
@@ -27,6 +29,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
     </div>
   </div>
   <div
+    aria-label="CPU usage (Legacy) : 10%"
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
@@ -43,6 +46,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
     </div>
   </div>
   <div
+    aria-label="Memory usage : 80%"
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
@@ -59,6 +63,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
     </div>
   </div>
   <div
+    aria-label="Inbound traffic : 8 Mbit/s"
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
@@ -75,6 +80,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
     </div>
   </div>
   <div
+    aria-label="Outbound traffic : 8 Mbit/s"
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
@@ -91,6 +97,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
     </div>
   </div>
   <div
+    aria-label="Inbound traffic (Legacy) : 8 Mbit/s"
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
@@ -107,6 +114,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
     </div>
   </div>
   <div
+    aria-label="Outbound traffic (Legacy) : 8 Mbit/s"
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
@@ -123,6 +131,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
     </div>
   </div>
   <div
+    aria-label="My Custom Label : 34.1%"
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
@@ -139,6 +148,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
     </div>
   </div>
   <div
+    aria-label="Avg of host.network.out.packets : 4,392.2"
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div

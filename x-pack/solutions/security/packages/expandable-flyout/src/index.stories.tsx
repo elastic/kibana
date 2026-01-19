@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -19,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { ExpandableFlyout } from '.';
 import { TestProvider } from './test/provider';
-import { initialUiState, State } from './store/state';
+import type { State } from './store/state';
+import { initialUiState } from './store/state';
 
 export default {
   component: ExpandableFlyout,
@@ -99,7 +99,7 @@ const registeredPanels = [
   },
 ];
 
-export const Right: Story<void> = () => {
+export const Right = () => {
   const state: State = {
     panels: {
       byId: {
@@ -109,7 +109,7 @@ export const Right: Story<void> = () => {
           },
           left: undefined,
           preview: undefined,
-          history: [{ id: 'right' }],
+          history: [{ lastOpen: Date.now(), panel: { id: 'right' } }],
         },
       },
     },
@@ -126,7 +126,7 @@ export const Right: Story<void> = () => {
   );
 };
 
-export const Left: Story<void> = () => {
+export const Left = () => {
   const state: State = {
     panels: {
       byId: {
@@ -138,7 +138,7 @@ export const Left: Story<void> = () => {
             id: 'left',
           },
           preview: undefined,
-          history: [{ id: 'right' }],
+          history: [{ lastOpen: Date.now(), panel: { id: 'right' } }],
         },
       },
     },
@@ -155,7 +155,7 @@ export const Left: Story<void> = () => {
   );
 };
 
-export const Preview: Story<void> = () => {
+export const Preview = () => {
   const state: State = {
     panels: {
       byId: {
@@ -171,7 +171,7 @@ export const Preview: Story<void> = () => {
               id: 'preview1',
             },
           ],
-          history: [{ id: 'right' }],
+          history: [{ lastOpen: Date.now(), panel: { id: 'right' } }],
         },
       },
     },
@@ -188,7 +188,7 @@ export const Preview: Story<void> = () => {
   );
 };
 
-export const MultiplePreviews: Story<void> = () => {
+export const MultiplePreviews = () => {
   const state: State = {
     panels: {
       byId: {
@@ -207,7 +207,7 @@ export const MultiplePreviews: Story<void> = () => {
               id: 'preview2',
             },
           ],
-          history: [{ id: 'right' }],
+          history: [{ lastOpen: Date.now(), panel: { id: 'right' } }],
         },
       },
     },
@@ -224,7 +224,7 @@ export const MultiplePreviews: Story<void> = () => {
   );
 };
 
-export const CollapsedPushMode: Story<void> = () => {
+export const CollapsedPushMode = () => {
   const state: State = {
     panels: {
       byId: {
@@ -234,7 +234,7 @@ export const CollapsedPushMode: Story<void> = () => {
           },
           left: undefined,
           preview: undefined,
-          history: [{ id: 'right' }],
+          history: [{ lastOpen: Date.now(), panel: { id: 'right' } }],
         },
       },
     },
@@ -251,7 +251,7 @@ export const CollapsedPushMode: Story<void> = () => {
   );
 };
 
-export const ExpandedPushMode: Story<void> = () => {
+export const ExpandedPushMode = () => {
   const state: State = {
     panels: {
       byId: {
@@ -263,7 +263,7 @@ export const ExpandedPushMode: Story<void> = () => {
             id: 'left',
           },
           preview: undefined,
-          history: [{ id: 'right' }],
+          history: [{ lastOpen: Date.now(), panel: { id: 'right' } }],
         },
       },
     },
@@ -280,7 +280,7 @@ export const ExpandedPushMode: Story<void> = () => {
   );
 };
 
-export const DisableTypeSelection: Story<void> = () => {
+export const DisableTypeSelection = () => {
   const state: State = {
     panels: {
       byId: {
@@ -292,7 +292,7 @@ export const DisableTypeSelection: Story<void> = () => {
             id: 'left',
           },
           preview: undefined,
-          history: [{ id: 'right' }],
+          history: [{ lastOpen: Date.now(), panel: { id: 'right' } }],
         },
       },
     },
@@ -311,7 +311,7 @@ export const DisableTypeSelection: Story<void> = () => {
   );
 };
 
-export const ResetWidths: Story<void> = () => {
+export const ResetWidths = () => {
   const state: State = {
     panels: {
       byId: {
@@ -323,7 +323,7 @@ export const ResetWidths: Story<void> = () => {
             id: 'left',
           },
           preview: undefined,
-          history: [{ id: 'right' }],
+          history: [{ lastOpen: Date.now(), panel: { id: 'right' } }],
         },
       },
     },
@@ -337,7 +337,7 @@ export const ResetWidths: Story<void> = () => {
   );
 };
 
-export const DisableResizeWidthSelection: Story<void> = () => {
+export const DisableResizeWidthSelection = () => {
   const state: State = {
     panels: {
       byId: {
@@ -349,7 +349,7 @@ export const DisableResizeWidthSelection: Story<void> = () => {
             id: 'left',
           },
           preview: undefined,
-          history: [{ id: 'right' }],
+          history: [{ lastOpen: Date.now(), panel: { id: 'right' } }],
         },
       },
     },

@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import { CustomRequestHandlerContext } from '@kbn/core/server';
+import type { CustomRequestHandlerContext } from '@kbn/core/server';
 
 /**
  * @internal
  */
 export type CloudRequestHandlerContext = CustomRequestHandlerContext<{}>;
-export type SolutionType = 'search' | 'elasticsearch' | 'observability' | 'security';
-export interface CloudDataAttributes {
-  onboardingData: {
-    solutionType?: SolutionType;
-    token: string;
-  };
-}

@@ -40,6 +40,8 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   onAlertsTableLoaded,
   refreshRef,
   timelineIntegration,
+  renderAlertsTable,
+  renderEventsTable,
 }) => {
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
@@ -90,6 +92,8 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
               onAlertsTableLoaded={onAlertsTableLoaded}
               refreshRef={refreshRef}
               timelineIntegration={timelineIntegration}
+              renderAlertsTable={renderAlertsTable}
+              renderEventsTable={renderEventsTable}
             />
           </Suspense>
         </Route>

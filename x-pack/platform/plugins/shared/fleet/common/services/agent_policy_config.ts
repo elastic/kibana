@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 
 import type { AgentPolicy } from '../types';
 

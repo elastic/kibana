@@ -28,6 +28,10 @@ import {
   DENSE_SEMANTIC_FIELD_MAPPINGS_MISSING_TASK_TYPE,
   DENSE_PIPELINE_FIELD_CAPS,
   DENSE_OLD_PIPELINE_DOCS,
+  SPARSE_SEMANTIC_FIELD_MAPPINGS_MULTI_FIELD_TYPE_FIELD_CAPS,
+  SPARSE_SEMANTIC_FIELD_MAPPINGS_MULTI_FIELD_TYPE,
+  SPARSE_SEMANTIC_FIELD_MAPPINGS_OBJECT_TYPE,
+  SPARSE_SEMANTIC_FIELD_MAPPINGS_OBJECT_TYPE_FIELD_CAPS,
 } from '../../__mocks__/fetch_query_source_fields.mock';
 import {
   fetchFields,
@@ -76,8 +80,20 @@ describe('fetch_query_source_fields', () => {
               sparse_vector: false,
             },
           ],
-          skipped_fields: 8,
-          source_fields: ['metadata.name', 'metadata.rolePermissions', 'metadata.summary', 'text'],
+          skipped_fields: 1,
+          source_fields: [
+            'metadata',
+            'metadata.name',
+            'metadata.name.keyword',
+            'metadata.rolePermissions',
+            'metadata.rolePermissions.keyword',
+            'metadata.summary',
+            'metadata.summary.keyword',
+            'text',
+            'text.keyword',
+            'vector',
+            'vector.model_id.keyword',
+          ],
           semantic_fields: [],
         },
         workplace_index2: {
@@ -89,7 +105,7 @@ describe('fetch_query_source_fields', () => {
             'metadata.summary',
           ],
           dense_vector_query_fields: [],
-          skipped_fields: 8,
+          skipped_fields: 1,
           elser_query_fields: [
             {
               field: 'content_vector.tokens',
@@ -100,9 +116,16 @@ describe('fetch_query_source_fields', () => {
           ],
           source_fields: [
             'content',
+            'content_vector',
+            'content_vector.model_id.keyword',
+            'content.keyword',
+            'metadata',
             'metadata.name',
+            'metadata.name.keyword',
             'metadata.rolePermissions',
+            'metadata.rolePermissions.keyword',
             'metadata.summary',
+            'metadata.summary.keyword',
           ],
         },
       });
@@ -147,21 +170,49 @@ describe('fetch_query_source_fields', () => {
             },
           ],
           elser_query_fields: [],
-          skipped_fields: 30,
+          skipped_fields: 2,
           source_fields: [
             'bread_crumbs',
+            'bread_crumbs.keyword',
+            'buttons',
             'buttons.button_link',
+            'buttons.button_link.keyword',
             'buttons.button_new_tab',
             'buttons.button_title',
+            'buttons.button_title.keyword',
+            'category_id',
             'filter_list',
+            'label',
+            'label.keyword',
+            'main_button',
             'main_button.button_link',
+            'main_button.button_new_tab',
             'main_button.button_title',
+            'main_button.button_title.keyword',
+            'main_button.keyword',
+            'page_content',
+            'page_content_e5_embbeding',
+            'page_content_e5_embbeding.model_id.keyword',
             'page_content_key',
+            'page_content_key.keyword',
+            'page_content_ner',
+            'page_content_ner.entities',
+            'page_content_ner.entities.class_name',
+            'page_content_ner.entities.class_probability',
+            'page_content_ner.entities.end_pos',
+            'page_content_ner.entities.entity',
+            'page_content_ner.entities.start_pos',
+            'page_content_ner.predicted_value',
             'page_content_text',
+            'page_id',
             'page_notification',
+            'page_notification.keyword',
             'title',
             'title_text',
+            'title.keyword',
+            'updated_date',
             'url',
+            'url.keyword',
           ],
         },
       });
@@ -193,8 +244,15 @@ describe('fetch_query_source_fields', () => {
               sparse_vector: true,
             },
           ],
-          source_fields: ['body_content', 'headings', 'title'],
-          skipped_fields: 4,
+          source_fields: [
+            'body_content',
+            'headings',
+            'ml',
+            'ml.inference',
+            'ml.inference.body_content_expanded.is_truncated',
+            'title',
+          ],
+          skipped_fields: 1,
         },
       });
     });
@@ -230,15 +288,31 @@ describe('fetch_query_source_fields', () => {
           semantic_fields: [],
           source_fields: [
             'content',
+            'content.keyword',
+            'metadata',
+            'metadata._run_ml_inference',
             'metadata.category',
+            'metadata.category.keyword',
             'metadata.content',
+            'metadata.content.keyword',
+            'metadata.created_on',
             'metadata.name',
+            'metadata.name.keyword',
+            'metadata.restricted',
             'metadata.rolePermissions',
+            'metadata.rolePermissions.keyword',
             'metadata.summary',
+            'metadata.summary.keyword',
+            'metadata.updated_at',
             'metadata.url',
+            'metadata.url.keyword',
+            'passages',
             'passages.text',
+            'passages.text.keyword',
+            'passages.vector',
+            'passages.vector.model_id.keyword',
           ],
-          skipped_fields: 18,
+          skipped_fields: 2,
         },
       });
     });
@@ -268,8 +342,8 @@ describe('fetch_query_source_fields', () => {
           ],
           elser_query_fields: [],
           semantic_fields: [],
-          source_fields: ['text'],
-          skipped_fields: 2,
+          source_fields: ['model_id.keyword', 'text'],
+          skipped_fields: 1,
         },
       });
     });
@@ -300,8 +374,8 @@ describe('fetch_query_source_fields', () => {
           ],
           dense_vector_query_fields: [],
           semantic_fields: [],
-          source_fields: ['text'],
-          skipped_fields: 2,
+          source_fields: ['model_id.keyword', 'text'],
+          skipped_fields: 1,
         },
       });
     });
@@ -339,8 +413,8 @@ describe('fetch_query_source_fields', () => {
             },
           ],
           elser_query_fields: [],
-          skipped_fields: 2,
-          source_fields: ['text'],
+          skipped_fields: 1,
+          source_fields: ['model_id.keyword', 'text'],
           semantic_fields: [],
         },
         elser_index: {
@@ -354,8 +428,8 @@ describe('fetch_query_source_fields', () => {
               sparse_vector: true,
             },
           ],
-          skipped_fields: 2,
-          source_fields: ['text'],
+          skipped_fields: 1,
+          source_fields: ['model_id.keyword', 'text'],
           semantic_fields: [],
         },
       });
@@ -385,8 +459,14 @@ describe('fetch_query_source_fields', () => {
                 indices: ['test-index2'],
               },
             ],
-            skipped_fields: 4,
-            source_fields: ['infer_field', 'non_infer_field'],
+            skipped_fields: 1,
+            source_fields: [
+              'infer_field',
+              'infer_field.inference',
+              'infer_field.inference.chunks',
+              'infer_field.inference.chunks.text',
+              'non_infer_field',
+            ],
           },
         });
       });
@@ -414,12 +494,83 @@ describe('fetch_query_source_fields', () => {
                 indices: ['test-index2'],
               },
             ],
-            skipped_fields: 4,
-            source_fields: ['infer_field', 'non_infer_field'],
+            skipped_fields: 1,
+            source_fields: [
+              'infer_field',
+              'infer_field.inference',
+              'infer_field.inference.chunks',
+              'infer_field.inference.chunks.text',
+              'non_infer_field',
+            ],
           },
         });
       });
-
+      it('should return the correct fields for semantic text -  object type - sparse', () => {
+        expect(
+          parseFieldsCapabilities(SPARSE_SEMANTIC_FIELD_MAPPINGS_OBJECT_TYPE_FIELD_CAPS, [
+            {
+              index: 'test-index-2',
+              doc: SPARSE_INPUT_OUTPUT_ONE_INDEX[0],
+              mapping: SPARSE_SEMANTIC_FIELD_MAPPINGS_OBJECT_TYPE,
+            },
+          ])
+        ).toEqual({
+          'test-index-2': {
+            bm25_query_fields: [],
+            dense_vector_query_fields: [],
+            elser_query_fields: [],
+            semantic_fields: [
+              {
+                embeddingType: 'sparse_vector',
+                field: 'title.semanticTextField',
+                inferenceId: 'elser-endpoint',
+                indices: ['test-index-2'],
+              },
+            ],
+            skipped_fields: 1,
+            source_fields: [
+              'title',
+              'title.semanticTextField',
+              'title.semanticTextField.inference',
+              'title.semanticTextField.inference.chunks',
+              'title.semanticTextField.inference.chunks.offset',
+            ],
+          },
+        });
+      });
+      it('should return the correct fields for semantic text - multi field type - sparse', () => {
+        expect(
+          parseFieldsCapabilities(SPARSE_SEMANTIC_FIELD_MAPPINGS_MULTI_FIELD_TYPE_FIELD_CAPS, [
+            {
+              index: 'test-index-2',
+              doc: SPARSE_INPUT_OUTPUT_ONE_INDEX[0],
+              mapping: SPARSE_SEMANTIC_FIELD_MAPPINGS_MULTI_FIELD_TYPE,
+            },
+          ])
+        ).toEqual({
+          'test-index-2': {
+            bm25_query_fields: [],
+            dense_vector_query_fields: [],
+            elser_query_fields: [],
+            semantic_fields: [
+              {
+                embeddingType: 'sparse_vector',
+                field: 'title.semanticTextField',
+                inferenceId: 'elser-endpoint',
+                indices: ['test-index-2'],
+              },
+            ],
+            skipped_fields: 1,
+            source_fields: [
+              'title',
+              'title.semanticTextField',
+              'title.semanticTextField.inference',
+              'title.semanticTextField.inference.chunks',
+              'title.semanticTextField.inference.chunks.offset',
+            ],
+          },
+        });
+      });
       it('skips if the semantic_text field not setup correctly', () => {
         expect(
           parseFieldsCapabilities(DENSE_SEMANTIC_FIELD_FIELD_CAPS, [
@@ -436,8 +587,13 @@ describe('fetch_query_source_fields', () => {
             dense_vector_query_fields: [],
             elser_query_fields: [],
             semantic_fields: [],
-            skipped_fields: 5, // increat by 1 for the semantic field
-            source_fields: ['non_infer_field'],
+            skipped_fields: 2, // increat by 1 for the semantic field
+            source_fields: [
+              'infer_field.inference',
+              'infer_field.inference.chunks',
+              'infer_field.inference.chunks.text',
+              'non_infer_field',
+            ],
           },
         });
       });
@@ -493,20 +649,18 @@ describe('fetch_query_source_fields', () => {
       await fetchFields(client, indices);
       expect(client.asCurrentUser.search).toHaveBeenCalledWith({
         index: 'search-example-main',
-        body: {
-          size: 0,
-          aggs: {
-            'page_content_e5_embbeding.model_id': {
-              terms: {
-                field: 'page_content_e5_embbeding.model_id.keyword',
-                size: 1,
-              },
+        size: 0,
+        aggs: {
+          'page_content_e5_embbeding.model_id': {
+            terms: {
+              field: 'page_content_e5_embbeding.model_id.keyword',
+              size: 1,
             },
-            'page_content_ner.model_id': {
-              terms: {
-                field: 'page_content_ner.model_id',
-                size: 1,
-              },
+          },
+          'page_content_ner.model_id': {
+            terms: {
+              field: 'page_content_ner.model_id',
+              size: 1,
             },
           },
         },
@@ -531,14 +685,12 @@ describe('fetch_query_source_fields', () => {
       const response = await fetchFields(client, indices);
       expect(client.asCurrentUser.search).toHaveBeenCalledWith({
         index: 'search-test-e5',
-        body: {
-          size: 0,
-          aggs: {
-            'ml.inference.body_content.model_id': {
-              terms: {
-                field: 'ml.inference.body_content.model_id.enum',
-                size: 1,
-              },
+        size: 0,
+        aggs: {
+          'ml.inference.body_content.model_id': {
+            terms: {
+              field: 'ml.inference.body_content.model_id.enum',
+              size: 1,
             },
           },
         },
@@ -556,7 +708,7 @@ describe('fetch_query_source_fields', () => {
           elser_query_fields: [],
           semantic_fields: [],
           source_fields: expect.any(Array),
-          skipped_fields: 30,
+          skipped_fields: 1,
         },
       });
     });
@@ -579,14 +731,12 @@ describe('fetch_query_source_fields', () => {
       await fetchFields(client, indices);
       expect(client.asCurrentUser.search).toHaveBeenCalledWith({
         index: 'index',
-        body: {
-          size: 0,
-          aggs: {
-            model_id: {
-              terms: {
-                field: 'model_id.keyword',
-                size: 1,
-              },
+        size: 0,
+        aggs: {
+          model_id: {
+            terms: {
+              field: 'model_id.keyword',
+              size: 1,
             },
           },
         },

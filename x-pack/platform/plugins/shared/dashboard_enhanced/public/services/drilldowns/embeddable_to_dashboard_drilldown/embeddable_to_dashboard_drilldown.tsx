@@ -9,20 +9,17 @@ import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-pub
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import {
   cleanEmptyKeys,
-  DashboardLocatorParams,
   getDashboardLocatorParamsFromEmbeddable,
 } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
-import {
-  AbstractDashboardDrilldown,
-  AbstractDashboardDrilldownParams,
-} from '../abstract_dashboard_drilldown';
+import type { AbstractDashboardDrilldownParams } from '../abstract_dashboard_drilldown';
+import { AbstractDashboardDrilldown } from '../abstract_dashboard_drilldown';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
-import { createExtract, createInject } from '../../../../common';
-import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
+import type { DashboardDrilldownConfig } from '../abstract_dashboard_drilldown';
 
 export type Context = ApplyGlobalFilterActionContext & {
   embeddable: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>;
@@ -42,7 +39,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
   public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER];
 
   protected async getLocation(
-    config: Config,
+    config: DashboardDrilldownConfig,
     context: Context,
     useUrlForState: boolean
   ): Promise<KibanaLocation> {
@@ -66,7 +63,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
     }
 
     if (timeRangeFromEvent) {
-      params.timeRange = timeRangeFromEvent;
+      params.time_range = timeRangeFromEvent;
     }
 
     const location = await this.locator.getLocation(params);
@@ -89,8 +86,4 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
       location.path
     );
   }
-
-  public readonly inject = createInject({ drilldownId: this.id });
-
-  public readonly extract = createExtract({ drilldownId: this.id });
 }

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
@@ -14,13 +16,12 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
 
-import type {
-  LogRateAnalysisEmbeddableApi,
-  LogRateAnalysisEmbeddableInitialState,
-} from '../embeddables/log_rate_analysis/types';
+import { v4 } from 'uuid';
+import type { LogRateAnalysisEmbeddableApi } from '../embeddables/log_rate_analysis/types';
 import type { AiopsPluginStartDeps } from '../types';
 
 import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
+import { EmbeddableLogRateAnalysisUserInput } from '../embeddables/log_rate_analysis/log_rate_analysis_config_input';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -49,43 +50,48 @@ export function createAddLogRateAnalysisEmbeddableAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      try {
-        const { resolveEmbeddableLogRateAnalysisUserInput } = await import(
-          '../embeddables/log_rate_analysis/resolve_log_rate_analysis_config_input'
-        );
+      const uuid = v4();
 
-        const initialState: LogRateAnalysisEmbeddableInitialState = {
-          dataViewId: undefined,
-        };
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: context.embeddable,
+        flyoutProps: {
+          hideCloseButton: true,
+          focusedPanelId: uuid,
+          'data-test-subj': 'aiopsLogRateAnalysisEmbeddableInitializer',
+          'aria-labelledby': 'logRateAnalysisConfig',
+        },
+        loadContent: async ({ closeFlyout }) => {
+          const embeddable = await presentationContainerParent.addNewPanel<
+            object,
+            LogRateAnalysisEmbeddableApi
+          >({
+            panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
+            serializedState: {},
+            maybePanelId: uuid,
+          });
 
-        const embeddable = await presentationContainerParent.addNewPanel<
-          object,
-          LogRateAnalysisEmbeddableApi
-        >({
-          panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-          initialState,
-        });
+          if (!embeddable) {
+            return;
+          }
 
-        if (!embeddable) {
-          return;
-        }
-
-        const deletePanel = () => {
-          presentationContainerParent.removePanel(embeddable.uuid);
-        };
-
-        resolveEmbeddableLogRateAnalysisUserInput(
-          coreStart,
-          pluginStart,
-          context.embeddable,
-          embeddable.uuid,
-          true,
-          embeddable,
-          deletePanel
-        );
-      } catch (e) {
-        return Promise.reject();
-      }
+          return (
+            <EmbeddableLogRateAnalysisUserInput
+              isNewPanel={true}
+              pluginStart={pluginStart}
+              logRateAnalysisControlsApi={embeddable}
+              onConfirm={(updatedState) => {
+                embeddable.updateUserInput(updatedState);
+                closeFlyout();
+              }}
+              onCancel={() => {
+                presentationContainerParent.removePanel(embeddable.uuid);
+                closeFlyout();
+              }}
+            />
+          );
+        },
+      });
     },
   };
 }

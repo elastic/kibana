@@ -10,12 +10,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiStat,
   EuiText,
   EuiTextColor,
-  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -35,9 +35,22 @@ interface Props {
   compressed?: boolean;
 }
 
-function Title({ title, size }: { title: string; size?: EuiTextProps['size'] }) {
+function Title({
+  title,
+  size,
+  dataTestSubj,
+}: {
+  title: string;
+  size?: EuiTextProps['size'];
+  dataTestSubj?: string;
+}) {
   return (
-    <EuiText style={{ fontWeight: 'bold' }} textAlign="left" size={size}>
+    <EuiText
+      style={{ fontWeight: 'bold' }}
+      textAlign="left"
+      size={size}
+      data-test-subj={dataTestSubj}
+    >
       {title}
     </EuiText>
   );
@@ -77,14 +90,12 @@ export function getValueLable(value: string, perc?: string) {
 export function SummaryItem({
   id,
   baseValue,
-  baseIcon,
   baseColor,
   comparisonValue,
   title,
   isLoading,
   comparisonPerc,
   comparisonColor,
-  comparisonIcon,
   titleHint,
   hasBorder = false,
   compressed = false,
@@ -93,23 +104,21 @@ export function SummaryItem({
   return (
     <EuiPanel hasShadow={false} hasBorder={hasBorder}>
       <EuiStat
-        title={<BaseValue id={id} value={baseValue} color={baseColor} icon={baseIcon} />}
+        title={<BaseValue id={id} value={baseValue} color={baseColor} />}
         titleSize={textSize}
         description={
           <>
             {titleHint ? (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <Title title={title} size={textSize} />
+                  <Title dataTestSubj={`${id}_summary_title`} title={title} size={textSize} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={titleHint}>
-                    <EuiIcon type="questionInCircle" />
-                  </EuiToolTip>
+                  <EuiIconTip content={titleHint} type="question" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              <Title title={title} size={textSize} />
+              <Title dataTestSubj={`${id}_summary_title`} title={title} size={textSize} />
             )}
             <EuiSpacer />
           </>
@@ -119,12 +128,6 @@ export function SummaryItem({
       >
         {!isLoading && comparisonValue ? (
           <EuiText color={comparisonColor} size={textSize}>
-            {comparisonIcon ? (
-              <EuiIcon
-                data-test-subj={`${id}_comparison_${comparisonIcon}_${comparisonColor}`}
-                type={comparisonIcon}
-              />
-            ) : null}
             <span data-test-subj={`${id}_comparison_value`}>
               {getValueLable(comparisonValue, comparisonPerc)}
             </span>

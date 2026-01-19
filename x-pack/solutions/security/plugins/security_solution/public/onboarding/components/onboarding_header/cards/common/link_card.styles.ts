@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { COLOR_MODES_STANDARD, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+
 export const useCardStyles = () => {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
 
   return css`
     min-width: 315px;
     /* We needed to add the "headerCard" class to make it take priority over the default EUI card styles */
+    .headerCardLink {
+      color: ${euiTheme.colors.textPrimary};
+      font-weight: ${euiTheme.font.weight.semiBold};
+    }
+
     &.headerCard:hover {
       *:not(.headerCardLink) {
         text-decoration: none;
@@ -23,11 +30,13 @@ export const useCardStyles = () => {
       .headerCardLink * {
         text-decoration: underline;
         text-decoration-color: ${euiTheme.colors.textPrimary};
+        color: ${euiTheme.colors.textPrimary};
       }
     }
 
     .headerCardTitle {
       font-weight: ${euiTheme.font.weight.semiBold};
+      font-size: 1rem;
     }
 
     ${isDarkMode

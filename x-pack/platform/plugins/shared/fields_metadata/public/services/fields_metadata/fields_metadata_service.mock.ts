@@ -6,7 +6,7 @@
  */
 
 import { createFieldsMetadataClientMock } from './fields_metadata_client.mock';
-import { IFieldsMetadataClient } from './types';
+import type { IFieldsMetadataClient } from './types';
 
 interface FieldsMetadataServiceStartMock {
   getClient: () => Promise<jest.Mocked<IFieldsMetadataClient>>;

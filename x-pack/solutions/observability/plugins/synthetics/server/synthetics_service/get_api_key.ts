@@ -9,12 +9,12 @@ import type {
   SecurityCreateApiKeyResponse,
   SecurityIndexPrivilege,
 } from '@elastic/elasticsearch/lib/api/types';
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import { syntheticsServiceAPIKeySavedObject } from '../saved_objects/service_api_key';
-import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
+import type { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
 import { checkHasPrivileges } from './authentication/check_has_privilege';
 
 export const syntheticsIndex = 'synthetics-*';
@@ -43,7 +43,10 @@ export const getAPIKeyForSyntheticsService = async ({
   server,
 }: {
   server: SyntheticsServerSetup;
-}): Promise<{ apiKey?: SyntheticsServiceApiKey; isValid: boolean }> => {
+}): Promise<{
+  apiKey?: SyntheticsServiceApiKey;
+  isValid: boolean;
+}> => {
   try {
     const apiKey = await syntheticsServiceAPIKeySavedObject.get(server);
 
@@ -67,15 +70,10 @@ export const getAPIKeyForSyntheticsService = async ({
       if (!hasPermissions) {
         return { isValid: false, apiKey };
       }
-
-      if (!isValid) {
-        server.logger.info('Synthetics api is no longer valid');
-      }
-
       return { apiKey, isValid };
     }
-  } catch (err) {
-    server.logger.error(err);
+  } catch (error) {
+    server.logger.error(`API key is invalid, ${error.message}`, { error });
   }
 
   return { isValid: false };
@@ -117,10 +115,12 @@ export const generateProjectAPIKey = async ({
   server,
   request,
   accessToElasticManagedLocations = true,
+  spaces = [ALL_SPACES_ID],
 }: {
   server: SyntheticsServerSetup;
   request: KibanaRequest;
   accessToElasticManagedLocations?: boolean;
+  spaces?: string[];
 }): Promise<SecurityCreateApiKeyResponse | null> => {
   const { security } = server;
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
@@ -138,7 +138,7 @@ export const generateProjectAPIKey = async ({
         kibana: [
           {
             base: [],
-            spaces: [ALL_SPACES_ID],
+            spaces,
             feature: {
               uptime: [accessToElasticManagedLocations ? 'all' : 'minimal_all'],
             },
@@ -213,10 +213,8 @@ const hasEnablePermissions = async ({
   const { cluster: clusterPrivs, indices: index } =
     getServiceApiKeyPrivileges(isElasticsearchServerless);
   const hasPrivileges = await syntheticsEsClient.baseESClient.security.hasPrivileges({
-    body: {
-      cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key', ...clusterPrivs],
-      index,
-    },
+    cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key', ...clusterPrivs],
+    index,
   });
 
   const { cluster } = hasPrivileges;

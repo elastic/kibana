@@ -18,7 +18,6 @@ const mockProps: HostPreviewPanelFooterProps = {
   hostName: 'test',
   contextID: 'test-host-panel',
   scopeId: 'test-scope-id',
-  isDraggable: false,
 };
 
 describe('<HostPreviewPanelFooter />', () => {

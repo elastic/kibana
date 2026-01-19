@@ -48,13 +48,13 @@ export function histogram(field: Field): Properties {
   return fieldProps;
 }
 
-export function keyword(field: Field): Properties {
+export function keyword(field: Field, isDynamic?: boolean): Properties {
   const fieldProps = getDefaultProperties(field);
   fieldProps.type = 'keyword';
 
   if (field.ignore_above) {
     fieldProps.ignore_above = field.ignore_above;
-  } else {
+  } else if (!isDynamic) {
     fieldProps.ignore_above = DEFAULT_IGNORE_ABOVE;
   }
   if (field.normalizer) {

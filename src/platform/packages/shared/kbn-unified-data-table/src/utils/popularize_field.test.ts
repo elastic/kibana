@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Capabilities } from '@kbn/core/public';
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { popularizeField } from './popularize_field';
 
 const capabilities = {
@@ -79,6 +79,31 @@ describe('Popularize field', () => {
     expect(result).toBeUndefined();
     expect(updateSavedObjectMock).toHaveBeenCalled();
     expect(field.count).toEqual(1);
+  });
+
+  test('should increment', async () => {
+    const field = {
+      count: 5,
+    };
+    const dataView = {
+      id: 'id',
+      fields: {
+        getByName: () => field,
+      },
+      setFieldCount: jest.fn().mockImplementation((fieldName, count) => {
+        field.count = count;
+      }),
+      isPersisted: () => true,
+    } as unknown as DataView;
+    const fieldName = '@timestamp';
+    const updateSavedObjectMock = jest.fn();
+    const dataViewsService = {
+      updateSavedObject: updateSavedObjectMock,
+    } as unknown as DataViewsContract;
+    const result = await popularizeField(dataView, fieldName, dataViewsService, capabilities);
+    expect(result).toBeUndefined();
+    expect(updateSavedObjectMock).toHaveBeenCalled();
+    expect(field.count).toEqual(6);
   });
 
   test('hides errors', async () => {

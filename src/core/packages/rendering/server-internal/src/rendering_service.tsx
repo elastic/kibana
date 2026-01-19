@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { firstValueFrom, of } from 'rxjs';
-import { catchError, take, timeout } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
 import { i18n as i18nLib } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
@@ -26,15 +25,17 @@ import {
   parseThemeNameValue,
   type UiSettingsParams,
   type UserProvidedValues,
+  DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
-import {
+import type {
   IRenderOptions,
   RenderingPrebootDeps,
   RenderingSetupDeps,
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
   RenderingMetadata,
+  RenderingStartDeps,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import {
@@ -47,6 +48,7 @@ import {
 import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
+import { isThemeBundled } from './theme';
 
 type RenderOptions =
   | RenderingSetupDeps
@@ -60,8 +62,15 @@ type RenderOptions =
 
 const themeVersion: ThemeVersion = 'v8';
 
+// TODO: Remove the temporary feature flag and supporting code when Borealis is live in Serverless
+// https://github.com/elastic/eui-private/issues/192
+export const DEFAULT_THEME_NAME_FEATURE_FLAG = 'coreRendering.defaultThemeName';
+
 /** @internal */
 export class RenderingService {
+  private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
+  private airgapped: boolean = false;
+
   constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
@@ -77,6 +86,7 @@ export class RenderingService {
           baseHref: http.staticAssets.getHrefBase(),
           packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
+          themeName$: this.themeName$,
         }),
       });
     });
@@ -96,6 +106,10 @@ export class RenderingService {
     userSettings,
     i18n,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
+    this.airgapped = await firstValueFrom(
+      this.coreContext.configService.atPath<boolean>('airgapped')
+    ).catch(() => false);
+
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
       renderer: bootstrapRendererFactory({
@@ -103,6 +117,7 @@ export class RenderingService {
         baseHref: http.staticAssets.getHrefBase(),
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
+        themeName$: this.themeName$,
         userSettingsService: userSettings,
       }),
     });
@@ -119,6 +134,23 @@ export class RenderingService {
         i18n,
       }),
     };
+  }
+
+  public start({ featureFlags }: RenderingStartDeps) {
+    featureFlags
+      .getStringValue$<ThemeName>(DEFAULT_THEME_NAME_FEATURE_FLAG, DEFAULT_THEME_NAME)
+      // Parse the input feature flag value to ensure it's of type ThemeName
+      // and that it's bundled with this build of Kibana
+      .pipe(
+        map((themeName) => {
+          if (isThemeBundled(themeName)) {
+            return parseThemeNameValue(themeName);
+          }
+
+          return DEFAULT_THEME_NAME;
+        })
+      )
+      .subscribe(this.themeName$);
   }
 
   private async render(
@@ -144,6 +176,7 @@ export class RenderingService {
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
+      airgapped: this.airgapped,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();
@@ -213,8 +246,6 @@ export class RenderingService {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
-    const themeName = getSettingValue<ThemeName>('theme:name', settings, parseThemeNameValue);
-
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({
         darkMode: mode,
@@ -223,7 +254,10 @@ export class RenderingService {
     const commonStylesheetPaths = getCommonStylesheetPaths({
       baseHref: staticAssetsHrefBase,
     });
+    const themeName = this.themeName$.getValue();
+
     const scriptPaths = getScriptPaths({
+      themeName,
       darkMode,
       baseHref: staticAssetsHrefBase,
     });
@@ -240,6 +274,7 @@ export class RenderingService {
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
+
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
@@ -270,6 +305,7 @@ export class RenderingService {
         env,
         featureFlags: {
           overrides: featureFlags?.getOverrides() || {},
+          initialFeatureFlags: (await featureFlags?.getInitialFeatureFlags()) || {},
         },
         clusterInfo,
         apmConfig,

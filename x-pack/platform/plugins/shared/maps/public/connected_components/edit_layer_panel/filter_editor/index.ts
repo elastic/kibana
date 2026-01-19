@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import type { Query } from '@kbn/es-query';
 import { FilterEditor } from './filter_editor';
 import { getEditState, getSelectedLayer } from '../../../selectors/map_selectors';
 import { setLayerQuery, updateSourceProp } from '../../../actions';
-import { MapStoreState } from '../../../reducers/store';
+import type { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   const layer = getSelectedLayer(state)!;

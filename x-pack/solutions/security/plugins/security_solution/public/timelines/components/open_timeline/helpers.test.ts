@@ -6,30 +6,30 @@
  */
 
 import { cloneDeep, omit } from 'lodash/fp';
-import { waitFor, renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { mockTimelineResults } from '../../../common/mock';
 import { timelineDefaults } from '../../store/defaults';
 import type { QueryTimelineById } from './helpers';
 import {
   defaultTimelineToTimelineModel,
+  formatTimelineResponseToModel,
   getNotesCount,
   getPinnedEventCount,
   isUntitled,
   useQueryTimelineById,
-  formatTimelineResponseToModel,
 } from './helpers';
 import type { OpenTimelineResult } from './types';
 import { TimelineId } from '../../../../common/types/timeline';
 import {
-  TimelineTypeEnum,
-  TimelineStatusEnum,
   type ColumnHeaderResult,
   type RowRendererId,
+  TimelineStatusEnum,
+  TimelineTypeEnum,
 } from '../../../../common/api/timeline';
 import {
-  mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
+  mockTimeline as mockSelectedTimeline,
 } from './__mocks__';
 import { resolveTimeline } from '../../containers/api';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
@@ -623,7 +623,6 @@ describe('helpers', () => {
 
       const args: QueryTimelineById = {
         duplicate: false,
-        graphEventId: '',
         timelineId: '',
         timelineType: TimelineTypeEnum.default,
         onError,
@@ -669,7 +668,6 @@ describe('helpers', () => {
       const onOpenTimeline = jest.fn();
       const args: QueryTimelineById = {
         duplicate: false,
-        graphEventId: '',
         timelineId: '',
         timelineType: TimelineTypeEnum.default,
         openTimeline: true,
@@ -699,7 +697,6 @@ describe('helpers', () => {
           expect(mockUpdateTimeline).toHaveBeenCalledWith({
             timeline: {
               ...timeline,
-              graphEventId: '',
               show: true,
               dateRange: {
                 start: '2020-07-07T08:20:18.966Z',
@@ -724,11 +721,14 @@ describe('helpers', () => {
         (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
         const newArgs: QueryTimelineById = {
           duplicate: false,
-          graphEventId: '',
           timelineId: undefined,
           timelineType: TimelineTypeEnum.default,
           onOpenTimeline,
           openTimeline: true,
+          query: {
+            kind: 'kuery',
+            expression: 'foo: bar',
+          },
         };
         (resolveTimeline as jest.Mock).mockResolvedValue(untitledTimeline);
         renderHook(async () => {
@@ -742,6 +742,12 @@ describe('helpers', () => {
             id: TimelineId.active,
             timeline: expect.objectContaining({
               columns: defaultUdtHeaders,
+              kqlQuery: {
+                filterQuery: {
+                  serializedQuery: 'foo: bar',
+                  kuery: { expression: 'foo: bar', kind: 'kuery' },
+                },
+              },
             }),
           })
         );
@@ -798,7 +804,6 @@ describe('helpers', () => {
       const onOpenTimeline = jest.fn();
       const args = {
         duplicate: false,
-        graphEventId: '',
         timelineId: '',
         timelineType: TimelineTypeEnum.template,
         onOpenTimeline,

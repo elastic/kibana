@@ -15,38 +15,7 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
-# Add an introduction to spaces
-  - target: '$'
-    description: Add an extra page about spaces
-    update:
-      x-topics:
-        - title: Kibana spaces
-          content: |
-            Spaces enable you to organize your dashboards and other saved objects into meaningful categories.
-            You can use the default space or create your own spaces.
-
-            To run APIs in non-default spaces, you must add `s/{space_id}/` to the path.
-            For example:
-
-            ```
-            curl -X GET "http://localhost:5601/s/marketing/api/data_views"
-            ```
-
-            If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
-
-            To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html).
-# Add some tag descriptions and displayNames
-  - target: '$.tags[?(@.name=="alerting")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Alerting enables you to define rules, which detect complex conditions within your data.
-        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. 
-        Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
-      externalDocs:
-        description: Alerting documentation
-        url: https://www.elastic.co/guide/en/kibana/master/alerting-getting-started.html
-      x-displayName: "Alerting"
+# Add tag descriptions that are specific to the Stack APIs
   - target: '$.tags[?(@.name=="cases")]'
     description: Change tag description and displayName
     update:
@@ -56,26 +25,26 @@ actions:
         You can also send cases to external incident management systems by configuring connectors.
       externalDocs:
         description: Cases documentation
-        url: https://www.elastic.co/guide/en/kibana/master/cases.html
-      x-displayName: "Cases"
-  - target: '$.tags[?(@.name=="connectors")]'
+        url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
+      x-displayName: 'Cases'
+  - target: '$.tags[?(@.name=="Fleet remote synced integrations")]'
+    description: Change tag description and add external docs link
+    update:
+      description: >
+        Use the Fleet remote synced integrations API to check the status of the automatic integrations synchronization on a remote cluster:
+
+        * Use the `/api/fleet/remote_synced_integrations/{outputId}/remote_status` endpoint on the management cluster to query the synchronization status of the integrations installed on the remote cluster by the ID of the configured remote Elasticsearch output.
+        
+        * Use the `/api/fleet/remote_synced_integrations/status` endpoint on the remote cluster to query the synchronization status of the installed integrations.
+      externalDocs:
+        description: Automatic integrations synchronization documentation
+        url: https://www.elastic.co/docs/reference/fleet/automatic-integrations-synchronization
+  - target: '$.tags[?(@.name=="Fleet service tokens")]'
     description: Change tag description and displayName
     update:
       description: >
-        Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
-        Alerting rules can use connectors to run actions when rule conditions are met.
-      externalDocs:
-        description: Connector documentation
-        url: https://www.elastic.co/guide/en/kibana/current/action-types.html
-      x-displayName: "Connectors"
-  - target: '$.tags[?(@.name=="data views")]'
-    description: Change displayName
-    update:
-      x-displayName: "Data views"
-  - target: '$.tags[?(@.name=="ml")]'
-    description: Change displayName
-    update:
-      x-displayName: "Machine learning"
+        Enables you to create tokens for Fleet service authentication and authorization.
+      x-displayName: 'Fleet service tokens'
   - target: '$.tags[?(@.name=="roles")]'
     description: Change displayName and description
     update:
@@ -83,25 +52,51 @@ actions:
       description: Manage the roles that grant Elasticsearch and Kibana privileges.
       externalDocs:
         description: Kibana role management
-        url: https://www.elastic.co/guide/en/kibana/master/kibana-role-management.html
-  - target: '$.tags[?(@.name=="slo")]'
-    description: Change displayName
-    update:
-      x-displayName: "Service level objectives"
-  - target: '$.tags[?(@.name=="spaces")]'
-    description: Change displayName
-    update:
-      x-displayName: "Spaces"
-      description: Manage your Kibana spaces.
-      externalDocs:
-        url: https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html
-        description: Space overview
-  - target: '$.tags[?(@.name=="system")]'
+        url: https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/defining-roles
+  - target: '$.tags[?(@.name=="saved objects")]'
     description: Change displayName and description
     update:
-      x-displayName: "System"
+      x-displayName: "Saved objects"
+      description: |
+        Export sets of saved objects that you want to import into Kibana, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
+
+        To manage a specific type of saved object, use the corresponding APIs.
+        For example, use:
+
+        * [Data views](../group/endpoint-data-views)
+        * [Spaces](../group/endpoint-spaces)
+        * [Short URLs](../group/endpoint-short-url)
+
+        Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
+  - target: '$.tags[?(@.name=="synthetics")]'
+    description: Add tag info
+    update:
+        x-displayName: Synthetics
+        description: Synthetics APIs enable you to check the status of your services and applications.
+        externalDocs:
+          description: Synthetic monitoring
+          url: https://www.elastic.co/docs/solutions/observability/synthetics
+  - target: '$.tags[?(@.name=="user session")]'
+    description: Change tag description
+    update:
       description: >
-        Get information about the system status, resource usage, and installed plugins.
+        Enables you to invalidate user sessions for security and session management purposes.
+  - target: '$.tags[?(@.name=="agent builder")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
+        
+        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+
+        **Elastic Agent Builder requires an Enterprise subscription.**
+      externalDocs:
+        description: Learn about working with Agent Builder programmatically
+        url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
+      # externalDocs:
+        # description: 
+        # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
+      x-displayName: 'Agent Builder'
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
@@ -109,19 +104,20 @@ actions:
 # Examples that are not applicable to serverless
   - target: "$.paths['/api/spaces/_copy_saved_objects']['post']"
     description: "Add example to copy saved objects to space API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               copySavedObjectsRequestExample1:
                 $ref: "../examples/copy_saved_objects_request1.yaml"
               copySavedObjectsRequestExample2:
                 $ref: "../examples/copy_saved_objects_request2.yaml"
       responses:
-        200: 
-          content: 
-            application/json; Elastic-Api-Version=2023-10-31: 
+        200:
+          description: 'OK: A successful request.'
+          content:
+            application/json:
               examples:
                 copySavedObjectsResponseExample1:
                   $ref: "../examples/copy_saved_objects_response1.yaml"
@@ -133,19 +129,20 @@ actions:
                   $ref: "../examples/copy_saved_objects_response4.yaml"
   - target: "$.paths['/api/spaces/_resolve_copy_saved_objects_errors']['post']"
     description: "Add example to resolve copy saved objects to space conflicts API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               resolveCopySavedObjectsRequestExample1:
                 $ref: "../examples/resolve_copy_saved_objects_request1.yaml"
               resolveCopySavedObjectsRequestExample2:
                 $ref: "../examples/resolve_copy_saved_objects_request2.yaml"
       responses:
-        200: 
-          content: 
-            application/json; Elastic-Api-Version=2023-10-31: 
+        200:
+          description: 'OK: A successful request.'
+          content:
+            application/json:
               examples:
                 resolveCopySavedObjectsResponseExample1:
                   $ref: "../examples/copy_saved_objects_response1.yaml"
@@ -153,35 +150,36 @@ actions:
                   $ref: "../examples/copy_saved_objects_response2.yaml"
   - target: "$.paths['/api/spaces/_disable_legacy_url_aliases']['post']"
     description: "Add example to disable legacy URL aliases API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               disableLegacyURLRequestExample1:
                 $ref: "../examples/disable_legacy_url_request1.yaml"
   - target: "$.paths['/api/spaces/_update_objects_spaces']['post']"
     description: "Add example to update saved object spaces API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               updateObjectSpacesRequestExample1:
                 $ref: "../examples/update_saved_objects_spaces_request1.yaml"
       responses:
-        200: 
-          content: 
-            application/json; Elastic-Api-Version=2023-10-31: 
+        200:
+          description: 'OK: A successful request.'
+          content:
+            application/json:
               examples:
                 updateObjectSpacesResponseExample1:
                   $ref: "../examples/update_saved_objects_spaces_response1.yaml"
   - target: "$.paths['/api/security/role/{name}']['put']"
     description: "Add examples to create role API"
-    update: 
+    update:
       requestBody:
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+        content:
+          application/json:
             examples:
               createRoleRequest1:
                 $ref: "../examples/create_role_request1.yaml"
@@ -197,7 +195,7 @@ actions:
       responses:
         200:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getRoleResponse1:
                   $ref: '../examples/get_role_response1.yaml'
@@ -207,7 +205,13 @@ actions:
       responses:
         200:
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getRolesResponse1:
                   $ref: '../examples/get_roles_response1.yaml'
+  - target: '$.paths[*][*]'
+    description: Add x-metaTags for Kibana product name
+    update:
+      x-metaTags:
+        - content: Kibana
+          name: product_name

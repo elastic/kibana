@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { deleteWatches } from '../lib/api';
@@ -20,6 +20,9 @@ export const DeleteWatchesModal = ({
 }) => {
   const { toasts } = useAppContext();
   const numWatchesToDelete = watchesToDelete.length;
+
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'deleteWatchModal' });
+
   if (!numWatchesToDelete) {
     return null;
   }
@@ -83,6 +86,8 @@ export const DeleteWatchesModal = ({
       }}
       cancelButtonText={cancelButtonText}
       confirmButtonText={confirmButtonText}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
     >
       {confirmModalText}
     </EuiConfirmModal>

@@ -9,9 +9,9 @@
 
 import { useRef } from 'react';
 
-import { Props as UseFieldProps } from './use_field';
+import type { Props as UseFieldProps } from './use_field';
 import { useFieldFromProps } from '../hooks';
-import { FieldHook } from '../types';
+import type { FieldHook } from '../types';
 
 interface Props<T> {
   fields: { [K in keyof T]: Exclude<UseFieldProps<T[K]>, 'children'> };

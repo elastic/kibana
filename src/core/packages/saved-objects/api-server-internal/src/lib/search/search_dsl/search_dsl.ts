@@ -9,7 +9,7 @@
 
 import Boom from '@hapi/boom';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
@@ -86,6 +86,7 @@ export function getSearchDsl(
       hasNoReference,
       hasNoReferenceOperator,
       kueryNode,
+      mappings,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder, pit),
     ...(pit ? getPitParams(pit) : {}),

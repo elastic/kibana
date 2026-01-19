@@ -7,6 +7,9 @@
 
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 import { operationDefinitionMap } from '.';
+import type { FormBasedLayer } from '../../../..';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { DateRange, IndexPattern } from '@kbn/lens-common';
 
 describe('count operation', () => {
   describe('getGroupByKey', () => {
@@ -117,6 +120,46 @@ describe('count operation', () => {
           'aggFilteredMetric id="2" enabled=true schema="metric" \n  customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggSum id="2-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}'
         )
       ).toBeUndefined();
+    });
+  });
+
+  describe('toESQL', () => {
+    const callToESQL = (column: unknown) =>
+      operationDefinitionMap.count.toESQL!(
+        column as unknown as FormBasedLayer['columns'][0],
+        '1',
+        {
+          getFieldByName: jest.fn().mockImplementation((field) => {
+            if (field) return { type: 'number', name: field };
+          }),
+        } as unknown as IndexPattern,
+        {} as unknown as FormBasedLayer,
+        {} as unknown as IUiSettingsClient,
+        {} as unknown as DateRange
+      );
+
+    test('doesnt support timeShift', () => {
+      const esql = callToESQL({
+        sourceField: 'bytes',
+        operationType: 'count',
+        timeShift: '1m',
+      });
+      expect(esql).toBeUndefined();
+    });
+
+    test('returns COUNT(*) for document fields', () => {
+      const esql = callToESQL({
+        operationType: 'count',
+      });
+      expect(esql).toBe('COUNT(*)');
+    });
+
+    test('returns COUNT(field) for non-document fields', () => {
+      const esql = callToESQL({
+        sourceField: 'bytes',
+        operationType: 'count',
+      });
+      expect(esql).toBe('COUNT(`bytes`)');
     });
   });
 });

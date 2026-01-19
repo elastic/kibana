@@ -11,15 +11,13 @@ import React, { useContext, useCallback, useEffect, memo, useMemo } from 'react'
 import type { KeyboardEvent, ReactElement } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly } from '@elastic/eui';
-import {
+import type {
   DragDropIdentifier,
   DropIdentifier,
-  nextValidDropTarget,
-  ReorderContext,
   RegisteredDropTargets,
   DragDropAction,
-  useDragDropContext,
 } from './providers';
+import { nextValidDropTarget, ReorderContext, useDragDropContext } from './providers';
 import { REORDER_ITEM_MARGIN } from './constants';
 import './sass/draggable.scss';
 
@@ -345,20 +343,7 @@ const DraggableImpl = memo(function DraggableImpl({
     hoveredDropTarget.dropType !== 'reorder';
 
   return (
-    <div
-      className={classNames(className, 'domDraggable', {
-        'domDraggable_active--move': draggedItemProps && dragType === 'move' && !keyboardMode,
-        'domDraggable_dragover_keyboard--move': shouldShowGhostImageInstead,
-        'domDraggable_active--copy': draggedItemProps && dragType === 'copy' && !keyboardMode,
-        'domDraggable_dragover_keyboard--copy':
-          keyboardMode && draggedItemProps && hoveredDropTarget,
-      })}
-      data-test-subj={dataTestSubj || `${dataTestSubjPrefix}_domDraggable_${value.humanData.label}`}
-      draggable
-      onDragEnd={dragEnd}
-      onDragStart={dragStart}
-      onMouseDown={removeSelection}
-    >
+    <>
       <EuiScreenReaderOnly showOnFocus>
         <button
           aria-label={value.humanData.label}
@@ -402,8 +387,25 @@ const DraggableImpl = memo(function DraggableImpl({
           onKeyUp={modifierHandlers.onKeyUp}
         />
       </EuiScreenReaderOnly>
-      {children}
-    </div>
+      <div
+        className={classNames(className, 'domDraggable', {
+          'domDraggable_active--move': draggedItemProps && dragType === 'move' && !keyboardMode,
+          'domDraggable_dragover_keyboard--move': shouldShowGhostImageInstead,
+          'domDraggable_active--copy': draggedItemProps && dragType === 'copy' && !keyboardMode,
+          'domDraggable_dragover_keyboard--copy':
+            keyboardMode && draggedItemProps && hoveredDropTarget,
+        })}
+        data-test-subj={
+          dataTestSubj || `${dataTestSubjPrefix}_domDraggable_${value.humanData.label}`
+        }
+        draggable
+        onDragEnd={dragEnd}
+        onDragStart={dragStart}
+        onMouseDown={removeSelection}
+      >
+        {children}
+      </div>
+    </>
   );
 });
 

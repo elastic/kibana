@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import type { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type Oas from 'oas';

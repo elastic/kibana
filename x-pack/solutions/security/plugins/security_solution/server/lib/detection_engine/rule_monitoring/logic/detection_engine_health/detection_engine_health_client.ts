@@ -6,6 +6,7 @@
  */
 
 import type { ISavedObjectsImporter, Logger } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { ExtMeta } from '../utils/console_logging';
 
@@ -14,6 +15,7 @@ import type {
   ClusterHealthSnapshot,
   RuleHealthParameters,
   RuleHealthSnapshot,
+  RuleHealthStats,
   SpaceHealthParameters,
   SpaceHealthSnapshot,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
@@ -23,10 +25,12 @@ import type { IRuleObjectsHealthClient } from './rule_objects/rule_objects_healt
 import type { IRuleSpacesClient } from './rule_spaces/rule_spaces_client';
 import type { IDetectionEngineHealthClient } from './detection_engine_health_client_interface';
 import { installAssetsForRuleMonitoring } from './assets/install_assets_for_rule_monitoring';
+import { getGapsSummaryForRule } from './gaps/get_gaps_summary_for_rule';
 
 export const createDetectionEngineHealthClient = (
   ruleSpacesClient: IRuleSpacesClient,
   ruleObjectsHealthClient: IRuleObjectsHealthClient,
+  rulesClient: RulesClientApi,
   eventLogHealthClient: IEventLogHealthClient,
   savedObjectsImporter: ISavedObjectsImporter,
   logger: Logger
@@ -43,9 +47,18 @@ export const createDetectionEngineHealthClient = (
           const statsBasedOnRuleObjects = await ruleObjectsHealthClient.calculateRuleHealth(args);
           const statsBasedOnEventLog = await eventLogHealthClient.calculateRuleHealth(args);
 
+          const gapsSummary = await getGapsSummaryForRule({
+            rulesClient,
+            ruleId: args.rule_id,
+            interval: args.interval,
+          });
+          const statsOverInterval: RuleHealthStats = {
+            ...statsBasedOnEventLog.stats_over_interval,
+            gap_summary: gapsSummary,
+          };
           return {
             state_at_the_moment: statsBasedOnRuleObjects.state_at_the_moment,
-            stats_over_interval: statsBasedOnEventLog.stats_over_interval,
+            stats_over_interval: statsOverInterval,
             history_over_interval: statsBasedOnEventLog.history_over_interval,
             debug: {
               ...statsBasedOnRuleObjects.debug,

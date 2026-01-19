@@ -9,6 +9,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useInstallProductDoc } from './use_install_product_doc';
 import { useAssistantContext } from '../../../..';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 jest.mock('../../../..', () => ({
   useAssistantContext: jest.fn(),
@@ -39,7 +40,7 @@ describe('useInstallProductDoc', () => {
       wrapper: TestProviders,
     });
 
-    result.current.mutate();
+    result.current.mutate(defaultInferenceEndpoints.ELSER);
     await waitFor(() => result.current.isSuccess);
 
     expect(mockAddSuccess).toHaveBeenCalledWith(
@@ -54,7 +55,7 @@ describe('useInstallProductDoc', () => {
       wrapper: TestProviders,
     });
 
-    result.current.mutate();
+    result.current.mutate(defaultInferenceEndpoints.ELSER);
     await waitFor(() => result.current.isError);
 
     expect(mockAddError).toHaveBeenCalledWith(

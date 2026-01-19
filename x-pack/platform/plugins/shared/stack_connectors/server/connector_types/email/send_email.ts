@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 // info on nodemailer: https://nodemailer.com/about/
+import type { SentMessageInfo } from 'nodemailer';
 import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
-import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
-import {
-  getNodeSSLOptions,
-  getSSLSettingsFromConfig,
-} from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
-import {
+import type { Logger } from '@kbn/core/server';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { CustomHostSettings, ProxySettings } from '@kbn/actions-utils';
+import { getNodeSSLOptions, getSSLSettingsFromConfig } from '@kbn/actions-utils';
+import type {
   ConnectorUsageCollector,
   ConnectorTokenClientContract,
-  ProxySettings,
 } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import type { Attachment } from '@kbn/connector-schemas/email';
+import { getDeleteTokenAxiosInterceptor } from '@kbn/actions-plugin/server/lib';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
 
@@ -37,6 +36,7 @@ export interface SendEmailOptions {
   content: Content;
   hasAuth: boolean;
   configurationUtilities: ActionsConfigurationUtilities;
+  attachments?: Attachment[];
 }
 
 // config validation ensures either service is set or host/port are set
@@ -75,6 +75,7 @@ export async function sendEmail(
 ): Promise<unknown> {
   const { transport, content } = options;
   const { message, messageHTML } = content;
+  const attachments = options.attachments ?? [];
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
 
@@ -84,10 +85,17 @@ export async function sendEmail(
       options,
       renderedMessage,
       connectorTokenClient,
-      connectorUsageCollector
+      connectorUsageCollector,
+      attachments
     );
   } else {
-    return await sendEmailWithNodemailer(logger, options, renderedMessage, connectorUsageCollector);
+    return await sendEmailWithNodemailer(
+      logger,
+      options,
+      renderedMessage,
+      connectorUsageCollector,
+      attachments
+    );
   }
 }
 
@@ -97,7 +105,8 @@ export async function sendEmailWithExchange(
   options: SendEmailOptions,
   messageHTML: string,
   connectorTokenClient: ConnectorTokenClientContract,
-  connectorUsageCollector: ConnectorUsageCollector
+  connectorUsageCollector: ConnectorUsageCollector,
+  attachments: Attachment[]
 ): Promise<unknown> {
   const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
@@ -115,7 +124,6 @@ export async function sendEmailWithExchange(
     credentials: {
       config: {
         clientId: clientId as string,
-        tenantId: tenantId as string,
       },
       secrets: {
         clientSecret: clientSecret as string,
@@ -135,35 +143,19 @@ export async function sendEmailWithExchange(
     Authorization: accessToken,
   };
 
+  const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
+    connectorTokenClient,
+    connectorId,
+  });
   const axiosInstance = axios.create();
-  axiosInstance.interceptors.response.use(
-    async (response: AxiosResponse) => {
-      // Look for 4xx errors that indicate something is wrong with the request
-      // We don't know for sure that it is an access token issue but remove saved
-      // token just to be sure
-      if (response.status >= 400 && response.status < 500) {
-        await connectorTokenClient.deleteConnectorTokens({ connectorId });
-      }
-      return response;
-    },
-    async (error) => {
-      const statusCode = error?.response?.status;
-
-      // Look for 4xx errors that indicate something is wrong with the request
-      // We don't know for sure that it is an access token issue but remove saved
-      // token just to be sure
-      if (statusCode >= 400 && statusCode < 500) {
-        await connectorTokenClient.deleteConnectorTokens({ connectorId });
-      }
-      return Promise.reject(error);
-    }
-  );
+  axiosInstance.interceptors.response.use(onFulfilled, onRejected);
 
   return await sendEmailGraphApi(
     {
       options,
       headers,
       messageHTML,
+      attachments,
     },
     logger,
     configurationUtilities,
@@ -172,12 +164,15 @@ export async function sendEmailWithExchange(
   );
 }
 
+export type SentMessageInfoResult = SentMessageInfo & { message?: unknown };
+
 // send an email using nodemailer
 async function sendEmailWithNodemailer(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorUsageCollector: ConnectorUsageCollector
+  connectorUsageCollector: ConnectorUsageCollector,
+  attachments: Attachment[]
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
@@ -194,6 +189,7 @@ async function sendEmailWithNodemailer(
     subject,
     html: messageHTML,
     text: message,
+    ...(attachments.length > 0 && { attachments }),
   };
 
   // The transport options do not seem to be exposed as a type, and we reference
@@ -201,7 +197,7 @@ async function sendEmailWithNodemailer(
   const transportConfig = getTransportConfig(configurationUtilities, logger, transport, hasAuth);
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
   connectorUsageCollector.addRequestBodyBytes(undefined, email);
-  const result = await nodemailerTransport.sendMail(email);
+  const result: SentMessageInfoResult = await nodemailerTransport.sendMail(email);
 
   if (service === JSON_TRANSPORT_SERVICE) {
     try {

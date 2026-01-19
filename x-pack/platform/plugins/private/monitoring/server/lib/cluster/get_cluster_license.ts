@@ -7,8 +7,8 @@
 
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
-import { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
@@ -28,16 +28,14 @@ export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
     size: 1,
     ignore_unavailable: true,
     filter_path: ['hits.hits._source.license'],
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        type: dataset,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        clusterUuid,
-        metric: ElasticsearchMetric.getMetricFields(),
-      }),
-    },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type: dataset,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      clusterUuid,
+      metric: ElasticsearchMetric.getMetricFields(),
+    }),
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

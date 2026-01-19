@@ -6,22 +6,19 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { useDeletePropertyAction } from './use_delete_property_action';
+import { TestProviders } from '../../../common/mock';
 
 describe('UserActionPropertyActions', () => {
-  let appMockRender: AppMockRenderer;
   const onDelete = jest.fn();
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('init', async () => {
     const { result } = renderHook(() => useDeletePropertyAction({ onDelete }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(result.current.showDeletionModal).toBe(false);
@@ -29,7 +26,7 @@ describe('UserActionPropertyActions', () => {
 
   it('opens the modal', async () => {
     const { result } = renderHook(() => useDeletePropertyAction({ onDelete }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -41,7 +38,7 @@ describe('UserActionPropertyActions', () => {
 
   it('closes the modal', async () => {
     const { result } = renderHook(() => useDeletePropertyAction({ onDelete }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -59,7 +56,7 @@ describe('UserActionPropertyActions', () => {
 
   it('calls onDelete on confirm', async () => {
     const { result } = renderHook(() => useDeletePropertyAction({ onDelete }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

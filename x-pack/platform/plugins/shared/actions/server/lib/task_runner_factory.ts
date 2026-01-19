@@ -8,14 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import {
   createTaskRunError,
-  RunContext,
   TaskErrorSource,
   throwRetryableError,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { type IBasePath, type Headers, type FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -26,8 +26,8 @@ import type {
   SavedObjectReference,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { ActionExecutorContract } from './action_executor';
-import {
+import type { ActionExecutorContract } from './action_executor';
+import type {
   ActionTaskExecutorParams,
   ActionTaskParams,
   ActionTypeExecutorResult,
@@ -35,14 +35,13 @@ import {
   SpaceIdToNamespaceFunction,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import {
-  ActionExecutionSourceType,
-  asEmptySource,
-  asSavedObjectExecutionSource,
-} from './action_execution_source';
-import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
+import type { ActionExecutionSourceType } from './action_execution_source';
+import { asEmptySource, asSavedObjectExecutionSource } from './action_execution_source';
+import type { RelatedSavedObjects } from './related_saved_objects';
+import { validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
-import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
+import type { InMemoryMetrics } from '../monitoring';
+import { IN_MEMORY_METRICS } from '../monitoring';
 import { ActionTypeDisabledError } from './errors';
 
 export interface TaskRunnerContext {

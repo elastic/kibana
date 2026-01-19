@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import {
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+} from '@kbn/cloud-security-posture-common/constants';
 
-import { AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap, PostureTypes } from './types_old';
+import type {
+  AwsCredentialsTypeFieldMap,
+  GcpCredentialsTypeFieldMap,
+  PostureTypes,
+} from './types_old';
 
 export const CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH = '/internal/cloud_security_posture/';
 
@@ -32,25 +39,18 @@ export const CSP_BENCHMARK_RULES_BULK_ACTION_API_CURRENT_VERSION = '1';
 export const GET_DETECTION_RULE_ALERTS_STATUS_PATH =
   '/internal/cloud_security_posture/detection_engine_rules/alerts/_status';
 export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
-export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
-export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
+
 export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';
-export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
-  'logs-cloud_security_posture.findings_latest-default';
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
-
-export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
-export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX =
-  'security_solution_cdr_latest_vulnerabilities';
 
 export const VULNERABILITIES_INDEX_NAME = 'logs-cloud_security_posture.vulnerabilities';
 export const VULNERABILITIES_INDEX_PATTERN = 'logs-cloud_security_posture.vulnerabilities-default*';
@@ -76,13 +76,6 @@ export const RULE_FAILED = `failed`;
 export const POSTURE_TYPE_ALL = 'all';
 
 export const CSPM_FINDINGS_STATS_INTERVAL = 5;
-
-// A mapping of in-development features to their status. These features should be hidden from users but can be easily
-// activated via a simple code change in a single location.
-export const INTERNAL_FEATURE_FLAGS = {
-  showManageRulesMock: false,
-  showFindingFlyoutEvidence: true,
-} as const;
 
 export const CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE = 'csp-rule-template';
 export const INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE = 'cloud-security-posture-settings';
@@ -129,6 +122,7 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
 };
 
 export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
+  cloud_connectors: ['role_arn', 'aws.credentials.external_id'],
   assume_role: ['role_arn'],
   direct_access_keys: ['access_key_id', 'secret_access_key'],
   temporary_keys: ['access_key_id', 'secret_access_key', 'session_token'],
@@ -168,10 +162,8 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
 };
 
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
+export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 
-export const ORGANIZATION_ACCOUNT = 'organization-account';
-export const SINGLE_ACCOUNT = 'single-account';
+export const CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION = '1.0.0';
 
-export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
-// Cloud Credentials Template url was implemented in 1.10.0-preview01. See PR - https://github.com/elastic/integrations/pull/9828
-export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';
+export const LOCAL_STORAGE_INTEGRATIONS_PAGE_ROUTE_CALLOUT_KEY = 'IntegrationsPageRouteCalloutKey';

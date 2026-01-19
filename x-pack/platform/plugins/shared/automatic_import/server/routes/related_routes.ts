@@ -10,15 +10,9 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { RELATED_GRAPH_PATH, RelatedRequestBody, RelatedResponse } from '../../common';
-import {
-  ACTIONS_AND_CONNECTORS_ALL_ROLE,
-  FLEET_ALL_ROLE,
-  INTEGRATIONS_ALL_ROLE,
-  ROUTE_HANDLER_TIMEOUT,
-} from '../constants';
+import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
 import type { AutomaticImportRouteHandlerContext } from '../plugin';
-import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
@@ -35,26 +29,22 @@ export function registerRelatedRoutes(router: IRouter<AutomaticImportRouteHandle
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
       },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE],
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            requiredPrivileges: [
-              FLEET_ALL_ROLE,
-              INTEGRATIONS_ALL_ROLE,
-              ACTIONS_AND_CONNECTORS_ALL_ROLE,
-            ],
-          },
-        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(RelatedRequestBody),
           },
         },
       },
-      withAvailability(async (context, req, res): Promise<IKibanaResponse<RelatedResponse>> => {
+      withAvailability(async (context, request, res): Promise<IKibanaResponse<RelatedResponse>> => {
         const {
           packageName,
           dataStreamName,
@@ -62,31 +52,33 @@ export function registerRelatedRoutes(router: IRouter<AutomaticImportRouteHandle
           samplesFormat,
           currentPipeline,
           langSmithOptions,
-        } = req.body;
+        } = request.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         const { getStartServices, logger } = await context.automaticImport;
-        const [, { actions: actionsPlugin }] = await getStartServices();
+        const [, startPlugins] = await getStartServices();
+
         try {
-          const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
-          const connector = await actionsClient.get({ id: req.body.connectorId });
+          const inference = await startPlugins.inference;
+          const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+          const connectorId = request.body.connectorId;
 
-          const abortSignal = getRequestAbortedSignal(req.events.aborted$);
-
-          const actionTypeId = connector.actionTypeId;
-          const llmType = getLLMType(actionTypeId);
-          const llmClass = getLLMClass(llmType);
-
-          const model = new llmClass({
-            actionsClient,
-            connectorId: connector.id,
-            logger,
-            llmType,
-            model: connector.config?.defaultModel,
-            temperature: 0.05,
-            maxTokens: 4096,
-            signal: abortSignal,
-            streaming: false,
+          const model = await inference.getChatModel({
+            request,
+            connectorId,
+            chatModelOptions: {
+              // not passing specific `model`, we'll always use the connector default model
+              // temperature may need to be parametrized in the future
+              temperature: 0.05,
+              // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
+              maxRetries: 1,
+              // Disable streaming explicitly
+              disableStreaming: true,
+              // Set a hard limit of 50 concurrent requests
+              maxConcurrency: 50,
+              telemetryMetadata: { pluginId: 'automatic_import' },
+              signal: abortSignal,
+            },
           });
 
           const parameters = {

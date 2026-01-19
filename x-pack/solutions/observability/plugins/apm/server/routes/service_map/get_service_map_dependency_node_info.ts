@@ -7,6 +7,12 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  calculateThroughputWithRange,
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import { getFailedTransactionRateTimeSeries } from '../../lib/helpers/transaction_error_rate';
 import { ApmDocumentType } from '../../../common/document_type';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -17,14 +23,8 @@ import type { NodeStats } from '../../../common/service_map';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
-import {
-  calculateFailedTransactionRate,
-  getFailedTransactionRateTimeSeries,
-  getOutcomeAggregation,
-} from '../../lib/helpers/transaction_error_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 interface Options {
@@ -71,32 +71,30 @@ function getServiceMapDependencyNodeInfoForTimeRange({
       apm: {
         events: [ProcessorEvent.metric],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-              {
-                term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName },
-              },
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...environmentQuery(environment),
-            ],
-          },
-        },
-        aggs: {
-          ...subAggs,
-          timeseries: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: intervalString,
-              min_doc_count: 0,
-              extended_bounds: { min: startWithOffset, max: endWithOffset },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+            {
+              term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName },
             },
-            aggs: subAggs,
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...environmentQuery(environment),
+          ],
+        },
+      },
+      aggs: {
+        ...subAggs,
+        timeseries: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
+          aggs: subAggs,
         },
       },
     });

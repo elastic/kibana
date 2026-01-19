@@ -17,6 +17,7 @@ import {
   EuiCallOut,
   EuiConfirmModal,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -45,6 +46,7 @@ interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'versio
   isUpgradingPackagePolicies?: boolean;
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  isDisabled?: boolean;
 }
 
 /*
@@ -77,7 +79,10 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   title,
   version,
   startServices,
+  isDisabled = false,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const history = useHistory();
   const { getPath } = useLink();
 
@@ -253,11 +258,14 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
         defaultMessage: 'Upgrade {packageName} and policies',
         values: { packageName: title },
       })}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
     >
       <>
         {conflictCount && conflictCount > 0 ? (
           <>
             <EuiCallOut
+              announceOnMount
               color="warning"
               iconType="warning"
               title={i18n.translate(
@@ -324,7 +332,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
             }
             data-test-subj="updatePackageBtn"
-            isDisabled={!canUpgradePackages}
+            isDisabled={isDisabled || !canUpgradePackages}
           >
             <FormattedMessage
               id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"

@@ -11,12 +11,12 @@ import { ElasticsearchMetric } from '../../metrics';
 import { getDefaultNodeFromId, isDefaultNode } from './get_default_node_from_id';
 import { calculateNodeType } from './calculate_node_type';
 import { getNodeTypeClassLabel } from './get_node_type_class_label';
-import {
+import type {
   ElasticsearchSource,
   ElasticsearchResponse,
   ElasticsearchLegacySource,
 } from '../../../../common/types/es';
-import { LegacyRequest } from '../../../types';
+import type { LegacyRequest } from '../../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
@@ -124,19 +124,17 @@ export function getNodeSummary(
     index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        type: dataset,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        clusterUuid,
-        metric,
-        filters,
-      }),
-    },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type: dataset,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      clusterUuid,
+      metric,
+      filters,
+    }),
   };
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then(

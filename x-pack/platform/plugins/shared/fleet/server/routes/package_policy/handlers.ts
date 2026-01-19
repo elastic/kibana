@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
-import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
+import { groupBy, isEmpty, isEqual, keyBy, uniq } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -43,7 +43,12 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses, inputsFormat } from '../../../common/constants';
-import { PackagePolicyNotFoundError, PackagePolicyRequestError } from '../../errors';
+import {
+  PackagePolicyNotFoundError,
+  PackagePolicyRequestError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
+  FleetError,
+} from '../../errors';
 import {
   getInstallation,
   getInstallations,
@@ -56,12 +61,8 @@ import {
   packagePolicyToSimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 
-import type {
-  SimplifiedInputs,
-  SimplifiedPackagePolicy,
-} from '../../../common/services/simplified_package_policy_helper';
-
-import { validateAgentlessInputs } from '../../../common/services/agentless_policy_helper';
+import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import { runWithCache } from '../../services/epm/packages/cache';
 
 import {
   isSimplifiedCreatePackagePolicyRequest,
@@ -71,6 +72,8 @@ import {
 } from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
+
+const deduplicateIds = (ids: string[]) => uniq(ids);
 
 export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
@@ -111,7 +114,8 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
-  const { ids, ignoreMissing } = request.body;
+  const ignoreMissing = request.body.ignoreMissing;
+  const ids = deduplicateIds(request.body.ids);
 
   try {
     const items = await packagePolicyService.getByIDs(soClient, ids, {
@@ -228,10 +232,23 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { force, id, package: pkg, ...newPolicy } = request.body;
+  if ('spaceIds' in newPolicy) {
+    delete newPolicy.spaceIds;
+  }
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   let wasPackageAlreadyInstalled = false;
 
   const spaceId = fleetContext.spaceId;
+
+  if (
+    appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI &&
+    request.body.supports_agentless
+  ) {
+    throw new FleetError(
+      'To create agentless package policies, use the Fleet agentless policies API.'
+    );
+  }
+
   try {
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
@@ -260,6 +277,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       savedObjectsClient: soClient,
       pkgName: pkg!.name,
     });
+
     wasPackageAlreadyInstalled = installation?.install_status === 'installed';
 
     // Create package policy
@@ -288,7 +306,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   } catch (error) {
     appContextService
       .getLogger()
-      .error(`Error while creating package policy due to error: ${error.message}`);
+      .error(`Error while creating package policy due to error: ${error.message}`, { error });
     if (!wasPackageAlreadyInstalled) {
       const installation = await getInstallation({
         savedObjectsClient: soClient,
@@ -305,6 +323,29 @@ export const createPackagePolicyHandler: FleetRequestHandler<
           esClient,
         });
       }
+    }
+
+    if (error instanceof CustomPackagePolicyNotAllowedForAgentlessError) {
+      // Agentless deployments have 1:1 agent to integration policies
+      // We delete the associated agent policy previously created.
+      const agentPolicyId = newPolicy.policy_ids?.[0];
+
+      if (agentPolicyId) {
+        appContextService
+          .getLogger()
+          .info(
+            `Deleting agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
+          );
+
+        await agentPolicyService.delete(soClient, esClient, agentPolicyId).catch(() => {
+          appContextService
+            .getLogger()
+            .error(
+              `Failed to delete agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
+            );
+        });
+      }
+      throw error;
     }
 
     if (error.statusCode) {
@@ -366,10 +407,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         pkgInfo,
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
-      validateAgentlessInputs(
-        body?.inputs as SimplifiedInputs,
-        body?.supports_agentless || newData.supports_agentless
-      );
     } else {
       // complete request
       const { overrides, ...restOfBody } = body as TypeOf<
@@ -393,16 +430,16 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
         supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
+        supports_cloud_connector:
+          restOfBody.supports_cloud_connector ?? packagePolicy.supports_cloud_connector,
+        cloud_connector_id: restOfBody.cloud_connector_id ?? packagePolicy.cloud_connector_id,
       } as NewPackagePolicy;
 
       if (overrides) {
         newData.overrides = overrides;
       }
     }
-    validateAgentlessInputs(
-      newData.inputs,
-      newData.supports_agentless || packagePolicy.supports_agentless
-    );
+
     newData.inputs = alignInputsAndStreams(newData.inputs);
 
     if (
@@ -456,11 +493,12 @@ export const deletePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
 
   const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
     soClient,
     esClient,
-    request.body.packagePolicyIds,
+    packagePolicyIds,
     { user, force: request.body.force, skipUnassignFromAgentPolicies: request.body.force },
     context,
     request
@@ -515,10 +553,11 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
+  const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,
     esClient,
-    request.body.packagePolicyIds,
+    packagePolicyIds,
     { user }
   );
 
@@ -543,12 +582,13 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
   const soClient = (await context.core).savedObjects.client;
 
   const body: UpgradePackagePolicyDryRunResponse = [];
-  const { packagePolicyIds } = request.body;
-
-  for (const id of packagePolicyIds) {
-    const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
-    body.push(result);
-  }
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
+  await runWithCache(async () => {
+    for (const id of packagePolicyIds) {
+      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
+      body.push(result);
+    }
+  });
 
   const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
 

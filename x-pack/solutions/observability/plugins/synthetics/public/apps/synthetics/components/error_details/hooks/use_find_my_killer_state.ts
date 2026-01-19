@@ -8,7 +8,7 @@
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
@@ -28,34 +28,32 @@ export function useFindMyKillerState() {
     {
       index: SYNTHETICS_INDEX_PATTERN,
 
-      body: {
-        // TODO: remove this once we have a better way to handle this mapping
-        runtime_mappings: {
-          'state.ends.id': {
-            type: 'keyword',
-          },
+      // TODO: remove this once we have a better way to handle this mapping
+      runtime_mappings: {
+        'state.ends.id': {
+          type: 'keyword',
         },
-        size: 1,
-        query: {
-          bool: {
-            filter: [
-              FINAL_SUMMARY_FILTER,
-              EXCLUDE_RUN_ONCE_FILTER,
-              {
-                term: {
-                  'state.ends.id': errorStateId,
-                },
-              },
-              {
-                term: {
-                  config_id: monitorId,
-                },
-              },
-            ],
-          },
-        },
-        sort: [{ '@timestamp': 'desc' }],
       },
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            FINAL_SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
+            {
+              term: {
+                'state.ends.id': errorStateId,
+              },
+            },
+            {
+              term: {
+                config_id: monitorId,
+              },
+            },
+          ],
+        },
+      },
+      sort: [{ '@timestamp': 'desc' }],
     },
     [lastRefresh, monitorId, dateRangeStart, dateRangeEnd],
     { name: 'getStateWhichEndTheState' }

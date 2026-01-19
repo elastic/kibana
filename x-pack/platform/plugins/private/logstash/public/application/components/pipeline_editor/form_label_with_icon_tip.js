@@ -14,7 +14,7 @@ export function FormLabelWithIconTip({ formRowLabelText, formRowTooltipText }) {
     <div>
       <span>{formRowLabelText}</span>
       &nbsp;
-      <EuiIconTip content={formRowTooltipText} size="s" type="questionInCircle" />
+      <EuiIconTip content={formRowTooltipText} size="s" type="question" />
     </div>
   );
 }

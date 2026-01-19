@@ -7,4 +7,5 @@
 
 export { AssistantAvatar, type AssistantAvatarProps } from './avatar';
 export { AssistantBeacon, type AssistantBeaconProps } from './beacon';
-export { AssistantIcon, type AssistantIconProps } from './icon';
+export { useBeaconSize } from './beacon.styles';
+export { AssistantIcon, RobotIcon, type AssistantIconProps } from './icon';

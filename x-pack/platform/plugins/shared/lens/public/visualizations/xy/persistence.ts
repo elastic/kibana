@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
-import { cloneDeep } from 'lodash';
 
-import { LegendValue } from '@elastic/charts';
-import { layerTypes } from '../../../common/layer_types';
-import { AnnotationGroups } from '../../types';
-import {
+import type { AnnotationGroups } from '@kbn/lens-common';
+import { LENS_LAYER_TYPES } from '@kbn/lens-common';
+import type {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
@@ -26,15 +23,10 @@ import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualizati
 import { nonNullable } from '../../utils';
 import { annotationLayerHasUnsavedChanges } from './state_helpers';
 
-export const isPersistedByReferenceAnnotationsLayer = (
+const isPersistedByReferenceAnnotationsLayer = (
   layer: XYPersistedAnnotationLayerConfig
 ): layer is XYPersistedByReferenceAnnotationLayerConfig =>
   isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'byReference';
-
-export const isPersistedLinkedByValueAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedLinkedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'linked';
 
 /**
  * This is the type of hybrid layer we get after the user has made a change to
@@ -84,82 +76,95 @@ export type XYPersistedState = Omit<XYState, 'layers'> & {
   valuesInLegend?: boolean;
 };
 
-export function convertToRuntime(
+export function convertPersistedState(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ) {
-  let newState = cloneDeep(injectReferences(state, annotationGroups, references));
-  newState = convertToLegendStats(newState);
-  return newState;
+  return structuredClone(injectReferences(state, annotationGroups, references));
 }
 
 export function convertToPersistable(state: XYState) {
   const persistableState: XYPersistedState = state;
-  const savedObjectReferences: SavedObjectReference[] = [];
+  const references: Reference[] = [];
   const persistableLayers: XYPersistedLayerConfig[] = [];
 
   persistableState.layers.forEach((layer) => {
+    // anything but an annotation can just be persisted as is
     if (!isAnnotationsLayer(layer)) {
       persistableLayers.push(layer);
-    } else {
-      if (isByReferenceAnnotationsLayer(layer)) {
-        const referenceName = `ref-${uuidv4()}`;
-        savedObjectReferences.push({
-          type: EVENT_ANNOTATION_GROUP_TYPE,
-          id: layer.annotationGroupId,
-          name: referenceName,
-        });
-
-        if (!annotationLayerHasUnsavedChanges(layer)) {
-          const persistableLayer: XYPersistedByReferenceAnnotationLayerConfig = {
-            persistanceType: 'byReference',
-            layerId: layer.layerId,
-            layerType: layer.layerType,
-            annotationGroupRef: referenceName,
-          };
-
-          persistableLayers.push(persistableLayer);
-        } else {
-          const persistableLayer: XYPersistedLinkedByValueAnnotationLayerConfig = {
-            persistanceType: 'linked',
-            cachedMetadata: layer.cachedMetadata || {
-              title: layer.__lastSaved.title,
-              description: layer.__lastSaved.description,
-              tags: layer.__lastSaved.tags,
-            },
-            layerId: layer.layerId,
-            layerType: layer.layerType,
-            annotationGroupRef: referenceName,
-            annotations: layer.annotations,
-            ignoreGlobalFilters: layer.ignoreGlobalFilters,
-          };
-          persistableLayers.push(persistableLayer);
-
-          savedObjectReferences.push({
-            type: 'index-pattern',
-            id: layer.indexPatternId,
-            name: getLayerReferenceName(layer.layerId),
-          });
-        }
-      } else {
-        const { indexPatternId, ...persistableLayer } = layer;
-        savedObjectReferences.push({
-          type: 'index-pattern',
-          id: indexPatternId,
-          name: getLayerReferenceName(layer.layerId),
-        });
-        persistableLayers.push({ ...persistableLayer, persistanceType: 'byValue' });
-      }
+      return;
     }
+    // a by value annotation layer can be persisted with some config tweak
+    if (!isByReferenceAnnotationsLayer(layer)) {
+      const { indexPatternId, ...persistableLayer } = layer;
+      references.push({
+        type: 'index-pattern',
+        id: indexPatternId,
+        name: getLayerReferenceName(layer.layerId),
+      });
+      persistableLayers.push({ ...persistableLayer, persistanceType: 'byValue' });
+      return;
+    }
+
+    /*
+     * by reference annotation layer needs to be handled carefully
+     */
+
+    // make this id stable so that it won't retrigger all the time a change diff
+    const referenceName = `ref-${layer.layerId}`;
+    references.push({
+      type: EVENT_ANNOTATION_GROUP_TYPE,
+      id: layer.annotationGroupId,
+      name: referenceName,
+    });
+
+    // if there's no divergence from the library, it can be persisted without much ado
+    if (!annotationLayerHasUnsavedChanges(layer)) {
+      const persistableLayer: XYPersistedByReferenceAnnotationLayerConfig = {
+        persistanceType: 'byReference',
+        layerId: layer.layerId,
+        layerType: layer.layerType,
+        annotationGroupRef: referenceName,
+      };
+
+      persistableLayers.push(persistableLayer);
+      return;
+    }
+    // this is the case where the by reference diverged from library
+    // so it needs to persist some extra metadata
+    const persistableLayer: XYPersistedLinkedByValueAnnotationLayerConfig = {
+      persistanceType: 'linked',
+      cachedMetadata: layer.cachedMetadata || {
+        title: layer.__lastSaved.title,
+        description: layer.__lastSaved.description,
+        tags: layer.__lastSaved.tags,
+      },
+      layerId: layer.layerId,
+      layerType: layer.layerType,
+      annotationGroupRef: referenceName,
+      annotations: layer.annotations,
+      ignoreGlobalFilters: layer.ignoreGlobalFilters,
+    };
+    persistableLayers.push(persistableLayer);
+
+    references.push({
+      type: 'index-pattern',
+      id: layer.indexPatternId,
+      name: getLayerReferenceName(layer.layerId),
+    });
   });
-  return { savedObjectReferences, state: { ...persistableState, layers: persistableLayers } };
+
+  return {
+    references,
+    state: { ...persistableState, layers: persistableLayers },
+  };
 }
 
 export const isPersistedAnnotationsLayer = (
   layer: XYPersistedLayerConfig
 ): layer is XYPersistedAnnotationLayerConfig =>
-  layer.layerType === layerTypes.ANNOTATIONS && !('indexPatternId' in layer);
+  layer.layerType === LENS_LAYER_TYPES.ANNOTATIONS && !('indexPatternId' in layer);
 
 export const isPersistedByValueAnnotationsLayer = (
   layer: XYPersistedLayerConfig
@@ -178,7 +183,7 @@ function needsInjectReferences(state: XYPersistedState | XYState): state is XYPe
 function injectReferences(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ): XYState {
   if (!references || !references.length) {
     return state as XYState;
@@ -247,7 +252,7 @@ function injectReferences(
               ...commonProps,
               ignoreGlobalFilters: annotationGroup.ignoreGlobalFilters,
               indexPatternId: annotationGroup.indexPatternId,
-              annotations: cloneDeep(annotationGroup.annotations),
+              annotations: structuredClone(annotationGroup.annotations),
             };
           } else {
             // a linked by-value layer gets settings from visualization state while
@@ -256,7 +261,7 @@ function injectReferences(
               ...commonProps,
               ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
               indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
-              annotations: cloneDeep(persistedLayer.annotations),
+              annotations: structuredClone(persistedLayer.annotations),
               cachedMetadata: persistedLayer.cachedMetadata,
             };
           }
@@ -266,26 +271,4 @@ function injectReferences(
       })
       .filter(nonNullable),
   };
-}
-
-function convertToLegendStats(state: XYState & { valuesInLegend?: unknown }) {
-  if ('valuesInLegend' in state) {
-    const valuesInLegend = state.valuesInLegend;
-    delete state.valuesInLegend;
-    const result: XYState = {
-      ...state,
-      legend: {
-        ...state.legend,
-        legendStats: [
-          ...new Set([
-            ...(valuesInLegend ? [LegendValue.CurrentAndLastValue] : []),
-            ...(state.legend.legendStats || []),
-          ]),
-        ],
-      },
-    };
-
-    return result;
-  }
-  return state;
 }

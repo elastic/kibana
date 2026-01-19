@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { useContext } from 'react';
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 
-import { CertResult, GetCertsParams, Ping } from '../../../../common/runtime_types';
+import type { CertResult, GetCertsParams, Ping } from '../../../../common/runtime_types';
 
 import { selectDynamicSettings } from '../../state/selectors';
 import {
@@ -45,7 +45,7 @@ export const useCertSearch = ({
 
   const esParams = createEsParams({
     index: settings.settings?.heartbeatIndices,
-    body: searchBody,
+    ...searchBody,
   });
 
   const { data: result, loading } = useEsSearch<Ping, typeof esParams>(

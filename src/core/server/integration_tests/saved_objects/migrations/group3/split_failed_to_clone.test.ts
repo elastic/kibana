@@ -8,6 +8,7 @@
  */
 
 import { join } from 'path';
+import { setTimeout as timer } from 'timers/promises';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { CloneIndexParams } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
 
@@ -18,20 +19,18 @@ import {
   type KibanaMigratorTestKit,
   defaultKibanaTaskIndex,
   defaultKibanaIndex,
-} from '../kibana_migrator_test_kit';
-import { BASELINE_TEST_ARCHIVE_1K } from '../kibana_migrator_archive_utils';
-import {
-  getRelocatingMigratorTestKit,
-  kibanaSplitIndex,
-} from '../kibana_migrator_test_kit.fixtures';
-import { delay } from '../test_utils';
+} from '@kbn/migrator-test-kit';
+import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
+import { getRelocatingMigratorTestKit, kibanaSplitIndex } from '@kbn/migrator-test-kit/fixtures';
 import '../jest_matchers';
 
 // mock clone_index from src/core/packages/saved-objects
 jest.mock('@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index', () => {
+  const { setTimeout: actualTimer } = jest.requireActual('timers/promises');
   const realModule = jest.requireActual(
     '@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index'
   );
+
   return {
     ...realModule,
     cloneIndex: (params: CloneIndexParams) => async () => {
@@ -39,7 +38,7 @@ jest.mock('@kbn/core-saved-objects-migration-server-internal/src/actions/clone_i
       // .kibana_migrator so that .kibana_migrator can completely finish the migration before we
       // fail
       if (!params.target.includes('tasks') && !params.target.includes('new'))
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await actualTimer(2_000);
       return realModule.cloneIndex(params)();
     },
   };
@@ -53,19 +52,18 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
 
   beforeAll(async () => {
     await clearLog(logFilePath);
-    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_1K });
+    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_SMALL });
   });
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(2);
+    await timer(2_000);
   });
 
   it('after resolving the problem and retrying the migration completes successfully', async () => {
     migratorTestKitFactory = () =>
       getRelocatingMigratorTestKit({
         logFilePath,
-        filterDeprecated: true,
         relocateTypes: {
           // move 'basic' to a new index
           basic: kibanaSplitIndex,
@@ -80,6 +78,7 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
       basic: 200,
       complex: 200,
       deprecated: 200,
+      old: 200,
       server: 200,
     });
     expect(await getAggregatedTypesCount(client, defaultKibanaTaskIndex)).toEqual({
@@ -103,6 +102,7 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
     // ensure we have a valid 'after' state
     expect(await getAggregatedTypesCount(client, defaultKibanaIndex)).toEqual({
       complex: 99,
+      old: 200,
     });
     expect(await getAggregatedTypesCount(client, defaultKibanaTaskIndex)).toEqual({
       task: 200,

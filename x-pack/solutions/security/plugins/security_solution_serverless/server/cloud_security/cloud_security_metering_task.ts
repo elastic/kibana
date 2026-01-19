@@ -190,11 +190,12 @@ export const getAssetAggByCloudSecuritySolution = async (
 ): Promise<AssetCountAggregation | undefined> => {
   const assetsAggQuery = getAssetAggQueryByCloudSecuritySolution(cloudSecuritySolution);
 
+  // @ts-expect-error elasticsearch@9.0.0 The types are tripping because of the dynamic aggs
   const response = await esClient.search<unknown, AssetCountAggregation>(assetsAggQuery);
 
   if (!response.aggregations) return;
 
-  return response.aggregations;
+  return response.aggregations as AssetCountAggregation;
 };
 
 const indexHasDataInDateRange = async (

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { ElementType } from 'react';
-import { css } from '@emotion/react';
-import type { FC } from 'react';
-import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import type { FC, ElementType } from 'react';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type {
   CommentsArray,
@@ -16,8 +16,8 @@ import type {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { euiThemeVars } from '@kbn/ui-theme';
-import { EmptyViewerState, ExceptionItemCard, Pagination, PaginationProps } from '../..';
+import type { PaginationProps } from '../..';
+import { EmptyViewerState, ExceptionItemCard, Pagination } from '../..';
 
 import type {
   RuleReferences,
@@ -25,13 +25,6 @@ import type {
   ViewerStatus,
   GetExceptionItemProps,
 } from '../types';
-
-const exceptionItemCss = css`
-  margin: ${euiThemeVars.euiSize} 0;
-  &div:first-child {
-    margin: ${euiThemeVars.euiSizeXS} 0 ${euiThemeVars.euiSize};
-  }
-`;
 
 interface ExceptionItemsProps {
   lastUpdated: string | number | null;
@@ -98,13 +91,12 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
   return (
     <>
       <ExceptionsUtility pagination={pagination} lastUpdated={lastUpdated} />
-      <EuiFlexGroup direction="column" gutterSize="none" className="eui-yScrollWithShadows">
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
-            css={exceptionItemCss}
             data-test-subj={`${dataTestSubj || ''}exceptionsContainer`}
             direction="column"
-            gutterSize="s"
+            gutterSize="m"
           >
             {exceptions.map((exception) => (
               <EuiFlexItem

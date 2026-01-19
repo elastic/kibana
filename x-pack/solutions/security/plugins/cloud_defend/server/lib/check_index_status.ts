@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { IndexStatus } from '../../common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
+import type { IndexStatus } from '../../common';
 
 export const checkIndexStatus = async (
   esClient: ElasticsearchClient,

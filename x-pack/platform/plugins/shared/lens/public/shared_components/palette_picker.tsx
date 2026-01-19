@@ -8,9 +8,11 @@
 import React from 'react';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { getActivePaletteName } from '@kbn/coloring';
-import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import { EuiColorPalettePicker } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getAppendedTag } from '@kbn/palettes';
 
 interface PalettePickerProps<T> {
   palettes: PaletteRegistry;
@@ -23,10 +25,11 @@ export function PalettePicker<T>({ palettes, activePalette, setPalette }: Palett
   const palettesToShow: EuiColorPalettePickerPaletteProps[] = palettes
     .getAll()
     .filter(({ internal }) => !internal)
-    .map(({ id, title, getCategoricalColors }) => {
+    .map(({ id, title, tag, getCategoricalColors }) => {
       return {
         value: id,
         title,
+        append: getAppendedTag(tag),
         type: 'fixed',
         palette: getCategoricalColors(10, id === paletteName ? activePalette?.params : undefined),
       };

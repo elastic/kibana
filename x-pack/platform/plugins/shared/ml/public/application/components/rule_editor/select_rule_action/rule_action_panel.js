@@ -198,7 +198,7 @@ export class RuleActionPanel extends Component {
     );
 
     return (
-      <EuiPanel paddingSize="m" className="select-rule-action-panel">
+      <EuiPanel paddingSize="m">
         <EuiDescriptionList
           type="column"
           columnWidths={[15, 85]}

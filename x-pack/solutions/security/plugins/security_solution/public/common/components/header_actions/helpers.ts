@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { TimelineEventsType } from '../../../../common/types';
 
 /**
@@ -22,8 +21,7 @@ import type { TimelineEventsType } from '../../../../common/types';
  *    `EuiButtonIcon` has a `margin-left: -4px`, which is subtracted from the
  *    `width`
  */
-export const DEFAULT_ACTION_BUTTON_WIDTH =
-  parseInt(euiThemeVars.euiSizeXL, 10) - parseInt(euiThemeVars.euiSizeXS, 10); // px
+export const DEFAULT_ACTION_BUTTON_WIDTH = 28; // px
 
 export const isAlert = (eventType: TimelineEventsType | Omit<TimelineEventsType, 'all'>): boolean =>
   eventType === 'signal';
@@ -46,7 +44,7 @@ export const getActionsColumnWidth = (actionButtonCount: number): number => {
   // `EuiDataGridRowCell` applies additional `padding-left` and
   // `padding-right`, which must be added to the content width to prevent the
   // content from being partially hidden due to the space occupied by padding:
-  const leftRightCellPadding = parseInt(euiThemeVars.euiDataGridCellPaddingM, 10) * 2; // parseInt ignores the trailing `px`, e.g. `6px`
+  const leftRightCellPadding = 12;
 
   return contentWidth + leftRightCellPadding;
 };

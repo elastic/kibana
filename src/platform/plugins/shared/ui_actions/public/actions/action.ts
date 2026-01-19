@@ -9,7 +9,7 @@
 
 import type { Presentable } from '@kbn/ui-actions-browser/src/types';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
-import { Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 /**
  * During action execution we can provide additional information,
@@ -20,6 +20,10 @@ export interface ActionExecutionMeta {
    * Trigger that executed the action
    */
   trigger: Trigger;
+  /**
+   * The event that caused the action to execute (e.g., mouse click, keyboard event)
+   */
+  event?: React.MouseEvent;
 }
 
 /**
@@ -41,9 +45,9 @@ export interface ActionMenuItemProps<Context extends object> {
 }
 
 export type FrequentCompatibilityChangeAction<Context extends object = object> = Action<Context> &
-  Required<Pick<Action<Context>, 'subscribeToCompatibilityChanges' | 'couldBecomeCompatible'>>;
+  Required<Pick<Action<Context>, 'getCompatibilityChangesSubject' | 'couldBecomeCompatible'>>;
 
-export interface Action<Context extends object = object>
+export interface Action<Context extends object = object, ActionExtension extends object = object>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
@@ -98,13 +102,9 @@ export interface Action<Context extends object = object>
   shouldAutoExecute?(context: ActionExecutionContext<Context>): Promise<boolean>;
 
   /**
-   * Allows this action to call a method when its compatibility changes.
-   * @returns a subscription that can be used to unsubscribe from the changes.
+   * @returns an Observable that emits when this action's compatibility changes.
    */
-  subscribeToCompatibilityChanges?: (
-    context: Context,
-    onChange: (isCompatible: boolean, action: Action<Context>) => void
-  ) => Subscription | undefined;
+  getCompatibilityChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if action could become compatible given the context. If present,
@@ -124,13 +124,17 @@ export interface Action<Context extends object = object>
    *
    */
   showNotification?: boolean;
+
+  extension?: ActionExtension;
 }
 
 /**
  * A convenience interface used to register an action.
  */
-export interface ActionDefinition<Context extends object = object>
-  extends Partial<Presentable<ActionDefinitionContext<Context>>> {
+export type ActionDefinition<
+  Context extends object = object,
+  ActionExtension extends object = {}
+> = Partial<Presentable<ActionDefinitionContext<Context>>> & { extension?: ActionExtension } & {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */
@@ -179,13 +183,9 @@ export interface ActionDefinition<Context extends object = object>
   showNotification?: boolean;
 
   /**
-   * Allows this action to call a method when its compatibility changes.
-   * @returns a subscription that can be used to unsubscribe from the changes.
+   * @returns an Observable that emits when this action's compatibility should be recalculated.
    */
-  subscribeToCompatibilityChanges?: (
-    context: Context,
-    onChange: (isCompatible: boolean, action: Action<Context>) => void
-  ) => Subscription | undefined;
+  getCompatibilityChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if action could become compatible given the context. If present,
@@ -193,6 +193,6 @@ export interface ActionDefinition<Context extends object = object>
    * is any chance that `isCompatible` could return true in the future.
    */
   couldBecomeCompatible?: (context: Context) => boolean;
-}
+};
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

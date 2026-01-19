@@ -3,7 +3,7 @@ steps:
     label: 'Cypress MKI - Defend Workflows'
     key: test_defend_workflows
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true

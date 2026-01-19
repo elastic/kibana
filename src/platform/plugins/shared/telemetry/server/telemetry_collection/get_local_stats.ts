@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import {
+import type { estypes } from '@elastic/elasticsearch';
+import type {
   StatsGetter,
   StatsCollectionContext,
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
-import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
+import type { KibanaUsageStats } from './get_kibana';
+import { getKibana, handleKibanaStats } from './get_kibana';
 import { getNodesUsage } from './get_nodes_usage';
-import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get_data_telemetry';
+import type { DataTelemetryPayload } from './get_data_telemetry';
+import { getDataTelemetry, DATA_TELEMETRY_ID } from './get_data_telemetry';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the
@@ -30,7 +32,6 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  * @param context The context
  */
 export function handleLocalStats<ClusterStats extends estypes.ClusterStatsResponse>(
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   { cluster_name, cluster_uuid, version }: estypes.InfoResponse,
   { _nodes, cluster_name: clusterName, ...clusterStats }: ClusterStats,
   kibana: KibanaUsageStats | undefined,

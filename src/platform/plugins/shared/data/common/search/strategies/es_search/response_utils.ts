@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ISearchOptions } from '@kbn/search-types';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ISearchOptions } from '@kbn/search-types';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is

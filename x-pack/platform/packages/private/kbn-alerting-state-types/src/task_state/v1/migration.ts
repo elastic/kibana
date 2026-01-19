@@ -7,7 +7,7 @@
 
 import { type TypeOf } from '@kbn/config-schema';
 import { isJSONObject, isString, isBoolean, isNumber, isStringArray, isBooleanArray } from '../lib';
-import {
+import type {
   versionSchema,
   throttledActionSchema,
   rawAlertInstanceSchema,
@@ -69,6 +69,7 @@ export function migrateMeta(meta: unknown): TypeOf<typeof metaSchema> | undefine
     pendingRecoveredCount: isNumber(meta.pendingRecoveredCount)
       ? meta.pendingRecoveredCount
       : undefined,
+    activeCount: isNumber(meta.activeCount) ? meta.activeCount : undefined,
     uuid: isString(meta.uuid) ? meta.uuid : undefined,
   };
 }

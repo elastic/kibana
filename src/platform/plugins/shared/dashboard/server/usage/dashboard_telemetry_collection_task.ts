@@ -9,29 +9,32 @@
 
 import moment from 'moment';
 
-import {
+import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type {
+  CoreSetup,
+  Logger,
+  SavedObjectAccessControl,
+  SavedObjectReference,
+} from '@kbn/core/server';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 import {
-  controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
+  collectSectionsAndAccessControl,
+  collectPinnedControls,
 } from './dashboard_telemetry';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
+  StoredControlGroupInput,
 } from '../dashboard_saved_object';
-
-interface DashboardSavedObjectAttributesAndReferences {
-  attributes: DashboardSavedObjectAttributes;
-  references: SavedObjectReference[];
-}
+import type { DashboardHit } from './types';
 
 // This task is responsible for running daily and aggregating all the Dashboard telemerty data
 // into a single document. This is an effort to make sure the load of fetching/parsing all of the
@@ -93,22 +96,20 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
     return {
       async run() {
         let dashboardData = getEmptyDashboardData();
-        const controlsCollector = controlsCollectorFactory(embeddable);
-        const processDashboards = (dashboards: DashboardSavedObjectAttributesAndReferences[]) => {
+        const processDashboards = (dashboards: DashboardHit[]) => {
           for (const dashboard of dashboards) {
-            // TODO is this injecting references really necessary?
-            // const attributes = injectReferences(dashboard, {
-            //   embeddablePersistableStateService: embeddable,
-            // });
-
-            dashboardData = controlsCollector(dashboard.attributes, dashboardData);
+            dashboardData = collectSectionsAndAccessControl(dashboard, dashboardData);
 
             try {
               const panels = JSON.parse(
                 dashboard.attributes.panelsJSON as string
               ) as unknown as SavedDashboardPanel[];
-
               collectPanelsByType(panels, dashboardData, embeddable);
+
+              const controls = JSON.parse(
+                dashboard.attributes.controlGroupInput?.panelsJSON as string
+              ) as unknown as StoredControlGroupInput['panels'];
+              collectPinnedControls(controls, dashboardData, embeddable);
             } catch (e) {
               logger.warn('Unable to parse panelsJSON for telemetry collection');
             }
@@ -127,7 +128,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
           index: dashboardIndex,
           ignore_unavailable: true,
           filter_path: ['hits.hits', '_scroll_id'],
-          body: { query: { bool: { filter: { term: { type: 'dashboard' } } } } },
+          query: { bool: { filter: { term: { type: 'dashboard' } } } },
           scroll: '30s',
         };
 
@@ -138,22 +139,23 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
           let result = await esClient.search<{
             dashboard: DashboardSavedObjectAttributes;
             references: SavedObjectReference[];
+            accessControl?: SavedObjectAccessControl;
           }>(searchParams);
 
           dashboardData = processDashboards(
             result.hits.hits
               .map((h) => {
                 if (h._source) {
+                  const { dashboard: attributes, references, accessControl } = h._source;
                   return {
-                    attributes: h._source.dashboard,
-                    references: h._source.references,
+                    attributes,
+                    references,
+                    ...(accessControl && { accessControl }),
                   };
                 }
                 return undefined;
               })
-              .filter<DashboardSavedObjectAttributesAndReferences>(
-                (s): s is DashboardSavedObjectAttributesAndReferences => s !== undefined
-              )
+              .filter((s): s is DashboardHit => s !== undefined)
           );
 
           while (result._scroll_id && result.hits.hits.length > 0) {
@@ -163,16 +165,16 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
               result.hits.hits
                 .map((h) => {
                   if (h._source) {
+                    const { dashboard: attributes, references, accessControl } = h._source;
                     return {
-                      attributes: h._source.dashboard,
-                      references: h._source.references,
+                      attributes,
+                      references,
+                      ...(accessControl && { accessControl }),
                     };
                   }
                   return undefined;
                 })
-                .filter<DashboardSavedObjectAttributesAndReferences>(
-                  (s): s is DashboardSavedObjectAttributesAndReferences => s !== undefined
-                )
+                .filter((s): s is DashboardHit => s !== undefined)
             );
           }
 

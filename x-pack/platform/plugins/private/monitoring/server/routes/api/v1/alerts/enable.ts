@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ActionResult } from '@kbn/actions-plugin/server';
-import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { ActionResult } from '@kbn/actions-plugin/server';
+import type { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { RulesFactory } from '../../../../rules';
 import { handleError } from '../../../../lib/errors';
-import { MonitoringCore, RouteDependencies } from '../../../../types';
+import type { MonitoringCore, RouteDependencies } from '../../../../types';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 
@@ -18,6 +18,12 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alerts/enable',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES cluster client',
+        },
+      },
       validate: false,
       options: {
         access: 'internal',

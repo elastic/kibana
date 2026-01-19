@@ -1,11 +1,582 @@
 {
   "id": "datasetQuality",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "classes": [
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-public.DataStreamsStatsService",
+        "type": "Class",
+        "tags": [],
+        "label": "DataStreamsStatsService",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/data_streams_stats_service.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.DataStreamsStatsService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/data_streams_stats_service.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.DataStreamsStatsService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "({ http, telemetryClient, }: ",
+              "DataStreamsStatsServiceStartDeps",
+              ") => ",
+              "DataStreamsStatsServiceStart"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/data_streams_stats_service.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.DataStreamsStatsService.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    http,\n    telemetryClient,\n  }",
+                "description": [],
+                "signature": [
+                  "DataStreamsStatsServiceStartDeps"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/data_streams_stats_service.ts",
+                "lineNumber": 20,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-public.calculatePercentage",
+        "type": "Function",
+        "tags": [],
+        "label": "calculatePercentage",
+        "description": [],
+        "signature": [
+          "({ totalDocs, count }: { totalDocs?: number | undefined; count?: number | undefined; }) => number"
+        ],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/public/utils/calculate_percentage.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.calculatePercentage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ totalDocs, count }",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/utils/calculate_percentage.ts",
+            "lineNumber": 8,
+            "columnNumber": 59,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.calculatePercentage.$1.totalDocs",
+                "type": "number",
+                "tags": [],
+                "label": "totalDocs",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/utils/calculate_percentage.ts",
+                "lineNumber": 8,
+                "columnNumber": 61,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.calculatePercentage.$1.count",
+                "type": "number",
+                "tags": [],
+                "label": "count",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/utils/calculate_percentage.ts",
+                "lineNumber": 8,
+                "columnNumber": 81,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-public.DatasetQualityIndicator",
+        "type": "Function",
+        "tags": [],
+        "label": "DatasetQualityIndicator",
+        "description": [],
+        "signature": [
+          "({ isLoading, quality, verbose, showTooltip, dataTestSubj, }: { isLoading: boolean; quality: ",
+          {
+            "pluginId": "datasetQuality",
+            "scope": "common",
+            "docId": "kibDatasetQualityPluginApi",
+            "section": "def-common.QualityIndicators",
+            "text": "QualityIndicators"
+          },
+          "; verbose?: boolean | undefined; showTooltip?: boolean | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.DatasetQualityIndicator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isLoading,\n  quality,\n  verbose = false,\n  showTooltip = false,\n  dataTestSubj,\n}",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+            "lineNumber": 29,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.DatasetQualityIndicator.$1.isLoading",
+                "type": "boolean",
+                "tags": [],
+                "label": "isLoading",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "lineNumber": 30,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.DatasetQualityIndicator.$1.quality",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "quality",
+                "description": [],
+                "signature": [
+                  "\"good\" | \"poor\" | \"degraded\""
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "lineNumber": 31,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.DatasetQualityIndicator.$1.verbose",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "verbose",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "lineNumber": 32,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.DatasetQualityIndicator.$1.showTooltip",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "showTooltip",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "lineNumber": 33,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.DatasetQualityIndicator.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "lineNumber": 34,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-public.IDataStreamsStatsClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "IDataStreamsStatsClient",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.IDataStreamsStatsClient.getDataStreamsTypesPrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataStreamsTypesPrivileges",
+            "description": [],
+            "signature": [
+              "(params: { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; }) => Promise<{ datasetTypesPrivileges: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.IDataStreamsStatsClient.getDataStreamsTypesPrivileges.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; }"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 41,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.IDataStreamsStatsClient.getDataStreamsStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataStreamsStats",
+            "description": [],
+            "signature": [
+              "(params?: (({ types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } | { datasetQuery: string; }) & { includeCreationDate?: boolean | undefined; }) | undefined) => Promise<{ datasetUserPrivileges: { datasetsPrivilages: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; hasFailureStore?: boolean | undefined; customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; })[]; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.IDataStreamsStatsClient.getDataStreamsStats.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "(({ types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } | { datasetQuery: string; }) & { includeCreationDate?: boolean | undefined; }) | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 43,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.IDataStreamsStatsClient.getDataStreamsDegradedStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataStreamsDegradedStats",
+            "description": [],
+            "signature": [
+              "(params?: ({ start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { datasetQuery?: string | undefined; }) | undefined) => Promise<{ dataset: string; count: number; }[]>"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.IDataStreamsStatsClient.getDataStreamsDegradedStats.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "({ start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { datasetQuery?: string | undefined; }) | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.IDataStreamsStatsClient.getDataStreamsFailedStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataStreamsFailedStats",
+            "description": [],
+            "signature": [
+              "(params?: ({ start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { datasetQuery?: string | undefined; }) | undefined) => Promise<{ dataset: string; count: number; }[]>"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.IDataStreamsStatsClient.getDataStreamsFailedStats.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "({ start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { datasetQuery?: string | undefined; }) | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 48,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.IDataStreamsStatsClient.getDataStreamsTotalDocs",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataStreamsTotalDocs",
+            "description": [],
+            "signature": [
+              "(params: { start: string; end: string; } & { type: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\"; }) => Promise<{ dataset: string; count: number; }[]>"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.IDataStreamsStatsClient.getDataStreamsTotalDocs.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ start: string; end: string; } & { type: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\"; }"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 50,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.IDataStreamsStatsClient.getIntegrations",
+            "type": "Function",
+            "tags": [],
+            "label": "getIntegrations",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "Integration",
+              "[]>"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.IDataStreamsStatsClient.getNonAggregatableDatasets",
+            "type": "Function",
+            "tags": [],
+            "label": "getNonAggregatableDatasets",
+            "description": [],
+            "signature": [
+              "(params: { start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { dataStream?: string | undefined; }) => Promise<{ aggregatable: boolean; datasets: string[]; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.IDataStreamsStatsClient.getNonAggregatableDatasets.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { dataStream?: string | undefined; }"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 53,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-public.IDataStreamsStatsClient.updateFailureStore",
+            "type": "Function",
+            "tags": [],
+            "label": "updateFailureStore",
+            "description": [],
+            "signature": [
+              "(params: ",
+              "UpdateFailureStoreParams",
+              ") => Promise<{ headers: { [x: string]: unknown; }; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.IDataStreamsStatsClient.updateFailureStore.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "UpdateFailureStoreParams"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 55,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-public.DataStreamStatServiceResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "DataStreamStatServiceResponse",
+        "description": [],
+        "signature": [
+          "{ datasetUserPrivileges: { datasetsPrivilages: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; hasFailureStore?: boolean | undefined; customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; })[]; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/data_streams_stats/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "datasetQuality",
@@ -15,6 +586,8 @@
       "label": "DatasetQualityPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+      "lineNumber": 30,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +602,8 @@
       "label": "DatasetQualityPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -47,6 +622,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -65,6 +642,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+          "lineNumber": 34,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -82,6 +661,8 @@
                 "> | undefined; }"
               ],
               "path": "x-pack/platform/plugins/shared/dataset_quality/public/controller/dataset_quality/create_controller.ts",
+              "lineNumber": 31,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -102,6 +683,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+          "lineNumber": 35,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -113,13 +696,17 @@
           "label": "createDatasetQualityDetailsController",
           "description": [],
           "signature": [
-            "({ initialState, }: { initialState: ",
+            "({ initialState, streamsRepositoryClient, refreshDefinition, }: { initialState: ",
             "DatasetQualityDetailsPublicStateUpdate",
-            "; }) => Promise<",
+            "; streamsRepositoryClient?: ",
+            "StreamsRepositoryClient",
+            " | undefined; refreshDefinition?: (() => void) | undefined; }) => Promise<",
             "DatasetQualityDetailsController",
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+          "lineNumber": 36,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -134,9 +721,13 @@
               "signature": [
                 "{ initialState: ",
                 "DatasetQualityDetailsPublicStateUpdate",
-                "; }"
+                "; streamsRepositoryClient?: ",
+                "StreamsRepositoryClient",
+                " | undefined; refreshDefinition?: (() => void) | undefined; }"
               ],
               "path": "x-pack/platform/plugins/shared/dataset_quality/public/controller/dataset_quality_details/create_controller.ts",
+              "lineNumber": 33,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -169,6 +760,8 @@
           "(dataStreamName: string) => { type: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\"; dataset: string; namespace: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/dataset_name.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -183,6 +776,52 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/dataset_name.ts",
+            "lineNumber": 30,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-common.mapPercentageToQuality",
+        "type": "Function",
+        "tags": [],
+        "label": "mapPercentageToQuality",
+        "description": [],
+        "signature": [
+          "(percentages: number[]) => ",
+          {
+            "pluginId": "datasetQuality",
+            "scope": "common",
+            "docId": "kibDatasetQualityPluginApi",
+            "section": "def-common.QualityIndicators",
+            "text": "QualityIndicators"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/quality_helpers.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-common.mapPercentageToQuality.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "percentages",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/quality_helpers.ts",
+            "lineNumber": 11,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -201,6 +840,8 @@
         "label": "DatasetQualityConfig",
         "description": [],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/plugin_config.ts",
+        "lineNumber": 9,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -217,7 +858,33 @@
         "label": "APIClientRequestParamsOf",
         "description": [],
         "signature": [
-          "{ \"GET /internal/dataset_quality/integrations/{integration}/dashboards\": ",
+          "{ \"GET /internal/dataset_quality/rule_types/degraded_docs/chart_preview\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/dataset_quality/rule_types/degraded_docs/chart_preview\", ",
+          "TypeC",
+          "<{ query: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; groupBy: ",
+          "Type",
+          "<string[], string, unknown>; start: ",
+          "StringC",
+          "; end: ",
+          "StringC",
+          "; interval: ",
+          "StringC",
+          "; }>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { series: { name: string; data: { x: number; y: number | null; }[]; }[]; totalGroups: number; }, ",
+          "DatasetQualityRouteCreateOptions",
+          ">; \"GET /internal/dataset_quality/integrations/{integration}/dashboards\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -246,6 +913,34 @@
           "<\"GET /internal/dataset_quality/integrations\", undefined, ",
           "DatasetQualityRouteHandlerResources",
           ", { integrations: ({ name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ src: string; } & { path?: string | undefined; size?: string | undefined; title?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; })[]; }, ",
+          "DatasetQualityRouteCreateOptions",
+          ">; \"PUT /internal/dataset_quality/data_streams/{dataStream}/update_failure_store\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"PUT /internal/dataset_quality/data_streams/{dataStream}/update_failure_store\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ dataStream: ",
+          "StringC",
+          "; }>; body: ",
+          "TypeC",
+          "<{ failureStoreEnabled: ",
+          "BooleanC",
+          "; customRetentionPeriod: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "UndefinedC",
+          "]>; }>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { headers: { [x: string]: unknown; }; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/failed_docs/errors\": ",
           {
@@ -423,7 +1118,7 @@
           "StringC",
           "; }>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { lastBackingIndexName?: string | undefined; indexTemplate?: string | undefined; createdOn?: number | null | undefined; integration?: string | undefined; datasetUserPrivileges?: ({ canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }) | undefined; }, ",
+          ", { lastBackingIndexName?: string | undefined; indexTemplate?: string | undefined; createdOn?: number | null | undefined; integration?: string | undefined; datasetUserPrivileges?: { datasetsPrivilages: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; canViewIntegrations: boolean; } | undefined; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/details\": ",
           {
@@ -447,7 +1142,7 @@
           "Type",
           "<number, string, unknown>; }>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { lastActivity?: number | undefined; degradedDocsCount?: number | undefined; failedDocsCount?: number | undefined; docsCount?: number | undefined; sizeBytes?: number | undefined; services?: { [x: string]: string[]; } | undefined; hosts?: { [x: string]: string[]; } | undefined; userPrivileges?: { canMonitor: boolean; } | undefined; }, ",
+          ", { hasFailureStore?: boolean | undefined; lastActivity?: number | undefined; degradedDocsCount?: number | undefined; failedDocsCount?: number | undefined; docsCount?: number | undefined; sizeBytes?: number | undefined; services?: { [x: string]: string[]; } | undefined; hosts?: { [x: string]: string[]; } | undefined; userPrivileges?: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } | undefined; defaultRetentionPeriod?: string | undefined; customRetentionPeriod?: string | undefined; isServerless?: boolean | undefined; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/values\": ",
           {
@@ -508,18 +1203,12 @@
           "<{ dataStream: ",
           "StringC",
           "; }>; query: ",
-          "IntersectionC",
-          "<[",
           "TypeC",
           "<{ start: ",
           "Type",
           "<number, string, unknown>; end: ",
           "Type",
-          "<number, string, unknown>; }>, ",
-          "TypeC",
-          "<{ type: ",
-          "KeyofC",
-          "<{ logs: null; metrics: null; traces: null; synthetics: null; profiling: null; }>; }>]>; }>, ",
+          "<number, string, unknown>; }>; }>, ",
           "DatasetQualityRouteHandlerResources",
           ", { aggregatable: boolean; datasets: string[]; }, ",
           "DatasetQualityRouteCreateOptions",
@@ -622,16 +1311,40 @@
           "<{ query: ",
           "IntersectionC",
           "<[",
+          "UnionC",
+          "<[",
           "TypeC",
           "<{ types: ",
           "Type",
           "<(\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], unknown>; }>, ",
-          "PartialC",
+          "TypeC",
           "<{ datasetQuery: ",
           "StringC",
-          "; }>]>; }>, ",
+          "; }>]>, ",
+          "PartialC",
+          "<{ includeCreationDate: ",
+          "Type",
+          "<boolean, boolean, unknown>; }>]>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { datasetUserPrivileges: { canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; })[]; }, ",
+          ", { datasetUserPrivileges: { datasetsPrivilages: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; hasFailureStore?: boolean | undefined; customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; })[]; }, ",
+          "DatasetQualityRouteCreateOptions",
+          ">; \"GET /internal/dataset_quality/data_streams/types_privileges\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/dataset_quality/data_streams/types_privileges\", ",
+          "TypeC",
+          "<{ query: ",
+          "TypeC",
+          "<{ types: ",
+          "Type",
+          "<(\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], unknown>; }>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { datasetTypesPrivileges: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; }[TEndpoint] extends ",
           {
@@ -668,6 +1381,8 @@
           " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -680,7 +1395,33 @@
         "label": "APIReturnType",
         "description": [],
         "signature": [
-          "{ \"GET /internal/dataset_quality/integrations/{integration}/dashboards\": ",
+          "{ \"GET /internal/dataset_quality/rule_types/degraded_docs/chart_preview\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/dataset_quality/rule_types/degraded_docs/chart_preview\", ",
+          "TypeC",
+          "<{ query: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; groupBy: ",
+          "Type",
+          "<string[], string, unknown>; start: ",
+          "StringC",
+          "; end: ",
+          "StringC",
+          "; interval: ",
+          "StringC",
+          "; }>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { series: { name: string; data: { x: number; y: number | null; }[]; }[]; totalGroups: number; }, ",
+          "DatasetQualityRouteCreateOptions",
+          ">; \"GET /internal/dataset_quality/integrations/{integration}/dashboards\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -709,6 +1450,34 @@
           "<\"GET /internal/dataset_quality/integrations\", undefined, ",
           "DatasetQualityRouteHandlerResources",
           ", { integrations: ({ name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ src: string; } & { path?: string | undefined; size?: string | undefined; title?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; })[]; }, ",
+          "DatasetQualityRouteCreateOptions",
+          ">; \"PUT /internal/dataset_quality/data_streams/{dataStream}/update_failure_store\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"PUT /internal/dataset_quality/data_streams/{dataStream}/update_failure_store\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ dataStream: ",
+          "StringC",
+          "; }>; body: ",
+          "TypeC",
+          "<{ failureStoreEnabled: ",
+          "BooleanC",
+          "; customRetentionPeriod: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "UndefinedC",
+          "]>; }>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { headers: { [x: string]: unknown; }; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/failed_docs/errors\": ",
           {
@@ -886,7 +1655,7 @@
           "StringC",
           "; }>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { lastBackingIndexName?: string | undefined; indexTemplate?: string | undefined; createdOn?: number | null | undefined; integration?: string | undefined; datasetUserPrivileges?: ({ canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }) | undefined; }, ",
+          ", { lastBackingIndexName?: string | undefined; indexTemplate?: string | undefined; createdOn?: number | null | undefined; integration?: string | undefined; datasetUserPrivileges?: { datasetsPrivilages: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; canViewIntegrations: boolean; } | undefined; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/details\": ",
           {
@@ -910,7 +1679,7 @@
           "Type",
           "<number, string, unknown>; }>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { lastActivity?: number | undefined; degradedDocsCount?: number | undefined; failedDocsCount?: number | undefined; docsCount?: number | undefined; sizeBytes?: number | undefined; services?: { [x: string]: string[]; } | undefined; hosts?: { [x: string]: string[]; } | undefined; userPrivileges?: { canMonitor: boolean; } | undefined; }, ",
+          ", { hasFailureStore?: boolean | undefined; lastActivity?: number | undefined; degradedDocsCount?: number | undefined; failedDocsCount?: number | undefined; docsCount?: number | undefined; sizeBytes?: number | undefined; services?: { [x: string]: string[]; } | undefined; hosts?: { [x: string]: string[]; } | undefined; userPrivileges?: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } | undefined; defaultRetentionPeriod?: string | undefined; customRetentionPeriod?: string | undefined; isServerless?: boolean | undefined; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/values\": ",
           {
@@ -971,18 +1740,12 @@
           "<{ dataStream: ",
           "StringC",
           "; }>; query: ",
-          "IntersectionC",
-          "<[",
           "TypeC",
           "<{ start: ",
           "Type",
           "<number, string, unknown>; end: ",
           "Type",
-          "<number, string, unknown>; }>, ",
-          "TypeC",
-          "<{ type: ",
-          "KeyofC",
-          "<{ logs: null; metrics: null; traces: null; synthetics: null; profiling: null; }>; }>]>; }>, ",
+          "<number, string, unknown>; }>; }>, ",
           "DatasetQualityRouteHandlerResources",
           ", { aggregatable: boolean; datasets: string[]; }, ",
           "DatasetQualityRouteCreateOptions",
@@ -1085,16 +1848,40 @@
           "<{ query: ",
           "IntersectionC",
           "<[",
+          "UnionC",
+          "<[",
           "TypeC",
           "<{ types: ",
           "Type",
           "<(\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], unknown>; }>, ",
-          "PartialC",
+          "TypeC",
           "<{ datasetQuery: ",
           "StringC",
-          "; }>]>; }>, ",
+          "; }>]>, ",
+          "PartialC",
+          "<{ includeCreationDate: ",
+          "Type",
+          "<boolean, boolean, unknown>; }>]>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { datasetUserPrivileges: { canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; })[]; }, ",
+          ", { datasetUserPrivileges: { datasetsPrivilages: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; hasFailureStore?: boolean | undefined; customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; })[]; }, ",
+          "DatasetQualityRouteCreateOptions",
+          ">; \"GET /internal/dataset_quality/data_streams/types_privileges\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/dataset_quality/data_streams/types_privileges\", ",
+          "TypeC",
+          "<{ query: ",
+          "TypeC",
+          "<{ types: ",
+          "Type",
+          "<(\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[], unknown>; }>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { datasetTypesPrivileges: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; }[TEndpoint] extends ",
           {
@@ -1107,12 +1894,14 @@
           "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
           "IKibanaResponse",
           "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
-          "Stream",
+          "stream",
           " | { message: string | Error; attributes?: ",
           "ResponseErrorAttributes",
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1130,11 +1919,73 @@
           ", \"body\"> & { pathname: string; method?: string | undefined; body?: any; }"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/fetch_options.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-common.QualityIndicators",
+        "type": "Type",
+        "tags": [],
+        "label": "QualityIndicators",
+        "description": [],
+        "signature": [
+          "\"good\" | \"poor\" | \"degraded\""
+        ],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/types/quality_types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-common.DEFAULT_DATEPICKER_REFRESH",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_DATEPICKER_REFRESH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/constants.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-common.DEFAULT_DATEPICKER_REFRESH.value",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/common/constants.ts",
+            "lineNumber": 32,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-common.DEFAULT_DATEPICKER_REFRESH.pause",
+            "type": "boolean",
+            "tags": [],
+            "label": "pause",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/common/constants.ts",
+            "lineNumber": 32,
+            "columnNumber": 59,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

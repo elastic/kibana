@@ -15,7 +15,6 @@ import {
 } from '@kbn/core/server/mocks';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { TaskInstanceFields } from '@kbn/reporting-common/types';
-import { sub, add, type Duration } from 'date-fns';
 
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
@@ -24,6 +23,7 @@ import {
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../constants';
 import { getExportSettings } from './get_export_settings';
+import moment from 'moment';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
@@ -39,6 +39,7 @@ describe('getExportSettings', () => {
       scroll: { size: 500, duration: '30s', strategy: 'pit' },
       useByteOrderMarkEncoding: false,
       maxConcurrentShardRequests: 5,
+      maxRows: 100,
     };
 
     taskInstanceFields = { startedAt: null, retryAt: null };
@@ -53,7 +54,7 @@ describe('getExportSettings', () => {
         case UI_SETTINGS_CSV_SEPARATOR:
           return ',';
         case UI_SETTINGS_DATEFORMAT_TZ:
-          return 'Browser';
+          return 'America/New_York';
         case UI_SETTINGS_SEARCH_INCLUDE_FROZEN:
           return false;
       }
@@ -72,6 +73,7 @@ describe('getExportSettings', () => {
         "escapeValue": [Function],
         "includeFrozen": false,
         "maxConcurrentShardRequests": 5,
+        "maxRows": 100,
         "maxSizeBytes": 180000,
         "scroll": Object {
           "duration": [Function],
@@ -83,7 +85,7 @@ describe('getExportSettings', () => {
           "retryAt": null,
           "startedAt": null,
         },
-        "timezone": "UTC",
+        "timezone": "America/New_York",
       }
     `);
   });
@@ -151,10 +153,27 @@ describe('getExportSettings', () => {
     ).toBe(`America/Aruba`);
   });
 
+  test('default browser timezone', async () => {
+    uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
+      switch (key) {
+        case UI_SETTINGS_DATEFORMAT_TZ:
+          return `Browser`;
+      }
+    });
+
+    // expect moment to guess the timezone if it's set to 'Browser'
+    // moment.guess mock will return 'America/New_York' and is defined here .../kbn-test/src/jest/setup/mocks.moment_timezone.js
+    expect(
+      await getExportSettings(uiSettingsClient, taskInstanceFields, config, '', logger).then(
+        ({ timezone }) => timezone
+      )
+    ).toBe(`America/New_York`);
+  });
+
   describe('scroll duration function', () => {
     let spiedDateNow: jest.Spied<typeof Date.now>;
     let mockedTaskInstanceFields: TaskInstanceFields;
-    const durationApart: Duration = { minutes: 5 };
+    const durationApart: { minutes: number } = { minutes: 5 };
 
     beforeEach(() => {
       const now = Date.now();
@@ -163,8 +182,8 @@ describe('getExportSettings', () => {
       spiedDateNow = jest.spyOn(Date, 'now').mockReturnValue(now);
 
       mockedTaskInstanceFields = {
-        startedAt: sub(new Date(Date.now()), durationApart),
-        retryAt: add(new Date(Date.now()), durationApart),
+        startedAt: moment().subtract(durationApart).toDate(),
+        retryAt: moment().add(durationApart).toDate(),
       };
     });
 
@@ -238,7 +257,7 @@ describe('getExportSettings', () => {
       };
 
       spiedDateNow.mockReturnValue(
-        add(mockedTaskInstanceFields.retryAt!, { minutes: 5 }).getTime()
+        moment(mockedTaskInstanceFields.retryAt!).add(durationApart).toDate().getTime()
       );
 
       const { scroll } = await getExportSettings(

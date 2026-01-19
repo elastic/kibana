@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { ObjectType, schema } from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { TrendRequest, TrendTable } from '../../../common/types';
-import { getFetchTrendsQuery, TrendsQuery } from './fetch_trends';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { SyntheticsEsClient } from '../../lib';
+import type { TrendsQuery } from './fetch_trends';
+import { getFetchTrendsQuery } from './fetch_trends';
+import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsEsClient } from '../../lib';
 
 export const getIntervalForCheckCount = (schedule: string, numChecks = 50) =>
   Number(schedule) * numChecks;
@@ -25,8 +27,8 @@ export async function fetchTrends(
     }
   >
 ): Promise<TrendTable> {
-  const requests = Object.keys(configs).map(
-    (key) => getFetchTrendsQuery(key, configs[key].locations, configs[key].interval).body
+  const requests = Object.keys(configs).map((key) =>
+    getFetchTrendsQuery(key, configs[key].locations, configs[key].interval)
   );
   const results = await esClient.msearch<TrendsQuery>(requests);
 

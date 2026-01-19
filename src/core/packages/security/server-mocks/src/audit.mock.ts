@@ -9,16 +9,17 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuditLogger } from '@kbn/core-security-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type MockedAuditLogger = jest.Mocked<AuditLogger>;
 
 export const auditLoggerMock = {
   create(): MockedAuditLogger {
-    return {
+    return lazyObject({
       log: jest.fn(),
       enabled: true,
       includeSavedObjectNames: false,
-    };
+    });
   },
 };
 
@@ -29,9 +30,9 @@ export interface MockedAuditService {
 
 export const auditServiceMock = {
   create(): MockedAuditService {
-    return {
+    return lazyObject({
       asScoped: jest.fn().mockReturnValue(auditLoggerMock.create()),
       withoutRequest: auditLoggerMock.create(),
-    };
+    });
   },
 };

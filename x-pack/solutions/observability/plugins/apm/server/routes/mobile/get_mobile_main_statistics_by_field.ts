@@ -7,6 +7,7 @@
 
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { merge } from 'lodash';
+import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
 import {
   SERVICE_NAME,
   SESSION_ID,
@@ -17,7 +18,6 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 
@@ -69,35 +69,33 @@ export async function getMobileMainStatisticsByField({
             },
           ],
         },
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                ...termQuery(SERVICE_NAME, serviceName),
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-                ...kqlQuery(kuery),
-              ],
-            },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+            ],
           },
-          aggs: {
-            main_statistics: {
-              terms: {
-                field,
-                size: 1000,
-              },
-              aggs: {
-                latency: {
-                  avg: {
-                    field: TRANSACTION_DURATION,
-                  },
+        },
+        aggs: {
+          main_statistics: {
+            terms: {
+              field,
+              size: 1000,
+            },
+            aggs: {
+              latency: {
+                avg: {
+                  field: TRANSACTION_DURATION,
                 },
-                sessions: {
-                  cardinality: {
-                    field: SESSION_ID,
-                  },
+              },
+              sessions: {
+                cardinality: {
+                  field: SESSION_ID,
                 },
               },
             },
@@ -135,31 +133,29 @@ export async function getMobileMainStatisticsByField({
           },
         ],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
         },
-        aggs: {
-          main_statistics: {
-            terms: {
-              field,
-              size: 1000,
-            },
-            aggs: {
-              crashes: {
-                filter: {
-                  term: {
-                    [ERROR_TYPE]: 'crash',
-                  },
+      },
+      aggs: {
+        main_statistics: {
+          terms: {
+            field,
+            size: 1000,
+          },
+          aggs: {
+            crashes: {
+              filter: {
+                term: {
+                  [ERROR_TYPE]: 'crash',
                 },
               },
             },

@@ -45,8 +45,8 @@ describe('processRunResults', () => {
       processRunResults({
         result: ruleResultService,
         runDate: new Date('2024-03-13T00:00:00.000Z'),
-        runResultWithMetrics: asOk({
-          alertInstances: { a: {} },
+        runRuleResult: asOk({
+          state: { alertInstances: { a: {} } },
           metrics: executionMetrics,
         }),
       })
@@ -84,8 +84,8 @@ describe('processRunResults', () => {
         logPrefix: `myRuleType:1`,
         result: ruleResultService,
         runDate: new Date('2024-03-13T00:00:00.000Z'),
-        runResultWithMetrics: asOk({
-          alertInstances: { a: {} },
+        runRuleResult: asOk({
+          state: { alertInstances: { a: {} } },
           metrics: executionMetrics,
         }),
       })
@@ -136,7 +136,7 @@ describe('processRunResults', () => {
         logPrefix: `myRuleType:1`,
         result: ruleResultService,
         runDate: new Date('2024-03-13T00:00:00.000Z'),
-        runResultWithMetrics: asErr(new Error('fail fail')),
+        runRuleResult: asErr(new Error('fail fail')),
       })
     ).toEqual({
       executionMetrics: null,

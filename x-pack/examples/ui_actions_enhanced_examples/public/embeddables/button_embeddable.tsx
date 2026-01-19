@@ -6,31 +6,23 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  DefaultEmbeddableApi,
-  ReactEmbeddableFactory,
-  VALUE_CLICK_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { BUTTON_EMBEDDABLE } from './register_button_embeddable';
 
 export const getButtonEmbeddableFactory = (uiActionsEnhanced: AdvancedUiActionsStart) => {
-  const factory: ReactEmbeddableFactory<{}, {}, DefaultEmbeddableApi<{}>> = {
+  const factory: EmbeddableFactory<{}, DefaultEmbeddableApi<{}>> = {
     type: BUTTON_EMBEDDABLE,
-    deserializeState: (state) => state.rawState,
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const api = buildApi(
-        {
-          serializeState: () => {
-            return {
-              rawState: {},
-              references: [],
-            };
-          },
-        },
-        {}
-      );
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+      function serializeState() {
+        return {};
+      }
+
+      const api = finalizeApi({
+        serializeState,
+      });
       return {
         api,
         Component: () => {

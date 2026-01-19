@@ -1,0 +1,7 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/ai-security-labs-content",
+  "owner": "@elastic/security-generative-ai",
+  "group": "security",
+  "visibility": "private"
+}

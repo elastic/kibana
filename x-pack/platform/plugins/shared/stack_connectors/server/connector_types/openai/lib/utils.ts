@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AxiosResponse, ResponseType } from 'axios';
-import { IncomingMessage } from 'http';
-import { OpenAiProviderType } from '../../../../common/openai/constants';
+import type { AxiosResponse, ResponseType } from 'axios';
+import type { IncomingMessage } from 'http';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import {
   sanitizeRequest as openAiSanitizeRequest,
   getRequestWithStreamOption as openAiGetRequestWithStreamOption,

@@ -6,24 +6,34 @@
  */
 
 import type { StateComparators } from '@kbn/presentation-publishing';
-import fastIsEqual from 'fast-deep-equal';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
-import type { ChangePointComponentApi, ChangePointEmbeddableState } from './types';
+import type { ChangePointComponentApi } from './types';
+import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
 
 type ChangePointEmbeddableCustomState = Omit<
   ChangePointEmbeddableState,
   'timeRange' | 'title' | 'description' | 'hidePanelTitles'
 >;
 
-export const initializeChangePointControls = (rawState: ChangePointEmbeddableState) => {
-  const viewType = new BehaviorSubject<ChangePointDetectionViewType>(rawState.viewType);
-  const dataViewId = new BehaviorSubject<string>(rawState.dataViewId);
-  const fn = new BehaviorSubject(rawState.fn);
-  const metricField = new BehaviorSubject(rawState.metricField);
-  const splitField = new BehaviorSubject(rawState.splitField);
-  const partitions = new BehaviorSubject(rawState.partitions);
-  const maxSeriesToPlot = new BehaviorSubject(rawState.maxSeriesToPlot);
+export const changePointComparators: StateComparators<ChangePointEmbeddableCustomState> = {
+  viewType: 'referenceEquality',
+  dataViewId: 'referenceEquality',
+  fn: 'referenceEquality',
+  metricField: 'referenceEquality',
+  splitField: 'referenceEquality',
+  partitions: 'deepEquality',
+  maxSeriesToPlot: 'referenceEquality',
+};
+
+export const initializeChangePointControls = (initialState: ChangePointEmbeddableState) => {
+  const viewType = new BehaviorSubject<ChangePointDetectionViewType>(initialState.viewType);
+  const dataViewId = new BehaviorSubject<string>(initialState.dataViewId);
+  const fn = new BehaviorSubject(initialState.fn);
+  const metricField = new BehaviorSubject(initialState.metricField);
+  const splitField = new BehaviorSubject(initialState.splitField);
+  const partitions = new BehaviorSubject(initialState.partitions);
+  const maxSeriesToPlot = new BehaviorSubject(initialState.maxSeriesToPlot);
 
   const updateUserInput = (update: ChangePointEmbeddableCustomState) => {
     viewType.next(update.viewType);
@@ -35,7 +45,7 @@ export const initializeChangePointControls = (rawState: ChangePointEmbeddableSta
     maxSeriesToPlot.next(update.maxSeriesToPlot);
   };
 
-  const serializeChangePointChartState = (): ChangePointEmbeddableCustomState => {
+  const getLatestState = (): ChangePointEmbeddableCustomState => {
     return {
       viewType: viewType.getValue(),
       dataViewId: dataViewId.getValue(),
@@ -47,18 +57,8 @@ export const initializeChangePointControls = (rawState: ChangePointEmbeddableSta
     };
   };
 
-  const changePointControlsComparators: StateComparators<ChangePointEmbeddableCustomState> = {
-    viewType: [viewType, (arg) => viewType.next(arg)],
-    dataViewId: [dataViewId, (arg) => dataViewId.next(arg)],
-    fn: [fn, (arg) => fn.next(arg)],
-    metricField: [metricField, (arg) => metricField.next(arg)],
-    splitField: [splitField, (arg) => splitField.next(arg)],
-    partitions: [partitions, (arg) => partitions.next(arg), fastIsEqual],
-    maxSeriesToPlot: [maxSeriesToPlot, (arg) => maxSeriesToPlot.next(arg)],
-  };
-
   return {
-    changePointControlsApi: {
+    api: {
       viewType,
       dataViewId,
       fn,
@@ -68,7 +68,24 @@ export const initializeChangePointControls = (rawState: ChangePointEmbeddableSta
       maxSeriesToPlot,
       updateUserInput,
     } as unknown as ChangePointComponentApi,
-    serializeChangePointChartState,
-    changePointControlsComparators,
+    anyStateChange$: merge(
+      viewType,
+      dataViewId,
+      fn,
+      metricField,
+      splitField,
+      partitions,
+      maxSeriesToPlot
+    ).pipe(map(() => undefined)),
+    getLatestState,
+    reinitializeState: (lastSavedState: ChangePointEmbeddableCustomState) => {
+      viewType.next(lastSavedState.viewType);
+      dataViewId.next(lastSavedState.dataViewId);
+      fn.next(lastSavedState.fn);
+      metricField.next(lastSavedState.metricField);
+      splitField.next(lastSavedState.splitField);
+      partitions.next(lastSavedState.partitions);
+      maxSeriesToPlot.next(lastSavedState.maxSeriesToPlot);
+    },
   };
 };

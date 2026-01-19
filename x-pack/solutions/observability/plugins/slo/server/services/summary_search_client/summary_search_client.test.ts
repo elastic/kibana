@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Pagination } from '@kbn/slo-schema/src/models/pagination';
+import type { Pagination } from '@kbn/slo-schema/src/models/pagination';
 import { createSLO } from '../fixtures/slo';
 import {
   aHitFromSummaryIndex,
   aHitFromTempSummaryIndex,
   aSummaryDocument,
 } from '../fixtures/summary_search_document';
+import { DEFAULT_SETTINGS } from '../slo_settings_repository';
 import { DefaultSummarySearchClient } from './summary_search_client';
 import type { Sort, SummarySearchClient } from './types';
 
@@ -27,25 +30,18 @@ const defaultPagination: Pagination = {
 };
 
 describe('Summary Search Client', () => {
-  let esClientMock: ElasticsearchClientMock;
+  let scopedClusterClient: IScopedClusterClient;
   let service: SummarySearchClient;
+  let esClientMock: ElasticsearchClientMock;
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    const soClientMock = {
-      getCurrentNamespace: jest.fn().mockReturnValue('default'),
-      get: jest.fn().mockResolvedValue({
-        attributes: {
-          selectedRemoteClusters: [],
-          useAllRemoteClusters: false,
-        },
-      }),
-    } as any;
+    scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    esClientMock = scopedClusterClient.asCurrentUser as ElasticsearchClientMock;
     service = new DefaultSummarySearchClient(
-      esClientMock,
-      soClientMock,
+      scopedClusterClient,
       loggerMock.create(),
-      'default'
+      'default',
+      DEFAULT_SETTINGS
     );
   });
 
@@ -148,7 +144,7 @@ describe('Summary Search Client', () => {
                     {
                       range: {
                         summaryUpdatedAt: {
-                          gte: 'now-2h',
+                          gte: 'now-48h',
                         },
                       },
                     },
@@ -233,8 +229,25 @@ describe('Summary Search Client', () => {
               { term: { spaceId: 'default' } },
               {
                 bool: {
-                  minimum_should_match: 1,
-                  should: [{ range: { summaryUpdatedAt: { gt: 'now-2h' } } }],
+                  filter: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              summaryUpdatedAt: {
+                                gt: 'now-2h',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  must: [],
+                  must_not: [],
+                  should: [],
                 },
               },
             ],

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
-import { AlertingAuthorization } from '../../../../authorization';
+import type { AlertingAuthorization } from '../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -26,10 +26,12 @@ import { asyncForEach } from '@kbn/std';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client';
-import { ScheduleBackfillParam } from './types';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
+import type { ScheduleBackfillParam } from './types';
 import { adHocRunStatus } from '../../../../../common/constants';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { backfillInitiator } from '../../../../../common/constants';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -184,7 +186,13 @@ const mockCreatePointInTimeFinderAsInternalUser = (
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {
   return {
     ruleId: '1',
-    start: '2023-11-16T08:00:00.000Z',
+    ranges: [
+      {
+        start: '2023-11-16T08:00:00.000Z',
+        end: '2023-11-16T08:05:00.000Z',
+      },
+    ],
+    initiator: backfillInitiator.USER,
     runActions: true,
     ...overwrites,
   };
@@ -231,6 +239,7 @@ describe('scheduleBackfill()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
@@ -254,7 +263,13 @@ describe('scheduleBackfill()', () => {
   afterAll(() => jest.useRealTimers());
 
   test('should successfully schedule backfill', async () => {
-    const mockData = [getMockData(), getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' })];
+    const mockData = [
+      getMockData(),
+      getMockData({
+        ruleId: '2',
+        ranges: [{ start: '2023-11-17T08:00:00.000Z', end: '2023-11-17T08:05:00.000Z' }],
+      }),
+    ];
     rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
 
     const result = await rulesClient.scheduleBackfill(mockData);
@@ -424,6 +439,7 @@ describe('scheduleBackfill()', () => {
             alertTypeId: existingDecryptedRule1.attributes.alertTypeId,
             apiKey: existingDecryptedRule1.attributes.apiKey,
             apiKeyCreatedByUser: existingDecryptedRule1.attributes.apiKeyCreatedByUser,
+            artifacts: { dashboards: [], investigation_guide: { blob: '' } },
             consumer: existingDecryptedRule1.attributes.consumer,
             createdAt: new Date(existingDecryptedRule1.attributes.createdAt),
             createdBy: existingDecryptedRule1.attributes.createdBy,
@@ -455,6 +471,7 @@ describe('scheduleBackfill()', () => {
             alertTypeId: existingDecryptedRule2.attributes.alertTypeId,
             apiKey: existingDecryptedRule2.attributes.apiKey,
             apiKeyCreatedByUser: existingDecryptedRule2.attributes.apiKeyCreatedByUser,
+            artifacts: { dashboards: [], investigation_guide: { blob: '' } },
             consumer: existingDecryptedRule2.attributes.consumer,
             createdAt: new Date(existingDecryptedRule2.attributes.createdAt),
             createdBy: existingDecryptedRule2.attributes.createdBy,
@@ -494,13 +511,13 @@ describe('scheduleBackfill()', () => {
         // @ts-expect-error
         rulesClient.scheduleBackfill(getMockData())
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true}\\" - expected value of type [array] but got [Object]"`
+        `"Error validating backfill schedule parameters \\"{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true}\\" - expected value of type [array] but got [Object]"`
       );
 
       await expect(
         rulesClient.scheduleBackfill([getMockData({ ruleId: 1 })])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":1,\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true}]\\" - [0.ruleId]: expected value of type [string] but got [number]"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":1,\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true}]\\" - [0.ruleId]: expected value of type [string] but got [number]"`
       );
     });
 
@@ -510,12 +527,16 @@ describe('scheduleBackfill()', () => {
           getMockData(),
           getMockData({
             ruleId: '2',
-            start: '2023-11-17T08:00:00.000Z',
-            end: '2023-11-17T08:00:00.000Z',
+            ranges: [
+              {
+                start: '2023-11-17T08:00:00.000Z',
+                end: '2023-11-17T08:00:00.000Z',
+              },
+            ],
           }),
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"runActions\\":true,\\"end\\":\\"2023-11-17T08:00:00.000Z\\"}]\\" - [1]: Backfill end must be greater than backfill start"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"ranges\\":[{\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"end\\":\\"2023-11-17T08:00:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true}]\\" - [1]: Backfill end must be greater than backfill start"`
       );
 
       await expect(
@@ -523,12 +544,16 @@ describe('scheduleBackfill()', () => {
           getMockData(),
           getMockData({
             ruleId: '2',
-            start: '2023-11-17T08:00:00.000Z',
-            end: '2023-11-16T08:00:00.000Z',
+            ranges: [
+              {
+                start: '2023-11-17T08:00:00.000Z',
+                end: '2023-11-16T08:00:00.000Z',
+              },
+            ],
           }),
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"runActions\\":true,\\"end\\":\\"2023-11-16T08:00:00.000Z\\"}]\\" - [1]: Backfill end must be greater than backfill start"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"ranges\\":[{\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:00:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true}]\\" - [1]: Backfill end must be greater than backfill start"`
       );
     });
 
@@ -573,7 +598,10 @@ describe('scheduleBackfill()', () => {
     test('should throw error if any scheduled rule types are disabled', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T08:05:00.000Z' }],
+        }),
       ];
       ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementationOnce(() => {
         throw new Error('Not enabled');
@@ -587,7 +615,15 @@ describe('scheduleBackfill()', () => {
     test('should throw error if any scheduled rule types are not authorized for this user', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [
+            {
+              start: '2023-11-16T08:00:00.000Z',
+              end: '2023-11-17T08:00:00.000Z',
+            },
+          ],
+        }),
       ];
       authorization.ensureAuthorized.mockImplementationOnce(() => {
         throw new Error('Unauthorized');
@@ -613,7 +649,10 @@ describe('scheduleBackfill()', () => {
     test('should throw if error bulk scheduling backfill tasks', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       backfillClient.bulkQueue.mockImplementationOnce(() => {
         throw new Error('error bulk queuing!');
@@ -626,5 +665,11 @@ describe('scheduleBackfill()', () => {
       expect(unsecuredSavedObjectsClient.find).toHaveBeenCalled();
       expect(backfillClient.bulkQueue).toHaveBeenCalled();
     });
+  });
+
+  test('should reject initiatorId when initiator is not system', async () => {
+    await expect(
+      rulesClient.scheduleBackfill([getMockData({ initiatorId: 'id', initiator: 'user' })])
+    ).rejects.toThrow('Initiator ID can only be used with system initiator');
   });
 });

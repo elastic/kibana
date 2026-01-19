@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const bodySchema = schema.any();
@@ -37,7 +37,7 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
         expand_wildcards: 'none' as const,
         reopen: true,
         index: indexName,
-        body: request.body,
+        settings: request.body,
       };
 
       try {

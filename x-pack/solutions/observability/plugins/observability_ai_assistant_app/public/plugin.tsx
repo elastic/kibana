@@ -17,8 +17,13 @@ import {
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
-import { createAppService, AIAssistantAppService } from '@kbn/ai-assistant';
+import type { AIAssistantAppService } from '@kbn/ai-assistant';
+import { createAppService } from '@kbn/ai-assistant';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { observabilityAppId } from '@kbn/observability-plugin/common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { firstValueFrom } from 'rxjs';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -73,13 +78,19 @@ export class ObservabilityAIAssistantAppPlugin
         },
       ],
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
-        // Load application bundle and Get start services
-        const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
-          import('./application'),
-          coreSetup.getStartServices() as Promise<
-            [CoreStart, ObservabilityAIAssistantAppPluginStartDependencies, unknown]
-          >,
-        ]);
+        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+
+        const chatExperience$ =
+          coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+
+        // Restrict access when the chat experience is set to Agent (reactive while mounted)
+        const initialChatExperience = await firstValueFrom(chatExperience$);
+        if (initialChatExperience === AIChatExperience.Agent) {
+          coreStart.application.navigateToApp(observabilityAppId, { path: '/' });
+          return () => {};
+        }
+
+        const { Application } = await import('./application');
 
         ReactDOM.render(
           <Application
@@ -91,7 +102,14 @@ export class ObservabilityAIAssistantAppPlugin
           appMountParameters.element
         );
 
+        const subscription = chatExperience$.subscribe((chatExperience) => {
+          if (chatExperience === AIChatExperience.Agent) {
+            coreStart.application.navigateToApp(observabilityAppId, { path: '/' });
+          }
+        });
+
         return () => {
+          subscription.unsubscribe();
           ReactDOM.unmountComponentAtNode(appMountParameters.element);
         };
       },
@@ -107,7 +125,9 @@ export class ObservabilityAIAssistantAppPlugin
     const appService = (this.appService = createAppService({
       pluginsStart,
     }));
+
     const isEnabled = appService.isEnabled();
+
     if (isEnabled) {
       coreStart.chrome.navControls.registerRight({
         mount: (element) => {
@@ -122,7 +142,9 @@ export class ObservabilityAIAssistantAppPlugin
             () => {}
           );
 
-          return () => {};
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
         },
         // right before the user profile
         order: 1001,
@@ -159,9 +181,13 @@ export class ObservabilityAIAssistantAppPlugin
       )
     );
 
-    pluginsStart.triggersActionsUi.actionTypeRegistry.register(
-      getObsAIAssistantConnectorType(service)
-    );
+    const isObservabilityAIAssistantEnabled = service.isEnabled();
+    if (isObservabilityAIAssistantEnabled) {
+      pluginsStart.triggersActionsUi.actionTypeRegistry.register(
+        getObsAIAssistantConnectorType(service)
+      );
+    }
+
     return {
       RootCauseAnalysisContainer: LazilyLoadedRootCauseAnalysisContainer,
     };

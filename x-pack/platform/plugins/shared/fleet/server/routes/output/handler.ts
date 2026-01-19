@@ -37,25 +37,18 @@ function ensureNoDuplicateSecrets(output: Partial<Output>) {
   if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
     throw Boom.badRequest('Cannot specify both password and secrets.password');
   }
-  if (
-    (output.type === outputType.Kafka || output.type === outputType.Logstash) &&
-    output.ssl?.key &&
-    output.secrets?.ssl?.key
-  ) {
+  if (output.ssl?.key && output.secrets?.ssl?.key) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
   }
-  if (
-    output.type === outputType.RemoteElasticsearch &&
-    output.service_token &&
-    output.secrets?.service_token
-  ) {
-    throw Boom.badRequest('Cannot specify both service_token and secrets.service_token');
+  if (output.type === outputType.RemoteElasticsearch) {
+    if (output.service_token && output.secrets?.service_token) {
+      throw Boom.badRequest('Cannot specify both service_token and secrets.service_token');
+    }
   }
 }
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
-  const outputs = await outputService.list(soClient);
+  const outputs = await outputService.list();
 
   const body: GetOutputsResponse = {
     items: outputs.items,
@@ -67,12 +60,11 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   return response.ok({ body });
 };
 
-export const getOneOuputHandler: RequestHandler<
+export const getOneOutputHandler: RequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    const output = await outputService.get(soClient, request.params.outputId);
+    const output = await outputService.get(request.params.outputId);
 
     const body: GetOneOutputResponse = {
       item: output,
@@ -103,7 +95,7 @@ export const putOutputHandler: RequestHandler<
     await validateOutputServerless(outputUpdate, soClient, request.params.outputId);
     ensureNoDuplicateSecrets(outputUpdate);
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
-    const output = await outputService.get(soClient, request.params.outputId);
+    const output = await outputService.get(request.params.outputId);
     if (output.is_default || output.is_default_monitoring) {
       await agentPolicyService.bumpAllAgentPolicies(esClient);
     } else {
@@ -166,10 +158,10 @@ async function validateOutputServerless(
   if (outputId && !output.hosts) {
     return;
   }
-  const defaultOutput = await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
+  const defaultOutput = await outputService.get(SERVERLESS_DEFAULT_OUTPUT_ID);
   let originalOutput;
   if (outputId) {
-    originalOutput = await outputService.get(soClient, outputId);
+    originalOutput = await outputService.get(outputId);
   }
   const type = output.type || originalOutput?.type;
   if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
@@ -182,9 +174,8 @@ async function validateOutputServerless(
 export const deleteOutputHandler: RequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    await outputService.delete(soClient, request.params.outputId);
+    await outputService.delete(request.params.outputId);
 
     const body: DeleteOutputResponse = {
       id: request.params.outputId,

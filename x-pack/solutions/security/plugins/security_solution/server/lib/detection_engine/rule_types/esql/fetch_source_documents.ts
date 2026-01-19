@@ -5,11 +5,23 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logQueryRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
+import type { SignalSource } from '../types';
+import { convertExternalIdsToDSL } from './build_esql_search_request';
+import type { ExcludedDocument } from './types';
+
+export interface FetchedDocument {
+  fields: estypes.SearchHit['fields'];
+  _source?: SignalSource;
+  _index: estypes.SearchHit['_index'];
+  _id: estypes.SearchHit['_id'];
+  _version: estypes.SearchHit['_version'];
+}
 
 interface FetchSourceDocumentsArgs {
   isRuleAggregating: boolean;
@@ -17,6 +29,9 @@ interface FetchSourceDocumentsArgs {
   index: string[];
   results: Array<Record<string, string | null>>;
   loggedRequests?: RulePreviewLoggedRequest[];
+  hasLoggedRequestsReachedLimit: boolean;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  excludedDocuments: Record<string, ExcludedDocument[]>;
 }
 /**
  * fetches source documents by list of their ids
@@ -29,7 +44,10 @@ export const fetchSourceDocuments = async ({
   esClient,
   index,
   loggedRequests,
-}: FetchSourceDocumentsArgs): Promise<Record<string, { fields: estypes.SearchHit['fields'] }>> => {
+  hasLoggedRequestsReachedLimit,
+  runtimeMappings,
+  excludedDocuments,
+}: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument[]>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
       acc.push(doc._id);
@@ -48,40 +66,59 @@ export const fetchSourceDocuments = async ({
         filter: {
           ids: { values: ids },
         },
+        ...(Object.keys(excludedDocuments).length > 0
+          ? {
+              must_not: convertExternalIdsToDSL(excludedDocuments, new Set(ids)),
+            }
+          : {}),
       },
     },
   };
 
   const searchBody = {
     query: idsQuery.query,
-    _source: false,
+    _source: true,
     fields: ['*'],
+    size: 2 * ids.length, // allows supporting multiple documents with the same _id across different indices
+    runtime_mappings: runtimeMappings,
   };
   const ignoreUnavailable = true;
 
   if (loggedRequests) {
     loggedRequests.push({
-      request: logQueryRequest(searchBody, { index, ignoreUnavailable }),
+      request: hasLoggedRequestsReachedLimit
+        ? undefined
+        : logQueryRequest(searchBody, { index, ignoreUnavailable }),
       description: i18n.FIND_SOURCE_DOCUMENTS_REQUEST_DESCRIPTION,
     });
   }
 
-  const response = await esClient.search({
+  const searchStart = performance.now();
+  const response = await esClient.search<SignalSource>({
     index,
-    body: searchBody,
+    ...searchBody,
     ignore_unavailable: ignoreUnavailable,
   });
 
   if (loggedRequests) {
-    loggedRequests[loggedRequests.length - 1].duration = response.took;
+    loggedRequests[loggedRequests.length - 1].duration = Math.round(
+      performance.now() - searchStart
+    );
   }
 
-  return response.hits.hits.reduce<Record<string, { fields: estypes.SearchHit['fields'] }>>(
-    (acc, hit) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      acc[hit._id!] = { fields: hit.fields };
-      return acc;
-    },
-    {}
-  );
+  return response.hits.hits.reduce<Record<string, FetchedDocument[]>>((acc, hit) => {
+    if (hit._id) {
+      if (!acc[hit._id]) {
+        acc[hit._id] = [];
+      }
+      acc[hit._id].push({
+        fields: hit.fields,
+        _source: hit._source,
+        _id: hit._id,
+        _index: hit._index,
+        _version: hit._version,
+      });
+    }
+    return acc;
+  }, {});
 };

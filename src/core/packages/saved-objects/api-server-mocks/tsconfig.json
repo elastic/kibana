@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -15,6 +15,7 @@
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/logging-mocks",
     "@kbn/core-saved-objects-server",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",

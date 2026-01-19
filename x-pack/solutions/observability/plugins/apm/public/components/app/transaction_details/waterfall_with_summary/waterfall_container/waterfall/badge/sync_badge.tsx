@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { AgentName } from '../../../../../../../../typings/es_schemas/ui/fields/agent';
@@ -24,6 +24,10 @@ const BLOCKING_LABEL = i18n.translate('xpack.apm.transactionDetails.syncBadgeBlo
 
 const ASYNC_LABEL = i18n.translate('xpack.apm.transactionDetails.syncBadgeAsync', {
   defaultMessage: 'async',
+});
+
+const TOOLTIP_CONTENT = i18n.translate('xpack.apm.transactionDetails.syncBadgeTooltip', {
+  defaultMessage: 'Indicates whether the span was executed synchronously or asynchronously.',
 });
 
 // true will show blocking, false will show async.
@@ -62,5 +66,9 @@ export function SyncBadge({ sync, agentName }: SyncBadgeProps) {
     return null;
   }
 
-  return <EuiBadge>{syncLabel}</EuiBadge>;
+  return (
+    <EuiToolTip content={TOOLTIP_CONTENT}>
+      <EuiBadge tabIndex={0}>{syncLabel}</EuiBadge>
+    </EuiToolTip>
+  );
 }

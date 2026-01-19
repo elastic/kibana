@@ -13,7 +13,7 @@ import {
   MAX_LATEST_ALERTS,
   MIN_LATEST_ALERTS,
 } from '../assistant/settings/alerts_settings/alerts_settings';
-import { KnowledgeBaseConfig } from '../assistant/types';
+import type { KnowledgeBaseConfig } from '../assistant/types';
 
 const nonDefaultMin = MIN_LATEST_ALERTS + 5000;
 const nonDefaultMax = nonDefaultMin + 5000;

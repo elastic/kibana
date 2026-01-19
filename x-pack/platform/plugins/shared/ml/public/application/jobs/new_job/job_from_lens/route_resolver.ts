@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { LensPublicStart, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { QuickLensJobCreator } from './quick_create_job';
 import type { MlApi } from '../../../services/ml_api_service';
@@ -23,7 +23,7 @@ interface Dependencies {
   dataViews: DataViewsContract;
   kibanaConfig: IUiSettingsClient;
   timeFilter: TimefilterContract;
-  dashboardService: DashboardStart;
+  share: SharePluginStart;
   mlApi: MlApi;
 }
 export async function resolver(
@@ -35,7 +35,7 @@ export async function resolver(
   filtersRisonString: string,
   layerIndexRisonString: string
 ) {
-  const { dataViews, lens, mlApi, timeFilter, kibanaConfig, dashboardService } = deps;
+  const { dataViews, lens, mlApi, timeFilter, kibanaConfig, share } = deps;
   if (lensSavedObjectRisonString === undefined) {
     throw new Error('Cannot create visualization');
   }
@@ -56,7 +56,7 @@ export async function resolver(
     dataViews,
     kibanaConfig,
     timeFilter,
-    dashboardService,
+    share,
     mlApi
   );
   await jobCreator.createAndStashADJob(vis, from, to, query, filters, layerIndex);

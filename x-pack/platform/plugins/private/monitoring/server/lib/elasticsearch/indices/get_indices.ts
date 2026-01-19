@@ -11,8 +11,8 @@ import { ElasticsearchMetric } from '../../metrics';
 import { createQuery } from '../../create_query';
 import { calculateRate } from '../../calculate_rate';
 import { getUnassignedShards } from '../shards';
-import { ElasticsearchResponse } from '../../../../common/types/es';
-import { LegacyRequest } from '../../../types';
+import type { ElasticsearchResponse } from '../../../../common/types/es';
+import type { LegacyRequest } from '../../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
@@ -148,27 +148,25 @@ export function buildGetIndicesQuery(
       'hits.hits.inner_hits.earliest.hits.hits._source.index_stats.total.search.query_total',
       'hits.hits.inner_hits.earliest.hits.hits._source.elasticsearch.index.total.search.query_total',
     ],
-    body: {
-      query: createQuery({
-        type,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        clusterUuid,
-        metric: metricFields,
-        filters,
-      }),
-      collapse: {
-        field: 'index_stats.index',
-        inner_hits: {
-          name: 'earliest',
-          size: 1,
-          sort: [{ timestamp: { order: 'asc', unmapped_type: 'long' } }],
-        },
+    query: createQuery({
+      type,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      clusterUuid,
+      metric: metricFields,
+      filters,
+    }),
+    collapse: {
+      field: 'index_stats.index',
+      inner_hits: {
+        name: 'earliest',
+        size: 1,
+        sort: [{ timestamp: { order: 'asc', unmapped_type: 'long' } }],
       },
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
   };
 }
 

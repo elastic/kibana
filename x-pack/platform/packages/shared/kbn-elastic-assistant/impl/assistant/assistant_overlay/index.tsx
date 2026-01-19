@@ -11,30 +11,26 @@ import { EuiFlyoutResizable } from '@elastic/eui';
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
-import { createGlobalStyle } from 'styled-components';
-import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
+import { isMac } from '@kbn/shared-ux-utility';
+import type { ShowAssistantOverlayProps } from '../../assistant_context';
+import { useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
-/**
- * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
- * component currently has focus and any specific context it may provide through the SAssInterface.
- */
-
-export const UnifiedTimelineGlobalStyles = createGlobalStyle`
-  body:has(.timeline-portal-overlay-mask) .euiOverlayMask {
-    z-index: 1003 !important;
-  }
-`;
+import {
+  useAssistantLastConversation,
+  useAssistantSpaceId,
+  type LastConversation,
+} from '../use_space_aware_context';
 
 export const AssistantOverlay = React.memo(() => {
+  const spaceId = useAssistantSpaceId();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  // Why is this named Title and not Id?
-  const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
+  // id if the conversation exists in the data stream, title if it's a new conversation
+  const [lastConversation, setSelectedConversation] = useState<LastConversation | undefined>(
+    undefined
+  );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay, getLastConversationId } =
-    useAssistantContext();
+  const { assistantTelemetry, setShowAssistantOverlay } = useAssistantContext();
+  const { getLastConversation } = useAssistantLastConversation({ spaceId });
 
   const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
 
@@ -44,16 +40,16 @@ export const AssistantOverlay = React.memo(() => {
       ({
         showOverlay: so,
         promptContextId: pid,
-        conversationTitle: cTitle,
+        selectedConversation,
       }: ShowAssistantOverlayProps) => {
-        const conversationId = getLastConversationId(cTitle);
-        if (so) assistantTelemetry?.reportAssistantInvoked({ conversationId, invokedBy: 'click' });
+        const nextConversation = getLastConversation(selectedConversation);
+        if (so) assistantTelemetry?.reportAssistantInvoked({ invokedBy: 'click' });
 
         setIsModalVisible(so);
         setPromptContextId(pid);
-        setConversationTitle(conversationId);
+        setSelectedConversation(nextConversation);
       },
-    [assistantTelemetry, getLastConversationId]
+    [assistantTelemetry, getLastConversation]
   );
   useEffect(() => {
     setShowAssistantOverlay(showOverlay);
@@ -63,16 +59,40 @@ export const AssistantOverlay = React.memo(() => {
   const handleShortcutPress = useCallback(() => {
     // Try to restore the last conversation on shortcut pressed
     if (!isModalVisible) {
-      setConversationTitle(getLastConversationId());
+      setSelectedConversation(getLastConversation());
       assistantTelemetry?.reportAssistantInvoked({
         invokedBy: 'shortcut',
-        conversationId: getLastConversationId(),
       });
     }
 
     setIsModalVisible(!isModalVisible);
-  }, [isModalVisible, getLastConversationId, assistantTelemetry]);
+  }, [isModalVisible, getLastConversation, assistantTelemetry]);
 
+  const hasOpenedFromUrl = useRef(false);
+
+  const handleOpenFromUrlState = useCallback(
+    (id: string) => {
+      if (!isModalVisible) {
+        setSelectedConversation(getLastConversation({ id }));
+        assistantTelemetry?.reportAssistantInvoked({
+          invokedBy: 'url',
+        });
+        setIsModalVisible(true);
+      }
+    },
+    [isModalVisible, getLastConversation, assistantTelemetry]
+  );
+
+  useEffect(() => {
+    if (hasOpenedFromUrl.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const assistantId = params.get('assistant');
+    if (assistantId && !isModalVisible) {
+      hasOpenedFromUrl.current = true;
+      handleOpenFromUrlState(assistantId);
+    }
+  }, [handleOpenFromUrlState, isModalVisible]);
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -85,12 +105,14 @@ export const AssistantOverlay = React.memo(() => {
   );
   useEvent('keydown', onKeyDown);
 
+  const flyoutRef = useRef<HTMLElement>(null);
+
   // Modal control functions
   const cleanupAndCloseModal = useCallback(() => {
     setIsModalVisible(false);
     setPromptContextId(undefined);
-    setConversationTitle(conversationTitle);
-  }, [conversationTitle]);
+    setSelectedConversation(lastConversation);
+  }, [lastConversation]);
 
   const handleCloseModal = useCallback(() => {
     cleanupAndCloseModal();
@@ -111,8 +133,6 @@ export const AssistantOverlay = React.memo(() => {
     });
   }, []);
 
-  const flyoutRef = useRef<HTMLDivElement>();
-
   if (!isModalVisible) return null;
 
   return (
@@ -132,14 +152,13 @@ export const AssistantOverlay = React.memo(() => {
         hideCloseButton
       >
         <Assistant
-          conversationTitle={conversationTitle}
+          lastConversation={lastConversation}
           promptContextId={promptContextId}
           onCloseFlyout={handleCloseModal}
           chatHistoryVisible={chatHistoryVisible}
           setChatHistoryVisible={toggleChatHistory}
         />
       </EuiFlyoutResizable>
-      <UnifiedTimelineGlobalStyles />
     </>
   );
 });

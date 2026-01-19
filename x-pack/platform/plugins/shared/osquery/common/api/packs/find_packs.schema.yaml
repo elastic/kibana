@@ -5,14 +5,57 @@ info:
 paths: { }
 components:
   schemas:
-    FindPacksRequestQuery:
+    FindPacksResponse:
       type: object
-      properties:
-        page:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
-        pageSize:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
-        sort:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
-        sortOrder:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+      properties: { }
+      example:
+        page: 1
+        pageSize: 10
+        total: 1
+        data:
+          - type: 'osquery-pack'
+            id: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+            namespaces:
+              - 'default'
+            attributes:
+              name: 'My Pack'
+              queries:
+                - query: 'select * from uptime;'
+                  interval: '3600'
+                  id: 'uptime'
+                  ecs_mapping:
+                    - host.uptime:
+                        field: 'total_seconds'
+              enabled: true
+              created_at: '2023-10-31T00:00:00Z'
+              updated_at: '2023-10-31T00:00:00Z'
+              created_by: 'elastic'
+              updated_by: 'elastic'
+              description: 'My pack description'
+        policy_ids: []
+    FindPackResponse:
+      type: object
+      properties: { }
+      example:
+        data:
+          id: "3c42c847-eb30-4452-80e0-728584042334"
+          type: "osquery-pack"
+          namespaces:
+            - "default"
+          updated_at: "2022-07-25T20:12:01.455Z"
+          name: "test_pack"
+          queries:
+            uptime:
+              interval: 3600
+              query: "select * from uptime"
+              ecs_mapping:
+                message:
+                  field: "days"
+          enabled: true
+          created_at: "2022-07-25T19:41:10.263Z"
+          created_by: "elastic"
+          updated_by: "elastic"
+          description: ""
+          policy_ids: [ ]
+          read_only: false  # true for prebuilt packs
+

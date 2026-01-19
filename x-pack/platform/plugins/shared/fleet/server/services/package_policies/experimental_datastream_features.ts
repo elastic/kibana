@@ -10,8 +10,6 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import { merge } from 'lodash';
 
-import { getRegistryDataStreamAssetBaseName } from '../../../common/services';
-
 import type { ExperimentalIndexingFeature } from '../../../common/types';
 import { PackageNotFoundError } from '../../errors';
 import type {
@@ -21,7 +19,7 @@ import type {
   IndexTemplateEntry,
 } from '../../types';
 import { appContextService } from '../app_context';
-import { prepareTemplate } from '../epm/elasticsearch/template/install';
+import { prepareDataStreamTemplates } from '../epm/elasticsearch/template/install';
 import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
 import { getInstalledPackageWithAssets } from '../epm/packages/get';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
@@ -66,26 +64,19 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     installation = installedPackageWithAssets.installation;
     const { packageInfo, paths, assetsMap } = installedPackageWithAssets;
 
-    // prepare template from package spec to find original index:false values
-    const templates = packageInfo.data_streams?.map((dataStream: any) => {
-      const experimentalDataStreamFeature =
-        packagePolicy.package?.experimental_data_stream_features?.find(
-          (datastreamFeature) =>
-            datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
-        );
-      return prepareTemplate({
-        packageInstallContext: {
-          assetsMap,
-          archiveIterator: createArchiveIteratorFromMap(assetsMap),
-          packageInfo,
-          paths,
-        },
-        dataStream,
-        experimentalDataStreamFeature,
-      });
-    });
+    const packageInstallContext = {
+      archiveIterator: createArchiveIteratorFromMap(assetsMap),
+      packageInfo,
+      paths,
+    };
+    const templates = await prepareDataStreamTemplates(
+      packageInfo.data_streams ?? [],
+      packageInstallContext,
+      assetsMap,
+      packagePolicy.package?.experimental_data_stream_features
+    );
 
-    templates?.forEach((template) => {
+    templates.forEach((template) => {
       Object.keys(template.componentTemplates).forEach((templateName) => {
         templateMappings[templateName] =
           (template.componentTemplates[templateName].template as any).mappings ?? {};
@@ -155,21 +146,32 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     });
 
     if (isSyntheticSourceOptInChanged) {
-      sourceModeSettings = {
-        _source: {
-          ...(featureMapEntry.features.synthetic_source ? { mode: 'synthetic' } : {}),
-        },
-      };
+      sourceModeSettings = featureMapEntry.features.synthetic_source
+        ? {
+            source: {
+              mode: 'synthetic',
+            },
+          }
+        : {};
     }
 
     if (componentTemplateChanged) {
       const body = {
         template: {
           ...componentTemplate.template,
+          settings: {
+            ...componentTemplate.template?.settings,
+            index: {
+              ...componentTemplate.template?.settings?.index,
+              mapping: {
+                ...componentTemplate.template?.settings?.index?.mapping,
+                ...sourceModeSettings,
+              },
+            },
+          },
           mappings: {
             ...mappings,
             properties: mappingsProperties ?? {},
-            ...sourceModeSettings,
           },
         },
       };
@@ -181,15 +183,24 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
       await esClient.cluster.putComponentTemplate({
         name: componentTemplateName,
-        body,
+        ...body,
         _meta: {
           has_experimental_data_stream_indexing_features: hasExperimentalDataStreamIndexingFeatures,
         },
       });
     }
 
-    const indexTemplate = indexTemplateRes.index_templates[0].index_template;
-    let updatedIndexTemplate = indexTemplate as IndexTemplate;
+    const rawIndexTemplate = indexTemplateRes.index_templates[0].index_template;
+
+    // Remove system-managed properties (dates) that cannot be set during create/update of index templates
+    const {
+      created_date: createdDate,
+      created_date_millis: createdDateMillis,
+      modified_date: modifiedDate,
+      modified_date_millis: modifiedDateMillis,
+      ...indexTemplate
+    } = rawIndexTemplate as IndexTemplate;
+    let updatedIndexTemplate = indexTemplate;
 
     if (isTSDBOptInChanged) {
       const indexTemplateBody = {
@@ -199,7 +210,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
           settings: {
             ...(indexTemplate.template?.settings ?? {}),
             index: {
-              mode: featureMapEntry.features.tsdb ? 'time_series' : null,
+              mode: featureMapEntry.features.tsdb ? 'time_series' : undefined,
             },
           },
         },
@@ -209,11 +220,14 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
       await esClient.indices.putIndexTemplate({
         name: featureMapEntry.data_stream,
-        // @ts-expect-error
-        body: indexTemplateBody,
+        ...indexTemplateBody,
         _meta: {
           has_experimental_data_stream_indexing_features: featureMapEntry.features.tsdb,
         },
+        // GET brings string | string[] | undefined but this PUT expects string[]
+        ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
+          ? [indexTemplateBody.ignore_missing_component_templates].flat()
+          : undefined,
       });
     }
 

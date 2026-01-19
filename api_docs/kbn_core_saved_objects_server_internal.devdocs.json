@@ -28,6 +28,8 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
+        "lineNumber": 116,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "any"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -56,6 +60,8 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
+                "lineNumber": 138,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -78,6 +84,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -92,6 +100,8 @@
                   "SavedObjectsSetupDeps"
                 ],
                 "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
+                "lineNumber": 143,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -114,6 +124,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
+            "lineNumber": 252,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -128,6 +140,8 @@
                   "SavedObjectsStartDeps"
                 ],
                 "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
+                "lineNumber": 252,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -146,6 +160,8 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/saved_objects_service.ts",
+            "lineNumber": 475,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -169,6 +185,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_create.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -183,6 +201,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_create.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -198,6 +218,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_create.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -219,6 +241,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_delete.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -233,6 +257,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_delete.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -248,6 +274,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_delete.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -269,6 +297,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -283,6 +313,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -298,6 +330,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_get.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -319,6 +353,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_resolve.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -333,6 +369,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_resolve.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -348,6 +386,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_resolve.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -369,6 +409,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_update.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -383,6 +425,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_update.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -398,6 +442,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_update.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -419,6 +465,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -433,6 +481,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -448,6 +498,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/create.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -469,6 +521,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -483,6 +537,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -498,6 +554,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/delete.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -519,6 +577,8 @@
           ", { kibanaIndex, kibanaVersion }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -533,6 +593,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -548,6 +610,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/deprecations/delete_unknown_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -569,6 +633,8 @@
           ", { config, coreUsageData }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/export.ts",
+        "lineNumber": 135,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -583,6 +649,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/export.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -598,6 +666,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/export.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -619,6 +689,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/find.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -633,6 +705,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/find.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -648,6 +722,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/find.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -669,6 +745,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/get.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -683,6 +761,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/get.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -698,6 +778,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/get.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -719,6 +801,8 @@
           ", { config, coreUsageData }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/import.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -733,6 +817,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/import.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -748,279 +834,11 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/import.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerLegacyExportRoute",
-        "type": "Function",
-        "tags": [],
-        "label": "registerLegacyExportRoute",
-        "description": [],
-        "signature": [
-          "(router: ",
-          "InternalSavedObjectRouter",
-          ", { kibanaVersion, coreUsageData, logger, access, legacyDeprecationInfo, }: { kibanaVersion: string; coreUsageData: ",
-          "InternalCoreUsageDataSetup",
-          "; logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "common",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-common.Logger",
-            "text": "Logger"
-          },
-          "; access: ",
-          "RouteAccess",
-          "; legacyDeprecationInfo: ",
-          "RouteDeprecationInfo",
-          "; }) => void"
-        ],
-        "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyExportRoute.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "router",
-            "description": [],
-            "signature": [
-              "InternalSavedObjectRouter"
-            ],
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyExportRoute.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n    kibanaVersion,\n    coreUsageData,\n    logger,\n    access,\n    legacyDeprecationInfo,\n  }",
-            "description": [],
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.kibanaVersion",
-                "type": "string",
-                "tags": [],
-                "label": "kibanaVersion",
-                "description": [],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.coreUsageData",
-                "type": "Object",
-                "tags": [],
-                "label": "coreUsageData",
-                "description": [],
-                "signature": [
-                  "InternalCoreUsageDataSetup"
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.logger",
-                "type": "Object",
-                "tags": [],
-                "label": "logger",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/logging",
-                    "scope": "common",
-                    "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-common.Logger",
-                    "text": "Logger"
-                  }
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.access",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "access",
-                "description": [],
-                "signature": [
-                  "\"internal\" | \"public\""
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyExportRoute.$2.legacyDeprecationInfo",
-                "type": "Object",
-                "tags": [],
-                "label": "legacyDeprecationInfo",
-                "description": [],
-                "signature": [
-                  "RouteDeprecationInfo"
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-server-internal",
-        "id": "def-server.registerLegacyImportRoute",
-        "type": "Function",
-        "tags": [],
-        "label": "registerLegacyImportRoute",
-        "description": [],
-        "signature": [
-          "(router: ",
-          "InternalSavedObjectRouter",
-          ", { maxImportPayloadBytes, coreUsageData, logger, access, legacyDeprecationInfo, }: { maxImportPayloadBytes: number; coreUsageData: ",
-          "InternalCoreUsageDataSetup",
-          "; logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "common",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-common.Logger",
-            "text": "Logger"
-          },
-          "; access: ",
-          "RouteAccess",
-          "; legacyDeprecationInfo: ",
-          "RouteDeprecationInfo",
-          "; }) => void"
-        ],
-        "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyImportRoute.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "router",
-            "description": [],
-            "signature": [
-              "InternalSavedObjectRouter"
-            ],
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server-internal",
-            "id": "def-server.registerLegacyImportRoute.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n    maxImportPayloadBytes,\n    coreUsageData,\n    logger,\n    access,\n    legacyDeprecationInfo,\n  }",
-            "description": [],
-            "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.maxImportPayloadBytes",
-                "type": "number",
-                "tags": [],
-                "label": "maxImportPayloadBytes",
-                "description": [],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.coreUsageData",
-                "type": "Object",
-                "tags": [],
-                "label": "coreUsageData",
-                "description": [],
-                "signature": [
-                  "InternalCoreUsageDataSetup"
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.logger",
-                "type": "Object",
-                "tags": [],
-                "label": "logger",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/logging",
-                    "scope": "common",
-                    "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-common.Logger",
-                    "text": "Logger"
-                  }
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.access",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "access",
-                "description": [],
-                "signature": [
-                  "\"internal\" | \"public\""
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server-internal",
-                "id": "def-server.registerLegacyImportRoute.$2.legacyDeprecationInfo",
-                "type": "Object",
-                "tags": [],
-                "label": "legacyDeprecationInfo",
-                "description": [],
-                "signature": [
-                  "RouteDeprecationInfo"
-                ],
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "returnComment": [],
@@ -1041,6 +859,8 @@
           ">) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/migrate.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1055,6 +875,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/migrate.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1072,6 +894,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/migrate.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1093,6 +917,8 @@
           ", { config, coreUsageData }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve_import_errors.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1107,6 +933,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve_import_errors.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1122,6 +950,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve_import_errors.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1143,6 +973,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1157,6 +989,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1172,6 +1006,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/resolve.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1193,6 +1029,8 @@
           ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/routes/update.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1207,6 +1045,8 @@
               "InternalSavedObjectRouter"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/update.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1222,6 +1062,8 @@
               "RouteDependencies"
             ],
             "path": "src/core/packages/saved-objects/server-internal/src/routes/update.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1236,15 +1078,36 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-server.REMOVED_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "REMOVED_TYPES",
+        "description": [
+          "\nTypes that are no longer registered and need to be removed\nAs of 8.8, no new types are allowed to be removed.\nRemoving saved object types is not backward compatible"
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
         "id": "def-server.SAVED_OBJECT_TYPES_COUNT",
         "type": "number",
         "tags": [],
         "label": "SAVED_OBJECT_TYPES_COUNT",
         "description": [],
         "signature": [
-          "128"
+          "143"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1261,6 +1124,8 @@
           "\nDefines settings for the elasticsearch-js client used for the SO migrations"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1272,6 +1137,8 @@
             "label": "maxRetries",
             "description": [],
             "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
+            "lineNumber": 13,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1283,6 +1150,8 @@
             "label": "requestTimeout",
             "description": [],
             "path": "src/core/packages/saved-objects/server-internal/src/constants.ts",
+            "lineNumber": 13,
+            "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false
           }

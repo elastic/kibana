@@ -14,13 +14,16 @@ export type {
   AuditLogger,
 } from './src/audit';
 export type {
-  APIKeys,
   AuthenticationServiceStart,
+  NativeAPIKeysType,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+  UiamAPIKeysType,
 } from './src/authentication';
 export type {
   PrivilegeDeprecationsService,
@@ -70,7 +73,6 @@ export {
 export type {
   ElasticsearchPrivilegesType,
   KibanaPrivilegesType,
-  APIKeysService,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   InvalidateAPIKeyResult,
@@ -89,4 +91,3 @@ export {
   getRestApiKeyWithKibanaPrivilegesSchema,
 } from './src/authentication';
 export { getKibanaRoleSchema, elasticsearchRoleSchema, GLOBAL_RESOURCE } from './src/authorization';
-export { ApiOperation } from './src/authorization';

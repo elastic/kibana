@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { getSeverityColor, getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
+import { getFormattedSeverityScore, useSeverityColor } from '@kbn/ml-anomaly-utils';
 
 interface SeverityCellProps {
   /**
@@ -27,7 +27,8 @@ interface SeverityCellProps {
  */
 export const SeverityCell: FC<SeverityCellProps> = memo(({ score, isMultiBucketAnomaly }) => {
   const severity = getFormattedSeverityScore(score);
-  const color = getSeverityColor(score);
+  const color = useSeverityColor(score);
+
   return isMultiBucketAnomaly ? (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -41,6 +42,8 @@ export const SeverityCell: FC<SeverityCellProps> = memo(({ score, isMultiBucketA
       <EuiFlexItem grow={false}>{severity}</EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <EuiHealth color={color}>{severity}</EuiHealth>
+    <EuiHealth textSize="inherit" color={color}>
+      {severity}
+    </EuiHealth>
   );
 });

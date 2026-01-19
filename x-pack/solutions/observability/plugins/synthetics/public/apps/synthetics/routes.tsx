@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
-import React, { FC, useEffect } from 'react';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -20,7 +21,7 @@ import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shar
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { CertRefreshBtn, CertificateTitle, CertificatesPage } from './components/certificates';
 import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
-import { ClientPluginsStart } from '../../plugin';
+import type { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
 import { SyntheticsPageTemplateComponent } from './components/common/page_template/synthetics_page_template';
 import { getMonitorDetailsRoute } from './components/monitor_details/route_config';

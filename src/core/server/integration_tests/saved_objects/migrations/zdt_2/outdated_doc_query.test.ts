@@ -11,8 +11,8 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../jest_matchers';
-import { SavedObjectsModelVersionMap, SavedObject } from '@kbn/core-saved-objects-server';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import type { SavedObjectsModelVersionMap, SavedObject } from '@kbn/core-saved-objects-server';
+import { getKibanaMigratorTestKit, startElasticsearch } from '@kbn/migrator-test-kit';
 import { createType } from '../test_utils';
 import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 import {
@@ -52,7 +52,6 @@ describe('getOutdatedDocumentsQuery', () => {
 
     return createType({
       name: 'test-type',
-      switchToModelVersionAt: '8.0.0',
       modelVersions,
       mappings: {
         dynamic: false,
@@ -102,7 +101,7 @@ describe('getOutdatedDocumentsQuery', () => {
 
     await client.bulk({
       refresh: 'true',
-      body: bulkCreateParams,
+      operations: bulkCreateParams,
     });
 
     return { client };

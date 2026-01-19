@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Config } from '../types';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Config } from '../types';
 
 const eventIngestedCommonComponentTemplate = {
   _meta: {
@@ -20,7 +20,7 @@ const eventIngestedCommonComponentTemplate = {
         event: {
           properties: {
             ingested: {
-              type: 'date',
+              type: 'date' as const,
             },
           },
         },
@@ -30,10 +30,13 @@ const eventIngestedCommonComponentTemplate = {
 };
 
 export async function installDefaultComponentTemplate(
-  _config: Config,
+  config: Config,
   client: Client,
   logger: ToolingLog
 ) {
+  if (config.indexing.slashLogs) {
+    return Promise.resolve();
+  }
   logger.info('Installing base component template: kbn-data-forge_base');
   await client.cluster.putComponentTemplate({
     name: `kbn-data-forge@mappings`,

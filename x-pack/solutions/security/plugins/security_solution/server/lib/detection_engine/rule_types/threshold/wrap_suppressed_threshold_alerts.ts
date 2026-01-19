@@ -6,7 +6,7 @@
  */
 
 import objectHash from 'object-hash';
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
@@ -19,18 +19,16 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type {
-  BaseFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { ConfigType } from '../../../../config';
-import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
-import type { ThresholdBucket } from './types';
+import type { ThresholdCompositeBucket } from './types';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { transformBucketIntoHit } from './bulk_create_threshold_signals';
-import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { SecuritySharedParams } from '../types';
+import type { ThresholdRuleParams } from '../../rule_schema';
 
 /**
  * wraps suppressed threshold alerts
@@ -39,46 +37,24 @@ import type { ThresholdNormalized } from '../../../../../common/api/detection_en
  * populates alert's suppression fields
  */
 export const wrapSuppressedThresholdALerts = ({
+  sharedParams,
   buckets,
-  spaceId,
-  completeRule,
-  mergeStrategy,
-  indicesToQuery,
   buildReasonMessage,
-  alertTimestampOverride,
-  ruleExecutionLogger,
-  publicBaseUrl,
-  inputIndex,
   startedAt,
-  from,
-  to,
-  threshold,
-  intendedTimestamp,
 }: {
-  buckets: ThresholdBucket[];
-  spaceId: string;
-  completeRule: CompleteRule<ThresholdRuleParams>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  indicesToQuery: string[];
+  sharedParams: SecuritySharedParams<ThresholdRuleParams>;
+  buckets: ThresholdCompositeBucket[];
   buildReasonMessage: BuildReasonMessage;
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  inputIndex: string;
   startedAt: Date;
-  from: Date;
-  to: Date;
-  suppressionWindow: string;
-  threshold: ThresholdNormalized;
-  intendedTimestamp: Date | undefined;
-}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
+  const { completeRule, spaceId } = sharedParams;
   return buckets.map((bucket) => {
     const hit = transformBucketIntoHit(
       bucket,
-      inputIndex,
+      sharedParams.inputIndex.join(','),
       startedAt,
-      from,
-      threshold,
+      sharedParams.tuple.from.toDate(),
+      completeRule.ruleParams.threshold,
       completeRule.ruleParams.ruleId
     );
 
@@ -88,21 +64,12 @@ export const wrapSuppressedThresholdALerts = ({
 
     const instanceId = objectHash([suppressedValues, completeRule.alertId, spaceId]);
 
-    const baseAlert: BaseFieldsLatest = transformHitToAlert({
-      spaceId,
-      completeRule,
+    const baseAlert: DetectionAlertLatest = transformHitToAlert({
+      sharedParams,
       doc: hit,
-      mergeStrategy,
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage,
-      indicesToQuery,
-      alertTimestampOverride,
-      ruleExecutionLogger,
       alertUuid: id,
-      publicBaseUrl,
-      intendedTimestamp,
     });
 
     return {

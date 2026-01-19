@@ -74,7 +74,7 @@ export function ProgressCallout() {
               </EuiText>
             }
             position="top"
-            type="iInCircle"
+            type="info"
           />
         </EuiFlexGroup>
       }

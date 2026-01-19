@@ -195,6 +195,7 @@ export function CustomSelectionTable({
       <EuiCheckbox
         id={`${mobile ? `mobile-` : ''}${selectAllCheckboxId}`}
         label={mobile ? selectAll : null}
+        aria-label={selectAll}
         checked={areAllItemsSelected()}
         onChange={toggleAll}
       />
@@ -280,15 +281,27 @@ export function CustomSelectionTable({
                   }
                   id={`${item[tableItemId]}-checkbox`}
                   data-test-subj={`${item[tableItemId]}-checkbox`}
+                  aria-label={i18n.translate('xpack.ml.jobSelector.customTable.checkboxAriaLabel', {
+                    defaultMessage: 'Select job {itemId}',
+                    values: { itemId: item[tableItemId] },
+                  })}
                   checked={isItemSelected(item[tableItemId])}
                   onChange={() => toggleItem(item[tableItemId])}
                 />
               )}
               {singleSelection && (
                 <EuiRadio
+                  name="jobSelection"
                   id={item[tableItemId]}
                   data-test-subj={`${item[tableItemId]}-radio-button`}
                   checked={isItemSelected(item[tableItemId])}
+                  aria-label={i18n.translate(
+                    'xpack.ml.jobSelector.customTable.singleSelectionRadioButtonAriaLabel',
+                    {
+                      defaultMessage: 'Select job {itemId}',
+                      values: { itemId: item[tableItemId] },
+                    }
+                  )}
                   onChange={() => toggleItem(item[tableItemId])}
                   disabled={radioDisabledCheck !== undefined ? radioDisabledCheck(item) : undefined}
                 />
@@ -369,7 +382,7 @@ export function CustomSelectionTable({
             fullWidth
             isInvalid={error !== null}
             error={getError(error)}
-            style={{ maxHeight: '0px' }}
+            css={{ maxHeight: '0px' }}
           >
             <Fragment />
           </EuiFormRow>

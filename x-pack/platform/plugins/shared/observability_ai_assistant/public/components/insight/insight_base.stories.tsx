@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
 
-import { FindActionResult } from '@kbn/actions-plugin/server';
+import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InsightBase as Component, InsightBaseProps } from './insight_base';
+import type { InsightBaseProps } from './insight_base';
+import { InsightBase as Component } from './insight_base';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
@@ -24,10 +24,6 @@ export default {
   title: 'app/Molecules/Insight',
   decorators: [KibanaReactStorybookDecorator],
 };
-
-const Template: ComponentStory<typeof Component> = (props: InsightBaseProps) => (
-  <Component {...props} />
-);
 
 const defaultProps: InsightBaseProps = {
   title: 'What is the root cause of performance degradation in my service?',
@@ -47,6 +43,8 @@ const defaultProps: InsightBaseProps = {
         loading: false,
         selectConnector: () => {},
         reloadConnectors: () => {},
+        getConnector: () => undefined,
+        isConnectorSelectionRestricted: false,
       }}
       onEditPrompt={() => {}}
     />
@@ -91,5 +89,6 @@ Morbi non faucibus massa. Aliquam sed augue in eros ornare luctus sit amet cursu
   isOpen: false,
 };
 
-export const Insight = Template.bind({});
-Insight.args = defaultProps;
+export const Insight = {
+  args: defaultProps,
+};

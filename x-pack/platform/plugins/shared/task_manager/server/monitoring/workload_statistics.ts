@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, timer } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest, timer } from 'rxjs';
 import { mergeMap, map, filter, switchMap, catchError } from 'rxjs';
-import { Logger } from '@kbn/core/server';
-import { JsonObject } from '@kbn/utility-types';
+import type { Logger } from '@kbn/core/server';
+import type { JsonObject } from '@kbn/utility-types';
 import { keyBy, mapValues } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { AggregationResultOf } from '@kbn/es-types';
-import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { HealthStatus } from './monitoring_stats_stream';
-import { TaskStore } from '../task_store';
-import { TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskStore } from '../task_store';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskCost } from '../task';
 
 interface StatusStat extends JsonObject {
@@ -264,7 +265,8 @@ export function createWorkloadAggregator({
         const value = bucket as TaskTypeWithStatusBucket;
         const taskDef = taskDefinitions.get(value.key as string);
         if (taskDef) {
-          const cost = value.doc_count * taskDef?.cost ?? TaskCost.Normal;
+          const cost =
+            value.doc_count * taskDef?.cost ? value.doc_count * taskDef?.cost : TaskCost.Normal;
 
           totalCost += cost;
           return Object.assign(acc, {
@@ -486,9 +488,8 @@ export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregat
   sum_other_doc_count?: number | undefined;
 }
 
-// @ts-expect-error key doesn't accept a string
 export interface ScheduleAggregation extends estypes.AggregationsFiltersAggregate {
-  buckets: Array<{ doc_count: number; key: string | number }>;
+  buckets: Array<{ doc_count: number; key: string }>;
   doc_count_error_upper_bound?: number | undefined;
   sum_other_doc_count?: number | undefined;
 }
@@ -540,7 +541,7 @@ function getTotalCost(taskTypeBuckets: TaskTypeBucket[], definitions: TaskTypeDi
   for (const bucket of taskTypeBuckets) {
     const taskDef = definitions.get(bucket.key as string);
     if (taskDef) {
-      cost += bucket.doc_count * taskDef?.cost ?? TaskCost.Normal;
+      cost += bucket.doc_count * taskDef?.cost ? bucket.doc_count * taskDef?.cost : TaskCost.Normal;
     } else {
       // task type is not registered with dictionary, do not add to cost
     }

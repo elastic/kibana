@@ -11,7 +11,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getPluginApiDocId } from '../utils';
 import { extractImportReferences } from './extract_import_refs';
-import { ApiScope, PluginOrPackage, Reference } from '../types';
+import type { PluginOrPackage, Reference } from '../types';
+import { ApiScope } from '../types';
 import {
   getKibanaPlatformPackage,
   getKibanaPlatformPlugin,
@@ -152,4 +153,18 @@ it('test single link', () => {
   );
   expect(results.length).toBe(1);
   expect((results[0] as Reference).text).toBe('FooFoo');
+});
+
+it('defaults to COMMON scope for paths outside standard plugin scopes', () => {
+  const testPlugin = getKibanaPlatformPlugin('pluginA');
+  // Path is in plugin directory but not under public/, server/, or common/.
+  const path = `${testPlugin.directory}/other/path.ts`;
+
+  const results = extractImportReferences(`import("${path}").SomeType`, [testPlugin], log);
+
+  expect(results.length).toBe(1);
+  const ref = results[0] as Reference;
+  expect(ref.text).toBe('SomeType');
+  // Paths outside standard scopes should default to COMMON.
+  expect(ref.scope).toBe(ApiScope.COMMON);
 });

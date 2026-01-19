@@ -93,7 +93,7 @@ export class SecurityPlugin
 
     this.config = this.initializerContext.config.get<ConfigType>();
     this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
-    this.navControlService = new SecurityNavControlService(this.buildFlavor);
+    this.navControlService = new SecurityNavControlService();
     this.managementService = new ManagementService(this.config);
   }
 
@@ -192,7 +192,7 @@ export class SecurityPlugin
     core: CoreStart,
     { management, share }: PluginStartDependencies
   ): SecurityPluginStart {
-    const { application, http, notifications } = core;
+    const { application, http, notifications, overlays } = core;
     const { anonymousPaths } = http;
 
     const logoutUrl = getLogoutUrl(http);
@@ -200,7 +200,14 @@ export class SecurityPlugin
 
     const sessionExpired = new SessionExpired(application, logoutUrl, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    this.sessionTimeout = new SessionTimeout(core, notifications, sessionExpired, http, tenant);
+    this.sessionTimeout = new SessionTimeout(
+      core,
+      notifications,
+      overlays,
+      sessionExpired,
+      http,
+      tenant
+    );
 
     this.sessionTimeout.start();
     this.securityCheckupService.start(core);

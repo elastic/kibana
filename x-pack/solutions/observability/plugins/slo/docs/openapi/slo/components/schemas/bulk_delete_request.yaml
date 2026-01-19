@@ -1,0 +1,14 @@
+title: Bulk delete SLO request
+description: >
+  The bulk delete SLO request takes a list of SLOs Definition id to delete.
+type: object
+required:
+  - list
+properties:
+  list:
+    description: An array of SLO Definition id
+    type: array
+    items:
+      type: string
+      example: 8853df00-ae2e-11ed-90af-09bb6422b258
+      description: The SLO Definition id

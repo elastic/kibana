@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { faker } from '@faker-js/faker';
+import type { ReloadReason } from './data_loader';
 import { loadEmbeddableData } from './data_loader';
 import {
   createUnifiedSearchApi,
@@ -14,56 +15,29 @@ import {
   makeEmbeddableServices,
 } from './mocks';
 import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { LensDocument } from '../persistence';
-import {
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type {
+  LensDocument,
   GetStateType,
-  LensApi,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensOverrides,
   LensPublicCallbacks,
   LensRuntimeState,
-} from './types';
-import {
-  HasParentApi,
-  PublishesTimeRange,
-  PublishesUnifiedSearch,
-  PublishingSubject,
-  ViewMode,
-} from '@kbn/presentation-publishing';
-import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
+import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
-import { defaultDoc } from '../mocks';
+import { createMockDatasource, defaultDoc } from '../mocks';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import * as Logger from './logger';
+import type { LensEmbeddableStartServices } from './types';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
 }));
 
-// Mock it for now, later investigate why the real one is not triggering here on tests
-jest.mock('@kbn/presentation-publishing', () => {
-  const original = jest.requireActual('@kbn/presentation-publishing');
-  const rx = jest.requireActual('rxjs');
-  return {
-    ...original,
-    fetch$: jest.fn((api: unknown) => {
-      const typeApi = api as PublishesTimeRange &
-        PublishesUnifiedSearch &
-        HasParentApi<PublishesUnifiedSearch & PublishesSearchSession>;
-      const emptyObservable = rx.of(undefined);
-      return rx.merge(
-        typeApi.timeRange$ ?? emptyObservable,
-        typeApi.filters$ ?? emptyObservable,
-        typeApi.query$ ?? emptyObservable,
-        typeApi.parentApi?.filters$ ?? emptyObservable,
-        typeApi.parentApi?.query$ ?? emptyObservable,
-        typeApi.parentApi?.searchSessionId$ ?? emptyObservable,
-        typeApi.timeRange$ ?? typeApi.parentApi?.timeRange$ ?? emptyObservable,
-        typeApi.parentApi?.timeslice$ ?? emptyObservable
-      );
-    }),
-  };
-});
+const loggerFn = jest.spyOn(Logger, 'addLog');
 
 // In order to listen the reload function, we need to
 // monitor the internalApi dispatchRenderStart spy
@@ -80,35 +54,40 @@ type ChangeFnType = ({
   parentApi: ReturnType<typeof createUnifiedSearchApi> &
     LensPublicCallbacks & {
       searchSessionId$: BehaviorSubject<string>;
+      esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
     };
   services: LensEmbeddableStartServices;
-}) => Promise<void | boolean>;
+}) => Promise<void | ReloadReason | false>;
 
-async function expectRerenderOnDataLoder(
+async function expectRerenderOnDataLoader(
   changeFn: ChangeFnType,
   runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() },
-  parentApiOverrides?: Partial<
-    {
-      filters$: BehaviorSubject<Filter[] | undefined>;
-      query$: BehaviorSubject<Query | AggregateQuery | undefined>;
-      timeRange$: BehaviorSubject<TimeRange | undefined>;
-    } & LensOverrides
-  >
+  {
+    parentApiOverrides,
+    servicesOverrides,
+    internalApiOverrides,
+  }: {
+    parentApiOverrides?: Partial<
+      {
+        filters$: BehaviorSubject<Filter[] | undefined>;
+        query$: BehaviorSubject<Query | AggregateQuery | undefined>;
+        timeRange$: BehaviorSubject<TimeRange | undefined>;
+        esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
+      } & LensOverrides
+    >;
+    internalApiOverrides?: Partial<LensInternalApi>;
+    servicesOverrides?: Partial<LensEmbeddableStartServices>;
+  } = {}
 ): Promise<void> {
   const parentApi = {
     ...createUnifiedSearchApi(),
     searchSessionId$: new BehaviorSubject<string>(''),
+    esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
     onLoad: jest.fn(),
     onBeforeBadgesRender: jest.fn(),
     onBrushEnd: jest.fn(),
     onFilter: jest.fn(),
     onTableRowClick: jest.fn(),
-    // Make TS happy
-    removePanel: jest.fn(),
-    replacePanel: jest.fn(),
-    getPanelCount: jest.fn(),
-    children$: new BehaviorSubject({}),
-    addNewPanel: jest.fn(),
     ...parentApiOverrides,
   };
   const api: LensApi = {
@@ -116,12 +95,18 @@ async function expectRerenderOnDataLoder(
     parentApi,
   };
   const getState = jest.fn(() => runtimeState);
-  const internalApi = getLensInternalApiMock();
-  const services = makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
-    visOverrides: { id: 'lnsXY' },
-    dataOverrides: { id: 'form_based' },
+  const internalApi = getLensInternalApiMock({
+    ...internalApiOverrides,
+    attributes$: new BehaviorSubject(runtimeState.attributes),
   });
-  services.documentToExpression = jest.fn().mockResolvedValue({ ast: 'expression_string' });
+  const services = {
+    ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
+      visOverrides: { id: 'lnsXY' },
+      dataOverrides: { id: 'form_based' },
+    }),
+    documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+    ...servicesOverrides,
+  };
   const { cleanup } = loadEmbeddableData(
     faker.string.uuid(),
     getState,
@@ -132,7 +117,7 @@ async function expectRerenderOnDataLoder(
   );
   // there's a debounce, so skip to the next tick
   jest.advanceTimersByTime(100);
-  expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1);
+  await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1));
   // change something
   const result = await changeFn({
     api,
@@ -142,13 +127,27 @@ async function expectRerenderOnDataLoder(
     services,
   });
   // fallback to true if undefined is returned
-  const expectRerender = result ?? true;
+  const expectRerender = result === false ? false : true;
+  // Add an advanced check if provided: the reload reason
+  const rerenderReason = typeof result === 'string' ? result : undefined;
   // there's a debounce, so skip to the next tick
   jest.advanceTimersByTime(200);
-  // unsubscribe to all observables before checking
-  cleanup();
+
+  if (expectRerender && rerenderReason) {
+    const reloadCalls = loggerFn.mock.calls.filter((call) =>
+      call[0].startsWith('Embeddable reload reason')
+    );
+    expect(reloadCalls[reloadCalls.length - 1][0]).toBe(
+      `Embeddable reload reason: ${rerenderReason}`
+    );
+  }
   // now check if the re-render has been dispatched
-  expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(expectRerender ? 2 : 1);
+  await waitFor(() =>
+    expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(expectRerender ? 2 : 1)
+  );
+
+  // wait for all rendering to complete before cleanup
+  cleanup();
 }
 
 function waitForValue(
@@ -166,55 +165,75 @@ describe('Data Loader', () => {
   });
   afterAll(() => {
     jest.useRealTimers();
+    loggerFn.mockRestore();
   });
 
   beforeEach(() => jest.clearAllMocks());
 
   it('should re-render once on filter change', async () => {
-    await expectRerenderOnDataLoder(async ({ api }) => {
-      (api.filters$ as BehaviorSubject<Filter[]>).next([
+    await expectRerenderOnDataLoader(async ({ parentApi }) => {
+      (parentApi.filters$ as BehaviorSubject<Filter[]>).next([
         { meta: { alias: 'test', negate: false, disabled: false } },
       ]);
-    });
-  });
-
-  it('should re-render once on search session change', async () => {
-    await expectRerenderOnDataLoder(async ({ api }) => {
-      // dispatch a new searchSessionId
-
-      (
-        api.parentApi as unknown as { searchSessionId$: BehaviorSubject<string | undefined> }
-      ).searchSessionId$.next('newSessionId');
+      return 'searchContext';
     });
   });
 
   it('should re-render once on attributes change', async () => {
-    await expectRerenderOnDataLoder(async ({ internalApi }) => {
+    await expectRerenderOnDataLoader(async ({ internalApi }) => {
       // trigger a change by changing the title in the attributes
       (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next({
         ...internalApi.attributes$.getValue(),
         title: faker.lorem.word(),
       });
+      return 'attributes';
     });
   });
 
   it('should re-render when dashboard view/edit mode changes if dynamic actions are set', async () => {
-    await expectRerenderOnDataLoder(async ({ api, getState }) => {
+    await expectRerenderOnDataLoader(async ({ api, getState }) => {
       getState.mockReturnValue({
         attributes: getLensAttributesMock(),
         enhancements: {
           dynamicActions: {
+            events: [
+              // make sure there's at least one event
+              {
+                eventId: 'test',
+                triggers: [],
+                action: { factoryId: 'test', name: 'testAction', config: {} },
+              },
+            ],
+          },
+        },
+      });
+      // trigger a change by changing the title in the attributes
+      (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
+
+      return 'viewMode';
+    });
+  });
+
+  it('should not re-render when dashboard view/edit mode changes if dynamic actions are not set', async () => {
+    await expectRerenderOnDataLoader(async ({ api, getState }) => {
+      getState.mockReturnValue({
+        attributes: getLensAttributesMock(),
+        enhancements: {
+          dynamicActions: {
+            // empty list should not trigger
             events: [],
           },
         },
       });
       // trigger a change by changing the title in the attributes
       (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
+
+      return false;
     });
   });
 
-  it('should not re-render when dashboard view/edit mode changes if dynamic actions are not set', async () => {
-    await expectRerenderOnDataLoder(async ({ api }) => {
+  it('should not re-render when dashboard view/edit mode changes if dynamic actions are not available', async () => {
+    await expectRerenderOnDataLoader(async ({ api }) => {
       // the default get state does not have dynamic actions
       // trigger a change by changing the title in the attributes
       (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
@@ -227,7 +246,7 @@ describe('Data Loader', () => {
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
-    await expectRerenderOnDataLoder(
+    await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.expressionParams$,
@@ -242,12 +261,12 @@ describe('Data Loader', () => {
         return false;
       },
       undefined, // use default attributes
-      createUnifiedSearchApi(query, filters) // customize parentApi
+      { parentApiOverrides: createUnifiedSearchApi(query, filters) } // customize parentApi
     );
   });
 
   it('should pass render mode to expression', async () => {
-    await expectRerenderOnDataLoder(async ({ internalApi }) => {
+    await expectRerenderOnDataLoader(async ({ internalApi }) => {
       await waitForValue(
         internalApi.expressionParams$,
         (v: unknown) => isObject(v) && 'renderMode' in v
@@ -284,7 +303,7 @@ describe('Data Loader', () => {
       ],
     };
 
-    await expectRerenderOnDataLoder(
+    await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.expressionParams$,
@@ -305,12 +324,78 @@ describe('Data Loader', () => {
         return false;
       },
       { attributes },
-      createUnifiedSearchApi(parentApiQuery, parentApiFilters, parentApiTimeRange)
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          parentApiQuery,
+          parentApiFilters,
+          parentApiTimeRange
+        ),
+      }
+    );
+  });
+
+  it('should propagate projectRouting from parent API to search context', async () => {
+    const projectRouting = '_alias:_origin';
+
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            projectRouting,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          { query: '', language: 'kuery' },
+          [],
+          { from: 'now-7d', to: 'now' },
+          projectRouting
+        ),
+      }
+    );
+  });
+
+  it('should handle undefined projectRouting from parent API', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            projectRouting: undefined,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          { query: '', language: 'kuery' },
+          [],
+          { from: 'now-7d', to: 'now' },
+          undefined
+        ),
+      }
     );
   });
 
   it('should call onload after rerender and onData$ call', async () => {
-    await expectRerenderOnDataLoder(async ({ parentApi, internalApi, api }) => {
+    await expectRerenderOnDataLoader(async ({ parentApi, internalApi, api }) => {
       expect(parentApi.onLoad).toHaveBeenLastCalledWith(true);
 
       await waitForValue(
@@ -330,7 +415,7 @@ describe('Data Loader', () => {
   });
 
   it('should initialize dateViews api with deduped list of index patterns', async () => {
-    await expectRerenderOnDataLoder(
+    await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.dataViews$,
@@ -357,7 +442,7 @@ describe('Data Loader', () => {
   });
 
   it('should override noPadding in the display options if noPadding is set in the embeddable input', async () => {
-    await expectRerenderOnDataLoder(async ({ internalApi }) => {
+    await expectRerenderOnDataLoader(async ({ internalApi }) => {
       await waitForValue(
         internalApi.expressionParams$,
         (v: unknown) => isObject(v) && 'expression' in v && typeof v.expression != null
@@ -370,18 +455,19 @@ describe('Data Loader', () => {
   });
 
   it('should reload only once when the attributes or savedObjectId and the search context change at the same time', async () => {
-    await expectRerenderOnDataLoder(async ({ internalApi, api }) => {
+    await expectRerenderOnDataLoader(async ({ internalApi, api }) => {
       // trigger a change by changing the title in the attributes
       (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next({
         ...internalApi.attributes$.getValue(),
         title: faker.lorem.word(),
       });
       (api.savedObjectId$ as BehaviorSubject<string | undefined>).next('newSavedObjectId');
+      return 'savedObjectId';
     });
   });
 
   it('should pass over the overrides as variables', async () => {
-    await expectRerenderOnDataLoder(
+    await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.expressionParams$,
@@ -407,6 +493,97 @@ describe('Data Loader', () => {
           settings: {
             onBrushEnd: 'ignore',
           },
+        },
+      }
+    );
+  });
+
+  it('should catch missing dataView errors correctly', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        // wait for the error to appear
+        await waitForValue(internalApi.blockingError$);
+
+        const error = internalApi.blockingError$.getValue()!;
+        expect(error.message).toEqual(
+          'Could not find the data view: 90943e30-9a47-11e8-b64d-95841ca0b247'
+        );
+        return false;
+      },
+      undefined,
+      // Unfortuantely some mocks are required here to make the test work
+      {
+        // Mock the testing datasource to return an error when asked for checkIntegrity
+        servicesOverrides: {
+          datasourceMap: {
+            form_based: {
+              ...createMockDatasource('form_based'),
+              checkIntegrity: jest.fn().mockReturnValue(['90943e30-9a47-11e8-b64d-95841ca0b247']),
+            },
+          },
+        },
+        // Mock the visualization context to fully load the datasource state
+        internalApiOverrides: {
+          getVisualizationContext: jest.fn().mockReturnValue({
+            activeAttributes: {
+              ...defaultDoc,
+              visualizationType: 'lnsXY',
+              state: { ...defaultDoc.state, datasourceStates: { form_based: {} } },
+            },
+            mergedSearchContext: {
+              now: Date.now(),
+              timeRange: { from: 'now-15m', to: 'now' },
+              query: [defaultDoc.state.query],
+              filters: [],
+              disableWarningToasts: true,
+            },
+            indexPatterns: [],
+            indexPatternRefs: {},
+            activeVisualizationState: { activeId: 'lnsXY' },
+            activeDatasourceState: {},
+            activeData: {},
+          }),
+        },
+      }
+    );
+  });
+
+  it('should re-render on ES|QL variable changes', async () => {
+    const baseAttributes = getLensAttributesMock();
+    await expectRerenderOnDataLoader(
+      async ({ parentApi }) => {
+        (parentApi.esqlVariables$ as BehaviorSubject<ESQLControlVariable[]>).next([
+          { key: 'foo', value: faker.database.column(), type: ESQLVariableType.FIELDS },
+        ]);
+        return 'searchContext';
+      },
+      {
+        attributes: getLensAttributesMock({
+          state: { ...baseAttributes.state, query: { esql: 'from index | where $foo > 0' } },
+        }),
+      }
+    );
+  });
+
+  it('should not re-render on ES|QL variable identical changes', async () => {
+    const baseAttributes = getLensAttributesMock();
+    const variables: ESQLControlVariable[] = [
+      { key: 'foo', value: faker.database.column(), type: ESQLVariableType.FIELDS },
+    ];
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        (internalApi.esqlVariables$ as BehaviorSubject<ESQLControlVariable[]>).next(variables);
+        // no rerender
+        return false;
+      },
+      {
+        attributes: getLensAttributesMock({
+          state: { ...baseAttributes.state, query: { esql: 'from index | where $foo > 0' } },
+        }),
+      },
+      {
+        internalApiOverrides: {
+          esqlVariables$: new BehaviorSubject<ESQLControlVariable[]>(variables),
         },
       }
     );

@@ -78,7 +78,6 @@ export const firstUpHit = {
   },
   tls: {
     cipher: 'TLS-AES-128-GCM-SHA256',
-    certificate_not_valid_before: '2022-11-28T08:19:01.000Z',
     established: true,
     server: {
       x509: {
@@ -108,7 +107,6 @@ export const firstUpHit = {
       },
     },
     version: '1.3',
-    certificate_not_valid_after: '2023-02-20T08:19:00.000Z',
     version_protocol: 'tls',
   },
   state: {
@@ -209,7 +207,6 @@ export const firstDownHit = ({
   tls: {
     established: true,
     cipher: 'TLS-AES-128-GCM-SHA256',
-    certificate_not_valid_before: '2022-11-28T08:19:01.000Z',
     server: {
       x509: {
         not_after: '2023-02-20T08:19:00.000Z',
@@ -238,7 +235,6 @@ export const firstDownHit = ({
       },
     },
     version: '1.3',
-    certificate_not_valid_after: '2023-02-20T08:19:00.000Z',
     version_protocol: 'tls',
   },
   state: {

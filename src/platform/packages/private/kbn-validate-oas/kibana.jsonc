@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/validate-oas",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

@@ -25,14 +25,7 @@ import {
 } from '../navigation';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
-  ({
-    detailName,
-    filterQuery,
-    indexNames,
-    dataViewSpec: indexPattern,
-    hostDetailsPagePath,
-    hostDetailsFilter,
-  }) => {
+  ({ detailName, filterQuery, indexNames, hostDetailsPagePath, hostDetailsFilter }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
 
     const tabProps = {
@@ -43,7 +36,6 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       setQuery,
       startDate: from,
       type: HostsType.details,
-      indexPattern,
       indexNames,
       hostName: detailName,
     };

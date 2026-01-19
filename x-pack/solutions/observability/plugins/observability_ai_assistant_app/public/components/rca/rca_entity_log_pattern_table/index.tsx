@@ -4,26 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiBasicTableColumn, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { formatInteger } from '@kbn/observability-utils-common/format/integer';
-import { highlightPatternFromRegex } from '@kbn/observability-utils-common/llm/log_analysis/highlight_patterns_from_regex';
-import type { EntityInvestigation } from '@kbn/observability-ai-server/root_cause_analysis/tasks/investigate_entity/types';
-import React, { useMemo, useState } from 'react';
-import { orderBy } from 'lodash';
 import type { AnalyzedLogPattern } from '@kbn/observability-ai-server/root_cause_analysis/tasks/analyze_log_patterns';
+import type { EntityInvestigation } from '@kbn/observability-ai-server/root_cause_analysis/tasks/investigate_entity/types';
+import { formatInteger } from '@kbn/observability-utils-common/format/integer';
+import { orderBy } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import { useTheme } from '../../../hooks/use_theme';
 import { SparkPlot } from '../../charts/spark_plot';
+import { highlightPatternFromRegex } from './highlight_patterns_from_regex';
 
 const badgeClassName = css`
   width: 100%;

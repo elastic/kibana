@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-export * from './types';
+export type * from './types';
 
 const configSchema = schema.object({
   // Is this plugin enabled?
@@ -17,7 +18,7 @@ const configSchema = schema.object({
   // Config namespace for developer-specific settings.
   developer: schema.maybe(
     schema.object({
-      // Settings for the project switcher.
+      // Settings for the project switcher.  This is now deprecated.
       projectSwitcher: schema.maybe(
         schema.object({
           // Should the switcher be enabled?
@@ -39,6 +40,7 @@ const configSchema = schema.object({
             schema.literal('security'),
             schema.literal('observability'),
             schema.literal('search'),
+            schema.literal('workplaceai'),
           ]),
         })
       ),
@@ -53,6 +55,12 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     developer: true,
   },
+  deprecations: ({ unused }) => [
+    unused('developer', { level: 'critical' }),
+    unused('developer.projectSwitcher', { level: 'critical' }),
+    unused('developer.projectSwitcher.enabled', { level: 'critical' }),
+    unused('developer.projectSwitcher.currentType', { level: 'critical' }),
+  ],
 };
 
 export type ServerlessConfig = TypeOf<typeof configSchema>;

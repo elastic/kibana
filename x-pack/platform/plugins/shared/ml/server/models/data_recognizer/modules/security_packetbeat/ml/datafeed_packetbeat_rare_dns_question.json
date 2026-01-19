@@ -10,7 +10,10 @@
         { "term": { "event.dataset": "network_traffic.dns" } }
       ],
       "minimum_should_match": 1,
-      "must_not": [{ "bool": { "filter": { "term": { "dns.question.type": "PTR" } } } }]
+      "must_not": [
+        { "bool": { "filter": { "term": { "dns.question.type": "PTR" } } } },
+        { "terms": { "process.name": ["elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", "winlogbeat.exe", "winlogbeat"] } }
+      ]
     }
   }
 }

@@ -7,18 +7,20 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { RuleMigrationTaskCreateClientParams } from './types';
-import { RuleMigrationsTaskClient } from './rule_migrations_task_client';
-
-export type MigrationRunning = Map<string, { user: string; abortController: AbortController }>;
+import {
+  RuleMigrationsTaskClient,
+  type RuleMigrationsRunning,
+} from './rule_migrations_task_client';
 
 export class RuleMigrationsTaskService {
-  private migrationsRunning: MigrationRunning;
+  private migrationsRunning: RuleMigrationsRunning;
 
   constructor(private logger: Logger) {
     this.migrationsRunning = new Map();
   }
 
   public createClient({
+    request,
     currentUser,
     dataClient,
     dependencies,
@@ -27,6 +29,7 @@ export class RuleMigrationsTaskService {
       this.migrationsRunning,
       this.logger,
       dataClient,
+      request,
       currentUser,
       dependencies
     );
@@ -35,7 +38,7 @@ export class RuleMigrationsTaskService {
   /** Stops all running migrations */
   stopAll() {
     this.migrationsRunning.forEach((migrationRunning) => {
-      migrationRunning.abortController.abort();
+      migrationRunning.abortController.abort('Server shutdown');
     });
     this.migrationsRunning.clear();
   }

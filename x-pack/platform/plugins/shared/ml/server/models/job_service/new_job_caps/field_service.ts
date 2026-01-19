@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -112,10 +112,8 @@ class FieldsService {
     return field.time_series_metric === TIME_SERIES_METRIC_TYPES.COUNTER;
   }
   // check to see whether the field is aggregatable
-  // If it is a counter field from a time series data stream, we cannot currently
-  // support any aggregations and so it cannot be used as a field_name in a detector.
   private isFieldAggregatable(field: estypes.FieldCapsFieldCapability) {
-    return field.aggregatable && this.isCounterField(field) === false;
+    return field.aggregatable;
   }
 
   // public function to load fields from _field_caps and create a list

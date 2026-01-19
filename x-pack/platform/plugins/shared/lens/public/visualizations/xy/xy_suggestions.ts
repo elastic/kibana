@@ -16,17 +16,10 @@ import type {
   TableSuggestionColumn,
   TableSuggestion,
   TableChangeType,
-} from '../../types';
+} from '@kbn/lens-common';
 import { getColorMappingDefaults } from '../../utils';
-import {
-  State,
-  XYState,
-  visualizationSubtypes,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  SeriesType,
-  defaultSeriesType,
-} from './types';
+import type { XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
+import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
@@ -58,7 +51,7 @@ export function getSuggestions({
   mainPalette,
   isFromContext,
   allowMixed,
-}: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
+}: SuggestionRequest<XYState>): Array<VisualizationSuggestion<XYState>> {
   const incompleteTable =
     !table.isMultiRow ||
     table.columns.length <= 1 ||
@@ -96,11 +89,11 @@ export function getSuggestions({
 function getSuggestionForColumns(
   table: TableSuggestion,
   keptLayerIds: string[],
-  currentState?: State,
+  currentState?: XYState,
   seriesType?: SeriesType,
   mainPalette?: SuggestionRequest['mainPalette'],
   allowMixed?: boolean
-): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
+): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
   const sharedArgs = {
     layerId: table.layerId,
@@ -135,7 +128,7 @@ function getSuggestionForColumns(
   }
 }
 
-function getBucketMappings(table: TableSuggestion, currentState?: State) {
+function getBucketMappings(table: TableSuggestion, currentState?: XYState) {
   const currentLayer =
     currentState &&
     getDataLayers(currentState.layers).find(({ layerId }) => layerId === table.layerId);
@@ -207,13 +200,13 @@ function getSuggestionsForLayer({
   xValue?: TableSuggestionColumn;
   yValues: TableSuggestionColumn[];
   splitBy?: TableSuggestionColumn;
-  currentState?: State;
+  currentState?: XYState;
   tableLabel?: string;
   keptLayerIds: string[];
   requestedSeriesType?: SeriesType;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
-}): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
+}): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
     requestedSeriesType || getSeriesType(currentState, layerId, xValue);
@@ -257,7 +250,7 @@ function getSuggestionsForLayer({
   }
 
   // Suggestions are either changing the data, or changing the way the data is used
-  const sameStateSuggestions: Array<VisualizationSuggestion<State>> = [];
+  const sameStateSuggestions: Array<VisualizationSuggestion<XYState>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
   if (seriesType.includes('bar') && (!xValue || xValue.operation.scale === 'ordinal')) {
@@ -408,8 +401,6 @@ function asPercentageSeriesType(oldSeriesType: SeriesType) {
   }
 }
 
-// Until the area chart rendering bug is fixed, avoid suggesting area charts
-// https://github.com/elastic/elastic-charts/issues/388
 function altSeriesType(oldSeriesType: SeriesType) {
   switch (oldSeriesType) {
     case 'area':
@@ -419,8 +410,9 @@ function altSeriesType(oldSeriesType: SeriesType) {
     case 'bar':
       return 'line';
     case 'bar_stacked':
-      return 'line';
+      return 'area_stacked';
     case 'line':
+      return 'area';
     default:
       return 'bar_stacked';
   }
@@ -566,12 +558,13 @@ function buildSuggestion({
         )
     : [];
 
-  const state: State = {
+  const state: XYState = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
+    pointVisibility: currentState?.pointVisibility,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,

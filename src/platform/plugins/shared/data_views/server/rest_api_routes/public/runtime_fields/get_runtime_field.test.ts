@@ -10,7 +10,7 @@
 import { getRuntimeField } from './get_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataViewLazy } from '../../../../common';
+import type { DataViewLazy } from '../../../../common';
 
 describe('get runtime field', () => {
   it('call usageCollection', async () => {

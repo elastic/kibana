@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
-import { Conversation } from '../../assistant_context/types';
-import { AIConnector } from '../../connectorland/connector_selector';
+import type React from 'react';
+import type { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
+import type { Conversation } from '../../assistant_context/types';
+import type { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
 
 export interface CodeBlockDetails {
@@ -71,7 +71,7 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
 };
 
 /**
- * Returns the new default system prompt, fallback to the default system prompt if not found
+ * Returns the new conversation default system prompt
  *
  * @param allSystemPrompts All available System Prompts
  */
@@ -93,13 +93,8 @@ export const getDefaultSystemPrompt = ({
 }: {
   allSystemPrompts: PromptResponse[];
   conversation: Conversation | undefined;
-}): PromptResponse | undefined => {
-  const conversationSystemPrompt = allSystemPrompts.find(
-    (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
-  );
-
-  return conversationSystemPrompt;
-};
+}): PromptResponse | undefined =>
+  allSystemPrompts.find((prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId);
 
 /**
  * Returns the API config for a conversation
@@ -138,7 +133,7 @@ export const getConversationApiConfig = ({
           actionTypeId: connector.actionTypeId,
           provider: connector.apiProvider ?? connectorApiProvider,
           defaultSystemPromptId: defaultSystemPrompt?.id,
-          model: conversation?.apiConfig?.model ?? connectorModel,
+          model: connectorModel ?? conversation?.apiConfig?.model,
         },
       }
     : ({

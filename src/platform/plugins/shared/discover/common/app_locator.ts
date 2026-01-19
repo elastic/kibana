@@ -8,15 +8,14 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { Filter, TimeRange, Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
-import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
+import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import { VIEW_MODE } from './constants';
-import type { DiscoverAppState } from '../public';
-import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { ESQLControlState } from '@kbn/esql-types';
+import type { VIEW_MODE, NEW_TAB_ID } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -69,6 +68,14 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   searchSessionId?: string;
 
   /**
+   * Optionally set Discover tab state.
+   * Use `new` as value for `id` to indicate that a new tab should be created.
+   * Once created, the new tab will have a unique id which can be referenced too if necessary.
+   * Use `label` to set a fallback tab label if it was not defined before yet.
+   */
+  tab?: { id: typeof NEW_TAB_ID | string; label?: string };
+
+  /**
    * Columns displayed in the table
    */
   columns?: string[];
@@ -105,103 +112,33 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    */
   breakdownField?: string;
   /**
+   * Used to force the chart to be hidden or visible
+   */
+  hideChart?: boolean;
+  /**
+   * Number of rows to sample for Discover grid
+   */
+  sampleSize?: number;
+  /**
    * Used when navigating to particular alert results
    */
   isAlertResults?: boolean;
+  /**
+   * Optionally add some ESQL controls
+   */
+  esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
-
-export interface DiscoverAppLocatorDependencies {
-  useHash: boolean;
-  setStateToKbnUrl: typeof setStateToKbnUrl;
-}
 
 /**
  * Location state of scoped history (history instance of Kibana Platform application service)
  */
 export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
+  esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
   isAlertResults?: boolean;
 }
 
-export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverAppLocatorParams> {
-  public readonly id = DISCOVER_APP_LOCATOR;
-
-  constructor(protected readonly deps: DiscoverAppLocatorDependencies) {}
-
-  public readonly getLocation = async (params: DiscoverAppLocatorParams) => {
-    const {
-      useHash = this.deps.useHash,
-      filters,
-      dataViewId,
-      indexPatternId,
-      dataViewSpec,
-      query,
-      refreshInterval,
-      savedSearchId,
-      timeRange,
-      searchSessionId,
-      columns,
-      grid,
-      savedQuery,
-      sort,
-      interval,
-      viewMode,
-      hideAggregatedPreview,
-      breakdownField,
-      isAlertResults,
-    } = params;
-    const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
-    const appState: Partial<DiscoverAppState> = {};
-    const queryState: GlobalQueryStateFromUrl = {};
-    const { isFilterPinned } = await import('@kbn/es-query');
-
-    if (query) appState.query = query;
-    if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
-    if (indexPatternId)
-      appState.dataSource = createDataViewDataSource({ dataViewId: indexPatternId });
-    if (dataViewId) appState.dataSource = createDataViewDataSource({ dataViewId });
-    if (isOfAggregateQueryType(query)) appState.dataSource = createEsqlDataSource();
-    if (columns) appState.columns = columns;
-    if (grid) appState.grid = grid;
-    if (savedQuery) appState.savedQuery = savedQuery;
-    if (sort) appState.sort = sort;
-    if (interval) appState.interval = interval;
-    if (timeRange) queryState.time = timeRange;
-    if (filters && filters.length) queryState.filters = filters?.filter((f) => isFilterPinned(f));
-    if (refreshInterval) queryState.refreshInterval = refreshInterval;
-    if (viewMode) appState.viewMode = viewMode;
-    if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
-    if (breakdownField) appState.breakdownField = breakdownField;
-
-    const state: MainHistoryLocationState = {};
-    if (dataViewSpec) state.dataViewSpec = dataViewSpec;
-    if (isAlertResults) state.isAlertResults = isAlertResults;
-
-    let path = `#/${savedSearchPath}`;
-
-    if (searchSessionId) {
-      path = `${path}?searchSessionId=${searchSessionId}`;
-    }
-
-    if (Object.keys(queryState).length) {
-      path = this.deps.setStateToKbnUrl<GlobalQueryStateFromUrl>(
-        '_g',
-        queryState,
-        { useHash },
-        path
-      );
-    }
-
-    if (Object.keys(appState).length) {
-      path = this.deps.setStateToKbnUrl('_a', appState, { useHash }, path);
-    }
-
-    return {
-      app: 'discover',
-      path,
-      state,
-    };
-  };
-}
+export type DiscoverAppLocatorGetLocation =
+  LocatorDefinition<DiscoverAppLocatorParams>['getLocation'];

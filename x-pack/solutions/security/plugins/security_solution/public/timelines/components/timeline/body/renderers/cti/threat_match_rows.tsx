@@ -16,10 +16,11 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { get } from 'lodash';
 import type { FC, ReactElement } from 'react';
-import React, { Fragment, useState, useCallback } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
@@ -39,19 +40,18 @@ const SpacedContainer = styled.div`
   margin: ${({ theme }) => theme.eui.euiSizeS} 0;
 `;
 
-export const renderThreatMatchRows: RowRenderer['renderRow'] = ({ data, isDraggable, scopeId }) => {
-  return <ThreatMatchRowWrapper data={data} isDraggable={isDraggable} scopeId={scopeId} />;
+export const renderThreatMatchRows: RowRenderer['renderRow'] = ({ data, scopeId }) => {
+  return <ThreatMatchRowWrapper data={data} scopeId={scopeId} />;
 };
 
 interface ThreatMatchRowProps {
   data: EcsSecurityExtension;
-  isDraggable: boolean;
   scopeId: string;
 }
 
 const MAX_INDICATOR_VISIBLE = 2;
 
-const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, isDraggable, scopeId }) => {
+const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, scopeId }) => {
   const indicators = get(data, ENRICHMENT_DESTINATION_PATH) as Fields[];
   const eventId = get(data, ID_FIELD_NAME);
 
@@ -68,10 +68,10 @@ const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, isDraggable, sco
               return (
                 <Fragment key={contextId}>
                   <ThreatMatchRow
+                    scopeId={scopeId}
                     contextId={contextId}
                     data={indicator}
                     eventId={eventId}
-                    isDraggable={isDraggable}
                   />
                   {index < indicators.length - 1 && <EuiHorizontalRule margin="s" />}
                 </Fragment>
@@ -81,7 +81,7 @@ const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, isDraggable, sco
         </RowRendererContainer>
       );
     },
-    [indicators, eventId, isDraggable, scopeId]
+    [indicators, eventId, scopeId]
   );
 
   const renderModalChildren = useCallback(() => getThreatMatchRows('all'), [getThreatMatchRows]);
@@ -110,13 +110,18 @@ const ThreatMatchRowModal: FC<ThreatMatchRowModalProps> = ({ title, renderChildr
   const [isModalVisible, setShowModal] = useState(false);
   const closeModal = () => setShowModal(false);
   const showModal = () => setShowModal(true);
+
+  const modalTitleId = useGeneratedHtmlId();
+
   let modal;
 
   if (isModalVisible) {
     modal = (
-      <EuiModal onClose={closeModal}>
+      <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
         <EuiModalHeader data-test-subj="threat-match-row-modal">
-          <EuiModalHeaderTitle>{ALL_INDICATOR_MATCHES_MODAL_HEADER}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
+            {ALL_INDICATOR_MATCHES_MODAL_HEADER}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>{renderChildren()}</EuiModalBody>
         <EuiModalFooter>

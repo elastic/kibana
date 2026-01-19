@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
+import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query';
 import {
   AGENT_NAME,
   HOST_HOSTNAME,
@@ -13,7 +14,7 @@ import {
   METRICSET_NAME,
   SERVICE_NAME,
 } from '@kbn/apm-types/es_fields';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRangeMetadata } from '../../../common';
 import {
   RollupInterval,
@@ -72,44 +73,42 @@ export function createGetHostServices({ apmEventClient }: ApmDataAccessServicesP
           },
         ],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    ...termQuery(METRICSET_NAME, 'app'),
-                    {
-                      bool: {
-                        must: [...termQuery(METRICSET_NAME, 'transaction')],
-                      },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  ...termQuery(METRICSET_NAME, 'app'),
+                  {
+                    bool: {
+                      must: [...termQuery(METRICSET_NAME, 'transaction')],
                     },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-              ...commonFiltersList,
-            ],
-          },
-        },
-        aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-              size,
-            },
-            aggs: {
-              latestAgent: {
-                top_metrics: {
-                  metrics: [{ field: AGENT_NAME }],
-                  sort: {
-                    '@timestamp': 'desc',
                   },
-                  size: 1,
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            ...commonFiltersList,
+          ],
+        },
+      },
+      aggs: {
+        services: {
+          terms: {
+            field: SERVICE_NAME,
+            size,
+          },
+          aggs: {
+            latestAgent: {
+              top_metrics: {
+                metrics: [{ field: AGENT_NAME }],
+                sort: {
+                  '@timestamp': 'desc',
                 },
+                size: 1,
               },
             },
           },
@@ -127,29 +126,27 @@ export function createGetHostServices({ apmEventClient }: ApmDataAccessServicesP
           },
         ],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: commonFiltersList,
-          },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: commonFiltersList,
         },
-        aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-              size,
-            },
-            aggs: {
-              latestAgent: {
-                top_metrics: {
-                  metrics: [{ field: AGENT_NAME }],
-                  sort: {
-                    '@timestamp': 'desc',
-                  },
-                  size: 1,
+      },
+      aggs: {
+        services: {
+          terms: {
+            field: SERVICE_NAME,
+            size,
+          },
+          aggs: {
+            latestAgent: {
+              top_metrics: {
+                metrics: [{ field: AGENT_NAME }],
+                sort: {
+                  '@timestamp': 'desc',
                 },
+                size: 1,
               },
             },
           },

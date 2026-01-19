@@ -2,6 +2,7 @@
 
 exports[`Fleet - validatePackagePolicy() works for packages with multiple policy templates (aka integrations) returns errors for invalid package policy 1`] = `
 Object {
+  "additional_datastreams_permissions": null,
   "description": null,
   "inputs": Object {
     "billing-aws/metrics": Object {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SpecDefinitionsService } from '../../../services';
+import type { SpecDefinitionsService } from '../../../services';
 
 export const search = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('search', {
@@ -270,6 +270,9 @@ export const search = (specService: SpecDefinitionsService) => {
             },
           ],
         ],
+      },
+      retriever: {
+        // populated by a global rule
       },
     },
   });

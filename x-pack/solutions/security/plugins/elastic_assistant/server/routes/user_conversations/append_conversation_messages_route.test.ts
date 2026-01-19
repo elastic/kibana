@@ -32,7 +32,7 @@ describe('Append conversation messages route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.appendConversationMessages.mockResolvedValue(
       getConversationMock(getQueryConversationParams())
     ); // successful append
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
 
     appendConversationMessageRoute(server.router);
   });
@@ -44,6 +44,27 @@ describe('Append conversation messages route', () => {
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
+    });
+    test('adds user to message', async () => {
+      await server.inject(
+        getAppendConversationMessageRequest('04128c15-0d1b-4716-a4c5-46997ac7f3bd'),
+        requestContextMock.convertContext(context)
+      );
+      expect(
+        clients.elasticAssistant.getAIAssistantConversationsDataClient.appendConversationMessages
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [
+            {
+              content: 'test content',
+              role: 'user',
+              timestamp: '2019-12-13T16:40:33.400Z',
+              traceData: { transactionId: '2', traceId: '1' },
+              user: { id: 'my_profile_uid', name: 'elastic' },
+            },
+          ],
+        })
+      );
     });
 
     test('returns 404 when append to a conversation that does not exist', async () => {

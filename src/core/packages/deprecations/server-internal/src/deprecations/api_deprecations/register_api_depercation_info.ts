@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DeprecationsDetails } from '@kbn/core-deprecations-common';
+import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 
 import { buildApiRouteDeprecationDetails } from './route/route_deprecations';
 import { buildApiAccessDeprecationDetails } from './access/access_deprecations';
@@ -15,7 +15,11 @@ import { buildApiDeprecationId } from './api_deprecation_id';
 import type { ApiDeprecationsServiceDeps } from './types';
 
 export const createGetApiDeprecations =
-  ({ http, coreUsageData }: Pick<ApiDeprecationsServiceDeps, 'coreUsageData' | 'http'>) =>
+  ({
+    http,
+    coreUsageData,
+    docLinks,
+  }: Pick<ApiDeprecationsServiceDeps, 'coreUsageData' | 'http' | 'docLinks'>) =>
   async (): Promise<DeprecationsDetails[]> => {
     const usageClient = coreUsageData.getClient();
     const deprecatedApis = http.getRegisteredDeprecatedApis();
@@ -43,6 +47,7 @@ export const createGetApiDeprecations =
             return buildApiRouteDeprecationDetails({
               apiUsageStats,
               deprecatedApiDetails,
+              docLinks,
             });
           }
           // if no access is specified then internal is the default
@@ -51,6 +56,7 @@ export const createGetApiDeprecations =
             return buildApiAccessDeprecationDetails({
               apiUsageStats,
               deprecatedApiDetails,
+              docLinks,
             });
           }
         }
@@ -61,10 +67,11 @@ export const registerApiDeprecationsInfo = ({
   deprecationsFactory,
   http,
   coreUsageData,
+  docLinks,
 }: ApiDeprecationsServiceDeps): void => {
   const deprecationsRegistery = deprecationsFactory.getRegistry('core.api_deprecations');
 
   deprecationsRegistery.registerDeprecations({
-    getDeprecations: createGetApiDeprecations({ http, coreUsageData }),
+    getDeprecations: createGetApiDeprecations({ http, coreUsageData, docLinks }),
   });
 };

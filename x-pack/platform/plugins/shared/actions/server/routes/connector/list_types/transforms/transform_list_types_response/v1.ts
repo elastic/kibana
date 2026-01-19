@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ConnectorType } from '../../../../../application/connector/types';
-import { ConnectorTypesResponseV1 } from '../../../../../../common/routes/connector/response';
+import type { ConnectorType } from '../../../../../application/connector/types';
+import type { GetAllConnectorTypesResponseV1 } from '../../../../../../common/routes/connector/response';
 
 export const transformListTypesResponse = (
   results: ConnectorType[]
-): ConnectorTypesResponseV1[] => {
+): GetAllConnectorTypesResponseV1 => {
   return results.map(
     ({
       id,
@@ -21,7 +21,10 @@ export const transformListTypesResponse = (
       minimumLicenseRequired,
       supportedFeatureIds,
       isSystemActionType,
+      source,
       subFeature,
+      isDeprecated,
+      allowMultipleSystemActions,
     }) => ({
       id,
       name,
@@ -31,7 +34,10 @@ export const transformListTypesResponse = (
       minimum_license_required: minimumLicenseRequired,
       supported_feature_ids: supportedFeatureIds,
       is_system_action_type: isSystemActionType,
+      source,
       sub_feature: subFeature,
+      is_deprecated: isDeprecated,
+      allow_multiple_system_actions: allowMultipleSystemActions,
     })
   );
 };

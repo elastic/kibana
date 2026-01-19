@@ -8,7 +8,7 @@
 import { getElasticsearchSettingsNodesResponsePayloadRT } from '../../../../../../common/http_api/elasticsearch_settings';
 import { checkNodesSettings } from '../../../../../lib/elasticsearch_settings';
 import { handleSettingsError } from '../../../../../lib/errors';
-import { MonitoringCore } from '../../../../../types';
+import type { MonitoringCore } from '../../../../../types';
 
 /*
  * Cluster Settings Check Route
@@ -17,6 +17,12 @@ export function nodesSettingsCheckRoute(server: MonitoringCore) {
   server.route({
     method: 'get',
     path: '/api/monitoring/v1/elasticsearch_settings/check/nodes',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {},
     options: {
       access: 'internal',

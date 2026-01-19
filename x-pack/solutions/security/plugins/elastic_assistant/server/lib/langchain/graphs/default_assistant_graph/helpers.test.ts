@@ -7,14 +7,16 @@
 
 import { streamGraph } from './helpers';
 import agent from 'elastic-apm-node';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { waitFor } from '@testing-library/react';
-import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { DefaultAssistantGraph } from './graph';
+import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import type { DefaultAssistantGraph } from './graph';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { AIMessage, AIMessageChunk, HumanMessage } from '@langchain/core/messages';
 
 jest.mock('elastic-apm-node');
 
@@ -49,18 +51,25 @@ describe('streamGraph', () => {
     streamEvents: mockStreamEvents,
   } as unknown as DefaultAssistantGraph;
   const mockOnLlmResponse = jest.fn().mockResolvedValue(null);
-  const requestArgs = {
-    apmTracer: mockApmTracer,
+  const requestArgs: Parameters<typeof streamGraph>[0] = {
     assistantGraph: mockAssistantGraph,
     inputs: {
-      input: 'input',
-      responseLanguage: 'English',
-      llmType: 'openai',
       connectorId: '123',
+      threadId: 'thread-123',
+      messages: [new HumanMessage('input')],
+      responseLanguage: 'English',
+      isRegeneration: false,
+      llmType: 'openai',
+      isOssModel: false,
     },
     logger: mockLogger,
     onLlmResponse: mockOnLlmResponse,
     request: mockRequest,
+    apmTracer: mockApmTracer,
+    isEnabledKnowledgeBase: false,
+    telemetry: {
+      reportEvent: jest.fn(),
+    } as unknown as AnalyticsServiceSetup,
   };
 
   beforeEach(() => {
@@ -73,159 +82,110 @@ describe('streamGraph', () => {
     });
   });
   describe('OpenAI Function Agent streaming', () => {
-    it('should execute the graph in streaming mode - OpenAI + isOssModel = false', async () => {
-      mockStreamEvents.mockReturnValue({
-        async *[Symbol.asyncIterator]() {
-          yield {
-            event: 'on_llm_stream',
-            data: { chunk: { message: { content: 'content' } } },
-            tags: [AGENT_NODE_TAG],
-          };
-          yield {
-            event: 'on_llm_end',
-            data: {
-              output: {
-                generations: [
-                  [{ generationInfo: { finish_reason: 'stop' }, text: 'final message' }],
-                ],
+    describe('Inference Chat Model Disabled', () => {
+      it('should execute the graph in streaming mode - OpenAI + isOssModel = false', async () => {
+        mockStreamEvents.mockReturnValue({
+          async *[Symbol.asyncIterator]() {
+            yield {
+              event: 'on_chat_model_stream',
+              data: { chunk: new AIMessageChunk({ content: 'content' }) },
+              tags: [AGENT_NODE_TAG],
+            };
+            yield {
+              event: 'on_chat_model_end',
+              data: {
+                output: new AIMessage('final message'),
               },
-            },
-            tags: [AGENT_NODE_TAG],
-          };
-        },
-      });
+              tags: [AGENT_NODE_TAG],
+            };
+          },
+        });
 
-      const response = await streamGraph(requestArgs);
+        const response = await streamGraph(requestArgs);
 
-      expect(response).toBe(mockResponseWithHeaders);
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
-        expect(mockOnLlmResponse).toHaveBeenCalledWith(
-          'final message',
-          { transactionId: 'transactionId', traceId: 'traceId' },
-          false
-        );
+        expect(response).toBe(mockResponseWithHeaders);
+        await waitFor(() => {
+          expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+          expect(mockOnLlmResponse).toHaveBeenCalledWith({
+            content: 'final message',
+            traceData: { transactionId: 'transactionId', traceId: 'traceId' },
+            isError: false,
+          });
+        });
       });
-    });
-    it('on_llm_end events with finish_reason != stop should not end the stream', async () => {
-      mockStreamEvents.mockReturnValue({
-        async *[Symbol.asyncIterator]() {
-          yield {
-            event: 'on_llm_stream',
-            data: { chunk: { message: { content: 'content' } } },
-            tags: [AGENT_NODE_TAG],
-          };
-          yield {
-            event: 'on_llm_end',
-            data: {
-              output: {
-                generations: [[{ generationInfo: { finish_reason: 'function_call' }, text: '' }]],
+      it('on_llm_end events with tool calls should not end the stream', async () => {
+        mockStreamEvents.mockReturnValue({
+          async *[Symbol.asyncIterator]() {
+            yield {
+              event: 'on_chat_model_stream',
+              data: { chunk: new AIMessageChunk({ content: 'content' }) },
+              tags: [AGENT_NODE_TAG],
+            };
+            yield {
+              event: 'on_chat_model_end',
+              data: {
+                output: new AIMessage({
+                  content: 'I will use the search tool to find more information.',
+                  tool_calls: [
+                    {
+                      name: 'search',
+                      args: {
+                        query: 'example',
+                      },
+                      id: 'tool_abcd123',
+                    },
+                  ],
+                }),
               },
-            },
-            tags: [AGENT_NODE_TAG],
-          };
-        },
+              tags: [AGENT_NODE_TAG],
+            };
+          },
+        });
+
+        const response = await streamGraph(requestArgs);
+
+        expect(response).toBe(mockResponseWithHeaders);
+        await waitFor(() => {
+          expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+          expect(mockPush).toHaveBeenCalledWith({ payload: '\n\n', type: 'content' });
+          expect(mockOnLlmResponse).not.toHaveBeenCalled();
+        });
       });
 
-      const response = await streamGraph(requestArgs);
-
-      expect(response).toBe(mockResponseWithHeaders);
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
-        expect(mockOnLlmResponse).not.toHaveBeenCalled();
-      });
-    });
-    it('on_llm_end events without a finish_reason should end the stream', async () => {
-      mockStreamEvents.mockReturnValue({
-        async *[Symbol.asyncIterator]() {
-          yield {
-            event: 'on_llm_stream',
-            data: { chunk: { message: { content: 'content' } } },
-            tags: [AGENT_NODE_TAG],
-          };
-          yield {
-            event: 'on_llm_end',
-            data: {
-              output: {
-                generations: [[{ generationInfo: {}, text: 'final message' }]],
+      it('on_chat_model_end events is called with chunks if there is no final text value', async () => {
+        mockStreamEvents.mockReturnValue({
+          async *[Symbol.asyncIterator]() {
+            yield {
+              event: 'on_chat_model_stream',
+              data: { chunk: new AIMessageChunk({ content: 'content' }) },
+              tags: [AGENT_NODE_TAG],
+            };
+            yield {
+              event: 'on_chat_model_end',
+              data: {
+                output: new AIMessage('content'),
               },
-            },
-            tags: [AGENT_NODE_TAG],
-          };
-        },
-      });
+              tags: [AGENT_NODE_TAG],
+            };
+          },
+        });
 
-      const response = await streamGraph(requestArgs);
+        const response = await streamGraph(requestArgs);
 
-      expect(response).toBe(mockResponseWithHeaders);
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
-        expect(mockOnLlmResponse).toHaveBeenCalledWith(
-          'final message',
-          { transactionId: 'transactionId', traceId: 'traceId' },
-          false
-        );
-      });
-    });
-    it('on_llm_end events is called with chunks if there is no final text value', async () => {
-      mockStreamEvents.mockReturnValue({
-        async *[Symbol.asyncIterator]() {
-          yield {
-            event: 'on_llm_stream',
-            data: { chunk: { message: { content: 'content' } } },
-            tags: [AGENT_NODE_TAG],
-          };
-          yield {
-            event: 'on_llm_end',
-            data: {
-              output: {
-                generations: [[{ generationInfo: {}, text: '' }]],
-              },
-            },
-            tags: [AGENT_NODE_TAG],
-          };
-        },
-      });
-
-      const response = await streamGraph(requestArgs);
-
-      expect(response).toBe(mockResponseWithHeaders);
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
-        expect(mockOnLlmResponse).toHaveBeenCalledWith(
-          'content',
-          { transactionId: 'transactionId', traceId: 'traceId' },
-          false
-        );
-      });
-    });
-    it('on_llm_end does not call handleStreamEnd if generations is undefined', async () => {
-      mockStreamEvents.mockReturnValue({
-        async *[Symbol.asyncIterator]() {
-          yield {
-            event: 'on_llm_stream',
-            data: { chunk: { message: { content: 'content' } } },
-            tags: [AGENT_NODE_TAG],
-          };
-          yield {
-            event: 'on_llm_end',
-            data: {},
-            tags: [AGENT_NODE_TAG],
-          };
-        },
-      });
-
-      const response = await streamGraph(requestArgs);
-
-      expect(response).toBe(mockResponseWithHeaders);
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
-        expect(mockOnLlmResponse).not.toHaveBeenCalled();
+        expect(response).toBe(mockResponseWithHeaders);
+        await waitFor(() => {
+          expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+          expect(mockOnLlmResponse).toHaveBeenCalledWith({
+            content: 'content',
+            traceData: { transactionId: 'transactionId', traceId: 'traceId' },
+            isError: false,
+          });
+        });
       });
     });
   });
 
-  describe('Tool Calling Agent and Structured Chat Agent streaming', () => {
+  describe('Tool Calling Agent streaming', () => {
     const mockAsyncIterator = {
       async *[Symbol.asyncIterator]() {
         yield {
@@ -267,18 +227,21 @@ describe('streamGraph', () => {
       },
     };
 
-    const expectConditions = async (response: unknown) => {
+    const expectConditions = async (response: unknown, isOssModel: boolean = false) => {
       expect(response).toBe(mockResponseWithHeaders);
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: 'Look at these' });
-        expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' rare IP' });
-        expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' addresses.' });
-        expect(mockOnLlmResponse).toHaveBeenCalledWith(
-          'Look at these rare IP addresses.',
-          { transactionId: 'transactionId', traceId: 'traceId' },
-          false
-        );
+        if (!isOssModel) {
+          expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: 'Look at these' });
+          expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' rare IP' });
+          expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' addresses.' });
+        }
+
+        expect(mockOnLlmResponse).toHaveBeenCalledWith({
+          content: 'Look at these rare IP addresses.',
+          traceData: { transactionId: 'transactionId', traceId: 'traceId' },
+          isError: false,
+        });
       });
     };
     it('should execute the graph in streaming mode - Gemini', async () => {
@@ -322,6 +285,16 @@ describe('streamGraph', () => {
           ...requestArgs.inputs,
           isOssModel: true,
         },
+      });
+      await expectConditions(response, true);
+    });
+    it('should execute the graph in streaming mode - OpenAI + inferenceChatModelDisabled = false', async () => {
+      const mockAssistantGraphAsyncIterator = {
+        streamEvents: () => mockAsyncIterator,
+      } as unknown as DefaultAssistantGraph;
+      const response = await streamGraph({
+        ...requestArgs,
+        assistantGraph: mockAssistantGraphAsyncIterator,
       });
       await expectConditions(response);
     });

@@ -7,15 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StateComparators } from '@kbn/presentation-publishing';
-import { debounce } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
-import { TimeRangeMeta } from './get_time_range_meta';
+import { BehaviorSubject, map, merge } from 'rxjs';
+import type { StateComparators } from '@kbn/presentation-publishing';
+import type { TimeSlice, TimeSliderControlState } from '@kbn/controls-schemas';
+import type { TimeRangeMeta } from './get_time_range_meta';
 import { FROM_INDEX, TO_INDEX } from './time_utils';
-import { Timeslice, TimesliderControlState } from './types';
+
+export const timeRangePercentageComparators: StateComparators<
+  Pick<
+    TimeSliderControlState,
+    'timesliceStartAsPercentageOfTimeRange' | 'timesliceEndAsPercentageOfTimeRange'
+  >
+> = {
+  timesliceStartAsPercentageOfTimeRange: 'referenceEquality',
+  timesliceEndAsPercentageOfTimeRange: 'referenceEquality',
+};
 
 export function initTimeRangePercentage(
-  state: TimesliderControlState,
+  state: TimeSliderControlState,
   onReset: (
     timesliceStartAsPercentageOfTimeRange: number | undefined,
     timesliceEndAsPercentageOfTimeRange: number | undefined
@@ -28,16 +37,8 @@ export function initTimeRangePercentage(
     state.timesliceEndAsPercentageOfTimeRange
   );
 
-  // debounce to avoid calling 'resetTimeslice' on each comparator reset
-  const debouncedOnReset = debounce(() => {
-    onReset(
-      timesliceStartAsPercentageOfTimeRange$.value,
-      timesliceEndAsPercentageOfTimeRange$.value
-    );
-  }, 0);
-
   return {
-    setTimeRangePercentage(timeslice: Timeslice | undefined, timeRangeMeta: TimeRangeMeta) {
+    setTimeRangePercentage(timeslice: TimeSlice | undefined, timeRangeMeta: TimeRangeMeta) {
       let timesliceStartAsPercentageOfTimeRange: number | undefined;
       let timesliceEndAsPercentageOfTimeRange: number | undefined;
       if (timeslice) {
@@ -51,32 +52,23 @@ export function initTimeRangePercentage(
       timesliceStartAsPercentageOfTimeRange$.next(timesliceStartAsPercentageOfTimeRange);
       timesliceEndAsPercentageOfTimeRange$.next(timesliceEndAsPercentageOfTimeRange);
     },
-    serializeState: () => {
+    getLatestState: () => {
       return {
         timesliceStartAsPercentageOfTimeRange: timesliceStartAsPercentageOfTimeRange$.value,
         timesliceEndAsPercentageOfTimeRange: timesliceEndAsPercentageOfTimeRange$.value,
       };
     },
-    comparators: {
-      timesliceStartAsPercentageOfTimeRange: [
-        timesliceStartAsPercentageOfTimeRange$,
-        (value: number | undefined) => {
-          timesliceStartAsPercentageOfTimeRange$.next(value);
-          debouncedOnReset();
-        },
-      ],
-      timesliceEndAsPercentageOfTimeRange: [
-        timesliceEndAsPercentageOfTimeRange$,
-        (value: number | undefined) => {
-          timesliceEndAsPercentageOfTimeRange$.next(value);
-          debouncedOnReset();
-        },
-      ],
-    } as StateComparators<
-      Pick<
-        TimesliderControlState,
-        'timesliceStartAsPercentageOfTimeRange' | 'timesliceEndAsPercentageOfTimeRange'
-      >
-    >,
+    anyStateChange$: merge(
+      timesliceStartAsPercentageOfTimeRange$,
+      timesliceEndAsPercentageOfTimeRange$
+    ).pipe(map(() => undefined)),
+    reinitializeState: (lastSaved?: TimeSliderControlState) => {
+      timesliceStartAsPercentageOfTimeRange$.next(lastSaved?.timesliceStartAsPercentageOfTimeRange);
+      timesliceEndAsPercentageOfTimeRange$.next(lastSaved?.timesliceEndAsPercentageOfTimeRange);
+      onReset(
+        lastSaved?.timesliceStartAsPercentageOfTimeRange,
+        lastSaved?.timesliceEndAsPercentageOfTimeRange
+      );
+    },
   };
 }

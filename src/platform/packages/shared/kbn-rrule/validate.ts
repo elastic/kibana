@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment-timezone';
-import { ConstructorOptions } from './types';
+import type { ConstructorOptions } from './types';
 
 export function validateOptions(opts: ConstructorOptions) {
   const byWeekDayRegex = new RegExp('^(((\\+|-)[1-4])?(MO|TU|WE|TH|FR|SA|SU))$');

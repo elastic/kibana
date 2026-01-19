@@ -11,6 +11,7 @@ import { ConnectLLMButton } from './connect_llm_button';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLoadConnectors } from '../../hooks/use_load_connectors';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { LLMs } from '../../../common/types';
 
 const render = (children: React.ReactNode) =>
   testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);
@@ -28,6 +29,12 @@ jest.mock('../../hooks/use_usage_tracker', () => ({
 const mockConnectors = {
   '1': { title: 'Connector 1' },
   '2': { title: 'Connector 2' },
+};
+
+const mockEisConnectors = {
+  id: 'connectorId4',
+  name: 'Elastic Managed LLM',
+  type: LLMs.inference,
 };
 
 describe('ConnectLLMButton', () => {
@@ -59,8 +66,9 @@ describe('ConnectLLMButton', () => {
       isLoading: false,
       isSuccess: true,
     });
-    const { getByTestId } = render(<ConnectLLMButton />);
+    const { getByTestId, getByText } = render(<ConnectLLMButton />);
     expect(getByTestId('connectLLMButton')).toBeInTheDocument();
+    expect(getByText('Connect to an LLM')).toBeInTheDocument();
   });
 
   it('show the flyout when the button is clicked', async () => {
@@ -77,14 +85,51 @@ describe('ConnectLLMButton', () => {
     await waitFor(() => expect(getByTestId('addConnectorFlyout')).toBeInTheDocument());
   });
 
-  it('show success button when connector exists', async () => {
+  it('show the flyout when manageConnectorsLink is clicked', async () => {
     (useLoadConnectors as jest.Mock).mockReturnValue({
-      data: [{}],
+      data: [
+        {
+          name: 'conn-1',
+          type: LLMs.openai,
+        },
+      ],
       isLoading: false,
       isSuccess: true,
     });
-    const { queryByTestId } = render(<ConnectLLMButton />);
+    const { getByTestId, queryByTestId } = render(<ConnectLLMButton />);
 
-    expect(queryByTestId('successConnectLLMButton')).toBeInTheDocument();
+    expect(queryByTestId('addConnectorFlyout')).not.toBeInTheDocument();
+
+    fireEvent.click(getByTestId('manageConnectorsLink'));
+    await waitFor(() => expect(getByTestId('addConnectorFlyout')).toBeInTheDocument());
+  });
+
+  it('show success text when connector exists', async () => {
+    (useLoadConnectors as jest.Mock).mockReturnValue({
+      data: [
+        {
+          name: 'conn-1',
+          type: LLMs.openai,
+        },
+      ],
+      isLoading: false,
+      isSuccess: true,
+    });
+    const { queryByTestId, getByText } = render(<ConnectLLMButton />);
+
+    expect(queryByTestId('successConnectLLMText')).toBeInTheDocument();
+    expect(getByText('conn-1 connected')).toBeInTheDocument();
+  });
+
+  it('show success text when EIS connector exists', async () => {
+    (useLoadConnectors as jest.Mock).mockReturnValue({
+      data: [mockEisConnectors],
+      isLoading: false,
+      isSuccess: true,
+    });
+    const { queryByTestId, getByText } = render(<ConnectLLMButton />);
+
+    expect(queryByTestId('successConnectLLMText')).toBeInTheDocument();
+    expect(getByText('Elastic Managed LLM connected')).toBeInTheDocument();
   });
 });

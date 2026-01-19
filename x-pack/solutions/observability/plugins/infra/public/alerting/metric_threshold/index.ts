@@ -18,6 +18,7 @@ import type { MetricExpressionParams } from '../../../common/alerting/metrics';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
 import { getRuleFormat } from './rule_data_formatters';
+import { getDescriptionFields } from '../common/get_description_fields/get_description_fields';
 
 export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
@@ -42,7 +43,9 @@ const metricThresholdDefaultActionMessage = i18n.translate(
 const metricThresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.infra.metrics.alerting.metric.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `'{{rule.name}}' has recovered.
+    defaultMessage: `Recovered: '{{context.reason}}'
+    
+  '{{rule.name}}' has recovered.
 
 - Affected: '{{context.group}}'
 - Metric: '{{context.metric}}'
@@ -77,5 +80,6 @@ export function createMetricThresholdRuleType({
     format: getRuleFormat({ assetDetailsLocator, metricsExplorerLocator }),
     alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
     priority: 10,
+    getDescriptionFields,
   };
 }

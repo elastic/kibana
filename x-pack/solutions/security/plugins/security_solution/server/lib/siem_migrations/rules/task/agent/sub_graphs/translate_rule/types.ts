@@ -6,23 +6,30 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { RunnableConfig } from '@langchain/core/runnables';
+import type { EsqlKnowledgeBase } from '../../../../../common/task/util/esql_knowledge_base';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
-import type { ChatModel } from '../../../util/actions_client_chat';
+import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { translateRuleState } from './state';
+import type { migrateRuleConfigSchema } from '../../state';
+import type { MigrateRuleGraphParams } from '../../types';
 
 export type TranslateRuleState = typeof translateRuleState.State;
-export type GraphNode = (state: TranslateRuleState) => Promise<Partial<TranslateRuleState>>;
+export type TranslateRuleGraphConfig = RunnableConfig<(typeof migrateRuleConfigSchema)['State']>;
+export type GraphNode = (
+  state: TranslateRuleState,
+  config: TranslateRuleGraphConfig
+) => Promise<Partial<TranslateRuleState>>;
 
 export interface TranslateRuleGraphParams {
-  model: ChatModel;
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  model: MigrateRuleGraphParams['model'];
+  esqlKnowledgeBase: EsqlKnowledgeBase;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
+  telemetryClient: RuleMigrationTelemetryClient;
   logger: Logger;
 }
 
 export interface TranslateRuleValidationErrors {
-  iterations: number;
+  retries_left: number;
   esql_errors?: string;
 }

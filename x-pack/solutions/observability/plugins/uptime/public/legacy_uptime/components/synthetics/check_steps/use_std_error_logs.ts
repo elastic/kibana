@@ -8,7 +8,7 @@
 import { useSelector } from 'react-redux';
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { selectDynamicSettings } from '../../../state/selectors';
-import { Ping } from '../../../../../common/runtime_types';
+import type { Ping } from '../../../../../common/runtime_types';
 
 export const useStdErrorLogs = ({
   monitorId,
@@ -21,36 +21,34 @@ export const useStdErrorLogs = ({
   const { data, loading } = useEsSearch(
     createEsParams({
       index: !monitorId && !checkGroup ? '' : settings?.heartbeatIndices,
-      body: {
-        size: 1000,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'synthetics.type': 'stderr',
-                },
+      size: 1000,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'synthetics.type': 'stderr',
               },
-              ...(monitorId
-                ? [
-                    {
-                      term: {
-                        'monitor.id': monitorId,
-                      },
+            },
+            ...(monitorId
+              ? [
+                  {
+                    term: {
+                      'monitor.id': monitorId,
                     },
-                  ]
-                : []),
-              ...(checkGroup
-                ? [
-                    {
-                      term: {
-                        'monitor.check_group': checkGroup,
-                      },
+                  },
+                ]
+              : []),
+            ...(checkGroup
+              ? [
+                  {
+                    term: {
+                      'monitor.check_group': checkGroup,
                     },
-                  ]
-                : []),
-            ],
-          },
+                  },
+                ]
+              : []),
+          ],
         },
       },
     }),

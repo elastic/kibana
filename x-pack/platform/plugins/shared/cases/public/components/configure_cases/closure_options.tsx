@@ -25,7 +25,7 @@ const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({
 }) => (
   <EuiDescribedFormGroup
     fullWidth
-    title={<h3>{i18n.CASE_CLOSURE_OPTIONS_TITLE}</h3>}
+    title={<h2>{i18n.CASE_CLOSURE_OPTIONS_TITLE}</h2>}
     description={
       <>
         <p>{i18n.CASE_CLOSURE_OPTIONS_DESC}</p>

@@ -7,8 +7,9 @@
 
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { lastRunFromState } from './last_run_status';
-import { RuleRunMetrics } from './rule_run_metrics_store';
-import { RuleResultServiceResults, RuleResultService } from '../monitoring/rule_result_service';
+import type { RuleRunMetrics } from './rule_run_metrics_store';
+import type { RuleResultServiceResults } from '../monitoring/rule_result_service';
+import { RuleResultService } from '../monitoring/rule_result_service';
 
 const getMetrics = ({
   hasReachedAlertLimit = false,
@@ -48,7 +49,7 @@ const getRuleResultService = ({
 describe('lastRunFromState', () => {
   it('returns successful outcome if no errors or warnings reported', () => {
     const result = lastRunFromState(
-      { metrics: getMetrics({}) },
+      getMetrics({}),
       getRuleResultService({ outcomeMessage: 'Rule executed succesfully' })
     );
 
@@ -66,7 +67,7 @@ describe('lastRunFromState', () => {
 
   it('returns a warning outcome if rules last execution reported one', () => {
     const result = lastRunFromState(
-      { metrics: getMetrics({}) },
+      getMetrics({}),
       getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
@@ -87,9 +88,7 @@ describe('lastRunFromState', () => {
 
   it('returns warning if rule has reached alert limit and alert circuit breaker opens', () => {
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({ hasReachedAlertLimit: true }),
-      },
+      getMetrics({ hasReachedAlertLimit: true }),
       getRuleResultService({})
     );
 
@@ -109,9 +108,7 @@ describe('lastRunFromState', () => {
 
   it('returns warning if rules actions completition is partial and action circuit breaker opens', () => {
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
-      },
+      getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
       getRuleResultService({})
     );
 
@@ -131,12 +128,10 @@ describe('lastRunFromState', () => {
 
   it('returns warning if rules actions completition is partial and queued action circuit breaker opens', () => {
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({
-          triggeredActionsStatus: ActionsCompletion.PARTIAL,
-          hasReachedQueuedActionsLimit: true,
-        }),
-      },
+      getMetrics({
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+        hasReachedQueuedActionsLimit: true,
+      }),
       getRuleResultService({})
     );
 
@@ -159,9 +154,7 @@ describe('lastRunFromState', () => {
     const frameworkOutcomeMessage =
       'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed';
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({ hasReachedAlertLimit: true }),
-      },
+      getMetrics({ hasReachedAlertLimit: true }),
       getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
@@ -188,9 +181,7 @@ describe('lastRunFromState', () => {
     const frameworkOutcomeMessage =
       'The maximum number of actions for this rule type was reached; excess actions were not triggered.';
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
-      },
+      getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
       getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
@@ -217,12 +208,10 @@ describe('lastRunFromState', () => {
     const frameworkOutcomeMessage =
       'The maximum number of queued actions was reached; excess actions were not triggered.';
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({
-          triggeredActionsStatus: ActionsCompletion.PARTIAL,
-          hasReachedQueuedActionsLimit: true,
-        }),
-      },
+      getMetrics({
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+        hasReachedQueuedActionsLimit: true,
+      }),
       getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
@@ -246,9 +235,7 @@ describe('lastRunFromState', () => {
 
   it('overwrites warning outcome to error if rule execution reports an error', () => {
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({ hasReachedAlertLimit: true }),
-      },
+      getMetrics({ hasReachedAlertLimit: true }),
       getRuleResultService({
         errors: [{ message: 'MOCK_ERROR', userError: false }],
         outcomeMessage: 'Rule execution reported an error',

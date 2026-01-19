@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import type { CloudProvider } from '@kbn/custom-icons';
 import { getAgentIcon, getCloudProviderIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import {
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_INSTANCE_ID,
@@ -89,7 +90,7 @@ const cloudDetailsKeys = [
 ];
 
 export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) {
-  const { colorMode } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
   const history = useHistory();
 
   const { data, status } = useInstanceDetailsFetcher({
@@ -133,7 +134,6 @@ export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) 
 
   const containerType = data.kubernetes?.pod?.name ? 'Kubernetes' : 'Docker';
 
-  const isDarkMode = colorMode === 'DARK';
   return (
     <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem>

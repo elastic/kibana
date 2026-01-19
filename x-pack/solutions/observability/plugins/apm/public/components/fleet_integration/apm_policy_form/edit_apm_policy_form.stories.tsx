@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import type { Meta, Story } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { EditAPMPolicyForm } from './edit_apm_policy_form';
@@ -36,7 +36,7 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const EditAPMPolicy: Story = () => {
+export const EditAPMPolicy: StoryFn = () => {
   const [newPolicy, setNewPolicy] = useState<NewPackagePolicy>(policy);
   const [isPolicyValid, setIsPolicyValid] = useState(true);
 
@@ -60,7 +60,9 @@ export const EditAPMPolicy: Story = () => {
         policy={{} as PackagePolicy}
         newPolicy={newPolicy}
         onChange={(value) => {
-          setIsPolicyValid(value.isValid);
+          if (value.isValid !== undefined) {
+            setIsPolicyValid(value.isValid);
+          }
           const updatedVars = value.updatedPolicy.inputs?.[0].vars;
           setNewPolicy((state) => ({
             ...state,
@@ -218,18 +220,6 @@ const policy = {
           value: false,
         },
         pprof_enabled: {
-          type: 'bool',
-          value: false,
-        },
-        java_attacher_discovery_rules: {
-          type: 'yaml',
-          value: '',
-        },
-        java_attacher_agent_version: {
-          type: 'text',
-          value: '',
-        },
-        java_attacher_enabled: {
           type: 'bool',
           value: false,
         },

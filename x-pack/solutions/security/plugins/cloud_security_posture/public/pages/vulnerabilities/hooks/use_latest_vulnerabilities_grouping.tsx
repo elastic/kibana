@@ -5,32 +5,33 @@
  * 2.0.
  */
 import { getGroupingQuery } from '@kbn/grouping';
-import {
+import type {
   GroupingAggregation,
   GroupPanelRenderer,
   GetGroupStats,
-  isNoneGroup,
   NamedAggregation,
-  parseGroupingQuery,
 } from '@kbn/grouping/src';
+import { isNoneGroup, parseGroupingQuery, MAX_RUNTIME_FIELD_SIZE } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import {
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  CDR_EXTENDED_VULN_RETENTION_POLICY,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import type { VulnerabilitiesGroupingAggregation } from '@kbn/cloud-security-posture';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import { checkIsFlattenResults } from '@kbn/grouping/src/containers/query/helpers';
 import {
   LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
   VULNERABILITY_GROUPING_OPTIONS,
   VULNERABILITY_FIELDS,
   CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS,
+  EVENT_ID,
+  VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import {
-  VulnerabilitiesGroupingAggregation,
-  VulnerabilitiesRootGroupingAggregation,
-  useGroupedVulnerabilities,
-} from './use_grouped_vulnerabilities';
+import type { VulnerabilitiesRootGroupingAggregation } from './use_grouped_vulnerabilities';
+import { useGroupedVulnerabilities } from './use_grouped_vulnerabilities';
 import { defaultGroupingOptions, getDefaultQuery } from '../constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { VULNERABILITIES_UNIT, groupingTitle, VULNERABILITIES_GROUPS_UNIT } from '../translations';
@@ -55,39 +56,57 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       critical: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.CRITICAL },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.CRITICAL,
+              case_insensitive: true,
+            },
           },
         },
       },
       high: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.HIGH },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.HIGH,
+              case_insensitive: true,
+            },
           },
         },
       },
       medium: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.MEDIUM },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.MEDIUM,
+              case_insensitive: true,
+            },
           },
         },
       },
       low: {
         filter: {
-          term: { 'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.LOW } },
+          term: {
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.LOW,
+              case_insensitive: true,
+            },
+          },
         },
       },
     },
   ];
 
   switch (field) {
-    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
-      return [...aggMetrics, getTermAggregation('resourceId', VULNERABILITY_FIELDS.RESOURCE_ID)];
-    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_ID:
+      return [
+        ...aggMetrics,
+        getTermAggregation('resourceName', VULNERABILITY_FIELDS.RESOURCE_NAME),
+      ];
+    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return [
         ...aggMetrics,
         getTermAggregation('cloudProvider', VULNERABILITY_FIELDS.CLOUD_PROVIDER),
+        getTermAggregation('accountName', VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME),
       ];
     case VULNERABILITY_GROUPING_OPTIONS.CVE:
       return [...aggMetrics, getTermAggregation('description', VULNERABILITY_FIELDS.DESCRIPTION)];
@@ -115,6 +134,56 @@ const getRuntimeMappingsByGroupField = (
     );
   }
   return {};
+};
+
+/**
+ * Returns the root aggregations query for the vulnerabilities grouping
+ */
+const getRootAggregations = (currentSelectedGroup: string): NamedAggregation[] => {
+  // Skip creating null group if "None" is selected
+  if (isNoneGroup([currentSelectedGroup])) {
+    return [{}];
+  }
+
+  const shouldFlattenMultiValueField = checkIsFlattenResults(
+    currentSelectedGroup,
+    VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS
+  );
+
+  // Create null group filter based on whether we need to flatten results
+  const nullGroupFilter = shouldFlattenMultiValueField
+    ? {
+        // For multi-value fields, check if field doesn't exist OR has too many values
+        bool: {
+          should: [
+            {
+              bool: {
+                must_not: {
+                  exists: { field: currentSelectedGroup },
+                },
+              },
+            },
+            {
+              script: {
+                script: {
+                  source: `doc['${currentSelectedGroup}'].size() > ${MAX_RUNTIME_FIELD_SIZE}`,
+                  lang: 'painless',
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      }
+    : undefined; // Not used for simple fields
+
+  return [
+    {
+      nullGroupItems: shouldFlattenMultiValueField
+        ? { filter: nullGroupFilter }
+        : { missing: { field: currentSelectedGroup } },
+    },
+  ];
 };
 
 /**
@@ -180,22 +249,18 @@ export const useLatestVulnerabilitiesGrouping = ({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
     groupByField: currentSelectedGroup,
     uniqueValue,
-    from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
-    to: 'now',
+    timeRange: {
+      from: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}`,
+      to: 'now',
+    },
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
     runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
-    rootAggregations: [
-      {
-        ...(!isNoneGroup([currentSelectedGroup]) && {
-          nullGroupItems: {
-            missing: { field: currentSelectedGroup },
-          },
-        }),
-      },
-    ],
+    rootAggregations: getRootAggregations(currentSelectedGroup),
+    multiValueFieldsToFlatten: VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
+    countByKeyForMultiValueFields: EVENT_ID,
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({

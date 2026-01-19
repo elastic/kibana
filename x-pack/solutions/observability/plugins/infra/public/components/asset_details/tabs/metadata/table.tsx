@@ -10,7 +10,6 @@ import { EuiText, EuiIcon, EuiInMemoryTable, type HorizontalAlignment } from '@e
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import { Query } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AddMetadataFilterButton } from './add_metadata_filter_button';
 import { ExpandableContent } from '../../components/expandable_content';
@@ -77,7 +76,14 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
     () => [
       {
         field: 'value',
-        name: <EuiIcon type="pin" />,
+        name: (
+          <EuiIcon
+            type="pin"
+            aria-label={i18n.translate('xpack.infra.metadataEmbeddable.pinFieldsColumn.ariaLabel', {
+              defaultMessage: 'Pin fields',
+            })}
+          />
+        ),
         align: 'center' as HorizontalAlignment,
         width: '5%',
         sortable: false,
@@ -103,7 +109,9 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
         name: VALUE_LABEL,
         width: '50%',
         sortable: false,
-        render: (_name: string, item: Field) => <ExpandableContent values={item.value} />,
+        render: (_name: string, item: Field) => (
+          <ExpandableContent fieldName={item.name} values={item.value} />
+        ),
       },
     ],
     [pinnedItems, setPinnedItems]
@@ -140,7 +148,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
       schema: true,
       placeholder: SEARCH_PLACEHOLDER,
     },
-    query: metadataSearch ? Query.parse(metadataSearch) : Query.MATCH_ALL,
+    query: metadataSearch,
   };
 
   const columns = useMemo(
@@ -170,9 +178,10 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
       columns={columns}
       items={fieldsWithPins}
       search={searchBar}
+      searchFormat="text"
       loading={loading}
       error={searchError ? `${searchError.message}` : ''}
-      message={
+      noItemsMessage={
         loading ? (
           <div data-test-subj="infraAssetDetailsMetadataLoading">{LOADING}</div>
         ) : (

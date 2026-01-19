@@ -30,12 +30,54 @@ export default {
 const mock = new NoDataCardStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-export const Card = (params: NoDataCardStorybookParams) => {
-  return (
-    <NoDataCardProvider {...mock.getServices(params)}>
-      <NoDataCard {...params} />
-    </NoDataCardProvider>
-  );
+export const Card = {
+  render: (params: NoDataCardStorybookParams) => {
+    return (
+      <NoDataCardProvider {...mock.getServices(params)}>
+        <NoDataCard {...params} />
+      </NoDataCardProvider>
+    );
+  },
+
+  argTypes,
+  args: {
+    buttonText: 'Browse integrations',
+    href: '/app/integrations/browse',
+  },
 };
 
-Card.argTypes = argTypes;
+export const NoPermission = {
+  render: (params: NoDataCardStorybookParams) => {
+    return (
+      <NoDataCardProvider {...mock.getServices(params)}>
+        <NoDataCard {...params} />
+      </NoDataCardProvider>
+    );
+  },
+
+  argTypes,
+  args: {
+    canAccessFleet: false,
+    buttonText: 'Browse integrations',
+    href: '/app/integrations/browse',
+  },
+};
+
+export const DisabledButtonWithTooltip = {
+  render: (params: NoDataCardStorybookParams) => {
+    return (
+      <NoDataCardProvider {...mock.getServices(params)}>
+        <NoDataCard {...params} />
+      </NoDataCardProvider>
+    );
+  },
+
+  argTypes,
+  args: {
+    canAccessFleet: false,
+    buttonText: 'Browse integrations',
+    disabledButtonTooltipText:
+      'This feature is currently unavailable. Please contact your administrator for access.',
+    href: '/app/integrations/browse',
+  },
+};

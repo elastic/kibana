@@ -74,7 +74,7 @@ export function groupsProvider(mlClient: MlClient) {
     for (const job of jobs) {
       const { jobId, groups } = job;
       try {
-        await mlClient.updateJob({ job_id: jobId, body: { groups } });
+        await mlClient.updateJob({ job_id: jobId, groups });
         results[jobId] = { success: true };
       } catch ({ body }) {
         results[jobId] = { success: false, error: body };

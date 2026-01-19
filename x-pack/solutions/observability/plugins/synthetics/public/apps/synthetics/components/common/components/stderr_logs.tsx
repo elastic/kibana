@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
@@ -17,7 +17,7 @@ import {
   EuiTitle,
   formatDate,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiInMemoryTable } from '@elastic/eui';
@@ -26,8 +26,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useStdErrorLogs } from './use_std_error_logs';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { Ping } from '../../../../../../common/runtime_types';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { Ping } from '../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const StdErrorLogs = ({
   checkGroup,
@@ -70,6 +70,12 @@ export const StdErrorLogs = ({
   ] as Array<EuiBasicTableColumn<Ping>>;
 
   const { items, loading } = useStdErrorLogs({ checkGroup });
+
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
+
+  const onTableChange = ({ page }: CriteriaWithPagination<(typeof items)[number]>) => {
+    setPagination({ pageIndex: page.index, pageSize: page.size });
+  };
 
   const { discover, exploratoryView } = useKibana<ClientPluginsStart>().services;
 
@@ -118,7 +124,12 @@ export const StdErrorLogs = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           {summaryMessage && (
-            <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
+            <EuiCallOut
+              announceOnMount
+              title={ERROR_SUMMARY_LABEL}
+              color="danger"
+              iconType="warning"
+            >
               <p>{summaryMessage}</p>
             </EuiCallOut>
           )}
@@ -139,9 +150,10 @@ export const StdErrorLogs = ({
           defaultFields: ['@timestamp', 'synthetics.payload.message'],
         }}
         pagination={{
-          pageSize,
+          ...pagination,
           pageSizeOptions: [2, 5, 10, 20, 50],
         }}
+        onTableChange={onTableChange}
       />
     </>
   );

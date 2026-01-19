@@ -6,8 +6,8 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { isRight } from 'fp-ts/lib/Either';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import { isRight } from 'fp-ts/Either';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { TLSParamsType } from '../../../../../../common/runtime_types/alerts/tls';
 
 export function validateTLSAlertParams(ruleParams: any): ValidationResult {

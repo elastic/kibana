@@ -11,8 +11,8 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
-import { SampleDataUsageTracker } from '../usage/usage';
+import type { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import type { SampleDataUsageTracker } from '../usage/usage';
 import { getSampleDataInstaller, SAMPLE_DATA_UNINSTALLED_EVENT } from './utils';
 import { SampleDataInstallError } from '../errors';
 

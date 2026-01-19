@@ -99,11 +99,15 @@ export function TimeComparison() {
 
   return (
     <EuiSelect
+      aria-label={i18n.translate('xpack.apm.timeComparison.euiSelect.seletTimeComparisonLabel', {
+        defaultMessage: 'Select time comparison options',
+      })}
       fullWidth={isSmall || isMedium}
       data-test-subj="comparisonSelect"
       disabled={comparisonEnabled === false}
       options={comparisonOptions}
       value={offset}
+      compressed
       prepend={
         <PrependContainer>
           <EuiCheckbox

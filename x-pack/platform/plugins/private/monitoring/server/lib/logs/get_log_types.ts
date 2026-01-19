@@ -6,11 +6,12 @@
  */
 
 import { checkParam } from '../error_missing_required';
-import { createTimeFilter, TimerangeFilter } from '../create_query';
+import type { TimerangeFilter } from '../create_query';
+import { createTimeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
 import { detectReasonFromException } from './detect_reason_from_exception';
-import { LegacyRequest } from '../../types';
-import { LogsResponse } from '../../../common/types/logs';
+import type { LegacyRequest } from '../../types';
+import type { LogsResponse } from '../../../common/types/logs';
 import { elasticsearchLogsFilter } from './logs_filter';
 
 interface LogType {
@@ -84,23 +85,21 @@ export async function getLogTypes(
     size: 0,
     filter_path: ['aggregations.levels.buckets', 'aggregations.types.buckets'],
     ignore_unavailable: true,
-    body: {
-      sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
-      query: {
-        bool: {
-          filter: [elasticsearchLogsFilter, ...filter],
-        },
+    sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
+    query: {
+      bool: {
+        filter: [elasticsearchLogsFilter, ...filter],
       },
-      aggs: {
-        types: {
-          terms: {
-            field: 'event.dataset',
-          },
-          aggs: {
-            levels: {
-              terms: {
-                field: 'log.level',
-              },
+    },
+    aggs: {
+      types: {
+        terms: {
+          field: 'event.dataset',
+        },
+        aggs: {
+          levels: {
+            terms: {
+              field: 'log.level',
             },
           },
         },

@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -26,6 +26,8 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
   onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
 }) => {
   const [isLoading, setLoading] = useState(false);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const dataStreamsCount = dataStreams.length;
 
@@ -88,6 +90,8 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="deleteDataStreamsConfirmation"
       title={

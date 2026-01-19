@@ -12,13 +12,19 @@ import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
 import { ExperimentalFeaturesService } from '../../../../../../services';
-import { useStartServices, sendPutOutput } from '../../../../hooks';
+import { useStartServices, sendPutOutput, licenseService } from '../../../../hooks';
 
 import { EditOutputFlyout } from '.';
 
 // mock yaml code editor
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: () => <>CODE EDITOR</>,
+}));
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiIconTip: () => '',
+  useGeneratedHtmlId: () => 'mocked-id',
 }));
 
 jest.mock('../../../../../../hooks/use_fleet_status', () => ({
@@ -56,10 +62,10 @@ function renderFlyout(output?: Output) {
   return { utils };
 }
 
-const logstashInputsLabels = [
+const sslInputsLabels = [
   'Client SSL certificate key',
   'Client SSL certificate',
-  'Server SSL certificate authorities (optional)',
+  'Server SSL certificate authorities',
 ];
 
 const kafkaInputsLabels = [
@@ -74,14 +80,8 @@ const kafkaInputsLabels = [
   'Key (optional)',
 ];
 
-const kafkaSectionsLabels = [
-  'Authentication',
-  'Partitioning',
-  'Topics',
-  'Headers',
-  'Compression',
-  'Broker settings',
-];
+// leave out 'Authentication', is now present in all the outputs
+const kafkaSectionsLabels = ['Partitioning', 'Topics', 'Headers', 'Compression', 'Broker settings'];
 
 const remoteEsOutputLabels = ['Hosts', 'Service token'];
 
@@ -94,7 +94,12 @@ describe('EditOutputFlyout', () => {
         },
       },
       docLinks: {
-        links: { fleet: {}, logstash: {}, kibana: {} },
+        links: {
+          fleet: {},
+          logstash: {},
+          kibana: {},
+          observability: {},
+        },
       },
       cloud: {
         isServerlessEnabled,
@@ -105,6 +110,7 @@ describe('EditOutputFlyout', () => {
   beforeEach(() => {
     mockStartServices(false);
     jest.clearAllMocks();
+    jest.spyOn(licenseService, 'isEnterprise').mockClear();
 
     mockedUseFleetStatus.mockReturnValue({} as any);
   });
@@ -122,22 +128,24 @@ describe('EditOutputFlyout', () => {
       is_default_monitoring: false,
     });
 
-    expect(
-      utils.queryByLabelText('Elasticsearch CA trusted fingerprint (optional)')
-    ).not.toBeNull();
+    expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
+    fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
 
-    // Does not show logstash SSL inputs
-    logstashInputsLabels.forEach((label) => {
-      expect(utils.queryByLabelText(label)).toBeNull();
-    });
+    await waitFor(() => {
+      // Shows SSL inputs
+      sslInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).not.toBeNull();
+      });
 
-    // Does not show kafka inputs nor sections
-    kafkaInputsLabels.forEach((label) => {
-      expect(utils.queryByLabelText(label)).toBeNull();
-    });
+      // Does not show kafka inputs nor sections
+      kafkaInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).toBeNull();
+      });
 
-    kafkaSectionsLabels.forEach((label) => {
-      expect(utils.queryByText(label)).toBeNull();
+      // 'Authentication' is now present in the main flyout, it shoul
+      kafkaSectionsLabels.forEach((label) => {
+        expect(utils.queryByText(label)).toBeNull();
+      });
     });
   });
 
@@ -148,20 +156,28 @@ describe('EditOutputFlyout', () => {
       id: 'output123',
       is_default: false,
       is_default_monitoring: false,
+      ssl: {
+        certificate: 'ssl-cert-value',
+        key: 'ssl-key-value',
+      },
     });
+    expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
+    fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
 
-    // Show logstash SSL inputs
-    logstashInputsLabels.forEach((label) => {
-      expect(utils.queryByLabelText(label)).not.toBeNull();
-    });
+    await waitFor(() => {
+      // Show SSL inputs
+      sslInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).not.toBeNull();
+      });
 
-    // Does not show kafka inputs nor sections
-    kafkaInputsLabels.forEach((label) => {
-      expect(utils.queryByLabelText(label)).toBeNull();
-    });
+      // Does not show kafka inputs nor sections
+      kafkaInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).toBeNull();
+      });
 
-    kafkaSectionsLabels.forEach((label) => {
-      expect(utils.queryByText(label)).toBeNull();
+      kafkaSectionsLabels.forEach((label) => {
+        expect(utils.queryByText(label)).toBeNull();
+      });
     });
   });
 
@@ -318,8 +334,11 @@ describe('EditOutputFlyout', () => {
     expect(utils.getByText('Additional setup required')).not.toBeNull();
   });
 
-  it('should render the flyout if the output provided is a remote ES output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+  it('should render the flyout if the output provided is a remote ES output and license is at least enterprise', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -333,6 +352,8 @@ describe('EditOutputFlyout', () => {
       id: 'outputR',
       is_default: false,
       is_default_monitoring: false,
+      kibana_url: 'http://localhost',
+      sync_integrations: true,
     });
 
     remoteEsOutputLabels.forEach((label) => {
@@ -345,10 +366,75 @@ describe('EditOutputFlyout', () => {
     );
 
     expect(utils.queryByTestId('serviceTokenSecretInput')).not.toBeNull();
+
+    expect(utils.queryByTestId('remoteClusterConfigurationCallout')).not.toBeNull();
+    expect(utils.queryByTestId('kibanaAPIKeyCallout')).not.toBeNull();
+    expect(
+      (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
+    ).toEqual('http://localhost');
+
+    expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
+    fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
+
+    await waitFor(() => {
+      // Show SSL inputs
+      sslInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).not.toBeNull();
+      });
+
+      // Does not show kafka inputs nor sections
+      kafkaInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).toBeNull();
+      });
+
+      kafkaSectionsLabels.forEach((label) => {
+        expect(utils.queryByText(label)).toBeNull();
+      });
+    });
+  });
+
+  it('should not render the flyout if the output is a remote ES output and the license is not at least enterprise', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'remote_elasticsearch',
+      name: 'remote es output',
+      id: 'outputR',
+      is_default: false,
+      is_default_monitoring: false,
+      kibana_url: 'http://localhost',
+      sync_integrations: true,
+    });
+
+    remoteEsOutputLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).not.toBeNull();
+    });
+    expect(utils.queryByTestId('serviceTokenCallout')).not.toBeNull();
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).toContain(
+      'Remote Elasticsearch'
+    );
+
+    expect(utils.queryByTestId('serviceTokenSecretInput')).not.toBeNull();
+
+    expect(utils.queryByTestId('remoteClusterConfigurationCallout')).not.toBeInTheDocument();
+    expect(utils.queryByTestId('kibanaAPIKeyCallout')).not.toBeInTheDocument();
   });
 
   it('should populate secret service token input with plain text value when editing remote ES output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -364,11 +450,20 @@ describe('EditOutputFlyout', () => {
       is_default_monitoring: false,
       service_token: '1234',
       hosts: ['https://localhost:9200'],
+      kibana_url: 'http://localhost:5601',
+      kibana_api_key: 'key',
     });
 
     expect((utils.getByTestId('serviceTokenSecretInput') as HTMLInputElement).value).toEqual(
       '1234'
     );
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.kibanaURLInput')).toBeNull();
+
+    fireEvent.click(utils.getByTestId('syncIntegrationsSwitch'));
+    expect(
+      (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
+    ).toEqual('http://localhost:5601');
 
     fireEvent.click(utils.getByText('Save and apply settings'));
 
@@ -376,8 +471,11 @@ describe('EditOutputFlyout', () => {
       expect(mockSendPutOutput).toHaveBeenCalledWith(
         'outputR',
         expect.objectContaining({
+          sync_integrations: true,
           secrets: { service_token: '1234' },
           service_token: undefined,
+          kibana_api_key: 'key',
+          kibana_url: 'http://localhost:5601',
         })
       );
     });

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -24,6 +24,7 @@
     "@kbn/i18n-react",
     "@kbn/coloring",
     "@kbn/config-schema",
+    "@kbn/lens-common",
   ],
   "exclude": [
     "target/**/*",

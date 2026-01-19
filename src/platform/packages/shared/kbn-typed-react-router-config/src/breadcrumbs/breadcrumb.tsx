@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { RequiredKeys } from 'utility-types';
+import type React from 'react';
+import type { RequiredKeys } from 'utility-types';
 import { useRouterBreadcrumb } from './use_router_breadcrumb';
-import { PathsOf, RouteMap, TypeOf } from '../types';
+import type { PathsOf, RouteMap, TypeOf } from '../types';
 
 type AsParamsProps<TObject extends Record<string, any>> = RequiredKeys<TObject> extends never
   ? {}

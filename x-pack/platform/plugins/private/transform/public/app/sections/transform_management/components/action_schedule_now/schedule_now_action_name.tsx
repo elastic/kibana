@@ -106,7 +106,7 @@ export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
 
   return (
     <EuiToolTip position="top" content={content}>
-      <>{scheduleNowActionNameText}</>
+      <span tabIndex={0}>{scheduleNowActionNameText}</span>
     </EuiToolTip>
   );
 };

@@ -14,7 +14,9 @@
         "tags": [],
         "label": "settingsServiceMock",
         "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/settings_service.mock.ts",
+        "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +30,9 @@
             "signature": [
               "() => any"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -48,7 +52,9 @@
               "IUiSettingsClient",
               ">; }"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -68,7 +74,9 @@
               "IUiSettingsClient",
               ">; }"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -84,7 +92,9 @@
         "tags": [],
         "label": "uiSettingsServiceMock",
         "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/ui_settings_service.mock.ts",
+        "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -98,7 +108,9 @@
             "signature": [
               "() => any"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -116,7 +128,9 @@
               "IUiSettingsClient",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -134,7 +148,9 @@
               "IUiSettingsClient",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

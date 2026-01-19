@@ -6,6 +6,7 @@
  */
 
 // Schema constants
+
 export * from './impl/schemas';
 
 export { defaultAssistantFeatures } from './impl/capabilities';
@@ -23,7 +24,7 @@ export {
 } from './impl/data_anonymization/helpers';
 
 export {
-  contentReferencesStoreFactory,
+  newContentReferencesStore,
   securityAlertReference,
   knowledgeBaseReference,
   securityAlertsPageReference,
@@ -33,6 +34,8 @@ export {
   contentReferenceBlock,
   removeContentReferences,
   pruneContentReferences,
+  enrichDocument,
+  sanitizeMessages,
 } from './impl/content_references';
 
 export type {
@@ -42,6 +45,13 @@ export type {
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';
+export {
+  getIsConversationOwner,
+  getCurrentConversationOwner,
+  getConversationSharedState,
+  ConversationSharedState,
+} from './impl/utils/sharing_helpers';
+
 export * from './constants';
 
 /** currently the same shape as "fields" property in the ES response */
@@ -66,3 +76,30 @@ export {
   /** The default (relative) start of the date range (i.e. `now-24h`) */
   DEFAULT_START,
 } from './impl/alerts/get_open_and_acknowledged_alerts_query';
+
+export { getAttackDiscoveryLoadingMessage } from './impl/utils/get_attack_discovery_loading_message';
+
+export {
+  getAttackChainMarkdown,
+  getAttackDiscoveryMarkdown,
+  getAttackDiscoveryMarkdownFields,
+  getMarkdownFields,
+  getMarkdownWithOriginalValues,
+} from './impl/utils/get_attack_discovery_markdown';
+
+export {
+  getOriginalAlertIds,
+  getTacticLabel,
+  getTacticMetadata,
+  replaceNewlineLiterals,
+  transformInternalReplacements,
+} from './impl/utils/attack_discovery_helpers';
+
+export { transformAttackDiscoveryAlertFromApi } from './impl/utils/transform_attack_discovery_alert_from_api';
+export { transformAttackDiscoveryAlertToApi } from './impl/utils/transform_attack_discovery_alert_to_api';
+export { transformAttackDiscoveryScheduleFromApi } from './impl/utils/transform_attack_discovery_schedule_from_api';
+export { transformAttackDiscoveryScheduleToApi } from './impl/utils/transform_attack_discovery_schedule_to_api';
+export { transformAttackDiscoveryScheduleCreatePropsToApi } from './impl/utils/transform_attack_discovery_schedule_create_props_to_api';
+export { transformAttackDiscoveryScheduleUpdatePropsToApi } from './impl/utils/transform_attack_discovery_schedule_update_props_to_api';
+export { transformAttackDiscoveryScheduleCreatePropsFromApi } from './impl/utils/transform_attack_discovery_schedule_create_props_from_api';
+export { transformAttackDiscoveryScheduleUpdatePropsFromApi } from './impl/utils/transform_attack_discovery_schedule_update_props_from_api';

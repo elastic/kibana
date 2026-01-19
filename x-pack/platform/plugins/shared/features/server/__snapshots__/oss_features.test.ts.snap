@@ -38,7 +38,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -54,7 +54,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "replacedBy": Array [
                   Object {
                     "feature": "discover_v2",
@@ -107,7 +107,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -123,7 +123,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "savedObject": Object {
                   "all": Array [
                     "search-session",
@@ -242,7 +242,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -258,7 +258,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "replacedBy": Array [
                   Object {
                     "feature": "dashboard_v2",
@@ -311,7 +311,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -327,7 +327,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "savedObject": Object {
                   "all": Array [
                     "search-session",
@@ -413,7 +413,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -429,7 +429,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "replacedBy": Array [
                   Object {
                     "feature": "discover_v2",
@@ -479,7 +479,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -520,7 +522,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -536,7 +538,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "savedObject": Object {
                   "all": Array [
                     "search-session",
@@ -570,7 +572,9 @@ Array [
                 },
                 "name": "Generate CSV reports",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -646,7 +650,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -706,7 +712,9 @@ Array [
                 "minimumLicense": "gold",
                 "name": "Generate PDF or PNG reports",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -755,7 +763,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -771,7 +779,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "replacedBy": Array [
                   Object {
                     "feature": "dashboard_v2",
@@ -822,7 +830,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -850,7 +860,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -891,7 +903,7 @@ Array [
         ],
       },
       Object {
-        "name": "Store Search Sessions",
+        "name": "Store Background search",
         "privilegeGroups": Array [
           Object {
             "groupType": "independent",
@@ -907,7 +919,7 @@ Array [
                     "search_sessions",
                   ],
                 },
-                "name": "Store Search Sessions",
+                "name": "Store Background search",
                 "savedObject": Object {
                   "all": Array [
                     "search-session",
@@ -942,7 +954,9 @@ Array [
                 "minimumLicense": "gold",
                 "name": "Generate PDF or PNG reports",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -962,7 +976,9 @@ Array [
                 },
                 "name": "Generate CSV reports from Discover session panels",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -1010,6 +1026,9 @@ exports[`buildOSSFeatures with a basic license returns the advancedSettings feat
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "manage_advanced_settings",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1068,6 +1087,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1084,6 +1105,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1143,6 +1165,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -1211,6 +1234,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -1239,6 +1263,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1253,6 +1279,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1281,6 +1308,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -1317,6 +1345,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -1398,6 +1427,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1413,6 +1444,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1551,6 +1583,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1564,6 +1598,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1901,6 +1936,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -1915,6 +1952,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -2055,6 +2093,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2066,6 +2106,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -2134,6 +2175,9 @@ exports[`buildOSSFeatures with a enterprise license returns the advancedSettings
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "manage_advanced_settings",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -2192,6 +2236,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2208,6 +2254,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -2267,6 +2314,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -2335,6 +2383,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -2363,6 +2412,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2377,6 +2428,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -2405,6 +2457,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -2441,6 +2494,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -2522,6 +2576,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2537,6 +2593,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -2675,6 +2732,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -2688,6 +2747,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -3025,6 +3085,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -3039,6 +3101,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -3179,6 +3242,8 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
         },
       },
@@ -3190,6 +3255,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],

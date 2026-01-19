@@ -9,41 +9,59 @@
 
 import { pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, map, Observable, skip } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   PublishesWritableUnifiedSearch,
   PublishesWritableDataViews,
   StateComparators,
+  ProjectRoutingOverrides,
+  PublishesProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
-import { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
-import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
 
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { DiscoverServices } from '../build_services';
-import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
-import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import {
-  PublishesSavedSearch,
+  isOfAggregateQueryType,
+  type AggregateQuery,
+  type Filter,
+  type Query,
+} from '@kbn/es-query';
+import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import type { DiscoverServices } from '../build_services';
+import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
+import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
+import type {
+  PublishesWritableSavedSearch,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableStateManager,
 } from './types';
+import { getEsqlDataView } from '../application/main/state_management/utils/get_esql_data_view';
 
 const initializeSearchSource = async (
-  dataService: DiscoverServices['data'],
+  discoverServices: DiscoverServices,
   serializedSearchSource?: SerializedSearchSourceFields
 ) => {
   const [searchSource, parentSearchSource] = await Promise.all([
-    dataService.search.searchSource.create(serializedSearchSource),
-    dataService.search.searchSource.create(),
+    discoverServices.data.search.searchSource.create(serializedSearchSource),
+    discoverServices.data.search.searchSource.create(),
   ]);
+
   searchSource.setParent(parentSearchSource);
-  const dataView = searchSource.getField('index');
+
+  const query = searchSource.getField('query');
+  let dataView = searchSource.getField('index');
+
+  if (isOfAggregateQueryType(query)) {
+    dataView = await getEsqlDataView(query, dataView, discoverServices);
+  }
+
   return { searchSource, dataView };
 };
 
@@ -63,6 +81,13 @@ const initializedSavedSearch = (
   };
 };
 
+const getProjectRoutingOverrides = (query: Query | AggregateQuery | undefined) => {
+  if (isOfAggregateQueryType(query)) {
+    const value = getProjectRoutingFromEsqlQuery(query.esql);
+    return value ? [{ value }] : undefined;
+  }
+};
+
 export const initializeSearchEmbeddableApi = async (
   initialState: SearchEmbeddableRuntimeState,
   {
@@ -71,15 +96,19 @@ export const initializeSearchEmbeddableApi = async (
     discoverServices: DiscoverServices;
   }
 ): Promise<{
-  api: PublishesSavedSearch & PublishesWritableDataViews & Partial<PublishesWritableUnifiedSearch>;
+  api: PublishesWritableSavedSearch &
+    PublishesWritableDataViews &
+    Partial<PublishesWritableUnifiedSearch> &
+    PublishesProjectRoutingOverrides;
   stateManager: SearchEmbeddableStateManager;
+  anyStateChange$: Observable<void>;
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
+  reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => void;
 }> => {
-  const serializedSearchSource$ = new BehaviorSubject(initialState.serializedSearchSource);
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView } = await initializeSearchSource(
-    discoverServices.data,
+    discoverServices,
     initialState.serializedSearchSource
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
@@ -108,6 +137,11 @@ export const initializeSearchEmbeddableApi = async (
   );
   const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
     searchSource.getField('query')
+  );
+
+  const initialQuery = searchSource.getField('query');
+  const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
+    getProjectRoutingOverrides(initialQuery)
   );
 
   const canEditUnifiedSearch = () => false;
@@ -167,6 +201,10 @@ export const initializeSearchEmbeddableApi = async (
     searchSource$.next(searchSource);
   };
 
+  const setColumns = (columns: string[] | undefined) => {
+    stateManager.columns.next(columns);
+  };
+
   /** Keep the saved search in sync with any state changes */
   const syncSavedSearch = combineLatest([onAnyStateChange, searchSource$])
     .pipe(
@@ -181,9 +219,20 @@ export const initializeSearchEmbeddableApi = async (
       savedSearch$.next(newSavedSearch);
     });
 
+  /** Keep projectRoutingOverrides$ in sync with query$ changes */
+  const syncProjectRoutingOverrides = query$.subscribe((query) => {
+    const currentOverrides = projectRoutingOverrides$.getValue();
+    const nextOverrides = getProjectRoutingOverrides(query);
+
+    if (!deepEqual(currentOverrides, nextOverrides)) {
+      projectRoutingOverrides$.next(nextOverrides);
+    }
+  });
+
   return {
     cleanup: () => {
       syncSavedSearch.unsubscribe();
+      syncProjectRoutingOverrides.unsubscribe();
     },
     api: {
       setDataViews,
@@ -193,41 +242,35 @@ export const initializeSearchEmbeddableApi = async (
       setFilters,
       query$,
       setQuery,
+      projectRoutingOverrides$,
       canEditUnifiedSearch,
+      setColumns,
     },
     stateManager,
+    anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
     comparators: {
-      sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
-      columns: [columns$, (value) => columns$.next(value), (a, b) => deepEqual(a, b)],
-      grid: [grid$, (value) => grid$.next(value), (a, b) => deepEqual(a, b)],
-      sampleSize: [
-        sampleSize$,
-        (value) => sampleSize$.next(value),
-        (a, b) => (a ?? defaults.sampleSize) === (b ?? defaults.sampleSize),
-      ],
-      rowsPerPage: [
-        rowsPerPage$,
-        (value) => rowsPerPage$.next(value),
-        (a, b) => (a ?? defaults.rowsPerPage) === (b ?? defaults.rowsPerPage),
-      ],
-      rowHeight: [
-        rowHeight$,
-        (value) => rowHeight$.next(value),
-        (a, b) => (a ?? defaults.rowHeight) === (b ?? defaults.rowHeight),
-      ],
-      headerRowHeight: [
-        headerRowHeight$,
-        (value) => headerRowHeight$.next(value),
-        (a, b) => (a ?? defaults.headerRowHeight) === (b ?? defaults.headerRowHeight),
-      ],
-
-      /** The following can't currently be changed from the dashboard */
-      serializedSearchSource: [
-        serializedSearchSource$,
-        (value) => serializedSearchSource$.next(value),
-      ],
-      viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
-      density: [density$, (value) => density$.next(value)],
+      sort: (a, b) => deepEqual(a ?? [], b ?? []),
+      columns: 'deepEquality',
+      grid: (a, b) => deepEqual(a ?? {}, b ?? {}),
+      sampleSize: (a, b) => (a ?? defaults.sampleSize) === (b ?? defaults.sampleSize),
+      rowsPerPage: (a, b) => (a ?? defaults.rowsPerPage) === (b ?? defaults.rowsPerPage),
+      rowHeight: (a, b) => (a ?? defaults.rowHeight) === (b ?? defaults.rowHeight),
+      headerRowHeight: (a, b) =>
+        (a ?? defaults.headerRowHeight) === (b ?? defaults.headerRowHeight),
+      serializedSearchSource: 'referenceEquality',
+      viewMode: 'referenceEquality',
+      density: 'referenceEquality',
+    },
+    reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => {
+      sort$.next(lastSaved?.sort);
+      columns$.next(lastSaved?.columns);
+      grid$.next(lastSaved?.grid);
+      sampleSize$.next(lastSaved?.sampleSize);
+      rowsPerPage$.next(lastSaved?.rowsPerPage);
+      rowHeight$.next(lastSaved?.rowHeight);
+      headerRowHeight$.next(lastSaved?.headerRowHeight);
+      savedSearchViewMode$.next(lastSaved?.viewMode);
+      density$.next(lastSaved?.density);
     },
   };
 };

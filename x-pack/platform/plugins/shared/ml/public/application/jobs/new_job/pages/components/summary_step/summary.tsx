@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useNavigateToManagementMlLink } from '../../../../../contexts/kibana/use_create_url';
 import { createResultsUrl } from '../../../../../util/results_url';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { PreviousButton } from '../wizard_nav';
@@ -51,7 +52,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   } = useMlKibana();
 
   const navigateToPath = useNavigateToPath();
-
+  const navigateToMlManagement = useNavigateToManagementMlLink('anomaly_detection');
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } =
     useContext(JobCreatorContext);
   const [progress, setProgress] = useState(resultsLoader.progress);
@@ -107,7 +108,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     try {
       await jobCreator.createJob();
       await jobCreator.createDatafeed();
-      advancedStartDatafeed(showStartModal ? jobCreator : null, navigateToPath);
+      advancedStartDatafeed(showStartModal ? jobCreator : null, navigateToMlManagement);
     } catch (error) {
       handleJobCreationError(error);
     }
@@ -135,11 +136,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   function clickResetJob() {
-    resetJob(jobCreator, navigateToPath);
+    resetJob(jobCreator, navigateToMlManagement);
   }
 
   const convertToAdvanced = () => {
-    convertToAdvancedJob(jobCreator, navigateToPath);
+    convertToAdvancedJob(jobCreator, navigateToMlManagement);
   };
 
   useEffect(() => {

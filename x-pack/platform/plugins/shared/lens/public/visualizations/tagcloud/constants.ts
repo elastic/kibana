@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { $Values } from '@kbn/utility-types';
+import type { $Values } from '@kbn/utility-types';
 import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 
 export const TAGCLOUD_LABEL = i18n.translate('xpack.lens.tagcloud.label', {

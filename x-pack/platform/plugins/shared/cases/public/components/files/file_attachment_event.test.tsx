@@ -9,28 +9,19 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../common/mock';
 import type { DownloadableFile } from './types';
 
-import { createAppMockRenderer } from '../../common/mock';
 import { basicFileMock } from '../../containers/mock';
 import { FileAttachmentEvent } from './file_attachment_event';
+import { renderWithTestingProviders } from '../../common/mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174661
-describe.skip('FileAttachmentEvent', () => {
-  let appMockRender: AppMockRenderer;
-
+describe('FileAttachmentEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-  });
-
-  afterEach(async () => {
-    await appMockRender.clearQueryCache();
   });
 
   it('renders clickable name', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FileAttachmentEvent file={basicFileMock as unknown as DownloadableFile} />
     );
 

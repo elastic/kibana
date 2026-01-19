@@ -8,16 +8,14 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
-import { SHARE_BUTTON_TEST_ID, CHAT_BUTTON_TEST_ID } from './test_ids';
+import { SHARE_BUTTON_TEST_ID } from './test_ids';
 import { HeaderActions } from './header_actions';
-import { useAssistant } from '../hooks/use_assistant';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProvidersComponent } from '../../../../common/mock';
 import { useGetFlyoutLink } from '../hooks/use_get_flyout_link';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../hooks/use_assistant');
 jest.mock('../hooks/use_get_flyout_link');
 
 jest.mock('@elastic/eui', () => ({
@@ -52,7 +50,6 @@ describe('<HeaderAction />', () => {
   beforeEach(() => {
     window.location.search = '?';
     jest.mocked(useGetFlyoutLink).mockReturnValue(alertUrl);
-    jest.mocked(useAssistant).mockReturnValue({ showAssistant: true, promptContextId: '' });
   });
 
   describe('Share alert url action', () => {
@@ -74,20 +71,6 @@ describe('<HeaderAction />', () => {
         dataFormattedForFieldBrowser: [],
       });
       expect(queryByTestId(SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
-    });
-
-    it('should render chat button in the title', () => {
-      const { getByTestId } = renderHeaderActions(mockContextValue);
-
-      expect(getByTestId(CHAT_BUTTON_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('should not render chat button in the title if should not be shown', () => {
-      jest.mocked(useAssistant).mockReturnValue({ showAssistant: false, promptContextId: '' });
-
-      const { queryByTestId } = renderHeaderActions(mockContextValue);
-
-      expect(queryByTestId(CHAT_BUTTON_TEST_ID)).not.toBeInTheDocument();
     });
   });
 });

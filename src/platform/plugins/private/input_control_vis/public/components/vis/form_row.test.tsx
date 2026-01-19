@@ -8,30 +8,30 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 
 import { FormRow } from './form_row';
 
 test('renders enabled control', () => {
-  const component = shallow(
+  const { container } = render(
     <FormRow label="test control" id="controlId" controlIndex={0}>
       <div>My Control</div>
     </FormRow>
   );
-  expect(component).toMatchSnapshot();
+  expect(container).toMatchSnapshot();
 });
 
 test('renders control with warning', () => {
-  const component = shallow(
+  const { container } = render(
     <FormRow label="test control" id="controlId" controlIndex={0} warningMsg="This is a warning">
       <div>My Control</div>
     </FormRow>
   );
-  expect(component).toMatchSnapshot();
+  expect(container).toMatchSnapshot();
 });
 
 test('renders disabled control with tooltip', () => {
-  const component = shallow(
+  const { container } = render(
     <FormRow
       label="test control"
       id="controlId"
@@ -41,5 +41,5 @@ test('renders disabled control with tooltip', () => {
       <div>My Control</div>
     </FormRow>
   );
-  expect(component).toMatchSnapshot();
+  expect(container).toMatchSnapshot();
 });

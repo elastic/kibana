@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { errors, TransportResult } from '@elastic/elasticsearch';
-import { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -14,13 +15,13 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { getMockSearchConfig } from '@kbn/data-plugin/config.mock';
-import { ISearchStrategy } from '@kbn/data-plugin/server';
+import type { ISearchStrategy } from '@kbn/data-plugin/server';
 import { enhancedEsSearchStrategyProvider } from '@kbn/data-plugin/server/search';
 import { createSearchSessionsClientMock } from '@kbn/data-plugin/server/search/mocks';
 import { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
 import { loggerMock } from '@kbn/logging-mocks';
 import { EMPTY, lastValueFrom } from 'rxjs';
-import { createResolvedLogViewMock } from '../../../common/log_views/resolved_log_view.mock';
+import { createResolvedLogViewLazyMock } from '../../../common/log_views/resolved_log_view.mock';
 import { createLogViewsClientMock } from '../log_views/log_views_client.mock';
 import { createLogViewsServiceStartMock } from '../log_views/log_views_service.mock';
 import {
@@ -59,7 +60,7 @@ describe('LogEntry search strategy', () => {
 
     const dataMock = createDataPluginMock(esSearchStrategy);
     const logViewsClientMock = createLogViewsClientMock();
-    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewLazyMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
 
@@ -89,23 +90,21 @@ describe('LogEntry search strategy', () => {
     expect(esClient.asyncSearch.submit).toHaveBeenCalledWith(
       expect.objectContaining({
         index: 'log-indices-*',
-        body: expect.objectContaining({
-          track_total_hits: false,
-          terminate_after: 1,
-          query: {
-            ids: {
-              values: ['LOG_ENTRY_ID'],
+        track_total_hits: false,
+        terminate_after: 1,
+        query: {
+          ids: {
+            values: ['LOG_ENTRY_ID'],
+          },
+        },
+        runtime_mappings: {
+          runtime_field: {
+            type: 'keyword',
+            script: {
+              source: 'emit("runtime value")',
             },
           },
-          runtime_mappings: {
-            runtime_field: {
-              type: 'keyword',
-              script: {
-                source: 'emit("runtime value")',
-              },
-            },
-          },
-        }),
+        },
       }),
       expect.anything()
     );
@@ -164,7 +163,7 @@ describe('LogEntry search strategy', () => {
 
     const dataMock = createDataPluginMock(esSearchStrategy);
     const logViewsClientMock = createLogViewsClientMock();
-    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewLazyMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
 
@@ -240,7 +239,7 @@ describe('LogEntry search strategy', () => {
 
     const dataMock = createDataPluginMock(esSearchStrategy);
     const logViewsClientMock = createLogViewsClientMock();
-    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewLazyMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
 
@@ -276,7 +275,7 @@ describe('LogEntry search strategy', () => {
 
     const dataMock = createDataPluginMock(esSearchStrategy);
     const logViewsClientMock = createLogViewsClientMock();
-    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewLazyMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
 

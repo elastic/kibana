@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useCallback, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PROXY_MODE, SNIFF_MODE } from '../../../../../../common/constants';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
 } from '../../../../../shared_imports';
-import { ClusterPayload } from '../../../../../../common/lib';
+import type { ClusterPayload } from '../../../../../../common/lib';
 import { RequestFlyout } from './request_flyout';
 
 interface Props {
@@ -26,6 +28,7 @@ interface Props {
   cluster?: ClusterPayload;
   nextButtonTestSubj: string;
   backButtonTestSubj?: string;
+  previousClusterMode?: typeof PROXY_MODE | typeof SNIFF_MODE;
 }
 
 export const ActionButtons: React.FC<Props> = ({
@@ -39,6 +42,7 @@ export const ActionButtons: React.FC<Props> = ({
   cluster,
   nextButtonTestSubj,
   backButtonTestSubj,
+  previousClusterMode,
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState(false);
   const toggleRequest = useCallback(() => {
@@ -92,7 +96,11 @@ export const ActionButtons: React.FC<Props> = ({
         )}
       </EuiFlexItem>
       {isRequestVisible && cluster ? (
-        <RequestFlyout cluster={cluster} close={() => setIsRequestVisible(false)} />
+        <RequestFlyout
+          cluster={cluster}
+          close={() => setIsRequestVisible(false)}
+          previousClusterMode={previousClusterMode}
+        />
       ) : null}
     </EuiFlexGroup>
   );

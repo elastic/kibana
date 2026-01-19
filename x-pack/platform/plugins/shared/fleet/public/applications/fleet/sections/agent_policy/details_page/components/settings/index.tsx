@@ -6,8 +6,9 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
-import { pick } from 'lodash';
+import { pick, uniqBy } from 'lodash';
 import {
   EuiBottomBar,
   EuiFlexGroup,
@@ -21,12 +22,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { useHistory } from 'react-router-dom';
 
+import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
+
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import type { AgentPolicy } from '../../../../../types';
 import {
   useStartServices,
   useAuthz,
-  sendUpdateAgentPolicy,
+  sendUpdateAgentPolicyForRq,
   useConfig,
   sendGetAgentStatus,
   useAgentPolicyRefresh,
@@ -115,41 +118,54 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const submitUpdateAgentPolicy = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await sendUpdateAgentPolicy(
-          agentPolicy.id,
-          pickAgentPolicyKeysToSend(agentPolicy)
-        );
-        if (data) {
-          notifications.toasts.addSuccess(
-            i18n.translate('xpack.fleet.editAgentPolicy.successNotificationTitle', {
-              defaultMessage: "Successfully updated ''{name}'' settings",
-              values: { name: agentPolicy.name },
-            })
+        const dataToSend = pickAgentPolicyKeysToSend(agentPolicy);
+        await sendUpdateAgentPolicyForRq(agentPolicy.id, pickAgentPolicyKeysToSend(agentPolicy));
+
+        if (
+          dataToSend.space_ids &&
+          !deepEqual(originalAgentPolicy.space_ids, dataToSend.space_ids)
+        ) {
+          const packages = uniqBy(
+            originalAgentPolicy.package_policies
+              ?.map((pp) =>
+                pp.package
+                  ? { pkgName: pp.package.name, pkgVersion: pp.package.version }
+                  : undefined
+              )
+              .filter(
+                (p): p is { pkgName: string; pkgVersion: string } => typeof p !== 'undefined'
+              ) ?? [],
+            'pkgName'
           );
-          if (
-            agentPolicy.space_ids &&
-            !agentPolicy.space_ids.includes(spaceId ?? DEFAULT_SPACE_ID)
-          ) {
-            history.replace(getPath('policies_list'));
-          } else {
-            refreshAgentPolicy();
-            setHasChanges(false);
+          for (const { pkgName, pkgVersion } of packages) {
+            await ensurePackageKibanaAssetsInstalled({
+              spaceIds: dataToSend.space_ids,
+              pkgName,
+              pkgVersion,
+              toasts: notifications.toasts,
+            });
           }
-        } else {
-          notifications.toasts.addDanger(
-            error
-              ? error.message
-              : i18n.translate('xpack.fleet.editAgentPolicy.errorNotificationTitle', {
-                  defaultMessage: 'Unable to update agent policy',
-                })
-          );
         }
-      } catch (e) {
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.fleet.editAgentPolicy.errorNotificationTitle', {
-            defaultMessage: 'Unable to update agent policy',
+
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.fleet.editAgentPolicy.successNotificationTitle', {
+            defaultMessage: "Successfully updated ''{name}'' settings",
+            values: { name: agentPolicy.name },
           })
         );
+
+        if (agentPolicy.space_ids && !agentPolicy.space_ids.includes(spaceId ?? DEFAULT_SPACE_ID)) {
+          history.replace(getPath('policies_list'));
+        } else {
+          refreshAgentPolicy();
+          setHasChanges(false);
+        }
+      } catch (error) {
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.fleet.editAgentPolicy.errorNotificationTitle', {
+            defaultMessage: 'Unable to update agent policy',
+          }),
+        });
       }
       setIsLoading(false);
     };

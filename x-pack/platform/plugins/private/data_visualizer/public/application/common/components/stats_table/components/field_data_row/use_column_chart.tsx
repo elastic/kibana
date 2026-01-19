@@ -24,6 +24,7 @@ import {
   type NumericDataItem,
   type OrdinalDataItem,
 } from '@kbn/ml-data-grid';
+import { useColumnChartStyles } from './column_chart_styles';
 
 const NON_AGGREGATABLE = 'non-aggregatable';
 
@@ -77,7 +78,8 @@ type LegendText = string | JSX.Element;
 export const getLegendText = (
   chartData: ChartData,
   maxChartColumns: number,
-  isNumeric = false
+  isNumeric = false,
+  styles: ReturnType<typeof useColumnChartStyles>
 ): LegendText => {
   if (chartData.type === 'unsupported') {
     return i18n.translate('xpack.dataVisualizer.dataGridChart.histogramNotAvailable', {
@@ -95,12 +97,12 @@ export const getLegendText = (
         <tbody>
           <tr>
             {chartData.data[0] !== undefined && (
-              <td className="dataGridChart__legendBoolean">
+              <td css={styles.legendBoolean}>
                 {chartData.data[0].key_as_string?.slice(0, 1) ?? ''}
               </td>
             )}
             {chartData.data[1] !== undefined && (
-              <td className="dataGridChart__legendBoolean">
+              <td css={styles.legendBoolean}>
                 {chartData.data[1].key_as_string?.slice(0, 1) ?? ''}
               </td>
             )}
@@ -163,6 +165,8 @@ export const useColumnChart = (
 
   const xScaleType = getXScaleType(fieldType);
 
+  const styles = useColumnChartStyles();
+
   const getColor = (d: ChartDataItem) => {
     if (hoveredRow === undefined || hoveredRow === null) {
       return BAR_COLOR;
@@ -219,7 +223,7 @@ export const useColumnChart = (
 
   return {
     data,
-    legendText: getLegendText(chartData, maxChartColumns, isNumeric),
+    legendText: getLegendText(chartData, maxChartColumns, isNumeric, styles),
     xScaleType,
   };
 };

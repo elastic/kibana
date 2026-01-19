@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiIconTip,
   EuiLink,
   EuiPageHeader,
   EuiPageSection,
@@ -179,7 +180,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
               })
             }
             docLinks={this.props.docLinks}
-            readOnly={this.props.readOnly}
+            readOnly={this.isReadOnly()}
           />
           <EuiSpacer />
           {this.getFormWarnings()}
@@ -191,16 +192,34 @@ export class EditRoleMappingPage extends Component<Props, State> {
   }
 
   private getInfoPanelMode = () => {
-    return this.props.readOnly ? 'view' : this.editingExistingRoleMapping() ? 'edit' : 'create';
+    return this.isReadOnly() ? 'view' : this.editingExistingRoleMapping() ? 'edit' : 'create';
   };
 
   private getFormTitle = () => {
-    if (this.props.readOnly) {
+    if (this.isReadOnly()) {
       return (
-        <FormattedMessage
-          id="xpack.security.management.editRoleMapping.readOnlyRoleMappingTitle"
-          defaultMessage="Viewing role mapping"
-        />
+        <>
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.readOnlyRoleMappingTitle"
+            defaultMessage="Viewing role mapping"
+          />
+          &nbsp;
+          {this.isReadOnlyRoleMapping() && (
+            <EuiIconTip
+              content={
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.readOnlyRoleMappingBadge.readOnlyRoleMappingCanNotBeModifiedTooltip"
+                  defaultMessage="Read only role mappings are built-in and cannot be removed or modified."
+                />
+              }
+              data-test-subj="readOnlyRoleMappingTooltip"
+              iconProps={{
+                style: { verticalAlign: 'super' },
+              }}
+              type="lock"
+            />
+          )}
+        </>
       );
     }
     if (this.editingExistingRoleMapping()) {
@@ -263,6 +282,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
     if (this.checkEmptyAnyAllMappings(this.state.roleMapping!.rules as RoleMappingRule)) {
       return (
         <EuiCallOut
+          announceOnMount
           title="Warning"
           color="warning"
           iconType="alert"
@@ -279,7 +299,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
   };
 
   private getFormButtons = () => {
-    if (this.props.readOnly === true) {
+    if (this.isReadOnly() === true) {
       return this.getReturnToRoleMappingListButton();
     }
 
@@ -338,7 +358,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
   };
 
   private getDeleteButton = () => {
-    if (this.editingExistingRoleMapping() && !this.props.readOnly) {
+    if (this.editingExistingRoleMapping() && !this.isReadOnly()) {
       return (
         <EuiFlexItem grow={false}>
           <DeleteProvider
@@ -426,6 +446,10 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
   private cloningExistingRoleMapping = () =>
     typeof this.props.name === 'string' && this.props.action === 'clone';
+
+  private isReadOnlyRoleMapping = () => this.state.roleMapping?.metadata?._read_only;
+
+  private isReadOnly = () => this.props.readOnly || this.isReadOnlyRoleMapping();
 
   private async loadAppData() {
     try {

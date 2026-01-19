@@ -10,30 +10,41 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiListGroup,
-  EuiListGroupItem,
   EuiPanel,
-  EuiConfirmModal,
+  EuiText,
+  EuiSpacer,
+  useEuiTheme,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
-import { isEmpty, findIndex, orderBy } from 'lodash';
-import { DataStreamApis } from '../../use_data_stream_apis';
-import { Conversation } from '../../../..';
+import { isEmpty, findIndex } from 'lodash';
+import type { User } from '@kbn/elastic-assistant-common';
+import { isMac } from '@kbn/shared-ux-utility';
+import { DeleteConversationModal } from '../delete_conversation_modal';
+import { ConversationListItem } from './conversation_list_item';
+import { useConversation } from '../../use_conversation';
+import type { ConversationWithOwner } from '../../api';
+import { useConversationsByDate } from './use_conversations_by_date';
+import type { DataStreamApis } from '../../use_data_stream_apis';
+import type { Conversation } from '../../../..';
 import * as i18n from './translations';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
   currentConversation?: Conversation;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
+  currentUser?: User;
+  onConversationSelected: ({ cId }: { cId: string }) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
-  conversations: Record<string, Conversation>;
+  isFetchingCurrentUserConversations: boolean;
+  conversations: Record<string, ConversationWithOwner>;
   onConversationDeleted: (conversationId: string) => void;
   onConversationCreate: () => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
+  setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
 const getCurrentConversationIndex = (
@@ -72,53 +83,49 @@ const getNextConversation = (
 export const ConversationSidePanel = React.memo<Props>(
   ({
     currentConversation,
+    currentUser,
     onConversationSelected,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
+    isFetchingCurrentUserConversations,
     conversations,
     onConversationDeleted,
     onConversationCreate,
+    refetchCurrentUserConversations,
+    setCurrentConversation,
+    setPaginationObserver,
   }) => {
+    const euiTheme = useEuiTheme();
+
+    const titleClassName = css`
+      text-transform: uppercase;
+      font-weight: ${euiTheme.euiTheme.font.weight.bold};
+    `;
     const [deleteConversationItem, setDeleteConversationItem] = useState<Conversation | null>(null);
 
+    const { copyConversationUrl, duplicateConversation } = useConversation();
+    const conversationsCategorizedByDate = useConversationsByDate(Object.values(conversations));
+
     const conversationList = useMemo(
-      () =>
-        orderBy(Object.values(conversations), 'updatedAt', 'desc').sort((a, b) =>
-          a.id.length > b.id.length ? -1 : 1
-        ),
-      [conversations]
+      () => Object.values(conversationsCategorizedByDate).flatMap((p) => p),
+      [conversationsCategorizedByDate]
     );
+
+    const lastConversationId = conversationList[conversationList.length - 1]?.id;
 
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
-
-    // Callback for when user deletes a conversation
-    const onDelete = useCallback(
-      (conversation: Conversation) => {
-        if (currentConversation?.id === conversation.id) {
-          const previousConversation = getNextConversation(conversationList, conversation);
-          onConversationSelected({
-            cId: previousConversation.id,
-            cTitle: previousConversation.title,
-          });
-        }
-        onConversationDeleted(conversation.id);
-      },
-      [currentConversation?.id, onConversationDeleted, conversationList, onConversationSelected]
-    );
 
     const onArrowUpClick = useCallback(() => {
       const previousConversation = getPreviousConversation(conversationList, currentConversation);
 
       onConversationSelected({
         cId: previousConversation.id,
-        cTitle: previousConversation.title,
       });
     }, [conversationList, currentConversation, onConversationSelected]);
     const onArrowDownClick = useCallback(() => {
       const nextConversation = getNextConversation(conversationList, currentConversation);
       onConversationSelected({
         cId: nextConversation.id,
-        cTitle: nextConversation.title,
       });
     }, [conversationList, currentConversation, onConversationSelected]);
 
@@ -155,19 +162,75 @@ export const ConversationSidePanel = React.memo<Props>(
       ]
     );
 
-    const handleCloseModal = useCallback(() => {
-      setDeleteConversationItem(null);
-    }, []);
+    const handleDuplicateConversation = useCallback(
+      (conversation?: Conversation) =>
+        duplicateConversation({
+          refetchCurrentUserConversations,
+          selectedConversation: conversation,
+          setCurrentConversation,
+        }),
+      [duplicateConversation, refetchCurrentUserConversations, setCurrentConversation]
+    );
 
-    const handleDelete = useCallback(() => {
-      if (deleteConversationItem) {
-        setDeleteConversationItem(null);
-        onDelete(deleteConversationItem);
-      }
-    }, [deleteConversationItem, onDelete]);
+    const handleCopyUrl = useCallback(
+      (conversation?: Conversation) => copyConversationUrl(conversation),
+      [copyConversationUrl]
+    );
+
+    const memoizedConversationList = useMemo(
+      () =>
+        Object.entries(conversationsCategorizedByDate).map(([category, convoList]) =>
+          convoList.length ? (
+            <EuiFlexItem grow={false} key={category}>
+              <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+                <EuiText css={titleClassName} size="s">
+                  {i18n.DATE_CATEGORY_LABELS[category]}
+                </EuiText>
+              </EuiPanel>
+              <EuiListGroup
+                size="xs"
+                css={css`
+                  padding: 0;
+                `}
+              >
+                {convoList.map((conversation) => (
+                  <ConversationListItem
+                    conversation={conversation}
+                    currentUser={currentUser}
+                    isActiveConversation={
+                      !isEmpty(conversation.id)
+                        ? conversation.id === currentConversation?.id
+                        : conversation.title === currentConversation?.title
+                    }
+                    key={conversation.id}
+                    handleDuplicateConversation={handleDuplicateConversation}
+                    handleCopyUrl={handleCopyUrl}
+                    lastConversationId={lastConversationId}
+                    onConversationSelected={onConversationSelected}
+                    setDeleteConversationItem={setDeleteConversationItem}
+                    setPaginationObserver={setPaginationObserver}
+                  />
+                ))}
+              </EuiListGroup>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+          ) : null
+        ),
+      [
+        conversationsCategorizedByDate,
+        currentConversation?.id,
+        currentConversation?.title,
+        currentUser,
+        handleCopyUrl,
+        handleDuplicateConversation,
+        lastConversationId,
+        onConversationSelected,
+        setPaginationObserver,
+        titleClassName,
+      ]
+    );
 
     useEvent('keydown', onKeyDown);
-
     return (
       <>
         <EuiFlexGroup
@@ -183,38 +246,21 @@ export const ConversationSidePanel = React.memo<Props>(
               overflow: auto;
             `}
           >
-            <EuiPanel hasShadow={false} borderRadius="none">
-              <EuiListGroup
-                size="xs"
-                css={css`
-                  padding: 0;
-                `}
-              >
-                {conversationList.map((conversation) => (
-                  <EuiListGroupItem
-                    key={conversation.id + conversation.title}
-                    onClick={() =>
-                      onConversationSelected({ cId: conversation.id, cTitle: conversation.title })
-                    }
-                    label={conversation.title}
-                    data-test-subj={`conversation-select-${conversation.title}`}
-                    isActive={
-                      !isEmpty(conversation.id)
-                        ? conversation.id === currentConversation?.id
-                        : conversation.title === currentConversation?.title
-                    }
-                    extraAction={{
-                      color: 'danger',
-                      onClick: () => setDeleteConversationItem(conversation),
-                      iconType: 'trash',
-                      iconSize: 's',
-                      disabled: conversation.isDefault,
-                      'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
-                      'data-test-subj': 'delete-option',
-                    }}
-                  />
-                ))}
-              </EuiListGroup>
+            <EuiPanel
+              hasShadow={false}
+              borderRadius="none"
+              data-test-subj={'conversationSidePanel'}
+            >
+              {memoizedConversationList}
+              {isFetchingCurrentUserConversations && (
+                <EuiLoadingSpinner
+                  size="m"
+                  css={css`
+                    display: block;
+                    margin: 0 auto;
+                  `}
+                />
+              )}
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -244,17 +290,14 @@ export const ConversationSidePanel = React.memo<Props>(
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {deleteConversationItem && (
-          <EuiConfirmModal
-            title={i18n.DELETE_CONVERSATION_TITLE}
-            onCancel={handleCloseModal}
-            onConfirm={handleDelete}
-            cancelButtonText={i18n.CANCEL_BUTTON_TEXT}
-            confirmButtonText={i18n.DELETE_BUTTON_TEXT}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
-          />
-        )}
+        <DeleteConversationModal
+          conversationList={conversationList}
+          currentConversationId={currentConversation?.id}
+          deleteConversationItem={deleteConversationItem}
+          onConversationDeleted={onConversationDeleted}
+          onConversationSelected={onConversationSelected}
+          setDeleteConversationItem={setDeleteConversationItem}
+        />
       </>
     );
   }

@@ -8,8 +8,8 @@
 import React, { useEffect, useState } from 'react';
 import { EuiAccordion, EuiLink, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataFilters } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, ISource } from '../../../classes/sources/source';
+import type { DataFilters } from '../../../../common/descriptor_types';
+import type { ImmutableSourceProperty, ISource } from '../../../classes/sources/source';
 
 export interface Props {
   source: ISource;

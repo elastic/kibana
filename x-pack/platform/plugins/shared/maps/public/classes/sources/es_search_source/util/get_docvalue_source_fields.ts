@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { getField } from '../../../../../common/elasticsearch_util';
 
 export interface ScriptField {

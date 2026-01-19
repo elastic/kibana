@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { PageTemplate } from '../page_template';
-import { PageTemplateProps } from '../page_template';
+import type { PageTemplateProps } from '../page_template';
 
 type EntSearchTemplateProps = PageTemplateProps;
 

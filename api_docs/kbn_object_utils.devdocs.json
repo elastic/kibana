@@ -32,6 +32,8 @@
           "(oldObj: TBase, newObj: TCompare | undefined) => ObjectDiffResult<TBase, TCompare>"
         ],
         "path": "src/platform/packages/shared/kbn-object-utils/src/calculate_object_diff.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "TBase"
             ],
             "path": "src/platform/packages/shared/kbn-object-utils/src/calculate_object_diff.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,6 +69,8 @@
               "TCompare | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-utils/src/calculate_object_diff.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -85,25 +91,29 @@
           "\nReturns a flattened version of the input object also accounting for nested properties."
         ],
         "signature": [
-          "(obj: Record<PropertyKey, unknown>, parentKey: string) => Record<PropertyKey, unknown>"
+          "(obj: TObj, parentKey: string) => Record<PropertyKey, GetValuesTypes<TObj>>"
         ],
         "path": "src/platform/packages/shared/kbn-object-utils/src/flatten_object.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/object-utils",
             "id": "def-common.flattenObject.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "obj",
             "description": [
               "- The input object."
             ],
             "signature": [
-              "Record<PropertyKey, unknown>"
+              "TObj"
             ],
             "path": "src/platform/packages/shared/kbn-object-utils/src/flatten_object.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,6 +131,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-object-utils/src/flatten_object.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -129,6 +141,115 @@
         "returnComment": [
           "An object containing all the flattened properties."
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/object-utils",
+        "id": "def-common.flattenObjectNestedLast",
+        "type": "Function",
+        "tags": [],
+        "label": "flattenObjectNestedLast",
+        "description": [
+          "\nReturns a flattened version of the input object, giving higher priority to nested fields and flattening them after the other properties."
+        ],
+        "signature": [
+          "(obj: TObj) => { [x: string]: GetValuesTypes<TObj> | GetValuesTypes<GetValuesTypes<TObj>>; [x: number]: GetValuesTypes<TObj> | GetValuesTypes<GetValuesTypes<TObj>>; [x: symbol]: GetValuesTypes<TObj> | GetValuesTypes<GetValuesTypes<TObj>>; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-object-utils/src/flatten_object.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.flattenObjectNestedLast.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [
+              "- The input object."
+            ],
+            "signature": [
+              "TObj"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/flatten_object.ts",
+            "lineNumber": 47,
+            "columnNumber": 80,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object containing all the flattened properties."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/object-utils",
+        "id": "def-common.unflattenObject",
+        "type": "Function",
+        "tags": [],
+        "label": "unflattenObject",
+        "description": [],
+        "signature": [
+          "(source: T, target: Record<string, any>) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<Exclude<",
+          "ValuesType",
+          "<{ [TKey in keyof T as string]: string extends TKey ? Record<TKey, T[TKey]> : {} extends Pick<T, TKey> ? ",
+          "DeepPartial",
+          "<DedotKey<T, TKey, Exclude<T[TKey], undefined>>> : DedotKey<T, TKey, T[TKey]>; }>, undefined>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-object-utils/src/unflatten_object.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.unflattenObject.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/unflatten_object.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.unflattenObject.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/unflatten_object.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],

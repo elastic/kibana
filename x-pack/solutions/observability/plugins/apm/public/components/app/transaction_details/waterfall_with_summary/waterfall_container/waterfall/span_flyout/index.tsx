@@ -26,17 +26,16 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
+import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { OpenSpanInDiscoverLink } from '../../../../../../shared/links/discover_links/open_span_in_discover_link';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
-import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { Summary } from '../../../../../../shared/summary';
 import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
-import { DurationSummaryItem } from '../../../../../../shared/summary/duration_summary_item';
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
-import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
 import { SyncBadge } from '../badge/sync_badge';
 import { FailureBadge } from '../failure_badge';
 import { ResponsiveFlyout } from '../responsive_flyout';
@@ -130,35 +129,36 @@ export function SpanFlyout({
 
   const isLoading = isPending(status);
 
+  const spanDetailsTitle = i18n.translate(
+    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
+    {
+      defaultMessage: 'Span details',
+    }
+  );
+
   return (
     <EuiPortal>
-      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true} aria-label={spanDetailsTitle}>
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>
-                  {i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle', {
-                    defaultMessage: 'Span details',
-                  })}
-                </h2>
+                <h2>{spanDetailsTitle}</h2>
               </EuiTitle>
             </EuiFlexItem>
             {span && (
               <EuiFlexItem grow={false}>
-                <DiscoverSpanLink spanId={span.span.id}>
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    { defaultMessage: 'View span in Discover' }
-                  )}
-                </DiscoverSpanLink>
+                <OpenSpanInDiscoverLink
+                  dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
+                  spanId={spanId}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
           {span?.span.composite && (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiCallOut color="warning" iconType="gear" size="s">
+                <EuiCallOut announceOnMount color="warning" iconType="gear" size="s">
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
                     {
@@ -214,8 +214,8 @@ function SpanFlyoutBody({
 
   const spanLinksTabContent = getSpanLinksTabContent({
     spanLinksCount,
-    traceId: span.trace.id,
-    spanId: span.span.id,
+    traceId: span.trace?.id,
+    spanId: span.span?.id,
     processorEvent: ProcessorEvent.span,
   });
 
@@ -266,12 +266,12 @@ function SpanFlyoutBody({
       <EuiSpacer size="m" />
       <Summary
         items={[
-          <TimestampTooltip time={span.timestamp.us / 1000} />,
+          <Timestamp timestamp={span.timestamp.us / 1000} renderMode="tooltip" />,
           <>
-            <DurationSummaryItem
+            <Duration
               duration={span.span.duration.us}
-              totalDuration={totalDuration}
-              parentType="transaction"
+              parent={{ duration: totalDuration, type: 'transaction', loading: false }}
+              showTooltip
             />
             {span.span.composite && (
               <CompositeSpanDurationSummaryItem
@@ -293,7 +293,9 @@ function SpanFlyoutBody({
                 defaultMessage: 'Type',
               })}
             >
-              <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
+              <EuiBadge color="hollow" tabIndex={0}>
+                {spanTypes.spanType}
+              </EuiBadge>
             </EuiToolTip>
             {spanTypes.spanSubtype && (
               <EuiToolTip
@@ -301,7 +303,9 @@ function SpanFlyoutBody({
                   defaultMessage: 'Subtype',
                 })}
               >
-                <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
+                <EuiBadge color="hollow" tabIndex={0}>
+                  {spanTypes.spanSubtype}
+                </EuiBadge>
               </EuiToolTip>
             )}
             {spanTypes.spanAction && (
@@ -310,7 +314,9 @@ function SpanFlyoutBody({
                   defaultMessage: 'Action',
                 })}
               >
-                <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
+                <EuiBadge color="hollow" tabIndex={0}>
+                  {spanTypes.spanAction}
+                </EuiBadge>
               </EuiToolTip>
             )}
 

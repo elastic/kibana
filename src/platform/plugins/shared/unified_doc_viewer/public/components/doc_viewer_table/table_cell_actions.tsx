@@ -8,15 +8,18 @@
  */
 
 import React from 'react';
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { FieldRow } from './field_row';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { IToasts } from '@kbn/core/public';
+import type { FieldRow } from './field_row';
 
 interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];
   row: FieldRow | undefined; // as we pass `rows[rowIndex]` it's safer to assume that `row` prop can be undefined
   isEsqlMode: boolean | undefined;
+  columns?: string[];
 }
 
 function isFilterInOutPairDisabled(
@@ -65,6 +68,65 @@ const esqlMultivalueFilteringDisabled = i18n.translate(
     defaultMessage: 'Multivalue filtering is not supported in ES|QL',
   }
 );
+
+const Copy: React.FC<Omit<TableActionsProps, 'isEsqlMode'> & { toasts: IToasts }> = ({
+  Component,
+  row,
+  toasts,
+}) => {
+  if (!row) {
+    return null;
+  }
+
+  const { name } = row;
+
+  const copyLabel = i18n.translate('unifiedDocViewer.docViews.table.copyValue', {
+    defaultMessage: 'Copy value',
+  });
+
+  return (
+    <Component
+      data-test-subj={`copyValueButton-${name}`}
+      iconType="copyClipboard"
+      title={copyLabel}
+      flush="left"
+      onClick={() => {
+        const errorMessage = i18n.translate(
+          'unifiedDocViewer.tableCellActions.copyFailedErrorText',
+          {
+            defaultMessage: 'Unable to copy to clipboard in this browser',
+          }
+        );
+
+        if (!row.formattedAsText) {
+          toasts.addWarning({
+            title: errorMessage,
+          });
+          return;
+        }
+
+        const copied = copyToClipboard(row.formattedAsText);
+        if (!copied) {
+          toasts.addWarning({
+            title: errorMessage,
+          });
+          return;
+        }
+
+        toasts.addInfo({
+          title: i18n.translate(
+            'unifiedDocViewer.tableCellActions.copyValueToClipboard.toastTitle',
+            {
+              defaultMessage: 'Copied to clipboard',
+            }
+          ),
+        });
+      }}
+    >
+      {copyLabel}
+    </Component>
+  );
+};
 
 const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
   Component,
@@ -214,11 +276,19 @@ const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | un
   );
 };
 
+// Toggle column
+const toggleColumnLabel = i18n.translate(
+  'unifiedDocViewer.docViews.table.toggleColumnTableButtonTooltip',
+  {
+    defaultMessage: 'Toggle column in table',
+  }
+);
+
 const ToggleColumn: React.FC<
   TableActionsProps & {
     onToggleColumn: ((field: string) => void) | undefined;
   }
-> = ({ Component, row, onToggleColumn }) => {
+> = ({ Component, columns, row, onToggleColumn }) => {
   if (!row) {
     return null;
   }
@@ -229,18 +299,12 @@ const ToggleColumn: React.FC<
     return null;
   }
 
-  // Toggle column
-  const toggleColumnLabel = i18n.translate(
-    'unifiedDocViewer.docViews.table.toggleColumnTableButtonTooltip',
-    {
-      defaultMessage: 'Toggle column in table',
-    }
-  );
+  const isColumnAdded = columns?.includes(name);
 
   return (
     <Component
       data-test-subj={`toggleColumnButton-${name}`}
-      iconType="listAdd"
+      iconType={isColumnAdded ? 'cross' : 'plusInCircle'}
       title={toggleColumnLabel}
       flush="left"
       onClick={() => onToggleColumn(name)}
@@ -252,11 +316,13 @@ const ToggleColumn: React.FC<
 
 export function getFieldCellActions({
   rows,
+  columns,
   isEsqlMode,
   onFilter,
   onToggleColumn,
 }: {
   rows: FieldRow[];
+  columns?: string[];
   isEsqlMode: boolean | undefined;
   onFilter?: DocViewFilterFn;
   onToggleColumn: ((field: string) => void) | undefined;
@@ -282,6 +348,7 @@ export function getFieldCellActions({
             return (
               <ToggleColumn
                 row={rows[rowIndex]}
+                columns={columns}
                 Component={Component}
                 isEsqlMode={isEsqlMode}
                 onToggleColumn={onToggleColumn}
@@ -297,12 +364,14 @@ export function getFieldValueCellActions({
   rows,
   isEsqlMode,
   onFilter,
+  toasts,
 }: {
   rows: FieldRow[];
   isEsqlMode: boolean | undefined;
   onFilter?: DocViewFilterFn;
+  toasts: IToasts;
 }) {
-  return onFilter
+  const filterActions = onFilter
     ? [
         ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
           return (
@@ -326,4 +395,10 @@ export function getFieldValueCellActions({
         },
       ]
     : [];
+
+  const copyAction = ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+    return <Copy toasts={toasts} row={rows[rowIndex]} Component={Component} />;
+  };
+
+  return [...filterActions, copyAction];
 }

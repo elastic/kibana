@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PublicAppInfo, PublicAppDeepLinkInfo, AppCategory } from '@kbn/core/public';
+import type { PublicAppInfo, PublicAppDeepLinkInfo, AppCategory } from '@kbn/core/public';
 import { distance } from 'fastest-levenshtein';
-import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
+import type { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
 
 /** Type used internally to represent an application unrolled into its separate deepLinks */
 export interface AppLink {
@@ -19,9 +19,6 @@ export interface AppLink {
   category?: AppCategory;
   euiIconType?: string;
 }
-
-/** weighting factor for scoring keywords */
-export const keywordScoreWeighting = 0.8;
 
 export const getAppResults = (
   term: string,
@@ -65,7 +62,7 @@ export const scoreApp = (term: string, appLink: AppLink): number => {
   ];
   const appScoreByKeywords = scoreAppByKeywords(term, keywords);
 
-  return Math.max(appScoreByTerms, appScoreByKeywords * keywordScoreWeighting);
+  return Math.max(appScoreByTerms, appScoreByKeywords);
 };
 
 const scoreAppByTerms = (term: string, title: string): number => {

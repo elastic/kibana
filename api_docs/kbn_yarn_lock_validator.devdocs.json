@@ -45,9 +45,11 @@
             "section": "def-common.YarnLock",
             "text": "YarnLock"
           },
-          ") => Map<string, { name: string; version: string; }>"
+          ", ignoreOptional: boolean) => Map<string, { name: string; version: string; }>"
         ],
         "path": "packages/kbn-yarn-lock-validator/src/find_production_dependencies.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -68,6 +70,8 @@
               }
             ],
             "path": "packages/kbn-yarn-lock-validator/src/find_production_dependencies.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -89,6 +93,25 @@
               }
             ],
             "path": "packages/kbn-yarn-lock-validator/src/find_production_dependencies.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/yarn-lock-validator",
+            "id": "def-common.findProductionDependencies.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "ignoreOptional",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-yarn-lock-validator/src/find_production_dependencies.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -118,6 +141,8 @@
           ">"
         ],
         "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -153,6 +178,8 @@
           ") => Promise<void>"
         ],
         "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -173,6 +200,8 @@
               }
             ],
             "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
+            "lineNumber": 27,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -194,6 +223,8 @@
               }
             ],
             "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
+            "lineNumber": 27,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -214,6 +245,8 @@
           "\nParsed yarn.lock file contents mapping `name@versionRange` strings to information from\nthe yarn.lock file that is used to satisfy that request."
         ],
         "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -230,6 +263,8 @@
               "[key: string]:  { version: string; resolved: string; integrity: string; dependencies?: { [key: string]: string; } | undefined; optionalDependencies?: { [key: string]: string; } | undefined; }"
             ],
             "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

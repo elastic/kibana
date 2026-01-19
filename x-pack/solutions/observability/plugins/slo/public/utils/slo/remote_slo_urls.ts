@@ -6,9 +6,10 @@
  */
 
 import { encode } from '@kbn/rison';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import path from 'path';
-import { paths } from '../../../common/locators/paths';
+import { transformSloToCloneState } from '../../pages/slo_edit/helpers/transform_slo_to_clone_state';
 
 function createBaseRemoteSloDetailsUrl(
   slo: SLOWithSummaryResponse,
@@ -19,10 +20,7 @@ function createBaseRemoteSloDetailsUrl(
   }
 
   const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const detailsPath = paths.sloDetails(
-    slo.id,
-    ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-  );
+  const detailsPath = paths.sloDetails(slo.id, slo.instanceId);
 
   const remoteUrl = new URL(path.join(spacePath, detailsPath), slo.remote.kibanaUrl);
   return remoteUrl;
@@ -97,7 +95,7 @@ export function createRemoteSloCloneUrl(slo: SLOWithSummaryResponse, spaceId: st
 
   const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
   const clonePath = paths.sloCreateWithEncodedForm(
-    encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
+    encodeURIComponent(encode(transformSloToCloneState(slo)))
   );
   const remoteUrl = new URL(path.join(spacePath, clonePath), slo.remote.kibanaUrl);
   return remoteUrl.toString();

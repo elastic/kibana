@@ -7,15 +7,16 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import apm from 'elastic-apm-node';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { syntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
-import { StatusRuleExecutorOptions } from './types';
-import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
-import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
+import { SyntheticsEsClient } from '../../lib';
+import type { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
+import type { StatusRuleExecutorOptions } from './types';
+import type { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
 import {
@@ -25,7 +26,8 @@ import {
 } from '../common';
 import { getActionVariables } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 
 export const registerSyntheticsStatusCheckRule = (
   server: SyntheticsServerSetup,
@@ -42,6 +44,7 @@ export const registerSyntheticsStatusCheckRule = (
     id: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
+    solution: observabilityFeatureId,
     name: STATUS_RULE_NAME,
     validate: {
       params: syntheticsMonitorStatusRuleParamsSchema,
@@ -55,7 +58,7 @@ export const registerSyntheticsStatusCheckRule = (
     executor: async (options: StatusRuleExecutorOptions) => {
       apm.setTransactionName('Synthetics Status Rule Executor');
       const { state: ruleState, params, services, spaceId } = options;
-      const { alertsClient, uiSettingsClient } = services;
+      const { alertsClient, uiSettingsClient, scopedClusterClient, savedObjectsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -70,14 +73,29 @@ export const registerSyntheticsStatusCheckRule = (
       const groupBy = params?.condition?.groupBy ?? 'locationId';
       const groupByLocation = groupBy === 'locationId';
 
-      const statusRule = new StatusRuleExecutor(server, syntheticsMonitorClient, options);
-
-      const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
-        ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
+      const esClient = new SyntheticsEsClient(
+        savedObjectsClient,
+        scopedClusterClient.asCurrentUser,
+        {
+          heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+        }
       );
 
-      statusRule.handleDownMonitorThresholdAlert({
+      const statusRule = new StatusRuleExecutor(esClient, server, syntheticsMonitorClient, options);
+
+      const { downConfigs, staleDownConfigs, upConfigs, pendingConfigs, stalePendingConfigs } =
+        await statusRule.getConfigs({
+          prevDownConfigs: ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs'],
+          prevPendingConfigs: ruleState.meta
+            ?.pendingConfigs as AlertOverviewStatus['pendingConfigs'],
+        });
+
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
+      });
+
+      await statusRule.handlePendingMonitorAlert({
+        pendingConfigs,
       });
 
       setRecoveredAlertsContext({
@@ -89,15 +107,18 @@ export const registerSyntheticsStatusCheckRule = (
         params,
         groupByLocation,
         staleDownConfigs,
+        stalePendingConfigs,
         upConfigs,
       });
 
       return {
-        state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
+        state: updateState(ruleState, !isEmpty(downConfigs) || !isEmpty(pendingConfigs), {
+          downConfigs,
+          pendingConfigs,
+        }),
       };
     },
     alerts: SyntheticsRuleTypeAlertDefinition,
-    fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

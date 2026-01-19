@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
@@ -19,6 +19,7 @@ import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_w
 import type { MlClient } from '../../lib/helpers/get_ml_client';
 import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
 import { AnomalyDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   anomalySearch,
   ML_SERVICE_NAME_FIELD,
@@ -50,45 +51,74 @@ export async function getServiceAnomalies({
     }
 
     const params = {
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...apmMlAnomalyQuery({
-                detectorTypes: [AnomalyDetectorType.txLatency],
-              }),
-              ...rangeQuery(Math.min(end - 30 * 60 * 1000, start), end, 'timestamp'),
-              {
-                terms: {
-                  // Only retrieving anomalies for default transaction types
-                  by_field_value: defaultTransactionTypes,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...apmMlAnomalyQuery({
+              detectorTypes: [AnomalyDetectorType.txLatency],
+            }),
+            ...rangeQuery(Math.min(end - 30 * 60 * 1000, start), end, 'timestamp'),
+            {
+              terms: {
+                // Only retrieving anomalies for default transaction types
+                by_field_value: defaultTransactionTypes,
+              },
+            },
+            ...wildcardQuery(ML_SERVICE_NAME_FIELD, searchQuery),
+          ] as estypes.QueryDslQueryContainer[],
+        },
+      },
+      aggs: {
+        services: {
+          composite: {
+            size: 5000,
+            sources: [
+              { serviceName: { terms: { field: ML_SERVICE_NAME_FIELD } } },
+              { jobId: { terms: { field: 'job_id' } } },
+            ] as Array<Record<string, estypes.AggregationsCompositeAggregationSource>>,
+          },
+          aggs: {
+            record_results: {
+              filter: {
+                term: {
+                  result_type: 'record',
                 },
               },
-              ...wildcardQuery(ML_SERVICE_NAME_FIELD, searchQuery),
-            ] as estypes.QueryDslQueryContainer[],
-          },
-        },
-        aggs: {
-          services: {
-            composite: {
-              size: 5000,
-              sources: [
-                { serviceName: { terms: { field: ML_SERVICE_NAME_FIELD } } },
-                { jobId: { terms: { field: 'job_id' } } },
-              ] as Array<Record<string, estypes.AggregationsCompositeAggregationSource>>,
+              aggs: {
+                metrics: {
+                  top_metrics: {
+                    metrics: asMutableArray([
+                      { field: 'actual' },
+                      { field: ML_TRANSACTION_TYPE_FIELD },
+                      { field: 'record_score' },
+                    ] as const),
+                    size: 1,
+                    sort: {
+                      record_score: 'desc' as const,
+                    },
+                  },
+                },
+              },
             },
-            aggs: {
-              metrics: {
-                top_metrics: {
-                  metrics: [
-                    { field: 'actual' },
-                    { field: ML_TRANSACTION_TYPE_FIELD },
-                    { field: 'result_type' },
-                    { field: 'record_score' },
-                  ],
-                  sort: {
-                    record_score: 'desc' as const,
+            // fallback to model_plot if no records are found
+            model_plot_results: {
+              filter: {
+                term: {
+                  result_type: 'model_plot',
+                },
+              },
+              aggs: {
+                metrics: {
+                  top_metrics: {
+                    metrics: asMutableArray([
+                      { field: 'actual' },
+                      { field: ML_TRANSACTION_TYPE_FIELD },
+                    ] as const),
+                    size: 1,
+                    sort: {
+                      timestamp: 'desc' as const,
+                    },
                   },
                 },
               },
@@ -122,12 +152,13 @@ export async function getServiceAnomalies({
     return {
       mlJobIds: jobIds,
       serviceAnomalies: relevantBuckets.map((bucket) => {
-        const metrics = bucket.metrics.top[0].metrics;
+        const recordMetrics = bucket.record_results.metrics.top[0]?.metrics;
+        const modelPlotMetrics = bucket.model_plot_results.metrics.top[0]?.metrics;
 
-        const anomalyScore =
-          metrics.result_type === 'record' && metrics.record_score
-            ? (metrics.record_score as number)
-            : 0;
+        // Anomaly score always comes from records, 0 if no records
+        const anomalyScore = recordMetrics?.record_score
+          ? (recordMetrics.record_score as number)
+          : 0;
 
         const severity = getSeverity(anomalyScore);
         const healthStatus = getServiceHealthStatus({ severity });
@@ -135,8 +166,10 @@ export async function getServiceAnomalies({
         return {
           serviceName: bucket.key.serviceName as string,
           jobId: bucket.key.jobId as string,
-          transactionType: metrics.by_field_value as string,
-          actualValue: metrics.actual as number | null,
+          // Prefer record metrics, fallback to model_plot for context values
+          transactionType: (recordMetrics?.by_field_value ||
+            modelPlotMetrics?.by_field_value) as string,
+          actualValue: (recordMetrics?.actual || modelPlotMetrics?.actual) as number,
           anomalyScore,
           healthStatus,
         };

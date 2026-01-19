@@ -26,10 +26,24 @@ const CACHE = new Map();
 
 /**
  * Read the pkgmap from disk and parse it into a Map
+ * @param {string=} packageMapPath
  * @returns {Map<string, string>}
  */
-function readPackageMap() {
-  return new Map(JSON.parse(Fs.readFileSync(PACKAGE_MAP_PATH, 'utf8')));
+function readPackageMap(packageMapPath) {
+  return new Map(JSON.parse(Fs.readFileSync(packageMapPath || PACKAGE_MAP_PATH, 'utf8')));
+}
+
+/**
+ * Removes packages from the package map
+ * @param {string[]} names
+ * @param {string=} packageMapPath
+ */
+function removePackagesFromPackageMap(names, packageMapPath) {
+  const path = packageMapPath || PACKAGE_MAP_PATH;
+  const map = readPackageMap(path);
+  names.forEach((name) => map.delete(name));
+  const newContent = JSON.stringify(Array.from(map));
+  Fs.writeFileSync(path, newContent);
 }
 
 /**
@@ -93,7 +107,7 @@ function updatePackageMap(repoRoot, manifestPaths) {
 }
 
 /**
- * Resolves to an array of BazelPackage instances which parse the manifest files,
+ * Resolves to an array of Package instances which parse the manifest files,
  * package.json files, and provide useful metadata about each package.
  * @param {string} repoRoot
  * @returns {Package[]}
@@ -202,6 +216,7 @@ module.exports = {
   getPkgDirMap,
   getPkgsById,
   updatePackageMap,
+  removePackagesFromPackageMap,
   findPackageForPath,
   readPackageMap,
   readHashOfPackageMap,

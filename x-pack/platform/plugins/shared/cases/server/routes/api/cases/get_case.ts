@@ -42,8 +42,10 @@ export const getCaseRoute = () =>
           includeComments: false,
         });
 
+        const { comments, ...caseWithoutComments } = res;
+
         return response.ok({
-          body: res,
+          body: caseWithoutComments,
         });
       } catch (error) {
         throw createCaseError({
@@ -57,6 +59,7 @@ export const getCaseRoute = () =>
 export const resolveCaseRoute = createCasesRoute({
   method: 'get',
   path: `${CASE_DETAILS_URL}/resolve`,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'internal',
   },

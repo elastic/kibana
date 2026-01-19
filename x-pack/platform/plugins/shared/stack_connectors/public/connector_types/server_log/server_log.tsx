@@ -11,11 +11,12 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ServerLogActionParams } from '../types';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/server_log/constants';
+import type { ServerLogActionParams } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<unknown, unknown, ServerLogActionParams> {
   return {
-    id: '.server-log',
+    id: CONNECTOR_ID,
     iconClass: 'logsApp',
     selectMessage: i18n.translate('xpack.stackConnectors.components.serverLog.selectMessageText', {
       defaultMessage: 'Add a message to a Kibana log.',

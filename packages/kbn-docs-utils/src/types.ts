@@ -47,6 +47,7 @@ export enum TypeKind {
    * Maps to the typescript syntax kind `TypeReferences`. For example,
    * export type FooFn = () => string will be a TypeKind, not a FunctionKind.
    */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   TypeKind = 'Type',
   /**
    * Uncategorized is used if a type is encountered that isn't handled.
@@ -184,6 +185,16 @@ export interface ApiDeclaration {
    * Used to create links to github to view the code for this API.
    */
   path: string;
+
+  /**
+   * Source position for easier navigation to the declaration.
+   */
+  lineNumber?: number;
+
+  /**
+   * Source position for easier navigation to the declaration.
+   */
+  columnNumber?: number;
 
   /**
    * Other plugins that reference this API item (along with SourceLink info for each reference).

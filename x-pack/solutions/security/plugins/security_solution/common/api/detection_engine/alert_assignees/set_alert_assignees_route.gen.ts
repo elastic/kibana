@@ -14,32 +14,10 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 
-import { AlertIds } from '../../model/alert.gen';
-import { NonEmptyString } from '../../model/primitives.gen';
-
-export type AlertAssignees = z.infer<typeof AlertAssignees>;
-export const AlertAssignees = z.object({
-  /**
-   * A list of users ids to assign.
-   */
-  add: z.array(NonEmptyString),
-  /**
-   * A list of users ids to unassign.
-   */
-  remove: z.array(NonEmptyString),
-});
+import { SetAlertAssigneesBody } from '../model/set_alert_assignees_body.gen';
 
 export type SetAlertAssigneesRequestBody = z.infer<typeof SetAlertAssigneesRequestBody>;
-export const SetAlertAssigneesRequestBody = z.object({
-  /**
-   * Details about the assignees to assign and unassign.
-   */
-  assignees: AlertAssignees,
-  /**
-   * List of alerts ids to assign and unassign passed assignees.
-   */
-  ids: AlertIds,
-});
+export const SetAlertAssigneesRequestBody = SetAlertAssigneesBody;
 export type SetAlertAssigneesRequestBodyInput = z.input<typeof SetAlertAssigneesRequestBody>;

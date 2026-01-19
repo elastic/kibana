@@ -9,7 +9,8 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ContentType, CodeEditorMode } from '../types';
 
-import { KeyValuePairsField, Pair } from './key_value_field';
+import type { Pair } from './key_value_field';
+import { KeyValuePairsField } from './key_value_field';
 
 export interface HeaderFieldProps {
   contentMode?: CodeEditorMode;

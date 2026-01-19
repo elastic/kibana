@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 
-import {} from '../..';
-
+import type { Connector, ConnectorSyncJobDocument } from '@kbn/search-connectors';
 import {
   CONNECTORS_JOBS_INDEX,
-  ConnectorSyncJobDocument,
   fetchConnectorByIndexName,
   SyncStatus,
 } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
-import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
+import type { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
-import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
 import { mapIndexStats } from './utils/map_index_stats';
 
@@ -61,7 +58,8 @@ const hasInProgressSyncs = async (
 
 export const fetchIndex = async (
   client: IScopedClusterClient,
-  index: string
+  index: string,
+  logger: Logger
 ): Promise<ElasticsearchIndexWithIngestion> => {
   const indexDataResult = await client.asCurrentUser.indices.get({ index });
   const indexData = indexDataResult[index];
@@ -73,8 +71,12 @@ export const fetchIndex = async (
     throw new Error('404');
   }
   const indexStats = indices[index];
-
-  const connector = await fetchConnectorByIndexName(client.asCurrentUser, index);
+  let connector: Connector | undefined;
+  try {
+    connector = await fetchConnectorByIndexName(client.asCurrentUser, index);
+  } catch (error) {
+    logger.error(`Error fetching connector for index ${index}: ${error}`);
+  }
   const hasInProgressSyncsResult = connector
     ? await hasInProgressSyncs(client, connector.id)
     : { inProgress: false, pending: false };
@@ -91,11 +93,6 @@ export const fetchIndex = async (
       ...indexResult,
       connector,
     };
-  }
-
-  const crawler = await fetchCrawlerByIndexName(client, index);
-  if (crawler) {
-    return { ...indexResult, connector, crawler };
   }
 
   return indexResult;

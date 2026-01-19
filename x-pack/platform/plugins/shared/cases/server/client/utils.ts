@@ -33,6 +33,7 @@ import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   AttachmentType,
+  EventAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
@@ -61,6 +62,7 @@ import {
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
   assertUnreachable,
+  isCommentRequestTypeEvent,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
@@ -121,6 +123,8 @@ export const decodeCommentRequest = (
         )} indices: ${JSON.stringify(indices)}`
       );
     }
+  } else if (isCommentRequestTypeEvent(comment)) {
+    decodeWithExcessOrThrow(EventAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
@@ -419,6 +423,34 @@ export const buildCustomFieldsFilter = ({
   return nodeBuilder.and([...customFieldsFilter]);
 };
 
+/**
+ * Helper function to remove .attributes from field paths in a KueryNode AST.
+ * This is used when searchType is 'search' to convert find-style filters to search-style filters.
+ */
+export const removeAttributesFromFilter = (node: KueryNode): KueryNode => {
+  // Create a deep copy to avoid mutating the original
+  const modifiedNode = structuredClone(node);
+
+  const traverse = (ast: KueryNode): void => {
+    // Handle literal nodes with string values (field paths)
+    if (ast.type === 'literal' && typeof ast.value === 'string') {
+      ast.value = ast.value.replace(/\.attributes\./g, '.');
+    }
+
+    // Recursively traverse all arguments
+    if (ast.arguments && Array.isArray(ast.arguments)) {
+      ast.arguments.forEach((arg) => {
+        if (arg) {
+          traverse(arg);
+        }
+      });
+    }
+  };
+
+  traverse(modifiedNode);
+  return modifiedNode;
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
@@ -433,8 +465,10 @@ export const constructQueryOptions = ({
   category,
   customFields,
   customFieldsConfiguration,
+  searchType = 'find',
 }: CasesSearchParams & {
   customFieldsConfiguration?: CustomFieldsConfiguration;
+  searchType?: 'find' | 'search';
 }): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
@@ -459,8 +493,14 @@ export const constructQueryOptions = ({
     customFieldsFilter,
   ]);
 
+  const combinedFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);
+  const finalFilter =
+    searchType === 'search' && combinedFilter
+      ? removeAttributesFromFilter(combinedFilter)
+      : combinedFilter;
+
   return {
-    filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
+    filter: finalFilter,
     sortField: sortByField,
   };
 };

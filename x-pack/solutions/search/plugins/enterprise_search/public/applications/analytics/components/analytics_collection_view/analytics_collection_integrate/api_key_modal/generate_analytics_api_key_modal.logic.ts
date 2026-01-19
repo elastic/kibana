@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { Status } from '../../../../../../../common/types/api';
 
@@ -38,7 +39,6 @@ export const GenerateApiKeyModalLogic = kea<
     keyName: [
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setKeyName: (_, { keyName }) => keyName,
       },
     ],

@@ -15,7 +15,7 @@ import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
 import { plainColumnRenderer } from './plain_column_renderer';
-import { getValues, deleteItemIdx, findItem } from './helpers';
+import { deleteItemIdx, findItem, getValues } from './helpers';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -195,41 +195,6 @@ describe('plain_column_renderer', () => {
       expect(wrapper.text()).toEqual('I am a log file message');
     });
 
-    test('should NOT render a message as a draggable', () => {
-      const mockMessageDatum = cloneDeep(mockTimelineData[30].data);
-      const column = plainColumnRenderer.renderColumn({
-        columnName: 'message',
-        eventId: _id,
-        values: getValues('message', mockMessageDatum),
-        field: defaultHeaders.find((h) => h.id === 'message')!,
-        scopeId: 'test',
-      });
-      const wrapper = mount(
-        <TestProviders>
-          <span>{column}</span>
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').first().exists()).toBe(false);
-    });
-
-    test('should render a _id as a draggable', () => {
-      const column = plainColumnRenderer.renderColumn({
-        columnName: '_id',
-        eventId: _id,
-        values: [mockTimelineData[0]._id],
-        field: defaultHeaders.find((h) => h.id === '_id')!,
-        scopeId: 'test',
-      });
-      const wrapper = mount(
-        <TestProviders>
-          <span>{column}</span>
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').first().exists()).toBe(true);
-    });
-
     test('should join multiple values with a comma [not draggable]', () => {
       const data = mockTimelineData[19].data;
       const column = plainColumnRenderer.renderColumn({
@@ -238,7 +203,6 @@ describe('plain_column_renderer', () => {
         values: getValues('process.args', data),
         field: defaultHeaders.find((h) => h.id === 'message')!,
         scopeId: 'test',
-        isDraggable: false,
       });
       const wrapper = mount(
         <TestProviders>
@@ -247,24 +211,6 @@ describe('plain_column_renderer', () => {
       );
       const values = getValues('process.args', data);
       expect(wrapper.text()).toEqual(values?.join(', '));
-    });
-
-    test('should NOT join multiple values with a comma [draggable]', () => {
-      const data = mockTimelineData[19].data;
-      const column = plainColumnRenderer.renderColumn({
-        columnName: 'process.args',
-        eventId: _id,
-        values: getValues('process.args', data),
-        field: defaultHeaders.find((h) => h.id === 'message')!,
-        scopeId: 'test',
-        isDraggable: true,
-      });
-      const wrapper = mount(
-        <TestProviders>
-          <span>{column}</span>
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').first().exists()).toBe(true);
     });
   });
 });

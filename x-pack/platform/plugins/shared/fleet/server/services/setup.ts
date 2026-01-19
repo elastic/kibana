@@ -10,18 +10,19 @@ import fs from 'fs/promises';
 import apm from 'elastic-apm-node';
 
 import { compact } from 'lodash';
-import pMap from 'p-map';
-import { v4 as uuidv4 } from 'uuid';
+
+import pRetry from 'p-retry';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 
 import { MessageSigningError } from '../../common/errors';
 
-import { AUTO_UPDATE_PACKAGES, FLEET_SETUP_LOCK_TYPE } from '../../common/constants';
+import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
-import type { DefaultPackagesInstallationError, FleetSetupLock } from '../../common/types';
-
-import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../constants';
+import type { DefaultPackagesInstallationError } from '../../common/types';
+import { scheduleSetupTask } from '../tasks/setup/schedule';
 
 import { appContextService } from './app_context';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
@@ -38,12 +39,7 @@ import { downloadSourceService } from './download_source';
 
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import {
-  ensureFleetEventIngestedPipelineIsInstalled,
-  ensureFleetFinalPipelineIsInstalled,
-} from './epm/elasticsearch/ingest_pipeline/install';
-import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
-import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
+
 import { isPackageInstalled } from './epm/packages/install';
 import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
@@ -63,6 +59,11 @@ import {
   getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
+import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
+import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
+import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
+import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
+import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -75,6 +76,20 @@ export interface SetupStatus {
   >;
 }
 
+export async function _runSetupWithLock(setupFn: () => Promise<SetupStatus>) {
+  return await pRetry(
+    () => appContextService.getLockManagerService()!.withLock('fleet-setup', () => setupFn()),
+    {
+      onFailedAttempt: async (error) => {
+        if (!(error instanceof LockAcquisitionError)) {
+          throw error;
+        }
+      },
+      maxRetryTime: 5 * 60 * 1000, // Retry for 5 minute to get the lock
+    }
+  );
+}
+
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -83,87 +98,20 @@ export async function setupFleet(
   } = { useLock: false }
 ): Promise<SetupStatus> {
   const t = apm.startTransaction('fleet-setup', 'fleet');
-  let created = false;
   try {
     if (options.useLock) {
-      const { created: isCreated, toReturn } = await createLock(soClient);
-      created = isCreated;
-      if (toReturn) return toReturn;
+      return _runSetupWithLock(() =>
+        awaitIfPending(async () => createSetupSideEffects(soClient, esClient))
+      );
+    } else {
+      return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
     }
-    return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
   } catch (error) {
     apm.captureError(error);
     t.setOutcome('failure');
     throw error;
   } finally {
     t.end();
-    // only delete lock if it was created by this instance
-    if (options.useLock && created) {
-      await deleteLock(soClient);
-    }
-  }
-}
-
-async function createLock(
-  soClient: SavedObjectsClientContract
-): Promise<{ created: boolean; toReturn?: SetupStatus }> {
-  const logger = appContextService.getLogger();
-  let created;
-  try {
-    // check if fleet setup is already started
-    const fleetSetupLock = await soClient.get<FleetSetupLock>(
-      FLEET_SETUP_LOCK_TYPE,
-      FLEET_SETUP_LOCK_TYPE
-    );
-
-    const LOCK_TIMEOUT = 60 * 60 * 1000; // 1 hour
-
-    // started more than 1 hour ago, delete previous lock
-    if (
-      fleetSetupLock.attributes.started_at &&
-      new Date(fleetSetupLock.attributes.started_at).getTime() < Date.now() - LOCK_TIMEOUT
-    ) {
-      await deleteLock(soClient);
-    } else {
-      logger.info('Fleet setup already in progress, abort setup');
-      return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
-    }
-  } catch (error) {
-    if (error.isBoom && error.output.statusCode === 404) {
-      logger.debug('Fleet setup lock does not exist, continue setup');
-    }
-  }
-
-  try {
-    created = await soClient.create<FleetSetupLock>(
-      FLEET_SETUP_LOCK_TYPE,
-      {
-        status: 'in_progress',
-        uuid: uuidv4(),
-        started_at: new Date().toISOString(),
-      },
-      { id: FLEET_SETUP_LOCK_TYPE }
-    );
-    if (logger.isLevelEnabled('debug')) {
-      logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
-    }
-  } catch (error) {
-    logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
-    return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
-  }
-  return { created: !!created };
-}
-
-async function deleteLock(soClient: SavedObjectsClientContract) {
-  const logger = appContextService.getLogger();
-  try {
-    await soClient.delete(FLEET_SETUP_LOCK_TYPE, FLEET_SETUP_LOCK_TYPE, { refresh: true });
-    logger.debug(`Fleet setup lock deleted`);
-  } catch (error) {
-    // ignore 404 errors
-    if (error.statusCode !== 404) {
-      logger.error('Could not delete fleet setup lock', error);
-    }
   }
 }
 
@@ -184,9 +132,9 @@ async function createSetupSideEffects(
   let packages = packagesOrUndefined ?? [];
 
   logger.debug('Setting Fleet server config');
-  await migrateSettingsToFleetServerHost(soClient);
+  await migrateSettingsToFleetServerHost(soClient, esClient);
   logger.debug('Setting up Fleet download source');
-  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient, esClient);
   // Need to be done before outputs and fleet server hosts as these object can reference a proxy
   logger.debug('Setting up Proxy');
   await ensurePreconfiguredFleetProxies(
@@ -212,14 +160,12 @@ async function createSetupSideEffects(
   );
 
   logger.debug('Setting up Fleet outputs');
-  await Promise.all([
-    ensurePreconfiguredOutputs(
-      soClient,
-      esClient,
-      getPreconfiguredOutputFromConfig(appContextService.getConfig())
-    ),
-    settingsService.settingsSetup(soClient),
-  ]);
+  await settingsService.settingsSetup(soClient);
+  await ensurePreconfiguredOutputs(
+    soClient,
+    esClient,
+    getPreconfiguredOutputFromConfig(appContextService.getConfig())
+  );
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
@@ -228,7 +174,12 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up Fleet Elasticsearch assets');
   let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
-  await ensureFleetGlobalEsAssets(soClient, esClient);
+  await ensureFleetGlobalEsAssets(
+    { soClient, esClient, logger },
+    {
+      reinstallPackages: true,
+    }
+  );
   stepSpan?.end();
 
   // Ensure that required packages are always installed even if they're left out of the config
@@ -271,7 +222,19 @@ async function createSetupSideEffects(
 
   logger.debug('Upgrade Fleet package install versions');
   stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
-  await upgradePackageInstallVersion({ soClient, esClient, logger });
+
+  const config = appContextService.getConfig();
+  const shouldDeferPackageBumpInstallVersion =
+    config?.startupOptimization?.deferPackageBumpInstallVersion ?? false;
+
+  if (shouldDeferPackageBumpInstallVersion) {
+    logger.info('Deferring package install version upgrade to background task');
+    await scheduleSetupTask(appContextService.getTaskManagerStart()!, {
+      type: 'upgradePackageInstallVersion',
+    });
+  } else {
+    await upgradePackageInstallVersion({ soClient, esClient, logger });
+  }
   stepSpan?.end();
 
   logger.debug('Generating key pair for message signing');
@@ -306,13 +269,40 @@ async function createSetupSideEffects(
   await ensureAgentPoliciesFleetServerKeysAndPolicies({ soClient, esClient, logger });
   stepSpan?.end();
 
-  logger.debug('Backfilling package policy supports_agentless field');
-  await backfillPackagePolicySupportsAgentless(esClient);
+  let backfillPackagePolicySupportsAgentlessError;
+  try {
+    logger.debug('Backfilling package policy supports_agentless field');
+    await backfillPackagePolicySupportsAgentless(esClient);
+  } catch (error) {
+    backfillPackagePolicySupportsAgentlessError = { error };
+  }
+
+  let ensureCorrectAgentlessSettingsIdsError;
+  try {
+    logger.debug('Fix agentless policy settings');
+    await ensureCorrectAgentlessSettingsIds(esClient);
+  } catch (error) {
+    ensureCorrectAgentlessSettingsIdsError = { error };
+  }
+
+  logger.debug('Update deprecated _source.mode in component templates');
+  await updateDeprecatedComponentTemplates(esClient);
+
+  logger.debug('Create CCS index patterns for remote clusters');
+  const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
+  await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+    ...(backfillPackagePolicySupportsAgentlessError
+      ? [backfillPackagePolicySupportsAgentlessError]
+      : []),
+    ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
   ];
+
+  logger.info('Scheduling async setup tasks');
+  await scheduleSetupTask(appContextService.getTaskManagerStart()!);
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
@@ -330,44 +320,6 @@ async function createSetupSideEffects(
     isInitialized: true,
     nonFatalErrors,
   };
-}
-
-/**
- * Ensure ES assets shared by all Fleet index template are installed
- */
-export async function ensureFleetGlobalEsAssets(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-) {
-  const logger = appContextService.getLogger();
-  // Ensure Global Fleet ES assets are installed
-  logger.debug('Creating Fleet component template and ingest pipeline');
-  const globalAssetsRes = await Promise.all([
-    ensureDefaultComponentTemplates(esClient, logger), // returns an array
-    ensureFleetFinalPipelineIsInstalled(esClient, logger),
-    ensureFleetEventIngestedPipelineIsInstalled(esClient, logger),
-  ]);
-  const assetResults = globalAssetsRes.flat();
-  if (assetResults.some((asset) => asset.isCreated)) {
-    // Update existing index template
-    const installedPackages = await getInstallations(soClient);
-    await pMap(
-      installedPackages.saved_objects,
-      async ({ attributes: installation }) => {
-        await reinstallPackageForInstallation({
-          soClient,
-          esClient,
-          installation,
-        }).catch((err) => {
-          apm.captureError(err);
-          logger.error(
-            `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
-          );
-        });
-      },
-      { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
-    );
-  }
 }
 
 /**

@@ -8,7 +8,8 @@
  */
 
 import * as React from 'react';
-import { EuiSpacer, EuiTabbedContent, EuiTabbedContentProps } from '@elastic/eui';
+import type { EuiTabbedContentProps } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDrilldownManager } from '../context';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';

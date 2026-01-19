@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, PieConfig } from './config';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { PieConfig } from './config';
+import { configSchema } from './config';
 
 export const config: PluginConfigDescriptor<PieConfig> = {
   exposeToBrowser: {

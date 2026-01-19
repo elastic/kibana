@@ -13,20 +13,18 @@ require('@kbn/babel-register').install();
 const Path = require('path');
 
 const webpack = require('webpack');
+const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
 const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
+const DOMPURIFY_SRC = require.resolve('dompurify/purify.js');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
-const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
-
+/** @returns {import('webpack').Configuration} */
 module.exports = {
-  node: {
-    child_process: 'empty',
-    fs: 'empty',
-  },
   externals: {
     module: 'module',
   },
@@ -36,6 +34,7 @@ module.exports = {
   },
   context: __dirname,
   devtool: 'cheap-source-map',
+  target: 'web',
   output: {
     path: UiSharedDepsSrcDistDir,
     filename: '[name].js',
@@ -44,7 +43,6 @@ module.exports = {
     devtoolModuleFilenameTemplate: (info) =>
       `kbn-ui-shared-deps-src/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
-    futureEmitAssets: true,
   },
 
   module: {
@@ -65,15 +63,12 @@ module.exports = {
         use: [require.resolve('@kbn/peggy-loader')],
       },
       {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        test: /\.text$/,
+        use: [require.resolve('@kbn/dot-text-loader')],
       },
       {
-        test: /\.(ttf)(\?|$)/,
-        loader: 'url-loader',
-        options: {
-          limit: 8192,
-        },
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /\.(js|tsx?)$/,
@@ -102,26 +97,45 @@ module.exports = {
           },
         },
       },
+      // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.
+      {
+        test: /\.(ttf)(\?|$)/,
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8192,
+          },
+        },
+      },
     ],
+  },
+
+  cache: {
+    type: 'filesystem',
   },
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
+    mainFields: ['browser', 'module', 'main'],
+    conditionNames: ['browser', 'module', 'import', 'require', 'default'],
     alias: {
       '@elastic/eui$': '@elastic/eui/optimize/es',
+      '@elastic/eui/lib/components/provider/nested$':
+        '@elastic/eui/optimize/es/components/provider/nested',
+      '@elastic/eui/lib/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
-      'react-dom$':
-        process.env.REACT_18 === 'true' ? 'react-dom-18/profiling' : 'react-dom/profiling',
+      'react-dom$': 'react-dom/profiling',
       'scheduler/tracing': 'scheduler/tracing-profiling',
-      react: process.env.REACT_18 === 'true' ? 'react-18' : 'react',
     },
   },
 
   optimization: {
+    moduleIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
+    chunkIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
     minimize: false,
-    noEmitOnErrors: true,
+    emitOnErrors: false,
   },
 
   performance: {
@@ -132,6 +146,7 @@ module.exports = {
   },
 
   plugins: [
+    new NodeLibsBrowserPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
@@ -140,5 +155,12 @@ module.exports = {
       context: REPO_ROOT,
       manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line import/no-dynamic-require
     }),
+
+    // Replace Monaco Editor's bundled DOMPurify 3.0.5 with the project's DOMPurify 3.2.4
+    // Monaco Editor imports DOMPurify using relative paths like './dompurify/dompurify.js' or '../../dompurify/dompurify.js'
+    new webpack.NormalModuleReplacementPlugin(
+      /(\.\.\/)*(\.\/)?dompurify[/\\]dompurify\.js$/,
+      DOMPURIFY_SRC
+    ),
   ],
 };

@@ -31,7 +31,7 @@
       "_ml/anomaly_detectors/{job_id}/results/buckets/{timestamp}",
       "_ml/anomaly_detectors/{job_id}/results/buckets"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-bucket.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-buckets",
     "availability": {
       "stack": true,
       "serverless": false

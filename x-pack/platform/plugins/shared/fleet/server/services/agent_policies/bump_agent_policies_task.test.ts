@@ -101,15 +101,10 @@ describe('_updatePackagePoliciesThatNeedBump', () => {
       },
     ]);
 
-    expect(mockedAgentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith(
-      expect.anything(),
-      undefined,
-      ['policy1']
-    );
-    expect(mockedAgentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith(
-      expect.anything(),
-      undefined,
-      ['policy2', 'policy3']
-    );
+    expect(mockedAgentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith(['policy1']);
+    expect(mockedAgentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith([
+      'policy2',
+      'policy3',
+    ]);
   });
 });

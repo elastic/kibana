@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/siem-readiness",
+  "owner": [
+    "@elastic/contextual-security-apps"
+  ],
+  "group": "security",
+  "visibility": "private"
+}

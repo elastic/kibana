@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getSurveyFeedbackURL } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
 const SLO_FEEDBACK_LINK = 'https://ela.st/slo-feedback';
 
@@ -15,19 +18,35 @@ interface Props {
   disabled?: boolean;
 }
 
+const feedbackButtonLabel = i18n.translate('xpack.slo.featureFeedbackButtonLabel', {
+  defaultMessage: 'Give feedback',
+});
+
 export function FeedbackButton({ disabled }: Props) {
+  const { kibanaVersion, cloud } = useKibana().services;
+  const { isServerless } = usePluginContext();
+
+  const feedbackUrl = getSurveyFeedbackURL({
+    formUrl: SLO_FEEDBACK_LINK,
+    kibanaVersion,
+    isCloudEnv: cloud?.isCloudEnabled,
+    isServerlessEnv: isServerless,
+    sanitizedPath: window.location.pathname,
+  });
+
   return (
-    <EuiButton
-      data-test-subj="sloFeedbackButton"
-      isDisabled={disabled}
-      href={SLO_FEEDBACK_LINK}
+    <EuiHeaderLink
+      aria-label={feedbackButtonLabel}
+      href={feedbackUrl}
+      size="s"
+      iconType="popout"
+      iconSide="right"
       target="_blank"
-      color="warning"
-      iconType="editorComment"
+      color="primary"
+      isDisabled={disabled}
+      data-test-subj="sloFeedbackButton"
     >
-      {i18n.translate('xpack.slo.feedbackButtonLabel', {
-        defaultMessage: 'Tell us what you think!',
-      })}
-    </EuiButton>
+      {feedbackButtonLabel}
+    </EuiHeaderLink>
   );
 }

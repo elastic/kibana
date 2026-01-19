@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { EnrollmentAPIKey } from '../../../../types';
 
@@ -19,11 +19,15 @@ interface Props {
 
 export const ConfirmEnrollmentTokenDelete = (props: Props) => {
   const { onCancel, onConfirm, enrollmentKey } = props;
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.fleet.enrollmentTokenDeleteModal.title', {
         defaultMessage: 'Revoke enrollment token',
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={i18n.translate('xpack.fleet.enrollmentTokenDeleteModal.cancelButton', {

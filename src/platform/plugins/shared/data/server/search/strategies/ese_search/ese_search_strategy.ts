@@ -10,12 +10,11 @@
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { IAsyncSearchRequestParams } from '../..';
-import { getKbnSearchError } from '../../report_search_error';
+import type { IAsyncSearchRequestParams } from '../..';
+import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
 import { DataViewType, isRunningResponse, pollSearch } from '../../../../common';
@@ -25,10 +24,11 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
-import { SearchUsage, searchUsageObserver } from '../../collectors/search';
+import type { SearchUsage } from '../../collectors/search';
+import { searchUsageObserver } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from '../es_search';
 import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
-import { SearchConfigSchema } from '../../../config';
+import type { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (
@@ -36,7 +36,8 @@ export const enhancedEsSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger,
   usage?: SearchUsage,
-  useInternalUser: boolean = false
+  useInternalUser: boolean = false,
+  isServerless: boolean = false
 ): ISearchStrategy<IEsSearchRequest<IAsyncSearchRequestParams>> => {
   function cancelAsyncSearch(id: string, { esClient }: SearchStrategyDependencies) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
@@ -100,7 +101,7 @@ export const enhancedEsSearchStrategyProvider = (
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const params = {
-      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
+      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options, isServerless)),
       ...request.params,
     };
     const { body, headers, meta } = await client.asyncSearch.submit(params, {
@@ -156,23 +157,30 @@ export const enhancedEsSearchStrategyProvider = (
   ): Promise<IEsSearchResponse> {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const legacyConfig = await firstValueFrom(legacyConfig$);
-    const { body, index, ...params } = request.params!;
-    const method = 'POST';
-    const path = encodeURI(`/${index}/_rollup_search`);
     const querystring = {
       ...getShardTimeout(legacyConfig),
       ...(await getIgnoreThrottled(uiSettingsClient)),
       ...(await getDefaultSearchParams(uiSettingsClient)),
-      ...params,
+    };
+
+    // Custom 400 error here because the client tries to run `index.toString()` and we no-longer can rely on ES 400
+    if (!request.params?.index) {
+      throw new KbnSearchError(`"params.index" is required when performing a rollup search`, 400);
+    }
+
+    const { ignore_unavailable, preference, ...params } = {
+      ...querystring,
+      ...request.params,
+      index: request.params.index,
     };
 
     try {
-      const esResponse = await client.transport.request(
+      const esResponse = await client.rollup.rollupSearch(
         {
-          method,
-          path,
-          body,
-          querystring,
+          ...params,
+          // Not defined in the spec, and the client places it in the body.
+          // This workaround allows us to force it as a query parameter.
+          querystring: { ...params.querystring, ignore_unavailable, preference },
         },
         {
           signal: options?.abortSignal,
@@ -180,7 +188,7 @@ export const enhancedEsSearchStrategyProvider = (
         }
       );
 
-      const response = esResponse.body as estypes.SearchResponse<any>;
+      const response = esResponse.body;
       return {
         rawResponse: shimHitsTotal(response, options),
         ...(esResponse.meta?.request?.params

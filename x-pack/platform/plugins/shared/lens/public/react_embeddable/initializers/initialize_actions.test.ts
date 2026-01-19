@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash';
 import { faker } from '@faker-js/faker';
-import type { LensRuntimeState, VisualizationContext } from '../types';
+import type { LensRuntimeState, VisualizationContext } from '@kbn/lens-common';
 import { initializeActionApi } from './initialize_actions';
 import {
   getLensApiMock,
@@ -15,6 +15,7 @@ import {
   getLensRuntimeStateMock,
   createUnifiedSearchApi,
   getLensInternalApiMock,
+  mockDynamicActionsManager,
 } from '../mocks';
 import { createEmptyLensState } from '../helper';
 const DATAVIEW_ID = 'myDataView';
@@ -58,7 +59,6 @@ function setupActionsApi(
     () => runtimeState,
     createUnifiedSearchApi(),
     pick(apiMock, ['timeRange$']),
-    apiMock.title$,
     internalApi,
     {
       ...services,
@@ -66,7 +66,8 @@ function setupActionsApi(
         ...services.data,
         nowProvider: { ...services.data.nowProvider, get: jest.fn(() => new Date()) },
       },
-    }
+    },
+    mockDynamicActionsManager()
   );
   return api;
 }

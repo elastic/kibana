@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { DocumentEntry } from '@kbn/elastic-assistant-common';
+import type { DocumentEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { isGlobalEntry } from './helpers';
 
@@ -49,6 +49,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
         setEntry((prevEntry) => ({
           ...prevEntry,
           users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : privateUsers,
+          global: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? true : false,
         })),
       [privateUsers, setEntry]
     );

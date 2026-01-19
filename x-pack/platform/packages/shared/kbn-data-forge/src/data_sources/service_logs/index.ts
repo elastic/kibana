@@ -7,7 +7,7 @@
 
 import { omit, sample } from 'lodash';
 import { SERVICE_LOGS } from '../../constants';
-import { GeneratorFunction } from '../../types';
+import type { GeneratorFunction } from '../../types';
 import { generateService } from './lib/generate_service';
 import { generateLogMessage } from './lib/generate_log_message';
 

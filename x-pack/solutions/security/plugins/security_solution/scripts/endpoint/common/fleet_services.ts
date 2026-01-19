@@ -65,6 +65,7 @@ import type {
   UpdateAgentPolicyResponse,
   PostNewAgentActionResponse,
   InstallPackageResponse,
+  FleetServerAgent,
 } from '@kbn/fleet-plugin/common/types';
 import semver from 'semver';
 import axios from 'axios';
@@ -145,18 +146,62 @@ const getAgentPolicyDataForUpdate = (
   ]) as UpdateAgentPolicyRequest['body'];
 };
 
-export const checkInFleetAgent = async (
-  esClient: Client,
-  agentId: string,
-  {
-    agentStatus = 'online',
-    log = createToolingLogger(),
-  }: Partial<{
-    /** The agent status to be sent. If set to `random`, then one will be randomly generated */
-    agentStatus: AgentStatus | 'random';
-    log: ToolingLog;
-  }> = {}
-): Promise<estypes.UpdateResponse> => {
+/**
+ * Assigns an existing Fleet agent to a new policy.
+ * NOTE: should only be used on mocked data.
+ */
+export const assignFleetAgentToNewPolicy = async ({
+  esClient,
+  kbnClient,
+  agentId,
+  newAgentPolicyId,
+  logger = createToolingLogger(),
+}: {
+  esClient: Client;
+  kbnClient: KbnClient;
+  agentId: string;
+  newAgentPolicyId: string;
+  logger?: ToolingLog;
+}): Promise<void> => {
+  const agentPolicy = await fetchAgentPolicy(kbnClient, newAgentPolicyId);
+  const update: Partial<FleetServerAgent> = {
+    ...buildFleetAgentCheckInUpdate(),
+    policy_id: newAgentPolicyId,
+    namespaces: agentPolicy.space_ids ?? [],
+  };
+
+  logger.verbose(
+    `update to agent id [${agentId}] showing assignment to new policy ID [${newAgentPolicyId}]:\n${JSON.stringify(
+      update,
+      null,
+      2
+    )}`
+  );
+
+  await esClient
+    .update({
+      index: AGENTS_INDEX,
+      id: agentId,
+      refresh: 'wait_for',
+      retry_on_conflict: 5,
+      doc: update,
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+type FleetAgentCheckInUpdateDoc = Pick<
+  FleetServerAgent,
+  | 'last_checkin_status'
+  | 'last_checkin'
+  | 'active'
+  | 'unenrollment_started_at'
+  | 'unenrolled_at'
+  | 'upgrade_started_at'
+  | 'upgraded_at'
+>;
+const buildFleetAgentCheckInUpdate = (
+  agentStatus: AgentStatus | 'random' = 'online'
+): FleetAgentCheckInUpdateDoc => {
   const fleetAgentStatus =
     agentStatus === 'random' ? fleetGenerator.randomAgentStatus() : agentStatus;
 
@@ -168,7 +213,7 @@ export const checkInFleetAgent = async (
     'unenrolled_at',
     'upgrade_started_at',
     'upgraded_at',
-  ]);
+  ]) as FleetAgentCheckInUpdateDoc;
 
   // WORKAROUND: Endpoint API will exclude metadata for any fleet agent whose status is `inactive`,
   // which means once we update the Fleet agent with that status, the metadata api will no longer
@@ -183,17 +228,44 @@ export const checkInFleetAgent = async (
     }
   });
 
-  log.verbose(`update to fleet agent [${agentId}][${agentStatus} / ${fleetAgentStatus}]: `, update);
+  return update;
+};
 
-  return esClient.update({
-    index: AGENTS_INDEX,
-    id: agentId,
-    refresh: 'wait_for',
-    retry_on_conflict: 5,
-    body: {
+/**
+ * Checks a Fleet agent in by updating the agent record directly in the `.fleet-agent` index.
+ * @param esClient
+ * @param agentId
+ * @param agentStatus
+ * @param log
+ */
+export const checkInFleetAgent = async (
+  esClient: Client,
+  agentId: string,
+  {
+    agentStatus = 'online',
+    log = createToolingLogger(),
+  }: Partial<{
+    /** The agent status to be sent. If set to `random`, then one will be randomly generated */
+    agentStatus: AgentStatus | 'random';
+    log: ToolingLog;
+  }> = {}
+): Promise<estypes.UpdateResponse> => {
+  const update = buildFleetAgentCheckInUpdate(agentStatus);
+
+  log.verbose(
+    `update to fleet agent [${agentId}][${agentStatus} / ${update.last_checkin_status}]: `,
+    update
+  );
+
+  return esClient
+    .update({
+      index: AGENTS_INDEX,
+      id: agentId,
+      refresh: 'wait_for',
+      retry_on_conflict: 5,
       doc: update,
-    },
-  });
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 /**
@@ -883,19 +955,23 @@ interface GetOrCreateDefaultAgentPolicyOptions {
   kbnClient: KbnClient;
   log: ToolingLog;
   policyName?: string;
+  overrides?: Partial<Omit<CreateAgentPolicyRequest['body'], 'name'>>;
 }
 
 /**
  * Creates a default Fleet Agent policy (if it does not yet exist) for testing. If
- * policy already exists, then it will be reused.
+ * policy already exists, then it will be reused. It uses the policy name to find an
+ * existing match.
  * @param kbnClient
  * @param log
  * @param policyName
+ * @param overrides
  */
 export const getOrCreateDefaultAgentPolicy = async ({
   kbnClient,
   log,
   policyName = DEFAULT_AGENT_POLICY_NAME,
+  overrides = {},
 }: GetOrCreateDefaultAgentPolicyOptions): Promise<AgentPolicy> => {
   const existingPolicy = await fetchAgentPolicyList(kbnClient, {
     kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
@@ -917,8 +993,9 @@ export const getOrCreateDefaultAgentPolicy = async ({
     policy: {
       name: policyName,
       description: `Policy created by security solution tooling: ${__filename}`,
-      namespace: spaceId,
+      namespace: spaceId.replace(/-/g, '_'),
       monitoring_enabled: ['logs', 'metrics'],
+      ...overrides,
     },
   });
 
@@ -1049,6 +1126,7 @@ export const addMicrosoftDefenderForEndpointIntegrationToAgentPolicy = async ({
                 value: clientId,
               },
               enable_request_tracer: {
+                value: false,
                 type: 'bool',
               },
               client_secret: {
@@ -1059,9 +1137,13 @@ export const addMicrosoftDefenderForEndpointIntegrationToAgentPolicy = async ({
                 type: 'text',
                 value: tenantId,
               },
-              interval: {
+              initial_interval: {
+                value: '5m',
                 type: 'text',
-                value: '30s',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
               },
               scopes: {
                 value: [],
@@ -1131,6 +1213,170 @@ export const addMicrosoftDefenderForEndpointIntegrationToAgentPolicy = async ({
             },
           },
         ],
+      },
+      {
+        type: 'cel',
+        policy_template: 'microsoft_defender_endpoint',
+        enabled: false,
+        streams: [
+          {
+            enabled: false,
+            data_stream: {
+              type: 'logs',
+              dataset: 'microsoft_defender_endpoint.machine',
+            },
+            vars: {
+              interval: {
+                value: '24h',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'microsoft_defender_endpoint-machine'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: false,
+            data_stream: {
+              type: 'logs',
+              dataset: 'microsoft_defender_endpoint.machine_action',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'microsoft_defender_endpoint-machine_action'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: false,
+            data_stream: {
+              type: 'logs',
+              dataset: 'microsoft_defender_endpoint.vulnerability',
+            },
+            vars: {
+              interval: {
+                value: '4h',
+                type: 'text',
+              },
+              batch_size: {
+                value: 8000,
+                type: 'integer',
+              },
+              affected_machines_only: {
+                value: true,
+                type: 'bool',
+              },
+              enable_request_tracer: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              tags: {
+                value: ['forwarded', 'microsoft_defender_endpoint-vulnerability'],
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              preserve_duplicate_custom_fields: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+        vars: {
+          client_id: {
+            type: 'text',
+          },
+          client_secret: {
+            type: 'password',
+          },
+          login_url: {
+            value: 'https://login.microsoftonline.com',
+            type: 'text',
+          },
+          url: {
+            value: 'https://api.security.microsoft.com',
+            type: 'text',
+          },
+          tenant_id: {
+            type: 'text',
+          },
+          token_scopes: {
+            value: ['https://securitycenter.onmicrosoft.com/windowsatpservice/.default'],
+            type: 'text',
+          },
+          proxy_url: {
+            type: 'text',
+          },
+          ssl: {
+            value:
+              '#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n',
+            type: 'yaml',
+          },
+        },
       },
     ],
     package: {
@@ -1785,4 +2031,240 @@ export const installIntegration = async (
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
+};
+
+interface AddCrowdStrikeIntegrationToAgentPolicyOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  agentPolicyId: string;
+  /** The CrowdStrike API URL */
+  apiUrl: string;
+  /** The CrowdStrike API client ID */
+  clientId: string;
+  /** The CrowdStrike API client secret */
+  clientSecret: string;
+  integrationPolicyName?: string;
+  /** Set to `true` if wanting to add the integration to the agent policy even if that agent policy already has one  */
+  force?: boolean;
+}
+
+export const addCrowdStrikeIntegrationToAgentPolicy = async ({
+  kbnClient,
+  log,
+  agentPolicyId,
+  apiUrl,
+  clientId,
+  clientSecret,
+  integrationPolicyName = `CrowdStrike policy (${Math.random().toString().substring(2, 6)})`,
+  force = false,
+}: AddCrowdStrikeIntegrationToAgentPolicyOptions): Promise<PackagePolicy> => {
+  // If `force` is `false and agent policy already has a CrowdStrike integration, exit here
+  if (!force) {
+    log.debug(
+      `Checking to see if agent policy [${agentPolicyId}] already includes a CrowdStrike integration policy`
+    );
+    const agentPolicy = await fetchAgentPolicy(kbnClient, agentPolicyId);
+    log.verbose(agentPolicy);
+    const integrationPolicies = agentPolicy.package_policies ?? [];
+
+    for (const integrationPolicy of integrationPolicies) {
+      if (integrationPolicy.package?.name === 'crowdstrike') {
+        log.debug(
+          `Returning existing CrowdStrike Integration Policy included in agent policy [${agentPolicyId}]`
+        );
+        return integrationPolicy;
+      }
+    }
+  }
+
+  // Try to get package info, install if not available
+  let packageInfo;
+  try {
+    packageInfo = await fetchPackageInfo(kbnClient, 'crowdstrike');
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('404')) {
+      log.info('CrowdStrike package not found, installing it first...');
+      await installIntegration(kbnClient, 'crowdstrike');
+      packageInfo = await fetchPackageInfo(kbnClient, 'crowdstrike');
+    } else {
+      throw error;
+    }
+  }
+
+  const { version: packageVersion, name: packageName, title: packageTitle } = packageInfo;
+
+  log.debug(
+    `Creating new CrowdStrike integration policy [package v${packageVersion}] and adding it to agent policy [${agentPolicyId}]`
+  );
+
+  return createIntegrationPolicy(kbnClient, {
+    name: integrationPolicyName,
+    description: `Created by script: ${__filename}`,
+    policy_id: agentPolicyId,
+    policy_ids: [agentPolicyId],
+    enabled: true,
+    inputs: [
+      {
+        type: 'cel',
+        policy_template: 'crowdstrike',
+        enabled: true,
+        vars: {
+          client_id: {
+            value: clientId,
+            type: 'text',
+          },
+          client_secret: {
+            value: clientSecret,
+            type: 'password',
+          },
+          url: {
+            value: apiUrl,
+            type: 'text',
+          },
+          token_url: {
+            value: `${apiUrl}/oauth2/token`,
+            type: 'text',
+          },
+          scopes: {
+            value: [],
+            type: 'text',
+          },
+          enable_request_tracer: {
+            value: false,
+            type: 'bool',
+          },
+          proxy_url: {
+            type: 'text',
+          },
+        },
+        streams: [
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'crowdstrike.alert',
+            },
+            vars: {
+              initial_interval: {
+                value: '30m',
+                type: 'text',
+              },
+              interval: {
+                value: '30s',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'crowdstrike-alert'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'crowdstrike.host',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'crowdstrike-host'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: false,
+            data_stream: {
+              type: 'logs',
+              dataset: 'crowdstrike.vulnerability',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
+              },
+              batch_size: {
+                value: 1000,
+                type: 'text',
+              },
+              http_client_timeout: {
+                value: '30s',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'crowdstrike-vulnerability'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              preserve_duplicate_custom_fields: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+      },
+    ],
+    package: {
+      name: packageName,
+      title: packageTitle,
+      version: packageVersion,
+    },
+  });
 };

@@ -12,6 +12,7 @@ import { flatten, groupBy, isEmpty } from 'lodash';
 import type {
   InferenceInferenceEndpoint,
   InferenceTaskType,
+  IngestDocument,
   MlGetTrainedModelsRequest,
   TasksTaskInfo,
   TransformGetTransformTransformSummary,
@@ -19,7 +20,6 @@ import type {
 import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IngestPipeline,
-  IngestSimulateDocument,
   IngestSimulateRequest,
   NodesInfoResponseBase,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -35,6 +35,7 @@ import {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
 import type { MlFeatures } from '../../../common/constants/app';
 import type {
@@ -60,6 +61,7 @@ import type { MLSavedObjectService } from '../../saved_objects';
 import { filterForEnabledFeatureModels } from '../../routes/trained_models';
 import { mlLog } from '../../lib/log';
 import { getModelDeploymentState } from './get_model_state';
+import { checksFactory } from '../../saved_objects/checks';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
@@ -156,7 +158,9 @@ export class ModelsProvider {
 
       const inferenceAPIMap = groupBy(
         endpoints,
-        (endpoint) => endpoint.service === 'elser' && endpoint.service_settings.model_id
+        (endpoint) =>
+          (endpoint.service === 'elser' || endpoint.service === 'elasticsearch') &&
+          endpoint.service_settings.model_id
       );
 
       for (const model of trainedModels) {
@@ -231,10 +235,15 @@ export class ModelsProvider {
     const idMap = new Map<string, TrainedModelUIItem>(
       resultItems.map((model) => [model.model_id, model])
     );
-    /**
-     * Fetches model definitions available for download
-     */
-    const forDownload = await this.getModelDownloads();
+
+    const [rawModels, forDownload] = await Promise.all([
+      this._client.asCurrentUser.ml.getTrainedModels({
+        size: 1000,
+      }),
+      this.getModelDownloads(),
+    ]);
+
+    const allExistingModelIds = new Set(rawModels.trained_model_configs.map((m) => m.model_id));
 
     const notDownloaded: TrainedModelUIItem[] = forDownload
       .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer, techPreview }) => {
@@ -252,13 +261,18 @@ export class ModelsProvider {
         return !idMap.has(modelId) && !hidden;
       })
       .map<ModelDownloadItem>((modelDefinition) => {
+        // Check if this downloadable model already exists in the system, but not in current space
+        const isDownloadedWithinDifferentSpace = allExistingModelIds.has(modelDefinition.model_id);
+
         return {
           model_id: modelDefinition.model_id,
           type: modelDefinition.type,
           tags: modelDefinition.type?.includes(ELASTIC_MODEL_TAG) ? [ELASTIC_MODEL_TAG] : [],
           putModelConfig: modelDefinition.config,
           description: modelDefinition.description,
-          state: MODEL_STATE.NOT_DOWNLOADED,
+          state: isDownloadedWithinDifferentSpace
+            ? MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE
+            : MODEL_STATE.NOT_DOWNLOADED,
           recommended: !!modelDefinition.recommended,
           modelName: modelDefinition.modelName,
           os: modelDefinition.os,
@@ -377,22 +391,31 @@ export class ModelsProvider {
   /**
    * Returns a complete list of entities for the Trained Models UI
    */
-  async getTrainedModelList(): Promise<TrainedModelUIItem[]> {
-    const resp = await this._mlClient.getTrainedModels({
-      size: 1000,
-    } as MlGetTrainedModelsRequest);
+  async getTrainedModelList(
+    mlSavedObjectService: MLSavedObjectService
+  ): Promise<TrainedModelUIItem[]> {
+    const { trainedModelsSpaces } = checksFactory(this._client, mlSavedObjectService);
+
+    const [models, spaces] = await Promise.all([
+      this._mlClient.getTrainedModels({
+        size: 1000,
+      } as MlGetTrainedModelsRequest),
+      trainedModelsSpaces(),
+    ]);
 
     let resultItems: TrainedModelUIItem[] = [];
 
     // Filter models based on enabled features
     const filteredModels = filterForEnabledFeatureModels(
-      resp.trained_model_configs,
+      models.trained_model_configs,
       this._enabledFeatures
     ) as TrainedModelConfigResponse[];
 
     const formattedModels = filteredModels.map<ExistingModelBase>((model) => {
       return {
         ...model,
+        // Assign spaces
+        spaces: spaces.trainedModels[model.model_id] ?? [],
         // Extract model types
         type: [
           model.model_type,
@@ -432,7 +455,7 @@ export class ModelsProvider {
    * Simulates the effect of the pipeline on given document.
    *
    */
-  async simulatePipeline(docs: IngestSimulateDocument[], pipelineConfig: IngestPipeline) {
+  async simulatePipeline(docs: IngestDocument[], pipelineConfig: IngestPipeline) {
     const simulateRequest: IngestSimulateRequest = {
       docs,
       pipeline: pipelineConfig,
@@ -457,34 +480,23 @@ export class ModelsProvider {
    *
    */
   async createInferencePipeline(pipelineConfig: IngestPipeline, pipelineName: string) {
-    let result = {};
-
-    result = await this._client.asCurrentUser.ingest.putPipeline({
+    return await this._client.asCurrentUser.ingest.putPipeline({
       id: pipelineName,
       ...pipelineConfig,
     });
-
-    return result;
   }
 
   /**
    * Retrieves existing pipelines.
    *
    */
-  async getPipelines() {
-    let result = {};
-    try {
-      result = await this._client.asCurrentUser.ingest.getPipeline();
-    } catch (error) {
-      if (error.statusCode === 404) {
-        // ES returns 404 when there are no pipelines
-        // Instead, we should return an empty response and a 200
-        return result;
-      }
-      throw error;
-    }
+  async getPipelines(): Promise<string[]> {
+    const result = await this._client.asCurrentUser.ingest.getPipeline(
+      { summary: true },
+      { ignore: [404] }
+    );
 
-    return result;
+    return Object.keys(result);
   }
 
   /**
@@ -537,7 +549,24 @@ export class ModelsProvider {
     let indicesSettings;
 
     try {
-      indicesSettings = await this._client.asInternalUser.indices.getSettings();
+      indicesSettings = await this._client.asInternalUser.indices.getSettings({
+        expand_wildcards: ['open', 'closed'],
+        filter_path: '**.index.default_pipeline',
+        master_timeout: '30s',
+      });
+    } catch (e) {
+      // Possible that the user doesn't have permissions to view
+      if (e.meta?.statusCode !== 403) {
+        mlLog.error(e);
+      }
+      indicesSettings = {};
+    }
+
+    if (isPopulatedObject(indicesSettings) === false) {
+      return pipelineIdsToDestinationIndices;
+    }
+
+    try {
       const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
         index: [
           {

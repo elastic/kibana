@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FleetServerHost } from '../models';
+import type { FleetServerHost, NewFleetServerHost } from '../models';
 
 import type { ListResult } from './common';
 
@@ -15,24 +15,11 @@ export interface PutFleetServerHostsRequest {
   params: {
     itemId: string;
   };
-  body: {
-    name?: string;
-    host_urls?: string[];
-    is_default?: boolean;
-    is_internal?: boolean;
-    proxy_id?: string | null;
-  };
+  body: Partial<NewFleetServerHost>;
 }
 
 export interface PostFleetServerHostsRequest {
-  body: {
-    id?: string;
-    name?: string;
-    host_urls?: string[];
-    is_default?: boolean;
-    is_internal?: boolean;
-    proxy_id?: string | null;
-  };
+  body: Partial<FleetServerHost>;
 }
 
 export interface PostFleetServerHostsResponse {

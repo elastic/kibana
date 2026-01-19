@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
@@ -93,9 +93,13 @@ const AlertOptional = rt.partial({
   'kibana.alert.end': schemaDate,
   'kibana.alert.flapping': schemaBoolean,
   'kibana.alert.flapping_history': schemaBooleanArray,
+  'kibana.alert.index_pattern': schemaString,
   'kibana.alert.intended_timestamp': schemaDate,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
+  'kibana.alert.maintenance_window_names': schemaStringArray,
+  'kibana.alert.muted': schemaBoolean,
+  'kibana.alert.pending_recovered_count': schemaStringOrNumber,
   'kibana.alert.previous_action_group': schemaString,
   'kibana.alert.reason': schemaString,
   'kibana.alert.rule.execution.timestamp': schemaDate,
@@ -103,9 +107,14 @@ const AlertOptional = rt.partial({
   'kibana.alert.rule.execution.uuid': schemaString,
   'kibana.alert.rule.parameters': schemaUnknown,
   'kibana.alert.rule.tags': schemaStringArray,
+  'kibana.alert.scheduled_action.date': schemaString,
+  'kibana.alert.scheduled_action.group': schemaString,
   'kibana.alert.severity_improving': schemaBoolean,
   'kibana.alert.start': schemaDate,
   'kibana.alert.time_range': schemaDateRange,
+  'kibana.alert.updated_at': schemaDate,
+  'kibana.alert.updated_by.user.id': schemaString,
+  'kibana.alert.updated_by.user.name': schemaString,
   'kibana.alert.url': schemaString,
   'kibana.alert.workflow_assignee_ids': schemaStringArray,
   'kibana.alert.workflow_status': schemaString,

@@ -8,8 +8,9 @@
  */
 
 import { Observable } from 'rxjs';
-import { Capabilities } from '@kbn/core/public';
-import { showPublicUrlSwitch, getTopNavConfig, TopNavConfigParams } from './get_top_nav_config';
+import type { Capabilities } from '@kbn/core/public';
+import type { TopNavConfigParams } from './get_top_nav_config';
+import { showPublicUrlSwitch, getTopNavConfig } from './get_top_nav_config';
 import type {
   VisualizeEditorVisInstance,
   VisualizeAppStateContainer,
@@ -134,6 +135,8 @@ describe('getTopNavConfig', () => {
         Object {
           "description": "Share Visualization",
           "disableButton": false,
+          "iconOnly": true,
+          "iconType": "share",
           "id": "share",
           "label": "share",
           "run": [Function],
@@ -161,6 +164,60 @@ describe('getTopNavConfig', () => {
         },
       ]
     `);
+  });
+  test('returns correct links that include when export integrations are available', () => {
+    const vis = {
+      savedVis: {
+        id: 'test',
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: 'alias_id',
+        },
+      },
+      vis: {
+        type: {
+          title: 'TSVB',
+        },
+      },
+    } as VisualizeEditorVisInstance;
+
+    const availableExportIntegrationsSpy = jest.spyOn(share, 'availableIntegrations');
+
+    availableExportIntegrationsSpy.mockImplementationOnce((_objectType, groupId) => {
+      if (groupId === 'export') {
+        return [
+          {
+            id: 'export',
+            shareType: 'integration',
+            groupId: 'export',
+            config: () => ({}),
+          },
+        ];
+      }
+
+      return [];
+    });
+
+    const topNavLinks = getTopNavConfig(
+      {
+        hasUnsavedChanges: false,
+        setHasUnsavedChanges: jest.fn(),
+        hasUnappliedChanges: false,
+        onOpenInspector: jest.fn(),
+        originatingApp: 'dashboards',
+        setOriginatingApp: jest.fn(),
+        visInstance: vis,
+        stateContainer,
+        visualizationIdFromUrl: undefined,
+        stateTransfer: createEmbeddableStateTransferMock(),
+      } as unknown as TopNavConfigParams,
+      services
+    );
+
+    expect(topNavLinks.find(({ id }) => id === 'export')).toBeDefined();
+
+    // revert mock implementation
+    availableExportIntegrationsSpy.mockRestore();
   });
   test('returns correct links if the originating app is undefined', () => {
     const vis = {
@@ -207,6 +264,8 @@ describe('getTopNavConfig', () => {
         Object {
           "description": "Share Visualization",
           "disableButton": false,
+          "iconOnly": true,
+          "iconType": "share",
           "id": "share",
           "label": "share",
           "run": [Function],
@@ -314,6 +373,8 @@ describe('getTopNavConfig', () => {
         Object {
           "description": "Share Visualization",
           "disableButton": false,
+          "iconOnly": true,
+          "iconType": "share",
           "id": "share",
           "label": "share",
           "run": [Function],
@@ -399,6 +460,8 @@ describe('getTopNavConfig', () => {
         Object {
           "description": "Share Visualization",
           "disableButton": true,
+          "iconOnly": true,
+          "iconType": "share",
           "id": "share",
           "label": "share",
           "run": [Function],
@@ -495,6 +558,8 @@ describe('getTopNavConfig', () => {
         Object {
           "description": "Share Visualization",
           "disableButton": false,
+          "iconOnly": true,
+          "iconType": "share",
           "id": "share",
           "label": "share",
           "run": [Function],

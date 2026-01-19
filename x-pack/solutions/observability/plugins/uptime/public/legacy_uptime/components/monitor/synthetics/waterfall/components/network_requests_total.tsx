@@ -55,7 +55,7 @@ export const NetworkRequestsTotal = ({
       </strong>
       {totalNetworkRequests > fetchedNetworkRequests && (
         <EuiIconTip
-          type={'iInCircle'}
+          type={'info'}
           content={i18n.translate('xpack.uptime.synthetics.waterfall.requestsTotalMessage.info', {
             defaultMessage: 'Waterfall view only shows up to 1000 requests',
           })}

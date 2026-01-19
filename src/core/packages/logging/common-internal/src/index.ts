@@ -14,6 +14,7 @@ export {
   MessageConversion,
   LevelConversion,
   MetaConversion,
+  ErrorConversion,
   type Conversion,
 } from './layouts';
 export { AbstractLogger, type CreateLogRecordFn } from './logger';

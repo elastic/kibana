@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { handleEsError } from '../../shared_imports';
 
 const bodySchema = schema.string();
@@ -34,7 +34,7 @@ export function registerExecuteRoute({ router, license }: RouteDependencies) {
         const client = (await ctx.core).elasticsearch.client.asCurrentUser;
         const response = await client.scriptsPainlessExecute(
           {
-            // @ts-expect-error `ExecutePainlessScriptRequest.body` does not allow `string`
+            // Should this be `script` instead?
             body,
           },
           {

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldNumber, EuiIconTip } from '@elastic/eui';
 
@@ -34,7 +35,7 @@ function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabe
             defaultMessage: 'Number of characters for labels positioned outside the chart.',
           })}
           position="top"
-          type="iInCircle"
+          type="info"
           color="subdued"
         />
       }

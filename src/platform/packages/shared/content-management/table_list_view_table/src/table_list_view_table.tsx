@@ -10,19 +10,14 @@
 import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useAsync from 'react-use/lib/useAsync';
-import {
+import type {
   EuiBasicTableColumn,
-  EuiButton,
-  EuiCallOut,
-  EuiEmptyPrompt,
   Pagination,
   Direction,
-  EuiSpacer,
   EuiTableActionsColumnType,
   CriteriaWithPagination,
-  Query,
-  Ast,
 } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, Query, Ast } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,7 +44,6 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   Table,
   ConfirmDeleteModal,
-  ListingLimitWarning,
   ItemDetails,
   UpdatedAtField,
   FORBIDDEN_SEARCH_CHARS,
@@ -61,13 +55,14 @@ import { type SortColumnField, getInitialSorting, saveSorting } from './componen
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import type { RowActions, SearchQueryError, TableItemsRowActions } from './types';
-import { CustomSortingOptions, sortByRecentlyAccessed } from './components/table_sort_select';
+import type { CustomSortingOptions } from './components/table_sort_select';
+import { sortByRecentlyAccessed } from './components/table_sort_select';
 import { ContentEditorActivityRow } from './components/content_editor_activity_row';
 
 const disabledEditAction = {
   enabled: false,
   reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
-    defaultMessage: 'Elastic manages this item. Clone it to make changes.',
+    defaultMessage: 'Elastic manages this item. Duplicate it to make changes.',
   }),
 };
 
@@ -81,7 +76,6 @@ export interface TableListViewTableProps<
 > {
   entityName: string;
   entityNamePlural: string;
-  listingLimit: number;
   initialFilter?: string;
   initialPageSize: number;
   emptyPrompt?: JSX.Element;
@@ -326,7 +320,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   initialFilter: initialQuery,
   headingId,
   initialPageSize,
-  listingLimit,
   urlStateEnabled = true,
   customSortingOptions,
   customTableColumn,
@@ -378,8 +371,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const initialQueryInitialized = useRef(false);
 
   const {
-    canEditAdvancedSettings,
-    getListingLimitSettingsUrl,
     getTagIdsFromReferences,
     searchQueryParser,
     notifyError,
@@ -453,7 +444,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     showDeleteModal,
     isDeletingItems,
     selectedIds,
-    totalItems,
     hasUpdatedAtMetadata,
     hasCreatedByMetadata,
     hasRecentlyAccessedMetadata,
@@ -463,7 +453,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   } = state;
 
   const showFetchError = Boolean(fetchError);
-  const showLimitError = !showFetchError && totalItems > listingLimit;
 
   const fetchItems = useCallback(async () => {
     dispatch({ type: 'onFetchItems' });
@@ -724,7 +713,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'controlsVertical',
+          icon: 'info',
           type: 'icon',
           onClick: inspectItem,
           'data-test-subj': `inspect-action`,
@@ -1180,17 +1169,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   return (
     <>
-      {/* Too many items error */}
-      {showLimitError && (
-        <ListingLimitWarning
-          canEditAdvancedSettings={canEditAdvancedSettings}
-          advancedSettingsLink={getListingLimitSettingsUrl()}
-          entityNamePlural={entityNamePlural}
-          totalItems={totalItems}
-          listingLimit={listingLimit}
-        />
-      )}
-
       {/* Error while fetching items */}
       {showFetchError && renderFetchError()}
 

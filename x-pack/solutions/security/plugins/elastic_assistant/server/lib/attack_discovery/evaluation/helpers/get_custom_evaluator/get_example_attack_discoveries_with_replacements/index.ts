@@ -13,7 +13,10 @@ import { getDiscoveriesWithOriginalValues } from '../../get_discoveries_with_ori
 export const getExampleAttackDiscoveriesWithReplacements = (
   example: Example | undefined
 ): AttackDiscoveries => {
-  const exampleAttackDiscoveries = example?.outputs?.attackDiscoveries;
+  // fallback to the legacy `attackDiscoveries` property for backwards compatibility
+  const exampleAttackDiscoveries =
+    example?.outputs?.insights ?? example?.outputs?.attackDiscoveries;
+
   const exampleReplacements = example?.outputs?.replacements ?? {};
 
   // NOTE: calls to `parse` throw an error if the Example input is invalid

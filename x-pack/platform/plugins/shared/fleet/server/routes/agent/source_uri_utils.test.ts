@@ -6,38 +6,78 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../../constants';
+import type { AgentPolicy } from '../../types';
+import { appContextService } from '../../services/app_context';
 
-import type { AgentPolicy, DownloadSource } from '../../types';
+import { getDownloadSourceForAgentPolicy } from './source_uri_utils';
 
-import { getSourceUriForAgentPolicy } from './source_uri_utils';
+jest.mock('../../services/app_context');
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
 
-const soClientMock = savedObjectsClientMock.create();
+function getMockedSoClient() {
+  const soClientMock = savedObjectsClientMock.create();
 
-jest.mock('../download_source', () => {
-  return {
-    downloadSourceService: {
-      getDefaultDownloadSourceId: async () => 'default-download-source-id',
-      get: async (soClient: any, id: string): Promise<DownloadSource> => {
-        if (id === 'test-ds-1') {
-          return {
-            id: 'test-ds-1',
-            is_default: false,
-            name: 'Test',
-            host: 'http://custom-registry-test',
-          };
-        }
-        return {
-          id: 'default-download-source-id',
+  soClientMock.find.mockResolvedValue({
+    saved_objects: [
+      {
+        id: 'default-download-source-id',
+        is_default: true,
+        attributes: {
+          download_source_id: 'test-source-id',
+        },
+      },
+      {
+        id: 'test-ds-1',
+        attributes: {
+          download_source_id: 'test-ds-1',
+        },
+      },
+    ],
+  } as any);
+
+  mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClientMock);
+
+  return soClientMock;
+}
+
+function getMockedEncryptedSoClient() {
+  const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+    getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  };
+
+  esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type: string, id: string) => {
+    switch (id) {
+      case 'test-ds-1': {
+        return mockDownloadSourceSO('test-ds-1', {
+          is_default: false,
+          name: 'Test',
+          host: 'http://custom-registry-test',
+        });
+      }
+      case 'default-download-source-id': {
+        return mockDownloadSourceSO('default-download-source-id', {
           is_default: true,
           name: 'Default host',
           host: 'http://default-registry.co',
-        };
-      },
-    },
-  };
-});
+        });
+      }
+      default:
+        throw new Error('not found: ' + id);
+    }
+  });
+
+  mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
+
+  return esoClientMock;
+}
 
 function mockDownloadSourceSO(id: string, attributes: any = {}) {
   return {
@@ -51,47 +91,11 @@ function mockDownloadSourceSO(id: string, attributes: any = {}) {
   };
 }
 describe('helpers', () => {
-  beforeEach(() => {
-    soClientMock.get.mockImplementation(async (type: string, id: string) => {
-      switch (id) {
-        case 'test-ds-1': {
-          return mockDownloadSourceSO('test-ds-1', {
-            is_default: false,
-            name: 'Test',
-            host: 'http://custom-registry-test',
-          });
-        }
-        case 'default-download-source-id': {
-          return mockDownloadSourceSO('default-download-source-id', {
-            is_default: true,
-            name: 'Default host',
-            host: 'http://default-registry.co',
-          });
-        }
-        default:
-          throw new Error('not found: ' + id);
-      }
-    });
-    soClientMock.find.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'default-download-source-id',
-          is_default: true,
-          attributes: {
-            download_source_id: 'test-source-id',
-          },
-        },
-        {
-          id: 'test-ds-1',
-          attributes: {
-            download_source_id: 'test-ds-1',
-          },
-        },
-      ],
-    } as any);
-  });
-  describe('getSourceUriForAgentPolicy', () => {
-    it('should return the source_uri set on an agent policy ', async () => {
+  beforeEach(() => {});
+  describe('getDownloadSourceForAgentPolicy', () => {
+    it('should return the dowload source object set on an agent policy ', async () => {
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
       const agentPolicy: AgentPolicy = {
         id: 'agent-policy-id',
         status: 'active',
@@ -106,11 +110,17 @@ describe('helpers', () => {
         is_protected: false,
       };
 
-      expect(await getSourceUriForAgentPolicy(soClientMock, agentPolicy)).toEqual({
+      expect(await getDownloadSourceForAgentPolicy(agentPolicy)).toEqual({
         host: 'http://custom-registry-test',
+        id: 'test-ds-1',
+        is_default: false,
+        name: 'Test',
       });
     });
-    it('should return the default source_uri if there is none set on the agent policy ', async () => {
+
+    it('should return the default download source object if there is none set on the agent policy ', async () => {
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
       const agentPolicy: AgentPolicy = {
         id: 'agent-policy-id',
         status: 'active',
@@ -124,8 +134,11 @@ describe('helpers', () => {
         is_protected: false,
       };
 
-      expect(await getSourceUriForAgentPolicy(soClientMock, agentPolicy)).toEqual({
+      expect(await getDownloadSourceForAgentPolicy(agentPolicy)).toEqual({
         host: 'http://default-registry.co',
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
       });
     });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransformMatrix3d } from './aeroelastic';
+import type { TransformMatrix3d } from './aeroelastic';
 
 // converts a transform matrix to a CSS string
 export const matrixToCSS = (transformMatrix: TransformMatrix3d): string =>

@@ -14,15 +14,22 @@ export interface UseCasesFeatures {
   isAlertsEnabled: boolean;
   isSyncAlertsEnabled: boolean;
   observablesAuthorized: boolean;
+  connectorsAuthorized: boolean;
   caseAssignmentAuthorized: boolean;
   pushToServiceAuthorized: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
+  isObservablesFeatureEnabled: boolean;
+  isExtractObservablesEnabled: boolean;
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
-  const { features } = useCasesContext();
-  const { isAtLeastPlatinum } = useLicense();
+  const {
+    features,
+    permissions: { assign },
+  } = useCasesContext();
+  const { isAtLeastGold, isAtLeastPlatinum } = useLicense();
   const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
+  const hasLicenseWithAtLeastGold = isAtLeastGold();
 
   const casesFeatures = useMemo(
     () => ({
@@ -37,11 +44,24 @@ export const useCasesFeatures = (): UseCasesFeatures => {
        */
       isSyncAlertsEnabled: !features.alerts.enabled ? false : features.alerts.sync,
       metricsFeatures: features.metrics,
-      caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum,
+      caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
       observablesAuthorized: hasLicenseGreaterThanPlatinum,
+      connectorsAuthorized: hasLicenseWithAtLeastGold,
+      isObservablesFeatureEnabled: !!features.observables.enabled,
+      isExtractObservablesEnabled:
+        !!features.observables.enabled && !!features.observables.autoExtract,
     }),
-    [features.alerts.enabled, features.alerts.sync, features.metrics, hasLicenseGreaterThanPlatinum]
+    [
+      features.alerts.enabled,
+      features.alerts.sync,
+      features.metrics,
+      hasLicenseGreaterThanPlatinum,
+      assign,
+      features.observables?.enabled,
+      features.observables?.autoExtract,
+      hasLicenseWithAtLeastGold,
+    ]
   );
 
   return casesFeatures;

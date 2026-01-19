@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useUserProfilesServices } from './services';
 
 export const userProfileKeys = {
@@ -32,6 +32,7 @@ export const useUserProfiles = (uids: string[], opts?: { enabled?: boolean }) =>
   const query = useQuery({
     queryKey: userProfileKeys.bulkGet(uids),
     queryFn: () => bulkGetUserProfiles(uids),
+    staleTime: Infinity,
     enabled: opts?.enabled ?? true,
   });
   return query;

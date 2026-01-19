@@ -7,7 +7,8 @@
 
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { DataStreamType, dataStreamTypesRt } from '../../common/types';
+import type { DataStreamType } from '../../common/types';
+import { dataStreamTypesRt } from '../../common/types';
 
 export const typeRt = t.type({
   type: dataStreamTypesRt,
@@ -29,3 +30,14 @@ export const rangeRt = t.type({
   start: isoToEpochRt,
   end: isoToEpochRt,
 });
+
+export const groupByRt = new t.Type<string[], string, unknown>(
+  'groupByRt',
+  (input: unknown): input is string[] =>
+    Array.isArray(input) && input.every((value) => typeof value === 'string'),
+  (input: unknown, context: t.Context) =>
+    typeof input === 'string' && input.split(',').every((value) => typeof value === 'string')
+      ? t.success(input.split(',') as string[])
+      : t.failure(input, context),
+  (output: string[]) => output.join(',')
+);

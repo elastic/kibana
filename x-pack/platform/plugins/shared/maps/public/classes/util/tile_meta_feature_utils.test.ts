@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TileMetaFeature } from '../../../common/descriptor_types';
+import type { TileMetaFeature } from '../../../common/descriptor_types';
 import {
   getAggsMeta,
   getAggRange,

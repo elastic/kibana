@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/public';
-import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
-import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
+import type { Reference } from '@kbn/content-management-utils';
+import type { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
+import type { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
@@ -34,7 +34,7 @@ export interface GraphWorkspaceSavedObject {
   legacyIndexPatternRef?: string;
   _source: Record<string, unknown>;
   updatedAt?: string;
-  references: SavedObjectReference[];
+  references: Reference[];
 }
 
 export interface SerializedWorkspaceState {

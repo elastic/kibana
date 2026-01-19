@@ -13,6 +13,7 @@ Object {
     "aggField": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The name of the numeric field that is used in the aggregation. This property is required when \`aggType\` is \`avg\`, \`max\`, \`min\` or \`sum\`.",
         "error": [Function],
         "presence": "optional",
       },
@@ -43,6 +44,7 @@ Object {
     "aggType": Object {
       "flags": Object {
         "default": "count",
+        "description": "The type of aggregation to perform.",
         "error": [Function],
         "presence": "optional",
       },
@@ -121,6 +123,7 @@ Object {
     },
     "esqlQuery": Object {
       "flags": Object {
+        "description": "The query definition in Elasticsearch Query Language.",
         "error": [Function],
       },
       "type": "any",
@@ -191,6 +194,7 @@ Object {
     "excludeHitsFromPreviousRun": Object {
       "flags": Object {
         "default": true,
+        "description": "Indicates whether to exclude matches from previous runs. If \`true\`, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run. This option is not available when a grouping field is specified.",
         "error": [Function],
         "presence": "optional",
       },
@@ -199,6 +203,7 @@ Object {
     "groupBy": Object {
       "flags": Object {
         "default": "all",
+        "description": "Indicates whether the aggregation is applied over all documents (\`all\`), grouped by row (\`row\`), or split into groups (\`top\`) using a grouping field (\`termField\`) where only the top groups (up to \`termSize\` number of groups) are checked. If grouping is used, an alert will be created for each group when it exceeds the threshold.",
         "error": [Function],
         "presence": "optional",
       },
@@ -220,6 +225,7 @@ Object {
     },
     "index": Object {
       "flags": Object {
+        "description": "The indices to query.",
         "error": [Function],
       },
       "type": "any",
@@ -294,6 +300,7 @@ Object {
     },
     "searchConfiguration": Object {
       "flags": Object {
+        "description": "The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.",
         "error": [Function],
       },
       "type": "any",
@@ -344,6 +351,7 @@ Object {
     "searchType": Object {
       "flags": Object {
         "default": "esQuery",
+        "description": "The type of query For example: \`esQuery\` for Elasticsearch Query DSL or \`esqlQuery\` for Elasticsearch Query Language (ES|QL).",
         "error": [Function],
         "presence": "optional",
       },
@@ -389,6 +397,7 @@ Object {
     },
     "size": Object {
       "flags": Object {
+        "description": "The number of documents to pass to the configured actions when the threshold condition is met.",
         "error": [Function],
       },
       "rules": Array [
@@ -410,6 +419,7 @@ Object {
     "sourceFields": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The sourceFields param is ignored.",
         "error": [Function],
         "presence": "optional",
       },
@@ -473,6 +483,7 @@ Object {
     "termField": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The names of up to four fields that are used for grouping the aggregation. This property is required when \`groupBy\` is \`top\`.",
         "error": [Function],
         "presence": "optional",
       },
@@ -554,6 +565,7 @@ Object {
     "termSize": Object {
       "flags": Object {
         "default": [Function],
+        "description": "This property is required when \`groupBy\` is \`top\`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.",
         "error": [Function],
         "presence": "optional",
       },
@@ -579,6 +591,7 @@ Object {
       "items": Array [
         Object {
           "flags": Object {
+            "description": "The threshold value that is used with the \`thresholdComparator\`. If the \`thresholdComparator\` is \`between\` or \`notBetween\`, you must specify the boundary values.",
             "error": [Function],
             "presence": "optional",
           },
@@ -603,6 +616,7 @@ Object {
     },
     "thresholdComparator": Object {
       "flags": Object {
+        "description": "The comparison function for the threshold. For example: greater than, less than, greater than or equal to, between, or not between.",
         "error": [Function],
       },
       "matches": Array [
@@ -691,6 +705,7 @@ Object {
     },
     "timeField": Object {
       "flags": Object {
+        "description": "The field that is used to calculate the time window.",
         "error": [Function],
       },
       "type": "any",
@@ -771,6 +786,7 @@ Object {
     },
     "timeWindowSize": Object {
       "flags": Object {
+        "description": "The size of the time window (in \`timeWindowUnit\` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.",
         "error": [Function],
       },
       "rules": Array [
@@ -785,6 +801,7 @@ Object {
     },
     "timeWindowUnit": Object {
       "flags": Object {
+        "description": "The type of units for the time window. For example: seconds, minutes, hours, or days.",
         "error": [Function],
       },
       "rules": Array [
@@ -1131,6 +1148,7 @@ Object {
     "aggField": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The name of the numeric field that is used in the aggregation. This property is required when \`aggType\` is \`avg\`, \`max\`, \`min\` or \`sum\`.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1161,6 +1179,7 @@ Object {
     "aggType": Object {
       "flags": Object {
         "default": "count",
+        "description": "The type of aggregation to perform.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1183,6 +1202,7 @@ Object {
     "filterKuery": Object {
       "flags": Object {
         "default": [Function],
+        "description": "A Kibana Query Language (KQL) expression thats limits the scope of alerts.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1210,6 +1230,7 @@ Object {
     "groupBy": Object {
       "flags": Object {
         "default": "all",
+        "description": "Indicates whether the aggregation is applied over all documents (\`all\`) or split into groups (\`top\`) using a grouping field (\`termField\`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to \`termSize\` number of groups) are checked.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1231,6 +1252,7 @@ Object {
     },
     "index": Object {
       "flags": Object {
+        "description": "The indices to query.",
         "error": [Function],
       },
       "matches": Array [
@@ -1311,6 +1333,7 @@ Object {
     "termField": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The names of up to four fields that are used for grouping the aggregation. This property is required when \`groupBy\` is \`top\`.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1341,6 +1364,7 @@ Object {
     "termSize": Object {
       "flags": Object {
         "default": [Function],
+        "description": "This property is required when \`groupBy\` is \`top\`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1390,6 +1414,7 @@ Object {
     },
     "thresholdComparator": Object {
       "flags": Object {
+        "description": "The comparison function for the threshold. For example: greater than, less than, greater than or equal to, between, or not between.",
         "error": [Function],
       },
       "matches": Array [
@@ -1478,6 +1503,7 @@ Object {
     },
     "timeField": Object {
       "flags": Object {
+        "description": "The field that is used to calculate the time window.",
         "error": [Function],
       },
       "metas": Array [
@@ -1503,6 +1529,7 @@ Object {
     },
     "timeWindowSize": Object {
       "flags": Object {
+        "description": "The size of the time window (in \`timeWindowUnit\` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.",
         "error": [Function],
       },
       "rules": Array [
@@ -1517,6 +1544,7 @@ Object {
     },
     "timeWindowUnit": Object {
       "flags": Object {
+        "description": "The type of units for the time window. For example: seconds, minutes, hours, or days.",
         "error": [Function],
       },
       "rules": Array [
@@ -1561,6 +1589,7 @@ Object {
     "anomalyDetectorTypes": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The types of anomalies that are detected. For example, detect abnormal latency, throughput, or failed transaction rates.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1628,6 +1657,7 @@ Object {
     },
     "anomalySeverityType": Object {
       "flags": Object {
+        "description": "The severity of anomalies that result in an alert: critical, major, minor, or warning.",
         "error": [Function],
       },
       "matches": Array [
@@ -1684,6 +1714,7 @@ Object {
     },
     "environment": Object {
       "flags": Object {
+        "description": "The environment from APM.",
         "error": [Function],
       },
       "rules": Array [
@@ -1699,6 +1730,7 @@ Object {
     "serviceName": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The service name from APM.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1720,6 +1752,7 @@ Object {
     "transactionType": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The transaction type from APM.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1740,12 +1773,14 @@ Object {
     },
     "windowSize": Object {
       "flags": Object {
+        "description": "The size of the time window (in \`windowUnit\` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.",
         "error": [Function],
       },
       "type": "number",
     },
     "windowUnit": Object {
       "flags": Object {
+        "description": "The type of units for the time window: minutes, hours, or days.",
         "error": [Function],
       },
       "rules": Array [
@@ -1775,6 +1810,7 @@ Object {
   "keys": Object {
     "environment": Object {
       "flags": Object {
+        "description": "Filter the errors coming from your application to apply the rule to a specific environment.",
         "error": [Function],
       },
       "rules": Array [
@@ -1790,6 +1826,7 @@ Object {
     "errorGroupingKey": Object {
       "flags": Object {
         "default": [Function],
+        "description": "Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1817,6 +1854,7 @@ Object {
       "items": Array [
         Object {
           "flags": Object {
+            "description": "Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.",
             "error": [Function],
             "presence": "optional",
           },
@@ -1951,6 +1989,7 @@ Object {
     "serviceName": Object {
       "flags": Object {
         "default": [Function],
+        "description": "Filter the errors coming from your application to apply the rule to a specific service.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1971,6 +2010,7 @@ Object {
     },
     "threshold": Object {
       "flags": Object {
+        "description": "The number of errors, which is the threshold for alerts.",
         "error": [Function],
       },
       "type": "number",
@@ -1978,6 +2018,7 @@ Object {
     "useKqlFilter": Object {
       "flags": Object {
         "default": [Function],
+        "description": "A filter in Kibana Query Language (KQL) that limits the scope of the rule.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1990,12 +2031,14 @@ Object {
     },
     "windowSize": Object {
       "flags": Object {
+        "description": "The time frame in which the errors must occur (in \`windowUnit\` units). Generally it should be a value higher than the rule check interval to avoid gaps in detection.",
         "error": [Function],
       },
       "type": "number",
     },
     "windowUnit": Object {
       "flags": Object {
+        "description": "The type of units for the time window: minutes, hours, or days.",
         "error": [Function],
       },
       "rules": Array [
@@ -2025,6 +2068,7 @@ Object {
   "keys": Object {
     "aggregationType": Object {
       "flags": Object {
+        "description": "The type of aggregation to perform.",
         "error": [Function],
       },
       "matches": Array [
@@ -2069,6 +2113,7 @@ Object {
     },
     "environment": Object {
       "flags": Object {
+        "description": "Filter the rule to apply to a specific environment.",
         "error": [Function],
       },
       "rules": Array [
@@ -2090,6 +2135,7 @@ Object {
       "items": Array [
         Object {
           "flags": Object {
+            "description": "Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.",
             "error": [Function],
             "presence": "optional",
           },
@@ -2224,6 +2270,7 @@ Object {
     "serviceName": Object {
       "flags": Object {
         "default": [Function],
+        "description": "Filter the rule to apply to a specific service.",
         "error": [Function],
         "presence": "optional",
       },
@@ -2244,6 +2291,7 @@ Object {
     },
     "threshold": Object {
       "flags": Object {
+        "description": "The latency threshold value.",
         "error": [Function],
       },
       "type": "number",
@@ -2251,6 +2299,7 @@ Object {
     "transactionName": Object {
       "flags": Object {
         "default": [Function],
+        "description": "Filter the rule to apply to a specific transaction name.",
         "error": [Function],
         "presence": "optional",
       },
@@ -2272,6 +2321,7 @@ Object {
     "transactionType": Object {
       "flags": Object {
         "default": [Function],
+        "description": "Filter the rule to apply to a specific transaction type.",
         "error": [Function],
         "presence": "optional",
       },
@@ -2293,6 +2343,7 @@ Object {
     "useKqlFilter": Object {
       "flags": Object {
         "default": [Function],
+        "description": "A Kibana Query Language (KQL) expression thats limits the scope of alerts.",
         "error": [Function],
         "presence": "optional",
       },
@@ -2305,12 +2356,14 @@ Object {
     },
     "windowSize": Object {
       "flags": Object {
+        "description": "The size of the time window (in \`windowUnit\` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.",
         "error": [Function],
       },
       "type": "number",
     },
     "windowUnit": Object {
       "flags": Object {
+        "description": "The type of units for the time window. For example: minutes, hours, or days.",
         "error": [Function],
       },
       "rules": Array [
@@ -2893,6 +2946,33 @@ Object {
         "error": [Function],
       },
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "schema": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -4742,6 +4822,19 @@ Object {
                     ],
                     "type": "string",
                   },
+                  "managed": Object {
+                    "flags": Object {
+                      "default": [Function],
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
+                    "type": "boolean",
+                  },
                   "name": Object {
                     "flags": Object {
                       "default": [Function],
@@ -5682,10 +5775,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -5700,6 +5795,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -5760,6 +5856,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -5813,10 +5910,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -6040,6 +6139,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -6219,7 +6336,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -6349,10 +6465,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -6367,6 +6485,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -6427,6 +6546,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -6480,10 +6600,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -6707,6 +6829,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -6886,7 +7026,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -7007,6 +7146,9 @@ Object {
                     "field": Object {
                       "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
                     },
+                    "negate": Object {
+                      "type": "boolean",
+                    },
                     "type": Object {
                       "const": "mapping",
                       "type": "string",
@@ -7079,10 +7221,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -7097,6 +7241,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -7157,6 +7302,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -7210,10 +7356,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -7437,6 +7585,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -7616,7 +7782,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -7727,10 +7892,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -7745,6 +7912,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -7805,6 +7973,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -7858,10 +8027,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -8085,6 +8256,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -8264,7 +8453,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -8333,7 +8521,8 @@ Object {
           "type": "array",
         },
         "historyWindowStart": Object {
-          "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+          "minLength": 1,
+          "type": "string",
         },
         "index": Object {
           "items": Object {
@@ -8430,10 +8619,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -8448,6 +8639,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -8508,6 +8700,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -8561,10 +8754,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -8788,6 +8983,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -8967,7 +9180,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -9135,10 +9347,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -9153,6 +9367,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -9213,6 +9428,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -9266,10 +9482,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -9493,6 +9711,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -9672,7 +9908,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -9840,10 +10075,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -9858,6 +10095,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -9918,6 +10156,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -9971,10 +10210,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -10198,6 +10439,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -10377,7 +10636,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -11090,6 +11348,44 @@ Object {
       ],
       "type": "object",
     },
+    "kqlQueryString": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
     "lookbackInterval": Object {
       "flags": Object {
         "default": null,
@@ -11231,6 +11527,14 @@ Object {
       "type": "alternatives",
     },
   },
+  "rules": Array [
+    Object {
+      "args": Object {
+        "method": [Function],
+      },
+      "name": "custom",
+    },
+  ],
   "type": "object",
 }
 `;

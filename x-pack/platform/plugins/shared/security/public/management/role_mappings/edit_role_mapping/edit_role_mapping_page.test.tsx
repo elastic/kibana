@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiProvider } from '@elastic/eui';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -44,17 +45,19 @@ describe('EditRoleMappingPage', () => {
 
     return mountWithIntl(
       <KibanaContextProvider services={coreStart}>
-        <EditRoleMappingPage
-          action="edit"
-          name={name}
-          roleMappingsAPI={roleMappingsAPI}
-          securityFeaturesAPI={securityFeaturesAPI}
-          rolesAPIClient={rolesAPI}
-          notifications={coreStart.notifications}
-          docLinks={coreStart.docLinks}
-          history={history}
-          readOnly={!coreStart.application.capabilities.role_mappings.save}
-        />
+        <EuiProvider>
+          <EditRoleMappingPage
+            action="edit"
+            name={name}
+            roleMappingsAPI={roleMappingsAPI}
+            securityFeaturesAPI={securityFeaturesAPI}
+            rolesAPIClient={rolesAPI}
+            notifications={coreStart.notifications}
+            docLinks={coreStart.docLinks}
+            history={history}
+            readOnly={!coreStart.application.capabilities.role_mappings.save}
+          />
+        </EuiProvider>
       </KibanaContextProvider>
     );
   };
@@ -435,6 +438,72 @@ describe('EditRoleMappingPage', () => {
     const rulePanels = wrapper.find('RuleEditorPanel[data-test-subj="roleMappingRulePanel"]');
     expect(rulePanels).toHaveLength(1);
     expect(rulePanels.at(0).props().readOnly).toBeTruthy();
+  });
+
+  it('renders a readonly view when role mapping has metadata._readonly=true', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
+    roleMappingsAPI.saveRoleMapping.mockResolvedValue(null);
+    roleMappingsAPI.getRoleMapping.mockResolvedValue({
+      name: 'foo',
+      role_templates: [
+        {
+          template: { id: 'foo' },
+        },
+      ],
+      enabled: true,
+      rules: {
+        all: [
+          {
+            field: {
+              username: '*',
+            },
+          },
+          {
+            all: [],
+          },
+        ],
+      },
+      metadata: {
+        _read_only: true,
+      },
+    });
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
+      hasCompatibleRealms: true,
+      canUseInlineScripts: true,
+      canUseStoredScripts: true,
+    });
+
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
+    await nextTick();
+    wrapper.update();
+
+    // back button
+    const backButton = wrapper.find('button[data-test-subj="roleMappingFormReturnButton"]');
+    expect(backButton).toHaveLength(1);
+
+    // no save button
+    const saveButton = wrapper.find('button[data-test-subj="saveRoleMappingButton"]');
+    expect(saveButton).toHaveLength(0);
+
+    // no delete button
+    const deleteButton = wrapper.find('emptyButton[data-test-subj="deleteRoleMappingButton"]');
+    expect(deleteButton).toHaveLength(0);
+
+    // Info panel is read-only (view mode)
+    const infoPanels = wrapper.find('MappingInfoPanel[data-test-subj="roleMappingInfoPanel"]');
+    expect(infoPanels).toHaveLength(1);
+    expect(infoPanels.at(0).props().mode).toEqual('view');
+
+    // Rule panel is read-only
+    const rulePanels = wrapper.find('RuleEditorPanel[data-test-subj="roleMappingRulePanel"]');
+    expect(rulePanels).toHaveLength(1);
+    expect(rulePanels.at(0).props().readOnly).toBeTruthy();
+
+    // Lock icon is displayed
+    const lockIcon = wrapper.find('EuiIconTip[data-test-subj="readOnlyRoleMappingTooltip"]');
+    expect(lockIcon).toHaveLength(1);
   });
 
   it('renders a warning when empty any or all rules are present', async () => {

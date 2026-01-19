@@ -3,75 +3,78 @@
 exports[`ElasticsearchMonitorsAdapter getMonitorChartsData will provide expected filters 1`] = `
 Array [
   Object {
-    "body": Object {
-      "aggs": Object {
-        "timeseries": Object {
-          "aggs": Object {
-            "location": Object {
-              "aggs": Object {
-                "duration": Object {
-                  "stats": Object {
-                    "field": "monitor.duration.us",
-                  },
+    "aggs": Object {
+      "timeseries": Object {
+        "aggs": Object {
+          "location": Object {
+            "aggs": Object {
+              "duration": Object {
+                "stats": Object {
+                  "field": "monitor.duration.us",
                 },
               },
-              "terms": Object {
-                "field": "observer.geo.name",
-                "missing": "Unnamed-location",
-              },
+            },
+            "terms": Object {
+              "field": "observer.geo.name",
+              "missing": "Unnamed-location",
             },
           },
-          "auto_date_histogram": Object {
-            "buckets": 25,
-            "field": "@timestamp",
-          },
+        },
+        "auto_date_histogram": Object {
+          "buckets": 25,
+          "field": "@timestamp",
         },
       },
-      "query": Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
-              "exists": Object {
-                "field": "summary",
-              },
-            },
-            Object {
-              "bool": Object {
-                "must_not": Object {
-                  "exists": Object {
-                    "field": "run_once",
-                  },
-                },
-              },
-            },
-            Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "gte": "now-15m",
-                  "lte": "now",
-                },
-              },
-            },
-            Object {
-              "term": Object {
-                "monitor.id": "fooID",
-              },
-            },
-            Object {
-              "range": Object {
-                "monitor.duration.us": Object {
-                  "gt": 0,
-                },
-              },
-            },
-          ],
-        },
-      },
-      "size": 0,
     },
     "index": "heartbeat-*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "exists": Object {
+              "field": "summary",
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Object {
+                "exists": Object {
+                  "field": "run_once",
+                },
+              },
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-15m",
+                "lte": "now",
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "monitor.id": "fooID",
+            },
+          },
+          Object {
+            "range": Object {
+              "monitor.duration.us": Object {
+                "gt": 0,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
   },
   Object {
+    "context": Object {
+      "loggingOptions": Object {
+        "loggerName": "uptime",
+      },
+    },
     "meta": true,
   },
 ]

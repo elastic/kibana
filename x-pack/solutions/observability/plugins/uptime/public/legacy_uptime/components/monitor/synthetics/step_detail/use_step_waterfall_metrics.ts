@@ -8,7 +8,7 @@
 import { useSelector } from 'react-redux';
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { selectDynamicSettings } from '../../../../state/selectors';
-import { MarkerItems } from '../waterfall/context/waterfall_chart';
+import type { MarkerItems } from '../waterfall/context/waterfall_chart';
 
 export interface Props {
   checkGroup: string;
@@ -29,32 +29,30 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, step
     hasNavigationRequest
       ? createEsParams({
           index: heartbeatIndices!,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      'synthetics.step.index': stepIndex,
-                    },
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'synthetics.step.index': stepIndex,
                   },
-                  {
-                    term: {
-                      'monitor.check_group': checkGroup,
-                    },
+                },
+                {
+                  term: {
+                    'monitor.check_group': checkGroup,
                   },
-                  {
-                    term: {
-                      'synthetics.type': 'step/metrics',
-                    },
+                },
+                {
+                  term: {
+                    'synthetics.type': 'step/metrics',
                   },
-                ],
-              },
+                },
+              ],
             },
-            fields: ['browser.*'],
-            size: 1000,
-            _source: false,
           },
+          fields: ['browser.*'],
+          size: 1000,
+          _source: false,
         })
       : {},
     [heartbeatIndices, checkGroup, hasNavigationRequest],

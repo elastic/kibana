@@ -8,19 +8,20 @@
 /**
  * Get all actions with in-memory connectors
  */
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AuditLogger } from '@kbn/security-plugin-types-server';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
-import { InMemoryConnector } from '../../../..';
-import { SavedObjectClientForFind } from '../../../../data/connector/types/params';
+import type { ActionTypeRegistry } from '../../../../action_type_registry';
+import type { InMemoryConnector } from '../../../..';
+import type { SavedObjectClientForFind } from '../../../../data/connector/types/params';
 import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
-import { GetAllParams, InjectExtraFindDataParams } from './types';
+import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
-import { ConnectorWithExtraFindData } from '../../types';
-import { GetAllUnsecuredParams } from './types/params';
+import type { ConnectorWithExtraFindData } from '../../types';
+import type { GetAllUnsecuredParams } from './types/params';
 
 interface GetAllHelperOpts {
   auditLogger?: AuditLogger;
@@ -30,6 +31,7 @@ interface GetAllHelperOpts {
   logger: Logger;
   namespace?: string;
   savedObjectsClient: SavedObjectClientForFind;
+  connectorTypeRegistry: ActionTypeRegistry;
 }
 
 export async function getAll({
@@ -57,6 +59,7 @@ export async function getAll({
     kibanaIndices: context.kibanaIndices,
     logger: context.logger,
     savedObjectsClient: context.unsecuredSavedObjectsClient,
+    connectorTypeRegistry: context.actionTypeRegistry,
   });
 }
 
@@ -67,6 +70,7 @@ export async function getAllUnsecured({
   kibanaIndices,
   logger,
   spaceId,
+  connectorTypeRegistry,
 }: GetAllUnsecuredParams): Promise<ConnectorWithExtraFindData[]> {
   const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
 
@@ -78,6 +82,7 @@ export async function getAllUnsecured({
     logger,
     namespace,
     savedObjectsClient: internalSavedObjectsRepository,
+    connectorTypeRegistry,
   });
 }
 
@@ -89,13 +94,15 @@ async function getAllHelper({
   logger,
   namespace,
   savedObjectsClient,
+  connectorTypeRegistry,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
   ).saved_objects.map((rawAction) => {
     const connector = connectorFromSavedObject(
       rawAction,
-      isConnectorDeprecated(rawAction.attributes)
+      isConnectorDeprecated(rawAction.attributes),
+      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId)
     );
     return omit(connector, 'secrets');
   });
@@ -113,15 +120,18 @@ async function getAllHelper({
 
   const mergedResult = [
     ...savedObjectsActions,
-    ...inMemoryConnectors.map((inMemoryConnector) => ({
-      id: inMemoryConnector.id,
-      actionTypeId: inMemoryConnector.actionTypeId,
-      name: inMemoryConnector.name,
-      isPreconfigured: inMemoryConnector.isPreconfigured,
-      isDeprecated: isConnectorDeprecated(inMemoryConnector),
-      isSystemAction: inMemoryConnector.isSystemAction,
-      ...(inMemoryConnector.exposeConfig ? { config: inMemoryConnector.config } : {}),
-    })),
+    ...(await filterInferenceConnectors(esClient, inMemoryConnectors)).map((connector) => {
+      return {
+        id: connector.id,
+        actionTypeId: connector.actionTypeId,
+        name: connector.name,
+        isPreconfigured: connector.isPreconfigured,
+        isDeprecated: isConnectorDeprecated(connector),
+        isSystemAction: connector.isSystemAction,
+        isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
+        ...(connector.exposeConfig ? { config: connector.config } : {}),
+      };
+    }),
   ].sort((a, b) => a.name.localeCompare(b.name));
 
   const connectors = await injectExtraFindData({
@@ -176,6 +186,9 @@ export async function getAllSystemConnectors({
       isPreconfigured: systemConnector.isPreconfigured,
       isDeprecated: isConnectorDeprecated(systemConnector),
       isSystemAction: systemConnector.isSystemAction,
+      isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
+        systemConnector.actionTypeId
+      ),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -237,4 +250,38 @@ async function injectExtraFindData({
     // @ts-expect-error aggegation type is not specified
     referencedByCount: aggregationResult.aggregations[connector.id].doc_count,
   }));
+}
+
+/**
+ * Filters out inference connectors that do not have an endpoint.
+ * It requires a connector config in order to retrieve the inference id.
+ *
+ * @param esClient
+ * @param connectors
+ * @returns
+ */
+export async function filterInferenceConnectors(
+  esClient: ElasticsearchClient,
+  connectors: InMemoryConnector[]
+): Promise<InMemoryConnector[]> {
+  let result = connectors;
+
+  if (result.some((connector) => connector.actionTypeId === '.inference')) {
+    try {
+      // Get all inference endpoints to filter out inference connector without endpoints
+      const inferenceEndpoints = await esClient.inference.get();
+      result = result.filter((connector) => {
+        if (connector.actionTypeId !== '.inference') return true;
+
+        const inferenceEndpoint = inferenceEndpoints.endpoints.find(
+          (endpoint) => endpoint.inference_id === connector.config?.inferenceId
+        );
+        return inferenceEndpoint !== undefined;
+      });
+    } catch (e) {
+      // If we can't get the inference endpoints, we just return all connectors
+    }
+  }
+
+  return result;
 }

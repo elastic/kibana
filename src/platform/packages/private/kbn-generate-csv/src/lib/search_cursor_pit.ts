@@ -47,13 +47,13 @@ export class SearchCursorPit extends SearchCursor {
           index: this.indexPatternTitle,
           keep_alive: scroll.duration(taskInstanceFields),
           ignore_unavailable: true,
-          // @ts-expect-error ignore_throttled is not in the type definition, but it is accepted by es
-          ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
+          ...(includeFrozen ? { querystring: { ignore_throttled: false } } : {}), // "true" will cause deprecation warnings logged in ES
         },
         {
           signal: this.abortController.signal,
           requestTimeout: scroll.duration(taskInstanceFields),
           maxRetries: 0,
+          // @ts-expect-error not documented in the types. Is this still supported?
           maxConcurrentShardRequests,
         }
       );
@@ -80,7 +80,7 @@ export class SearchCursorPit extends SearchCursor {
 
     const searchParamsPit = {
       params: {
-        body: searchBody,
+        ...searchBody,
         max_concurrent_shard_requests: effectiveMaxConcurrentShardRequests,
       },
     };
@@ -124,6 +124,8 @@ export class SearchCursorPit extends SearchCursor {
       throw new Error('Could not retrieve the search body!');
     }
 
+    this.logger.debug(() => `Executing search with body: ${JSON.stringify(searchBody)}`);
+
     const response = await this.searchWithPit(searchBody);
 
     if (!response) {
@@ -164,7 +166,7 @@ export class SearchCursorPit extends SearchCursor {
   public async closeCursor() {
     if (this.cursorId) {
       this.logger.debug(`Executing close PIT on ${this.formatCursorId(this.cursorId)}`);
-      await this.clients.es.asCurrentUser.closePointInTime({ body: { id: this.cursorId } });
+      await this.clients.es.asCurrentUser.closePointInTime({ id: this.cursorId });
     } else {
       this.logger.warn(`No PIT Id to clear!`);
     }

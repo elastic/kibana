@@ -11,7 +11,7 @@
         "label": "ResizableLayout",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<",
+          "({ className, mode, direction, fixedPanelSize, minFixedPanelSize, minFlexPanelSize, fixedPanel, flexPanel, fixedPanelOrder, resizeButtonClassName, [\"data-test-subj\"]: dataTestSubj, onFixedPanelSizeChange, }: ",
           {
             "pluginId": "@kbn/resizable-layout",
             "scope": "public",
@@ -19,36 +19,39 @@
             "section": "def-public.ResizableLayoutProps",
             "text": "ResizableLayoutProps"
           },
-          " & ",
-          {
-            "pluginId": "@kbn/shared-ux-utility",
-            "scope": "common",
-            "docId": "kibKbnSharedUxUtilityPluginApi",
-            "section": "def-common.WithSuspenseExtendedDeps",
-            "text": "WithSuspenseExtendedDeps"
-          },
-          " & React.RefAttributes<{}>>"
+          ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/kbn-resizable-layout/index.ts",
+        "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+        "lineNumber": 70,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/resizable-layout",
             "id": "def-public.ResizableLayout.$1",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "{\n  className,\n  mode,\n  direction,\n  fixedPanelSize,\n  minFixedPanelSize,\n  minFlexPanelSize,\n  fixedPanel,\n  flexPanel,\n  fixedPanelOrder,\n  resizeButtonClassName,\n  ['data-test-subj']: dataTestSubj,\n  onFixedPanelSizeChange,\n}",
             "description": [],
             "signature": [
-              "P"
+              {
+                "pluginId": "@kbn/resizable-layout",
+                "scope": "public",
+                "docId": "kibKbnResizableLayoutPluginApi",
+                "section": "def-public.ResizableLayoutProps",
+                "text": "ResizableLayoutProps"
+              }
             ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 70,
+            "columnNumber": 33,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -61,6 +64,8 @@
         "label": "ResizableLayoutProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +82,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,6 +106,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,35 +130,26 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-public.ResizableLayoutProps.container",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "container",
-            "description": [
-              "\nThe parent container element, used to calculate the layout size"
-            ],
-            "signature": [
-              "HTMLElement | null"
-            ],
-            "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
             "id": "def-public.ResizableLayoutProps.fixedPanelSize",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "fixedPanelSize",
             "description": [
               "\nCurrent size of the fixed panel in pixels"
             ],
+            "signature": [
+              "number | \"max-content\""
+            ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -163,6 +163,8 @@
               "\nMinimum size of the fixed panel in pixels"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -176,38 +178,69 @@
               "\nMinimum size of the flex panel in pixels"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
             "id": "def-public.ResizableLayoutProps.fixedPanel",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "fixedPanel",
             "description": [
               "\nThe fixed panel"
             ],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
             "id": "def-public.ResizableLayoutProps.flexPanel",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "flexPanel",
             "description": [
               "\nThe flex panel"
             ],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/resizable-layout",
+            "id": "def-public.ResizableLayoutProps.fixedPanelOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fixedPanelOrder",
+            "description": [
+              "\nThe side to render the fixed panel."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/resizable-layout",
+                "scope": "public",
+                "docId": "kibKbnResizableLayoutPluginApi",
+                "section": "def-public.ResizableLayoutOrder",
+                "text": "ResizableLayoutOrder"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -224,6 +257,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -240,6 +275,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -256,6 +293,8 @@
               "((fixedPanelSize: number) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -270,6 +309,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
+                "lineNumber": 65,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -290,6 +331,8 @@
         "label": "ResizableLayoutDirection",
         "description": [],
         "path": "src/platform/packages/shared/kbn-resizable-layout/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -302,6 +345,22 @@
         "label": "ResizableLayoutMode",
         "description": [],
         "path": "src/platform/packages/shared/kbn-resizable-layout/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/resizable-layout",
+        "id": "def-public.ResizableLayoutOrder",
+        "type": "Enum",
+        "tags": [],
+        "label": "ResizableLayoutOrder",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-resizable-layout/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

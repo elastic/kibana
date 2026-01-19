@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -25,6 +24,7 @@ import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
+import { HostPanelFooter } from './footer';
 import { HostPanelContent } from './content';
 import { HostPanelHeader } from './header';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
@@ -34,13 +34,14 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { useKibana } from '../../../common/lib/kibana';
+import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   hostName: string;
-  isDraggable?: boolean;
-  isPreviewMode?: boolean;
+  isPreviewMode: boolean;
 }
 
 export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -61,9 +62,11 @@ export const HostPanel = ({
   contextID,
   scopeId,
   hostName,
-  isDraggable,
-  isPreviewMode,
+  isPreviewMode = false,
 }: HostPanelProps) => {
+  const { uiSettings } = useKibana().services;
+  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -114,7 +117,7 @@ export const HostPanel = ({
     setQuery,
   });
 
-  const { openDetailsPanel, isLinkEnabled } = useNavigateToHostDetails({
+  const openDetailsPanel = useNavigateToHostDetails({
     hostName,
     scopeId,
     isRiskScoreExist,
@@ -123,7 +126,6 @@ export const HostPanel = ({
     hasNonClosedAlerts,
     isPreviewMode,
     contextID,
-    isDraggable,
   });
 
   const openDefaultPanel = useCallback(
@@ -170,7 +172,7 @@ export const HostPanel = ({
               }
               expandDetails={openDefaultPanel}
               isPreviewMode={isPreviewMode}
-              isPreview={scopeId === TableId.rulePreview}
+              isRulePreview={scopeId === TableId.rulePreview}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
             <HostPanelContent
@@ -179,21 +181,15 @@ export const HostPanel = ({
               riskScoreState={riskScoreState}
               contextID={contextID}
               scopeId={scopeId}
-              isDraggable={!!isDraggable}
               openDetailsPanel={openDetailsPanel}
-              isLinkEnabled={isLinkEnabled}
               recalculatingScore={recalculatingScore}
               onAssetCriticalityChange={calculateEntityRiskScore}
               isPreviewMode={isPreviewMode}
             />
             {isPreviewMode && (
-              <HostPreviewPanelFooter
-                hostName={hostName}
-                contextID={contextID}
-                scopeId={scopeId}
-                isDraggable={!!isDraggable}
-              />
+              <HostPreviewPanelFooter hostName={hostName} contextID={contextID} scopeId={scopeId} />
             )}
+            {!isPreviewMode && assetInventoryEnabled && <HostPanelFooter hostName={hostName} />}
           </>
         );
       }}

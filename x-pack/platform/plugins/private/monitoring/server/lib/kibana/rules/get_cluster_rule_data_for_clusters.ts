@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Cluster, LegacyRequest } from '../../../types';
+import type { Cluster, LegacyRequest } from '../../../types';
 import { getIndexPatterns, getKibanaDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 import { createQuery } from '../../create_query';
@@ -36,37 +36,35 @@ export async function getClusterRuleDataForClusters(
         index: indexPatterns,
         size: 0,
         ignore_unavailable: true,
-        body: {
-          query: createQuery({
-            type,
-            dsDataset: getKibanaDataset(dataset),
-            metricset: dataset,
-            start,
-            end,
-            clusterUuid,
-            metric,
-          }),
-          aggs: {
-            indices: {
-              terms: {
-                field: '_index',
-                size: 1,
-              },
+        query: createQuery({
+          type,
+          dsDataset: getKibanaDataset(dataset),
+          metricset: dataset,
+          start,
+          end,
+          clusterUuid,
+          metric,
+        }),
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: 1,
             },
-            overdue_count: {
-              max: {
-                field: 'kibana.cluster_rules.overdue.count',
-              },
+          },
+          overdue_count: {
+            max: {
+              field: 'kibana.cluster_rules.overdue.count',
             },
-            overdue_delay_p50: {
-              max: {
-                field: 'kibana.cluster_rules.overdue.delay.p50',
-              },
+          },
+          overdue_delay_p50: {
+            max: {
+              field: 'kibana.cluster_rules.overdue.delay.p50',
             },
-            overdue_delay_p99: {
-              max: {
-                field: 'kibana.cluster_rules.overdue.delay.p99',
-              },
+          },
+          overdue_delay_p99: {
+            max: {
+              field: 'kibana.cluster_rules.overdue.delay.p99',
             },
           },
         },

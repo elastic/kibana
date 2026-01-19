@@ -5,22 +5,36 @@
  * 2.0.
  */
 
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
   getInheritedViewMode,
-  ViewMode,
   type PublishingSubject,
   apiHasExecutionContext,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { RenderMode } from '@kbn/expressions-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
-import { LensRuntimeState, LensSerializedState } from './types';
-import type { LensAttributesService } from '../lens_attribute_service';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
+import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
+import type {
+  LensRuntimeState,
+  LensSerializedState,
+  StructuredDatasourceStates,
+  DatasourceStates,
+  GeneralDatasourceStates,
+  FormBasedPersistedState,
+  TextBasedPersistedState,
+} from '@kbn/lens-common';
+import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import type { ESQLStartServices } from './esql';
+import { loadESQLAttributes } from './esql';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
+import type { LensEmbeddableStartServices } from './types';
+import { getLensBuilder } from '../lazy_builder';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -32,6 +46,7 @@ export function createEmptyLensState(
   const isTextBased = query && isOfAggregateQueryType(query);
   return {
     attributes: {
+      version: LENS_ITEM_LATEST_VERSION,
       title: title ?? '',
       description: description ?? '',
       visualizationType,
@@ -47,62 +62,54 @@ export function createEmptyLensState(
   };
 }
 
-// Shared logic to ensure the attributes are correctly loaded
-// Make sure to inject references from the container down to the runtime state
-// this ensure migrations/copy to spaces works correctly
+/**
+ * Shared logic to ensure the attributes are correctly loaded
+ * Make sure to inject references from the container down to the runtime state
+ * this ensure migrations/copy to spaces works correctly
+ **/
 export async function deserializeState(
-  attributeService: LensAttributesService,
-  rawState: LensSerializedState,
-  references?: SavedObjectReference[]
-) {
-  if (rawState.savedObjectId) {
+  {
+    attributeService,
+    ...services
+  }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
+  { savedObjectId, ...state }: LensSerializedAPIConfig
+): Promise<LensRuntimeState> {
+  const fallbackAttributes = createEmptyLensState().attributes;
+
+  if (savedObjectId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
-        await attributeService.loadFromLibrary(rawState.savedObjectId);
-      return { ...rawState, attributes, managed, sharingSavedObjectProps };
+        await attributeService.loadFromLibrary(savedObjectId);
+      return {
+        ...state,
+        savedObjectId,
+        attributes,
+        managed,
+        sharingSavedObjectProps,
+      } satisfies LensRuntimeState;
     } catch (e) {
       // return an empty Lens document if no saved object is found
-      return { ...rawState, attributes: createEmptyLensState().attributes };
+      return { ...state, attributes: fallbackAttributes };
     }
   }
-  // Inject applied only to by-value SOs
-  return attributeService.injectReferences(
-    ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState,
-    references?.length ? references : undefined
-  );
-}
 
-export function emptySerializer() {
-  return {};
-}
+  const newState = transformFromApiConfig(state) as LensRuntimeState;
 
-export type ComparatorType<T extends unknown> = [
-  BehaviorSubject<T>,
-  (newValue: T) => void,
-  (a: T, b: T) => boolean
-];
-
-export function makeComparator<T extends unknown>(
-  observable: BehaviorSubject<T>
-): ComparatorType<T> {
-  return [observable, (newValue: T) => observable.next(newValue), fastIsEqual];
-}
-
-/**
- * Helper function to either extract an observable from an API or create a new one
- * with a default value to start with.
- * Note that extracting from the API will make subscription emit if the value changes upstream
- * as it keeps the original reference without cloning.
- * @returns the observable and a comparator to use for detecting "unsaved changes" on it
- */
-export function buildObservableVariable<T extends unknown>(
-  variable: T | PublishingSubject<T>
-): [BehaviorSubject<T>, ComparatorType<T>] {
-  if (variable instanceof BehaviorSubject) {
-    return [variable, makeComparator(variable)];
+  if (newState.isNewPanel) {
+    try {
+      const newAttributes = await loadESQLAttributes(services);
+      // provide a fallback
+      return {
+        ...newState,
+        attributes: newAttributes ?? newState.attributes ?? fallbackAttributes,
+      };
+    } catch (e) {
+      // return an empty Lens document if no saved object is found
+      return { ...newState, attributes: fallbackAttributes };
+    }
   }
-  const variable$ = new BehaviorSubject<T>(variable as T);
-  return [variable$, makeComparator(variable$)];
+
+  return newState;
 }
 
 export function isTextBasedLanguage(state: LensRuntimeState) {
@@ -144,4 +151,87 @@ export function extractInheritedViewModeObservable(
     return extractInheritedViewModeObservable(parentApi.parentApi);
   }
   return new BehaviorSubject<ViewMode>('view');
+}
+
+export function getStructuredDatasourceStates(
+  datasourceStates?: Readonly<GeneralDatasourceStates>
+): StructuredDatasourceStates {
+  return {
+    formBased: ((datasourceStates as DatasourceStates)?.formBased?.state ??
+      datasourceStates?.formBased ??
+      undefined) as FormBasedPersistedState,
+    textBased: ((datasourceStates as DatasourceStates)?.textBased?.state ??
+      datasourceStates?.textBased ??
+      undefined) as TextBasedPersistedState,
+  };
+}
+
+export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSerializedState {
+  const builder = getLensBuilder();
+
+  if (!builder) {
+    // builder not enabled, return the state as is
+    return state as LensSerializedState;
+  }
+
+  const chartType = builder.getType(state.attributes);
+
+  if (!builder.isSupported(chartType)) {
+    return state as LensSerializedState;
+  }
+
+  if (!state.attributes) {
+    // Not sure if this is possible
+    throw new Error('attributes are missing');
+  }
+
+  // check if already converted
+  if (!isLensAPIFormat(state.attributes)) {
+    return state as LensSerializedState;
+  }
+
+  const attributes = builder.fromAPIFormat(state.attributes);
+
+  return {
+    ...state,
+    attributes,
+  };
+}
+
+export function transformToApiConfig(state: LensSerializedState): LensByValueSerializedAPIConfig {
+  if (state.savedObjectId) {
+    return {
+      ...state,
+      attributes: undefined,
+    };
+  }
+
+  const builder = getLensBuilder();
+
+  if (!builder) {
+    // builder not enabled, return the state as is
+    return state as LensByValueSerializedAPIConfig;
+  }
+
+  const chartType = builder.getType(state.attributes);
+
+  if (!builder.isSupported(chartType)) {
+    // TODO: remove this once all formats are supported
+    return state as LensByValueSerializedAPIConfig;
+  }
+
+  if (!state.attributes) {
+    // This should only ever handle by-value state.
+    throw new Error('attributes are missing');
+  }
+
+  const apiConfigAttributes = builder.toAPIFormat({
+    ...state.attributes,
+    visualizationType: state.attributes.visualizationType ?? LENS_UNKNOWN_VIS,
+  });
+
+  return {
+    ...state,
+    attributes: apiConfigAttributes,
+  };
 }

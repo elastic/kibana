@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { ActionsConfigurationUtilities } from '../actions_config';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 import { actionsConfigMock } from '../actions_config.mock';
-import {
-  TestSecretsSchema,
-  TestConfigSchema,
-  TestConfig,
-  TestSecrets,
-  TestSubActionConnector,
-} from './mocks';
-import { IService, ServiceParams, SubActionConnectorType, ValidatorType } from './types';
+import type { TestConfig, TestSecrets } from './mocks';
+import { TestSecretsSchema, TestConfigSchema, TestSubActionConnector } from './mocks';
+import type { IService, ServiceParams, SubActionConnectorType } from './types';
+import { ValidatorType } from './types';
 import { buildValidators } from './validators';
 
 describe('Validators', () => {
@@ -89,14 +85,14 @@ describe('Validators', () => {
   it('should validate the params correctly', async () => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
-    expect(params.schema.validate({ subAction: 'test', subActionParams: {} }));
+    expect(params.schema.parse({ subAction: 'test', subActionParams: {} }));
   });
 
   it('should allow any field in subActionParams', async () => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
     expect(
-      params.schema.validate({
+      params.schema.parse({
         subAction: 'test',
         subActionParams: {
           foo: 'foo',
@@ -129,7 +125,7 @@ describe('Validators', () => {
   ])('should throw if the subAction is %p', async (subAction) => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
-    expect(() => params.schema.validate({ subAction, subActionParams: {} })).toThrow();
+    expect(() => params.schema.parse({ subAction, subActionParams: {} })).toThrow();
   });
 
   it('calls the config and secrets custom validator functions', () => {

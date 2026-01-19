@@ -8,10 +8,13 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import * as labels from './labels';
-import { DANGER_VIZ_COLOR, getSkippedVizColor, SUCCESS_VIZ_COLOR } from './monitor_status_data';
+import { getSkippedVizColor } from './monitor_status_data';
 
 export const MonitorStatusLegend = ({ brushable }: { brushable: boolean }) => {
   const { euiTheme } = useEuiTheme();
+
+  const SUCCESS_COLOR = euiTheme.colors.success;
+  const DANGER_COLOR = euiTheme.colors.danger;
 
   const LegendItem = useMemo(() => {
     return ({
@@ -39,8 +42,8 @@ export const MonitorStatusLegend = ({ brushable }: { brushable: boolean }) => {
 
   return (
     <EuiFlexGroup wrap={true} responsive={false}>
-      <LegendItem color={SUCCESS_VIZ_COLOR} label={labels.COMPLETE_LABEL} />
-      <LegendItem color={DANGER_VIZ_COLOR} label={labels.FAILED_LABEL} />
+      <LegendItem color={SUCCESS_COLOR} label={labels.COMPLETE_LABEL} />
+      <LegendItem color={DANGER_COLOR} label={labels.FAILED_LABEL} />
       <LegendItem color={getSkippedVizColor(euiTheme)} label={labels.SKIPPED_LABEL} />
       {/*
         // Hiding error for now until @elastic/chart's Heatmap chart supports annotations

@@ -12,7 +12,7 @@ import {
   createDocumentTransformFnMock,
   checkVersionCompatibilityMock,
 } from './documents_update_init.test.mocks';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import {
   createContextMock,
   createPostInitState,

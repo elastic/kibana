@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { coreMock, applicationServiceMock } from '@kbn/core/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
@@ -24,12 +24,13 @@ import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { VisualizationsPlugin } from './plugin';
 import { Schemas } from './vis_types';
-import { Schema, VisualizationsSetup, VisualizationsStart } from '.';
+import type { Schema, VisualizationsSetup, VisualizationsStart } from '.';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -75,7 +76,6 @@ const createInstance = async () => {
       application: applicationServiceMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
       spaces: spacesPluginMock.createStartContract(),
-      savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
       savedSearch: savedSearchPluginMock.createStartContract(),
       navigation: navigationPluginMock.createStartContract(),
@@ -84,6 +84,7 @@ const createInstance = async () => {
       screenshotMode: screenshotModePluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
       usageCollection: {
         reportUiCounter: jest.fn(),
       },

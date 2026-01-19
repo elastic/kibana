@@ -15,13 +15,20 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
-import { mockGlobalState } from '../../../../public/common/mock';
-import type { EntityDefinition } from '@kbn/entities-schema';
+import { EntityStoreCapability, type EntityDefinition } from '@kbn/entities-schema';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
 import { EntityType } from '../../../../common/search_strategy';
-import type { InitEntityEngineResponse } from '../../../../common/api/entity_analytics';
+import type {
+  EngineDescriptor,
+  InitEntityEngineResponse,
+} from '../../../../common/api/entity_analytics';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { defaultOptions } from './constants';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
+import { allowedExperimentalValues } from '../../../../common';
 
 const definition: EntityDefinition = convertToEntityManagerDefinition(
   {
@@ -31,6 +38,7 @@ const definition: EntityDefinition = convertToEntityManagerDefinition(
     version: '0.0.1',
     fields: [],
     identityField: 'host.name',
+    identityFieldMapping: { type: 'keyword' },
     indexMappings: {},
     indexPatterns: [],
     settings: {
@@ -46,22 +54,102 @@ const definition: EntityDefinition = convertToEntityManagerDefinition(
   { namespace: 'test', filter: '' }
 );
 
+const engine: EngineDescriptor = {
+  type: 'user',
+  frequency: '',
+  fieldHistoryLength: 0,
+  indexPattern: '',
+  lookbackPeriod: '',
+  timeout: '',
+  delay: '',
+  status: 'started',
+};
+
+const stubSecurityDataView = createStubDataView({
+  spec: {
+    id: 'security',
+    title: 'security',
+  },
+});
+
+const getDefaultIndexes = (type: string) => {
+  return [
+    stubSecurityDataView.getIndexPattern(),
+    ...(type === 'user' ? ['.entity_analytics.monitoring.users-default'] : []),
+    '.asset-criticality.asset-criticality-default',
+    'risk-score.risk-score-latest-default',
+    `.entities.v1.reset.security_${type}_default*`,
+    `.entities.v1.updates.security_${type}_default*`,
+  ];
+};
+
+const dataviewService = {
+  ...dataViewPluginMocks.createStartContract(),
+  get: () => Promise.resolve(stubSecurityDataView),
+  clearInstanceCache: () => Promise.resolve(),
+};
+
+const mockGetEntityDefinition = jest.fn().mockResolvedValue([]);
+const mockUpdateEntityDefinition = jest.fn().mockResolvedValue(undefined);
+jest.mock('@kbn/entityManager-plugin/server/lib/entity_client', () => {
+  return {
+    EntityClient: jest.fn().mockImplementation(() => ({
+      updateEntityDefinition: mockUpdateEntityDefinition,
+      getEntityDefinitions: mockGetEntityDefinition,
+    })),
+  };
+});
+
+const mockListDescriptor = jest.fn().mockResolvedValue({ engines: [] });
+const mockUpdateStatus = jest.fn().mockResolvedValue({});
+jest.mock('./saved_object/engine_descriptor', () => {
+  return {
+    EngineDescriptorClient: jest.fn().mockImplementation(() => ({
+      list: mockListDescriptor,
+      updateStatus: mockUpdateStatus,
+    })),
+  };
+});
+
+const mockCheckPrivileges = jest.fn().mockReturnValue({
+  hasAllRequested: true,
+  privileges: {
+    elasticsearch: { cluster: [], index: [] },
+    kibana: [],
+  },
+});
+
 describe('EntityStoreDataClient', () => {
-  const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const esClientMock = clusterClientMock.asCurrentUser;
   const loggerMock = loggingSystemMock.createLogger();
+  const uiSettingsClientGetMock = jest.fn();
+  const uiSettingsClientMock = {
+    get: uiSettingsClientGetMock,
+  } as unknown as IUiSettingsClient;
+
   const dataClient = new EntityStoreDataClient({
     clusterClient: clusterClientMock,
     logger: loggerMock,
     namespace: 'default',
-    soClient: mockSavedObjectClient,
+    soClient: savedObjectsClientMock.create(),
     kibanaVersion: '9.0.0',
-    dataViewsService: {} as DataViewsService,
-    appClient: {} as AppClient,
+    dataViewsService: dataviewService as unknown as DataViewsService,
+    appClient: {
+      getSourcererDataViewId: jest.fn().mockReturnValue('security-solution'),
+      getAlertsIndex: jest.fn().mockReturnValue('alerts'),
+    } as unknown as AppClient,
     config: {} as EntityStoreConfig,
-    experimentalFeatures: mockGlobalState.app.enableExperimental,
+    experimentalFeatures: allowedExperimentalValues,
     taskManager: {} as TaskManagerStartContract,
+    security: {
+      authz: {
+        checkPrivilegesDynamicallyWithRequest: () => mockCheckPrivileges,
+      },
+    } as unknown as SecurityPluginStart,
+    request: {} as KibanaRequest,
+    uiSettingsClient: uiSettingsClientMock,
+    isServerless: false,
   });
 
   const defaultSearchParams = {
@@ -89,7 +177,7 @@ describe('EntityStoreDataClient', () => {
 
   describe('search entities', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      jest.clearAllMocks();
       esClientMock.search.mockResolvedValue(emptySearchResponse);
     });
 
@@ -349,7 +437,7 @@ describe('EntityStoreDataClient', () => {
     let spyInit: jest.SpyInstance;
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      jest.clearAllMocks();
       spyInit = jest
         .spyOn(dataClient, 'init')
         .mockImplementation(() => Promise.resolve({} as InitEntityEngineResponse));
@@ -364,13 +452,220 @@ describe('EntityStoreDataClient', () => {
       expect(spyInit).toHaveBeenCalledWith(EntityType.host, expect.anything(), expect.anything());
     });
 
-    it('does not enable engine when the given entity type is disabled', async () => {
+    it('enable all', async () => {
+      uiSettingsClientGetMock.mockReturnValue(true);
       await dataClient.enable({
         ...defaultOptions,
-        entityTypes: [EntityType.universal],
       });
 
-      expect(spyInit).not.toHaveBeenCalled();
+      expect(spyInit).toHaveBeenCalledWith(EntityType.host, expect.anything(), expect.anything());
+      expect(spyInit).toHaveBeenCalledWith(EntityType.user, expect.anything(), expect.anything());
+      expect(spyInit).toHaveBeenCalledWith(
+        EntityType.service,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(spyInit).toHaveBeenCalledWith(
+        EntityType.generic,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('enable all without generic', async () => {
+      uiSettingsClientGetMock.mockReturnValue(false);
+
+      await dataClient.enable({
+        ...defaultOptions,
+      });
+
+      expect(spyInit).toHaveBeenCalledWith(EntityType.host, expect.anything(), expect.anything());
+      expect(spyInit).toHaveBeenCalledWith(EntityType.user, expect.anything(), expect.anything());
+      expect(spyInit).toHaveBeenCalledWith(
+        EntityType.service,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(spyInit).not.toHaveBeenCalledWith(
+        EntityType.generic,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('applyDataViewIndices', () => {
+    beforeEach(() => {
+      mockUpdateEntityDefinition.mockClear();
+      jest.clearAllMocks();
+    });
+
+    it('applies data view indices to the entity store', async () => {
+      mockListDescriptor.mockResolvedValueOnce({ engines: [engine] });
+      mockGetEntityDefinition.mockResolvedValueOnce({
+        definitions: [definition],
+      });
+
+      const response = await dataClient.applyDataViewIndices();
+
+      expect(mockUpdateEntityDefinition).toHaveBeenCalled();
+      expect(response.errors.length).toBe(0);
+      expect(response.successes.length).toBe(1);
+    });
+
+    it('adds the engine indexPattern to the the entity store', async () => {
+      const indexPattern = 'testIndex';
+      mockListDescriptor.mockResolvedValueOnce({
+        engines: [{ ...engine, indexPattern }],
+      });
+      mockGetEntityDefinition.mockResolvedValueOnce({
+        definitions: [definition],
+      });
+
+      const response = await dataClient.applyDataViewIndices();
+      expect(mockUpdateEntityDefinition).toHaveBeenCalled();
+      expect(response.errors.length).toBe(0);
+      expect(response.successes.length).toBe(1);
+      expect(response.successes[0].changes).toEqual({
+        indexPatterns: [...getDefaultIndexes(response.successes[0].type), 'testIndex'],
+      });
+    });
+
+    it('returns empty successes and errors if no engines found', async () => {
+      mockListDescriptor.mockResolvedValueOnce({ engines: [] });
+
+      const response = await dataClient.applyDataViewIndices();
+
+      expect(response.successes.length).toBe(0);
+      expect(response.errors.length).toBe(0);
+    });
+
+    it('return an error if the user does not have required privileges', async () => {
+      mockCheckPrivileges.mockReturnValueOnce({
+        hasAllRequested: false,
+        privileges: {
+          elasticsearch: { cluster: [], index: [] },
+          kibana: [],
+        },
+      });
+      mockListDescriptor.mockResolvedValueOnce({
+        engines: [engine],
+      });
+      mockGetEntityDefinition.mockResolvedValueOnce({
+        definitions: [definition],
+      });
+
+      const result = await dataClient.applyDataViewIndices();
+
+      await expect(result.errors.length).toBe(1);
+      await expect(result.errors[0].message).toMatch(
+        /The current user does not have the required indices privileges.*/
+      );
+    });
+
+    it('skips update if index patterns are the same', async () => {
+      mockListDescriptor.mockResolvedValueOnce({ engines: [engine] });
+      mockGetEntityDefinition.mockResolvedValueOnce({
+        definitions: [
+          {
+            indexPatterns: getDefaultIndexes(engine.type),
+          },
+        ],
+      });
+
+      const response = await dataClient.applyDataViewIndices();
+
+      expect(mockUpdateEntityDefinition).not.toHaveBeenCalled();
+      expect(response.successes.length).toBe(1);
+      expect(response.errors.length).toBe(0);
+    });
+
+    it('handles errors during update', async () => {
+      const testErrorMessages = 'Update failed';
+      mockUpdateEntityDefinition.mockRejectedValueOnce(new Error(testErrorMessages));
+      mockListDescriptor.mockResolvedValueOnce({ engines: [engine] });
+      mockGetEntityDefinition.mockResolvedValueOnce({
+        definitions: [definition],
+      });
+
+      const response = await dataClient.applyDataViewIndices();
+
+      expect(response.errors.length).toBeGreaterThan(0);
+      expect(response.errors[0].message).toBe(testErrorMessages);
+    });
+  });
+
+  describe('isCapabilityEnabled', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns false when engine not enabled', async () => {
+      mockGetEntityDefinition.mockReturnValue({ definitions: [] });
+      expect(
+        await dataClient.isCapabilityEnabled(EntityType.user, EntityStoreCapability.CRUD_API)
+      ).toBeFalsy();
+      expect(mockGetEntityDefinition).toBeCalledTimes(1);
+    });
+
+    it('returns false when capability is undefined', async () => {
+      mockGetEntityDefinition.mockReturnValue({
+        definitions: [{}],
+      });
+
+      expect(
+        await dataClient.isCapabilityEnabled(EntityType.user, EntityStoreCapability.CRUD_API)
+      ).toBeFalsy();
+
+      expect(mockGetEntityDefinition).toBeCalledTimes(1);
+    });
+
+    it('returns false when no capability enabled', async () => {
+      mockGetEntityDefinition.mockReturnValue({
+        definitions: [
+          {
+            capabilities: [],
+          },
+        ],
+      });
+
+      expect(
+        await dataClient.isCapabilityEnabled(EntityType.user, EntityStoreCapability.CRUD_API)
+      ).toBeFalsy();
+
+      expect(mockGetEntityDefinition).toBeCalledTimes(1);
+    });
+
+    it('returns false when other capability enabled', async () => {
+      mockGetEntityDefinition.mockReturnValue({
+        definitions: [
+          {
+            capabilities: [EntityStoreCapability.HISTORICAL_VIEWS],
+          },
+        ],
+      });
+
+      expect(
+        await dataClient.isCapabilityEnabled(EntityType.user, EntityStoreCapability.CRUD_API)
+      ).toBeFalsy();
+
+      expect(mockGetEntityDefinition).toBeCalledTimes(1);
+    });
+
+    it('returns true when capability enabled', async () => {
+      mockGetEntityDefinition.mockReturnValue({
+        definitions: [
+          {
+            capabilities: [EntityStoreCapability.HISTORICAL_VIEWS, EntityStoreCapability.CRUD_API],
+          },
+        ],
+      });
+
+      expect(
+        await dataClient.isCapabilityEnabled(EntityType.user, EntityStoreCapability.CRUD_API)
+      ).toBeTruthy();
+
+      expect(mockGetEntityDefinition).toBeCalledTimes(1);
     });
   });
 });

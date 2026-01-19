@@ -8,10 +8,31 @@
  */
 
 import React from 'react';
+import { type UseEuiTheme, euiFontSize } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export const DataTablePopoverCellValue = ({ children }: { children: React.ReactNode }) => {
-  return <span className="unifiedDataTable__cellPopoverValue eui-textBreakWord">{children}</span>;
+  const styles = useMemoCss(componentStyles);
+
+  return (
+    <span className="unifiedDataTable__cellPopoverValue eui-textBreakWord" css={styles.popover}>
+      {children}
+    </span>
+  );
 };
 
 // eslint-disable-next-line import/no-default-export
 export default DataTablePopoverCellValue;
+
+const componentStyles = {
+  popover: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
+
+    return css({
+      fontFamily: euiTheme.font.familyCode,
+      fontSize,
+    });
+  },
+};

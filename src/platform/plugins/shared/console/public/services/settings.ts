@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Storage } from '.';
+import type { Storage } from '.';
 
 export const DEFAULT_SETTINGS = Object.freeze({
   fontSize: 14,
@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   isHistoryEnabled: true,
   isKeyboardShortcutsEnabled: true,
   isAccessibilityOverlayEnabled: true,
+  selectedHost: null as string | null,
 });
 
 export interface DevToolsSettings {
@@ -41,6 +42,7 @@ export interface DevToolsSettings {
   isHistoryEnabled: boolean;
   isKeyboardShortcutsEnabled: boolean;
   isAccessibilityOverlayEnabled: boolean;
+  selectedHost: string | null;
 }
 
 enum SettingKeys {
@@ -53,6 +55,7 @@ enum SettingKeys {
   IS_HISTORY_ENABLED = 'is_history_enabled',
   IS_KEYBOARD_SHORTCUTS_ENABLED = 'is_keyboard_shortcuts_enabled',
   IS_ACCESSIBILITY_OVERLAY_ENABLED = 'is_accessibility_overlay_enabled',
+  SELECTED_HOST = 'selected_host',
 }
 
 export class Settings {
@@ -164,6 +167,15 @@ export class Settings {
     );
   }
 
+  getSelectedHost() {
+    return this.storage.get(SettingKeys.SELECTED_HOST, DEFAULT_SETTINGS.selectedHost);
+  }
+
+  setSelectedHost(host: string | null) {
+    this.storage.set(SettingKeys.SELECTED_HOST, host);
+    return true;
+  }
+
   toJSON(): DevToolsSettings {
     return {
       autocomplete: this.getAutocomplete(),
@@ -175,6 +187,7 @@ export class Settings {
       isHistoryEnabled: Boolean(this.getIsHistoryEnabled()),
       isKeyboardShortcutsEnabled: Boolean(this.getIsKeyboardShortcutsDisabled()),
       isAccessibilityOverlayEnabled: Boolean(this.getIsAccessibilityOverlayEnabled()),
+      selectedHost: this.getSelectedHost(),
     };
   }
 
@@ -188,6 +201,7 @@ export class Settings {
     isHistoryEnabled,
     isKeyboardShortcutsEnabled,
     isAccessibilityOverlayEnabled,
+    selectedHost,
   }: DevToolsSettings) {
     this.setFontSize(fontSize);
     this.setWrapMode(wrapMode);
@@ -198,6 +212,7 @@ export class Settings {
     this.setIsHistoryEnabled(isHistoryEnabled);
     this.setIsKeyboardShortcutsEnabled(isKeyboardShortcutsEnabled);
     this.setIsAccessibilityOverlayEnabled(isAccessibilityOverlayEnabled);
+    this.setSelectedHost(selectedHost);
   }
 }
 

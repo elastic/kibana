@@ -7,45 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
-import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { Observable, combineLatest, lastValueFrom, of, startWith, switchMap, tap } from 'rxjs';
+import type { estypes } from '@elastic/elasticsearch';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type {
+  FetchContext,
+  PublishesDataViews,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
+import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
-import { ControlGroupApi } from '../../../control_group/types';
+import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 
 export function minMax$({
   controlFetch$,
-  controlGroupApi,
   dataViews$,
   fieldName$,
+  useGlobalFilters$,
   setIsLoading,
 }: {
-  controlFetch$: Observable<ControlFetchContext>;
-  controlGroupApi: ControlGroupApi;
+  controlFetch$: Observable<FetchContext>;
   dataViews$: PublishesDataViews['dataViews$'];
   fieldName$: PublishingSubject<string>;
+  useGlobalFilters$: PublishingSubject<boolean | undefined>;
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([
-    controlFetch$,
-    dataViews$,
-    fieldName$,
-    apiPublishesReload(controlGroupApi)
-      ? controlGroupApi.reload$.pipe(startWith(undefined))
-      : of(undefined),
-  ]).pipe(
+  return combineLatest([controlFetch$, dataViews$, fieldName$, useGlobalFilters$]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([controlFetchContext, dataViews, fieldName]) => {
+    switchMap(async ([controlFetchContext, dataViews, fieldName, useGlobalFilters]) => {
       const dataView = dataViews?.[0];
       const dataViewField = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
       if (!dataView || !dataViewField) {
@@ -61,6 +57,8 @@ export function minMax$({
           dataView,
           field: dataViewField,
           ...controlFetchContext,
+          timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
+          filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
         });
       } catch (error) {
         return { error, max: undefined, min: undefined };

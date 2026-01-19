@@ -9,7 +9,7 @@
 
 import { cloneDeep, reduceRight } from 'lodash';
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { mapCombined } from './mappers/map_combined';
 import { mapSpatialFilter } from './mappers/map_spatial_filter';
 import { mapMatchAll } from './mappers/map_match_all';
@@ -75,7 +75,7 @@ export function mapFilter(filter: Filter) {
   mappedFilter.meta.params = mapped.params;
   mappedFilter.meta.disabled = Boolean(mappedFilter.meta.disabled);
   mappedFilter.meta.negate = Boolean(mappedFilter.meta.negate);
-  mappedFilter.meta.alias = mappedFilter.meta.alias || null;
+  mappedFilter.meta.alias = mappedFilter.meta.alias;
 
   return mappedFilter;
 }

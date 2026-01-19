@@ -61,7 +61,7 @@ const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = (
   );
 
   return (
-    <EuiToolTip content={VIEW_IN_LOGS}>
+    <EuiToolTip content={VIEW_IN_LOGS} disableScreenReaderOutput>
       <EuiButtonIcon iconType="search" onClick={handleClick} aria-label={VIEW_IN_LOGS} />
     </EuiToolTip>
   );

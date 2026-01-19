@@ -8,6 +8,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { PageScope } from '../../../data_view_manager/constants';
+import { PageLoader } from '../../../common/components/page_loader';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy';
@@ -27,6 +30,8 @@ import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use
 import { useInstalledSecurityJobNameById } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 export interface NetworkDetailsProps {
   /**
@@ -42,11 +47,7 @@ export interface NetworkDetailsProps {
 /**
  * Component rendering all the network details for the expandable flyout
  */
-export const NetworkDetails = ({
-  ip,
-  flowTarget,
-  isDraggable,
-}: NetworkDetailsProps & { isDraggable?: boolean }) => {
+export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
   const dispatch = useDispatch();
   const { to, from, isInitializing } = useGlobalTime();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -76,13 +77,35 @@ export const NetworkDetails = ({
     services: { uiSettings },
   } = useKibana();
 
-  const { indicesExist, sourcererDataView, selectedPatterns } = useSourcererDataView();
-  const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: getEsQueryConfig(uiSettings),
-    dataViewSpec: sourcererDataView,
-    queries: [query],
-    filters,
-  });
+  const {
+    indicesExist: oldIndicesExist,
+    sourcererDataView: oldSourcererDataView,
+    selectedPatterns: oldSelectedPatterns,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView: experimentalDataView, status } = useDataView();
+  const experimentalSelectedPatterns = useSelectedPatterns();
+
+  const indicesExist = newDataViewPickerEnabled
+    ? !!experimentalDataView.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
+  const [filterQuery, kqlError] = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: getEsQueryConfig(uiSettings),
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
+        queries: [query],
+        filters,
+      }),
+    [uiSettings, oldSourcererDataView, experimentalDataView, query, filters]
+  );
 
   const [loading, { id, networkDetails }] = useNetworkDetails({
     skip: isInitializing || filterQuery === undefined,
@@ -103,6 +126,10 @@ export const NetworkDetails = ({
     aggregationInterval: 'auto',
   });
 
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
+
   return indicesExist ? (
     <IpOverview
       contextID={undefined}
@@ -113,7 +140,6 @@ export const NetworkDetails = ({
       loading={loading}
       isInDetailsSidePanel
       isLoadingAnomaliesData={isLoadingAnomaliesData}
-      isDraggable={isDraggable}
       type={type}
       flowTarget={flowTarget}
       startDate={from}
@@ -121,6 +147,8 @@ export const NetworkDetails = ({
       narrowDateRange={narrowDateRange}
       indexPatterns={selectedPatterns}
       jobNameById={jobNameById}
+      scopeId={PageScope.default}
+      isFlyoutOpen={true}
     />
   ) : (
     <EmptyPrompt />

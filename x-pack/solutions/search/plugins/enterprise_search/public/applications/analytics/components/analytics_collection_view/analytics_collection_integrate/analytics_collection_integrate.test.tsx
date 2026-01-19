@@ -14,7 +14,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCodeBlock, EuiSteps } from '@elastic/eui';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
 import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate_view';
 

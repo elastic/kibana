@@ -29,7 +29,7 @@
         "signature": [
           "(source$: ",
           "Observable",
-          "<Record<string, unknown> & { type: string; }>, {\n    logger,\n    signal,\n  }: { logger: Pick<",
+          "<Record<string, unknown> & { type: string; }>, {\n    logger,\n    signal,\n    flushThrottleMs = 100,\n    flushMinBytes,\n  }: { logger: Pick<",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -37,10 +37,11 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          ", \"error\" | \"debug\">; signal: AbortSignal; }) => ",
-          "PassThrough"
+          ", \"error\" | \"debug\">; signal: AbortSignal; flushThrottleMs?: number | undefined; flushMinBytes?: number | undefined; }) => ResponseStream"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,6 +57,8 @@
               "<Record<string, unknown> & { type: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,9 +68,11 @@
             "id": "def-common.observableIntoEventSourceStream.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    logger,\n    signal,\n  }",
+            "label": "{\n    logger,\n    signal,\n    flushThrottleMs = 100,\n    flushMinBytes,\n  }",
             "description": [],
             "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+            "lineNumber": 40,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -130,6 +135,8 @@
                   ", meta?: Meta | undefined) => void; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "lineNumber": 41,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -144,6 +151,46 @@
                   "AbortSignal"
                 ],
                 "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "lineNumber": 42,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/sse-utils-server",
+                "id": "def-common.observableIntoEventSourceStream.$2.flushThrottleMs",
+                "type": "number",
+                "tags": [
+                  "default"
+                ],
+                "label": "flushThrottleMs",
+                "description": [
+                  "\nThe minimum time in milliseconds between flushes of the stream.\nThis is to avoid flushing too often if the source emits events in quick succession.\n"
+                ],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/sse-utils-server",
+                "id": "def-common.observableIntoEventSourceStream.$2.flushMinBytes",
+                "type": "number",
+                "tags": [],
+                "label": "flushMinBytes",
+                "description": [
+                  "\nThe Cloud proxy currently buffers 4kb or 8kb of data until flushing.\nThis decreases the responsiveness of the streamed response,\nso we manually insert some data during stream flushes to force the proxy to flush too."
+                ],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "lineNumber": 50,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -170,6 +217,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils-server/src/supertest_to_observable.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -184,6 +233,8 @@
               "Test"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils-server/src/supertest_to_observable.ts",
+            "lineNumber": 32,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -195,7 +246,25 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/sse-utils-server",
+        "id": "def-common.cloudProxyBufferSize",
+        "type": "number",
+        "tags": [],
+        "label": "cloudProxyBufferSize",
+        "description": [],
+        "signature": [
+          "4096"
+        ],
+        "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

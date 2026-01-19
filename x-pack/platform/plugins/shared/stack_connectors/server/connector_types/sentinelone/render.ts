@@ -8,9 +8,9 @@
 import { map } from 'lodash';
 import { set } from '@kbn/safer-lodash-set/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { Logger } from '@kbn/core/server';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
+import type { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { Logger } from '@kbn/core/server';
+import { SUB_ACTION } from '@kbn/connector-schemas/sentinelone';
 
 interface Context {
   alerts: Ecs[];

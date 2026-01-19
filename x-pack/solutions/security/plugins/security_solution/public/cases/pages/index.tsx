@@ -10,12 +10,21 @@ import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { EasePanelKey } from '../../flyout/ease/constants/panel_keys';
+import { AlertsTable } from '../../detections/components/alerts_table';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { RulePanelKey } from '../../flyout/rule_details/right';
 import { TimelineId } from '../../../common/types/timeline';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
-import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
+import {
+  APP_ID,
+  CASES_PATH,
+  SECURITY_FEATURE_ID,
+  SecurityPageName,
+} from '../../../common/constants';
 import { timelineActions } from '../../timelines/store';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { getEndpointDetailsPath } from '../../management/common/routing';
@@ -27,9 +36,16 @@ import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
+import { EaseAlertsTable } from '../components/ease/wrapper';
+import { EventsTableForCases } from '../components/case_events/table';
+import { CASES_FEATURES } from '..';
 
 const CaseContainerComponent: React.FC = () => {
-  const { cases, telemetry } = useKibana().services;
+  const {
+    application: { capabilities },
+    cases,
+    telemetry,
+  } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
@@ -40,24 +56,53 @@ const CaseContainerComponent: React.FC = () => {
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 
+  // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
+  //  https://github.com/elastic/kibana/issues/218741
+  const EASE = capabilities[SECURITY_FEATURE_ID].configurations;
+
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: alertId,
-            indexName: index,
-            scopeId: TimelineId.casePage,
+      //  For EASE we need to show the AI alert flyout.
+      if (EASE) {
+        openFlyout({
+          right: {
+            id: EasePanelKey,
+            params: {
+              id: alertId,
+              indexName: index,
+            },
           },
-        },
-      });
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-        location: TimelineId.casePage,
-        panel: 'right',
-      });
+        });
+      } else {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: alertId,
+              indexName: index,
+              scopeId: TimelineId.casePage,
+            },
+          },
+        });
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+          location: TimelineId.casePage,
+          panel: 'right',
+        });
+      }
     },
-    [openFlyout, telemetry]
+    [EASE, openFlyout, telemetry]
+  );
+
+  const renderAlertsTable = useCallback(
+    (props: CaseViewAlertsTableProps) => {
+      //  For EASE we need to show the Alert summary page alerts table.
+      if (EASE) {
+        return <EaseAlertsTable id={props.id} onLoaded={props.onLoaded} query={props.query} />;
+      } else {
+        return <AlertsTable tableType={TableId.alertsOnCasePage} {...props} />;
+      }
+    },
+    [EASE]
   );
 
   const onRuleDetailsClick = useCallback(
@@ -101,6 +146,7 @@ const CaseContainerComponent: React.FC = () => {
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
+            ...CASES_FEATURES,
             metrics: [
               CaseMetricsFeature.ALERTS_COUNT,
               CaseMetricsFeature.ALERTS_USERS,
@@ -109,6 +155,7 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.LIFESPAN,
             ],
             alerts: { isExperimental: false },
+            events: { enabled: true },
           },
           refreshRef,
           actionsNavigation: {
@@ -145,6 +192,8 @@ const CaseContainerComponent: React.FC = () => {
           useFetchAlertData,
           onAlertsTableLoaded,
           permissions: userCasesPermissions,
+          renderAlertsTable,
+          renderEventsTable: EventsTableForCases,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

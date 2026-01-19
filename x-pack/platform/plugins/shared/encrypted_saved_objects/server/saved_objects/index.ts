@@ -7,17 +7,24 @@
 
 import pMap from 'p-map';
 
-import type {
-  ISavedObjectsPointInTimeFinder,
-  ISavedObjectsRepository,
-  ISavedObjectTypeRegistry,
-  SavedObject,
-  SavedObjectsBaseOptions,
-  SavedObjectsCreatePointInTimeFinderDependencies,
-  SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsServiceSetup,
-  StartServicesAccessor,
+import {
+  type ISavedObjectsPointInTimeFinder,
+  type ISavedObjectsRepository,
+  type ISavedObjectTypeRegistry,
+  type Logger,
+  type SavedObject,
+  type SavedObjectsBaseOptions,
+  type SavedObjectsCreatePointInTimeFinderDependencies,
+  type SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsErrorHelpers,
+  type SavedObjectsServiceSetup,
+  type StartServicesAccessor,
 } from '@kbn/core/server';
+import { errorContent } from '@kbn/core-saved-objects-server';
+import type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsClientOptions,
+} from '@kbn/encrypted-saved-objects-shared';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
@@ -25,58 +32,32 @@ import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_exte
 import type { EncryptedSavedObjectsService } from '../crypto';
 
 export { normalizeNamespace };
+export type { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions };
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
   savedObjects: SavedObjectsServiceSetup;
   getStartServices: StartServicesAccessor;
+  logger: Logger;
 }
+
+// This is based off of the SavedObjectsErrorHelpers.createUnsupportedTypeError function
+// But uses a custom 'reason' aka message
+export const createUnsupportedEncryptedTypeError = (type: string) =>
+  SavedObjectsErrorHelpers.decorateBadRequestError(
+    new Error('Bad Request'),
+    `Type '${type}' is not registered as an encrypted type`
+  );
 
 export type ClientInstanciator = (
   options?: EncryptedSavedObjectsClientOptions
 ) => EncryptedSavedObjectsClient;
 
-export interface EncryptedSavedObjectsClientOptions {
-  includedHiddenTypes?: string[];
-}
-
-export interface EncryptedSavedObjectsClient {
-  getDecryptedAsInternalUser: <T = unknown>(
-    type: string,
-    id: string,
-    options?: SavedObjectsBaseOptions
-  ) => Promise<SavedObject<T>>;
-
-  /**
-   * API method, that can be used to help page through large sets of saved objects and returns decrypted properties in result SO.
-   * Its interface matches interface of the corresponding Saved Objects API `createPointInTimeFinder` method:
-   *
-   * @example
-   * ```ts
-   * const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser({
-   *   filter,
-   *   type: 'my-saved-object-type',
-   *   perPage: 1000,
-   * });
-   * for await (const response of finder.find()) {
-   *   // process response
-   * }
-   * ```
-   *
-   * @param findOptions matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderOptions}
-   * @param dependencies matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderDependencies}
-   *
-   */
-  createPointInTimeFinderDecryptedAsInternalUser<T = unknown, A = unknown>(
-    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
-    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
-  ): Promise<ISavedObjectsPointInTimeFinder<T, A>>;
-}
-
 export function setupSavedObjects({
   service,
   savedObjects,
   getStartServices,
+  logger,
 }: SetupSavedObjectsParams): ClientInstanciator {
   // Register custom saved object extension that will encrypt, decrypt and strip saved object
   // attributes where appropriate for any saved object repository request.
@@ -109,7 +90,10 @@ export function setupSavedObjects({
         const savedObject = await internalRepository.get(type, id, options);
 
         if (!service.isRegistered(savedObject.type)) {
-          return savedObject as SavedObject<T>;
+          logger.error(
+            `getDecryptedAsInternalUser called with non-encrypted type: ${savedObject.type}`
+          );
+          throw createUnsupportedEncryptedTypeError(savedObject.type);
         }
 
         return {
@@ -129,6 +113,18 @@ export function setupSavedObjects({
         findOptions: SavedObjectsCreatePointInTimeFinderOptions,
         dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
       ): Promise<ISavedObjectsPointInTimeFinder<T, A>> => {
+        const unsupportedTypes = (
+          Array.isArray(findOptions.type) ? findOptions.type : [findOptions.type]
+        ).filter((t) => !service.isRegistered(t));
+
+        if (unsupportedTypes.length) {
+          logger.error(
+            `createPointInTimeFinderDecryptedAsInternalUser called with non-encrypted types: ${unsupportedTypes.join(
+              ', '
+            )}`
+          );
+        }
+
         const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
         const finder = internalRepository.createPointInTimeFinder<T, A>(findOptions, dependencies);
         const finderAsyncGenerator = finder.find();
@@ -139,7 +135,10 @@ export function setupSavedObjects({
               res.saved_objects,
               async (savedObject) => {
                 if (!service.isRegistered(savedObject.type)) {
-                  return savedObject;
+                  return {
+                    ...savedObject,
+                    error: errorContent(createUnsupportedEncryptedTypeError(savedObject.type)),
+                  };
                 }
 
                 const descriptor = {

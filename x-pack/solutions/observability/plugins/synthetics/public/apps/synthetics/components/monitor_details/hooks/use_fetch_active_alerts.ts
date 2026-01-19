@@ -16,7 +16,7 @@ import { useParams } from 'react-router-dom';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { useSelectedLocation } from './use_selected_location';
 
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export function useFetchActiveAlerts() {
   const { http } = useKibana<ClientPluginsStart>().services;
@@ -52,6 +52,11 @@ export function useFetchActiveAlerts() {
                   'location.id': selectedLocation?.id,
                 },
               },
+              {
+                term: {
+                  'kibana.alert.status': 'active',
+                },
+              },
             ],
           },
         },
@@ -62,6 +67,6 @@ export function useFetchActiveAlerts() {
   return {
     loading,
     data,
-    numberOfAlerts: data?.hits?.total.value ?? 0,
+    numberOfActiveAlerts: data?.hits?.total.value ?? 0,
   };
 }

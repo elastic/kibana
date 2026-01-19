@@ -6,37 +6,23 @@
  */
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { SearchEmbeddableSerializedState } from '@kbn/discover-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type { Filter } from '@kbn/es-query';
-import type { ViewMode } from '@kbn/presentation-publishing';
-import {
-  EmbeddableTypes,
-  EmbeddableExpressionType,
-  EmbeddableExpression,
-} from '../../expression_types';
+import type { EmbeddableExpression } from '../../expression_types';
+import { EmbeddableTypes, EmbeddableExpressionType } from '../../expression_types';
 
 import { buildEmbeddableFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionValueFilter } from '../../../types';
+import type { ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   id: string;
 }
 
-type Output = EmbeddableExpression<
-  Partial<SearchEmbeddableSerializedState> & {
-    id: string;
-    filters?: Filter[];
-    viewMode?: ViewMode;
-  }
->;
-
 export function savedSearch(): ExpressionFunctionDefinition<
   'savedSearch',
   ExpressionValueFilter | null,
   Arguments,
-  Output
+  EmbeddableExpression
 > {
   const { help, args: argHelp } = getFunctionHelp().savedSearch;
   return {

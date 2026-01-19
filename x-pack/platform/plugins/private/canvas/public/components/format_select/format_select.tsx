@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment, PureComponent, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiSpacer, EuiFieldText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   /** The ID of the argument form */
@@ -73,6 +75,9 @@ export class FormatSelect extends PureComponent<Props> {
           id={argId}
           value={isCustomFormat ? 'custom' : argValue}
           options={this._options}
+          aria-label={i18n.translate('xpack.canvas.formatSelect.select.ariaLabel', {
+            defaultMessage: 'Format options',
+          })}
           onChange={this._handleSelectChange}
         />
         {isCustomFormat && (

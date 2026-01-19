@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback } from 'react';
-import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
-import { DataStreamApis } from '../use_data_stream_apis';
-import { AIConnector } from '../../connectorland/connector_selector';
-import { Conversation } from '../../..';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
+import type { DataStreamApis } from '../use_data_stream_apis';
+import type { AIConnector } from '../../connectorland/connector_selector';
+import type { Conversation } from '../../..';
 import { AssistantSettings } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -19,14 +19,16 @@ interface Props {
   isSettingsModalVisible: boolean;
   selectedConversationId?: string;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
+  onConversationSelected: ({ cId }: { cId: string }) => void;
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   refetchPrompts?: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
+  setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
 /**
@@ -37,12 +39,13 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
     defaultConnector,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
-    selectedConversationId,
     onConversationSelected,
     conversations,
     conversationsLoaded,
+    refetchCurrentConversation,
     refetchCurrentUserConversations,
     refetchPrompts,
+    setPaginationObserver,
   }) => {
     const { toasts } = useAssistantContext();
 
@@ -58,6 +61,7 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
     const handleSave = useCallback(
       async (success: boolean) => {
         cleanupAndCloseModal();
+        await refetchCurrentConversation({ isStreamRefetch: false });
         await refetchCurrentUserConversations();
         if (refetchPrompts) {
           await refetchPrompts();
@@ -69,19 +73,25 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
           });
         }
       },
-      [cleanupAndCloseModal, refetchCurrentUserConversations, refetchPrompts, toasts]
+      [
+        cleanupAndCloseModal,
+        refetchCurrentConversation,
+        refetchCurrentUserConversations,
+        refetchPrompts,
+        toasts,
+      ]
     );
 
     return (
       isSettingsModalVisible && (
         <AssistantSettings
           defaultConnector={defaultConnector}
-          selectedConversationId={selectedConversationId}
           onConversationSelected={onConversationSelected}
           onClose={handleCloseModal}
           onSave={handleSave}
           conversations={conversations}
           conversationsLoaded={conversationsLoaded}
+          setPaginationObserver={setPaginationObserver}
         />
       )
     );

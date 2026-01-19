@@ -8,43 +8,43 @@
 import { i18n } from '@kbn/i18n';
 
 export const RULE_GAPS_OVERVIEW_PANEL_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.label',
+  'xpack.securitySolution.detectionEngine.ruleGaps.overviewPanel.label',
   {
-    defaultMessage: 'Total rules with gaps:',
+    defaultMessage: 'Rules with gaps',
   }
 );
 
-export const RULE_GAPS_OVERVIEW_PANEL_SHOW_ALL_RULES_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.showAllRulesLabel',
+export const RULE_GAPS_OVERVIEW_PANEL_TOOLTIP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleGaps.overviewPanel.tooltip',
   {
-    defaultMessage: 'Show all rules',
+    defaultMessage: 'Rules with gaps / rules with gaps being filled',
   }
 );
 
-export const RULE_GAPS_OVERVIEW_PANEL_SHOW_RULES_WITH_GAPS_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.showRulesWithGapsLabel',
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusLabel',
   {
-    defaultMessage: 'Show rules with gaps',
+    defaultMessage: 'Auto gap fill status:',
   }
 );
 
-export const RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.last24HoursLabel',
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_ON = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusOn',
   {
-    defaultMessage: 'Last 24 hours',
+    defaultMessage: 'On',
   }
 );
 
-export const RULE_GAPS_OVERVIEW_PANEL_LAST_3_DAYS_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.last3DaysLabel',
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_OFF = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusOff',
   {
-    defaultMessage: 'Last 3 days',
+    defaultMessage: 'Off',
   }
 );
 
-export const RULE_GAPS_OVERVIEW_PANEL_LAST_7_DAYS_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.last7DaysLabel',
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LOADING = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusLoading',
   {
-    defaultMessage: 'Last 7 days',
+    defaultMessage: 'Loading',
   }
 );

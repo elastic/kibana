@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

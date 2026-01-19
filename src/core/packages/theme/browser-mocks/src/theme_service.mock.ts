@@ -11,6 +11,7 @@ import { of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ThemeServiceSetup, CoreTheme } from '@kbn/core-theme-browser';
 import type { ThemeService } from '@kbn/core-theme-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const mockTheme: CoreTheme = {
   darkMode: false,
@@ -26,24 +27,21 @@ const createTheme$Mock = (theme: CoreTheme = createThemeMock()) => {
 };
 
 const createThemeContractMock = (theme: CoreTheme = createThemeMock()) => {
-  const themeMock: jest.Mocked<ThemeServiceSetup> = {
+  const themeMock: jest.Mocked<ThemeServiceSetup> = lazyObject({
     theme$: createTheme$Mock(theme),
     getTheme: jest.fn().mockReturnValue(theme),
-  };
+  });
   return themeMock;
 };
 
 type ThemeServiceContract = PublicMethodsOf<ThemeService>;
 
 const createServiceMock = () => {
-  const mocked: jest.Mocked<ThemeServiceContract> = {
-    setup: jest.fn(),
-    start: jest.fn(),
+  const mocked: jest.Mocked<ThemeServiceContract> = lazyObject({
+    setup: jest.fn().mockReturnValue(createThemeContractMock()),
+    start: jest.fn().mockReturnValue(createThemeContractMock()),
     stop: jest.fn(),
-  };
-
-  mocked.setup.mockReturnValue(createThemeContractMock());
-  mocked.start.mockReturnValue(createThemeContractMock());
+  });
 
   return mocked;
 };

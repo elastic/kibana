@@ -1,0 +1,4 @@
+redirects:
+  'extend/development-documentation.md': 'docs-content://extend/contribute/index.md'
+  'extend/saved-objects-service.md': 'extend/saved-objects.md'
+  'reference/osquery-exported-fields.md': 'integration-docs://reference/osquery-intro.md'

@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { darkMode, euiThemeVars } from '@kbn/ui-theme';
+import { useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
 
 type ResolverColorNames =
-  | 'copyableFieldBackground'
   | 'descriptionText'
   | 'full'
   | 'graphControls'
   | 'graphControlsBackground'
   | 'graphControlsBorderColor'
-  | 'linkColor'
   | 'resolverBackground'
   | 'resolverEdge'
   | 'resolverEdgeText'
@@ -29,22 +27,24 @@ type ColorMap = Record<ResolverColorNames, string>;
  * Get access to Kibana-theme based colors.
  */
 export function useColors(): ColorMap {
-  return useMemo(() => {
-    return {
-      copyableFieldBackground: euiThemeVars.euiColorLightShade,
-      descriptionText: euiThemeVars.euiTextColor,
-      full: euiThemeVars.euiColorFullShade,
-      graphControls: euiThemeVars.euiColorDarkestShade,
-      graphControlsBackground: euiThemeVars.euiColorEmptyShade,
-      graphControlsBorderColor: euiThemeVars.euiColorLightShade,
-      processBackingFill: `${euiThemeVars.euiColorPrimary}${darkMode ? '1F' : '0F'}`, // Add opacity 0F = 6% , 1F = 12%
-      resolverBackground: euiThemeVars.euiColorEmptyShade,
-      resolverEdge: darkMode ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorLightestShade,
-      resolverBreadcrumbBackground: euiThemeVars.euiColorLightestShade,
-      resolverEdgeText: darkMode ? euiThemeVars.euiColorFullShade : euiThemeVars.euiColorDarkShade,
-      triggerBackingFill: `${euiThemeVars.euiColorDanger}${darkMode ? '1F' : '0F'}`,
-      pillStroke: euiThemeVars.euiColorLightShade,
-      linkColor: euiThemeVars.euiLinkColor,
-    };
-  }, []);
+  const { euiTheme, colorMode } = useEuiTheme();
+  const darkMode = useMemo(() => colorMode === 'DARK', [colorMode]);
+
+  return useMemo(
+    () => ({
+      descriptionText: euiTheme.colors.textParagraph,
+      full: euiTheme.colors.fullShade,
+      graphControls: euiTheme.colors.darkestShade,
+      graphControlsBackground: euiTheme.colors.emptyShade,
+      graphControlsBorderColor: euiTheme.colors.lightShade,
+      processBackingFill: `${euiTheme.colors.primary}${darkMode ? '1F' : '0F'}`, // Add opacity 0F = 6% , 1F = 12%
+      resolverBackground: euiTheme.colors.emptyShade,
+      resolverEdge: darkMode ? euiTheme.colors.lightShade : euiTheme.colors.lightestShade,
+      resolverBreadcrumbBackground: euiTheme.colors.lightestShade,
+      resolverEdgeText: darkMode ? euiTheme.colors.fullShade : euiTheme.colors.darkShade,
+      triggerBackingFill: `${euiTheme.colors.danger}${darkMode ? '1F' : '0F'}`,
+      pillStroke: euiTheme.colors.lightShade,
+    }),
+    [darkMode, euiTheme]
+  );
 }

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useGetQueryDelaySettings } from './use_get_query_delay_settings';
 
 jest.mock('../lib/rule_api/get_query_delay_settings', () => ({

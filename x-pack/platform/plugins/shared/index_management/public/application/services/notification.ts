@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 
 export class NotificationService {
   private _toasts: any;
@@ -18,7 +18,11 @@ export class NotificationService {
     return this._toasts;
   }
 
-  private addToasts = (title: string, type: 'danger' | 'warning' | 'success', text?: string) => {
+  private addToasts = (
+    title: string,
+    type: 'danger' | 'warning' | 'success' | 'info',
+    text?: string
+  ) => {
     this._toasts.add({
       title,
       color: type,
@@ -36,6 +40,10 @@ export class NotificationService {
 
   public showSuccessToast(title: string, text?: string) {
     this.addToasts(title, 'success', text);
+  }
+
+  public showInfoToast(title: string, text?: string) {
+    this.addToasts(title, 'info', text);
   }
 }
 

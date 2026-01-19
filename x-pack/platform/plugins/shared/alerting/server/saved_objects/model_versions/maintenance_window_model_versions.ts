@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { rawMaintenanceWindowSchemaV1 } from '../schemas/raw_maintenance_window';
 
 export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
@@ -34,6 +34,21 @@ export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
           },
           updatedAt: {
             type: 'date',
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawMaintenanceWindowSchemaV1.extends({}, { unknowns: 'ignore' }),
+    },
+  },
+  '3': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          createdBy: {
+            type: 'keyword',
           },
         },
       },

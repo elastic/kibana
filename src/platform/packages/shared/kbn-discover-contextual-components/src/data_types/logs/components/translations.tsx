@@ -21,6 +21,10 @@ export const resourceLabel = i18n.translate('discover.logs.dataTable.header.popo
   defaultMessage: 'Resource',
 });
 
+export const traceLabel = i18n.translate('discover.traces.dataTable.header.popover.trace', {
+  defaultMessage: 'Trace',
+});
+
 export const actionFilterForText = (text: string) =>
   i18n.translate('discover.logs.flyoutDetail.value.hover.filterFor', {
     defaultMessage: 'Filter for this {value}',

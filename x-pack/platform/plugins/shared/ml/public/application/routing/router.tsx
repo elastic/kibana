@@ -56,7 +56,7 @@ export interface PageProps {
 
 export interface PageDependencies {
   history: AppMountParameters['history'];
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 
@@ -85,11 +85,12 @@ export const PageLoader: FC<PropsWithChildren<{ context: RouteResolverContext }>
  */
 export const MlRouter: FC<{
   pageDeps: PageDependencies;
-}> = ({ pageDeps }) => (
+  entryPoint?: string; // update this to finite set of possible ids - now 'jobs' - maybe make part of the context to avoid prop drilling?
+}> = ({ pageDeps, entryPoint }) => (
   <Router history={pageDeps.history}>
     <UrlStateProvider>
       <MlNotificationsContextProvider>
-        <MlPage pageDeps={pageDeps} />
+        <MlPage pageDeps={pageDeps} entryPoint={entryPoint} />
       </MlNotificationsContextProvider>
     </UrlStateProvider>
   </Router>

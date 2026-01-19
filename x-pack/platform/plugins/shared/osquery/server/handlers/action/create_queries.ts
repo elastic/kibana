@@ -9,6 +9,7 @@ import { isEmpty, isNumber, map, pickBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -21,6 +22,8 @@ interface CreateDynamicQueriesParams {
   agents: string[];
   osqueryContext: OsqueryAppContext;
   error?: string;
+  spaceId: string;
+  spaceScopedClient: SavedObjectsClient;
 }
 
 export const createDynamicQueries = async ({
@@ -29,6 +32,8 @@ export const createDynamicQueries = async ({
   agents,
   osqueryContext,
   error,
+  spaceId,
+  spaceScopedClient,
 }: CreateDynamicQueriesParams) =>
   params.queries?.length
     ? map(params.queries, ({ query, ...restQuery }) => {
@@ -56,7 +61,9 @@ export const createDynamicQueries = async ({
             saved_query_prebuilt: params.saved_query_id
               ? await isSavedQueryPrebuilt(
                   osqueryContext.service.getPackageService()?.asInternalUser,
-                  params.saved_query_id
+                  params.saved_query_id,
+                  spaceScopedClient,
+                  spaceId
                 )
               : undefined,
             ecs_mapping: params.ecs_mapping,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 export async function getESClusterUuid(client: IScopedClusterClient) {
   const response = await client.asCurrentUser.info({

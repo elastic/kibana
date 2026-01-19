@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, useGeneratedHtmlId } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
@@ -24,40 +23,49 @@ export const Flyout = ({
   closeFlyout,
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
   const [, setUrlState] = useAssetDetailsUrlState();
-  const { asset, loading } = useAssetDetailsRenderPropsContext();
+  const { entity, loading, schema } = useAssetDetailsRenderPropsContext();
   const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
   const { activeTabId } = useTabSwitcherContext();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  useEffectOnce(() => {
-    telemetry.reportAssetDetailsFlyoutViewed({
-      componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
-      assetType: asset.type,
-      tabId: activeTabId,
-    });
-  });
+  useEffect(() => {
+    if (!loading) {
+      telemetry.reportAssetDetailsFlyoutViewed({
+        componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
+        assetType: entity.type,
+        tabId: activeTabId,
+        schema_selected: schema || 'ecs',
+      });
+    }
+  }, [schema, entity.type, activeTabId, telemetry, loading]);
 
   const handleOnClose = useCallback(() => {
     setUrlState(null);
     closeFlyout();
   }, [closeFlyout, setUrlState]);
 
+  const headingId = useGeneratedHtmlId({ prefix: 'assetDetailsFlyoutTitle' });
+
   return (
     <EuiFlyout
       onClose={handleOnClose}
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
-      data-asset-type={asset.type}
+      data-asset-type={entity.type}
+      data-schema-selected={schema}
+      aria-labelledby={headingId}
     >
       <>
         <EuiFlyoutHeader hasBorder>
           <FlyoutHeader
-            title={asset.name}
+            title={entity.name}
             tabs={tabEntries}
             rightSideItems={rightSideItems}
-            assetType={asset.type}
+            entityType={entity.type}
             loading={loading}
+            schema={schema}
+            headingId={headingId}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

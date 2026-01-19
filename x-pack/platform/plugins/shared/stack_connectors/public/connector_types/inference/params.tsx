@@ -5,32 +5,49 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   JsonEditorWithMessageVariables,
+  useKibana,
   type ActionParamsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect } from '@elastic/eui';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
+import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect, EuiCallOut } from '@elastic/eui';
 import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
-import { ActionVariable } from '@kbn/alerting-types';
-import {
+import type { ActionVariable } from '@kbn/alerting-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type {
   ChatCompleteParams,
   RerankParams,
   SparseEmbeddingParams,
   TextEmbeddingParams,
   UnifiedChatCompleteParams,
-} from '../../../common/inference/types';
+} from '@kbn/connector-schemas/inference';
+import { SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 import { DEFAULTS_BY_TASK_TYPE } from './constants';
 import * as i18n from './translations';
-import { SUB_ACTION } from '../../../common/inference/constants';
-import { InferenceActionConnector, InferenceActionParams } from './types';
+import type { InferenceActionConnector, InferenceActionParams } from './types';
 
 const InferenceServiceParamsFields: React.FunctionComponent<
   ActionParamsProps<InferenceActionParams>
 > = ({ actionParams, editAction, index, errors, actionConnector, messageVariables }) => {
   const { subAction, subActionParams } = actionParams;
+  const [isEndpointExists, setIsInferenceEndpointExists] = useState<boolean>(true);
 
-  const { taskType, provider } = (actionConnector as unknown as InferenceActionConnector).config;
+  const {
+    services: { http },
+  } = useKibana();
+
+  const { taskType, provider, inferenceId } = (
+    actionConnector as unknown as InferenceActionConnector
+  ).config;
+
+  useEffect(() => {
+    const f = async () => {
+      setIsInferenceEndpointExists(await isInferenceEndpointExists(http, inferenceId));
+    };
+    f();
+  }, [http, inferenceId]);
 
   useEffect(() => {
     if (!subAction) {
@@ -62,6 +79,23 @@ const InferenceServiceParamsFields: React.FunctionComponent<
     },
     [editAction, index, subActionParams]
   );
+
+  if (!isEndpointExists) {
+    return (
+      <EuiCallOut
+        announceOnMount={false}
+        title="Missing configuration"
+        color="warning"
+        iconType="warning"
+      >
+        <FormattedMessage
+          id="xpack.stackConnectors.components.inference.loadingErrorText"
+          defaultMessage={'Inference Endpoint by ID {inferenceId} does not exist!'}
+          values={{ inferenceId }}
+        />
+      </EuiCallOut>
+    );
+  }
 
   if (subAction === SUB_ACTION.UNIFIED_COMPLETION) {
     return (
@@ -166,7 +200,14 @@ const UnifiedCompletionParamsFields: React.FunctionComponent<{
         label={i18n.BODY}
         errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
-          editSubActionParams({ body: JSON.parse(json) });
+          let parsedJson;
+          try {
+            parsedJson = JSON.parse(json);
+          } catch (e) {
+            // If the JSON is invalid, we keep the original string so it can go through validation
+          }
+          // Update with parsedJson, when valid, to ensure the body is sent as an object when action params are submitted
+          editSubActionParams({ body: parsedJson ?? json });
         }}
         onBlur={() => {
           if (!subActionParams.body) {

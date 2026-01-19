@@ -529,7 +529,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           {stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
             <>
               <EuiSpacer size={'m'} />
-              <EuiCallOut color="warning" iconType="warning" size="m">
+              <EuiCallOut announceOnMount color="warning" iconType="warning" size="m">
                 <p>
                   <FormattedMessage
                     id="xpack.transform.stepDetailsForm.destinationIndexWarning"
@@ -826,7 +826,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                     defaultMessage: 'Choose a maximum page search size.',
                   }
                 )}
-                isInvalid={!isTransformFrequencyValid}
+                isInvalid={!isTransformSettingsMaxPageSearchSizeValid}
                 data-test-subj="transformMaxPageSearchSizeInput"
               />
             </EuiFormRow>

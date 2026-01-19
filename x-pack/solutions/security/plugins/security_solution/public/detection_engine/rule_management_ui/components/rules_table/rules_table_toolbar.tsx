@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NewChat } from '@kbn/elastic-assistant';
-import { useUserData } from '../../../../detections/components/user_info';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
@@ -16,7 +15,12 @@ import * as i18n from './translations';
 import { getPromptContextFromDetectionRules } from '../../../../assistant/helpers';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import * as i18nAssistant from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18nAssistant from '../../../common/translations';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 
 export enum AllRulesTabs {
   management = 'management',
@@ -28,14 +32,14 @@ export const RulesTableToolbar = React.memo(() => {
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
-  const [{ loading, canUserCRUD }] = useUserData();
+  const canReadRules = useUserPrivileges().rulesPrivileges.read;
 
   const installedTotal =
     (ruleManagementFilters?.rules_summary.custom_count ?? 0) +
     (ruleManagementFilters?.rules_summary.prebuilt_installed_count ?? 0);
-  const updateTotal = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
+  const updateTotal = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_upgrade ?? 0;
 
-  const shouldDisplayRuleUpdatesTab = !loading && canUserCRUD && updateTotal > 0;
+  const shouldDisplayRuleUpdatesTab = canReadRules && updateTotal > 0;
 
   const ruleTabs = useMemo(
     () => ({
@@ -86,10 +90,30 @@ export const RulesTableToolbar = React.memo(() => {
     () => rules.filter((rule) => selectedRuleIds.includes(rule.id)),
     [rules, selectedRuleIds]
   );
+
+  const selectedRuleNames = useMemo(() => selectedRules.map((rule) => rule.name), [selectedRules]);
   const getPromptContext = useCallback(
     async () => getPromptContextFromDetectionRules(selectedRules),
     [selectedRules]
   );
+
+  const chatTitle = useMemo(() => {
+    return `${i18nAssistant.DETECTION_RULES_CONVERSATION_ID} - ${selectedRuleNames.join(', ')}`;
+  }, [selectedRuleNames]);
+
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const ruleAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.rule,
+      attachmentData: {
+        text: getPromptContextFromDetectionRules(selectedRules),
+        attachmentLabel: selectedRules.length === 1 ? selectedRules[0].name : i18n.SELECTED_RULES,
+      },
+      attachmentPrompt: i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
+    }),
+    [selectedRules]
+  );
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
   return (
     <EuiFlexGroup justifyContent={'spaceBetween'}>
@@ -97,16 +121,28 @@ export const RulesTableToolbar = React.memo(() => {
         <TabNavigation navTabs={ruleTabs} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {hasAssistantPrivilege && selectedRules.length > 0 && (
-          <NewChat
-            category="detection-rules"
-            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
-            description={i18nAssistant.RULE_MANAGEMENT_CONTEXT_DESCRIPTION}
-            getPromptContext={getPromptContext}
-            suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}
-            tooltip={i18nAssistant.RULE_MANAGEMENT_CONTEXT_TOOLTIP}
-            isAssistantEnabled={isAssistantEnabled}
-          />
+        {hasAssistantPrivilege && selectedRules.length > 0 && isAssistantEnabled && (
+          <>
+            {isAgentChatExperienceEnabled ? (
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                telemetry={{
+                  pathway: 'rules_table',
+                  attachments: ['rule'],
+                }}
+              />
+            ) : (
+              <NewChat
+                category="detection-rules"
+                conversationTitle={chatTitle}
+                description={i18nAssistant.RULE_MANAGEMENT_CONTEXT_DESCRIPTION}
+                getPromptContext={getPromptContext}
+                suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}
+                tooltip={i18nAssistant.RULE_MANAGEMENT_CONTEXT_TOOLTIP}
+                isAssistantEnabled={isAssistantEnabled}
+              />
+            )}
+          </>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -8,7 +8,7 @@
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -27,28 +27,26 @@ export function useErrorFailedTests() {
   const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 10000,
-        query: {
-          bool: {
-            filter: [
-              SUMMARY_FILTER,
-              EXCLUDE_RUN_ONCE_FILTER,
-              {
-                term: {
-                  'state.id': errorStateId,
-                },
+      size: 10000,
+      query: {
+        bool: {
+          filter: [
+            SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
+            {
+              term: {
+                'state.id': errorStateId,
               },
-              {
-                term: {
-                  config_id: monitorId,
-                },
+            },
+            {
+              term: {
+                config_id: monitorId,
               },
-            ],
-          },
+            },
+          ],
         },
-        sort: [{ '@timestamp': 'desc' }],
       },
+      sort: [{ '@timestamp': 'desc' }],
     },
     [lastRefresh, monitorId, dateRangeStart, dateRangeEnd],
     { name: 'getMonitorErrorFailedTests' }

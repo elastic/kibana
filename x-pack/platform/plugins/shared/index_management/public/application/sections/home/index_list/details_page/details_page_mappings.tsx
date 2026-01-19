@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
-import { Index } from '../../../../..';
+import type { Index } from '../../../../..';
 import { DetailsPageMappingsContent } from './details_page_mappings_content';
 
 import { useLoadIndexMappings } from '../../../../services';
@@ -19,8 +20,7 @@ import { useLoadIndexMappings } from '../../../../services';
 export const DetailsPageMappings: FunctionComponent<{
   index?: Index;
   showAboutMappings?: boolean;
-  hasUpdateMappingsPrivilege?: boolean;
-}> = ({ index, showAboutMappings = true, hasUpdateMappingsPrivilege }) => {
+}> = ({ index, showAboutMappings = true }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index?.name || '');
   const [jsonError, setJsonError] = useState<boolean>(false);
 
@@ -96,7 +96,6 @@ export const DetailsPageMappings: FunctionComponent<{
       jsonData={data}
       showAboutMappings={showAboutMappings}
       refetchMapping={resendRequest}
-      hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
     />
   );
 };

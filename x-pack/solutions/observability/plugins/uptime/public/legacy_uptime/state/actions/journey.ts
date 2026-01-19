@@ -6,7 +6,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types';
+import type { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;

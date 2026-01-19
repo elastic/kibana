@@ -22,7 +22,9 @@
         "tags": [],
         "label": "i18nServiceMock",
         "description": [],
-        "path": "packages/core/i18n/core-i18n-server-mocks/src/i18n_service.mock.ts",
+        "path": "src/core/packages/i18n/server-mocks/src/i18n_service.mock.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +38,9 @@
             "signature": [
               "() => jest.Mocked<I18nServiceContract>"
             ],
-            "path": "packages/core/i18n/core-i18n-server-mocks/src/i18n_service.mock.ts",
+            "path": "src/core/packages/i18n/server-mocks/src/i18n_service.mock.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +58,9 @@
               "I18nServiceSetup",
               ">"
             ],
-            "path": "packages/core/i18n/core-i18n-server-mocks/src/i18n_service.mock.ts",
+            "path": "src/core/packages/i18n/server-mocks/src/i18n_service.mock.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -72,7 +78,9 @@
               "InternalI18nServicePreboot",
               ">"
             ],
-            "path": "packages/core/i18n/core-i18n-server-mocks/src/i18n_service.mock.ts",
+            "path": "src/core/packages/i18n/server-mocks/src/i18n_service.mock.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

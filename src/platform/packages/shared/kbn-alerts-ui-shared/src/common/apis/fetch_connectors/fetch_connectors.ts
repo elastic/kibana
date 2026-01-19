@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { ActionConnector } from '../../types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { ActionConnector } from '../../types';
 import { transformConnectorResponse } from './transform_connectors_response';
 import { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
 

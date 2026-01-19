@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, Observable, firstValueFrom } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs';
 import { get } from 'lodash';
-import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
+import type { ChangedDeprecatedPaths } from '@kbn/config';
+import { hasConfigPathIntersection } from '@kbn/config';
 
 import type {
   AggregationsMultiBucketAggregateBase,
@@ -49,7 +51,7 @@ import {
   type SavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server';
 
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './saved_objects';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
@@ -182,26 +184,24 @@ export class CoreUsageDataService
       { aliases: UsageDataAggs }
     >({
       index: MAIN_SAVED_OBJECT_INDEX, // depends on the .kibana split (assuming 'legacy-url-alias' is stored in '.kibana')
-      body: {
-        track_total_hits: true,
-        query: { match: { type: LEGACY_URL_ALIAS_TYPE } },
-        aggs: {
-          aliases: {
+      track_total_hits: true,
+      query: { match: { type: LEGACY_URL_ALIAS_TYPE } },
+      aggs: {
+        aliases: {
+          filters: {
             filters: {
-              filters: {
-                disabled: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
-                active: {
-                  bool: {
-                    must_not: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
-                    must: { range: { [`${LEGACY_URL_ALIAS_TYPE}.resolveCounter`]: { gte: 1 } } },
-                  },
+              disabled: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
+              active: {
+                bool: {
+                  must_not: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
+                  must: { range: { [`${LEGACY_URL_ALIAS_TYPE}.resolveCounter`]: { gte: 1 } } },
                 },
               },
             },
           },
         },
-        size: 0,
       },
+      size: 0,
     });
 
     const { hits, aggregations } = resp;
@@ -254,7 +254,6 @@ export class CoreUsageDataService
           customHeadersConfigured: isConfigured.record(es.customHeaders),
           healthCheckDelayMs: es.healthCheck.delay.asMilliseconds(),
           logQueries: es.logQueries,
-          pingTimeoutMs: es.pingTimeout.asMilliseconds(),
           requestHeadersWhitelistConfigured: isConfigured.stringOrArray(
             es.requestHeadersWhitelist,
             ['authorization', 'es-client-authentication']
@@ -280,6 +279,7 @@ export class CoreUsageDataService
           rewriteBasePath: http.rewriteBasePath,
           keepaliveTimeout: http.keepaliveTimeout,
           socketTimeout: http.socketTimeout,
+          protocol: http.protocol,
           compression: {
             enabled: http.compression.enabled,
             referrerWhitelistConfigured: isConfigured.array(http.compression.referrerWhitelist),

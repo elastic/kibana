@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 export const [getUiSettingsService, setUiSettingsService] =

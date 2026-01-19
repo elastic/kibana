@@ -156,9 +156,9 @@ describe('Bulk actions knowledge base entry route', () => {
       );
     });
     test('handles all three bulk update actions at once', async () => {
-      clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient.findDocuments
-        .mockResolvedValueOnce(Promise.resolve(getEmptyFindResult()))
-        .mockResolvedValue(Promise.resolve(getFindKnowledgeBaseEntriesResultWithSingleHit()));
+      clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient.findDocuments.mockResolvedValue(
+        Promise.resolve(getFindKnowledgeBaseEntriesResultWithSingleHit())
+      );
       const response = await server.inject(
         getBulkActionKnowledgeBaseEntryRequest({
           create: [getCreateKnowledgeBaseEntrySchemaMock()],
@@ -201,7 +201,7 @@ describe('Bulk actions knowledge base entry route', () => {
       );
     });
     test('returns 401 Unauthorized when request context getCurrentUser is not defined', async () => {
-      context.elasticAssistant.getCurrentUser.mockReturnValueOnce(null);
+      context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(null);
       const response = await server.inject(
         getBulkActionKnowledgeBaseEntryRequest({
           create: [getCreateKnowledgeBaseEntrySchemaMock()],
@@ -214,11 +214,9 @@ describe('Bulk actions knowledge base entry route', () => {
 
   describe('unhappy paths', () => {
     test('catches error if creation throws', async () => {
-      clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient.findDocuments.mockImplementation(
-        async () => {
-          throw new Error('Test error');
-        }
-      );
+      mockBulk.mockImplementationOnce(async () => {
+        throw new Error('Test error');
+      });
       const response = await server.inject(
         getBulkActionKnowledgeBaseEntryRequest({
           create: [getCreateKnowledgeBaseEntrySchemaMock()],

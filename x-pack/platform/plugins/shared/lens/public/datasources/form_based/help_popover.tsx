@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { EuiLinkButtonProps, EuiPopoverProps, EuiWrappingPopoverProps } from '@elastic/eui';
 import {
   EuiIcon,
   EuiLink,
-  EuiLinkButtonProps,
   EuiPopover,
-  EuiPopoverProps,
   EuiWrappingPopover,
-  EuiWrappingPopoverProps,
   EuiPopoverTitle,
   EuiText,
+  type UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { StartServices } from '../../types';
-import './help_popover.scss';
+import { css } from '@emotion/react';
+import type { LensStartServices as StartServices } from '@kbn/lens-common';
 
 export const HelpPopoverButton = ({
   children,
@@ -28,15 +29,37 @@ export const HelpPopoverButton = ({
   children: string;
   onClick: EuiLinkButtonProps['onClick'];
 }) => {
+  const euiThemeContext = useEuiTheme();
   return (
     <EuiText size="xs">
       <EuiLink onClick={onClick}>
-        <EuiIcon className="lnsHelpPopover__buttonIcon" size="s" type="help" />
-
+        <EuiIcon size="s" type="question" css={helpPopoverStyles.button(euiThemeContext)} />
         {children}
       </EuiLink>
     </EuiText>
   );
+};
+
+const HelpPopoverContent = ({ title, children }: { title?: string; children: ReactNode }) => {
+  const euiThemeContext = useEuiTheme();
+  return (
+    <>
+      {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
+      <EuiText className="eui-yScroll" size="s" css={helpPopoverStyles.content(euiThemeContext)}>
+        {children}
+      </EuiText>
+    </>
+  );
+};
+
+const helpPopoverStyles = {
+  button: ({ euiTheme }: UseEuiTheme) => css`
+    margin-right: ${euiTheme.size.xs};
+  `,
+  content: ({ euiTheme }: UseEuiTheme) => css`
+    max-height: 40vh;
+    padding: ${euiTheme.size.m};
+  `,
 };
 
 export const HelpPopover = ({
@@ -58,18 +81,13 @@ export const HelpPopover = ({
     <EuiPopover
       anchorPosition={anchorPosition}
       button={button}
-      className="lnsHelpPopover"
       closePopover={closePopover}
       isOpen={isOpen}
       ownFocus
-      panelClassName="lnsHelpPopover__panel"
+      panelStyle={{ maxInlineSize: '480px' }}
       panelPaddingSize="none"
     >
-      {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
-
-      <EuiText className="lnsHelpPopover__content" size="s">
-        {children}
-      </EuiText>
+      <HelpPopoverContent title={title}>{children}</HelpPopoverContent>
     </EuiPopover>
   );
 };
@@ -96,18 +114,13 @@ export const WrappingHelpPopover = ({
       <EuiWrappingPopover
         anchorPosition={anchorPosition}
         button={button}
-        className="lnsHelpPopover"
         closePopover={closePopover}
         isOpen={isOpen}
         ownFocus
-        panelClassName="lnsHelpPopover__panel"
+        panelStyle={{ maxInlineSize: '480px' }}
         panelPaddingSize="none"
       >
-        {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
-
-        <EuiText className="lnsHelpPopover__content" size="s">
-          {children}
-        </EuiText>
+        <HelpPopoverContent title={title}>{children}</HelpPopoverContent>
       </EuiWrappingPopover>
     </KibanaRenderContextProvider>
   );

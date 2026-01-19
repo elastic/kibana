@@ -22,7 +22,9 @@
         "tags": [],
         "label": "uiSettingsServiceMock",
         "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+        "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+        "lineNumber": 79,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +40,9 @@
               "InternalUiSettingsServicePreboot",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -56,7 +60,9 @@
               "UiSettingsServiceSetup",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -74,7 +80,9 @@
               "UiSettingsServiceStart",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -92,7 +100,9 @@
               "IUiSettingsClient",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -108,7 +118,9 @@
             "signature": [
               "() => jest.Mocked<UiSettingsServiceContract>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

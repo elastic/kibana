@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-  EntriesArray,
+import {
+  type ExceptionListItemSchema,
+  type CreateExceptionListItemSchema,
+  type UpdateExceptionListItemSchema,
+  type EntriesArray,
+  ListOperatorTypeEnum,
+  type ListOperatorType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
+import { LIST_ITEM_ENTRY_OPERATOR_TYPES } from './common/artifact_list_item_entry_values';
 import { BaseDataGenerator } from './base_data_generator';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts/constants';
+import { ENDPOINT_EVENTS_LOG_INDEX_FIELDS } from './common/alerts_ecs_fields';
 
 /** Utility that removes null and undefined from a Type's property value */
 type NonNullableTypeProperties<T> = {
@@ -39,7 +43,6 @@ export const exceptionItemToCreateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): CreateExceptionListItemSchemaWithNonNullProps => {
   const {
-    /* eslint-disable @typescript-eslint/naming-convention */
     description,
     entries,
     expire_time,
@@ -52,7 +55,6 @@ export const exceptionItemToCreateExceptionItem = (
     namespace_type,
     os_types,
     tags,
-    /* eslint-enable @typescript-eslint/naming-convention */
   } = exceptionItem;
 
   return {
@@ -74,7 +76,6 @@ export const exceptionItemToCreateExceptionItem = (
 const exceptionItemToUpdateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): UpdateExceptionListItemSchemaWithNonNullProps => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, item_id, _version } = exceptionItem;
   const { list_id: _, ...updateAttributes } = exceptionItemToCreateExceptionItem(exceptionItem);
 
@@ -141,6 +142,66 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     overrides: Partial<CreateExceptionListItemSchema> = {}
   ): CreateExceptionListItemSchemaWithNonNullProps {
     return Object.assign(exceptionItemToCreateExceptionItem(this.generate()), overrides);
+  }
+
+  generateEndpointException(
+    overrides: Partial<ExceptionListItemSchema> = {}
+  ): ExceptionListItemSchema {
+    return this.generate({
+      name: `Endpoint exception (${this.randomString(5)})`,
+      list_id: ENDPOINT_LIST_ID,
+      entries: this.randomEndpointExceptionEntries(1),
+      tags: [],
+      ...overrides,
+    });
+  }
+
+  generateEndpointExceptionForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateEndpointException()),
+      ...overrides,
+    };
+  }
+
+  generateEndpointExceptionForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateEndpointException()),
+      ...overrides,
+    };
+  }
+
+  protected randomEndpointExceptionEntries(
+    count: number = this.randomN(5)
+  ): ExceptionListItemSchema['entries'] {
+    const operatorTypes = LIST_ITEM_ENTRY_OPERATOR_TYPES.filter(
+      (item) =>
+        !(
+          [
+            ListOperatorTypeEnum.LIST,
+            ListOperatorTypeEnum.NESTED,
+            ListOperatorTypeEnum.EXISTS,
+          ] as ListOperatorType[]
+        ).includes(item)
+    );
+    const fieldList = ENDPOINT_EVENTS_LOG_INDEX_FIELDS.filter((field) => field.endsWith('.text'));
+
+    return Array.from({ length: count || 1 }, () => {
+      const operatorType = this.randomChoice(operatorTypes);
+
+      return {
+        field: this.randomChoice(fieldList),
+        operator: 'included',
+        type: operatorType,
+        value:
+          operatorType === ListOperatorTypeEnum.MATCH_ANY
+            ? [this.randomString(10), this.randomString(10)]
+            : this.randomString(10),
+      };
+    }) as ExceptionListItemSchema['entries'];
   }
 
   generateTrustedApp(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
@@ -350,6 +411,45 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   ): UpdateExceptionListItemSchemaWithNonNullProps {
     return {
       ...exceptionItemToUpdateExceptionItem(this.generateBlocklist()),
+      ...overrides,
+    };
+  }
+
+  generateTrustedDevice(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    // Use HOST field by default for compatibility with all OS types
+    // USERNAME field can only be used with Windows-only OS
+    const defaultEntries: ExceptionListItemSchema['entries'] = [
+      {
+        field: 'host.name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: `host_${this.randomString(5)}`,
+      },
+    ];
+
+    return this.generate({
+      name: `Trusted device (${this.randomString(5)})`,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      os_types: this.randomChoice([['windows'], ['macos'], ['windows', 'macos']]),
+      entries: defaultEntries,
+      ...overrides,
+    });
+  }
+
+  generateTrustedDeviceForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateTrustedDevice()),
+      ...overrides,
+    };
+  }
+
+  generateTrustedDeviceForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateTrustedDevice()),
       ...overrides,
     };
   }

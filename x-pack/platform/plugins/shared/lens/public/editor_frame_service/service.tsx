@@ -6,32 +6,33 @@
  */
 
 import React from 'react';
-import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import {
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-  DataViewsContract,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import {
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { LensDocument } from '../persistence/saved_object_store';
-import {
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { css } from '@emotion/react';
+import type {
+  LensDocument,
   Datasource,
   Visualization,
   EditorFrameSetup,
   EditorFrameInstance,
   EditorFrameStart,
-} from '../types';
+} from '@kbn/lens-common';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -97,12 +98,12 @@ export class EditorFrameService {
     doc: LensDocument,
     services: EditorFramePlugins & { forceDSL?: boolean }
   ) => {
-    const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
-      this.loadDatasources(),
-      this.loadVisualizations(),
-    ]);
-
-    const { persistedStateToExpression } = await import('../async_services');
+    const [resolvedDatasources, resolvedVisualizations, { persistedStateToExpression }] =
+      await Promise.all([
+        this.loadDatasources(),
+        this.loadVisualizations(),
+        import('../async_services'),
+      ]);
 
     return persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc, services);
   };
@@ -120,12 +121,11 @@ export class EditorFrameService {
 
   public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
     const createInstance = async (): Promise<EditorFrameInstance> => {
-      const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
+      const [resolvedDatasources, resolvedVisualizations, { EditorFrame }] = await Promise.all([
         this.loadDatasources(),
         this.loadVisualizations(),
+        import('../async_services'),
       ]);
-
-      const { EditorFrame } = await import('../async_services');
 
       return {
         EditorFrameContainer: ({
@@ -136,7 +136,14 @@ export class EditorFrameService {
           addUserMessages,
         }) => {
           return (
-            <div className="lnsApp__frame">
+            <div
+              css={css`
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+              `}
+            >
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
                 core={core}
@@ -146,8 +153,6 @@ export class EditorFrameService {
                 getUserMessages={getUserMessages}
                 addUserMessages={addUserMessages}
                 indexPatternService={indexPatternService}
-                datasourceMap={resolvedDatasources}
-                visualizationMap={resolvedVisualizations}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
               />
             </div>

@@ -5,20 +5,32 @@
  * 2.0.
  */
 
-import { UseKnowledgeBaseResult } from '../use_knowledge_base';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common';
+import type { UseKnowledgeBaseResult } from '../use_knowledge_base';
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   return {
-    install: async () => {},
     isInstalling: false,
+    isPolling: false,
+    install: async () => {},
+    isProductDocInstalling: false,
+    isProductDocUninstalling: false,
+    installProductDoc: async (inferenceId: string) => {},
+    uninstallProductDoc: async (inferenceId: string) => {},
     status: {
       loading: false,
       refresh: () => {},
       error: undefined,
       value: {
-        ready: true,
+        inferenceModelState: InferenceModelState.NOT_INSTALLED,
         enabled: true,
+        concreteWriteIndex: undefined,
+        currentInferenceId: undefined,
+        isReIndexing: false,
+        productDocStatus: 'uninstalled',
       },
     },
+    warmupModel: async () => {},
+    isWarmingUpModel: false,
   };
 }

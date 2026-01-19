@@ -9,11 +9,12 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { IncomingHttpHeaders } from 'http';
+import type { IncomingHttpHeaders } from 'http';
 import type { AsyncSearchResponse } from './types';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
-import { AsyncSearchStatusResponse } from './types';
-import { shimHitsTotal, getTotalLoaded, IAsyncSearchOptions } from '../../../../common';
+import type { AsyncSearchStatusResponse } from './types';
+import type { IAsyncSearchOptions } from '../../../../common';
+import { shimHitsTotal, getTotalLoaded } from '../../../../common';
 
 /**
  * Get the Kibana representation of an async search status response.

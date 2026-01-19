@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { ValidatorServices } from '../../types';
+import type { ValidatorServices } from '../../types';
 
 const validProtocols: string[] = ['http:', 'https:'];
 export const assertURL = (url: string) => {
@@ -30,7 +30,7 @@ export const urlAllowListValidator = <T>(urlKey: string) => {
   return (obj: T, validatorServices: ValidatorServices) => {
     const { configurationUtilities } = validatorServices;
     try {
-      const url = get(obj, urlKey, '');
+      const url = get(obj, urlKey, '') as string;
 
       configurationUtilities.ensureUriAllowed(url);
     } catch (allowListError) {

@@ -27,7 +27,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 
 import type { Eval } from '../../../../common';
@@ -101,7 +101,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       genErrorEval.eval &&
       isRegressionEvaluateResponse(genErrorEval.eval)
     ) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { mse, msle, huber, r_squared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
         mse,
@@ -140,7 +139,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       trainingErrorEval.eval &&
       isRegressionEvaluateResponse(trainingErrorEval.eval)
     ) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { mse, msle, huber, r_squared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
         mse,
@@ -243,7 +241,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
         docsLink={
           <EuiButtonEmpty
             target="_blank"
-            iconType="help"
+            iconType="question"
             iconSide="left"
             size="xs"
             color="primary"

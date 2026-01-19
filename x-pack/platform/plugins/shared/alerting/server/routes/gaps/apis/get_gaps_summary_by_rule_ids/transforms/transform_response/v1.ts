@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetGapsSummaryByRuleIdsResponse } from '../../../../../../application/rule/methods/get_gaps_summary_by_rule_ids/types';
-import { GetGapsSummaryByRuleIdsResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
+import type { GetGapsSummaryByRuleIdsResponse } from '../../../../../../application/gaps/methods/get_gaps_summary_by_rule_ids/types';
+import type { GetGapsSummaryByRuleIdsResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 
 export const transformResponse = (
   response: GetGapsSummaryByRuleIdsResponse
@@ -16,5 +16,6 @@ export const transformResponse = (
     total_unfilled_duration_ms: gap.totalUnfilledDurationMs,
     total_in_progress_duration_ms: gap.totalInProgressDurationMs,
     total_filled_duration_ms: gap.totalFilledDurationMs,
+    gap_fill_status: gap.gapFillStatus,
   })),
 });

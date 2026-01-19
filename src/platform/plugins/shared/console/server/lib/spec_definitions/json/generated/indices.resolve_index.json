@@ -13,15 +13,22 @@
         "none"
       ],
       "ignore_unavailable": "__flag__",
-      "allow_no_indices": "__flag__"
+      "allow_no_indices": "__flag__",
+      "mode": [
+        "standard",
+        "time_series",
+        "logsdb",
+        "lookup"
+      ]
     },
     "methods": [
-      "GET"
+      "GET",
+      "POST"
     ],
     "patterns": [
       "_resolve/index/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-resolve-index-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-resolve-index",
     "availability": {
       "stack": true,
       "serverless": true

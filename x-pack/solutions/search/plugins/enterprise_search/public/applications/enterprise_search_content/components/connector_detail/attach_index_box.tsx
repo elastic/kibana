@@ -10,10 +10,10 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -27,7 +27,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Connector, MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -96,10 +97,10 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     isFullMatch: boolean;
     searchValue: string;
   }>();
+  const sanitizedNameWithoutPrefix = formatApiName(connector.name);
   const [sanitizedName, setSanitizedName] = useState<string>(
-    prefixConnectorIndex(formatApiName(connector.name))
+    prefixConnectorIndex(sanitizedNameWithoutPrefix)
   );
-
   const [selectedIndex, setSelectedIndex] = useState<
     { label: string; shouldCreate?: boolean } | undefined
   >(
@@ -193,7 +194,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
 
   useEffect(() => {
     // Suggested name for managed connector should include the content- prefix
-    setSanitizedName(prefixConnectorIndex(formatApiName(connector.name)));
+    setSanitizedName(prefixConnectorIndex(sanitizedNameWithoutPrefix));
   }, [connector.name]);
 
   const { hash } = useLocation();
@@ -269,6 +270,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
             isInvalid={!!error}
           >
             <EuiComboBox
+              isInvalid={!!error}
               placeholder={i18n.translate(
                 'xpack.enterpriseSearch.attachIndexBox.euiFormRow.indexSelector.placeholder',
                 { defaultMessage: 'Select or create an index' }
@@ -373,7 +375,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 fill
                 onClick={() => {
                   createIndex({ indexName: sanitizedName, language: null });
-                  setSelectedIndex({ label: sanitizedName });
+                  setSelectedIndex({ label: sanitizedNameWithoutPrefix });
                 }}
                 isLoading={isSaveLoading || isExistLoading}
                 disabled={indexExists[sanitizedName]}

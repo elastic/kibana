@@ -9,15 +9,15 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import { SearchSource } from '@kbn/data-plugin/common';
+import type { SearchSource } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { TimeRange } from '@kbn/es-query';
-import { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
-import { FetchContext } from '@kbn/presentation-publishing';
-import { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
+import type { TimeRange } from '@kbn/es-query';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { FetchContext } from '@kbn/presentation-publishing';
+import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { SortOrder, DataGridDensity } from '@kbn/unified-data-table';
 
 export const getMockedSearchApi = ({

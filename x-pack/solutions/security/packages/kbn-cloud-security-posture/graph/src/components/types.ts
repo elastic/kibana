@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 import type {
   EntityNodeDataModel,
   GroupNodeDataModel,
   LabelNodeDataModel,
   EdgeDataModel,
   NodeShape,
-  Color as NodeColor,
+  NodeColor,
+  NodeDocumentDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { Node, NodeProps as xyNodeProps, Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
 
@@ -33,12 +34,20 @@ export type ExpandButtonClickCallback = (
   unToggleCallback: () => void
 ) => void;
 
+export type IpClickCallback = (e: React.MouseEvent<HTMLElement>) => void;
+
+export type CountryClickCallback = (e: React.MouseEvent<HTMLElement>) => void;
+
+export type EventClickCallback = (e: React.MouseEvent<HTMLButtonElement>) => void;
+
 export interface EntityNodeViewModel
   extends Record<string, unknown>,
     EntityNodeDataModel,
     BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
+  ipClickHandler?: IpClickCallback;
+  countryClickHandler?: CountryClickCallback;
 }
 
 export interface GroupNodeViewModel
@@ -46,12 +55,17 @@ export interface GroupNodeViewModel
     GroupNodeDataModel,
     BaseNodeDataViewModel {}
 
+export type NodeDocumentDataViewModel = NodeDocumentDataModel;
+
 export interface LabelNodeViewModel
   extends Record<string, unknown>,
     LabelNodeDataModel,
     BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
+  ipClickHandler?: IpClickCallback;
+  countryClickHandler?: CountryClickCallback;
+  eventClickHandler?: EventClickCallback;
 }
 
 export type NodeViewModel = EntityNodeViewModel | GroupNodeViewModel | LabelNodeViewModel;

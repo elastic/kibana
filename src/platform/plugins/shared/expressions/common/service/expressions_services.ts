@@ -7,25 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 
-import { SavedObjectReference } from '@kbn/core/types';
-import {
+import type { SavedObjectReference } from '@kbn/core/types';
+import type {
   MigrateFunctionsObject,
   PersistableStateService,
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { ExecutionContextSearch } from '@kbn/es-query';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 import { Executor } from '../executor';
-import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
-import { ExpressionAstExpression } from '../ast';
-import { ExecutionContract, ExecutionResult } from '../execution';
-import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
-import { AnyExpressionFunctionDefinition } from '../expression_functions';
+import type { AnyExpressionRenderDefinition } from '../expression_renderers';
+import { ExpressionRendererRegistry } from '../expression_renderers';
+import type { ExpressionAstExpression } from '../ast';
+import type { ExecutionContract, ExecutionResult } from '../execution';
+import type { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
+import type { AnyExpressionFunctionDefinition } from '../expression_functions';
 import {
   clog,
   createTable,

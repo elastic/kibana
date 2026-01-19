@@ -72,7 +72,7 @@ export function Profiling() {
         </>
       ),
       append: (
-        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+        <Popover iconSize="s" iconColor="subdued" icon="question">
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.flamegraphInfoPopoverBody"
@@ -108,7 +108,7 @@ export function Profiling() {
         </>
       ),
       append: (
-        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+        <Popover iconSize="s" iconColor="subdued" icon="question">
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.functionsInfoPopoverBody"
@@ -144,7 +144,7 @@ export function Profiling() {
         </>
       ),
       append: (
-        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+        <Popover iconSize="s" iconColor="subdued" icon="question">
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.threadsInfoPopoverBody"

@@ -17,7 +17,6 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 import type { CanvasStartDeps } from '../plugin';
 
@@ -33,7 +32,6 @@ export let presentationUtilService: PresentationUtilPluginStart;
 export let reportingService: ReportingStart | undefined;
 export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
-export let visualizationsService: VisualizationsStart;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -45,18 +43,21 @@ export const setKibanaServices = (
   kibanaVersion = initContext.env.packageInfo.version;
 
   coreServices = kibanaCore;
+  const capabilities = kibanaCore.application.capabilities;
   contentManagementService = deps.contentManagement;
   dataService = deps.data;
   dataViewsService = deps.dataViews;
   embeddableService = deps.embeddable;
   expressionsService = deps.expressions;
   presentationUtilService = deps.presentationUtil;
-  reportingService = Boolean(kibanaCore.application.capabilities.canvas?.generatePdf)
+  reportingService = Boolean(
+    capabilities.canvas?.generatePdf === true ||
+      capabilities.reportingLegacy?.generateReport === true
+  )
     ? deps.reporting
     : undefined;
   spacesService = deps.spaces;
   uiActionsService = deps.uiActions;
-  visualizationsService = deps.visualizations;
 
   servicesReady$.next(true);
 };

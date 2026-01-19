@@ -8,8 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 
-import { EuiPage, EuiPageBody, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
-
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPanel,
+  useEuiTheme,
+  useEuiBreakpoint,
+} from '@elastic/eui';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { css } from '@emotion/react';
 import {
   SearchProfilerTabs,
   ProfileTree,
@@ -22,7 +32,59 @@ import {
 
 import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';
 import { hasAggregations, hasSearch } from './lib';
-import { Targets } from './types';
+import type { Targets } from './types';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    // App root page container
+    appRoot: css([
+      {
+        overflow: 'hidden',
+        flex: '1 1 auto',
+      }, // adding dev tool top bar to the body offset
+      kbnFullBodyHeightCss(`(${euiTheme.size.base} * 3)`),
+    ]),
+
+    // Page body container
+    pageBody: css`
+      height: 100%;
+      flex: 1 1 auto;
+    `,
+
+    // Page body content panel
+    pageBodyContent: css`
+      height: 100%;
+    `,
+
+    // Main body group
+    bodyGroup: css`
+      height: 100%;
+    `,
+
+    // Main content area
+    main: css`
+      height: 100%;
+      flex-grow: 1;
+      order: 2;
+      margin-left: ${euiTheme.size.base};
+      display: flex;
+      overflow: hidden;
+      flex-direction: column;
+
+      // Make only the tab content scroll
+      .search-profiler-tabs {
+        flex-shrink: 0;
+      }
+
+      ${useEuiBreakpoint(['xs', 's'])} {
+        flex: 0 0 auto;
+        margin: ${euiTheme.size.base} 0;
+      }
+    `,
+  };
+};
 
 export const App = () => {
   const { getLicenseStatus, notifications } = useAppContext();
@@ -31,6 +93,7 @@ export const App = () => {
     useProfilerReadContext();
 
   const dispatch = useProfilerActionContext();
+  const styles = useStyles();
 
   const handleProfileTreeError = (e: Error) => {
     notifications.addError(e, {
@@ -84,21 +147,16 @@ export const App = () => {
 
   return (
     <>
-      <EuiPage className="prfDevTool__page appRoot">
-        <EuiPageBody className="prfDevTool__page__pageBody">
+      <EuiPage css={styles.appRoot}>
+        <EuiPageBody css={styles.pageBody}>
           {renderLicenseWarning()}
-          <EuiPanel className="prfDevTool__page__pageBodyContent">
-            <EuiFlexGroup
-              responsive={false}
-              gutterSize="s"
-              direction="row"
-              className="prfDevTool__page__bodyGroup"
-            >
+          <EuiPanel css={styles.pageBodyContent}>
+            <EuiFlexGroup responsive={false} gutterSize="s" direction="row" css={styles.bodyGroup}>
               <EuiFlexItem>
                 <ProfileQueryEditor />
               </EuiFlexItem>
               <EuiFlexItem grow={3}>
-                <EuiFlexGroup className="prfDevTool__main" gutterSize="none" direction="column">
+                <EuiFlexGroup css={styles.main} gutterSize="none" direction="column">
                   <SearchProfilerTabs
                     activeTab={activeTab}
                     activateTab={setActiveTab}

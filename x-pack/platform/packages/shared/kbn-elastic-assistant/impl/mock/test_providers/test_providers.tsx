@@ -12,12 +12,17 @@ import React from 'react';
 
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { UserProfileService } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
-import { AssistantAvailability } from '../../assistant_context/types';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { AssistantProviderProps } from '../../assistant_context';
+import { AssistantProvider, useAssistantContextValue } from '../../assistant_context';
+import type { AssistantAvailability } from '../../assistant_context/types';
+import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
+import { MOCK_CURRENT_USER } from '../../assistant/use_conversation/sample_conversations';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -29,12 +34,17 @@ window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 export const mockAssistantAvailability: AssistantAvailability = {
+  hasSearchAILakeConfigurations: false,
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
   hasUpdateAIAssistantAnonymization: true,
   hasManageGlobalKnowledgeBase: true,
+  hasAgentBuilderPrivilege: true,
+  hasAgentBuilderManagePrivilege: true,
   isAssistantEnabled: true,
+  isAssistantVisible: true,
+  isAssistantManagementEnabled: true,
 };
 
 /** A utility for wrapping children in the providers required to run tests */
@@ -53,6 +63,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
+  const mockGetUrlForApp = jest.fn();
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -68,34 +79,41 @@ export const TestProvidersComponent: React.FC<Props> = ({
 
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
+  const docLinks = docLinksServiceMock.createStartContract();
+
+  const assistantProviderProps = {
+    actionTypeRegistry,
+    assistantAvailability,
+    augmentMessageCodeBlocks: {
+      mount: jest.fn().mockReturnValue(() => {}),
+    },
+    basePath: 'https://localhost:5601/kbn',
+    docLinks,
+    getComments: mockGetComments,
+    getUrlForApp: mockGetUrlForApp,
+    http: mockHttp,
+    navigateToApp: mockNavigateToApp,
+    ...providerContext,
+    currentAppId: 'test',
+    productDocBase: {
+      installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
+    },
+    userProfileService: jest.fn() as unknown as UserProfileService,
+    chrome,
+    settings: {
+      client: {
+        get: jest.fn(),
+      },
+    } as unknown as SettingsStart,
+  } as AssistantProviderProps;
 
   return (
     <I18nProvider>
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
-          <AssistantProvider
-            actionTypeRegistry={actionTypeRegistry}
-            assistantAvailability={assistantAvailability}
-            augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
-            basePath={'https://localhost:5601/kbn'}
-            docLinks={{
-              ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-              DOC_LINK_VERSION: 'current',
-            }}
-            getComments={mockGetComments}
-            http={mockHttp}
-            baseConversations={{}}
-            navigateToApp={mockNavigateToApp}
-            {...providerContext}
-            currentAppId={'test'}
-            productDocBase={{
-              installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
-            }}
-            userProfileService={jest.fn() as unknown as UserProfileService}
-            chrome={chrome}
-          >
-            {children}
-          </AssistantProvider>
+          <TestAssistantProviders assistantProviderProps={assistantProviderProps}>
+            <AssistantSpaceIdProvider spaceId="default">{children}</AssistantSpaceIdProvider>
+          </TestAssistantProviders>
         </QueryClientProvider>
       </ThemeProvider>
     </I18nProvider>
@@ -105,3 +123,18 @@ export const TestProvidersComponent: React.FC<Props> = ({
 TestProvidersComponent.displayName = 'TestProvidersComponent';
 
 export const TestProviders = React.memo(TestProvidersComponent);
+
+const TestAssistantProviders = ({
+  assistantProviderProps,
+  children,
+}: {
+  assistantProviderProps: AssistantProviderProps;
+  children: React.ReactNode;
+}) => {
+  const assistantContextValue = useAssistantContextValue(assistantProviderProps);
+  return (
+    <AssistantProvider value={{ ...assistantContextValue, currentUser: MOCK_CURRENT_USER }}>
+      {children}
+    </AssistantProvider>
+  );
+};

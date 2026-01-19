@@ -10,7 +10,7 @@ import {
   createLogViewsServiceSetupMock,
   createLogViewsServiceStartMock,
 } from './services/log_views/log_views_service.mock';
-import { LogsSharedPluginSetup, LogsSharedPluginStart } from './types';
+import type { LogsSharedPluginSetup, LogsSharedPluginStart } from './types';
 
 const createLogsSharedSetupMock = () => {
   const logsSharedSetupMock: jest.Mocked<LogsSharedPluginSetup> = {

@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
-import React, { ReactNode, useState } from 'react';
-import { Controller, FieldPath, useFormContext } from 'react-hook-form';
-import { Suggestion, useFetchApmSuggestions } from '../../../../../hooks/use_fetch_apm_suggestions';
-import { CreateSLOForm } from '../../../types';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
+import type { FieldPath } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
+import type { Suggestion } from '../../../../../hooks/use_fetch_apm_suggestions';
+import { useFetchApmSuggestions } from '../../../../../hooks/use_fetch_apm_suggestions';
+import type { CreateSLOForm } from '../../../types';
 
 interface Option {
   label: string;
@@ -20,7 +24,6 @@ interface Option {
 }
 
 export interface Props {
-  allowAllOption?: boolean;
   dataTestSubj: string;
   fieldName: string;
   label: string;
@@ -30,7 +33,6 @@ export interface Props {
 }
 
 export function FieldSelector({
-  allowAllOption = true,
   dataTestSubj,
   fieldName,
   label,
@@ -49,20 +51,14 @@ export function FieldSelector({
 
   const debouncedSearch = debounce((value) => setSearch(value), 200);
 
-  const options = (
-    allowAllOption
-      ? [
-          {
-            value: ALL_VALUE,
-            label: i18n.translate('xpack.slo.sloEdit.fieldSelector.all', {
-              defaultMessage: 'All',
-            }),
-          },
-        ]
-      : []
-  ).concat(createOptions(suggestions));
-
-  const isDisabled = name !== 'indicator.params.service' && !serviceName;
+  const options = [
+    {
+      value: ALL_VALUE,
+      label: i18n.translate('xpack.slo.sloEdit.fieldSelector.all', {
+        defaultMessage: 'All',
+      }),
+    },
+  ].concat(createOptions(suggestions));
 
   return (
     <EuiFlexItem>
@@ -82,7 +78,7 @@ export function FieldSelector({
           defaultValue=""
           name={name}
           control={control}
-          rules={{ required: !isDisabled }}
+          rules={{ required: true }}
           render={({ field, fieldState }) => (
             <EuiComboBox
               {...field}
@@ -90,7 +86,6 @@ export function FieldSelector({
               async
               data-test-subj={dataTestSubj}
               isClearable
-              isDisabled={isDisabled}
               isInvalid={fieldState.invalid}
               isLoading={isLoading}
               onChange={(selected: EuiComboBoxOptionOption[]) => {

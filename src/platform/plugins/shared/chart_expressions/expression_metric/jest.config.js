@@ -17,4 +17,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/src/platform/plugins/shared/chart_expressions/expression_metric/{common,public,server}/**/*.{ts,tsx}',
   ],
+  setupFiles: ['jest-canvas-mock'],
 };

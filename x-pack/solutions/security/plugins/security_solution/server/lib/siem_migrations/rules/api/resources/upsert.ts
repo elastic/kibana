@@ -7,18 +7,21 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import partition from 'lodash/partition';
-import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import { partition } from 'lodash';
+import { isResourceSupportedVendor } from '../../../../../../common/siem_migrations/rules/resources/types';
+import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import {
   UpsertRuleMigrationResourcesRequestBody,
   UpsertRuleMigrationResourcesRequestParams,
   type UpsertRuleMigrationResourcesResponse,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
+import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { CreateRuleMigrationResourceInput } from '../../data/rule_migrations_data_resources_client';
-import { withLicense } from '../util/with_license';
+import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
+import { authz } from '../util/authz';
 import { processLookups } from '../util/lookups';
+import { withLicense } from '../../../common/api/util/with_license';
+import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
 
 export const registerSiemRuleMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,
@@ -28,7 +31,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
     .post({
       path: SIEM_RULE_MIGRATION_RESOURCES_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
       options: { body: { maxBytes: 26214400 } }, // rise payload limit to 25MB
     })
     .addVersion(
@@ -49,19 +52,28 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
         ): Promise<IKibanaResponse<UpsertRuleMigrationResourcesResponse>> => {
           const resources = req.body;
           const migrationId = req.params.migration_id;
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'rules'
+          );
           try {
             const ctx = await context.resolve(['securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+
+            await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
             // Check if the migration exists
-            const { data } = await ruleMigrationsClient.data.rules.get(migrationId, { size: 1 });
+            const { data } = await ruleMigrationsClient.data.items.get(migrationId, { size: 1 });
             const [rule] = data;
             if (!rule) {
               return res.notFound({ body: { message: 'Migration not found' } });
             }
 
             const [lookups, macros] = partition(resources, { type: 'lookup' });
-            const processedLookups = await processLookups(lookups, ruleMigrationsClient);
+            const processedLookups = await processLookups(
+              lookups,
+              ruleMigrationsClient.data.lookups
+            );
             const resourcesUpsert = [...macros, ...processedLookups].map((resource) => ({
               ...resource,
               migration_id: migrationId,
@@ -70,20 +82,30 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             // Upsert the resources
             await ruleMigrationsClient.data.resources.upsert(resourcesUpsert);
 
-            // Create identified resource documents to keep track of them (without content)
-            const resourceIdentifier = new ResourceIdentifier(rule.original_rule.vendor);
-            const resourcesToCreate = resourceIdentifier
-              .fromResources(resources)
-              .map<CreateRuleMigrationResourceInput>((resource) => ({
-                ...resource,
-                migration_id: migrationId,
-              }));
-            await ruleMigrationsClient.data.resources.create(resourcesToCreate);
+            if (!isResourceSupportedVendor(rule.original_rule.vendor)) {
+              logger.debug(
+                `Identifying resources for rule migration [id=${migrationId}] and vendor [${rule.original_rule.vendor}]  is not supported. Skipping resource identification.`
+              );
+              return res.ok({ body: { acknowledged: true } });
+            }
+
+            if (rule.original_rule.vendor === 'splunk') {
+              const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor);
+              const identifiedMissingResources = await resourceIdentifier.fromResources(resources);
+              const resourcesToCreate =
+                identifiedMissingResources.map<CreateSiemMigrationResourceInput>((resource) => ({
+                  ...resource,
+                  migration_id: migrationId,
+                }));
+              await ruleMigrationsClient.data.resources.create(resourcesToCreate);
+            }
 
             return res.ok({ body: { acknowledged: true } });
-          } catch (err) {
-            logger.error(err);
-            return res.badRequest({ body: err.message });
+            // Create identified resource documents to keep track of them (without content)
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logUploadResources({ migrationId, error });
+            return res.customError({ statusCode: 500, body: error.message });
           }
         }
       )

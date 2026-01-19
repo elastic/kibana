@@ -11,14 +11,12 @@ import { combineLatest, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs';
 import type { IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import type { IEsSearchResponse } from '@kbn/search-types';
-import {
-  getSearchParamsFromRequest,
-  SearchRequest,
-  DataPublicPluginStart,
-} from '@kbn/data-plugin/public';
+import type { SearchRequest, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { search as dataPluginSearch } from '@kbn/data-plugin/public';
 import type { RequestResponder } from '@kbn/inspector-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { VegaInspectorAdapters } from '../vega_inspector';
 
 /** @internal **/
@@ -28,7 +26,7 @@ export const extendSearchParamsWithRuntimeFields = async (
   indexPatternString?: string
 ) => {
   if (indexPatternString) {
-    let runtimeMappings = requestParams.body?.runtime_mappings;
+    let runtimeMappings = requestParams.runtime_mappings;
 
     if (!runtimeMappings) {
       const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
@@ -39,7 +37,7 @@ export const extendSearchParamsWithRuntimeFields = async (
 
     return {
       ...requestParams,
-      body: { ...requestParams.body, runtime_mappings: runtimeMappings },
+      runtime_mappings: runtimeMappings,
     };
   }
 
@@ -58,7 +56,8 @@ export class SearchAPI {
     private readonly abortSignal?: AbortSignal,
     public readonly inspectorAdapters?: VegaInspectorAdapters,
     private readonly searchSessionId?: string,
-    private readonly executionContext?: KibanaExecutionContext
+    private readonly executionContext?: KibanaExecutionContext,
+    private readonly projectRouting?: ProjectRouting
   ) {}
 
   search(searchRequests: SearchRequest[]) {
@@ -67,8 +66,9 @@ export class SearchAPI {
 
     return combineLatest(
       searchRequests.map((request) => {
-        const requestId = request.name;
-        const requestParams = getSearchParamsFromRequest(request, {
+        const { name: requestId, ...restRequest } = request;
+
+        const requestParams = getSearchParamsFromRequest(restRequest, {
           getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
         });
 
@@ -82,14 +82,81 @@ export class SearchAPI {
                 ...request,
                 searchSessionId: this.searchSessionId,
               });
-              requestResponders[requestId].json(params.body);
+              requestResponders[requestId].json(params);
             }
           }),
-          switchMap((params) =>
-            search
+          switchMap((params) => {
+            return search
               .search(
                 { params },
                 {
+                  abortSignal: this.abortSignal,
+                  sessionId: this.searchSessionId,
+                  executionContext: this.executionContext,
+                  projectRouting: this.projectRouting,
+                }
+              )
+              .pipe(
+                tap(
+                  (data) => this.inspectSearchResult(data, requestResponders[requestId]),
+                  (err) =>
+                    this.inspectSearchResult(
+                      {
+                        rawResponse: err?.err,
+                      },
+                      requestResponders[requestId]
+                    )
+                ),
+                map((data) => ({
+                  name: requestId,
+                  rawResponse: structuredClone(data.rawResponse),
+                }))
+              );
+          })
+        );
+      })
+    );
+  }
+
+  public resetSearchStats() {
+    if (this.inspectorAdapters) {
+      this.inspectorAdapters.requests.reset();
+    }
+  }
+
+  searchEsql(
+    esqlRequests: Array<{
+      query: string;
+      filter?: unknown;
+      params?: Array<Record<string, unknown>>;
+      dropNullColumns?: boolean;
+      name: string;
+    }>
+  ) {
+    const { search } = this.dependencies;
+    const requestResponders: any = {};
+
+    return combineLatest(
+      esqlRequests.map((request) => {
+        const { name: requestId, ...restRequest } = request;
+
+        return from(Promise.resolve()).pipe(
+          tap(() => {
+            /** inspect request data **/
+            if (this.inspectorAdapters) {
+              requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, {
+                ...request,
+                searchSessionId: this.searchSessionId,
+              });
+              requestResponders[requestId].json(restRequest);
+            }
+          }),
+          switchMap(() => {
+            return search
+              .search(
+                { params: restRequest },
+                {
+                  strategy: 'esql_async',
                   abortSignal: this.abortSignal,
                   sessionId: this.searchSessionId,
                   executionContext: this.executionContext,
@@ -108,19 +175,13 @@ export class SearchAPI {
                 ),
                 map((data) => ({
                   name: requestId,
-                  rawResponse: data.rawResponse,
+                  rawResponse: structuredClone(data.rawResponse),
                 }))
-              )
-          )
+              );
+          })
         );
       })
     );
-  }
-
-  public resetSearchStats() {
-    if (this.inspectorAdapters) {
-      this.inspectorAdapters.requests.reset();
-    }
   }
 
   private inspectSearchResult(response: IEsSearchResponse, requestResponder: RequestResponder) {

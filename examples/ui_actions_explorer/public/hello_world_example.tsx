@@ -11,18 +11,22 @@ import React, { useState } from 'react';
 
 import { EuiButton, EuiSpacer, EuiText, EuiModalBody, EuiLink, EuiSwitch } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { UiActionsStart, createAction } from '@kbn/ui-actions-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '@kbn/ui-actions-examples-plugin/public';
 
 const DYNAMIC_ACTION_ID = `${ACTION_HELLO_WORLD}-Waldo`;
 
 interface Props {
   uiActionsStartService: UiActionsStart;
-  startServices: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
+  startServices: Pick<CoreStart, 'overlays' | 'rendering'>;
 }
 
-export const HelloWorldExample = ({ uiActionsStartService, startServices }: Props) => {
+export const HelloWorldExample = ({
+  uiActionsStartService,
+  startServices: { overlays, rendering },
+}: Props) => {
   const [isChecked, setIsChecked] = useState(false);
 
   const actionsMessage = isChecked ? '2 actions attached' : '1 action attached';
@@ -71,7 +75,7 @@ export const HelloWorldExample = ({ uiActionsStartService, startServices }: Prop
                 type: ACTION_HELLO_WORLD,
                 getDisplayName: () => 'Say hello to Waldo',
                 execute: async () => {
-                  const overlay = startServices.overlays.openModal(
+                  const overlay = overlays.openModal(
                     toMountPoint(
                       <EuiModalBody>
                         <EuiText data-test-subj="dynamicHelloWorldActionText">Hello Waldo</EuiText>{' '}
@@ -79,7 +83,7 @@ export const HelloWorldExample = ({ uiActionsStartService, startServices }: Prop
                           Close
                         </EuiButton>
                       </EuiModalBody>,
-                      startServices
+                      rendering
                     )
                   );
                 },

@@ -9,7 +9,7 @@
 
 import { Env } from '@kbn/config';
 import { getDocLinksMeta, getDocLinks } from '@kbn/doc-links';
-import { LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
@@ -32,9 +32,6 @@ export const getMigrationDocLink = () => {
   });
   return docLinks.kibanaUpgradeSavedObjects;
 };
-
-export const delay = (seconds: number) =>
-  new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 
 export const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
   name: 'test-type',

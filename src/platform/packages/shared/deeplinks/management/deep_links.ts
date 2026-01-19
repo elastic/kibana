@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   MONITORING_APP_ID,
   INTEGRATIONS_APP_ID,
   FLEET_APP_ID,
   OSQUERY_APP_ID,
   MANAGEMENT_APP_ID,
+  CLOUD_CONNECT_NAV_ID,
 } from './constants';
 
 // Monitoring
@@ -28,7 +29,10 @@ export type IntegrationsDeepLinkId = IntegrationsAppId | FleetAppId | OsQueryApp
 // Management
 export type ManagementAppId = typeof MANAGEMENT_APP_ID;
 export type ManagementId =
+  | 'ad_settings'
   | 'aiAssistantManagementSelection'
+  | 'analytics'
+  | 'anomaly_detection'
   | 'securityAiAssistantManagement'
   | 'observabilityAiAssistantManagement'
   | 'api_keys'
@@ -36,6 +40,8 @@ export type ManagementId =
   | 'cross_cluster_replication'
   | 'dataViews'
   | 'data_quality'
+  | 'data_usage'
+  | 'content_connectors'
   | 'filesManagement'
   | 'license_management'
   | 'index_lifecycle_management'
@@ -45,6 +51,7 @@ export type ManagementId =
   | 'maintenanceWindows'
   | 'migrate_data'
   | 'objects'
+  | 'overview'
   | 'pipelines'
   | 'remote_clusters'
   | 'reporting'
@@ -55,15 +62,21 @@ export type ManagementId =
   | 'settings'
   | 'snapshot_restore'
   | 'spaces'
+  | 'supplied_configurations'
   | 'tags'
+  | 'trained_models'
   | 'transform'
   | 'triggersActions'
+  | 'triggersActionsAlerts'
   | 'triggersActionsConnectors'
   | 'upgrade_assistant'
   | 'users'
-  | 'watcher';
+  | 'watcher'
+  | 'genAiSettings';
 
 export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${ManagementId}`;
+
+export type CloudConnectDeepLinkId = typeof CLOUD_CONNECT_NAV_ID;
 
 // Combined
 export type AppId = MonitoringAppId | IntegrationsAppId | ManagementAppId;
@@ -72,4 +85,5 @@ export type DeepLinkId =
   | AppId
   | MonitoringDeepLinkId
   | IntegrationsDeepLinkId
+  | CloudConnectDeepLinkId
   | ManagementDeepLinkId;

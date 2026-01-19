@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 export const createQueryWrapperMock = (): {
   queryClient: QueryClient;
@@ -19,8 +19,11 @@ export const createQueryWrapperMock = (): {
       },
     },
     logger: {
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       error: () => undefined,
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       log: () => undefined,
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       warn: () => undefined,
     },
   });

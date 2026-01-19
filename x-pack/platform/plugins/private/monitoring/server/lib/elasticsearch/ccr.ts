@@ -8,8 +8,8 @@
 import moment from 'moment';
 import { ElasticsearchMetric } from '../metrics';
 import { createQuery } from '../create_query';
-import { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
@@ -33,18 +33,16 @@ export async function checkCcrEnabled(req: LegacyRequest, ccs: string) {
     index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
-    body: {
-      query: createQuery({
-        type: dataset,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        clusterUuid,
-        metric: metricFields,
-      }),
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-    },
+    query: createQuery({
+      type: dataset,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      clusterUuid,
+      metric: metricFields,
+    }),
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     filter_path: [
       'hits.hits._source.stack_stats.xpack.ccr',
       'hits.hits._source.elasticsearch.cluster.stats.stack.xpack.ccr',

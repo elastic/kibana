@@ -23,7 +23,7 @@ info:
     GET kbn:/api/data_views
     ```
 
-    For more information about the console, refer to [Run API requests](https://www.elastic.co/guide/en/kibana/current/console-kibana.html).
+    For more information about the console, refer to [Run API requests](https://www.elastic.co/docs/explore-analyze/query-filter/tools/console).
 
     NOTE: Access to internal Kibana API endpoints will be restricted in Kibana version 9.0. Please move any integrations to publicly documented APIs.
 
@@ -33,7 +33,7 @@ info:
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
 
     This documentation contains work-in-progress information for future Elastic Stack releases.
-  version: '1.0.2'
+  version: '' # Leave empty
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
     url: https://creativecommons.org/licenses/by-nc-nd/4.0/

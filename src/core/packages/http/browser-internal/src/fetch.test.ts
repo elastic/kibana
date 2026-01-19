@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// @ts-expect-error
-import fetchMock from 'fetch-mock/es5/client';
+import { setTimeout as timer } from 'timers/promises';
+import fetchMock from 'fetch-mock';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { first } from 'rxjs';
@@ -18,10 +18,6 @@ import type { HttpResponse, HttpFetchOptionsWithPath } from '@kbn/core-http-brow
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-
-function delay<T>(duration: number) {
-  return new Promise<T>((r) => setTimeout(r, duration));
-}
 
 const BASE_PATH = 'http://localhost/myBase';
 
@@ -215,7 +211,7 @@ describe('Fetch', () => {
         headers: { myHeader: 'foo' },
       });
 
-      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+      expect(fetchMock.lastOptions()!.headers?.['kbn-system-request']).toBeUndefined();
     });
 
     it('should not set kbn-system-request header when asSystemRequest: false', async () => {
@@ -225,7 +221,7 @@ describe('Fetch', () => {
         asSystemRequest: false,
       });
 
-      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+      expect(fetchMock.lastOptions()!.headers?.['kbn-system-request']).toBeUndefined();
     });
 
     it('should set kbn-system-request header when asSystemRequest: true', async () => {
@@ -338,7 +334,7 @@ describe('Fetch', () => {
 
       const lastCall = fetchMock.lastCall();
 
-      expect(lastCall!.request.credentials).toBe('same-origin');
+      expect(lastCall!.request!.credentials).toBe('same-origin');
       expect(lastCall![1]).toMatchObject({
         method: 'GET',
         headers: {
@@ -625,7 +621,7 @@ describe('Fetch', () => {
       });
 
       fetchInstance.fetch('/my/path').then(unusedSpy, unusedSpy);
-      await delay(1000);
+      await timer(1000);
 
       expect(unusedSpy).toHaveBeenCalledTimes(0);
       expect(usedSpy).toHaveBeenCalledTimes(1);
@@ -646,7 +642,7 @@ describe('Fetch', () => {
       fetchInstance.intercept({ request: usedSpy, response: unusedSpy });
 
       fetchInstance.fetch('/my/path').then(unusedSpy, unusedSpy);
-      await delay(1000);
+      await timer(1000);
 
       expect(fetchMock.called()).toBe(true);
       expect(usedSpy).toHaveBeenCalledTimes(3);
@@ -666,7 +662,7 @@ describe('Fetch', () => {
       fetchInstance.intercept({ response: unusedSpy, responseError: unusedSpy });
 
       fetchInstance.post('/my/path').then(unusedSpy, unusedSpy);
-      await delay(1000);
+      await timer(1000);
 
       expect(fetchMock.called()).toBe(true);
       expect(unusedSpy).toHaveBeenCalledTimes(0);
@@ -754,7 +750,7 @@ describe('Fetch', () => {
       expect(createRequest.mock.calls[0][0].path).toContain('/my/route');
       expect(createRequest.mock.calls[1][0].path).toContain('/api/alpha');
       expect(createRequest.mock.calls[2][0].path).toContain('/api/beta');
-      expect(fetchMock.lastCall()!.request.url).toContain('/api/gamma');
+      expect(fetchMock.lastCall()!.request!.url).toContain('/api/gamma');
     });
 
     it('should accumulate response information', async () => {
@@ -841,7 +837,7 @@ describe('Fetch', () => {
       });
 
       fetchInstance.fetch('/my/path');
-      await delay(500);
+      await timer(500);
 
       expect(unusedSpy).toHaveBeenCalledTimes(0);
     });
@@ -865,6 +861,68 @@ describe('Fetch', () => {
 
       await expect(fetchInstance.fetch('/my/path')).resolves.toEqual({ foo: 'bar' });
       expect(usedSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('should intercept the actual fetch call', async () => {
+      const fetch = jest.fn().mockImplementation(async (next, options) => ({
+        ...(await next(options)),
+        body: { foo: 'baz' },
+      }));
+      fetchInstance.intercept({ fetch });
+
+      await expect(fetchInstance.fetch('/my/path')).resolves.toEqual({ foo: 'baz' });
+      expect(fetch).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          path: '/my/path',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should call fetch interceptors in order', async () => {
+      const fetch1 = jest.fn().mockImplementation(async (next) => ({
+        ...(await next({ path: '/fetch1' })),
+        body: { foo: 'baz1' },
+      }));
+      const fetch2 = jest.fn().mockImplementation(async (next) => ({
+        ...(await next({ path: '/fetch2' })),
+        body: { foo: 'baz2' },
+      }));
+      fetchInstance.intercept({ fetch: fetch1 });
+      fetchInstance.intercept({ fetch: fetch2 });
+
+      await expect(fetchInstance.fetch('/my/path')).resolves.toEqual({ foo: 'baz1' });
+      expect(fetch1).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          path: '/my/path',
+        }),
+        expect.anything()
+      );
+      expect(fetch2).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          path: '/fetch1',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should halt fetch interceptors', async () => {
+      const fetch1 = jest.fn().mockImplementation((next, options, controller) => {
+        controller.halt();
+        return next(options);
+      });
+      const fetch2 = jest.fn().mockImplementation((next, options) => next(options));
+      fetchInstance.intercept({ fetch: fetch1 });
+      fetchInstance.intercept({ fetch: fetch2 });
+
+      fetchInstance.fetch('/my/path');
+      await new Promise(process.nextTick);
+
+      expect(fetch1).toHaveBeenCalled();
+      expect(fetch2).not.toHaveBeenCalled();
     });
   });
 

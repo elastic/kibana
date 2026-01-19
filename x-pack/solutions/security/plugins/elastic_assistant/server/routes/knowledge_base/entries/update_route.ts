@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
@@ -13,11 +13,9 @@ import {
   UpdateKnowledgeBaseEntryRequestParams,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import {
-  KnowledgeBaseEntryResponse,
-  KnowledgeBaseEntryUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
-import { ElasticAssistantPluginRouter } from '../../../types';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { KnowledgeBaseEntryUpdateRouteProps } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
 
@@ -39,7 +37,7 @@ export const updateKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
         validate: {
           request: {
             params: buildRouteValidationWithZod(UpdateKnowledgeBaseEntryRequestParams),
-            body: buildRouteValidationWithZod(KnowledgeBaseEntryUpdateProps),
+            body: buildRouteValidationWithZod(KnowledgeBaseEntryUpdateRouteProps),
           },
         },
       },
@@ -50,7 +48,7 @@ export const updateKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
           const logger = ctx.elasticAssistant.logger;
 
           // Perform license, authenticated user and FF checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -63,8 +61,13 @@ export const updateKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
 
           const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const updateResponse = await kbDataClient?.updateKnowledgeBaseEntry({
-            knowledgeBaseEntry: { ...request.body, id: request.params.id },
+            knowledgeBaseEntry: {
+              ...request.body,
+              id: request.params.id,
+              ...(request.body.global ? { users: [] } : {}),
+            },
             auditLogger: ctx.elasticAssistant.auditLogger,
+            telemetry: ctx.elasticAssistant.telemetry,
           });
 
           if (updateResponse?.updatedEntry) {
@@ -74,7 +77,7 @@ export const updateKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
           }
 
           return assistantResponse.error({
-            body: updateResponse?.errors?.[0].message ?? `Knowledge Base Entry was not created`,
+            body: updateResponse?.errors?.[0].message ?? `Knowledge Base Entry was not updated`,
             statusCode: 400,
           });
         } catch (err) {

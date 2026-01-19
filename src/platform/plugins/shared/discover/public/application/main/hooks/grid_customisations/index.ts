@@ -9,7 +9,8 @@
 
 import { useMemo } from 'react';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { DataGridColumnsDeps, getDataGridColumnsConfiguration } from './logs';
+import type { DataGridColumnsDeps } from './logs';
+import { getDataGridColumnsConfiguration } from './logs';
 
 export * from './logs';
 

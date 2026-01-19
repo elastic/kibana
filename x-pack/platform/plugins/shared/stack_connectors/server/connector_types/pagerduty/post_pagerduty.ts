@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
-import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { Logger } from '@kbn/core/server';
+import type { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 
 interface PostPagerdutyOptions {

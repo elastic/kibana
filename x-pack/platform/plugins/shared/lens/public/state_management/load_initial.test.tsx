@@ -13,10 +13,11 @@ import {
   mockStoreDeps,
   exactMatchDoc,
 } from '../mocks';
-import { Location, History } from 'history';
+import type { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
-import { InitialAppState, loadInitial } from './lens_slice';
-import { Filter } from '@kbn/es-query';
+import type { InitialAppState } from './lens_slice';
+import { loadInitial } from './lens_slice';
+import type { Filter } from '@kbn/es-query';
 import { faker } from '@faker-js/faker';
 import { DOC_TYPE } from '../../common/constants';
 
@@ -32,6 +33,7 @@ const preloadedState = {
   visualization: {
     state: null,
     activeId: 'testVis',
+    selectedLayerId: null,
   },
 };
 
@@ -118,13 +120,13 @@ describe('Initializing the store', () => {
       },
     });
 
-    const { store, deps } = makeLensStore({
+    const { store } = makeLensStore({
       storeDeps,
       preloadedState,
     });
 
     await loadInitialAppState(store, defaultProps);
-    const { datasourceMap } = deps;
+    const { datasourceMap } = storeDeps;
 
     expect(datasourceMap.testDatasource.initialize).toHaveBeenCalledWith(
       datasource1State,
@@ -172,6 +174,7 @@ describe('Initializing the store', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           datasourceStates: { testDatasource: { isLoading: false, state: {} } },
         },
@@ -182,6 +185,7 @@ describe('Initializing the store', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           activeDatasourceId: 'testDatasource',
           datasourceStates: {
@@ -201,6 +205,7 @@ describe('Initializing the store', () => {
           visualization: {
             state: 'testVis initial state', // new vis gets initialized
             activeId: 'testVis',
+            selectedLayerId: null,
           },
           activeDatasourceId: 'testDatasource2', // resets to first on the list
           datasourceStates: {
@@ -234,7 +239,14 @@ describe('Initializing the store', () => {
 
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
-          persistedDoc: { ...defaultDoc, type: DOC_TYPE },
+          persistedDoc: expect.objectContaining({
+            ...defaultDoc,
+            type: DOC_TYPE,
+            state: {
+              ...defaultDoc.state,
+              visualization: 'testVis initial state',
+            },
+          }),
           query: defaultDoc.state.query,
           isLoading: false,
           activeDatasourceId: 'testDatasource',

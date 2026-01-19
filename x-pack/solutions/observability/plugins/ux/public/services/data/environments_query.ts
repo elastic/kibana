@@ -14,7 +14,7 @@ import {
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { Environment } from '../../../common/environment_rt';
+import type { Environment } from '../../../common/environment_rt';
 
 export function transformEnvironmentsResponse<T>(
   response?: ESSearchResponse<T, ReturnType<typeof getEnvironments>>
@@ -43,43 +43,41 @@ export function getEnvironments({
   end: number;
 }) {
   return {
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis',
-                },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: start,
+                lte: end,
+                format: 'epoch_millis',
               },
             },
-            {
-              term: {
-                [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
-              },
-            },
-            {
-              term: {
-                [PROCESSOR_EVENT]: 'transaction',
-              },
-            },
-            ...(serviceName === undefined || serviceName === null
-              ? []
-              : [{ term: { [SERVICE_NAME]: serviceName } }]),
-          ],
-        },
-      },
-      aggs: {
-        environments: {
-          terms: {
-            field: SERVICE_ENVIRONMENT,
-            missing: ENVIRONMENT_NOT_DEFINED.value,
-            size,
           },
+          {
+            term: {
+              [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
+            },
+          },
+          {
+            term: {
+              [PROCESSOR_EVENT]: 'transaction',
+            },
+          },
+          ...(serviceName === undefined || serviceName === null
+            ? []
+            : [{ term: { [SERVICE_NAME]: serviceName } }]),
+        ],
+      },
+    },
+    aggs: {
+      environments: {
+        terms: {
+          field: SERVICE_ENVIRONMENT,
+          missing: ENVIRONMENT_NOT_DEFINED.value,
+          size,
         },
       },
     },

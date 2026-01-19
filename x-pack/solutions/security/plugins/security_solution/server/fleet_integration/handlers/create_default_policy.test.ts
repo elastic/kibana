@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Subject } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
@@ -24,6 +24,7 @@ import type {
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
+import type { ExperimentalFeatures } from '../../../common';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
@@ -35,6 +36,9 @@ describe('Create Default Policy tests ', () => {
   let licenseService: LicenseService;
   let productFeaturesService: ProductFeaturesService;
   const telemetryConfigProviderMock = createTelemetryConfigProviderMock();
+  const experimentalFeatures = {
+    trustedDevices: true,
+  } as ExperimentalFeatures;
 
   const createDefaultPolicyCallback = async (
     config?: AnyPolicyCreateConfig
@@ -48,7 +52,8 @@ describe('Create Default Policy tests ', () => {
       cloud,
       esClientInfo,
       productFeaturesService,
-      telemetryConfigProviderMock
+      telemetryConfigProviderMock,
+      experimentalFeatures
     );
   };
 
@@ -61,7 +66,12 @@ describe('Create Default Policy tests ', () => {
   });
 
   describe('When no config is set', () => {
-    it('Should return PolicyConfig for events only when license is at least platinum', async () => {
+    beforeEach(() => {
+      // @ts-expect-error write to readonly property for testing
+      experimentalFeatures.linuxDnsEvents = true;
+    });
+
+    it('Should return PolicyConfig when license is at least platinum', async () => {
       const defaultPolicy = policyFactory();
 
       const policy = await createDefaultPolicyCallback(undefined);
@@ -127,20 +137,28 @@ describe('Create Default Policy tests ', () => {
       };
     };
 
-    const defaultEventsDisabled = () => ({
+    const defaultEventsDisabled = (): {
+      linux: PolicyConfig['linux']['events'];
+      mac: PolicyConfig['mac']['events'];
+      windows: PolicyConfig['windows']['events'];
+    } => ({
       linux: {
-        process: false,
+        dns: false,
         file: false,
+        process: false,
         network: false,
         session_data: false,
         tty_io: false,
       },
       mac: {
+        dns: false,
         process: false,
         file: false,
         network: false,
+        security: false,
       },
       windows: {
+        credential_access: false,
         process: false,
         file: false,
         network: false,
@@ -151,6 +169,11 @@ describe('Create Default Policy tests ', () => {
       },
     });
     const OSTypes = ['linux', 'mac', 'windows'] as const;
+
+    beforeEach(() => {
+      // @ts-expect-error write to readonly property for testing
+      experimentalFeatures.linuxDnsEvents = true;
+    });
 
     it('Should return PolicyConfig for events only when preset is DataCollection', async () => {
       const defaultPolicy = policyFactory();
@@ -308,6 +331,302 @@ describe('Create Default Policy tests ', () => {
       telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(undefined);
       const policyConfig = await createDefaultPolicyCallback();
       expect(policyConfig.global_telemetry_enabled).toBe(false);
+    });
+  });
+
+  describe('Device Control Removal', () => {
+    it('should remove device control when endpointTrustedDevices product feature is disabled', async () => {
+      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_trusted_devices')
+      );
+
+      await createDefaultPolicyCallback();
+
+      expect(removeDeviceControlSpy).toHaveBeenCalledTimes(1);
+      removeDeviceControlSpy.mockRestore();
+    });
+
+    it('should remove device control when trustedDevices experimental feature is disabled', async () => {
+      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      const experimentalFeaturesWithTrustedDevicesDisabled = {
+        trustedDevices: false,
+      } as ExperimentalFeatures;
+
+      const createDefaultPolicyCallbackWithDisabledFeature = async (
+        config?: AnyPolicyCreateConfig
+      ): Promise<PolicyConfig> => {
+        const esClientInfo = await elasticsearchServiceMock
+          .createClusterClient()
+          .asInternalUser.info();
+        esClientInfo.cluster_name = '';
+        esClientInfo.cluster_uuid = '';
+        return createDefaultPolicy(
+          licenseService,
+          config,
+          cloud,
+          esClientInfo,
+          productFeaturesService,
+          telemetryConfigProviderMock,
+          experimentalFeaturesWithTrustedDevicesDisabled
+        );
+      };
+
+      await createDefaultPolicyCallbackWithDisabledFeature();
+
+      expect(removeDeviceControlSpy).toHaveBeenCalledTimes(1);
+      removeDeviceControlSpy.mockRestore();
+    });
+
+    it('should remove device control when both endpointTrustedDevices product feature and experimental feature are disabled', async () => {
+      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_trusted_devices')
+      );
+      const experimentalFeaturesWithTrustedDevicesDisabled = {
+        trustedDevices: false,
+      } as ExperimentalFeatures;
+
+      const createDefaultPolicyCallbackWithBothDisabled = async (
+        config?: AnyPolicyCreateConfig
+      ): Promise<PolicyConfig> => {
+        const esClientInfo = await elasticsearchServiceMock
+          .createClusterClient()
+          .asInternalUser.info();
+        esClientInfo.cluster_name = '';
+        esClientInfo.cluster_uuid = '';
+        return createDefaultPolicy(
+          licenseService,
+          config,
+          cloud,
+          esClientInfo,
+          productFeaturesService,
+          telemetryConfigProviderMock,
+          experimentalFeaturesWithTrustedDevicesDisabled
+        );
+      };
+
+      await createDefaultPolicyCallbackWithBothDisabled();
+
+      expect(removeDeviceControlSpy).toHaveBeenCalledTimes(1);
+      removeDeviceControlSpy.mockRestore();
+    });
+
+    it('should NOT remove device control when both endpointTrustedDevices product feature and trustedDevices experimental feature are enabled', async () => {
+      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      // Both features are enabled by default in the test setup
+
+      await createDefaultPolicyCallback();
+
+      expect(removeDeviceControlSpy).not.toHaveBeenCalled();
+      removeDeviceControlSpy.mockRestore();
+    });
+  });
+
+  describe('Linux DNS Events Feature Flag', () => {
+    describe('with linuxDnsEvents feature flag disabled', () => {
+      const createDefaultPolicyWithFeature = async (
+        config?: AnyPolicyCreateConfig
+      ): Promise<PolicyConfig> => {
+        const experimentalFeaturesWithDnsDisabled = {
+          trustedDevices: true,
+          linuxDnsEvents: false,
+        } as ExperimentalFeatures;
+
+        const esClientInfo = await elasticsearchServiceMock
+          .createClusterClient()
+          .asInternalUser.info();
+        esClientInfo.cluster_name = '';
+        esClientInfo.cluster_uuid = '';
+        return createDefaultPolicy(
+          licenseService,
+          config,
+          cloud,
+          esClientInfo,
+          productFeaturesService,
+          telemetryConfigProviderMock,
+          experimentalFeaturesWithDnsDisabled
+        );
+      };
+
+      it('should remove Linux DNS events from default policy', async () => {
+        const removeLinuxDnsEventsSpy = jest.spyOn(PolicyConfigHelpers, 'removeLinuxDnsEvents');
+        const defaultPolicy = policyFactory();
+
+        const policy = await createDefaultPolicyWithFeature();
+
+        expect(removeLinuxDnsEventsSpy).toHaveBeenCalledTimes(1);
+        expect(policy.linux.events).not.toHaveProperty('dns');
+        expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
+        expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+
+        removeLinuxDnsEventsSpy.mockRestore();
+      });
+
+      it('should remove Linux DNS events when license is below platinum', async () => {
+        licenseEmitter.next(Gold);
+
+        const policy = await createDefaultPolicyWithFeature();
+
+        expect(policy.linux.events.dns).toBeUndefined();
+      });
+
+      it('should remove Linux DNS events with DataCollection preset', async () => {
+        const config = {
+          type: 'endpoint',
+          endpointConfig: { preset: 'DataCollection' },
+        } as PolicyCreateEndpointConfig;
+
+        const policy = await createDefaultPolicyWithFeature(config);
+
+        expect(policy.linux.events.dns).toBeUndefined();
+      });
+
+      it('should remove Linux DNS events with NGAV preset', async () => {
+        const config = {
+          type: 'endpoint',
+          endpointConfig: { preset: 'NGAV' },
+        } as PolicyCreateEndpointConfig;
+
+        const policy = await createDefaultPolicyWithFeature(config);
+
+        expect(policy.linux.events.dns).toBeUndefined();
+      });
+
+      it('should remove Linux DNS events with EDREssential preset', async () => {
+        const config = {
+          type: 'endpoint',
+          endpointConfig: { preset: 'EDREssential' },
+        } as PolicyCreateEndpointConfig;
+
+        const policy = await createDefaultPolicyWithFeature(config);
+
+        expect(policy.linux.events.dns).toBeUndefined();
+      });
+
+      it('should remove Linux DNS events with EDRComplete preset', async () => {
+        const config = {
+          type: 'endpoint',
+          endpointConfig: { preset: 'EDRComplete' },
+        } as PolicyCreateEndpointConfig;
+
+        const policy = await createDefaultPolicyWithFeature(config);
+
+        expect(policy.linux.events.dns).toBeUndefined();
+      });
+
+      it('should remove Linux DNS events with cloud config', async () => {
+        const config = {
+          type: 'cloud',
+        } as PolicyCreateCloudConfig;
+
+        const policy = await createDefaultPolicyWithFeature(config);
+
+        expect(policy.linux.events.dns).toBeUndefined();
+      });
+    });
+
+    describe('with linuxDnsEvents feature flag enabled', () => {
+      const createDefaultPolicyWithFeature = async (
+        config?: AnyPolicyCreateConfig
+      ): Promise<PolicyConfig> => {
+        const experimentalFeaturesWithDnsEnabled = {
+          trustedDevices: true,
+          linuxDnsEvents: true,
+        } as ExperimentalFeatures;
+
+        const esClientInfo = await elasticsearchServiceMock
+          .createClusterClient()
+          .asInternalUser.info();
+        esClientInfo.cluster_name = '';
+        esClientInfo.cluster_uuid = '';
+        return createDefaultPolicy(
+          licenseService,
+          config,
+          cloud,
+          esClientInfo,
+          productFeaturesService,
+          telemetryConfigProviderMock,
+          experimentalFeaturesWithDnsEnabled
+        );
+      };
+
+      it('should NOT remove Linux DNS events from default policy', async () => {
+        const removeLinuxDnsEventsSpy = jest.spyOn(PolicyConfigHelpers, 'removeLinuxDnsEvents');
+        const defaultPolicy = policyFactory();
+
+        const policy = await createDefaultPolicyWithFeature();
+
+        expect(removeLinuxDnsEventsSpy).not.toHaveBeenCalled();
+        expect(policy.linux.events.dns).toBe(true);
+        expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
+        expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
+        expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+
+        removeLinuxDnsEventsSpy.mockRestore();
+      });
+
+      it('should include Linux DNS events when license is below platinum', async () => {
+        licenseEmitter.next(Gold);
+
+        const policy = await createDefaultPolicyWithFeature();
+
+        expect(policy.linux.events.dns).toBe(true);
+      });
+
+      it('should include Linux DNS events with DataCollection preset', async () => {
+        const config = {
+          type: 'endpoint',
+          endpointConfig: { preset: 'DataCollection' },
+        } as PolicyCreateEndpointConfig;
+
+        const policy = await createDefaultPolicyWithFeature(config);
+
+        expect(policy.linux.events.dns).toBe(true);
+      });
+
+      it('should include Linux DNS events with NGAV preset (but set to false)', async () => {
+        const config = {
+          type: 'endpoint',
+          endpointConfig: { preset: 'NGAV' },
+        } as PolicyCreateEndpointConfig;
+
+        const policy = await createDefaultPolicyWithFeature(config);
+
+        expect(policy.linux.events.dns).toBe(false);
+      });
+
+      it('should include Linux DNS events with EDREssential preset (but set to false)', async () => {
+        const config = {
+          type: 'endpoint',
+          endpointConfig: { preset: 'EDREssential' },
+        } as PolicyCreateEndpointConfig;
+
+        const policy = await createDefaultPolicyWithFeature(config);
+
+        expect(policy.linux.events.dns).toBe(false);
+      });
+
+      it('should include Linux DNS events with EDRComplete preset', async () => {
+        const config = {
+          type: 'endpoint',
+          endpointConfig: { preset: 'EDRComplete' },
+        } as PolicyCreateEndpointConfig;
+
+        const policy = await createDefaultPolicyWithFeature(config);
+
+        expect(policy.linux.events.dns).toBe(true);
+      });
+
+      it('should include Linux DNS events with cloud config', async () => {
+        const config = {
+          type: 'cloud',
+        } as PolicyCreateCloudConfig;
+
+        const policy = await createDefaultPolicyWithFeature(config);
+
+        expect(policy.linux.events.dns).toBe(true);
+      });
     });
   });
 });

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { CCRReadExceptionsStats } from '../../../common/types/alerts';
+import type { CCRReadExceptionsStats } from '../../../common/types/alerts';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
@@ -30,90 +30,88 @@ export async function fetchCCRReadExceptions(
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations.remote_clusters.buckets'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    nested: {
-                      ignore_unmapped: true,
-                      path: 'ccr_stats.read_exceptions',
-                      query: {
-                        exists: {
-                          field: 'ccr_stats.read_exceptions.exception',
-                        },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  nested: {
+                    ignore_unmapped: true,
+                    path: 'ccr_stats.read_exceptions',
+                    query: {
+                      exists: {
+                        field: 'ccr_stats.read_exceptions.exception',
                       },
                     },
                   },
-                  {
-                    nested: {
-                      ignore_unmapped: true,
-                      path: 'elasticsearch.ccr.read_exceptions',
-                      query: {
-                        exists: {
-                          field: 'elasticsearch.ccr.read_exceptions.exception',
-                        },
-                      },
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-            createDatasetFilter('ccr_stats', 'ccr', getElasticsearchDataset('ccr')),
-            {
-              range: {
-                timestamp: {
-                  format: 'epoch_millis',
-                  gte: startMs,
-                  lte: endMs,
                 },
+                {
+                  nested: {
+                    ignore_unmapped: true,
+                    path: 'elasticsearch.ccr.read_exceptions',
+                    query: {
+                      exists: {
+                        field: 'elasticsearch.ccr.read_exceptions.exception',
+                      },
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          createDatasetFilter('ccr_stats', 'ccr', getElasticsearchDataset('ccr')),
+          {
+            range: {
+              timestamp: {
+                format: 'epoch_millis',
+                gte: startMs,
+                lte: endMs,
               },
             },
-          ],
-        },
-      },
-      aggs: {
-        remote_clusters: {
-          terms: {
-            field: 'ccr_stats.remote_cluster',
-            size,
           },
-          aggs: {
-            follower_indices: {
-              terms: {
-                field: 'ccr_stats.follower_index',
-                size,
-              },
-              aggs: {
-                hits: {
-                  top_hits: {
-                    sort: [
-                      {
-                        timestamp: {
-                          order: 'desc' as const,
-                          unmapped_type: 'long' as const,
-                        },
+        ],
+      },
+    },
+    aggs: {
+      remote_clusters: {
+        terms: {
+          field: 'ccr_stats.remote_cluster',
+          size,
+        },
+        aggs: {
+          follower_indices: {
+            terms: {
+              field: 'ccr_stats.follower_index',
+              size,
+            },
+            aggs: {
+              hits: {
+                top_hits: {
+                  sort: [
+                    {
+                      timestamp: {
+                        order: 'desc' as const,
+                        unmapped_type: 'long' as const,
                       },
-                    ],
-                    _source: {
-                      includes: [
-                        'cluster_uuid',
-                        'elasticsearch.cluster.id',
-                        'ccr_stats.read_exceptions',
-                        'elasticsearch.ccr.read_exceptions',
-                        'ccr_stats.shard_id',
-                        'elasticsearch.ccr.shard_id',
-                        'ccr_stats.leader_index',
-                        'elasticsearch.ccr.leader.index',
-                      ],
                     },
-                    size: 1,
+                  ],
+                  _source: {
+                    includes: [
+                      'cluster_uuid',
+                      'elasticsearch.cluster.id',
+                      'ccr_stats.read_exceptions',
+                      'elasticsearch.ccr.read_exceptions',
+                      'ccr_stats.shard_id',
+                      'elasticsearch.ccr.shard_id',
+                      'ccr_stats.leader_index',
+                      'elasticsearch.ccr.leader.index',
+                    ],
                   },
+                  size: 1,
                 },
               },
             },
@@ -126,7 +124,7 @@ export async function fetchCCRReadExceptions(
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

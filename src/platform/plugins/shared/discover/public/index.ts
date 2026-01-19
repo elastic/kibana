@@ -15,11 +15,11 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
 }
 
-export type { DiscoverAppState } from './application/main/state_management/discover_app_state_container';
-export type { DiscoverStateContainer } from './application/main/state_management/discover_state';
+export type { DiscoverAppState } from './application/main/state_management/redux';
 export type { DataDocumentsMsg } from './application/main/state_management/discover_data_state_container';
 export type { DiscoverContainerProps } from './components/discover_container';
 export type {
+  ExtendedDiscoverStateContainer,
   CustomizationCallback,
   DiscoverCustomization,
   DiscoverCustomizationService,
@@ -33,11 +33,11 @@ export {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   apiPublishesSavedSearch,
   type PublishesSavedSearch,
+  type PublishesWritableSavedSearch,
   type HasTimeRange,
-  type SearchEmbeddableSerializedState,
   type SearchEmbeddableRuntimeState,
   type SearchEmbeddableApi,
-  type NonPersistedDisplayOptions,
 } from './embeddable';
-export { loadSharingDataHelpers } from './utils';
 export type { DiscoverServices } from './build_services';
+
+export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');

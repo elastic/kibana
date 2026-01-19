@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { EuiFlexGroup } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
+import styled from '@emotion/styled';
 
 const CONTAINER_BREAKPOINT = 500;
 
@@ -35,7 +36,7 @@ export const operatorContainer = cx(
     text-align: center;
 
     @container (min-width: ${CONTAINER_BREAKPOINT}px) {
-      margin-top: ${euiThemeVars.euiSizeXL};
+      align-self: center;
       justify-content: flex-start;
       flex: 0 0 auto;
     }
@@ -51,12 +52,12 @@ export const input = cx(
   `
 );
 
-export const fieldSection = css`
-  gap: ${euiThemeVars.euiSizeS};
+export const FieldSectionGroup = styled(EuiFlexGroup)`
+  gap: ${({ theme }) => theme.euiTheme.size.s};
   flex-wrap: wrap;
 
   @container (min-width: ${CONTAINER_BREAKPOINT}px) {
     flex-wrap: nowrap;
-    gap: ${euiThemeVars.euiSizeL};
+    gap: ${({ theme }) => theme.euiTheme.size.l};
   }
 `;

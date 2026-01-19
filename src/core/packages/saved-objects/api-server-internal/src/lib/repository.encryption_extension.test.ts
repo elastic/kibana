@@ -14,14 +14,14 @@ import {
   mockGetSearchDsl,
 } from './repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaMigratorMock } from '../mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
   MAIN_SAVED_OBJECT_INDEX,
   type ISavedObjectsEncryptionExtension,

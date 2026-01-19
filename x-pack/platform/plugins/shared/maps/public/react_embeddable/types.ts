@@ -6,62 +6,38 @@
  */
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
-import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import {
-  apiIsOfType,
-  apiPublishesTitle,
-  apiPublishesUnifiedSearch,
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type {
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
+  HasType,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import { Observable } from 'rxjs';
-import { MapAttributes } from '../../common/content_management';
-import {
-  LayerDescriptor,
-  MapCenterAndZoom,
-  MapExtent,
-  MapSettings,
-} from '../../common/descriptor_types';
-import { ILayer } from '../classes/layers/layer';
-import { EventHandlers } from '../reducers/non_serializable_instances';
+import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import type { Observable } from 'rxjs';
+import type { LayerDescriptor } from '../../common/descriptor_types';
+import type { ILayer } from '../classes/layers/layer';
+import type { EventHandlers } from '../reducers/non_serializable_instances';
+import type {
+  MapByReferenceState,
+  MapByValueState,
+  MapEmbeddableState,
+} from '../../common/embeddable/types';
 
-export type MapSerializedState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> & {
-    // by-value
-    attributes?: MapAttributes;
-    // by-reference
-    savedObjectId?: string;
-
-    isLayerTOCOpen?: boolean;
-    openTOCDetails?: string[];
-    mapCenter?: MapCenterAndZoom;
-    mapBuffer?: MapExtent;
-    mapSettings?: Partial<MapSettings>;
-    hiddenLayers?: string[];
-    timeRange?: TimeRange;
-    filterByMapExtent?: boolean;
-    isMovementSynchronized?: boolean;
-  };
-
-export type MapRuntimeState = MapSerializedState;
-
-export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
+export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
   HasDynamicActions &
   Partial<HasEditCapabilities> &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesDataLoading &
   PublishesDataViews &
+  PublishesProjectRoutingOverrides &
   PublishesUnifiedSearch &
-  HasLibraryTransforms<MapSerializedState, MapSerializedState> & {
+  HasLibraryTransforms<MapByReferenceState, MapByValueState> & {
     getLayerList: () => ILayer[];
     reload: () => void;
     setEventHandlers: (eventHandlers: EventHandlers) => void;
@@ -72,10 +48,6 @@ export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
 
 export const isMapApi = (api: unknown): api is MapApi => {
   return Boolean(
-    api &&
-      apiIsOfType(api, 'map') &&
-      typeof (api as MapApi).getLayerList === 'function' &&
-      apiPublishesTitle(api) &&
-      apiPublishesUnifiedSearch(api)
+    api && (api as HasType)?.type === 'map' && typeof (api as MapApi).getLayerList === 'function'
   );
 };

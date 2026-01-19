@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { journey, step, expect, before, Page } from '@elastic/synthetics';
+import type { Page } from '@elastic/synthetics';
+import { journey, step, expect, before } from '@elastic/synthetics';
 import { noop } from 'lodash';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { byTestId, delay } from '../../../helpers/utils';
@@ -69,7 +70,7 @@ journey('MonitorAlerts', async ({ page, params }: { page: Page; params: any }) =
   });
 
   step('close anomaly detection flyout', async () => {
-    await page.click(byTestId('cancelSaveRuleButton'));
+    await page.click(byTestId('ruleFlyoutFooterCancelButton'));
   });
 
   step('open anomaly detection alert', async () => {
@@ -83,7 +84,7 @@ journey('MonitorAlerts', async ({ page, params }: { page: Page; params: any }) =
   });
 
   step('save anomaly detection alert', async () => {
-    await page.click(byTestId('saveRuleButton'));
+    await page.click(byTestId('ruleFlyoutFooterSaveButton'));
     await page.click(byTestId('confirmModalConfirmButton'));
     await page.waitForSelector(`text=Created rule "${alertId}"`);
   });

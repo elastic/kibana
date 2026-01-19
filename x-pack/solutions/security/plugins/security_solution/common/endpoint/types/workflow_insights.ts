@@ -57,6 +57,8 @@ export interface SecurityWorkflowInsight {
   value: string;
   remediation: {
     exception_list_items?: ExceptionListRemediationType[];
+    descriptive?: string; // text based explanation
+    link?: string;
   };
   metadata: {
     notes?: Record<string, string>;

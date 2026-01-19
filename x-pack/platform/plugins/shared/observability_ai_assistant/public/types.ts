@@ -8,8 +8,9 @@
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
@@ -20,18 +21,18 @@ import type {
   Message,
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
-  AdHocInstruction,
+  Instruction,
 } from '../common/types';
 import type { TelemetryEventTypeWithPayload } from './analytics';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { ChatActionClickHandler } from './components/chat/types';
 import type { InsightProps } from './components/insight/insight';
-import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
-import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
-import { useChat } from './hooks/use_chat';
+import type { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
+import type { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
+import type { useChat } from './hooks/use_chat';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
-import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
-import { createScreenContextAction } from './utils/create_screen_context_action';
+import type { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
+import type { createScreenContextAction } from './utils/create_screen_context_action';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -49,6 +50,7 @@ export interface ObservabilityAIAssistantChatService {
   chat: (
     name: string,
     options: {
+      systemMessage: string;
       messages: Message[];
       connectorId: string;
       functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
@@ -61,15 +63,12 @@ export interface ObservabilityAIAssistantChatService {
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;
+    systemMessage?: string;
     messages: Message[];
     persist: boolean;
-    disableFunctions:
-      | boolean
-      | {
-          except: string[];
-        };
+    disableFunctions: boolean;
     signal: AbortSignal;
-    instructions?: AdHocInstruction[];
+    instructions?: Array<string | Instruction>;
     scopes: AssistantScope[];
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getFunctions: (options?: {
@@ -79,7 +78,7 @@ export interface ObservabilityAIAssistantChatService {
   }) => FunctionDefinition[];
   functions$: BehaviorSubject<FunctionDefinition[]>;
   hasFunction: (name: string) => boolean;
-  getSystemMessage: () => Message;
+  getSystemMessage: () => string;
   hasRenderFunction: (name: string) => boolean;
   renderFunction: (
     name: string,
@@ -144,6 +143,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
 export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface ObservabilityAIAssistantPublicSetup {}

@@ -6,12 +6,12 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { AADAlert } from '@kbn/alerts-as-data-utils';
+import type { AADAlert } from '@kbn/alerts-as-data-utils';
 import { get, isEmpty } from 'lodash';
-import { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
+import type { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { AlertHit, CombinedSummarizedAlerts } from '../types';
-import {
+import type { AlertHit, CombinedSummarizedAlerts } from '../types';
+import type {
   AlertInstanceMeta,
   AlertInstanceState,
   RawAlertInstance,
@@ -68,6 +68,7 @@ export class Alert<
     this.meta = meta;
     this.meta.uuid = meta.uuid ?? uuidV4();
     this.meta.maintenanceWindowIds = meta.maintenanceWindowIds ?? [];
+    this.meta.maintenanceWindowNames = meta.maintenanceWindowNames ?? [];
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
     }
@@ -79,6 +80,10 @@ export class Alert<
 
   getUuid() {
     return this.meta.uuid!;
+  }
+
+  matchesUuid(uuid: string): boolean {
+    return this.meta.uuid === uuid || this.id === uuid;
   }
 
   isAlertAsData() {
@@ -216,6 +221,15 @@ export class Alert<
     return this;
   }
 
+  clearThrottlingLastScheduledActions(allActionUuids: string[]) {
+    const throttlingActions = this.meta.lastScheduledActions?.actions || {};
+    Object.keys(throttlingActions).forEach((id) => {
+      if (!allActionUuids.includes(id)) {
+        delete throttlingActions[id];
+      }
+    });
+  }
+
   updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null, uuid?: string) {
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
@@ -224,9 +238,11 @@ export class Alert<
     this.meta.lastScheduledActions.group = group;
     this.meta.lastScheduledActions.date = date;
 
+    // action group has changed, clear out the actions history
     if (this.meta.lastScheduledActions.group !== group) {
       this.meta.lastScheduledActions.actions = {};
     } else if (uuid) {
+      // uuid is provided, this is an action on interval
       if (!this.meta.lastScheduledActions.actions) {
         this.meta.lastScheduledActions.actions = {};
       }
@@ -245,13 +261,14 @@ export class Alert<
     return this.toRaw();
   }
 
-  toRaw(recovered: boolean = false): RawAlertInstance {
+  toRaw(recovered = false): RawAlertInstance {
     return recovered
       ? {
           // for a recovered alert, we only care to track the flappingHistory,
           // the flapping flag, and the UUID
           meta: {
             maintenanceWindowIds: this.meta.maintenanceWindowIds,
+            maintenanceWindowNames: this.meta.maintenanceWindowNames,
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
             uuid: this.meta.uuid,
@@ -327,6 +344,14 @@ export class Alert<
 
   getMaintenanceWindowIds() {
     return this.meta.maintenanceWindowIds ?? [];
+  }
+
+  setMaintenanceWindowNames(maintenanceWindowNames: string[] = []) {
+    this.meta.maintenanceWindowNames = maintenanceWindowNames;
+  }
+
+  getMaintenanceWindowNames() {
+    return this.meta.maintenanceWindowNames ?? [];
   }
 
   incrementActiveCount() {

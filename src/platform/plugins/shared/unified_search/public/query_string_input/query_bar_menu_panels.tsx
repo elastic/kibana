@@ -7,20 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useRef, useEffect, RefObject } from 'react';
+import type { RefObject } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { isEqual } from 'lodash';
-import {
+import type {
   EuiContextMenuPanelDescriptor,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
-  Filter,
-  Query,
-  TimeRange,
   enableFilter,
   disableFilter,
   toggleFilterNegated,
@@ -39,11 +35,10 @@ import {
 } from '@kbn/data-plugin/common';
 import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import { QueryLanguageSwitcher, fromUser } from '@kbn/kql/public';
 import type { IUnifiedSearchPluginServices } from '../types';
-import { fromUser } from './from_user';
-import { QueryLanguageSwitcher } from './language_switcher';
-import { FilterPanelOption } from '../types';
+import type { FilterPanelOption } from '../types';
 import { PanelTitle } from './panel_title';
 
 const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {
@@ -171,6 +166,7 @@ export interface QueryBarMenuPanelsProps {
   timeFilter?: SavedQueryTimeFilter;
   query?: Query;
   showSaveQuery?: boolean;
+  showSavedQueryControls?: boolean;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   savedQueryService: SavedQueryService;
@@ -199,6 +195,7 @@ export function useQueryBarMenuPanels({
   timeFilter,
   query,
   showSaveQuery,
+  showSavedQueryControls = true,
   showFilterBar,
   showQueryInput,
   savedQueryService,
@@ -220,7 +217,10 @@ export function useQueryBarMenuPanels({
   const { appName, usageCollection, uiSettings, http, storage, application } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const showSavedQueries =
-    showQueryInput && showFilterBar && application.capabilities.savedQueryManagement?.showQueries;
+    showSavedQueryControls &&
+    showQueryInput &&
+    showFilterBar &&
+    application.capabilities.savedQueryManagement?.showQueries;
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
   const [hasSavedQueries, setHasSavedQueries] = useState(false);
@@ -255,9 +255,10 @@ export function useQueryBarMenuPanels({
 
   useEffect(() => {
     if (savedQuery) {
-      const filtersHaveChanged = Boolean(
-        savedQuery?.attributes.filters &&
-          !compareFilters(filters ?? [], savedQuery.attributes.filters, COMPARE_ALL_OPTIONS)
+      const filtersHaveChanged = !compareFilters(
+        filters ?? [],
+        savedQuery.attributes.filters ?? [],
+        COMPARE_ALL_OPTIONS
       );
 
       const timeFilterHasChanged = Boolean(
@@ -335,13 +336,6 @@ export function useQueryBarMenuPanels({
     }
   };
 
-  const onQueryStringChange = (value: string) => {
-    onQueryChange({
-      query: { query: value, language },
-      dateRange: getDateRange(),
-    });
-  };
-
   const onSelectLanguage = (lang: string) => {
     http.post('/internal/kql_opt_in_stats', {
       version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
@@ -352,7 +346,10 @@ export function useQueryBarMenuPanels({
     storage.set(storageKey!, lang);
 
     const newQuery = { query: '', language: lang };
-    onQueryStringChange(newQuery.query);
+    onQueryChange({
+      query: newQuery,
+      dateRange: getDateRange(),
+    });
     onQueryBarSubmit({
       query: { query: fromUser(newQuery.query), language: newQuery.language },
       dateRange: getDateRange(),

@@ -14,6 +14,13 @@ export const registerVersionedDeprecatedRoute = (router: IRouter) => {
   router.versioned
     .get({
       path: DEPRECATED_ROUTES.VERSIONED_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
+        },
+      },
       description: 'Routing example plugin deprecated versioned route.',
       access: 'public',
       options: {
@@ -43,6 +50,13 @@ export const registerVersionedDeprecatedRoute = (router: IRouter) => {
   router.versioned
     .get({
       path: DEPRECATED_ROUTES.VERSIONED_INTERNAL_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
+        },
+      },
       description: 'Routing example plugin deprecated versioned route.',
       access: 'internal',
       options: {

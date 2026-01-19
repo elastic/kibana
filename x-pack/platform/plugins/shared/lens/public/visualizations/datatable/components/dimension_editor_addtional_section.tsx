@@ -9,10 +9,12 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiFormRow, EuiFieldText, EuiText, useEuiTheme, EuiComboBox } from '@elastic/eui';
-import { PaletteRegistry } from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import type { VisualizationDimensionEditorProps } from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
+import type {
+  VisualizationDimensionEditorProps,
+  DatatableVisualizationState,
+} from '@kbn/lens-common';
 
 import type { ColumnState } from '../../../../common/expressions';
 
@@ -20,11 +22,9 @@ import {
   getDefaultSummaryLabel,
   getFinalSummaryConfiguration,
   getSummaryRowOptions,
-} from '../../../../common/expressions/datatable/summary';
-import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
-import { DatatableInspectorTables } from '../../../../common/expressions/datatable/datatable_fn';
-
-import './dimension_editor.scss';
+} from '../../../../common/expressions/impl/datatable/summary';
+import { isNumericFieldForDatatable } from '../../../../common/expressions/impl/datatable/utils';
+import { DatatableInspectorTables } from '../../../../common/expressions/defs/datatable/datatable';
 
 type ColumnType = DatatableVisualizationState['columns'][number];
 type SummaryRowType = Extract<ColumnState['summaryRow'], string>;

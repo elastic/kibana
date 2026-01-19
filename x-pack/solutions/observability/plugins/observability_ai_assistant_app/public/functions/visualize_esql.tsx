@@ -42,11 +42,14 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  VisualizeESQLFunctionArguments,
-  VisualizeQueryResponse,
+import {
+  type VisualizeESQLFunctionArguments,
+  type VisualizeQueryResponse,
 } from '../../common/functions/visualize_esql';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+
+import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+
+const VISUALIZE_QUERY_FUNCTION_NAME = 'visualize_query';
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
@@ -109,7 +112,11 @@ export function VisualizeESQL({
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return getESQLAdHocDataview(query, dataViews);
+    return getESQLAdHocDataview({
+      dataViewsService: dataViews,
+      query,
+      options: { skipFetchFields: true },
+    });
   }, [query, dataViews]);
 
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
@@ -304,7 +311,7 @@ export function VisualizeESQL({
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
-                <EuiToolTip content={editVisualizationLabel}>
+                <EuiToolTip content={editVisualizationLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
                     iconType="pencil"
@@ -319,7 +326,7 @@ export function VisualizeESQL({
                   />
                 </EuiToolTip>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={saveVisualizationLabel}>
+                  <EuiToolTip content={saveVisualizationLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
                       size="xs"
                       iconType="save"
@@ -391,7 +398,7 @@ export function registerVisualizeQueryRenderFunction({
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
 }) {
   registerRenderFunction(
-    'visualize_query',
+    VISUALIZE_QUERY_FUNCTION_NAME,
     ({
       arguments: { query, userOverrides, intention },
       response,

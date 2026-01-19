@@ -15,7 +15,8 @@ import type { Rule } from 'eslint';
 import type { Node } from 'estree';
 import type { ModuleType } from '@kbn/repo-source-classifier';
 
-import { visitAllImportStatements, Importer } from '../helpers/visit_all_import_statements';
+import type { Importer } from '../helpers/visit_all_import_statements';
+import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
@@ -89,8 +90,8 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
     return visitAllImportStatements((req, { node, importer, type }) => {
       if (
         req === null ||
-        // we can ignore imports using the raw-loader, they will need to be resolved but can be managed on a case by case basis
-        req.startsWith('!!raw-loader') ||
+        // we can ignore imports using the ?raw (replacing legacy raw-loader), they will need to be resolved but can be managed on a case by case basis
+        req.endsWith('?raw') ||
         // type only imports can stretch across all the boundaries
         isTypeOnlyImport(importer)
       ) {

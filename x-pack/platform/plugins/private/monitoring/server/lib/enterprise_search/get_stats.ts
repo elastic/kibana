@@ -6,10 +6,10 @@
  */
 
 import moment from 'moment';
-import { TimeRange } from '../../../common/http_api/shared';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { TimeRange } from '../../../common/http_api/shared';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import {
@@ -38,14 +38,12 @@ export async function getStats(
     filter_path: entSearchAggFilterPath,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      query: createEnterpriseSearchQuery({
-        start,
-        end,
-        uuid: clusterUuid,
-      }),
-      aggs: entSearchUuidsAgg(maxBucketSize),
-    },
+    query: createEnterpriseSearchQuery({
+      start,
+      end,
+      uuid: clusterUuid,
+    }),
+    aggs: entSearchUuidsAgg(maxBucketSize),
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

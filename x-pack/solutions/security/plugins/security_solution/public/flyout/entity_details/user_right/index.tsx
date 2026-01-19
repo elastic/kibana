@@ -25,6 +25,7 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
+import { UserPanelFooter } from './footer';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { useObservedUser } from './hooks/use_observed_user';
@@ -33,13 +34,14 @@ import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { useKibana } from '../../../common/lib/kibana';
+import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   userName: string;
-  isDraggable?: boolean;
-  isPreviewMode?: boolean;
+  isPreviewMode: boolean;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -58,9 +60,11 @@ export const UserPanel = ({
   contextID,
   scopeId,
   userName,
-  isDraggable,
-  isPreviewMode,
+  isPreviewMode = false,
 }: UserPanelProps) => {
+  const { uiSettings } = useKibana().services;
+  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
@@ -78,7 +82,7 @@ export const UserPanel = ({
 
   const observedUser = useObservedUser(userName, scopeId);
   const email = observedUser.details.user?.email;
-  const managedUser = useManagedUser(userName, email, observedUser.isLoading);
+  const managedUser = useManagedUser();
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
@@ -115,12 +119,11 @@ export const UserPanel = ({
     setQuery,
   });
 
-  const { openDetailsPanel, isLinkEnabled } = useNavigateToUserDetails({
+  const openDetailsPanel = useNavigateToUserDetails({
     userName,
     email,
     scopeId,
     contextID,
-    isDraggable,
     isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
@@ -142,7 +145,7 @@ export const UserPanel = ({
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
-  if (observedUser.isLoading || managedUser.isLoading) {
+  if (observedUser.isLoading) {
     return <FlyoutLoading />;
   }
 
@@ -170,7 +173,7 @@ export const UserPanel = ({
               }
               expandDetails={openPanelFirstTab}
               isPreviewMode={isPreviewMode}
-              isPreview={scopeId === TableId.rulePreview}
+              isRulePreview={scopeId === TableId.rulePreview}
             />
             <UserPanelHeader
               userName={userName}
@@ -179,25 +182,18 @@ export const UserPanel = ({
             />
             <UserPanelContent
               userName={userName}
-              managedUser={managedUser}
               observedUser={observedUserWithAnomalies}
               riskScoreState={riskScoreState}
               recalculatingScore={recalculatingScore}
               onAssetCriticalityChange={calculateEntityRiskScore}
               contextID={contextID}
               scopeId={scopeId}
-              isDraggable={!!isDraggable}
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
-              isLinkEnabled={isLinkEnabled}
             />
+            {!isPreviewMode && assetInventoryEnabled && <UserPanelFooter userName={userName} />}
             {isPreviewMode && (
-              <UserPreviewPanelFooter
-                userName={userName}
-                contextID={contextID}
-                scopeId={scopeId}
-                isDraggable={!!isDraggable}
-              />
+              <UserPreviewPanelFooter userName={userName} contextID={contextID} scopeId={scopeId} />
             )}
           </>
         );

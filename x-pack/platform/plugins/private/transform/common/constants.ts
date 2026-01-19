@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 import type { TransformHealthTests } from './types/alerting';
 

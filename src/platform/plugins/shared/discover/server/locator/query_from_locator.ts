@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Query } from '@kbn/es-query';
-import { LocatorServicesDeps } from '.';
-import { DiscoverAppLocatorParams } from '../../common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { LocatorServicesDeps } from '.';
+import type { DiscoverAppLocatorParams } from '../../common';
 
 /**
  * @internal

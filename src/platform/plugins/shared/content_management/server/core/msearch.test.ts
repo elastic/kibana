@@ -12,7 +12,8 @@ import { MSearchService } from './msearch';
 import { ContentRegistry } from './registry';
 import { createMockedStorage } from './mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { StorageContext } from '.';
+import type { StorageContext } from '.';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 const SEARCH_LISTING_LIMIT = 100;
 const SEARCH_PER_PAGE = 10;
@@ -65,6 +66,7 @@ const setup = () => {
 
 const mockStorageContext = (ctx: Partial<StorageContext> = {}): StorageContext => {
   return {
+    request: mockRouter.createFakeKibanaRequest({}),
     requestHandlerContext: 'mockRequestHandlerContext' as any,
     utils: 'mockUtils' as any,
     version: {

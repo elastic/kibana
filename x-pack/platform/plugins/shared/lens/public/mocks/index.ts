@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DragContextState, DragContextValue } from '@kbn/dom-drag-drop';
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DragContextState, DragContextValue } from '@kbn/dom-drag-drop';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { createMockDataViewsState } from '../data_views_service/mocks';
-import { FramePublicAPI } from '../types';
 export { mockDataPlugin } from './data_plugin_mock';
 export {
   visualizationMap,
@@ -25,12 +25,21 @@ export {
   mockDatasourceStates,
   defaultState,
   makeLensStore,
-  mountWithProvider,
+  mountWithReduxStore,
   renderWithReduxStore,
 } from './store_mocks';
 export { lensPluginMock } from './lens_plugin_mock';
 export { mockDataViewWithTimefield } from './dataview_mock';
 export { mockAllSuggestions } from './suggestions_mock';
+export {
+  getLensAttributesMock,
+  getLensApiMock,
+  getLensInternalApiMock,
+  getLensSerializedStateMock,
+  createParentApiMock,
+  createUnifiedSearchApi,
+  makeEmbeddableServices,
+} from '../react_embeddable/mocks';
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
 

@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { BeatsElasticsearchResponse } from './types';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
 import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
@@ -38,14 +38,12 @@ export async function getStats(req: LegacyRequest, beatsIndexPattern: string, cl
     filter_path: beatsAggFilterPath,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      query: createBeatsQuery({
-        start,
-        end,
-        clusterUuid,
-      }),
-      aggs: beatsUuidsAgg(maxBucketSize!),
-    },
+    query: createBeatsQuery({
+      start,
+      end,
+      clusterUuid,
+    }),
+    aggs: beatsUuidsAgg(maxBucketSize!),
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

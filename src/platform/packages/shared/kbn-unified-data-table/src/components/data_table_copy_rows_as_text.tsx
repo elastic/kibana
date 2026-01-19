@@ -12,11 +12,13 @@ import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import type { ToastsStart } from '@kbn/core/public';
-import { DataTableRecord, calcFieldCounts } from '@kbn/discover-utils';
-import { copyRowsAsTextToClipboard } from '../utils/copy_value_to_clipboard';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { calcFieldCounts } from '@kbn/discover-utils';
+import { copyRowsAsTextToClipboard, CopyAsTextFormat } from '../utils/copy_value_to_clipboard';
 import { UnifiedDataTableContext } from '../table_context';
 
 interface DataTableCopyRowsAsTextProps {
+  format: CopyAsTextFormat;
   rows: DataTableRecord[];
   toastNotifications: ToastsStart;
   columns: string[];
@@ -24,6 +26,7 @@ interface DataTableCopyRowsAsTextProps {
 }
 
 export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = ({
+  format,
   rows,
   toastNotifications,
   columns,
@@ -36,7 +39,11 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
 
   return (
     <EuiContextMenuItem
-      data-test-subj="unifiedDataTableCopyRowsAsText"
+      data-test-subj={
+        format === CopyAsTextFormat.markdown
+          ? 'unifiedDataTableCopyRowsAsMarkdown'
+          : 'unifiedDataTableCopyRowsAsText'
+      }
       icon="copyClipboard"
       disabled={isProcessing}
       onClick={async () => {
@@ -54,6 +61,7 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
         }, [] as string[]);
 
         await copyRowsAsTextToClipboard({
+          format,
           columns: uniq(outputColumns),
           // preserving the original order of rows rather than the order of selecting rows
           selectedRowIndices: rows.reduce((acc, row, index) => {
@@ -70,10 +78,17 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
         onCompleted();
       }}
     >
-      <FormattedMessage
-        id="unifiedDataTable.copySelectionToClipboard"
-        defaultMessage="Copy selection as text"
-      />
+      {format === CopyAsTextFormat.markdown ? (
+        <FormattedMessage
+          id="unifiedDataTable.copySelectionAsMarkdownToClipboard"
+          defaultMessage="Copy selection as Markdown"
+        />
+      ) : (
+        <FormattedMessage
+          id="unifiedDataTable.copySelectionToClipboard"
+          defaultMessage="Copy selection as text"
+        />
+      )}
     </EuiContextMenuItem>
   );
 };

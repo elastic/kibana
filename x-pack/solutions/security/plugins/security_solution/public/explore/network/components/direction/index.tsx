@@ -23,12 +23,12 @@ export const OUTGOING = 'outgoing';
 export const LISTENING = 'listening';
 export const UNKNOWN = 'unknown';
 
-export const DEFAULT_ICON = 'questionInCircle';
+export const DEFAULT_ICON = 'question';
 
 /** Returns an icon representing the value of `network.direction` */
 export const getDirectionIcon = (
   networkDirection?: string | null
-): 'arrowUp' | 'arrowDown' | 'globe' | 'bullseye' | 'questionInCircle' => {
+): 'arrowUp' | 'arrowDown' | 'globe' | 'bullseye' | 'question' => {
   if (networkDirection == null) {
     return DEFAULT_ICON;
   }
@@ -60,14 +60,14 @@ export const DirectionBadge = React.memo<{
   contextId: string;
   direction?: string | null;
   eventId: string;
-  isDraggable?: boolean;
-}>(({ contextId, eventId, direction, isDraggable }) => (
+  scopeId: string;
+}>(({ contextId, eventId, direction, scopeId }) => (
   <DraggableBadge
+    scopeId={scopeId}
     contextId={contextId}
     eventId={eventId}
     field={NETWORK_DIRECTION_FIELD_NAME}
     iconType={getDirectionIcon(direction)}
-    isDraggable={isDraggable}
     value={direction}
     isAggregatable={true}
     fieldType="keyword"

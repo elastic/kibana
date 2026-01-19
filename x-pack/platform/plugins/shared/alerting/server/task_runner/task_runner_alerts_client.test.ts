@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import {
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
+import type {
   RuleExecutorOptions,
   RuleTypeParams,
   RuleTypeState,
@@ -16,12 +16,10 @@ import {
   Rule,
   RuleAlertData,
   RawRule,
-  MaintenanceWindowStatus,
-  DEFAULT_FLAPPING_SETTINGS,
-  DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../types';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './types';
+import { DEFAULT_FLAPPING_SETTINGS, DEFAULT_QUERY_DELAY_SETTINGS } from '../types';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -33,11 +31,11 @@ import {
   elasticsearchServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import {
@@ -57,11 +55,11 @@ import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import * as LegacyAlertsClientModule from '../alerts_client/legacy_alerts_client';
 import * as RuleRunMetricsStoreModule from '../lib/rule_run_metrics_store';
@@ -69,7 +67,7 @@ import { legacyAlertsClientMock } from '../alerts_client/legacy_alerts_client.mo
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { AlertsService } from '../alerts_service';
 import { ReplaySubject, Subject } from 'rxjs';
-import { IAlertsClient } from '../alerts_client/types';
+import type { IAlertsClient } from '../alerts_client/types';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
 import {
   TIMESTAMP,
@@ -81,6 +79,8 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
+  ALERT_MUTED,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -102,13 +102,16 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
+  ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { createTaskRunnerLogger } from './lib';
-import { SavedObject } from '@kbn/core/server';
-import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
+import type { SavedObject } from '@kbn/core/server';
+import {
+  getMockMaintenanceWindow,
+  maintenanceWindowsServiceMock,
+} from './maintenance_windows/maintenance_windows_service.mock';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
@@ -125,7 +128,6 @@ jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 jest.mock('../rules_client/lib/get_alert_from_raw');
 const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
 
-let fakeTimer: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const taskRunnerLogger = createTaskRunnerLogger({ logger, tags: ['1', 'test'] });
 
@@ -162,11 +164,12 @@ describe('Task Runner', () => {
     let mockedTaskInstance: ConcreteTaskInstance;
 
     beforeAll(() => {
-      fakeTimer = sinon.useFakeTimers();
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(DATE_1970));
       mockedTaskInstance = mockTaskInstance();
     });
 
-    afterAll(() => fakeTimer.restore());
+    afterAll(() => jest.useRealTimers());
 
     const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
     const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -271,6 +274,7 @@ describe('Task Runner', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id1',
+              title: 'test-name1',
             },
             {
               ...getMockMaintenanceWindow(),
@@ -278,12 +282,22 @@ describe('Task Runner', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id2',
+              title: 'test-name2',
             },
           ],
           maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
         });
         logger.get.mockImplementation(() => logger);
         ruleType.executor.mockResolvedValue({ state: {} });
+        clusterClient.search.mockResolvedValue({
+          took: 10,
+          timed_out: false,
+          _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+          hits: {
+            total: { relation: 'eq', value: 0 },
+            hits: [],
+          },
+        });
       });
 
       test('should not use legacy alerts client if alerts client created', async () => {
@@ -294,9 +308,9 @@ describe('Task Runner', () => {
           .spyOn(RuleRunMetricsStoreModule, 'RuleRunMetricsStore')
           .mockImplementation(() => ruleRunMetricsStore);
         mockAlertsService.createAlertsClient.mockImplementation(() => mockAlertsClient);
-        mockAlertsClient.getAlertsToSerialize.mockResolvedValue({
-          alertsToReturn: {},
-          recoveredAlertsToReturn: {},
+        mockAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
+          rawActiveAlerts: {},
+          rawRecoveredAlerts: {},
         });
         ruleRunMetricsStore.getMetrics.mockReturnValue({
           numSearches: 3,
@@ -343,6 +357,8 @@ describe('Task Runner', () => {
             consumer: 'bar',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             id: '1',
+            muteAll: false,
+            mutedInstanceIds: [],
             name: 'rule-name',
             parameters: {
               bar: true,
@@ -613,10 +629,13 @@ describe('Task Runner', () => {
               [ALERT_CONSECUTIVE_MATCHES]: 1,
               [ALERT_DURATION]: 0,
               [ALERT_FLAPPING]: false,
+              [ALERT_MUTED]: false,
               [ALERT_FLAPPING_HISTORY]: [true],
               [ALERT_INSTANCE_ID]: '1',
               [ALERT_SEVERITY_IMPROVING]: false,
               [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+              [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
+              [ALERT_PENDING_RECOVERED_COUNT]: 0,
               [ALERT_RULE_CATEGORY]: 'My test rule',
               [ALERT_RULE_CONSUMER]: 'bar',
               [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -652,9 +671,9 @@ describe('Task Runner', () => {
         mockAlertsService.createAlertsClient.mockImplementation(() => {
           throw new Error('Could not initialize!');
         });
-        mockLegacyAlertsClient.getAlertsToSerialize.mockResolvedValue({
-          alertsToReturn: {},
-          recoveredAlertsToReturn: {},
+        mockLegacyAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
+          rawActiveAlerts: {},
+          rawRecoveredAlerts: {},
         });
         ruleRunMetricsStore.getMetrics.mockReturnValue({
           numSearches: 3,
@@ -746,9 +765,9 @@ describe('Task Runner', () => {
         const spy2 = jest
           .spyOn(RuleRunMetricsStoreModule, 'RuleRunMetricsStore')
           .mockImplementation(() => ruleRunMetricsStore);
-        mockLegacyAlertsClient.getAlertsToSerialize.mockResolvedValue({
-          alertsToReturn: {},
-          recoveredAlertsToReturn: {},
+        mockLegacyAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
+          rawActiveAlerts: {},
+          rawRecoveredAlerts: {},
         });
         ruleRunMetricsStore.getMetrics.mockReturnValue({
           numSearches: 3,
@@ -832,9 +851,68 @@ describe('Task Runner', () => {
 
       test('should use rule specific flapping settings if global flapping is enabled', async () => {
         mockAlertsService.createAlertsClient.mockImplementation(() => mockAlertsClient);
-        mockAlertsClient.getAlertsToSerialize.mockResolvedValue({
-          alertsToReturn: {},
-          recoveredAlertsToReturn: {},
+        mockAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
+          rawActiveAlerts: {},
+          rawRecoveredAlerts: {},
+        });
+
+        const taskRunner = new TaskRunner({
+          ruleType: ruleTypeWithAlerts,
+          internalSavedObjectsRepository,
+          taskInstance: {
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+            },
+          },
+          context: taskRunnerFactoryInitializerParams,
+          inMemoryMetrics,
+        });
+
+        const ruleSpecificFlapping = {
+          enabled: false,
+          lookBackWindow: 10,
+          statusChangeThreshold: 10,
+        };
+
+        mockGetAlertFromRaw.mockReturnValue({
+          ...mockedRuleTypeSavedObject,
+          flapping: ruleSpecificFlapping,
+        } as Rule);
+
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          ...mockedRawRuleSO,
+          flapping: ruleSpecificFlapping,
+        } as SavedObject<RawRule>);
+
+        await taskRunner.run();
+
+        expect(mockAlertsClient.initializeExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            flappingSettings: {
+              enabled: false,
+              lookBackWindow: 10,
+              statusChangeThreshold: 10,
+            },
+          })
+        );
+      });
+
+      test('should still use rule specific flapping settings if global flapping is disabled', async () => {
+        rulesSettingsService.getSettings.mockResolvedValue({
+          flappingSettings: {
+            enabled: false,
+            lookBackWindow: 20,
+            statusChangeThreshold: 20,
+          },
+          queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+        });
+
+        mockAlertsService.createAlertsClient.mockImplementation(() => mockAlertsClient);
+        mockAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
+          rawActiveAlerts: {},
+          rawRecoveredAlerts: {},
         });
 
         const taskRunner = new TaskRunner({
@@ -872,65 +950,8 @@ describe('Task Runner', () => {
           expect.objectContaining({
             flappingSettings: {
               enabled: true,
-              ...ruleSpecificFlapping,
-            },
-          })
-        );
-      });
-
-      test('should not use rule specific flapping settings if global flapping is disabled', async () => {
-        rulesSettingsService.getSettings.mockResolvedValue({
-          flappingSettings: {
-            enabled: false,
-            lookBackWindow: 20,
-            statusChangeThreshold: 20,
-          },
-          queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
-        });
-
-        mockAlertsService.createAlertsClient.mockImplementation(() => mockAlertsClient);
-        mockAlertsClient.getAlertsToSerialize.mockResolvedValue({
-          alertsToReturn: {},
-          recoveredAlertsToReturn: {},
-        });
-
-        const taskRunner = new TaskRunner({
-          ruleType: ruleTypeWithAlerts,
-          internalSavedObjectsRepository,
-          taskInstance: {
-            ...mockedTaskInstance,
-            state: {
-              ...mockedTaskInstance.state,
-              previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-            },
-          },
-          context: taskRunnerFactoryInitializerParams,
-          inMemoryMetrics,
-        });
-
-        const ruleSpecificFlapping = {
-          lookBackWindow: 10,
-          statusChangeThreshold: 10,
-        };
-
-        mockGetAlertFromRaw.mockReturnValue({
-          ...mockedRuleTypeSavedObject,
-          flapping: ruleSpecificFlapping,
-        } as Rule);
-
-        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-          ...mockedRawRuleSO,
-          flapping: ruleSpecificFlapping,
-        } as SavedObject<RawRule>);
-
-        await taskRunner.run();
-
-        expect(mockAlertsClient.initializeExecution).toHaveBeenCalledWith(
-          expect.objectContaining({
-            flappingSettings: {
-              enabled: false,
-              lookBackWindow: 20,
-              statusChangeThreshold: 20,
+              lookBackWindow: 10,
+              statusChangeThreshold: 10,
             },
           })
         );
@@ -979,15 +1000,7 @@ describe('Task Runner', () => {
       expect(alertsClientToUse.checkLimitUsage).toHaveBeenCalled();
       expect(alertsClientNotToUse.checkLimitUsage).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        flappingSettings: {
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
-        },
-        ruleRunMetricsStore,
-      });
+      expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith();
 
       expect(alertsClientToUse.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
@@ -1000,12 +1013,12 @@ describe('Task Runner', () => {
       expect(alertsClientToUse.persistAlerts).toHaveBeenCalled();
       expect(alertsClientNotToUse.persistAlerts).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('activeCurrent');
-      expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('recoveredCurrent');
+      expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('active');
+      expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('recovered');
       expect(alertsClientNotToUse.getProcessedAlerts).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.getAlertsToSerialize).toHaveBeenCalled();
-      expect(alertsClientNotToUse.getAlertsToSerialize).not.toHaveBeenCalled();
+      expect(alertsClientToUse.getRawAlertInstancesForState).toHaveBeenCalled();
+      expect(alertsClientNotToUse.getRawAlertInstancesForState).not.toHaveBeenCalled();
     }
   }
 });

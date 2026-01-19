@@ -34,7 +34,9 @@
         "signature": [
           "\"kbn-management storybook\""
         ],
-        "path": "packages/kbn-management/storybook/config/constants.ts",
+        "path": "src/platform/packages/shared/kbn-management/storybook/config/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -49,9 +51,11 @@
           "The remote URL of the root from which Storybook loads stories for kbn-management."
         ],
         "signature": [
-          "\"https://github.com/elastic/kibana/tree/main/packages/kbn-management\""
+          "\"https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-management\""
         ],
-        "path": "packages/kbn-management/storybook/config/constants.ts",
+        "path": "src/platform/packages/shared/kbn-management/storybook/config/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

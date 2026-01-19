@@ -10,7 +10,7 @@ import React from 'react';
 import { UsageTrackerContextProvider } from '../contexts/usage_tracker_context';
 import { useKibana } from '../hooks/use_kibana';
 import { SearchHomepageBody } from './search_homepage_body';
-import { SearchHomepageHeader } from './search_homepage_header';
+import { SearchHomepageHeader } from './header';
 
 export const App: React.FC = () => {
   const {
@@ -18,7 +18,7 @@ export const App: React.FC = () => {
   } = useKibana();
   return (
     <UsageTrackerContextProvider usageCollection={usageCollection}>
-      <SearchHomepageHeader showEndpointsAPIKeys={false} />
+      <SearchHomepageHeader />
       <SearchHomepageBody />
     </UsageTrackerContextProvider>
   );

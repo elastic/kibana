@@ -8,9 +8,7 @@
  */
 
 import type { ValuesType, UnionToIntersection } from 'utility-types';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
-// TODO: Remove when all usages have been migrated to non-body
-import { SearchRequest as SearchRequestWithBodyKey } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 interface AggregationsAggregationContainer extends Record<string, any> {
   aggs?: any;
@@ -45,9 +43,9 @@ type Source = estypes.SearchSourceFilter | boolean | estypes.Fields;
 
 type TopMetricKeysOf<TAggregationContainer extends AggregationsAggregationContainer> =
   TAggregationContainer extends { top_metrics: { metrics: { field: infer TField } } }
-    ? TField
+    ? Extract<TField, string | number | symbol>
     : TAggregationContainer extends { top_metrics: { metrics: Array<{ field: infer TField }> } }
-    ? TField
+    ? Extract<TField, string | number | symbol>
     : string;
 
 type ValueTypeOfField<T> = T extends Record<string, string | number>
@@ -85,7 +83,7 @@ export type SearchHit<
     ? {
         fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>;
       }
-    : { fields?: Record<string, unknown[]> }) &
+    : { fields?: Record<string, unknown[] | undefined> }) &
   (TDocValueFields extends DocValueFields
     ? {
         fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>;
@@ -635,14 +633,10 @@ type WrapAggregationResponse<T> = keyof UnionToIntersection<T> extends never
 
 export type InferSearchResponseOf<
   TDocument = unknown,
-  TSearchRequest extends
-    | (estypes.SearchRequest & { body?: never }) // the union is necessary for the check 4 lines below
-    | SearchRequestWithBodyKey = estypes.SearchRequest,
+  TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
   TOptions extends { restTotalHitsAsInt?: boolean } = {}
 > = Omit<estypes.SearchResponse<TDocument>, 'aggregations' | 'hits'> &
-  (TSearchRequest['body'] extends TopLevelAggregationRequest
-    ? WrapAggregationResponse<SearchResponseOf<TSearchRequest['body'], TDocument>>
-    : TSearchRequest extends TopLevelAggregationRequest
+  (TSearchRequest extends TopLevelAggregationRequest
     ? WrapAggregationResponse<SearchResponseOf<TSearchRequest, TDocument>>
     : { aggregations?: InvalidAggregationRequest }) & {
     hits: Omit<estypes.SearchResponse<TDocument>['hits'], 'total' | 'hits'> &
@@ -656,16 +650,14 @@ export type InferSearchResponseOf<
               relation: 'eq' | 'gte';
             };
           }) & {
-        hits: HitsOf<
-          TSearchRequest extends SearchRequestWithBodyKey ? TSearchRequest['body'] : TSearchRequest,
-          TDocument
-        >;
+        hits: HitsOf<TSearchRequest, TDocument>;
       };
   };
 
 export interface ESQLColumn {
   name: string;
   type: string;
+  original_types?: string[];
 }
 
 export type ESQLRow = unknown[];
@@ -678,6 +670,7 @@ export interface ESQLSearchResponse {
   all_columns?: ESQLColumn[];
   values: ESQLRow[];
   took?: number;
+  documents_found?: number;
   _clusters?: estypes.ClusterStatistics;
 }
 
@@ -688,10 +681,16 @@ export interface ESQLSearchParams {
   // time_zone?: string;
   query: string;
   filter?: unknown;
+  project_routing?: string;
   locale?: string;
-  include_ccs_metadata?: boolean;
+  include_execution_metadata?: boolean;
   dropNullColumns?: boolean;
   params?:
     | estypes.ScalarValue[]
-    | Array<Record<string, string | number | Record<string, string | number> | undefined>>;
+    | Array<
+        Record<
+          string,
+          string | number | (string | number)[] | Record<string, string | number> | undefined
+        >
+      >;
 }

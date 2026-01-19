@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -23,40 +23,42 @@ import {
   SearchResponseWarningsBadgePopoverContent,
 } from '@kbn/search-response-warnings';
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
 import { getOriginalId } from '@kbn/transpose-utils';
-import type { DateRange } from '../../../common/types';
 import type {
+  DateRange,
+  FiltersIndexPatternColumn,
+  FormBasedLayer,
+  FormBasedPersistedState,
+  FormBasedPrivateState,
   FramePublicAPI,
   IndexPattern,
-  StateSetter,
+  ReferenceBasedIndexPatternColumn,
   UserMessage,
   VisualizationInfo,
-} from '../../types';
+  GenericIndexPatternColumn,
+  TermsIndexPatternColumn,
+  CountIndexPatternColumn,
+  RangeIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  MaxIndexPatternColumn,
+  MinIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  StateSetter,
+} from '@kbn/lens-common';
 import { renewIDs } from '../../utils';
-import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
-import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
+import type { GenericOperationDefinition } from './operations';
 import {
   operationDefinitionMap,
   getReferenceRoot,
   updateColumnParam,
   updateDefaultLabels,
-  type GenericIndexPatternColumn,
-  type TermsIndexPatternColumn,
-  type CountIndexPatternColumn,
-  type RangeIndexPatternColumn,
-  type FormulaIndexPatternColumn,
-  type DateHistogramIndexPatternColumn,
-  type MaxIndexPatternColumn,
-  type MinIndexPatternColumn,
-  type GenericOperationDefinition,
-  type FieldBasedIndexPatternColumn,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
-import { FiltersIndexPatternColumn } from './operations/definitions/filters';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
@@ -182,7 +184,7 @@ export function fieldIsInvalid(
 const accuracyModeDisabledWarning = (
   columnName: string,
   columnId: string,
-  enableAccuracyMode: () => void
+  enableAccuracyMode?: () => void
 ): UserMessage => ({
   uniqueId: PRECISION_ERROR_ACCURACY_MODE_DISABLED,
   severity: 'warning',
@@ -204,12 +206,16 @@ const accuracyModeDisabledWarning = (
           name: <strong>{columnName}</strong>,
         }}
       />
-      <EuiSpacer size="s" />
-      <EuiLink data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
-        {i18n.translate('xpack.lens.indexPattern.enableAccuracyMode', {
-          defaultMessage: 'Enable accuracy mode',
-        })}
-      </EuiLink>
+      {enableAccuracyMode ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiLink data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
+            {i18n.translate('xpack.lens.indexPattern.enableAccuracyMode', {
+              defaultMessage: 'Enable accuracy mode',
+            })}
+          </EuiLink>
+        </>
+      ) : null}
     </>
   ),
 });
@@ -442,7 +448,7 @@ export function getPrecisionErrorWarningMessages(
   state: FormBasedPrivateState,
   { activeData, dataViews }: FramePublicAPI,
   docLinks: DocLinksStart,
-  setState: StateSetter<FormBasedPrivateState>
+  setState?: StateSetter<FormBasedPrivateState>
 ) {
   const warningMessages: UserMessage[] = [];
 
@@ -491,23 +497,29 @@ export function getPrecisionErrorWarningMessages(
                     column.id,
                     docLinks.links.aggs.terms_doc_count_error
                   )
-                : accuracyModeDisabledWarning(column.name, column.id, () => {
-                    setState((prevState) =>
-                      mergeLayer({
-                        state: prevState,
-                        layerId,
-                        newLayer: updateDefaultLabels(
-                          updateColumnParam({
-                            layer: currentLayer,
-                            columnId: column.id,
-                            paramName: 'accuracyMode',
-                            value: true,
-                          }),
-                          indexPattern
-                        ),
-                      })
-                    );
-                  })
+                : accuracyModeDisabledWarning(
+                    column.name,
+                    column.id,
+                    setState
+                      ? () => {
+                          setState((prevState) =>
+                            mergeLayer({
+                              state: prevState,
+                              layerId,
+                              newLayer: updateDefaultLabels(
+                                updateColumnParam({
+                                  layer: currentLayer,
+                                  columnId: column.id,
+                                  paramName: 'accuracyMode',
+                                  value: true,
+                                }),
+                                indexPattern
+                              ),
+                            })
+                          );
+                        }
+                      : undefined
+                  )
             );
           } else {
             warningMessages.push({
@@ -545,33 +557,37 @@ export function getPrecisionErrorWarningMessages(
                       ),
                     }}
                   />
-                  <EuiSpacer size="s" />
-                  <EuiLink
-                    onClick={() => {
-                      setState((prevState) =>
-                        mergeLayer({
-                          state: prevState,
-                          layerId,
-                          newLayer: updateDefaultLabels(
-                            updateColumnParam({
-                              layer: currentLayer,
-                              columnId: column.id,
-                              paramName: 'orderBy',
-                              value: {
-                                type: 'rare',
-                                maxDocCount: DEFAULT_MAX_DOC_COUNT,
-                              },
-                            }),
-                            indexPattern
-                          ),
-                        })
-                      );
-                    }}
-                  >
-                    {i18n.translate('xpack.lens.indexPattern.switchToRare', {
-                      defaultMessage: 'Rank by rarity',
-                    })}
-                  </EuiLink>
+                  {setState ? (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiLink
+                        onClick={() => {
+                          setState((prevState) =>
+                            mergeLayer({
+                              state: prevState,
+                              layerId,
+                              newLayer: updateDefaultLabels(
+                                updateColumnParam({
+                                  layer: currentLayer,
+                                  columnId: column.id,
+                                  paramName: 'orderBy',
+                                  value: {
+                                    type: 'rare',
+                                    maxDocCount: DEFAULT_MAX_DOC_COUNT,
+                                  },
+                                }),
+                                indexPattern
+                              ),
+                            })
+                          );
+                        }}
+                      >
+                        {i18n.translate('xpack.lens.indexPattern.switchToRare', {
+                          defaultMessage: 'Rank by rarity',
+                        })}
+                      </EuiLink>
+                    </>
+                  ) : null}
                 </>
               ),
               fixableInEditor: true,

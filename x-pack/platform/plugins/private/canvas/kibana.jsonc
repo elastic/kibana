@@ -20,17 +20,10 @@
       "data",
       "dataViews",
       "embeddable",
-      "expressionError",
-      "expressionImage",
-      "expressionMetric",
-      "expressionRepeatImage",
-      "expressionRevealImage",
-      "expressionShape",
       "expressions",
       "features",
       "inspector",
       "presentationUtil",
-      "visualizations",
       "uiActions",
       "share",
       "contentManagement",
@@ -47,7 +40,6 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "visualizations",
       "fieldFormats"
     ]
   }

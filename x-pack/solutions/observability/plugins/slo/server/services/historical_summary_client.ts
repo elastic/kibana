@@ -5,33 +5,28 @@
  * 2.0.
  */
 
-import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  ALL_VALUE,
+import type { SearchSearchRequestBody } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
   BudgetingMethod,
-  calendarAlignedTimeWindowSchema,
   DurationUnit,
   FetchHistoricalSummaryParams,
-  fetchHistoricalSummaryResponseSchema,
+  FetchHistoricalSummaryResponse,
+  HistoricalSummaryResponse,
+} from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  calendarAlignedTimeWindowSchema,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
   toMomentUnitOfTime,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import * as t from 'io-ts';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import {
-  DateRange,
-  GroupBy,
-  HistoricalSummary,
-  Objective,
-  SLOId,
-  TimeWindow,
-  toCalendarAlignedTimeWindowMomentUnit,
-} from '../domain/models';
+import type { DateRange, GroupBy, Objective, SLOId, TimeWindow } from '../domain/models';
+import { toCalendarAlignedTimeWindowMomentUnit } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
@@ -53,16 +48,10 @@ interface DailyAggBucket {
   };
 }
 
-export type HistoricalSummaryResponse = t.TypeOf<typeof fetchHistoricalSummaryResponseSchema>;
-
-export interface HistoricalSummaryClient {
-  fetch(list: FetchHistoricalSummaryParams): Promise<HistoricalSummaryResponse>;
-}
-
-export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
+export class HistoricalSummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetch(params: FetchHistoricalSummaryParams): Promise<HistoricalSummaryResponse> {
+  async fetch(params: FetchHistoricalSummaryParams): Promise<FetchHistoricalSummaryResponse> {
     const dateRangeBySlo = params.list.reduce<
       Record<SLOId, { range: DateRange; queryRange: DateRange }>
     >((acc, { sloId, timeWindow, range }) => {
@@ -89,7 +78,7 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
       ]
     );
 
-    const historicalSummary: HistoricalSummaryResponse = [];
+    const historicalSummary: FetchHistoricalSummaryResponse = [];
     if (searches.length === 0) {
       return historicalSummary;
     }
@@ -169,10 +158,10 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
 function handleResultForCalendarAlignedAndOccurrences(
   objective: Objective,
   buckets: DailyAggBucket[]
-): HistoricalSummary[] {
+): HistoricalSummaryResponse[] {
   const initialErrorBudget = 1 - objective.target;
 
-  return buckets.map((bucket: DailyAggBucket): HistoricalSummary => {
+  return buckets.map((bucket: DailyAggBucket) => {
     const good = bucket.cumulative_good?.value ?? 0;
     const total = bucket.cumulative_total?.value ?? 0;
     const sliValue = computeSLI(good, total);
@@ -180,7 +169,7 @@ function handleResultForCalendarAlignedAndOccurrences(
     const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget, true);
 
     return {
-      date: new Date(bucket.key_as_string),
+      date: bucket.key_as_string,
       errorBudget,
       sliValue,
       status: computeSummaryStatus(objective, sliValue, errorBudget),
@@ -192,11 +181,11 @@ function handleResultForCalendarAlignedAndTimeslices(
   objective: Objective,
   buckets: DailyAggBucket[],
   dateRange: { range: DateRange; queryRange: DateRange }
-): HistoricalSummary[] {
+): HistoricalSummaryResponse[] {
   const initialErrorBudget = 1 - objective.target;
   const totalSlices = getSlicesFromDateRange(dateRange.range, objective.timesliceWindow!);
 
-  return buckets.map((bucket: DailyAggBucket): HistoricalSummary => {
+  return buckets.map((bucket: DailyAggBucket) => {
     const good = bucket.cumulative_good?.value ?? 0;
     const total = bucket.cumulative_total?.value ?? 0;
     const sliValue = computeSLI(good, total, totalSlices);
@@ -204,7 +193,7 @@ function handleResultForCalendarAlignedAndTimeslices(
     const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
 
     return {
-      date: new Date(bucket.key_as_string),
+      date: bucket.key_as_string,
       errorBudget,
       sliValue,
       status: computeSummaryStatus(objective, sliValue, errorBudget),
@@ -216,7 +205,7 @@ function handleResultForRollingAndOccurrences(
   objective: Objective,
   buckets: DailyAggBucket[],
   dateRange: { range: DateRange; queryRange: DateRange }
-): HistoricalSummary[] {
+): HistoricalSummaryResponse[] {
   const initialErrorBudget = 1 - objective.target;
 
   return buckets
@@ -225,7 +214,7 @@ function handleResultForRollingAndOccurrences(
         moment(bucket.key_as_string).isSameOrAfter(dateRange.range.from) &&
         moment(bucket.key_as_string).isSameOrBefore(dateRange.range.to)
     )
-    .map((bucket: DailyAggBucket): HistoricalSummary => {
+    .map((bucket: DailyAggBucket) => {
       const good = bucket.cumulative_good?.value ?? 0;
       const total = bucket.cumulative_total?.value ?? 0;
 
@@ -234,7 +223,7 @@ function handleResultForRollingAndOccurrences(
       const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
 
       return {
-        date: new Date(bucket.key_as_string),
+        date: bucket.key_as_string,
         errorBudget,
         sliValue,
         status: computeSummaryStatus(objective, sliValue, errorBudget),
@@ -247,7 +236,7 @@ function handleResultForRollingAndTimeslices(
   timeWindow: TimeWindow,
   buckets: DailyAggBucket[],
   dateRange: { range: DateRange; queryRange: DateRange }
-): HistoricalSummary[] {
+): HistoricalSummaryResponse[] {
   const initialErrorBudget = 1 - objective.target;
 
   const totalSlices = Math.ceil(
@@ -260,7 +249,7 @@ function handleResultForRollingAndTimeslices(
         moment(bucket.key_as_string).isSameOrAfter(dateRange.range.from) &&
         moment(bucket.key_as_string).isSameOrBefore(dateRange.range.to)
     )
-    .map((bucket: DailyAggBucket): HistoricalSummary => {
+    .map((bucket: DailyAggBucket) => {
       const good = bucket.cumulative_good?.value ?? 0;
       const total = bucket.cumulative_total?.value ?? 0;
       const sliValue = computeSLI(good, total, totalSlices);
@@ -268,7 +257,7 @@ function handleResultForRollingAndTimeslices(
       const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
 
       return {
-        date: new Date(bucket.key_as_string),
+        date: bucket.key_as_string,
         errorBudget,
         sliValue,
         status: computeSummaryStatus(objective, sliValue, errorBudget),
@@ -292,7 +281,7 @@ function generateSearchQuery({
   dateRange: { range: DateRange; queryRange: DateRange };
   timeWindow: TimeWindow;
   budgetingMethod: BudgetingMethod;
-}): MsearchMultisearchBody {
+}): SearchSearchRequestBody {
   const unit = toMomentUnitOfTime(timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(timeWindow.duration.value, unit).asDays();
 
@@ -389,8 +378,8 @@ function generateSearchQuery({
 /**
  * queryRange is used for the filter range on the query,
  * while range is used for storing the actual range requested
- * For a rolling window, the query range starts 1 timeWindow duration before the actual range from.
- * For calednar window, the query range is the same as the range.
+ * For rolling SLO, the query range starts 1 timeWindow duration before the actual range from.
+ * For calendar aligned SLO, the query range is the same as the range.
  *
  * @param timeWindow
  * @param range
@@ -435,8 +424,10 @@ function getDateRange(
   }
 
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
-    const now = moment();
+    // If range is provided, we use the lower bound to calculate the calendar aligned range.
+    const now = moment(range?.from ?? new Date());
     const unit = toCalendarAlignedTimeWindowMomentUnit(timeWindow);
+
     const from = moment.utc(now).startOf(unit);
     const to = moment.utc(now).endOf(unit);
 

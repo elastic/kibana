@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { createSingleFieldMatchEnrichment } from './create_single_field_match_enrichment';
 import { searchEnrichments } from './search_enrichments';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from './__mocks__/alerts';
 import type { EnrichmentFunction } from './types';
+import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
+import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
 jest.mock('./search_enrichments', () => ({
   searchEnrichments: jest.fn(),
@@ -20,11 +20,11 @@ const mockSearchEnrichments = searchEnrichments as jest.Mock;
 
 describe('createSingleFieldMatchEnrichment', () => {
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
-  let alertServices: RuleExecutorServicesMock;
+  let ruleServices: PersistenceExecutorOptionsMock;
 
   beforeEach(() => {
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-    alertServices = alertsMock.createRuleExecutorServices();
+    ruleServices = createPersistenceExecutorOptionsMock();
   });
 
   afterEach(() => {
@@ -39,7 +39,7 @@ describe('createSingleFieldMatchEnrichment', () => {
       index: ['host-enrichment'],
       events: [createAlert('1')],
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       mappingField: {
         eventField: 'host.name',
         enrichmentField: 'host.name',
@@ -76,7 +76,7 @@ describe('createSingleFieldMatchEnrichment', () => {
         createAlert('3'),
       ],
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       enrichmentResponseFields: ['host.name'],
       mappingField: {
         eventField: 'host.name',
@@ -114,7 +114,7 @@ describe('createSingleFieldMatchEnrichment', () => {
       ],
       enrichmentResponseFields: ['host.name'],
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       mappingField: {
         eventField: 'host.name',
         enrichmentField: 'host.name',
@@ -140,7 +140,7 @@ describe('createSingleFieldMatchEnrichment', () => {
       index: ['host-enrichment'],
       events: [createAlert('1', { host: { name: 'host name 1' } })],
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       enrichmentResponseFields: ['host.name'],
       mappingField: {
         eventField: 'host.name',
@@ -162,7 +162,7 @@ describe('createSingleFieldMatchEnrichment', () => {
       index: ['host-enrichment'],
       events: [createAlert('1')],
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       enrichmentResponseFields: ['host.name'],
       mappingField: {
         eventField: 'host.name',
@@ -192,7 +192,7 @@ describe('createSingleFieldMatchEnrichment', () => {
       events,
       logger: ruleExecutionLogger,
       enrichmentResponseFields: ['host.name'],
-      services: alertServices,
+      services: ruleServices,
       mappingField: {
         eventField: 'host.name',
         enrichmentField: 'host.name',

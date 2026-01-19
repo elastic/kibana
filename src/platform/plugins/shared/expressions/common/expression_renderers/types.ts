@@ -8,7 +8,7 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { ExpressionAstExpression } from '../ast';
+import type { ExpressionAstExpression } from '../ast';
 
 export interface ExpressionRenderDefinition<Config = unknown> {
   /**

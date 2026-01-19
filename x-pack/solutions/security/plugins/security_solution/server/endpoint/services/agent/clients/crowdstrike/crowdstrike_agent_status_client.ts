@@ -6,11 +6,11 @@
  */
 
 import {
-  CROWDSTRIKE_CONNECTOR_ID,
+  CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+} from '@kbn/connector-schemas/crowdstrike/constants';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/connector-schemas/crowdstrike';
 import { keyBy } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
@@ -61,7 +61,6 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const esClient = this.options.esClient;
-    const metadataService = this.options.endpointService.getEndpointMetadataService();
     const sortField = 'crowdstrike.host.last_seen';
 
     const query = {
@@ -116,7 +115,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           { ignore: [404] }
         ),
 
-        getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+        getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
       ]).catch(catchAndWrapError);
 
       const mostRecentAgentInfosByAgentId = searchResponse?.hits?.hits?.reduce<
@@ -158,7 +157,6 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           pendingActions: pendingActions?.pending_actions ?? {},
         };
 
-        // console.log({ acc });
         return acc;
       }, {});
     } catch (err) {

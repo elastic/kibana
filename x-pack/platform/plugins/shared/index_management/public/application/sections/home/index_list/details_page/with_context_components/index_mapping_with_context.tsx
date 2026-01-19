@@ -11,8 +11,9 @@ import { UIM_APP_NAME } from '../../../../../../../common/constants/ui_metric';
 import { httpService } from '../../../../../services/http';
 import { notificationService } from '../../../../../services/notification';
 import { UiMetricService } from '../../../../../services/ui_metric';
-import { AppDependencies, IndexManagementAppContext } from '../../../../..';
-import { IndexMappingWithContextProps } from './index_mapping_with_context_types';
+import type { AppDependencies } from '../../../../..';
+import { IndexManagementAppContext } from '../../../../..';
+import type { IndexMappingWithContextProps } from './index_mapping_with_context_types';
 import { DetailsPageMappings } from '../details_page_mappings';
 
 export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = ({
@@ -20,7 +21,6 @@ export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = (
   dependencies,
   index,
   showAboutMappings,
-  hasUpdateMappingsPrivilege,
 }) => {
   // this normally happens when the index management app is rendered
   // but if components are embedded elsewhere that setup is skipped, so we have to do it here
@@ -43,11 +43,7 @@ export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = (
   };
   return (
     <IndexManagementAppContext core={core} dependencies={newDependencies}>
-      <DetailsPageMappings
-        index={index}
-        showAboutMappings={showAboutMappings}
-        hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
-      />
+      <DetailsPageMappings index={index} showAboutMappings={showAboutMappings} />
     </IndexManagementAppContext>
   );
 };

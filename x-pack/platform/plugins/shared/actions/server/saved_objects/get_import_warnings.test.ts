@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import { RawAction } from '../types';
+import type { SavedObject } from '@kbn/core/server';
+import type { RawAction } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 
 describe('getImportWarnings', () => {

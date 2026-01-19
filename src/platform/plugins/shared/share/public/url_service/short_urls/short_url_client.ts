@@ -9,14 +9,11 @@
 
 import { parse as parseUrl } from 'url';
 import type { SerializableRecord } from '@kbn/utility-types';
-import {
-  LegacyShortUrlLocatorParams,
-  LEGACY_SHORT_URL_LOCATOR_ID,
-} from '../../../common/url_service/locators/legacy_short_url_locator';
-import {
-  SHORT_URL_REDIRECT_LOCATOR,
-  ShortUrlRedirectLocatorParams,
-} from '../../../common/url_service/locators/short_url_redirect_locator';
+import { convertRelativeTimeStringToAbsoluteTimeString } from '../../lib/time_utils';
+import type { LegacyShortUrlLocatorParams } from '../../../common/url_service/locators/legacy_short_url_locator';
+import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../../common/url_service/locators/legacy_short_url_locator';
+import type { ShortUrlRedirectLocatorParams } from '../../../common/url_service/locators/short_url_redirect_locator';
+import { SHORT_URL_REDIRECT_LOCATOR } from '../../../common/url_service/locators/short_url_redirect_locator';
 import type {
   IShortUrlClient,
   ShortUrl,
@@ -75,9 +72,42 @@ export class BrowserShortUrlClient implements IShortUrlClient {
   }
 
   public async createWithLocator<P extends SerializableRecord>(
-    params: ShortUrlCreateParams<P>
+    params: ShortUrlCreateParams<P>,
+    isAbsoluteTime?: boolean
   ): Promise<ShortUrlCreateResponse<P>> {
-    const result = await this.create(params);
+    const getUpdatedParams = (inputParams: ShortUrlCreateParams<P>) => {
+      if (!isAbsoluteTime) return inputParams;
+
+      const timeRange = inputParams.params?.timeRange as SerializableRecord;
+      const timeRangeSnakeCase = inputParams.params?.time_range as SerializableRecord;
+
+      const timeRanges: {
+        timeRange?: { from: string | undefined; to: string | undefined };
+        time_range?: { from: string | undefined; to: string | undefined };
+      } = {};
+
+      if (timeRange?.from && timeRange?.to) {
+        timeRanges.timeRange = {
+          from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from as string),
+          to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string),
+        };
+      }
+      if (timeRangeSnakeCase?.from && timeRangeSnakeCase?.to) {
+        timeRanges.time_range = {
+          from: convertRelativeTimeStringToAbsoluteTimeString(timeRangeSnakeCase.from as string),
+          to: convertRelativeTimeStringToAbsoluteTimeString(timeRangeSnakeCase.to as string),
+        };
+      }
+      return {
+        ...inputParams,
+        params: {
+          ...inputParams.params,
+          ...timeRanges,
+        },
+      };
+    };
+
+    const result = await this.create(getUpdatedParams(params));
     const redirectLocator = this.dependencies.locators.get<ShortUrlRedirectLocatorParams>(
       SHORT_URL_REDIRECT_LOCATOR
     )!;
@@ -92,7 +122,10 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     };
   }
 
-  public async createFromLongUrl(longUrl: string): Promise<ShortUrlCreateFromLongUrlResponse> {
+  public async createFromLongUrl(
+    longUrl: string,
+    isAbsoluteTime?: boolean
+  ): Promise<ShortUrlCreateFromLongUrlResponse> {
     const parsedUrl = parseUrl(longUrl);
 
     if (!parsedUrl || !parsedUrl.path) {
@@ -110,12 +143,16 @@ export class BrowserShortUrlClient implements IShortUrlClient {
       throw new Error(`Locator "${LEGACY_SHORT_URL_LOCATOR_ID}" not found`);
     }
 
-    const result = await this.createWithLocator({
-      locator,
-      params: {
-        url: relativeUrl,
+    const result = await this.createWithLocator(
+      {
+        locator,
+        params: {
+          url: relativeUrl,
+        },
       },
-    });
+      isAbsoluteTime
+    );
+
     const shortUrl = await result.locator.getUrl(result.params, { absolute: true });
 
     return {

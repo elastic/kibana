@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
   rawRuleSchemaV1,
   rawRuleSchemaV2,
   rawRuleSchemaV3,
   rawRuleSchemaV4,
+  rawRuleSchemaV5,
+  rawRuleSchemaV6,
+  rawRuleSchemaV7,
+  rawRuleSchemaV8,
 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -40,6 +44,64 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleSchemaV4.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV4,
+    },
+  },
+  '5': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV5.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV5,
+    },
+  },
+  '6': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          artifacts: {
+            properties: {
+              investigation_guide: {
+                properties: {
+                  blob: {
+                    type: 'text',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV6.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV6,
+    },
+  },
+  '7': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV7.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV7,
+    },
+  },
+  '8': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          actions: {
+            properties: {
+              params: {
+                type: 'flattened',
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV8,
     },
   },
 };

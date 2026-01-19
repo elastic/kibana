@@ -7,21 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext, IUiSettingsClient } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type {
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  IUiSettingsClient,
+} from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
-import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
+import type { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
+import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -39,6 +45,7 @@ export interface IndexPatternManagementStartDependencies {
   spaces?: SpacesPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
   uiSettings: IUiSettingsClient;
 }
 

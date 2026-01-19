@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { QueryClient, QueryClientProvider, QueryClientProviderProps } from '@tanstack/react-query';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { QueryClientProviderProps } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 // FIXME: adds inefficient boilerplate that should not be required. See https://github.com/elastic/kibana/issues/180725
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { RenderOptions, RenderResult } from '@testing-library/react';
+import { render as reactRender } from '@testing-library/react';
 
-import { TriggersAndActionsUiServices } from '../..';
+import type { TriggersAndActionsUiServices } from '../..';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 
 /* eslint-disable no-console */
@@ -28,9 +30,11 @@ export interface AppMockRenderer {
   AppWrapper: FC<PropsWithChildren<unknown>>;
 }
 
-export const createAppMockRenderer = (
-  queryClientContext?: QueryClientProviderProps['context']
-): AppMockRenderer => {
+export const createAppMockRenderer = (options?: {
+  queryClientContext?: QueryClientProviderProps['context'];
+  additionalServices?: any;
+}): AppMockRenderer => {
+  const { queryClientContext, additionalServices } = options ?? {};
   const services = createStartServicesMock();
   const core = coreMock.createStart();
 
@@ -53,22 +57,22 @@ export const createAppMockRenderer = (
 
   const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <I18nProvider>
-      <KibanaRenderContextProvider {...core}>
-        <KibanaContextProvider services={services}>
+      {core.rendering.addContext(
+        <KibanaContextProvider services={{ ...services, ...additionalServices }}>
           <QueryClientProvider client={queryClient} context={queryClientContext}>
             {children}
           </QueryClientProvider>
         </KibanaContextProvider>
-      </KibanaRenderContextProvider>
+      )}
     </I18nProvider>
   ));
 
   AppWrapper.displayName = 'AppWrapper';
 
-  const render: UiRender = (ui, options) => {
+  const render: UiRender = (ui, _options) => {
     return reactRender(ui, {
       wrapper: AppWrapper,
-      ...options,
+      ..._options,
     });
   };
 

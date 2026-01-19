@@ -9,7 +9,8 @@ import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';
-import { ConfigKey, Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   getTimeSpanFilter,
@@ -77,16 +78,14 @@ export function useInlineErrors({
   const { data } = useEsSearch(
     {
       index: doFetch ? SYNTHETICS_INDEX_PATTERN : '',
-      body: {
-        size: 1000,
-        query: {
-          bool: {
-            filter: getInlineErrorFilters(),
-          },
+      size: 1000,
+      query: {
+        bool: {
+          filter: getInlineErrorFilters(),
         },
-        collapse: { field: 'monitor.id' },
-        sort: sortFieldMap[sortField] ? [{ [sortFieldMap[sortField]]: sortOrder }] : undefined,
       },
+      collapse: { field: 'monitor.id' },
+      sort: sortFieldMap[sortField] ? [{ [sortFieldMap[sortField]]: sortOrder }] : undefined,
     },
     [syntheticsMonitors, lastRefresh, doFetch, sortField, sortOrder],
     { name: 'getInvalidMonitors' }

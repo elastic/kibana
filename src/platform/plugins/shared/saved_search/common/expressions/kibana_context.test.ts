@@ -10,11 +10,11 @@
 import { FilterStateStore, buildFilter, FILTERS } from '@kbn/es-query';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { KibanaContext, ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
+import type { KibanaContext, ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
 import { fromSavedSearchAttributes } from '../service/saved_searches_utils';
 import type { SavedSearchAttributes, SavedSearch } from '../types';
-
-import { getKibanaContextFn, KibanaContextStartDependencies } from './kibana_context';
+import type { KibanaContextStartDependencies } from './kibana_context';
+import { getKibanaContextFn } from './kibana_context';
 
 type StartServicesMock = DeeplyMockedKeys<KibanaContextStartDependencies>;
 
@@ -56,6 +56,19 @@ describe('kibanaContextFn', () => {
               query: [],
             }),
           },
+          tabs: [
+            {
+              id: 'test',
+              label: 'Test',
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    query: [],
+                  }),
+                },
+              },
+            },
+          ],
         } as SavedSearchAttributes,
         [],
         undefined,

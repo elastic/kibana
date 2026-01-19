@@ -28,7 +28,7 @@ import { css } from '@emotion/react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  EVENT_FILTERS_OPERATORS,
+  ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
@@ -40,36 +40,28 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
-import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
+import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
+import { FormattedError } from '../../../../components/formatted_error';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
-  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY,
-  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT,
+  PROCESS_DESCENDANT_EXTRA_ENTRY,
+  PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
-import {
-  isFilterProcessDescendantsEnabled,
-  isFilterProcessDescendantsTag,
-  isPolicySelectionTag,
-} from '../../../../../../common/endpoint/service/artifacts/utils';
+import { ProcessDescendantsIconTip } from '../../../../components/process_descendant_icontip';
+import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   eventsIndexPattern,
 } from '../../../../../../common/endpoint/constants';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import {
-  isArtifactGlobal,
-  getPolicyIdsFromArtifact,
-  getArtifactTagsByPolicySelection,
-} from '../../../../../../common/endpoint/service/artifacts';
+import { getAddedFieldsCounts, computeHasDuplicateFields } from '../../../../common/utils';
 
 import {
   ABOUT_EVENT_FILTERS,
@@ -82,12 +74,13 @@ import {
 import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
 
-import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
-import { ProcessDescendantsTooltip } from './process_descendant_tooltip';
+import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import { EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS } from '../translations';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -101,25 +94,6 @@ const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEM
   inputDisplay: OS_TITLES[os],
 }));
 
-// Defines the tag categories for Event Filters, using the given order.
-const TAG_FILTERS = Object.freeze({
-  policySelection: isPolicySelectionTag,
-  processDescendantsFiltering: isFilterProcessDescendantsTag,
-});
-
-const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
-  formFields.reduce<{ [k: string]: number }>((allFields, field) => {
-    if (field in allFields) {
-      allFields[field]++;
-    } else {
-      allFields[field] = 1;
-    }
-    return allFields;
-  }, {});
-
-const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
-  Object.values(formFieldsList).some((e) => e > 1);
-
 const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
   {
     field: '',
@@ -129,26 +103,15 @@ const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
   },
 ];
 
-const cleanupEntries = (
-  item: ArtifactFormComponentProps['item']
-): ArtifactFormComponentProps['item']['entries'] => {
-  return item.entries.map(
+const cleanupEntries = (item: ArtifactFormComponentProps['item']) =>
+  item.entries.forEach(
     (e: ArtifactFormComponentProps['item']['entries'][number] & { id?: string }) => {
       delete e.id;
-      return e;
     }
   );
-};
-
-type EventFilterItemEntries = Array<{
-  field: string;
-  value: string;
-  operator: 'included' | 'excluded';
-  type: Exclude<ExceptionListItemSchema['entries'][number]['type'], 'list'>;
-}>;
 
 export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
-  memo(({ allowSelectOs = true, item: exception, policies, policiesIsLoading, onChange, mode }) => {
+  memo(({ allowSelectOs = true, item: exception, onChange, mode, error: submitError }) => {
     const getTestId = useTestIdGenerator('eventFilters-form');
     const { http } = useKibana().services;
 
@@ -166,10 +129,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [newComment, setNewComment] = useState('');
     const [hasCommentError, setHasCommentError] = useState(false);
     const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
-    const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
-    const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(exception), [exception]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(exception));
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
       hasWrongOperatorWithWildcard([exception])
@@ -185,34 +144,21 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       undefined,
       ENDPOINT_FIELDS_SEARCH_STRATEGY
     );
-    const { getTagsUpdatedBy } = useGetUpdatedTags(exception, TAG_FILTERS);
+    const { getTagsUpdatedBy } = useGetUpdatedTags(exception);
     const euiTheme = useEuiTheme();
 
-    const isFilterProcessDescendantsFeatureEnabled = useIsExperimentalFeatureEnabled(
-      'filterProcessDescendantsForEventFiltersEnabled'
-    );
-
     const isFilterProcessDescendantsSelected = useMemo(
-      () => isFilterProcessDescendantsEnabled(exception),
+      () => isProcessDescendantsEnabled(exception),
       [exception]
     );
 
-    const [areConditionsValid, setAreConditionsValid] = useState(
-      !!exception.entries.length || false
-    );
-    // compute this for initial render only
-    const existingComments = useMemo<ExceptionListItemSchema['comments']>(
-      () => (exception as ExceptionListItemSchema)?.comments,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
+    const [areConditionsValid, setAreConditionsValid] = useState(!!exception.entries.length);
+
+    const [existingComments, _] = useState<ExceptionListItemSchema['comments']>(
+      (exception as ExceptionListItemSchema)?.comments
     );
 
-    const showAssignmentSection = useMemo(() => {
-      return (
-        isPlatinumPlus ||
-        (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
-      );
-    }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
+    const showAssignmentSection = useCanAssignArtifactPerPolicy(exception, mode, hasFormChanged);
 
     const isFormValid = useMemo(() => {
       // verify that it has legit entries
@@ -221,7 +167,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         !hasNameError &&
         !hasCommentError &&
         !!exception.entries.length &&
-        (exception.entries as EventFilterItemEntries).some((e) => e.value !== '' || e.value.length)
+        (exception.entries as ExceptionEntries).some((e) => e.value !== '' || e.value.length)
       );
     }, [hasCommentError, hasNameError, exception.entries]);
 
@@ -236,7 +182,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         cleanupEntries(item);
         onChange({
           item,
-          isValid: isFormValid && areConditionsValid,
+          isValid: isFormValid && areConditionsValid && hasFormChanged,
           confirmModalLabels: hasWildcardWithWrongOperator
             ? CONFIRM_WARNING_MODAL_LABELS(
                 i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name', {
@@ -246,26 +192,15 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             : undefined,
         });
       },
-      [areConditionsValid, exception, isFormValid, onChange, hasWildcardWithWrongOperator]
+      [
+        areConditionsValid,
+        exception,
+        hasFormChanged,
+        isFormValid,
+        onChange,
+        hasWildcardWithWrongOperator,
+      ]
     );
-
-    // set initial state of `wasByPolicy` that checks
-    // if the initial state of the exception was by policy or not
-    useEffect(() => {
-      if (!hasFormChanged && exception.tags) {
-        setWasByPolicy(!isArtifactGlobal({ tags: exception.tags }));
-      }
-    }, [exception.tags, hasFormChanged]);
-
-    // select policies if editing
-    useEffect(() => {
-      if (hasFormChanged) return;
-      const policyIds = exception.tags ? getPolicyIdsFromArtifact({ tags: exception.tags }) : [];
-
-      if (!policyIds.length) return;
-      const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
-      setSelectedPolicies(policiesData);
-    }, [hasFormChanged, exception, policies]);
 
     const eventFilterItem = useMemo<ArtifactFormComponentProps['item']>(() => {
       const ef: ArtifactFormComponentProps['item'] = exception;
@@ -273,8 +208,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         ? (exception.entries as ExceptionListItemSchema['entries'])
         : defaultConditionEntry();
 
-      // TODO: `id` gets added to the exception.entries item
-      // Is there a simpler way to this?
       cleanupEntries(ef);
 
       setAreConditionsValid(!!exception.entries.length);
@@ -302,6 +235,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           error={NAME_ERROR}
         >
           <EuiFieldText
+            isInvalid={hasNameError && hasBeenInputNameVisited}
             aria-label={NAME_LABEL}
             id="eventFiltersFormInputName"
             defaultValue={exception?.name ?? ''}
@@ -372,10 +306,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             fullWidth
             valueOfSelected={selectedOs}
             onChange={handleOnOsChange}
+            data-test-subj={getTestId('os-select')}
           />
         </EuiFormRow>
       ),
-      [handleOnOsChange, selectedOs]
+      [getTestId, handleOnOsChange, selectedOs]
     );
 
     // comments and handler
@@ -489,8 +424,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                   defaultMessage="Process Descendants"
                 />
               </EuiText>
-              <ProcessDescendantsTooltip
+              <ProcessDescendantsIconTip
                 data-test-subj={getTestId('filterProcessDescendantsTooltip')}
+                tooltipText={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS.tooltipText}
+                versionInfo={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS.versionInfo}
               />
             </EuiFlexGroup>
           ),
@@ -501,8 +438,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     }, [getTestId, isFilterProcessDescendantsSelected]);
 
     const filterTypeSubsection = useMemo(() => {
-      if (!isFilterProcessDescendantsFeatureEnabled) return null;
-
       return (
         <>
           <EuiButtonGroup
@@ -532,14 +467,13 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                   defaultMessage="Additional condition added:"
                 />
               </EuiText>
-              <code>{PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT}</code>
+              <code>{PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT}</code>
               <EuiSpacer size="m" />
             </>
           )}
         </>
       );
     }, [
-      isFilterProcessDescendantsFeatureEnabled,
       handleFilterTypeOnChange,
       euiTheme.euiTheme.size.l,
       filterTypeOptions,
@@ -550,19 +484,18 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     // conditions and handler
     const handleOnBuilderChange = useCallback(
       (arg: OnChangeProps) => {
-        const hasDuplicates =
+        const isCalledWithoutChanges =
           (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
           isEqual(arg.exceptionItems[0]?.entries, exception?.entries);
 
-        if (hasDuplicates) {
+        if (isCalledWithoutChanges) {
           const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
 
-          if (isFilterProcessDescendantsFeatureEnabled && isFilterProcessDescendantsSelected) {
-            addedFields.push(PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.field);
+          if (isFilterProcessDescendantsSelected) {
+            addedFields.push(PROCESS_DESCENDANT_EXTRA_ENTRY.field);
           }
 
           setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
-          if (!hasFormChanged) setHasFormChanged(true);
           return;
         } else {
           setHasDuplicateFields(false);
@@ -596,13 +529,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         processChanged(updatedItem);
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [
-        exception,
-        hasFormChanged,
-        isFilterProcessDescendantsFeatureEnabled,
-        isFilterProcessDescendantsSelected,
-        processChanged,
-      ]
+      [exception, hasFormChanged, isFilterProcessDescendantsSelected, processChanged]
     );
     const exceptionBuilderComponentMemo = useMemo(
       () =>
@@ -623,7 +550,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           dataTestSubj: 'alert-exception-builder',
           idAria: 'alert-exception-builder',
           onChange: handleOnBuilderChange,
-          operatorsList: EVENT_FILTERS_OPERATORS,
+          operatorsList: ENDPOINT_ARTIFACT_OPERATORS,
           osTypes: exception.os_types,
           showValueListModal: ShowValueListModal,
         }),
@@ -679,44 +606,25 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo, filterTypeSubsection]
     );
 
-    // policy and handler
-    const handleOnPolicyChange = useCallback(
-      (change: EffectedPolicySelection) => {
-        const policySelectionTags = getArtifactTagsByPolicySelection(change);
-
-        // Preserve old selected policies when switching to global
-        if (!change.isGlobal) {
-          setSelectedPolicies(change.selected);
+    const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
+      (updatedItem) => {
+        processChanged({ tags: updatedItem.tags ?? [] });
+        if (!hasFormChanged) {
+          setHasFormChanged(true);
         }
-
-        const tags = getTagsUpdatedBy('policySelection', policySelectionTags);
-        processChanged({ tags });
-        if (!hasFormChanged) setHasFormChanged(true);
       },
-      [processChanged, getTagsUpdatedBy, hasFormChanged]
+      [hasFormChanged, processChanged]
     );
 
     const policiesSection = useMemo(
       () => (
         <EffectedPolicySelect
-          selected={selectedPolicies}
-          options={policies}
-          isGlobal={isGlobal}
-          isLoading={policiesIsLoading}
-          isPlatinumPlus={isPlatinumPlus}
-          onChange={handleOnPolicyChange}
+          item={exception}
+          onChange={handleEffectedPolicyOnChange}
           data-test-subj={getTestId('effectedPolicies')}
         />
       ),
-      [
-        selectedPolicies,
-        policies,
-        isGlobal,
-        policiesIsLoading,
-        isPlatinumPlus,
-        handleOnPolicyChange,
-        getTestId,
-      ]
+      [exception, handleEffectedPolicyOnChange, getTestId]
     );
 
     useEffect(() => {
@@ -728,11 +636,20 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     }
 
     return (
-      <EuiForm component="div">
+      <EuiForm
+        component="div"
+        error={
+          submitError ? (
+            <FormattedError error={submitError} data-test-subj={getTestId('submitError')} />
+          ) : undefined
+        }
+        isInvalid={!!submitError}
+      >
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
         {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+        {hasWildcardWithWrongOperator && hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
         {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
         {hasDuplicateFields && (
           <>

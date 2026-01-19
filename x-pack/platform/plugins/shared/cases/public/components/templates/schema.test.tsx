@@ -33,6 +33,13 @@ describe('Template schema', () => {
           "connectorId": Object {
             "defaultValue": "none",
             "label": "External incident management system",
+            "labelAppend": <EuiText
+              color="subdued"
+              data-test-subj="form-optional-field-label"
+              size="xs"
+            >
+              Optional
+            </EuiText>,
           },
           "customFields": Object {},
           "description": Object {
@@ -49,6 +56,17 @@ describe('Template schema', () => {
                 "validator": [Function],
               },
             ],
+          },
+          "extractObservables": Object {
+            "defaultValue": true,
+            "helpText": "Enabling this option will extract observables from the alert automatically.",
+            "labelAppend": <EuiText
+              color="subdued"
+              data-test-subj="form-optional-field-label"
+              size="xs"
+            >
+              Optional
+            </EuiText>,
           },
           "fields": Object {
             "defaultValue": null,

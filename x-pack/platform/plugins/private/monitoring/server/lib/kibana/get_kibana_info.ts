@@ -6,9 +6,9 @@
  */
 
 import { merge } from 'lodash';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { getIndexPatterns, getKibanaDataset } from '../../../common/get_index_patterns';
 import { MissingRequiredError } from '../error_missing_required';
 import { buildKibanaInfo } from './build_kibana_info';
@@ -62,18 +62,16 @@ export function getKibanaInfo(
       'hits.hits._source.service.id',
       'hits.hits._source.service.version',
     ],
-    body: {
-      query: createQuery({
-        type,
-        dsDataset: getKibanaDataset(dataset),
-        metricset: dataset,
-        clusterUuid,
-        uuid: kibanaUuid,
-        metric: KibanaMetric.getMetricFields(),
-      }),
-      collapse: { field: 'kibana_stats.kibana.uuid' },
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-    },
+    query: createQuery({
+      type,
+      dsDataset: getKibanaDataset(dataset),
+      metricset: dataset,
+      clusterUuid,
+      uuid: kibanaUuid,
+      metric: KibanaMetric.getMetricFields(),
+    }),
+    collapse: { field: 'kibana_stats.kibana.uuid' },
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

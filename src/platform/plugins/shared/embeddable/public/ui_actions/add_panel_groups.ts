@@ -46,5 +46,6 @@ export const ADD_PANEL_LEGACY_GROUP = {
     i18n.translate('embeddableApi.common.constants.grouping.legacy', {
       defaultMessage: 'Legacy',
     }),
-  order: -2, // Given an item that doesn't specify a group is assigned zero, this forces it to the bottom of the list
+  getIconType: () => 'empty',
+  order: -10, // Given an item that doesn't specify a group is assigned zero, this forces other to come after all intentionally grouped section
 };

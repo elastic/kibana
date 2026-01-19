@@ -12,12 +12,12 @@ import type { HttpFetchOptions } from '@kbn/core/public';
 import { getTimeFieldRange } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { useStorage } from '@kbn/ml-local-storage';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
-import type { MinimumTimeRangeOption } from './minimum_time_range';
 import { DEFAULT_MINIMUM_TIME_RANGE_OPTION, MINIMUM_TIME_RANGE } from './minimum_time_range';
 import type { AiOpsKey, AiOpsStorageMapped } from '../../../types/storage';
 import { AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE } from '../../../types/storage';
+import type { MinimumTimeRangeOption } from '../../../../common/embeddables/pattern_analysis/types';
 
 export function useMinimumTimeRange() {
   const { http } = useAiopsAppContext();

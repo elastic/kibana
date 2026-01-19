@@ -73,7 +73,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
   params: z.object({
     query: createEntityDefinitionQuerySchema,
   }),
-  handler: async ({ context, request, response, params, server, logger }) => {
+  handler: async ({ context, request, response, params, server, getScopedClient, logger }) => {
     try {
       const apiKeysEnabled = await checkIfAPIKeysAreEnabled(server);
       if (!apiKeysEnabled) {
@@ -100,7 +100,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
-      logger.info(`Enabling managed entity discovery (installOnly=${params.query.installOnly})`);
+      logger.debug(`Enabling managed entity discovery (installOnly=${params.query.installOnly})`);
       const soClient = core.savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
@@ -128,9 +128,11 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
       await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
       const esClient = core.elasticsearch.client.asCurrentUser;
+      const entityClient = await getScopedClient({ request });
       const installedDefinitions = await installBuiltInEntityDefinitions({
         esClient,
         soClient,
+        isServerless: entityClient.isServerless(),
         logger,
         definitions: builtInDefinitions,
       });
@@ -142,7 +144,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
           )
         );
       }
-      logger.info('Managed entity discovery is enabled');
+      logger.debug('Managed entity discovery is enabled');
 
       return response.ok({ body: { success: true } });
     } catch (err) {

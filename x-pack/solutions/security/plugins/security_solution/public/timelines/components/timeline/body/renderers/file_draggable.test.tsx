@@ -11,6 +11,7 @@ import { TestProviders } from '../../../../../common/mock';
 
 import { FileDraggable } from './file_draggable';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -22,13 +23,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../common/components/cell_actions/cell_actions_renderer', () => {
+  return {
+    CellActionsRenderer: jest.fn(),
+  };
+});
+
+const MockedCellActionsRenderer = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-renderer">{children}</div>;
+});
+
 describe('FileDraggable', () => {
+  beforeEach(() => {
+    (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
+  });
   const mount = useMountAppended();
 
   test('it prefers fileName and filePath over endgameFileName and endgameFilePath when all of them are provided', () => {
     const wrapper = mount(
       <TestProviders>
         <FileDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameFileName="[endgameFileName]"
           endgameFilePath="[endgameFilePath]"
@@ -48,6 +63,7 @@ describe('FileDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <FileDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameFileName={undefined}
           endgameFilePath={undefined}
@@ -65,6 +81,7 @@ describe('FileDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <FileDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameFileName="[endgameFileName]"
           endgameFilePath={undefined}
@@ -82,6 +99,7 @@ describe('FileDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <FileDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameFileName={undefined}
           endgameFilePath="[endgameFilePath]"
@@ -99,6 +117,7 @@ describe('FileDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <FileDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameFileName={undefined}
           endgameFilePath={undefined}
@@ -116,6 +135,7 @@ describe('FileDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <FileDraggable
+          scopeId="some_scope"
           contextId="test"
           endgameFileName={undefined}
           endgameFilePath={undefined}
@@ -127,5 +147,29 @@ describe('FileDraggable', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('in[filePath]');
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <FileDraggable
+          scopeId="some_scope"
+          contextId="test"
+          endgameFileName={undefined}
+          endgameFilePath={undefined}
+          eventId="1"
+          fileExtOriginalPath={undefined}
+          fileName={undefined}
+          filePath="[filePath]"
+        />
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsRenderer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

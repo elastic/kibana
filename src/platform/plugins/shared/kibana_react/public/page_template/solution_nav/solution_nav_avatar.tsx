@@ -8,15 +8,11 @@
  */
 
 import { css } from '@emotion/react';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
-import {
-  DistributiveOmit,
-  EuiAvatar,
-  EuiAvatarProps,
-  useEuiTheme,
-  useEuiShadow,
-} from '@elastic/eui';
+import type { DistributiveOmit, EuiAvatarProps } from '@elastic/eui';
+import { EuiAvatar, useEuiTheme, useEuiShadow } from '@elastic/eui';
 
 export type KibanaPageTemplateSolutionNavAvatarProps = DistributiveOmit<EuiAvatarProps, 'size'> & {
   /**

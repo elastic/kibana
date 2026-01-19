@@ -31,7 +31,9 @@
         "signature": [
           "(expected: string, received: string) => string | undefined"
         ],
-        "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/diff_strings.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +47,9 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/diff_strings.ts",
+            "lineNumber": 90,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,7 +64,9 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/diff_strings.ts",
+            "lineNumber": 90,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -81,7 +87,9 @@
         "signature": [
           "({\n  archivePath,\n  targetDir,\n  stripComponents = 0,\n  setModifiedTimes,\n}: Options) => Promise<void>"
         ],
-        "path": "packages/kbn-dev-utils/src/extract.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/extract.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -95,7 +103,9 @@
             "signature": [
               "Options"
             ],
-            "path": "packages/kbn-dev-utils/src/extract.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/extract.ts",
+            "lineNumber": 57,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,7 +131,9 @@
             "text": "AxiosRequestError"
           }
         ],
-        "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,7 +147,9 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
+            "lineNumber": 20,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -162,7 +176,9 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -176,7 +192,9 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
+            "lineNumber": 24,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -195,7 +213,9 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-dev-utils/src/plugin_list/run_plugin_list_cli.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/plugin_list/run_plugin_list_cli.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -218,7 +238,9 @@
           "ChildProcess",
           "; }"
         ],
-        "path": "packages/kbn-dev-utils/src/worker/index.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/worker/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -232,7 +254,9 @@
             "signature": [
               "StartTSWorkerArgs"
             ],
-            "path": "packages/kbn-dev-utils/src/worker/index.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/worker/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -258,7 +282,9 @@
           " | null> | null) => ",
           "Transform"
         ],
-        "path": "packages/kbn-dev-utils/src/streams.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/streams.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -276,7 +302,9 @@
               "node_modules/@types/vinyl/index",
               " | null> | null"
             ],
-            "path": "packages/kbn-dev-utils/src/streams.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/streams.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -306,7 +334,9 @@
           "AxiosError",
           "<unknown, any>"
         ],
-        "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -320,7 +350,9 @@
             "signature": [
               "undefined"
             ],
-            "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -346,7 +378,9 @@
           "AxiosError",
           "<unknown, any>"
         ],
-        "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -359,9 +393,11 @@
             "description": [],
             "signature": [
               "AxiosResponse",
-              "<T, any>"
+              "<T, any, {}>"
             ],
-            "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -378,7 +414,9 @@
         "tags": [],
         "label": "CA_CERT_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -393,7 +431,9 @@
         "signature": [
           "\"F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84\""
         ],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -405,7 +445,9 @@
         "tags": [],
         "label": "ES_CERT_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -417,7 +459,9 @@
         "tags": [],
         "label": "ES_EMPTYPASSWORD_P12_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -429,7 +473,9 @@
         "tags": [],
         "label": "ES_KEY_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -441,7 +487,9 @@
         "tags": [],
         "label": "ES_NOPASSWORD_P12_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -456,7 +504,9 @@
         "signature": [
           "\"storepass\""
         ],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -468,7 +518,9 @@
         "tags": [],
         "label": "ES_P12_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -480,7 +532,9 @@
         "tags": [],
         "label": "FLEET_SERVER_CERT_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -492,7 +546,9 @@
         "tags": [],
         "label": "FLEET_SERVER_KEY_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -507,7 +563,9 @@
         "signature": [
           "\"storepass\""
         ],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -519,7 +577,9 @@
         "tags": [],
         "label": "FLEET_SERVER_P12_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -531,7 +591,9 @@
         "tags": [],
         "label": "KBN_CERT_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -543,7 +605,9 @@
         "tags": [],
         "label": "KBN_KEY_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -558,7 +622,9 @@
         "signature": [
           "\"storepass\""
         ],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -570,7 +636,9 @@
         "tags": [],
         "label": "KBN_P12_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -584,7 +652,9 @@
         "tags": [],
         "label": "fleetServerDevServiceAccount",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -595,7 +665,9 @@
             "tags": [],
             "label": "token",
             "description": [],
-            "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -609,9 +681,11 @@
         "tags": [],
         "label": "kibanaDevServiceAccount",
         "description": [
-          "\n`kibana-dev` service account token for connecting to ESS\nSee packages/kbn-es/src/serverless_resources/README.md"
+          "\n`kibana-dev` service account token for connecting to ESS\nSee src/platform/packages/shared/kbn-es/src/serverless_resources/README.md"
         ],
-        "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -622,7 +696,9 @@
             "tags": [],
             "label": "token",
             "description": [],
-            "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

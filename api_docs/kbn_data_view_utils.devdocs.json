@@ -47,6 +47,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/convert_to_data_view_field_spec.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,6 +69,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/convert_to_data_view_field_spec.ts",
+            "lineNumber": 17,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -86,6 +90,8 @@
           "(basePatterns: string | string[], selector: Selector) => RegExp"
         ],
         "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -100,6 +106,8 @@
               "string | string[]"
             ],
             "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+            "lineNumber": 14,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -115,9 +123,128 @@
               "Selector"
             ],
             "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+            "lineNumber": 14,
+            "columnNumber": 74,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-view-utils",
+        "id": "def-common.getDataViewFieldOrCreateFromColumnMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "getDataViewFieldOrCreateFromColumnMeta",
+        "description": [],
+        "signature": [
+          "({ dataView, fieldName, columnMeta, }: { dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; fieldName: string; columnMeta?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumnMeta",
+            "text": "DatatableColumnMeta"
+          },
+          " | undefined; }) => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/get_data_view_field_or_create.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-view-utils",
+            "id": "def-common.getDataViewFieldOrCreateFromColumnMeta.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dataView,\n  fieldName,\n  columnMeta,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/get_data_view_field_or_create.ts",
+            "lineNumber": 19,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-view-utils",
+                "id": "def-common.getDataViewFieldOrCreateFromColumnMeta.$1.dataView",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/get_data_view_field_or_create.ts",
+                "lineNumber": 20,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/data-view-utils",
+                "id": "def-common.getDataViewFieldOrCreateFromColumnMeta.$1.fieldName",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/get_data_view_field_or_create.ts",
+                "lineNumber": 21,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/data-view-utils",
+                "id": "def-common.getDataViewFieldOrCreateFromColumnMeta.$1.columnMeta",
+                "type": "Object",
+                "tags": [],
+                "label": "columnMeta",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.DatatableColumnMeta",
+                    "text": "DatatableColumnMeta"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/get_data_view_field_or_create.ts",
+                "lineNumber": 22,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -134,6 +261,8 @@
           "(allowedList: (string | RegExp)[]) => (value: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/test_pattern_against_allowed_list.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,6 +277,8 @@
               "(string | RegExp)[]"
             ],
             "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/test_pattern_against_allowed_list.ts",
+            "lineNumber": 11,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -173,6 +304,8 @@
           "\"esql\""
         ],
         "path": "src/platform/packages/shared/kbn-data-view-utils/src/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

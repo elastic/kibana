@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiModal,
   EuiModalHeader,
@@ -22,6 +23,7 @@ import {
   EuiFormRow,
   EuiCheckboxGroup,
   EuiSwitch,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -46,10 +48,12 @@ export const ExportModal: FC<ExportModalProps> = ({
   includeReferences,
   onIncludeReferenceChange,
 }) => {
+  const exportModalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal onClose={onCancel}>
+    <EuiModal onClose={onCancel} aria-labelledby={exportModalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={exportModalTitleId}>
           <FormattedMessage
             id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
             defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AutoFollowPattern, AutoFollowPatternFromEs, AutoFollowPatternToEs } from '../types';
+import type { AutoFollowPattern, AutoFollowPatternFromEs, AutoFollowPatternToEs } from '../types';
 
 export const deserializeAutoFollowPattern = (
   autoFollowPattern: AutoFollowPatternFromEs

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RequestHandler } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { convertRequests } from '@elastic/request-converter';
-import { RouteDependencies } from '../../..';
+import type { RouteDependencies } from '../../..';
 
 import { acceptedHttpVerb, nonEmptyString } from '../proxy/validation_config';
 
@@ -77,6 +78,11 @@ export const registerConvertRequestRoute = ({
   router.post(
     {
       path: '/api/console/convert_request_to_language',
+      security: {
+        authz: {
+          requiredPrivileges: ['console'],
+        },
+      },
       validate: routeValidationConfig,
     },
     handler

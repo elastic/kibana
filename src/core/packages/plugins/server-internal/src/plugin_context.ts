@@ -12,11 +12,16 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { IContextProvider, IRouter } from '@kbn/core-http-server';
-import { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
-import { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { PluginWrapper } from './plugin';
-import {
+import type { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
+import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type {
+  CoreRequestHandlerContext,
+  RequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
+import { CoreRouteHandlerContext } from '@kbn/core-http-request-handler-context-server-internal';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type { PluginWrapper } from './plugin';
+import type {
   PluginsServicePrebootSetupDeps,
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
@@ -27,6 +32,7 @@ import type { IRuntimePluginContractResolver } from './plugin_contract_resolver'
 /** @internal */
 export interface InstanceInfo {
   uuid: string;
+  airgapped: boolean;
 }
 
 /**
@@ -70,6 +76,7 @@ export function createPluginInitializerContext({
       packageInfo: coreContext.env.packageInfo,
       instanceUuid: instanceInfo.uuid,
       configs: coreContext.env.configs,
+      airgapped: instanceInfo.airgapped,
     },
 
     /**
@@ -214,12 +221,14 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       legacy: deps.elasticsearch.legacy,
       publicBaseUrl: deps.elasticsearch.publicBaseUrl,
       setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
+      setCpsFeatureFlag: deps.elasticsearch.setCpsFeatureFlag,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
       getAsLabels: deps.executionContext.getAsLabels,
     },
     featureFlags: {
+      setInitialFeatureFlagsGetter: deps.featureFlags.setInitialFeatureFlagsGetter,
       setProvider: deps.featureFlags.setProvider,
       appendContext: deps.featureFlags.appendContext,
     },
@@ -264,8 +273,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       setEncryptionExtension: deps.savedObjects.setEncryptionExtension,
       setSecurityExtension: deps.savedObjects.setSecurityExtension,
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
+      setAccessControlTransforms: deps.savedObjects.setAccessControlTransforms,
       registerType: deps.savedObjects.registerType,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
+      isAccessControlEnabled: deps.savedObjects.isAccessControlEnabled,
     },
     status: {
       core$: deps.status.core$,
@@ -282,6 +293,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     userSettings: {},
     getStartServices: () => plugin.startDependencies,
+    createRequestHandlerContext: async (request): Promise<CoreRequestHandlerContext> => {
+      const [coreStart] = await plugin.startDependencies;
+      return new CoreRouteHandlerContext(coreStart as unknown as InternalCoreStart, request);
+    },
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,
@@ -291,6 +306,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    pricing: {
+      isFeatureAvailable: deps.pricing.isFeatureAvailable,
+      registerProductFeatures: deps.pricing.registerProductFeatures,
+    },
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
@@ -298,6 +317,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     userProfile: {
       registerUserProfileDelegate: (delegate) =>
         deps.userProfile.registerUserProfileDelegate(delegate),
+    },
+    injection: {
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
+    dataStreams: {
+      registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
     },
   };
 }
@@ -361,6 +386,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
+      getUnsafeInternalClient: deps.savedObjects.getUnsafeInternalClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
@@ -385,10 +411,18 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    pricing: deps.pricing,
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,
     },
     userProfile: deps.userProfile,
+    injection: {
+      fork: () => deps.injection.fork(plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
+    dataStreams: {
+      initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
+    },
   };
 }

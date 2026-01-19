@@ -6,7 +6,9 @@
  */
 
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ServicesResponse } from '../../../common/service_map/types';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
@@ -23,40 +25,43 @@ export async function getServiceStats({
   serviceGroupKuery,
   serviceName,
   kuery,
-}: IEnvOptions & { maxNumberOfServices: number }) {
+}: IEnvOptions & { maxNumberOfServices: number }): Promise<ServicesResponse[]> {
+  const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
+  const shouldQueryMetrics = processorEvent === ProcessorEvent.metric;
   const params = {
-    apm: {
-      events: [
-        getProcessorEventForTransactions(searchAggregatedTransactions),
-        ProcessorEvent.metric as const,
-        ProcessorEvent.error as const,
-      ],
-    },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...termsQuery(SERVICE_NAME, serviceName),
-            ...kqlQuery(serviceGroupKuery),
-            ...kqlQuery(kuery),
+    apm: shouldQueryMetrics
+      ? {
+          sources: [
+            {
+              documentType: ApmDocumentType.ServiceTransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+            },
           ],
-        },
+        }
+      : { events: [processorEvent] },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...termsQuery(SERVICE_NAME, serviceName),
+          ...kqlQuery(serviceGroupKuery),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: maxNumberOfServices,
-          },
-          aggs: {
-            agent_name: {
-              terms: {
-                field: AGENT_NAME,
-              },
+    },
+    aggs: {
+      services: {
+        terms: {
+          field: SERVICE_NAME,
+          size: maxNumberOfServices,
+        },
+        aggs: {
+          agent_name: {
+            terms: {
+              field: AGENT_NAME,
             },
           },
         },
@@ -66,13 +71,12 @@ export async function getServiceStats({
 
   const response = await apmEventClient.search('get_service_stats_for_service_map', params);
 
-  return (
-    response.aggregations?.services.buckets.map((bucket) => {
-      return {
-        [SERVICE_NAME]: bucket.key as string,
-        [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
-      };
-    }) || []
-  );
+  const services =
+    response.aggregations?.services.buckets.map((bucket) => ({
+      [SERVICE_NAME]: bucket.key as string,
+      [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
+      [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
+    })) || [];
+
+  return services;
 }

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { SwitchSchemaMessage } from '../../../../components/shared/switch_schema_message';
+import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import type { HostNodeRow } from '../hooks/use_hosts_table';
 import { useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
@@ -23,6 +26,12 @@ export const HostsTable = () => {
   const { loading } = useHostsViewContext();
   const { loading: hostCountLoading, count } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
+  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
+
+  const schemas: DataSchemaFormat[] = useMemo(
+    () => timeRangeMetadata?.schemas || [],
+    [timeRangeMetadata?.schemas]
+  );
 
   const { onPageReady } = usePerformanceContext();
 
@@ -57,6 +66,9 @@ export const HostsTable = () => {
       });
     }
   }, [loading, hostCountLoading, onPageReady, count, searchCriteria]);
+
+  const hasDataOnAnotherSchema =
+    schemas.length === 1 && searchCriteria.preferredSchema !== schemas[0];
 
   return (
     <>
@@ -96,9 +108,15 @@ export const HostsTable = () => {
             })
           ) : (
             <EuiEmptyPrompt
-              body={i18n.translate('xpack.infra.waffle.noDataDescription', {
-                defaultMessage: 'Try adjusting your time or filter.',
-              })}
+              body={
+                hasDataOnAnotherSchema ? (
+                  <SwitchSchemaMessage dataTestSubj="infraHostsTableNoDataInSelectedSchema" />
+                ) : (
+                  i18n.translate('xpack.infra.waffle.noDataDescription', {
+                    defaultMessage: 'Try adjusting your time or filter.',
+                  })
+                )
+              }
               data-test-subj="hostsViewTableNoData"
               layout="vertical"
               title={

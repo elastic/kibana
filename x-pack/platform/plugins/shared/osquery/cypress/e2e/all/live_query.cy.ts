@@ -37,12 +37,12 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('Query is a required field').should('not.exist');
     checkResults();
     getAdvancedButton().click();
-    fillInQueryTimeout('910');
+    fillInQueryTimeout('86410');
     submitQuery();
-    cy.contains('The timeout value must be 900 seconds or or lower.');
+    cy.contains('The timeout value must be 86400 seconds or or lower.');
     fillInQueryTimeout('890');
     submitQuery();
-    cy.contains('The timeout value must be 900 seconds or or lower.').should('not.exist');
+    cy.contains('The timeout value must be 86400 seconds or or lower.').should('not.exist');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
     submitQuery();
     cy.contains('ECS field is required.');

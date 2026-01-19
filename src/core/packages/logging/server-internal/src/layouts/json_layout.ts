@@ -10,8 +10,9 @@
 import moment from 'moment-timezone';
 import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import { Ecs, EcsVersion } from '@elastic/ecs';
-import { LogRecord, Layout } from '@kbn/logging';
+import type { Ecs } from '@elastic/ecs';
+import { EcsVersion } from '@elastic/ecs';
+import type { LogRecord, Layout } from '@kbn/logging';
 
 const { literal, object } = schema;
 
@@ -65,6 +66,9 @@ export class JsonLayout implements Layout {
     if (record.meta) {
       // @ts-expect-error toJSON not defined on `LogMeta`, but some structured meta can have it defined
       const serializedMeta = record.meta.toJSON ? record.meta.toJSON() : { ...record.meta };
+      if (serializedMeta.error instanceof Error) {
+        serializedMeta.error = JsonLayout.errorToSerializableObject(serializedMeta.error);
+      }
       output = merge(serializedMeta, log);
     }
 

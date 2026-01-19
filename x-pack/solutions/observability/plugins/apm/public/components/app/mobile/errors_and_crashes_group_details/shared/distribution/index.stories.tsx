@@ -12,7 +12,7 @@ import { MockApmPluginStorybook } from '../../../../../../context/apm_plugin/moc
 import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 
 export default {
-  title: 'app/ErrorGroupDetails/distribution',
+  title: 'app/ErrorsAndCrashGroupDetails/distribution',
   component: ErrorDistribution,
   decorators: [
     (Story: ComponentType) => {

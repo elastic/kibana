@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node"]
@@ -27,5 +27,7 @@
     "@kbn/home-plugin",
     "@kbn/management-plugin",
     "@kbn/ui-actions-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/licensing-types",
   ]
 }

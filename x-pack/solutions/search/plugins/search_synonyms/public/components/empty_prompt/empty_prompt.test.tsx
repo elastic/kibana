@@ -24,7 +24,7 @@ describe('Synonyms Overview Empty Prompt', () => {
   it('renders', () => {
     render(
       <Wrapper>
-        <EmptyPrompt />
+        <EmptyPrompt getStartedAction={() => {}} />
       </Wrapper>
     );
     expect(screen.getByTestId('searchSynonymsEmptyPromptGetStartedButton')).toBeInTheDocument();

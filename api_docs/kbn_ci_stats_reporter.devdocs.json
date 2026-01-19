@@ -27,7 +27,9 @@
         "description": [
           "Object that helps report data to the ci-stats service"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +60,9 @@
                 "text": "CiStatsReporter"
               }
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -78,7 +82,9 @@
                     "text": "SomeDevLog"
                   }
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "lineNumber": 124,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -96,7 +102,9 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -117,7 +125,9 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "lineNumber": 128,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -138,7 +148,9 @@
                     "text": "SomeDevLog"
                   }
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "lineNumber": 128,
+                "columnNumber": 60,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -158,7 +170,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -176,7 +190,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -202,7 +218,9 @@
               },
               ") => Promise<boolean | undefined>"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -222,7 +240,9 @@
                     "text": "TimingsOptions"
                   }
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "lineNumber": 152,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -258,7 +278,9 @@
               },
               " | undefined) => Promise<boolean | undefined>"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 229,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -279,7 +301,9 @@
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "lineNumber": 233,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -301,7 +325,9 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "lineNumber": 233,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -329,7 +355,9 @@
               },
               ") => Promise<void>"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 258,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -349,7 +377,9 @@
                     "text": "CiStatsReportTestsOptions"
                   }
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "lineNumber": 261,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -369,7 +399,9 @@
               "PerformanceMetrics",
               ") => Promise<boolean | undefined>"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 316,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -383,7 +415,9 @@
                 "signature": [
                   "PerformanceMetrics"
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "lineNumber": 316,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -414,7 +448,9 @@
           },
           ", group: string) => (startTime: number, id: string, meta: Record<string, any>) => Promise<void>"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/report_time.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -434,7 +470,9 @@
                 "text": "ToolingLog"
               }
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/report_time.ts",
+            "lineNumber": 14,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -449,7 +487,9 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/report_time.ts",
+            "lineNumber": 14,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -469,7 +509,9 @@
         "description": [
           "A ci-stats metric record"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -482,7 +524,9 @@
             "description": [
               "Top-level categorization for the metric, e.g. \"page load bundle size\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -495,7 +539,9 @@
             "description": [
               "Specific sub-set of the \"group\", e.g. \"dashboard\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -508,7 +554,9 @@
             "description": [
               "integer value recorded as the value of this metric"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -524,7 +572,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -540,7 +590,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -563,7 +615,9 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -579,7 +633,9 @@
         "description": [
           "Options for reporting tests to ci-stats"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -601,7 +657,9 @@
                 "text": "CiStatsTestGroupInfo"
               }
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -624,7 +682,9 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -638,7 +698,9 @@
         "tags": [],
         "label": "CiStatsTestGroupInfo",
         "description": [],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -651,7 +713,9 @@
             "description": [
               "\nISO-8601 formatted datetime representing when the group of tests started running"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -664,7 +728,9 @@
             "description": [
               "\nThe number of miliseconds that the tests ran for"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -677,7 +743,9 @@
             "description": [
               "\nThe type of tests run in this group, any value is valid but test groups are groupped by type in the UI so use something consistent"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -690,7 +758,9 @@
             "description": [
               "\nThe name of this specific group (within the \"type\")"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -704,9 +774,11 @@
               "\nOverall result of this test group"
             ],
             "signature": [
-              "\"skip\" | \"fail\" | \"pass\""
+              "\"skip\" | \"pass\" | \"fail\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -728,7 +800,9 @@
                 "text": "CiStatsMetadata"
               }
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -742,7 +816,9 @@
         "tags": [],
         "label": "CiStatsTestRun",
         "description": [],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -755,7 +831,9 @@
             "description": [
               "\nISO-8601 formatted datetime representing when the tests started running"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -768,7 +846,9 @@
             "description": [
               "\nDuration of the tests in milliseconds"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -781,7 +861,9 @@
             "description": [
               "\nA sequence number, this is used to order the tests in a specific test run"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -797,7 +879,9 @@
             "signature": [
               "\"after all hook\" | \"after each hook\" | \"before all hook\" | \"before each hook\" | \"test\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -811,9 +895,11 @@
               "\n\"fail\", \"pass\" or \"skip\", the result of the tests"
             ],
             "signature": [
-              "\"skip\" | \"fail\" | \"pass\""
+              "\"skip\" | \"pass\" | \"fail\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -829,7 +915,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -842,7 +930,9 @@
             "description": [
               "\nThe name of this specific test run"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -855,7 +945,9 @@
             "description": [
               "\nRelative path from the root of the repo contianing this test"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -871,7 +963,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -887,7 +981,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -903,7 +999,9 @@
             "signature": [
               "{ name: string; base64Png: string; }[] | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -919,7 +1017,9 @@
         "description": [
           "A ci-stats timing event"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -932,7 +1032,9 @@
             "description": [
               "Top-level categorization for the timing, e.g. \"scripts/foo\", process type, etc."
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -945,7 +1047,9 @@
             "description": [
               "Specific timing (witin the \"group\" being tracked) e.g. \"total\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -958,7 +1062,9 @@
             "description": [
               "time in milliseconds which should be recorded"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -981,7 +1087,9 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -997,7 +1105,9 @@
         "description": [
           "Options for reporting metrics to ci-stats"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1020,7 +1130,9 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1036,7 +1148,9 @@
         "description": [
           "Options for reporting timings to ci-stats"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1059,7 +1173,9 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1075,7 +1191,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1091,7 +1209,9 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1109,9 +1229,11 @@
         "label": "CiStatsTestResult",
         "description": [],
         "signature": [
-          "\"skip\" | \"fail\" | \"pass\""
+          "\"skip\" | \"pass\" | \"fail\""
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1126,7 +1248,9 @@
         "signature": [
           "\"after all hook\" | \"after each hook\" | \"before all hook\" | \"before each hook\" | \"test\""
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

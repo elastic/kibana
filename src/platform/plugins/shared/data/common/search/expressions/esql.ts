@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import { esFieldTypeToKibanaFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type {
   IKibanaSearchRequest,
@@ -21,21 +21,30 @@ import type {
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  fixESQLQueryWithVariables,
+  getNamedParams,
+  mapVariableToColumn,
+  isComputedColumn,
+  getQuerySummary,
+} from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
-import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { catchError, defer, map, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import DateMath from '@kbn/datemath';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import {
   ESQL_ASYNC_SEARCH_STRATEGY,
   ESQL_TABLE_TYPE,
+  getSideEffectFunction,
   isRunningResponse,
   type KibanaContext,
 } from '..';
-import { UiSettingsCommon } from '../..';
+import type { UiSettingsCommon } from '../..';
 
 declare global {
   interface Window {
@@ -97,7 +106,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     name: 'esql',
     type: 'datatable',
     inputTypes: ['kibana_context', 'null'],
-    allowCache: true,
     help: i18n.translate('data.search.esql.help', {
       defaultMessage: 'Queries Elasticsearch using ES|QL.',
     }),
@@ -154,6 +162,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         }),
       },
     },
+    allowCache: {
+      withSideEffects: (_, { inspectorAdapters }) => {
+        return getSideEffectFunction(inspectorAdapters);
+      },
+    },
     fn(
       input,
       {
@@ -164,7 +177,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         descriptionForInspector,
         ignoreGlobalFilters,
       },
-      { abortSignal, inspectorAdapters, getKibanaRequest }
+      { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
     ) {
       return defer(() =>
         getStartDependencies(() => {
@@ -180,18 +193,22 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         })
       ).pipe(
         switchMap(({ search, uiSettings }) => {
+          // this is for backward compatibility, if the query is of fields or functions type
+          // and the query is not set with ?? in the query, we should set it
+          // https://github.com/elastic/elasticsearch/pull/122459
+          const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
           const params: ESQLSearchParams = {
-            query,
+            query: fixedQuery,
             // time_zone: timezone,
             locale,
-            include_ccs_metadata: true,
+            include_execution_metadata: true,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
 
-            const namedParams = getNamedParams(query, input.timeRange, input.esqlVariables);
+            const namedParams = getNamedParams(fixedQuery, input.timeRange, input.esqlVariables);
 
             if (namedParams.length) {
               params.params = namedParams;
@@ -261,7 +278,12 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
-            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+            {
+              abortSignal,
+              strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+              sessionId: getSearchSessionId(),
+              projectRouting: input?.projectRouting,
+            }
           ).pipe(
             catchError((error) => {
               if (!error.attributes) {
@@ -333,29 +355,60 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
           const indexPattern = getIndexPatternFromESQLQuery(query);
 
-          const allColumns =
-            (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
-              id: name,
-              name,
-              meta: {
-                type: esFieldTypeToKibanaFieldType(type),
-                esType: type,
-                sourceParams:
-                  type === 'date'
-                    ? {
-                        appliedTimeRange: input?.timeRange,
-                        params: {},
-                        indexPattern,
-                      }
-                    : {
-                        indexPattern,
-                      },
-              },
-              isNull: hasEmptyColumns ? !lookup.has(name) : false,
-            })) ?? [];
+          const appliedTimeRange = input?.timeRange
+            ? {
+                from: DateMath.parse(input.timeRange.from)?.toISOString(),
+                to: DateMath.parse(input.timeRange.to, { roundUp: true })?.toISOString(),
+              }
+            : undefined;
 
+          // Normalize body.values: if all arrays are empty, convert to single empty array
+          const normalizedValues = body.values.every(
+            (row) => Array.isArray(row) && row.length === 0
+          )
+            ? []
+            : body.values;
+
+          // Get query summary to identify computed columns
+          const querySummary = getQuerySummary(query);
+
+          const allColumns =
+            (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
+              const originalTypes = original_types ?? [];
+              const hasConflict = type === 'unsupported' && originalTypes.length > 1;
+              const kibanaFieldType = hasConflict
+                ? KBN_FIELD_TYPES.CONFLICT
+                : esFieldTypeToKibanaFieldType(type);
+              return {
+                id: name,
+                name,
+                meta: {
+                  type: kibanaFieldType,
+                  esType: type,
+                  sourceParams:
+                    type === 'date'
+                      ? {
+                          appliedTimeRange,
+                          params: {},
+                          indexPattern,
+                          sourceField: name,
+                        }
+                      : {
+                          indexPattern,
+                          sourceField: name,
+                        },
+                  params: {
+                    id: kibanaFieldType,
+                  },
+                },
+                isNull: hasEmptyColumns ? !lookup.has(name) : false,
+                isComputedColumn: isComputedColumn(name, querySummary),
+              };
+            }) ?? [];
+
+          const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
           const updatedWithVariablesColumns = mapVariableToColumn(
-            query,
+            fixedQuery,
             input?.esqlVariables ?? [],
             allColumns as DatatableColumn[]
           );
@@ -366,7 +419,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           }
           const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
 
-          const rows = body.values.map((row) => zipObject(columnNames, row));
+          const rows = normalizedValues.map((row) => zipObject(columnNames, row));
 
           return {
             type: 'datatable',
@@ -374,7 +427,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               type: ESQL_TABLE_TYPE,
               query,
               statistics: {
-                totalCount: body.values.length,
+                totalCount: normalizedValues.length,
               },
             },
             columns: updatedWithVariablesColumns,

@@ -46,7 +46,7 @@ export const NO_SPACES_HELP = i18n.translate(
   'xpack.automaticImport.step.dataStream.noSpacesHelpText',
   {
     defaultMessage:
-      'Name must be at least 2 characters long and can only contain lowercase letters, numbers, and underscores (_)',
+      'Name must be at least 2 characters long, start with a letter, and can only contain lowercase letters, numbers, and underscores (_)',
   }
 );
 export const PACKAGE_NAMES_FETCH_ERROR = i18n.translate(
@@ -124,7 +124,7 @@ export const ADD_OPEN_API_SPEC_DESCRIPTION = i18n.translate(
   'xpack.automaticImport.step.dataStream.addOpenApiSpecDescription',
   {
     defaultMessage:
-      'To successfully ingest CEL data from an API, provide the associated OpenAPI Specification (OAS) file.',
+      'To successfully ingest data from an API, provide the associated OpenAPI Specification (OAS) file.',
   }
 );
 export const TECH_PREVIEW = i18n.translate(
@@ -141,27 +141,40 @@ export const TECH_PREVIEW_TOOLTIP = i18n.translate(
   }
 );
 
-export const LOGS_SAMPLE_LABEL = i18n.translate(
-  'xpack.automaticImport.step.dataStream.logsSample.label',
-  {
+export const LOGS_SAMPLE_LABEL = {
+  MAIN: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.label', {
     defaultMessage: 'Logs',
-  }
-);
+  }),
+  SUBTEXT_PRETEXT: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.warningInfoPretext',
+    {
+      defaultMessage: 'Supported log formats, ',
+    }
+  ),
+  SUBTEXT_INFO_LINK: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.warningInfoLink',
+    {
+      defaultMessage: 'refer to the documentation.',
+    }
+  ),
+};
 
-export const LOGS_SAMPLE_WARNING = i18n.translate(
-  'xpack.automaticImport.step.dataStream.logsSample.warning',
-  {
+export const LOGS_SAMPLE_WARNING = {
+  MAIN: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.warning', {
     defaultMessage:
       'Please note that this data will be analyzed by a third-party AI tool. Ensure that you comply with privacy and security guidelines when selecting data.',
-  }
-);
+  }),
+};
 
-export const LOGS_SAMPLE_DESCRIPTION = i18n.translate(
-  'xpack.automaticImport.step.dataStream.logsSample.description',
-  {
+export const LOGS_SAMPLE_DESCRIPTION = {
+  MAIN: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.description', {
     defaultMessage: 'Drag and drop a file or Browse files.',
-  }
-);
+  }),
+  SUBTEXT: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.descriptionSubtext', {
+    defaultMessage: 'Supported file types include JSON/NDJSON, CSV, ...',
+  }),
+};
+
 export const LOGS_SAMPLE_ERROR = {
   CAN_NOT_READ: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.errorCanNotRead', {
     defaultMessage: 'Failed to read the logs sample file',
@@ -192,6 +205,18 @@ export const LOGS_SAMPLE_ERROR = {
   NOT_OBJECT: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.errorNotObject', {
     defaultMessage: 'The logs sample file contains non-object entries',
   }),
+  DOCUMENTATION_LINK_TEXT: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.documentationLinkText',
+    {
+      defaultMessage: 'Refer to the documentation for supported log formats',
+    }
+  ),
+  HELP_TEXT_PREFIX: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.helpTextPrefix',
+    {
+      defaultMessage: 'Having issues?',
+    }
+  ),
 };
 
 export const ANALYZING = i18n.translate('xpack.automaticImport.step.dataStream.analyzing', {
@@ -271,6 +296,12 @@ export const GENERATION_ERROR_TRANSLATION: Record<
     defaultMessage:
       'CEF format detected. Please decode the CEF logs into JSON format using filebeat decode_cef processor.',
   }),
+  [GenerationErrorCode.BUILD_INTEGRATION_ERROR]: i18n.translate(
+    'xpack.automaticImport.errors.buildIntegrationError',
+    {
+      defaultMessage: 'An error occurred while building the integration package. Please try again.',
+    }
+  ),
   [GenerationErrorCode.UNPARSEABLE_CSV_DATA]: (attributes) => {
     if (
       attributes.underlyingMessages !== undefined &&

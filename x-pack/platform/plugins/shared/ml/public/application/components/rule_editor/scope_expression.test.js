@@ -9,15 +9,14 @@
 jest.mock('../../services/job_service', () => 'mlJobService');
 
 import React from 'react';
-
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 
 import { ScopeExpression } from './scope_expression';
 
 describe('ScopeExpression', () => {
   const testFilterListIds = ['web_domains', 'safe_domains', 'uk_domains'];
-  const updateScope = jest.fn(() => {});
+  const updateScope = jest.fn();
 
   const requiredProps = {
     fieldName: 'domain',
@@ -31,9 +30,9 @@ describe('ScopeExpression', () => {
       enabled: true,
     };
 
-    const component = shallowWithIntl(<ScopeExpression {...props} />);
+    const { container } = renderWithI18n(<ScopeExpression {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders when empty list of filter IDs is supplied', () => {
@@ -43,9 +42,9 @@ describe('ScopeExpression', () => {
       enabled: true,
     };
 
-    const component = shallowWithIntl(<ScopeExpression {...props} />);
+    const { container } = renderWithI18n(<ScopeExpression {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders when filter ID and type supplied', () => {
@@ -57,9 +56,9 @@ describe('ScopeExpression', () => {
       enabled: true,
     };
 
-    const component = shallowWithIntl(<ScopeExpression {...props} />);
+    const { container } = renderWithI18n(<ScopeExpression {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders when enabled set to false', () => {
@@ -71,8 +70,8 @@ describe('ScopeExpression', () => {
       enabled: false,
     };
 
-    const component = shallowWithIntl(<ScopeExpression {...props} />);
+    const { container } = renderWithI18n(<ScopeExpression {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

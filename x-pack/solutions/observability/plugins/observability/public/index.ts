@@ -7,15 +7,14 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110905
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { lazy } from 'react';
-import {
-  Plugin,
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type {
   ObservabilityPublicPluginsStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicStart,
   ObservabilityPublicSetup,
 } from './plugin';
+import { Plugin } from './plugin';
 export type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -39,24 +38,20 @@ export {
   enableInspectEsQueries,
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
-  enableAgentExplorerView,
   apmEnableTableSearchBar,
 } from '../common/ui_settings_keys';
+export { alertsLocatorID, uptimeOverviewLocatorID } from '../common';
 export {
-  alertsLocatorID,
   ruleDetailsLocatorID,
   rulesLocatorID,
   sloDetailsLocatorID,
   sloEditLocatorID,
-  uptimeOverviewLocatorID,
-} from '../common';
+} from '@kbn/deeplinks-observability';
 
-export type { RulesParams } from './locators/rules';
+export type { RulesLocatorParams } from '@kbn/deeplinks-observability';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { DatePicker } from './pages/overview/components/date_picker';
-
-export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
 
 export type {
   Stat,
@@ -88,7 +83,7 @@ export type {
   ObservabilityHasDataResponse,
   Subset,
 } from './typings';
-import { TopAlert } from './typings/alerts';
+import type { TopAlert } from './typings/alerts';
 export type { TopAlert };
 import type { AlertDetailsAppSectionProps } from './pages/alert_details/types';
 export type { AlertDetailsAppSectionProps };
@@ -100,7 +95,6 @@ export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useSummaryTimeRange } from './hooks/use_summary_time_range';
 
-export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { buildEsQuery } from './utils/build_es_query';
 
 export type {
@@ -129,3 +123,11 @@ export { RuleConditionChart } from './components/rule_condition_chart';
 export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_group';
 export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';
 export { Threshold } from './components/custom_threshold/components/threshold';
+
+export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';
+export { AlertActions } from './components/alert_actions/alert_actions_lazy';
+export type {
+  GetObservabilityAlertsTableProp,
+  ObservabilityAlertsTableContext,
+  ObservabilityAlertsTableProps,
+} from './components/alerts_table/types';

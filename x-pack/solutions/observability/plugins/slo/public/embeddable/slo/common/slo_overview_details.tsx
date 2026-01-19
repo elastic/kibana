@@ -17,16 +17,15 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
+import type { SloTabId } from '@kbn/deeplinks-observability';
+import { OVERVIEW_TAB_ID } from '@kbn/deeplinks-observability';
 import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
-import {
-  OVERVIEW_TAB_ID,
-  SloDetails,
-  SloTabId,
-} from '../../../pages/slo_details/components/slo_details';
+import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -43,6 +42,10 @@ export function SloOverviewDetails({
     http: { basePath },
     uiSettings,
   } = useKibana().services;
+
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'sloOverviewFlyout',
+  });
 
   const onClose = () => {
     setSelectedSlo(null);
@@ -62,10 +65,10 @@ export function SloOverviewDetails({
   }
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.slo.sloOverviewDetails.h2.detailsLabel', {
               defaultMessage: '{sloName}',
               values: { sloName: slo.name },

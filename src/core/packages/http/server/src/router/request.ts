@@ -10,6 +10,7 @@
 import type { URL } from 'url';
 import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
 import type { Observable } from 'rxjs';
+import type { Span } from 'elastic-apm-node';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
@@ -41,8 +42,10 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  span?: Span | null;
   authzResult?: Record<string, boolean>;
   measureElu?: () => void;
+  startTime: number;
 }
 
 /**

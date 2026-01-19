@@ -9,10 +9,12 @@ import type { AuditLogger, Logger, StartServicesAccessor } from '@kbn/core/serve
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { StartPlugins } from '../../../plugin';
 import { scheduleAssetCriticalityEcsCompliancyMigration } from '../asset_criticality/migrations/schedule_ecs_compliancy_migration';
-import { assetCrticalityCopyTimestampToEventIngested } from './asset_criticality_copy_timestamp_to_event_ingested';
-import { riskScoreCopyTimestampToEventIngested } from './risk_score_copy_timestamp_to_event_ingested';
 import { updateAssetCriticalityMappings } from '../asset_criticality/migrations/update_asset_criticality_mappings';
 import { updateRiskScoreMappings } from '../risk_engine/migrations/update_risk_score_mappings';
+import { renameRiskScoreComponentTemplate } from '../risk_engine/migrations/rename_risk_score_component_templates';
+import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_ingested_pipeline';
+import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
+import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -39,27 +41,15 @@ export interface EntityAnalyticsMigrationsParams {
  * note: If you change the `latest` property, the transform will reinstall after the engine task runs.
  */
 export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMigrationsParams) => {
-  const scopedLogger = params.logger.get('entityAnalytics.migration');
-
-  await updateAssetCriticalityMappings({ ...params, logger: scopedLogger });
-  await scheduleAssetCriticalityEcsCompliancyMigration({ ...params, logger: scopedLogger });
-  await updateRiskScoreMappings({ ...params, logger: scopedLogger });
-};
-
-export const scheduleAssetCriticalityCopyTimestampToEventIngested = async (
-  params: EntityAnalyticsMigrationsParams
-) => {
-  const scopedLogger = params.logger.get(
-    'entityAnalytics.assetCriticality.copyTimestampToEventIngested'
-  );
-
-  await assetCrticalityCopyTimestampToEventIngested({ ...params, logger: scopedLogger });
-};
-
-export const scheduleRiskScoreCopyTimestampToEventIngested = async (
-  params: EntityAnalyticsMigrationsParams
-) => {
-  const scopedLogger = params.logger.get('entityAnalytics.riskScore.copyTimestampToEventIngested');
-
-  await riskScoreCopyTimestampToEventIngested({ ...params, logger: scopedLogger });
+  const paramsWithScopedLogger = {
+    ...params,
+    logger: params.logger.get('entityAnalytics.migration'),
+  };
+  await createEventIngestedPipelineInAllNamespaces(paramsWithScopedLogger);
+  await updateAssetCriticalityMappings(paramsWithScopedLogger);
+  await scheduleAssetCriticalityEcsCompliancyMigration(paramsWithScopedLogger);
+  await renameRiskScoreComponentTemplate(paramsWithScopedLogger);
+  await updateRiskScoreMappings(paramsWithScopedLogger);
+  await updatePrivilegedMonitoringSourceIndex(paramsWithScopedLogger);
+  await upsertPrivilegedMonitoringEntitySource(paramsWithScopedLogger);
 };

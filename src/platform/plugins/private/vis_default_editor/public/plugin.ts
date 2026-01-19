@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorController } from './default_editor_controller';

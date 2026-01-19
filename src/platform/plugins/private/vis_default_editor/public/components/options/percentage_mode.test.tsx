@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { PercentageModeOption, PercentageModeOptionProps } from './percentage_mode';
+import type { PercentageModeOptionProps } from './percentage_mode';
+import { PercentageModeOption } from './percentage_mode';
 import { EuiFieldText } from '@elastic/eui';
 
 describe('PercentageModeOption', () => {

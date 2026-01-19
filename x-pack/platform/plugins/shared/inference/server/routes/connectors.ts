@@ -6,11 +6,7 @@
  */
 
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import {
-  InferenceConnector,
-  InferenceConnectorType,
-  isSupportedConnectorType,
-} from '@kbn/inference-common';
+import { getConnectorList } from '../util/get_connector_list';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 
 export function registerConnectorsRoute({
@@ -35,24 +31,7 @@ export function registerConnectorsRoute({
       const actions = await coreSetup
         .getStartServices()
         .then(([_coreStart, pluginsStart]) => pluginsStart.actions);
-
-      const client = await actions.getActionsClientWithRequest(request);
-
-      const allConnectors = await client.getAll({
-        includeSystemActions: false,
-      });
-
-      const connectors: InferenceConnector[] = allConnectors
-        .filter((connector) => isSupportedConnectorType(connector.actionTypeId))
-        .map((connector) => {
-          return {
-            connectorId: connector.id,
-            name: connector.name,
-            type: connector.actionTypeId as InferenceConnectorType,
-            config: connector.config ?? {},
-          };
-        });
-
+      const connectors = await getConnectorList({ actions, request });
       return response.ok({ body: { connectors } });
     }
   );

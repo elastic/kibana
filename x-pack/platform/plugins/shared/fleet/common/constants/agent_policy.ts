@@ -35,6 +35,8 @@ export const AGENT_POLICY_DEFAULT_MONITORING_DATASETS = [
 ];
 
 export const LICENSE_FOR_SCHEDULE_UPGRADE = 'platinum';
+export const LICENSE_FOR_AGENT_MIGRATION = 'enterprise';
+export const LICENSE_FOR_AGENT_ROLLBACK = 'enterprise';
 
 export const DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT = 750;
 

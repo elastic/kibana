@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
+import { NotesButton } from '../../../timelines/components/timeline/notes/notes_button';
 import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../user_privileges';
 import { ActionIconItem } from './action_icon_item';

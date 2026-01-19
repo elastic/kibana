@@ -19,6 +19,8 @@ import { sendGetAgents, useMultipleAgentPolicies } from '../hooks';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
 jest.mock('../hooks', () => {
+  const mutateAsyncMock = jest.fn().mockResolvedValue({ data: [] });
+
   return {
     ...jest.requireActual('../hooks'),
     useMultipleAgentPolicies: jest.fn(),
@@ -31,7 +33,7 @@ jest.mock('../hooks', () => {
     useConfig: jest.fn().mockReturnValue({
       agents: { enabled: true },
     }),
-    sendDeletePackagePolicy: jest.fn().mockResolvedValue({ data: [] }),
+    useDeletePackagePolicyMutation: jest.fn().mockReturnValue({ mutateAsync: mutateAsyncMock }),
     sendDeleteAgentPolicy: jest.fn().mockResolvedValue({ data: [] }),
   };
 });
@@ -137,8 +139,7 @@ function createMockAgentPolicies(
   }
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/199204
-describe.skip('PackagePolicyDeleteProvider', () => {
+describe('PackagePolicyDeleteProvider', () => {
   it('Should show delete integrations action and cancel modal', async () => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
     sendGetAgentsMock.mockResolvedValue({

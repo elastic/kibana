@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import type { ReportingCore } from '../..';
 import { authorizedUserPreRouting } from '../common';
-import { RequestHandler } from '../common/generate';
+import { GenerateRequestHandler } from '../common/request_handler';
 
 export function registerGenerationRoutesPublic(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
@@ -28,7 +28,7 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
             requiredPrivileges: kibanaAccessControlTags,
           },
         },
-        validate: RequestHandler.getValidation(),
+        validate: GenerateRequestHandler.getValidation(),
         options: {
           tags: kibanaAccessControlTags.map((controlAccessTag) => `access:${controlAccessTag}`),
           access: 'public',
@@ -36,19 +36,19 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {
-          const requestHandler = new RequestHandler(
+          const requestHandler = new GenerateRequestHandler({
             reporting,
             user,
             context,
             path,
             req,
             res,
-            logger
-          );
-          return await requestHandler.handleGenerateRequest(
-            req.params.exportType,
-            requestHandler.getJobParams()
-          );
+            logger,
+          });
+          return await requestHandler.handleRequest({
+            exportTypeId: req.params.exportType,
+            jobParams: requestHandler.getJobParams(),
+          });
         } catch (err) {
           if (err instanceof KibanaResponse) {
             return err;

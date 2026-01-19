@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import type { AutoAbortedAPMClient } from '../services/rest/create_call_apm_api';
 import { callApmApi } from '../services/rest/create_call_apm_api';
@@ -82,14 +83,17 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<in
   : unknown;
 
 export function useFetcher<TReturn>(
-  fn: (callApmApi: AutoAbortedAPMClient) => TReturn,
+  fn: (callApmApi: AutoAbortedAPMClient, signal: AbortSignal) => TReturn,
   fnDeps: any[],
   options: {
     preservePreviousData?: boolean;
     showToastOnError?: boolean;
+    skipTimeRangeRefreshUpdate?: boolean;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
-  const { notifications } = useKibana();
+  const {
+    services: { notifications, rendering },
+  } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
   const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
@@ -98,6 +102,21 @@ export function useFetcher<TReturn>(
   const [counter, setCounter] = useState(0);
   const { timeRangeId } = useTimeRangeId();
   const { addInspectorRequest } = useInspectorContext();
+
+  const deps = useMemo(() => {
+    const _deps = [counter, preservePreviousData, showToastOnError, ...fnDeps];
+    if (options.skipTimeRangeRefreshUpdate !== true) {
+      _deps.push(timeRangeId);
+    }
+    return _deps;
+  }, [
+    counter,
+    fnDeps,
+    options.skipTimeRangeRefreshUpdate,
+    preservePreviousData,
+    showToastOnError,
+    timeRangeId,
+  ]);
 
   useEffect(() => {
     let controller: AbortController = new AbortController();
@@ -109,7 +128,7 @@ export function useFetcher<TReturn>(
 
       const signal = controller.signal;
 
-      const promise = fn(createAutoAbortedAPMClient(signal, addInspectorRequest));
+      const promise = fn(createAutoAbortedAPMClient(signal, addInspectorRequest), signal);
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
@@ -142,13 +161,13 @@ export function useFetcher<TReturn>(
         if (!signal.aborted) {
           const errorDetails = 'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
-          if (showToastOnError) {
-            notifications.toasts.danger({
+          if (showToastOnError && notifications && rendering) {
+            notifications.toasts.addDanger({
               title: i18n.translate('xpack.apm.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
 
-              body: (
+              text: toMountPoint(
                 <div>
                   <h5>
                     {i18n.translate('xpack.apm.fetcher.error.status', {
@@ -157,7 +176,8 @@ export function useFetcher<TReturn>(
                   </h5>
 
                   {errorDetails}
-                </div>
+                </div>,
+                rendering
               ),
             });
           }
@@ -176,14 +196,7 @@ export function useFetcher<TReturn>(
       controller.abort();
     };
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [
-    counter,
-    preservePreviousData,
-    timeRangeId,
-    showToastOnError,
-    ...fnDeps,
-    /* eslint-enable react-hooks/exhaustive-deps */
-  ]);
+  }, deps);
 
   return useMemo(() => {
     return {

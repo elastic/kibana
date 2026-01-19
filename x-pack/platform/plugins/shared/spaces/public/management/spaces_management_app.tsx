@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   PrivilegesAPIClientPublicContract,
   RolesAPIClient,
@@ -82,7 +81,8 @@ export const spacesManagementApp = Object.freeze({
           text: title,
           href: `/`,
         };
-        const { notifications, application, chrome, http, overlays } = coreStart;
+        const { notifications, application, chrome, http, overlays, docLinks } = coreStart;
+        const enableSecurityLink = docLinks.links.security.enableElasticSearchSecurityFeatures;
 
         chrome.docTitle.change(title);
 
@@ -174,12 +174,13 @@ export const spacesManagementApp = Object.freeze({
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}
               getPrivilegesAPIClient={getPrivilegesAPIClient}
+              enableSecurityLink={enableSecurityLink}
             />
           );
         };
 
         render(
-          <KibanaRenderContextProvider {...coreStart}>
+          coreStart.rendering.addContext(
             <KibanaContextProvider services={coreStart}>
               <RedirectAppLinks coreStart={coreStart}>
                 <Router history={history}>
@@ -197,7 +198,7 @@ export const spacesManagementApp = Object.freeze({
                 </Router>
               </RedirectAppLinks>
             </KibanaContextProvider>
-          </KibanaRenderContextProvider>,
+          ),
           element
         );
 

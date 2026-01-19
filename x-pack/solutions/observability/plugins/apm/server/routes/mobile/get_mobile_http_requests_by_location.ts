@@ -61,33 +61,31 @@ export async function getHttpRequestsByLocation({
 
   const response = await apmEventClient.search('get_mobile_location_http_requests', {
     apm: {
-      events: [ProcessorEvent.span],
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(SPAN_TYPE, 'external'),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...termQuery(SPAN_TYPE, 'external'),
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-          },
-          aggs,
+    },
+    aggs: {
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: intervalString,
+          min_doc_count: 0,
         },
-        ...aggs,
+        aggs,
       },
+      ...aggs,
     },
   });
 

@@ -16,4 +16,7 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/entity_analytics/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/entity_analytics/test/setup.ts',
+  ],
 };

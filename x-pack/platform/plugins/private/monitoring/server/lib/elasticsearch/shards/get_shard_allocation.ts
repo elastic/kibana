@@ -7,8 +7,8 @@
 
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
-import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
-import { LegacyRequest } from '../../../types';
+import type { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
+import type { LegacyRequest } from '../../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
@@ -109,16 +109,14 @@ export function getShardAllocation(
     index: indexPatterns,
     size: config.ui.max_bucket_size,
     ignore_unavailable: true,
-    body: {
-      query: createQuery({
-        type,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        clusterUuid,
-        metric,
-        filters,
-      }),
-    },
+    query: createQuery({
+      type,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      clusterUuid,
+      metric,
+      filters,
+    }),
   };
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then(handleResponse);

@@ -6,30 +6,40 @@
  */
 
 import pMap from 'p-map';
-import { chunk, flatten } from 'lodash';
+import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
-import { Logger } from '@kbn/core/server';
-import { Middleware } from './lib/middleware';
+import type { Logger } from '@kbn/core/server';
+import { isEqual } from 'lodash';
+import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
-import {
+import type {
+  ApiKeyOptions,
   ConcreteTaskInstance,
   IntervalSchedule,
+  RruleSchedule,
+  ScheduleOptions,
   TaskInstanceWithDeprecatedFields,
   TaskInstanceWithId,
-  TaskStatus,
 } from './task';
-import { TaskStore } from './task_store';
+import { TaskStatus } from './task';
+import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
-import { ErrorOutput } from './lib/bulk_operation_buffer';
+import type { ErrorOutput } from './lib/bulk_operation_buffer';
+import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
+import { TaskAlreadyRunningError } from './lib/errors';
+import type { TaskPollingLifecycle } from './polling_lifecycle';
+import { getExecutionId } from './lib/get_execution_id';
 
 const VERSION_CONFLICT_STATUS = 409;
+const NOT_FOUND_STATUS = 404;
 const BULK_ACTION_SIZE = 100;
 export interface TaskSchedulingOpts {
   logger: Logger;
   taskStore: TaskStore;
   middleware: Middleware;
   taskManagerId: string;
+  taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
 }
 
 /**
@@ -48,6 +58,7 @@ export interface BulkUpdateTaskResult {
 }
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
+  forced: boolean;
 }
 
 export interface RunNowResult {
@@ -59,6 +70,7 @@ export class TaskScheduling {
   private store: TaskStore;
   private logger: Logger;
   private middleware: Middleware;
+  private readonly taskPolling: TaskPollingLifecycle | undefined;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -69,6 +81,7 @@ export class TaskScheduling {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
+    this.taskPolling = opts.taskPollingLifecycle;
   }
 
   /**
@@ -79,10 +92,10 @@ export class TaskScheduling {
    */
   public async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
-    options?: Record<string, unknown>
+    options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-      ...options,
+      ...omit(options, 'apiKey', 'request'),
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
 
@@ -91,11 +104,18 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
 
-    return await this.store.schedule({
-      ...modifiedTask,
-      traceparent: traceparent || '',
-      enabled: modifiedTask.enabled ?? true,
-    });
+    return await this.store.schedule(
+      {
+        ...modifiedTask,
+        traceparent: traceparent || '',
+        enabled: modifiedTask.enabled ?? true,
+      },
+      options?.request
+        ? {
+            request: options?.request,
+          }
+        : undefined
+    );
   }
 
   /**
@@ -106,7 +126,7 @@ export class TaskScheduling {
    */
   public async bulkSchedule(
     taskInstances: TaskInstanceWithDeprecatedFields[],
-    options?: Record<string, unknown>
+    options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance[]> {
     const traceparent =
       agent.currentTransaction && agent.currentTransaction.type !== 'request'
@@ -115,7 +135,7 @@ export class TaskScheduling {
     const modifiedTasks = await Promise.all(
       taskInstances.map(async (taskInstance) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-          ...options,
+          ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
         return {
@@ -126,10 +146,21 @@ export class TaskScheduling {
       })
     );
 
-    return await this.store.bulkSchedule(modifiedTasks);
+    return await this.store.bulkSchedule(
+      modifiedTasks,
+      options?.request
+        ? {
+            request: options?.request,
+          }
+        : undefined
+    );
   }
 
-  public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {
+  public async bulkDisable(
+    taskIds: string[],
+    clearStateIdsOrBoolean?: string[] | boolean,
+    options?: ApiKeyOptions
+  ) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
@@ -144,10 +175,11 @@ export class TaskScheduling {
           : {}),
       }),
       validate: false,
+      options,
     });
   }
 
-  public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
+  public async bulkEnable(taskIds: string[], runSoon: boolean = true, options?: ApiKeyOptions) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
@@ -166,6 +198,7 @@ export class TaskScheduling {
         return { ...task, enabled: true };
       },
       validate: false,
+      options,
     });
   }
 
@@ -192,32 +225,34 @@ export class TaskScheduling {
    * `schedule` and `runAt` will be recalculated after task run finishes
    *
    * @param {string[]} taskIds  - list of task ids
-   * @param {IntervalSchedule} schedule  - new schedule
+   * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
    * @returns {Promise<BulkUpdateTaskResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
-    schedule: IntervalSchedule
+    schedule: IntervalSchedule | RruleSchedule,
+    options?: ApiKeyOptions
   ): Promise<BulkUpdateTaskResult> {
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
-      filter: (task) =>
-        task.status === TaskStatus.Idle && task.schedule?.interval !== schedule.interval,
+      filter: (task) => task.status === TaskStatus.Idle && !isEqual(task.schedule, schedule),
       map: (task) => {
-        const oldIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
-
-        // computing new runAt using formula:
-        // newRunAt = oldRunAt - oldInterval + newInterval
-        const newRunAtInMs = Math.max(
-          Date.now(),
-          task.runAt.getTime() - oldIntervalInMs + parseIntervalAsMillisecond(schedule.interval)
-        );
+        const newRunAtInMs = calculateNextRunAtFromSchedule({
+          schedule,
+          startDate: task.scheduledAt,
+        });
 
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
       },
       validate: false,
+      /**
+       * Because the schedule can be converted from Interval to Rrule and vice versa we want to a void a situation
+       * where both are defined by passing mergeAttributes: false here.
+       */
+      mergeAttributes: false,
+      options,
     });
   }
 
@@ -236,8 +271,34 @@ export class TaskScheduling {
    * @param taskId - The task being scheduled.
    * @returns {Promise<RunSoonResult>}
    */
-  public async runSoon(taskId: string): Promise<RunSoonResult> {
-    const task = await this.getNonRunningTask(taskId);
+  public async runSoon(taskId: string, force: boolean = false): Promise<RunSoonResult> {
+    let forced: boolean = false;
+    const task = await this.store.get(taskId);
+
+    if (task.status === TaskStatus.Unrecognized) {
+      throw new Error(`Failed to run task "${taskId}" with status ${task.status}`);
+    }
+
+    if (task.status === TaskStatus.Claiming) {
+      throw new TaskAlreadyRunningError(taskId);
+    }
+
+    if (task.status === TaskStatus.Running) {
+      if (!force) {
+        throw new TaskAlreadyRunningError(taskId);
+      }
+
+      // check if task is currently running
+      const currentTaskIds = this.taskPolling?.getCurrentTasksInPool() || [];
+      const currentExecutionIds = currentTaskIds.map((executionId) => getExecutionId(executionId));
+
+      if (currentExecutionIds.includes(taskId)) {
+        throw new TaskAlreadyRunningError(taskId, true);
+      } else {
+        forced = true;
+      }
+    }
+
     try {
       await this.store.update(
         {
@@ -258,7 +319,7 @@ export class TaskScheduling {
         throw e;
       }
     }
-    return { id: task.id };
+    return { id: task.id, forced };
   }
 
   /**
@@ -269,29 +330,30 @@ export class TaskScheduling {
    */
   public async ensureScheduled(
     taskInstance: TaskInstanceWithId,
-    options?: Record<string, unknown>
+    options?: ScheduleOptions
   ): Promise<TaskInstanceWithId> {
     try {
       return await this.schedule(taskInstance, options);
     } catch (err) {
       if (err.statusCode === VERSION_CONFLICT_STATUS) {
+        // check if task specifies a schedule interval
+        // if so,try to update the just the schedule
+        // only works for interval schedule
+        if (taskInstance.schedule && taskInstance.schedule.interval) {
+          const result = await this.bulkUpdateSchedules([taskInstance.id], taskInstance.schedule);
+          if (
+            result.errors.length &&
+            result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
+            result.errors[0].error.statusCode !== NOT_FOUND_STATUS
+          ) {
+            throw new Error(
+              `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
+            );
+          }
+        }
         return taskInstance;
       }
       throw err;
-    }
-  }
-
-  private async getNonRunningTask(taskId: string) {
-    const task = await this.store.get(taskId);
-    switch (task.status) {
-      case TaskStatus.Claiming:
-      case TaskStatus.Running:
-        throw Error(`Failed to run task "${taskId}" as it is currently running`);
-      case TaskStatus.Unrecognized:
-        throw Error(`Failed to run task "${taskId}" with status ${task.status}`);
-      case TaskStatus.Failed:
-      default:
-        return task;
     }
   }
 }

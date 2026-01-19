@@ -7,6 +7,7 @@
 
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
+import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -18,7 +19,6 @@ import type { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getDocumentTypeFilterForServiceDestinationStatistics,
@@ -106,45 +106,41 @@ export async function getTopDependencyOperations({
     apm: {
       events: [getProcessorEventForServiceDestinationStatistics(searchServiceDestinationMetrics)],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
-            ...getDocumentTypeFilterForServiceDestinationStatistics(
-              searchServiceDestinationMetrics
-            ),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
+          ...getDocumentTypeFilterForServiceDestinationStatistics(searchServiceDestinationMetrics),
+        ],
       },
-      aggs: {
-        operationName: {
-          terms: {
-            field: SPAN_NAME,
-            size: MAX_NUM_OPERATIONS,
-          },
-          aggs: {
-            over_time: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: {
-                  min: startWithOffset,
-                  max: endWithOffset,
-                },
+    },
+    aggs: {
+      operationName: {
+        terms: {
+          field: SPAN_NAME,
+          size: MAX_NUM_OPERATIONS,
+        },
+        aggs: {
+          over_time: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: intervalString,
+              min_doc_count: 0,
+              extended_bounds: {
+                min: startWithOffset,
+                max: endWithOffset,
               },
-              aggs,
             },
-            ...aggs,
-            total_time: {
-              sum: { field },
-            },
+            aggs,
+          },
+          ...aggs,
+          total_time: {
+            sum: { field },
           },
         },
       },

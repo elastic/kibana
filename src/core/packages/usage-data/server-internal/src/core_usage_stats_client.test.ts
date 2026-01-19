@@ -10,13 +10,15 @@
 import { Subject } from 'rxjs';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
-import {
-  CORE_USAGE_STATS_TYPE,
-  CORE_USAGE_STATS_ID,
+import type {
   BaseIncrementOptions,
   IncrementSavedObjectsImportOptions,
   IncrementSavedObjectsResolveImportErrorsOptions,
   IncrementSavedObjectsExportOptions,
+} from '@kbn/core-usage-data-base-server-internal';
+import {
+  CORE_USAGE_STATS_TYPE,
+  CORE_USAGE_STATS_ID,
 } from '@kbn/core-usage-data-base-server-internal';
 import {
   BULK_CREATE_STATS_PREFIX,

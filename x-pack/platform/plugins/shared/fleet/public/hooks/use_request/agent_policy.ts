@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
+
+import type { GetAutoUpgradeAgentsStatusResponse } from '../../../common/types';
 
 import { agentPolicyRouteService } from '../../services';
 import { API_VERSIONS } from '../../../common/constants';
@@ -73,11 +75,26 @@ export const useBulkGetAgentPoliciesQuery = (
   );
 };
 
+/**
+ * @deprecated use sendBulkGetAgentPoliciesForRq instead
+ */
 export const sendBulkGetAgentPolicies = (
   ids: string[],
   options?: { full?: boolean; ignoreMissing?: boolean }
 ) => {
   return sendRequest<BulkGetAgentPoliciesResponse>({
+    path: agentPolicyRouteService.getBulkGetPath(),
+    method: 'post',
+    body: JSON.stringify({ ids, full: options?.full, ignoreMissing: options?.ignoreMissing }),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const sendBulkGetAgentPoliciesForRq = (
+  ids: string[],
+  options?: { full?: boolean; ignoreMissing?: boolean }
+) => {
+  return sendRequestForRq<BulkGetAgentPoliciesResponse>({
     path: agentPolicyRouteService.getBulkGetPath(),
     method: 'post',
     body: JSON.stringify({ ids, full: options?.full, ignoreMissing: options?.ignoreMissing }),
@@ -131,6 +148,32 @@ export const sendGetOneAgentPolicy = (agentPolicyId: string) => {
   });
 };
 
+export function useGetAutoUpgradeAgentsStatusQuery(agentPolicyId: string) {
+  return useQuery(['auto_upgrade_agents_status'], () =>
+    sendRequestForRq<GetAutoUpgradeAgentsStatusResponse>({
+      method: 'get',
+      path: agentPolicyRouteService.getAutoUpgradeAgentsStatusPath(agentPolicyId),
+      version: API_VERSIONS.public.v1,
+    })
+  );
+}
+
+export const sendCreateAgentPolicyForRq = (
+  body: CreateAgentPolicyRequest['body'],
+  { withSysMonitoring }: { withSysMonitoring: boolean } = { withSysMonitoring: false }
+) => {
+  return sendRequestForRq<CreateAgentPolicyResponse>({
+    path: agentPolicyRouteService.getCreatePath(),
+    method: 'post',
+    body: JSON.stringify(body),
+    query: withSysMonitoring ? { sys_monitoring: true } : {},
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+/**
+ * @deprecated use sendCreateAgentPolicyForRq instead
+ */
 export const sendCreateAgentPolicy = (
   body: CreateAgentPolicyRequest['body'],
   { withSysMonitoring }: { withSysMonitoring: boolean } = { withSysMonitoring: false }
@@ -144,6 +187,9 @@ export const sendCreateAgentPolicy = (
   });
 };
 
+/**
+ * @deprecated use sendUpdateAgentPolicyForRq instead
+ */
 export const sendUpdateAgentPolicy = (
   agentPolicyId: string,
   body: UpdateAgentPolicyRequest['body']
@@ -181,6 +227,15 @@ export const sendCopyAgentPolicy = (
 
 export const sendDeleteAgentPolicy = (body: DeleteAgentPolicyRequest['body']) => {
   return sendRequest<DeleteAgentPolicyResponse>({
+    path: agentPolicyRouteService.getDeletePath(),
+    method: 'post',
+    body: JSON.stringify(body),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const sendDeleteAgentPolicyForRq = (body: DeleteAgentPolicyRequest['body']) => {
+  return sendRequestForRq<DeleteAgentPolicyResponse>({
     path: agentPolicyRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Rule, RuleType } from '../../common';
+import type { Rule, RuleType } from '../../common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRule, loadRuleType, loadRuleTypes } from './rule_api';
 
@@ -53,6 +53,7 @@ describe('loadRuleTypes', () => {
               "read": true,
             },
           },
+          "autoRecoverAlerts": false,
           "category": "management",
           "defaultActionGroupId": "default",
           "enabledInLicense": true,
@@ -191,6 +192,7 @@ function getApiRuleType() {
         },
       ],
     },
+    auto_recover_alerts: false,
     authorized_consumers: {
       alerts: {
         read: true,
@@ -242,6 +244,7 @@ function getRuleType(): RuleType {
         },
       ],
     },
+    autoRecoverAlerts: false,
     authorizedConsumers: {
       alerts: {
         read: true,

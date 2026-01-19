@@ -15,7 +15,7 @@ import type {
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
@@ -89,10 +89,13 @@ export interface AgentClient {
    */
   listAgents(
     options: ListWithKuery & {
+      showAgentless?: boolean;
       showInactive: boolean;
       aggregations?: Record<string, AggregationsAggregationContainer>;
       searchAfter?: SortResults;
+      openPit?: boolean;
       pitId?: string;
+      pitKeepAlive?: string;
       getStatusSummary?: boolean;
     }
   ): Promise<{
@@ -100,6 +103,7 @@ export interface AgentClient {
     total: number;
     page: number;
     perPage: number;
+    pit?: string;
     statusSummary?: Record<AgentStatus, number>;
     aggregations?: Record<string, estypes.AggregationsAggregate>;
   }>;
@@ -131,8 +135,14 @@ class AgentClientImpl implements AgentClient {
 
   public async listAgents(
     options: ListWithKuery & {
+      showAgentless?: boolean;
       showInactive: boolean;
       aggregations?: Record<string, AggregationsAggregationContainer>;
+      searchAfter?: SortResults;
+      openPit?: boolean;
+      pitId?: string;
+      pitKeepAlive?: string;
+      getStatusSummary?: boolean;
     }
   ) {
     await this.#runPreflight();

@@ -30,7 +30,7 @@ export class ServiceOverviewLocatorDefinition implements LocatorDefinition<Servi
     const params = { rangeFrom, rangeTo, environment };
     return {
       app: 'apm',
-      path: `/services/${serviceName}/overview?${qs.stringify(params)}`,
+      path: `/services/${encodeURIComponent(serviceName)}/overview?${qs.stringify(params)}`,
       state: {},
     };
   };

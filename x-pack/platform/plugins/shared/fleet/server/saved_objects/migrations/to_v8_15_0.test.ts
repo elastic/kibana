@@ -13,7 +13,7 @@ import {
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 import type { PackagePolicy } from '../../../common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
+import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
 import { getSavedObjectTypes } from '..';
 
 const getPolicyDoc = (packageName: string): SavedObject<PackagePolicy> => {
@@ -38,7 +38,7 @@ const getPolicyDoc = (packageName: string): SavedObject<PackagePolicy> => {
       created_by: '',
       inputs: [],
     },
-    type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     references: [],
   };
 };
@@ -48,7 +48,7 @@ describe('8.15.0 Requires Root Package Policy migration', () => {
 
   beforeEach(() => {
     migrator = createModelVersionTestMigrator({
-      type: getSavedObjectTypes()[PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+      type: getSavedObjectTypes()[LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE],
     });
   });
 

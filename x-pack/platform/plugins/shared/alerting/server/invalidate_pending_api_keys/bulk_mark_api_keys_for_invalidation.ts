@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
@@ -36,7 +36,10 @@ export const bulkMarkApiKeysForInvalidation = async (
       logger.error(
         `Failed to bulk mark list of API keys [${apiKeys
           .map((key) => `"${key}"`)
-          .join(', ')}] for invalidation: ${e.message}`
+          .join(', ')}] for invalidation: ${e.message}`,
+        {
+          error: { stack_trace: e.stack },
+        }
       );
     }
   });

@@ -29,6 +29,7 @@ export interface ClientConfigType {
       duration: string;
       size: number;
     };
+    maxRows: number;
   };
   poll: {
     jobsRefresh: {
@@ -43,3 +44,13 @@ export interface ClientConfigType {
   };
   statefulSettings: { enabled: boolean };
 }
+
+export interface ReportParamsGetterOptions {
+  objectType?: string;
+  sharingData: any;
+}
+
+export type ReportParamsGetter<
+  O extends ReportParamsGetterOptions = ReportParamsGetterOptions,
+  T = unknown
+> = (options: O) => T;

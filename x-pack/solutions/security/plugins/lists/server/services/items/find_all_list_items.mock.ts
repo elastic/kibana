@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getShardMock } from '../../schemas/common/get_shard.mock';
 
-import { FindAllListItemsOptions } from './find_all_list_items';
+import type { FindAllListItemsOptions } from './find_all_list_items';
 
 export const getFindCount = (): Promise<estypes.CountResponse> => {
   return Promise.resolve({

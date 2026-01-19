@@ -7,8 +7,7 @@
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
@@ -85,21 +84,21 @@ export async function getServiceInstanceMetadataDetails({
         apm: {
           events: [ProcessorEvent.metric],
         },
-        body: {
-          track_total_hits: false,
-          terminate_after: 1,
-          size: 1,
-          query: {
-            bool: {
-              filter: filter.concat({ term: { [METRICSET_NAME]: 'app' } }),
-            },
+        track_total_hits: false,
+        terminate_after: 1,
+        size: 1,
+        query: {
+          bool: {
+            filter: filter.concat({ term: { [METRICSET_NAME]: 'app' } }),
           },
-          fields,
         },
+        fields,
       }
     );
 
-    return unflattenKnownApmEventFields(maybe(response.hits.hits[0])?.fields, requiredKeys);
+    const hits = maybe(response.hits.hits[0])?.fields;
+
+    return hits && accessKnownApmEventFields(hits).requireFields(requiredKeys).unflatten();
   }
 
   async function getTransactionEventSample() {
@@ -109,19 +108,17 @@ export async function getServiceInstanceMetadataDetails({
         apm: {
           events: [ProcessorEvent.transaction],
         },
-        body: {
-          track_total_hits: false,
-          terminate_after: 1,
-          size: 1,
-          query: { bool: { filter } },
-          fields,
-        },
+        track_total_hits: false,
+        terminate_after: 1,
+        size: 1,
+        query: { bool: { filter } },
+        fields,
       }
     );
 
-    return unflattenKnownApmEventFields(
-      maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
-    );
+    const hits = maybe(response.hits.hits[0])?.fields;
+
+    return hits && accessKnownApmEventFields(hits).unflatten();
   }
 
   async function getTransactionMetricSample() {
@@ -131,23 +128,21 @@ export async function getServiceInstanceMetadataDetails({
         apm: {
           events: [getProcessorEventForTransactions(true)],
         },
-        body: {
-          track_total_hits: false,
-          terminate_after: 1,
-          size: 1,
-          query: {
-            bool: {
-              filter: filter.concat(getBackwardCompatibleDocumentTypeFilter(true)),
-            },
+        track_total_hits: false,
+        terminate_after: 1,
+        size: 1,
+        query: {
+          bool: {
+            filter: filter.concat(getBackwardCompatibleDocumentTypeFilter(true)),
           },
-          fields,
         },
+        fields,
       }
     );
 
-    return unflattenKnownApmEventFields(
-      maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
-    );
+    const hits = maybe(response.hits.hits[0])?.fields;
+
+    return hits && accessKnownApmEventFields(hits).unflatten();
   }
 
   // we can expect the most detail of application metrics,

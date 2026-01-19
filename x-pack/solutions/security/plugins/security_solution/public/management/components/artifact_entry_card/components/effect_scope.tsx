@@ -11,6 +11,7 @@ import type { CommonProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   GLOBAL_EFFECT_SCOPE,
@@ -27,6 +28,11 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 //          by policy (>0), but **NOT** show the menu.
 //          So something like: `<EffectScope perPolicyCount={3} />`
 //          This should display it as "Applied to 3 policies", but NOT as a menu with links
+
+const POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE = i18n.translate(
+  'xpack.securitySolution.effectScope.policyDetailsNotAccessibleInActiveSpace',
+  { defaultMessage: 'Policy is not accessible from the current space' }
+);
 
 const StyledWithContextMenuShiftedWrapper = styled('div')`
   margin-left: -10px;
@@ -105,28 +111,36 @@ const WithContextMenu = memo<WithContextMenuProps>(
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const hoverInfo = useMemo(
-      () =>
-        canReadPolicies ? (
-          <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="popout">
-            <FormattedMessage
-              id="xpack.securitySolution.contextMenuItemByRouter.viewDetails"
-              defaultMessage="View details"
-            />
-          </StyledEuiButtonEmpty>
-        ) : undefined,
-      [canReadPolicies]
-    );
+    const menuItems: ContextMenuItemNavByRouterProps[] = useMemo(() => {
+      return policies.map((policyMenuItem) => {
+        const hasHref = Boolean(policyMenuItem.href);
+
+        return {
+          ...policyMenuItem,
+          hoverInfo:
+            hasHref && canReadPolicies ? (
+              <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="popout">
+                <FormattedMessage
+                  id="xpack.securitySolution.contextMenuItemByRouter.viewDetails"
+                  defaultMessage="View details"
+                />
+              </StyledEuiButtonEmpty>
+            ) : undefined,
+          disabled: !hasHref,
+          toolTipContent: !hasHref ? POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE : undefined,
+        };
+      });
+    }, [canReadPolicies, policies]);
+
     return (
       <ContextMenuWithRouterSupport
         maxHeight="235px"
         fixedWidth={true}
         panelPaddingSize="none"
-        items={policies}
+        items={menuItems}
         anchorPosition={policies.length > 1 ? 'rightCenter' : 'rightUp'}
         data-test-subj={dataTestSubj}
         loading={loadingPoliciesList}
-        hoverInfo={hoverInfo}
         button={
           <EuiButtonEmpty size="xs" data-test-subj={getTestId('button')}>
             {children}

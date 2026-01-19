@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* TODO: (new data view picker) remove this after new picker is enabled */
+
 import { css } from '@emotion/react';
 import type { SubsetDataTableModel, TableId } from '@kbn/securitysolution-data-table';
 import {
@@ -12,6 +14,7 @@ import {
   DataTableComponent,
   defaultHeaders,
   getEventIdToDataMapping,
+  getTableByIdSelector,
 } from '@kbn/securitysolution-data-table';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -31,6 +34,8 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { PageScope } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { InspectButton } from '../inspect';
 import type {
   ControlColumnProps,
@@ -43,18 +48,11 @@ import type { RowRenderer, SortColumnTimeline as Sort } from '../../../../common
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { eventsViewerSelector } from './selectors';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
-import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
-import {
-  useSessionView,
-  useSessionViewNavigation,
-} from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import { getCombinedFilterQuery } from './helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { EmptyTable, TableContext, TableLoading } from './shared';
@@ -65,7 +63,11 @@ import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
+import { globalFiltersQuerySelector, globalQuerySelector } from '../../store/inputs/selectors';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
@@ -80,7 +82,7 @@ export interface EventsViewerProps {
   pageFilters?: Filter[];
   renderCellValue: React.FC<CellValueElementProps>;
   rowRenderers: RowRenderer[];
-  sourcererScope: SourcererScopeName;
+  sourcererScope: PageScope;
   start: string;
   tableId: TableId;
   topRightMenuOptions?: React.ReactNode;
@@ -114,46 +116,68 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
   const tableContext = useMemo(() => ({ tableId }), [tableId]);
-
+  const selectGlobalFiltersQuerySelector = useMemo(() => globalFiltersQuerySelector(), []);
+  const selectGlobalQuerySelector = useMemo(() => globalQuerySelector(), []);
+  const filters = useSelector(selectGlobalFiltersQuerySelector);
+  const query = useSelector(selectGlobalQuerySelector);
+  const selectTableById = useMemo(() => getTableByIdSelector(), []);
   const {
-    filters,
-    query,
-    dataTable: {
-      columns,
-      defaultColumns,
-      deletedEventIds,
-      graphEventId, // If truthy, the graph viewer (Resolver) is showing
-      itemsPerPage,
-      itemsPerPageOptions,
-      sessionViewConfig,
-      showCheckboxes,
-      sort,
-      queryFields,
-      selectAll,
-      selectedEventIds,
-      isSelectAllChecked,
-      loadingEventIds,
-      title,
-    } = defaultModel,
-  } = useSelector((state: State) => eventsViewerSelector(state, tableId));
+    columns,
+    defaultColumns,
+    deletedEventIds,
+    itemsPerPage,
+    itemsPerPageOptions,
+    showCheckboxes,
+    sort,
+    queryFields,
+    selectAll,
+    selectedEventIds,
+    isSelectAllChecked,
+    loadingEventIds,
+    title,
+  } = useSelector((state: State) => selectTableById(state, tableId) ?? defaultModel);
+
   const inspectModalTitle = useMemo(() => <span data-test-subj="title">{title}</span>, [title]);
 
-  const {
-    uiSettings,
-    data,
-    triggersActionsUi: { getFieldBrowser },
-  } = useKibana().services;
+  const { uiSettings, data } = useKibana().services;
 
   const {
-    browserFields,
-    dataViewId,
-    selectedPatterns,
-    sourcererDataView,
-    dataViewId: selectedDataViewId,
-    loading: isLoadingIndexPattern,
+    browserFields: oldBrowserFields,
+    dataViewId: oldDataViewId,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+    loading: oldIsLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
+  const oldGetFieldSpec = useGetFieldSpec(sourcererScope);
 
-  const getFieldSpec = useGetFieldSpec(sourcererScope);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView: experimentalDataView, status } = useDataView(sourcererScope);
+
+  const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIsLoadingIndexPattern;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? null : oldDataViewId;
+  const selectedDataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+
+  const runtimeMappings = useMemo(() => {
+    return newDataViewPickerEnabled
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings) ?? {}
+      : (oldSourcererDataView?.runtimeFieldMap as RunTimeMappings) ?? {};
+  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataView]);
+
+  const experimentalGetFieldSpec = useCallback(
+    (fieldName: string) => {
+      return experimentalDataView.fields?.getByName(fieldName)?.toSpec();
+    },
+    [experimentalDataView.fields]
+  );
+  const getFieldSpec = newDataViewPickerEnabled ? experimentalGetFieldSpec : oldGetFieldSpec;
 
   const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {
@@ -180,21 +204,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   }, []);
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
-
-  // TODO remove this when session view is fully migrated to the flyout and the advanced settings is removed
-  const { Navigation } = useSessionViewNavigation({
-    scopeId: tableId,
-  });
-  const { SessionView } = useSessionView({
-    scopeId: tableId,
-  });
-  const graphOverlay = useMemo(() => {
-    const shouldShowOverlay =
-      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
-    return shouldShowOverlay ? (
-      <GraphOverlay scopeId={tableId} SessionView={SessionView} Navigation={Navigation} />
-    ) : null;
-  }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
 
   const setQuery = useCallback(
     ({ id, inspect, loading, refetch }: SetQuery) =>
@@ -235,12 +244,22 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        indexPattern: sourcererDataView,
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, browserFields, globalFilters, start, sourcererDataView, query, end]
+    [
+      esQueryConfig,
+      browserFields,
+      globalFilters,
+      start,
+      oldSourcererDataView,
+      experimentalDataView,
+      query,
+      end,
+    ]
   );
 
   const canQueryTimeline = useMemo(
@@ -282,7 +301,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
-      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,
@@ -496,8 +515,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     <div data-test-subj="events-viewer-panel">
       {showFullLoading && <TableLoading height="short" />}
 
-      {graphOverlay}
-
       {canQueryTimeline && (
         <TableContext.Provider value={tableContext}>
           <div
@@ -507,7 +524,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
               position: relative;
             `}
           >
-            {!loading && !graphOverlay && (
+            {!loading && (
               <div
                 css={css`
                   position: absolute;
@@ -527,12 +544,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
               </div>
             )}
 
-            {!hasAlerts && !loading && !graphOverlay && <EmptyTable />}
+            {!hasAlerts && !loading && <EmptyTable />}
 
             {hasAlerts && (
               <EuiFlexItem
                 css={css`
-                  display: ${!graphEventId && graphOverlay == null ? 'flex' : 'none'};
+                  display: flex;
                   overflow: auto;
                 `}
               >
@@ -555,7 +572,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     unitCountText={unitCountText}
                     pagination={pagination}
                     totalItems={totalCountMinusDeleted}
-                    getFieldBrowser={getFieldBrowser}
                     getFieldSpec={getFieldSpec}
                     cellActionsTriggerId={cellActionsTriggerId}
                   />

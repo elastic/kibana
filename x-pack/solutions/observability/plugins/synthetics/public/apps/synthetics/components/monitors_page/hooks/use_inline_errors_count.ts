@@ -21,17 +21,15 @@ export function useInlineErrorsCount() {
   const { data, loading } = useEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: getInlineErrorFilters(),
-          },
+      size: 0,
+      query: {
+        bool: {
+          filter: getInlineErrorFilters(),
         },
-        aggs: {
-          total: {
-            cardinality: { field: 'monitor.id' },
-          },
+      },
+      aggs: {
+        total: {
+          cardinality: { field: 'monitor.id' },
         },
       },
     },

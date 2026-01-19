@@ -6,13 +6,14 @@
  */
 
 import moment from 'moment';
-import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
+import type { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { getIndexPatterns, getKibanaDataset } from '../../../common/get_index_patterns';
 import { createQuery } from '../create_query';
 import { KibanaMetric } from '../metrics';
-import { buildKibanaInfo, KibanaInfo } from './build_kibana_info';
+import type { KibanaInfo } from './build_kibana_info';
+import { buildKibanaInfo } from './build_kibana_info';
 import { isKibanaStatusStale } from './is_kibana_status_stale';
 
 interface Kibana {
@@ -67,47 +68,45 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
     index: indexPatterns,
     size: config.ui.max_bucket_size,
     ignore_unavailable: true,
-    body: {
-      query: createQuery({
-        type,
-        dsDataset: getKibanaDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        clusterUuid,
-        metric: KibanaMetric.getMetricFields(),
-      }),
-      collapse: {
-        field: 'kibana_stats.kibana.uuid',
-      },
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-      _source: [
-        'timestamp',
-        '@timestamp',
-        'kibana_stats.process.memory.resident_set_size_in_bytes',
-        'kibana.stats.process.memory.resident_set_size.bytes',
-        'kibana_stats.os.load.1m',
-        'kibana.stats.os.load.1m',
-        'kibana_stats.response_times.average',
-        'kibana.stats.response_time.avg.ms',
-        'kibana_stats.response_times.max',
-        'kibana.stats.response_time.max.ms',
-        'kibana_stats.requests.total',
-        'kibana.stats.request.total',
-        'kibana_stats.kibana.transport_address',
-        'kibana.stats.transport_address',
-        'kibana_stats.kibana.name',
-        'kibana.stats.name',
-        'kibana_stats.kibana.host',
-        'kibana.stats.host.name',
-        'kibana_stats.kibana.uuid',
-        'service.id',
-        'kibana_stats.kibana.status',
-        'kibana.stats.status',
-        'kibana_stats.concurrent_connections',
-        'kibana.stats.concurrent_connections',
-      ],
+    query: createQuery({
+      type,
+      dsDataset: getKibanaDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      clusterUuid,
+      metric: KibanaMetric.getMetricFields(),
+    }),
+    collapse: {
+      field: 'kibana_stats.kibana.uuid',
     },
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+    _source: [
+      'timestamp',
+      '@timestamp',
+      'kibana_stats.process.memory.resident_set_size_in_bytes',
+      'kibana.stats.process.memory.resident_set_size.bytes',
+      'kibana_stats.os.load.1m',
+      'kibana.stats.os.load.1m',
+      'kibana_stats.response_times.average',
+      'kibana.stats.response_time.avg.ms',
+      'kibana_stats.response_times.max',
+      'kibana.stats.response_time.max.ms',
+      'kibana_stats.requests.total',
+      'kibana.stats.request.total',
+      'kibana_stats.kibana.transport_address',
+      'kibana.stats.transport_address',
+      'kibana_stats.kibana.name',
+      'kibana.stats.name',
+      'kibana_stats.kibana.host',
+      'kibana.stats.host.name',
+      'kibana_stats.kibana.uuid',
+      'service.id',
+      'kibana_stats.kibana.status',
+      'kibana.stats.status',
+      'kibana_stats.concurrent_connections',
+      'kibana.stats.concurrent_connections',
+    ],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

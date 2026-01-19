@@ -7,10 +7,10 @@
 
 /* eslint-disable max-classes-per-file */
 
+import type { BuildFlavor } from '@kbn/config';
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
-  APIKeys as APIKeysType,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   CreateRestAPIKeyParams,
@@ -18,6 +18,7 @@ import type {
   GrantAPIKeyResult,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
+  NativeAPIKeysType,
   ValidateAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
@@ -45,6 +46,7 @@ export interface ConstructorOptions {
   license: SecurityLicense;
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
+  buildFlavor?: BuildFlavor;
 }
 
 type GrantAPIKeyParams =
@@ -63,12 +65,13 @@ type GrantAPIKeyParams =
 /**
  * Class responsible for managing Elasticsearch API keys.
  */
-export class APIKeys implements APIKeysType {
+export class APIKeys implements NativeAPIKeysType {
   private readonly logger: Logger;
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
   private readonly applicationName: string;
   private readonly kibanaFeatures: KibanaFeature[];
+  private readonly buildFlavor?: BuildFlavor;
 
   constructor({
     logger,
@@ -76,12 +79,14 @@ export class APIKeys implements APIKeysType {
     license,
     applicationName,
     kibanaFeatures,
+    buildFlavor,
   }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
     this.license = license;
     this.applicationName = applicationName;
     this.kibanaFeatures = kibanaFeatures;
+    this.buildFlavor = buildFlavor;
   }
 
   /**
@@ -98,11 +103,7 @@ export class APIKeys implements APIKeysType {
       `Testing if API Keys are enabled by attempting to invalidate a non-existant key: ${id}`
     );
     try {
-      await this.clusterClient.asInternalUser.security.invalidateApiKey({
-        body: {
-          ids: [id],
-        },
-      });
+      await this.clusterClient.asInternalUser.security.invalidateApiKey({ ids: [id] });
       return true;
     } catch (e) {
       if (this.doesErrorIndicateAPIKeysAreDisabled(e)) {
@@ -116,7 +117,7 @@ export class APIKeys implements APIKeysType {
    * Determines if cross-cluster API Keys are enabled in Elasticsearch.
    */
   async areCrossClusterAPIKeysEnabled(): Promise<boolean> {
-    if (!this.license.isEnabled()) {
+    if (!this.license.isEnabled() || this.buildFlavor === 'serverless') {
       return false;
     }
 
@@ -170,18 +171,16 @@ export class APIKeys implements APIKeysType {
         });
       } else {
         result = await scopedClusterClient.asCurrentUser.security.createApiKey({
-          body: {
-            name,
-            expiration,
-            metadata,
-            role_descriptors: isCreateRestAPIKeyParams(createParams)
-              ? createParams.role_descriptors
-              : this.parseRoleDescriptorsWithKibanaPrivileges(
-                  createParams.kibana_role_descriptors,
-                  this.kibanaFeatures,
-                  false
-                ),
-          },
+          name,
+          expiration,
+          metadata,
+          role_descriptors: isCreateRestAPIKeyParams(createParams)
+            ? createParams.role_descriptors
+            : this.parseRoleDescriptorsWithKibanaPrivileges(
+                createParams.kibana_role_descriptors,
+                this.kibanaFeatures,
+                false
+              ),
         });
       }
 
@@ -296,7 +295,7 @@ export class APIKeys implements APIKeysType {
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
-      result = await this.clusterClient.asInternalUser.security.grantApiKey({ body: params });
+      result = await this.clusterClient.asInternalUser.security.grantApiKey(params);
       this.logger.debug('API key was granted successfully');
     } catch (e) {
       this.logger.error(`Failed to grant API key: ${e.message}`);
@@ -321,9 +320,7 @@ export class APIKeys implements APIKeysType {
     try {
       // User needs `manage_api_key` privilege to use this API
       result = await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
-        body: {
-          ids: params.ids,
-        },
+        ids: params.ids,
       });
       this.logger.debug(
         `API keys by ids=[${params.ids.join(', ')}] was invalidated successfully as current user`
@@ -356,9 +353,7 @@ export class APIKeys implements APIKeysType {
     try {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
       result = await this.clusterClient.asInternalUser.security.invalidateApiKey({
-        body: {
-          ids: params.ids,
-        },
+        ids: params.ids,
       });
       this.logger.debug(`API keys by ids=[${params.ids.join(', ')}] was invalidated successfully`);
     } catch (e) {

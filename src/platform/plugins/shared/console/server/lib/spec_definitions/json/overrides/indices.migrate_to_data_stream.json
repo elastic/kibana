@@ -1,0 +1,7 @@
+{
+  "indices.migrate_to_data_stream": {
+    "patterns": [
+      "_data_stream/_migrate/{data_stream}"
+    ]
+  }
+}

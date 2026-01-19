@@ -20,12 +20,12 @@ elif [[ "$TEST_PACKAGE" == "rpm" ]]; then
   download_artifact 'kibana-*-x86_64.rpm' . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.6"
 elif [[ "$TEST_PACKAGE" == "docker" ]]; then
-  download_artifact "kibana-$KIBANA_PKG_VERSION*-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact "kibana-$KIBANA_PKG_VERSION*-docker-image-amd64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.7"
 fi
 cd ..
 
-export VAGRANT_CWD=$PWD/test/package
+export VAGRANT_CWD=$PWD/src/platform/test/package
 vagrant up "$TEST_PACKAGE" --no-provision
 
 node scripts/es snapshot \
@@ -56,5 +56,6 @@ export TEST_ES_URL="http://elastic:changeme@192.168.56.1:9200"
 
 cd x-pack
 
-echo "--- FTR - Reporting"
-node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
+# Re-enable after finding suitable suites, --include-tag=smoke does not currently have any matches
+# echo "--- FTR - Reporting"
+# node scripts/functional_test_runner.js --config src/platform/test/functional/apps/visualize/config.ts --include-tag=smoke --quiet

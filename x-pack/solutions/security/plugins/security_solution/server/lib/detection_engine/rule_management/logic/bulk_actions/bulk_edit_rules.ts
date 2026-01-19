@@ -8,6 +8,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
+import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
 import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
@@ -16,12 +17,14 @@ import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 
 import type { IPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { convertAlertingRuleToRuleResponse } from '../detection_rules_client/converters/convert_alerting_rule_to_rule_response';
-import { calculateIsCustomized } from '../detection_rules_client/mergers/rule_source/calculate_is_customized';
+import { calculateExternalRuleSource } from '../detection_rules_client/mergers/rule_source/calculate_external_rule_source';
 import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 import { ruleParamsModifier } from './rule_params_modifier';
 import { splitBulkEditActions } from './split_bulk_edit_actions';
 import { validateBulkEditRule } from './validations';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
+import { invariant } from '../../../../../../common/utils/invariant';
+import { createDefaultInternalRuleSource } from '../detection_rules_client/mergers/rule_source/create_default_internal_rule_source';
 
 export interface BulkEditRulesArguments {
   actionsClient: ActionsClient;
@@ -66,12 +69,15 @@ export const bulkEditRules = async ({
   const baseVersionsMap = new Map(
     baseVersions.map((baseVersion) => [baseVersion.rule_id, baseVersion])
   );
+  const currentRulesMap = new Map(rules.map((rule) => [rule.id, rule]));
 
   const result = await rulesClient.bulkEdit<RuleParams>({
-    ids: rules.map((rule) => rule.id),
+    ids: Array.from(currentRulesMap.keys()),
     operations,
-    paramsModifier: async (rule) => {
-      const ruleParams = rule.params;
+    // Rules Client applies operations to rules client aware fields like tags
+    // the rule before passing it to paramsModifier().
+    paramsModifier: async (partiallyModifiedRule) => {
+      const ruleParams = partiallyModifiedRule.params;
 
       await validateBulkEditRule({
         mlAuthz,
@@ -80,36 +86,33 @@ export const bulkEditRules = async ({
         immutable: ruleParams.immutable,
         ruleCustomizationStatus,
       });
+
+      const currentRule = currentRulesMap.get(partiallyModifiedRule.id);
+
+      invariant(currentRule, "Unable to extract rule's current data in paramsModifier");
+
       const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
         ruleParams,
         paramsActions
       );
 
-      // Update rule source
-      const updatedRule = {
-        ...rule,
+      const nextRule = convertAlertingRuleToRuleResponse({
+        ...partiallyModifiedRule,
         params: modifiedParams,
-      };
-      const ruleResponse = convertAlertingRuleToRuleResponse(updatedRule);
-      let isCustomized = false;
-      if (ruleResponse.immutable === true) {
-        isCustomized = calculateIsCustomized({
-          baseRule: baseVersionsMap.get(ruleResponse.rule_id),
-          nextRule: ruleResponse,
-          ruleCustomizationStatus,
-        });
-      }
+      });
 
-      const ruleSource =
-        ruleResponse.immutable === true
-          ? {
-              type: 'external' as const,
-              isCustomized,
-            }
-          : {
-              type: 'internal' as const,
-            };
-      modifiedParams.ruleSource = ruleSource;
+      if (nextRule.immutable === true) {
+        const baseRule = baseVersionsMap.get(nextRule.rule_id);
+        const ruleSource = calculateExternalRuleSource({
+          baseRule,
+          currentRule: convertAlertingRuleToRuleResponse(currentRule),
+          nextRule,
+        });
+
+        modifiedParams.ruleSource = convertObjectKeysToCamelCase(ruleSource);
+      } else {
+        modifiedParams.ruleSource = createDefaultInternalRuleSource();
+      }
 
       return { modifiedParams, isParamsUpdateSkipped };
     },

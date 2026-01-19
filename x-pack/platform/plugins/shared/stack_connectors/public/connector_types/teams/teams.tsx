@@ -11,11 +11,12 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { TeamsActionParams, TeamsSecrets } from '../types';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/teams/constants';
+import type { TeamsActionParams, TeamsSecrets } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
   return {
-    id: '.teams',
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.teams.selectMessageText', {
       defaultMessage: 'Send a message to a Microsoft Teams channel.',

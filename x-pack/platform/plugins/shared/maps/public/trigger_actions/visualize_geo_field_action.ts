@@ -7,13 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  createAction,
-  ACTION_VISUALIZE_GEO_FIELD,
-  VisualizeFieldContext,
-} from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { createAction, ACTION_VISUALIZE_GEO_FIELD } from '@kbn/ui-actions-plugin/public';
 import { getUsageCollection } from '../kibana_services';
 import { APP_ID } from '../../common/constants';
+import { getMapsLink } from './get_maps_link';
 
 import { getVisualizeCapabilities, getCore } from '../kibana_services';
 
@@ -28,7 +26,6 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     return Boolean(!!getVisualizeCapabilities().show && context.dataViewSpec && context.fieldName);
   },
   getHref: async (context) => {
-    const { getMapsLink } = await import('./get_maps_link');
     const { app, path } = await getMapsLink(context);
 
     return getCore().application.getUrlForApp(app, {
@@ -37,7 +34,6 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     });
   },
   execute: async (context) => {
-    const { getMapsLink } = await import('./get_maps_link');
     const { app, path, state } = await getMapsLink(context);
 
     const usageCollection = getUsageCollection();

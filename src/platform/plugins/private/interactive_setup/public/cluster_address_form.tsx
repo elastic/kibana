@@ -74,13 +74,12 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
     },
     onSubmit: async (values) => {
       const url = new URL(values.host);
-      const host = `${url.protocol}//${url.hostname}:${url.port || 9200}`;
 
       const result = await http.post<PingResult>('/internal/interactive_setup/ping', {
-        body: JSON.stringify({ host }),
+        body: JSON.stringify({ host: url.origin }),
       });
 
-      onSuccess?.(result, { host });
+      onSuccess?.(result, { host: url.origin });
     },
   });
 

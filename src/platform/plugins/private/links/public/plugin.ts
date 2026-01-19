@@ -7,30 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import { i18n } from '@kbn/i18n';
+import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
-  DashboardStart,
-  DASHBOARD_GRID_COLUMN_COUNT,
-  PanelPlacementStrategy,
-} from '@kbn/dashboard-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
-import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import { LinksRuntimeState } from './types';
-import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
-import { LinksCrudTypes } from '../common/content_management';
-import { LinksStrings } from './components/links_strings';
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { LinksEmbeddableState } from '../common';
+import {
+  APP_ICON,
+  APP_NAME,
+  CONTENT_ID,
+  LATEST_VERSION,
+  LINKS_EMBEDDABLE_TYPE,
+  LINKS_SAVED_OBJECT_TYPE,
+} from '../common';
+import type { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
-import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import { registerCreateLinksPanelAction } from './actions/create_links_panel_action';
-import { deserializeLinksSavedObject } from './lib/deserialize_from_library';
+import { setKibanaServices } from './services/kibana_services';
+import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
+
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
@@ -63,18 +67,24 @@ export class LinksPlugin
 
       plugins.embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
-          const initialState = await deserializeLinksSavedObject(savedObject);
-          container.addNewPanel<LinksRuntimeState>({
-            panelType: CONTENT_ID,
-            initialState,
-          });
+          container.addNewPanel<LinksEmbeddableState>(
+            {
+              panelType: LINKS_EMBEDDABLE_TYPE,
+              serializedState: {
+                savedObjectId: savedObject.id,
+              },
+            },
+            {
+              displaySuccessMessage: true,
+            }
+          );
         },
-        savedObjectType: CONTENT_ID,
+        savedObjectType: LINKS_SAVED_OBJECT_TYPE,
         savedObjectName: APP_NAME,
         getIconForSavedObject: () => APP_ICON,
       });
 
-      plugins.embeddable.registerReactEmbeddableFactory(CONTENT_ID, async () => {
+      plugins.embeddable.registerReactEmbeddableFactory(LINKS_EMBEDDABLE_TYPE, async () => {
         const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
         return getLinksEmbeddableFactory();
       });
@@ -84,14 +94,20 @@ export class LinksPlugin
         name: CONTENT_ID,
         title: APP_NAME,
         icon: APP_ICON,
-        description: LinksStrings.getDescription(),
+        description: i18n.translate('links.description', {
+          defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
+        }),
         stage: 'production',
         appExtensions: {
           visualizations: {
             docTypes: [CONTENT_ID],
             searchFields: ['title^3'],
             client: getLinksClient,
-            toListItem(linkItem: LinksCrudTypes['Item']) {
+            toListItem(
+              linkItem: Omit<LinksCrudTypes['Item'], 'attributes'> & {
+                attributes: { title: string; description?: string };
+              }
+            ) {
               const { id, type, updatedAt, attributes } = linkItem;
               const { title, description } = attributes;
 
@@ -100,10 +116,10 @@ export class LinksPlugin
                 title,
                 editor: {
                   onEdit: async (savedObjectId: string) => {
-                    const { openEditorFlyout } = await import('./editor/open_editor_flyout');
-                    const linksSavedObject = await getLinksClient().get(savedObjectId);
-                    const initialState = await deserializeLinksSavedObject(linksSavedObject.item);
-                    await openEditorFlyout({ initialState });
+                    const { onVisualizationsEdit } = await import(
+                      './editor/on_visualizations_edit'
+                    );
+                    onVisualizationsEdit(savedObjectId);
                   },
                 },
                 description,
@@ -122,20 +138,24 @@ export class LinksPlugin
 
   public start(core: CoreStart, plugins: LinksStartDependencies) {
     setKibanaServices(core, plugins);
-    untilPluginStartServicesReady().then(() => {
-      registerCreateLinksPanelAction();
 
-      plugins.dashboard.registerDashboardPanelPlacementSetting(
-        CONTENT_ID,
-        async (runtimeState?: LinksRuntimeState) => {
-          if (!runtimeState) return {};
-          const isHorizontal = runtimeState.layout === 'horizontal';
-          const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
-          const height = isHorizontal ? 4 : (runtimeState.links?.length ?? 1 * 3) + 4;
-          return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
-        }
-      );
-    });
+    plugins.uiActions.addTriggerActionAsync(
+      ADD_PANEL_TRIGGER,
+      ADD_LINKS_PANEL_ACTION_ID,
+      async () => {
+        const { addLinksPanelAction } = await import('./actions/add_links_panel_action');
+        return addLinksPanelAction;
+      }
+    );
+
+    plugins.presentationUtil.registerPanelPlacementSettings(
+      LINKS_EMBEDDABLE_TYPE,
+      async (serializedState?: LinksEmbeddableState) => {
+        const { getPanelPlacement } = await import('./embeddable/embeddable_module');
+        const placementSettings = await getPanelPlacement(serializedState);
+        return { placementSettings };
+      }
+    );
 
     return {};
   }

@@ -1,0 +1,27 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-di",
+    "@kbn/core-di-internal",
+    "@kbn/core-di-mocks",
+    "@kbn/core-di-server",
+    "@kbn/core-http-server",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-lifecycle-server",
+  ]
+}

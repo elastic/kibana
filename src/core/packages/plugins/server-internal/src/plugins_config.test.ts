@@ -10,7 +10,8 @@
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { PluginsConfig, PluginsConfigType } from './plugins_config';
+import type { PluginsConfigType } from './plugins_config';
+import { PluginsConfig } from './plugins_config';
 
 describe('PluginsConfig', () => {
   it('retrieves additionalPluginPaths from config.paths when in production mode', () => {
@@ -35,12 +36,24 @@ describe('PluginsConfig', () => {
 
   it('retrieves shouldEnableAllPlugins', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
-    const rawConfig: any = {
+    const rawConfig: PluginsConfigType = {
       initialize: true,
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
     };
     const config = new PluginsConfig(rawConfig, env);
-    expect(config.shouldEnableAllPlugins).toBe(true);
+    expect(config.shouldEnableAllPlugins).toEqual(true);
+  });
+
+  it('retrieves included plugin groups', () => {
+    const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
+    const rawConfig: PluginsConfigType = {
+      initialize: true,
+      paths: ['some-path', 'another-path'],
+      forceEnableAllPlugins: true,
+      allowlistPluginGroups: ['search'],
+    };
+    const config = new PluginsConfig(rawConfig, env);
+    expect(config.allowlistPluginGroups).toEqual(['search']);
   });
 });

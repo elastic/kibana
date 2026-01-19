@@ -12,8 +12,11 @@ import type {
   AuditLogger,
   IScopedClusterClient,
   AuditEvent,
+  IUiSettingsClient,
   AnalyticsServiceSetup,
+  KibanaRequest,
 } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { HealthStatus, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -21,10 +24,24 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
 import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
-import type { EntityDefinition } from '@kbn/entities-schema';
+import type { EntityStoreCapability, EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
+import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
+import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
+import {
+  ENTITY_STORE_INDEX_PATTERN,
+  ENTITY_STORE_HISTORY_INDEX_PATTERN,
+  ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
+  ENTITY_STORE_UPDATES_INDEX_PATTERN,
+} from '../../../../common/entity_analytics/entity_store/constants';
+import { getEnabledEntityTypes } from '../../../../common/entity_analytics/utils';
+import {
+  getAllMissingPrivileges,
+  getMissingPrivilegesErrorMessage,
+} from '../../../../common/entity_analytics/privileges';
 import { merge } from '../../../../common/utils/objects/merge';
-import { getEnabledStoreEntityTypes } from '../../../../common/entity_analytics/entity_store/utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
@@ -57,11 +74,17 @@ import {
 import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import {
   startEntityStoreFieldRetentionEnrichTask,
+  startEntityStoreHealthTask,
+  removeEntityStoreHealthTask,
   removeEntityStoreFieldRetentionEnrichTask,
   getEntityStoreFieldRetentionEnrichTaskState as getEntityStoreFieldRetentionEnrichTaskStatus,
   removeEntityStoreDataViewRefreshTask,
   startEntityStoreDataViewRefreshTask,
   getEntityStoreDataViewRefreshTaskState,
+  startEntityStoreSnapshotTask,
+  removeEntityStoreSnapshotTask,
+  getEntityStoreSnapshotTaskState,
+  getDataViewRefreshTaskId,
 } from './tasks';
 import {
   createEntityIndex,
@@ -77,31 +100,46 @@ import {
   getFieldRetentionEnrichPolicyStatus,
   getEntityIndexStatus,
   getEntityIndexComponentTemplateStatus,
+  deleteAllEntitySnapshotIndices,
+  createEntityResetIndex,
+  deleteEntityResetIndex,
+  getEntityResetIndexStatus,
+  getEntitySnapshotIndexStatus,
 } from './elasticsearch_assets';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
   buildEntityDefinitionId,
-  buildIndexPatterns,
+  buildIndexPatternsByEngine,
   getEntitiesIndexName,
   isPromiseFulfilled,
   isPromiseRejected,
+  mergeEntityStoreIndices,
 } from './utils';
 import { EntityEngineActions } from './auditing/actions';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import type { EntityRecord, EntityStoreConfig } from './types';
 import {
   ENTITY_ENGINE_INITIALIZATION_EVENT,
+  ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 import { createEngineDescription } from './installation/engine_description';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
-import {
-  createKeywordBuilderPipeline,
-  deleteKeywordBuilderPipeline,
-} from '../../asset_inventory/ingest_pipelines';
-
 import type { ApiKeyManager } from './auth/api_key';
+import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
+import { entityEngineDescriptorTypeName } from './saved_object';
+import {
+  deleteEntityUpdatesDataStreams,
+  getEntityUpdatesDataStreamStatus,
+  initEntityUpdatesDataStream,
+} from './elasticsearch_assets/updates_entity_data_stream';
+import { getEntityILMPolicyStatuses } from './elasticsearch_assets/ilm_policy_status';
+import {
+  createEntityUpdatesIndexComponentTemplate,
+  deleteEntityUpdatesIndexComponentTemplate,
+  getEntityUpdatesIndexComponentTemplateStatus,
+} from './elasticsearch_assets/updates_component_template';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -130,6 +168,10 @@ interface EntityStoreClientOpts {
   experimentalFeatures: ExperimentalFeatures;
   telemetry?: AnalyticsServiceSetup;
   apiKeyManager?: ApiKeyManager;
+  security: SecurityPluginStart;
+  request: KibanaRequest;
+  uiSettingsClient: IUiSettingsClient;
+  isServerless: boolean;
 }
 
 interface SearchEntitiesParams {
@@ -148,6 +190,8 @@ export class EntityStoreDataClient {
   private riskScoreDataClient: RiskScoreDataClient;
   private esClient: ElasticsearchClient;
   private apiKeyGenerator?: ApiKeyManager;
+  private uiSettingsClient: IUiSettingsClient;
+  private isServerless: boolean;
 
   constructor(private readonly options: EntityStoreClientOpts) {
     const {
@@ -158,13 +202,18 @@ export class EntityStoreDataClient {
       kibanaVersion,
       namespace,
       apiKeyManager,
+      uiSettingsClient,
+      isServerless,
     } = options;
     this.esClient = clusterClient.asCurrentUser;
     this.apiKeyGenerator = apiKeyManager;
+    this.uiSettingsClient = uiSettingsClient;
+    this.isServerless = isServerless;
 
     this.entityClient = new EntityClient({
       clusterClient,
       soClient,
+      isServerless,
       logger,
     });
 
@@ -202,6 +251,9 @@ export class EntityStoreDataClient {
           ...(taskManager
             ? [getEntityStoreDataViewRefreshTaskState({ namespace, taskManager })]
             : []),
+          ...(taskManager
+            ? [getEntityStoreSnapshotTaskState({ namespace, entityType: type, taskManager })]
+            : []),
           getPlatformPipelineStatus({
             engineId: definition.id,
             esClient: this.esClient,
@@ -219,12 +271,33 @@ export class EntityStoreDataClient {
             esClient: this.esClient,
             namespace,
           }),
+          getEntityResetIndexStatus({
+            entityType: type,
+            esClient: this.esClient,
+            namespace,
+          }),
+          ...(await getEntitySnapshotIndexStatus({
+            entityType: type,
+            esClient: this.esClient,
+            namespace,
+          })),
+          getEntityUpdatesDataStreamStatus(type, this.esClient, namespace),
+          ...(await getEntityILMPolicyStatuses({
+            esClient: this.esClient,
+            isServerless: this.isServerless,
+          })),
           getEntityIndexComponentTemplateStatus({
             definitionId: definition.id,
             esClient: this.esClient,
           }),
+          getEntityUpdatesIndexComponentTemplateStatus(definition.id, this.esClient),
         ])
       : Promise.resolve([] as EngineComponentStatus[]);
+  }
+
+  public async isEngineRunning(type: EntityType) {
+    const engine = await this.engineClient.maybeGet(type);
+    return engine?.status === ENGINE_STATUS.STARTED;
   }
 
   public async enable(
@@ -239,8 +312,7 @@ export class EntityStoreDataClient {
     const run = <T>(fn: () => Promise<T>) =>
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
-    const { experimentalFeatures } = this.options;
-    const enabledEntityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+    const enabledEntityTypes = await this.getEnabledEntityTypes();
 
     // When entityTypes param is defined it only enables the engines that are provided
     const enginesTypes = requestBodyOverrides.entityTypes
@@ -257,26 +329,39 @@ export class EntityStoreDataClient {
     return { engines, succeeded: true };
   }
 
+  public async getEnabledEntityTypes(): Promise<EntityType[]> {
+    const genericEntityStoreEnabled = await this.uiSettingsClient.get<boolean>(
+      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+    );
+
+    return getEnabledEntityTypes(genericEntityStoreEnabled);
+  }
+
   public async status({
     include_components: withComponents = false,
   }: GetEntityStoreStatusRequestQuery): Promise<GetEntityStoreStatusResponse> {
     const { namespace } = this.options;
-    const { engines, count } = await this.engineClient.list();
+    const { engines } = await this.engineClient.list();
+
+    const enabledEntityTypes = await this.getEnabledEntityTypes();
+    const enabledEngines = engines.filter((engine) => {
+      return enabledEntityTypes.indexOf(EntityType[engine.type]) > -1;
+    });
 
     let status = ENTITY_STORE_STATUS.RUNNING;
-    if (count === 0) {
+    if (enabledEngines.length === 0) {
       status = ENTITY_STORE_STATUS.NOT_INSTALLED;
-    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
+    } else if (enabledEngines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
       status = ENTITY_STORE_STATUS.ERROR;
-    } else if (engines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
+    } else if (enabledEngines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
       status = ENTITY_STORE_STATUS.STOPPED;
-    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
+    } else if (enabledEngines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
       status = ENTITY_STORE_STATUS.INSTALLING;
     }
 
     if (withComponents) {
       const enginesWithComponents = await Promise.all(
-        engines.map(async (engine) => {
+        enabledEngines.map(async (engine) => {
           const id = buildEntityDefinitionId(engine.type, namespace);
           const {
             definitions: [definition],
@@ -301,7 +386,7 @@ export class EntityStoreDataClient {
 
       return { engines: enginesWithComponents, status };
     } else {
-      return { engines, status };
+      return { engines: enabledEngines, status };
     }
   }
 
@@ -310,16 +395,6 @@ export class EntityStoreDataClient {
     requestBody: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
-    const { experimentalFeatures } = this.options;
-
-    if (entityType === EntityType.universal && !experimentalFeatures.assetInventoryStoreEnabled) {
-      throw new Error('Universal entity store is not enabled');
-    }
-
-    if (entityType === EntityType.service && !experimentalFeatures.serviceEntityStoreEnabled) {
-      throw new Error('Service entity store is not enabled');
-    }
-
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }
@@ -380,7 +455,12 @@ export class EntityStoreDataClient {
     const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
     try {
-      const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+      const defaultIndexPatterns = await buildIndexPatternsByEngine(
+        namespace,
+        entityType,
+        appClient,
+        dataViewsService
+      );
       const options = merge(defaultOptions, requestParams);
 
       const description = createEngineDescription({
@@ -410,14 +490,6 @@ export class EntityStoreDataClient {
       });
       this.log(`debug`, entityType, `Created entity definition`);
 
-      if (entityType === EntityType.universal) {
-        logger.debug('creating keyword builder pipeline');
-        await createKeywordBuilderPipeline({
-          logger,
-          esClient: this.esClient,
-        });
-      }
-
       // the index must be in place with the correct mapping before the enrich policy is created
       // this is because the enrich policy will fail if the index does not exist with the correct fields
       await createEntityIndexComponentTemplate(description, this.esClient);
@@ -429,6 +501,10 @@ export class EntityStoreDataClient {
         logger,
       });
       this.log(`debug`, entityType, `Created entity index`);
+
+      // Create reset index required by Snapshot task
+      await createEntityResetIndex({ entityType, esClient: this.esClient, namespace });
+      this.log(`debug`, entityType, `Created entity reset index`);
 
       // we must create and execute the enrich policy before the pipeline is created
       // this is because the pipeline will fail if the enrich index does not exist
@@ -456,6 +532,12 @@ export class EntityStoreDataClient {
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
 
+      // CRUD Assets
+      await createEntityUpdatesIndexComponentTemplate(description, this.esClient);
+      this.log(`debug`, entityType, `Created entity updates index component template`);
+      await initEntityUpdatesDataStream(entityType, this.esClient, namespace);
+      this.log(`debug`, entityType, `Initialized entity updates data stream`);
+
       // finally start the entity definition now that everything is in place
       const updated = await this.start(entityType, { force: true });
 
@@ -466,6 +548,7 @@ export class EntityStoreDataClient {
         taskManager,
         interval: options.enrichPolicyExecutionInterval,
       });
+      this.log(`debug`, entityType, `Started entity store field retention enrich task`);
 
       // this task will continuously refresh the Entity Store indices based on the Data View
       await startEntityStoreDataViewRefreshTask({
@@ -474,14 +557,30 @@ export class EntityStoreDataClient {
         taskManager,
       });
 
-      this.log(`debug`, entityType, `Started entity store field retention enrich task`);
-      this.log(`info`, entityType, `Entity store initialized`);
+      await taskManager.runSoon(getDataViewRefreshTaskId(namespace));
 
+      this.log(`debug`, entityType, `Started entity store data view refresh task`);
+
+      // this task will create daily snapshots for the historical view
+      await startEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
+      this.log(`debug`, entityType, `Started entity store snapshot task`);
+
+      this.log(`info`, entityType, `Entity store initialized`);
       const setupEndTime = moment().utc().toISOString();
       const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
       this.options.telemetry?.reportEvent(ENTITY_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
+        namespace,
+        entityType,
       });
+
+      // this task will report Entity Store state as telemetry events
+      await startEntityStoreHealthTask({
+        namespace,
+        logger,
+        taskManager,
+      });
+      this.log(`debug`, entityType, `Started entity store health task`);
 
       return updated;
     } catch (err) {
@@ -503,7 +602,6 @@ export class EntityStoreDataClient {
         status: ENGINE_STATUS.ERROR,
         error: {
           message: err.message,
-          stack: err.stack,
           action: 'init',
         },
       });
@@ -539,10 +637,11 @@ export class EntityStoreDataClient {
           resource: EngineComponentResourceEnum.entity_definition,
         },
         ...definition.state.components.transforms.map(({ installed, stats }) => ({
-          id,
+          id: stats?.id || id,
           resource: EngineComponentResourceEnum.transform,
           installed,
           health: transformHealthToComponentHealth(stats?.health?.status),
+          metadata: stats?.stats,
           errors: (stats?.health as TransformHealth)?.issues?.map(({ issue, details }) => ({
             title: issue,
             message: details,
@@ -646,10 +745,15 @@ export class EntityStoreDataClient {
   ) {
     const { namespace, logger, appClient, dataViewsService, config } = this.options;
     const { deleteData, deleteEngine } = options;
+    const deletionStartTime = moment.utc().toISOString();
 
     const descriptor = await this.engineClient.maybeGet(entityType);
-    const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
-
+    const defaultIndexPatterns = await buildIndexPatternsByEngine(
+      namespace,
+      entityType,
+      appClient,
+      dataViewsService
+    );
     const description = createEngineDescription({
       entityType,
       namespace,
@@ -702,14 +806,14 @@ export class EntityStoreDataClient {
       });
       this.log('debug', entityType, `Deleted field retention enrich policy`);
 
-      if (entityType === EntityType.universal) {
-        logger.debug(`Deleting asset inventory keyword builder pipeline`);
+      await removeEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
+      this.log('debug', entityType, `Deleted entity store snapshot task`);
 
-        await deleteKeywordBuilderPipeline({
-          logger,
-          esClient: this.esClient,
-        });
-      }
+      // CRUD Assets
+      await deleteEntityUpdatesDataStreams(entityType, this.esClient, namespace);
+      this.log('debug', entityType, `Delete entity updates index`);
+      await deleteEntityUpdatesIndexComponentTemplate(description, this.esClient);
+      this.log('debug', entityType, `Delete entity updates index`);
 
       if (deleteData) {
         await deleteEntityIndex({
@@ -719,7 +823,16 @@ export class EntityStoreDataClient {
           logger,
         });
         this.log('debug', entityType, `Deleted entity index`);
+        await deleteAllEntitySnapshotIndices({
+          entityType,
+          esClient: this.esClient,
+          namespace,
+        });
+        this.log('debug', entityType, `Deleted snapshot indices`);
       }
+
+      await deleteEntityResetIndex({ entityType, esClient: this.esClient, namespace });
+      this.log('debug', entityType, `Deleted reset index`);
 
       if (descriptor && deleteEngine) {
         await this.engineClient.delete(entityType);
@@ -737,6 +850,11 @@ export class EntityStoreDataClient {
           logger,
           taskManager,
         });
+        await removeEntityStoreHealthTask({
+          namespace,
+          logger,
+          taskManager,
+        });
         this.log(
           'debug',
           entityType,
@@ -744,7 +862,16 @@ export class EntityStoreDataClient {
         );
       }
 
-      logger.info(`[Entity Store] In namespace ${namespace}: Deleted store for ${entityType}`);
+      const deletionEndTime = moment.utc().toISOString();
+      const duration = moment(deletionEndTime).diff(moment(deletionStartTime), 'seconds');
+      logger.info(
+        `[Entity Store] In namespace ${namespace}: Deleted store for ${entityType} in ${duration} seconds`
+      );
+      this.options.telemetry?.reportEvent(ENTITY_ENGINE_DELETION_EVENT.eventType, {
+        duration,
+        namespace,
+        entityType,
+      });
       return { deleted: true };
     } catch (err) {
       this.log(`error`, entityType, `Error deleting entity store: ${err.message}`);
@@ -818,6 +945,16 @@ export class EntityStoreDataClient {
 
     const { engines } = await this.engineClient.list();
 
+    if (engines.length === 0) {
+      logger.debug(
+        `In namespace ${this.options.namespace}: No entity engines found, skipping data view index application`
+      );
+      return {
+        successes: [],
+        errors: [],
+      };
+    }
+
     const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = engines.map(
       async (engine) => {
         const originalStatus = engine.status;
@@ -833,11 +970,13 @@ export class EntityStoreDataClient {
           );
         }
 
-        const indexPatterns = await buildIndexPatterns(
+        const defaultIndexPatterns = await buildIndexPatternsByEngine(
           this.options.namespace,
+          engine.type,
           this.options.appClient,
           this.options.dataViewsService
         );
+        const indexPatterns = mergeEntityStoreIndices(defaultIndexPatterns, engine.indexPattern);
 
         // Skip update if index patterns are the same
         if (isEqual(definition.indexPatterns, indexPatterns)) {
@@ -848,6 +987,18 @@ export class EntityStoreDataClient {
         } else {
           logger.info(
             `In namespace ${this.options.namespace}: Data view index changes detected, applying changes to entity definition.`
+          );
+        }
+
+        const privileges = await this.getEntityStoreSourceIndicesPrivileges(indexPatterns);
+
+        if (!privileges.has_all_required) {
+          const missingPrivilegesMsg = getMissingPrivilegesErrorMessage(
+            getAllMissingPrivileges(privileges)
+          );
+
+          throw new Error(
+            `The current user does not have the required indices privileges for updating the '${engine.type}' entity store.\n${missingPrivilegesMsg}`
           );
         }
 
@@ -893,6 +1044,68 @@ export class EntityStoreDataClient {
     };
   }
 
+  /**
+   * Get the index privileges required for installing all entity store resources
+   */
+  public getEntityStoreInitPrivileges = async (indices: string[]) => {
+    const security = this.options.security;
+
+    // The entity store needs access to all security solution indices
+    const indicesPrivileges = this.getEntityStoreSourceRequiredIndicesPrivileges(indices);
+
+    // The entity store has to create the following indices
+    indicesPrivileges[ENTITY_STORE_INDEX_PATTERN] = ['read', 'manage'];
+    indicesPrivileges[ENTITY_STORE_UPDATES_INDEX_PATTERN] = ['read', 'manage'];
+    indicesPrivileges[RISK_SCORE_INDEX_PATTERN] = ['read', 'manage'];
+    indicesPrivileges[ENTITY_STORE_HISTORY_INDEX_PATTERN] = [
+      'create_index',
+      'manage',
+      'read',
+      'write',
+    ];
+
+    return checkAndFormatPrivileges({
+      request: this.options.request,
+      security,
+      privilegesToCheck: {
+        kibana: [
+          security.authz.actions.savedObject.get(entityEngineDescriptorTypeName, 'create'),
+          security.authz.actions.savedObject.get(SO_ENTITY_DEFINITION_TYPE, 'create'),
+        ],
+        elasticsearch: {
+          cluster: ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+          index: indicesPrivileges,
+        },
+      },
+    });
+  };
+
+  /**
+   * Get the index privileges required for running the transform
+   */
+  public getEntityStoreSourceIndicesPrivileges = (indexPatterns: string[]) => {
+    const requiredIndicesPrivileges =
+      this.getEntityStoreSourceRequiredIndicesPrivileges(indexPatterns);
+
+    return checkAndFormatPrivileges({
+      request: this.options.request,
+      security: this.options.security,
+      privilegesToCheck: {
+        elasticsearch: {
+          cluster: [],
+          index: requiredIndicesPrivileges,
+        },
+      },
+    });
+  };
+
+  private getEntityStoreSourceRequiredIndicesPrivileges(securitySolutionIndices: string[]) {
+    return securitySolutionIndices.reduce<Record<string, string[]>>((acc, index) => {
+      acc[index] = ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES;
+      return acc;
+    }, {});
+  }
+
   private log(
     level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>,
     entityType: EntityType,
@@ -935,5 +1148,17 @@ export class EntityStoreDataClient {
     };
 
     return this.options.auditLogger?.log(event);
+  }
+
+  async isCapabilityEnabled(type: EntityType, capability: EntityStoreCapability): Promise<boolean> {
+    const { definitions } = await this.entityClient.getEntityDefinitions({ type });
+
+    if (definitions.length === 0) {
+      return false;
+    }
+
+    const capabilities = definitions[0].capabilities || [];
+
+    return capabilities.indexOf(capability) > -1;
   }
 }

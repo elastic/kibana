@@ -29,7 +29,7 @@ export const convertRangeToISO = (range: Range): Range => ({
   end: convertDateToISOString(range.end),
 });
 
-const buildFakeScopedRequest = ({
+export const buildFakeScopedRequest = ({
   coreStart,
   namespace,
 }: {

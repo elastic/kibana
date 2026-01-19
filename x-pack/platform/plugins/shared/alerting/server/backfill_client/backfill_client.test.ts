@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import { adHocRunStatus } from '../../common/constants';
+import { adHocRunStatus, backfillInitiator } from '../../common/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
+} from '@kbn/core/server';
 import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { ScheduleBackfillParam } from '../application/backfill/methods/schedule/types';
-import { RuleDomain } from '../application/rule/types';
+import type { ScheduleBackfillParam } from '../application/backfill/methods/schedule/types';
+import type { RuleDomain } from '../application/rule/types';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { BackfillClient } from './backfill_client';
-import { AdHocRunSO } from '../data/ad_hoc_run/types';
+import type { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { transformAdHocRunToBackfillResult } from '../application/backfill/transforms';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskRunnerFactory } from '../task_runner';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { eventLogClientMock, eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 
@@ -29,7 +33,8 @@ jest.mock('../lib/rule_gaps/update/update_gaps', () => ({
   updateGaps: jest.fn(),
 }));
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { RawRule, RawRuleAction } from '../types';
+import type { RawRule, RawRuleAction } from '../types';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const logger = loggingSystemMock.create().get();
 const taskManagerSetup = taskManagerMock.createSetup();
@@ -45,7 +50,13 @@ const actionsClient = actionsClientMock.create();
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {
   return {
     ruleId: '1',
-    start: '2023-11-16T08:00:00.000Z',
+    initiator: 'user',
+    ranges: [
+      {
+        start: '2023-11-16T08:00:00.000Z',
+        end: '2023-11-16T20:00:00.000Z',
+      },
+    ],
     runActions: true,
     ...overwrites,
   };
@@ -65,6 +76,7 @@ const mockRuleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   validate: {
     params: { validate: (params) => params },
   },
@@ -120,6 +132,7 @@ function getMockAdHocRunAttributes({
 } = {}): AdHocRunSO {
   // @ts-expect-error
   return {
+    initiator: backfillInitiator.USER,
     ...(omitApiKey ? {} : { apiKeyId: '123', apiKeyToUse: 'MTIzOmFiYw==' }),
     createdAt: '2024-01-30T00:00:00.000Z',
     duration: '12h',
@@ -257,7 +270,10 @@ describe('BackfillClient', () => {
     test('should successfully create backfill saved objects and queue backfill tasks', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule();
       const rule2 = getMockRule({ id: '2' });
@@ -381,7 +397,7 @@ describe('BackfillClient', () => {
 
     test('should successfully schedule backfill for rule with actions when runActions=true', async () => {
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '987',
           actionTypeId: 'test',
           config: {
@@ -392,16 +408,15 @@ describe('BackfillClient', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-        },
+        }),
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         actions: [
@@ -600,7 +615,7 @@ describe('BackfillClient', () => {
 
     test('should successfully schedule backfill for rule with rule-level notifyWhen field', async () => {
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '987',
           actionTypeId: 'test',
           config: {
@@ -611,16 +626,15 @@ describe('BackfillClient', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-        },
+        }),
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         notifyWhen: 'onActiveAlert',
@@ -819,7 +833,11 @@ describe('BackfillClient', () => {
     test('should ignore actions for rule with actions when runActions=false', async () => {
       const mockData = [
         getMockData({ runActions: false }),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z', runActions: false }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+          runActions: false,
+        }),
       ];
       const rule1 = getMockRule({
         actions: [
@@ -976,7 +994,7 @@ describe('BackfillClient', () => {
       actionsClient.isSystemAction.mockReturnValueOnce(false);
       actionsClient.isSystemAction.mockReturnValueOnce(true);
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '987',
           actionTypeId: 'test',
           config: {
@@ -987,22 +1005,14 @@ describe('BackfillClient', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-        },
-        {
+        }),
+        createMockConnector({
           id: 'system_456',
           actionTypeId: 'test.system',
           name: 'System action: .cases',
-          config: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ]);
       const mockData = [getMockData()];
       const rule = getMockRule({
@@ -1128,7 +1138,7 @@ describe('BackfillClient', () => {
 
     test('should schedule backfill for rule with unsupported actions and return warning', async () => {
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '987',
           actionTypeId: 'test',
           config: {
@@ -1139,16 +1149,15 @@ describe('BackfillClient', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-        },
+        }),
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         actions: [
@@ -1346,7 +1355,7 @@ describe('BackfillClient', () => {
 
     test('should schedule backfill for rule with unsupported rule-level notifyWhen field and return warning', async () => {
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '987',
           actionTypeId: 'test',
           config: {
@@ -1357,16 +1366,15 @@ describe('BackfillClient', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-        },
+        }),
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         notifyWhen: 'onThrottleInterval',
@@ -1546,7 +1554,12 @@ describe('BackfillClient', () => {
     });
 
     test('should successfully create multiple backfill saved objects for a single rule', async () => {
-      const mockData = [getMockData(), getMockData({ end: '2023-11-17T08:00:00.000Z' })];
+      const mockData = [
+        getMockData(),
+        getMockData({
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
+      ];
       const rule1 = getMockRule();
       const mockRules = [rule1];
 
@@ -1666,7 +1679,10 @@ describe('BackfillClient', () => {
     test('should log warning if no rule found for backfill job', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule();
       const mockRules = [rule1];
@@ -1724,7 +1740,7 @@ describe('BackfillClient', () => {
         message: 'User has created ad hoc run for ad_hoc_run_params [id=abc]',
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        `Error for ruleId 2 - not scheduling backfill for {\"ruleId\":\"2\",\"start\":\"2023-11-16T08:00:00.000Z\",\"runActions\":true,\"end\":\"2023-11-17T08:00:00.000Z\"}`
+        `Error for ruleId 2 - not scheduling backfill for {\"ruleId\":\"2\",\"initiator\":\"user\",\"ranges\":[{\"start\":\"2023-11-16T08:00:00.000Z\",\"end\":\"2023-11-17T08:00:00.000Z\"}],\"runActions\":true}`
       );
       expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
         {
@@ -1768,6 +1784,7 @@ describe('BackfillClient', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -2039,6 +2056,7 @@ describe('BackfillClient', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -2162,6 +2180,7 @@ describe('BackfillClient', () => {
         logger,
         backfillClient,
         actionsClient,
+        initiator: backfillInitiator.USER,
       });
       expect(updateGaps).toHaveBeenNthCalledWith(2, {
         backfillSchedule: mockAttributes.schedule,
@@ -2174,6 +2193,7 @@ describe('BackfillClient', () => {
         logger,
         backfillClient,
         actionsClient,
+        initiator: backfillInitiator.USER,
       });
     });
 
@@ -2245,6 +2265,7 @@ describe('BackfillClient', () => {
         logger,
         backfillClient,
         actionsClient,
+        initiator: backfillInitiator.USER,
       });
     });
   });
@@ -2552,6 +2573,181 @@ describe('BackfillClient', () => {
         `Error deleting tasks with IDs: def with errors: delete failed`
       );
     });
+
+    test('should process bulk create in chunks of 10', async () => {
+      // Create 25 mock rules and backfill params to test chunking
+      const mockRules = Array.from({ length: 25 }, (_, i) => getMockRule({ id: `${i + 1}` }));
+      const mockData = Array.from({ length: 25 }, (_, i) => getMockData({ ruleId: `${i + 1}` }));
+
+      // Create mock responses for each chunk
+      const mockResponses = Array.from({ length: 3 }, (_, chunkIndex) => {
+        const startIdx = chunkIndex * 10;
+        const endIdx = Math.min(startIdx + 10, 25);
+        return {
+          saved_objects: Array.from({ length: endIdx - startIdx }, (item, i) => {
+            const idx = startIdx + i;
+            return getBulkCreateParam(`id-${idx}`, `${idx + 1}`, getMockAdHocRunAttributes());
+          }),
+        };
+      });
+
+      // Mock bulkCreate to return different responses for each chunk
+      unsecuredSavedObjectsClient.bulkCreate
+        .mockResolvedValueOnce(mockResponses[0])
+        .mockResolvedValueOnce(mockResponses[1])
+        .mockResolvedValueOnce(mockResponses[2]);
+
+      const result = await backfillClient.bulkQueue({
+        actionsClient,
+        auditLogger,
+        params: mockData,
+        rules: mockRules,
+        ruleTypeRegistry,
+        spaceId: 'default',
+        unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
+      });
+
+      // Verify bulkCreate was called 3 times (for chunks of 10, 10, and 5)
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(3);
+
+      // Verify each chunk was processed with correct size
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(10);
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[1][0]).toHaveLength(10);
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[2][0]).toHaveLength(5);
+
+      // Verify all results were combined correctly
+      expect(result).toHaveLength(25);
+    });
+
+    test('should return errors when bulkCreate failed', async () => {
+      const mockData = [getMockData(), getMockData({ ruleId: '2' })];
+      const rule1 = getMockRule();
+      const rule2 = getMockRule({ id: '2' });
+      const mockRules = [rule1, rule2];
+
+      unsecuredSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('Bulk create failed'));
+
+      const result = await backfillClient.bulkQueue({
+        actionsClient,
+        auditLogger,
+        params: mockData,
+        rules: mockRules,
+        ruleTypeRegistry,
+        spaceId: 'default',
+        unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        error: { code: 'Error', message: 'Bulk create failed' },
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['creation'],
+        },
+        kibana: {},
+        message: 'Failed attempt to create ad hoc run for an ad hoc run',
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        error: { code: 'Error', message: 'Bulk create failed' },
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['creation'],
+        },
+        kibana: {},
+        message: 'Failed attempt to create ad hoc run for an ad hoc run',
+      });
+      expect(taskManagerStart.bulkSchedule).not.toHaveBeenCalled();
+      expect(result).toEqual([
+        {
+          error: {
+            message: 'Bulk create failed',
+            rule: { id: '1', name: 'my rule name' },
+          },
+        },
+        {
+          error: {
+            message: 'Bulk create failed',
+            rule: { id: '2', name: 'my rule name' },
+          },
+        },
+      ]);
+    });
+
+    test('should preserve successful results when later chunk bulkCreate failed', async () => {
+      const totalRules = 11;
+      const mockRules = Array.from({ length: totalRules }, (_, i) =>
+        getMockRule({ id: `${i + 1}` })
+      );
+      const mockData = mockRules.map((rule) => getMockData({ ruleId: rule.id }));
+
+      const firstChunkSavedObjects = Array.from({ length: 10 }, (_, i) =>
+        getBulkCreateParam(
+          `id-${i + 1}`,
+          `${i + 1}`,
+          getMockAdHocRunAttributes({ ruleId: `${i + 1}` })
+        )
+      );
+
+      unsecuredSavedObjectsClient.bulkCreate
+        .mockResolvedValueOnce({ saved_objects: firstChunkSavedObjects })
+        .mockRejectedValueOnce(new Error('Second chunk failed'));
+
+      const result = await backfillClient.bulkQueue({
+        actionsClient,
+        auditLogger,
+        params: mockData,
+        rules: mockRules,
+        ruleTypeRegistry,
+        spaceId: 'default',
+        unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenCalledTimes(11);
+
+      const firstChunkRequest = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<
+        SavedObjectsBulkCreateObject<AdHocRunSO>
+      >;
+      expect(result.slice(0, 10)).toEqual(
+        firstChunkSavedObjects.map((so, index) =>
+          transformAdHocRunToBackfillResult({
+            adHocRunSO: so,
+            isSystemAction,
+            originalSO: firstChunkRequest?.[index],
+          })
+        )
+      );
+      expect(result.slice(10)).toEqual([
+        {
+          error: {
+            message: 'Second chunk failed',
+            rule: { id: '11', name: 'my rule name' },
+          },
+        },
+      ]);
+      expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith(
+        firstChunkSavedObjects.map((so) => ({
+          id: so.id,
+          taskType: 'ad_hoc_run-backfill',
+          state: {},
+          params: { adHocRunParamsId: so.id, spaceId: 'default' },
+        }))
+      );
+    });
   });
 
   describe('findOverlappingBackfills()', () => {
@@ -2584,8 +2780,7 @@ describe('BackfillClient', () => {
 
       const result = await backfillClient.findOverlappingBackfills({
         ruleId: '1',
-        start: mockStart,
-        end: mockEnd,
+        ranges: [{ start: mockStart, end: mockEnd }],
         savedObjectsRepository: mockSavedObjectsRepository,
         actionsClient,
       });
@@ -2595,8 +2790,8 @@ describe('BackfillClient', () => {
         perPage: 100,
         hasReference: [{ id: '1', type: RULE_SAVED_OBJECT_TYPE }],
         filter: `
-        ad_hoc_run_params.attributes.start <= "${mockEnd.toISOString()}" and
-        ad_hoc_run_params.attributes.end >= "${mockStart.toISOString()}"
+        (ad_hoc_run_params.attributes.start <= "${mockEnd.toISOString()}" and
+        ad_hoc_run_params.attributes.end >= "${mockStart.toISOString()}")
       `,
       });
 
@@ -2620,8 +2815,7 @@ describe('BackfillClient', () => {
       await expect(
         backfillClient.findOverlappingBackfills({
           ruleId: '1',
-          start: mockStart,
-          end: mockEnd,
+          ranges: [{ start: mockStart, end: mockEnd }],
           savedObjectsRepository: mockSavedObjectsRepository,
           actionsClient,
         })
@@ -2640,13 +2834,109 @@ describe('BackfillClient', () => {
 
       const result = await backfillClient.findOverlappingBackfills({
         ruleId: '1',
-        start: mockStart,
-        end: mockEnd,
+        ranges: [{ start: mockStart, end: mockEnd }],
         savedObjectsRepository: mockSavedObjectsRepository,
         actionsClient,
       });
 
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('deleteBackfillsByInitiatorId()', () => {
+    test('should successfully delete backfills by initiator id and use correct filter', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            id: 'abc',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes({ overwrites: { initiator: 'init-1' } }),
+            references: [{ id: '1', name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
+            version: '1',
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true }],
+      });
+      taskManagerStart.bulkRemove.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: 'task', success: true }],
+      });
+
+      await backfillClient.deleteBackfillsByInitiatorId({
+        initiatorId: 'init-1',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        filter: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiatorId: "init-1"`,
+      });
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+      ]);
+      expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(['abc']);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('should call updateGaps when deleting by initiator with shouldUpdateGaps', async () => {
+      const attrs = getMockAdHocRunAttributes({
+        overwrites: {
+          initiator: backfillInitiator.SYSTEM,
+          start: '2023-11-16T08:00:00.000Z',
+          schedule: [
+            {
+              runAt: '2023-11-16T20:00:00.000Z',
+              interval: '12h',
+              status: adHocRunStatus.PENDING,
+            },
+          ],
+        },
+      });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            id: 'abc',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: attrs,
+            references: [{ id: '1', name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
+            version: '1',
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true }],
+      });
+      taskManagerStart.bulkRemove.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: 'task', success: true }],
+      });
+
+      await backfillClient.deleteBackfillsByInitiatorId({
+        initiatorId: backfillInitiator.SYSTEM,
+        unsecuredSavedObjectsClient,
+        shouldUpdateGaps: true,
+        internalSavedObjectsRepository,
+        eventLogClient,
+        eventLogger,
+        actionsClient,
+      });
+
+      expect(updateGaps).toHaveBeenCalledTimes(1);
+      expect(updateGaps).toHaveBeenCalledWith({
+        ruleId: '1',
+        start: new Date(attrs.start),
+        end: new Date(),
+        backfillSchedule: attrs.schedule,
+        savedObjectsRepository: internalSavedObjectsRepository,
+        logger,
+        eventLogClient,
+        eventLogger,
+        shouldRefetchAllBackfills: true,
+        backfillClient,
+        actionsClient,
+        initiator: backfillInitiator.SYSTEM,
+      });
     });
   });
 });

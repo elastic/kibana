@@ -8,27 +8,26 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import FieldsPreview from './case_fields_preview';
-import type { AppMockRenderer } from '../../../common/mock';
+
 import { theHiveConnector } from '../mock';
-import { createAppMockRenderer } from '../../../common/mock';
-import { createQueryWithMarkup } from '../../../common/test_utils';
+import { renderWithTestingProviders } from '../../../common/mock';
+import { tableMatchesExpectedContent } from '../../../common/test_utils';
 
 describe('TheHive Fields: Preview', () => {
   const fields = {
     tlp: 1,
   };
 
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders all fields correctly', () => {
-    appMockRenderer.render(<FieldsPreview connector={theHiveConnector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={theHiveConnector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
-    expect(getByText('TLP: GREEN')).toBeInTheDocument();
+    const rows = screen.getAllByTestId('card-list-item-row');
+    const expectedContent = [['TLP', 'GREEN']];
+
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
 });

@@ -19,7 +19,7 @@ import {
   decodeThreatMatchNamedQuery,
   encodeThreatMatchNamedQuery,
   getMatchedFields,
-  getSignalValueMap,
+  getFieldAndValueToDocIdsMap,
   getMaxClauseCountErrorValue,
 } from './utils';
 
@@ -59,7 +59,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -72,7 +71,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -89,7 +87,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -102,7 +99,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -112,36 +108,6 @@ describe('utils', () => {
       expect(combinedResults.success).toEqual(false);
     });
 
-    test('it should use the latest date if it is set in the new result', () => {
-      const existingResult: SearchAfterAndBulkCreateReturnType = {
-        success: false,
-        warning: false,
-        searchAfterTimes: ['10', '20', '30'],
-        bulkCreateTimes: ['5', '15', '25'],
-        enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
-        createdSignalsCount: 3,
-        createdSignals: Array(3).fill(sampleSignalHit()),
-        errors: [],
-        warningMessages: [],
-      };
-
-      const newResult: SearchAfterAndBulkCreateReturnType = {
-        success: true,
-        warning: false,
-        searchAfterTimes: ['10', '20', '30'],
-        bulkCreateTimes: ['5', '15', '25'],
-        enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 3,
-        createdSignals: Array(3).fill(sampleSignalHit()),
-        errors: [],
-        warningMessages: [],
-      };
-      const combinedResults = combineResults(existingResult, newResult);
-      expect(combinedResults.lastLookBackDate?.toISOString()).toEqual('2020-09-16T03:34:32.390Z');
-    });
-
     test('it should combine the searchAfterTimes and the bulkCreateTimes', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
@@ -149,7 +115,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -162,7 +127,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -185,7 +149,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'],
@@ -198,7 +161,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 4', 'error 1', 'error 3', 'error 5'],
@@ -311,7 +273,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -323,7 +284,6 @@ describe('utils', () => {
         searchAfterTimes: ['30'], // max value from existingResult.searchAfterTimes
         bulkCreateTimes: ['25'], // max value from existingResult.bulkCreateTimes
         enrichmentTimes: ['3'], // max value from existingResult.enrichmentTimes
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -341,7 +301,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -353,7 +312,6 @@ describe('utils', () => {
         searchAfterTimes: [],
         bulkCreateTimes: [],
         enrichmentTimes: [],
-        lastLookBackDate: undefined,
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -365,7 +323,6 @@ describe('utils', () => {
         searchAfterTimes: ['30'], // max value from existingResult.searchAfterTimes
         bulkCreateTimes: ['25'], // max value from existingResult.bulkCreateTimes
         enrichmentTimes: ['3'], // max value from existingResult.enrichmentTimes
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -384,7 +341,6 @@ describe('utils', () => {
         searchAfterTimes: [],
         bulkCreateTimes: [],
         enrichmentTimes: [],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: [],
         errors: [],
@@ -396,7 +352,6 @@ describe('utils', () => {
         searchAfterTimes: [],
         bulkCreateTimes: [],
         enrichmentTimes: [],
-        lastLookBackDate: undefined,
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -409,7 +364,6 @@ describe('utils', () => {
         searchAfterTimes: ['0'],
         bulkCreateTimes: ['0'],
         enrichmentTimes: ['0'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: [],
         errors: [],
@@ -428,7 +382,6 @@ describe('utils', () => {
         searchAfterTimes: [],
         bulkCreateTimes: [],
         enrichmentTimes: [],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: [],
         errors: [],
@@ -441,7 +394,6 @@ describe('utils', () => {
         searchAfterTimes: [],
         bulkCreateTimes: [],
         enrichmentTimes: [],
-        lastLookBackDate: undefined,
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -454,7 +406,6 @@ describe('utils', () => {
         searchAfterTimes: ['0'],
         bulkCreateTimes: ['0'],
         enrichmentTimes: ['0'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: [],
         errors: [],
@@ -473,7 +424,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'], // max is 30
         bulkCreateTimes: ['5', '15', '25'], // max is 25
         enrichmentTimes: ['1', '2', '3'], // max is 3
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -485,7 +435,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
@@ -497,7 +446,6 @@ describe('utils', () => {
         searchAfterTimes: ['40', '5', '15'],
         bulkCreateTimes: ['50', '5', '15'],
         enrichmentTimes: ['4', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'),
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
@@ -510,7 +458,6 @@ describe('utils', () => {
         searchAfterTimes: ['70'], // max value between newResult1 and newResult2 + max array value of existingResult (40 + 30 = 70)
         bulkCreateTimes: ['75'], // max value between newResult1 and newResult2 + max array value of existingResult (50 + 25 = 75)
         enrichmentTimes: ['7'], // max value between newResult1 and newResult2 + max array value of existingResult (4 + 3 = 7)
-        lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'), // max lastLookBackDate
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
@@ -529,7 +476,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'], // max is 30
         bulkCreateTimes: ['5', '15', '25'], // max is 25
         enrichmentTimes: ['1', '2', '3'], // max is 3
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -541,7 +487,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
@@ -553,7 +498,6 @@ describe('utils', () => {
         searchAfterTimes: ['40', '5', '15'],
         bulkCreateTimes: ['50', '5', '15'],
         enrichmentTimes: ['5', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'),
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
@@ -566,7 +510,6 @@ describe('utils', () => {
         searchAfterTimes: ['70'], // max value between newResult1 and newResult2 + max array value of existingResult (40 + 30 = 70)
         bulkCreateTimes: ['75'], // max value between newResult1 and newResult2 + max array value of existingResult (50 + 25 = 75)
         enrichmentTimes: ['8'], // max value between newResult1 and newResult2 + max array value of existingResult (50 + 3 = 8)
-        lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'), // max lastLookBackDate
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
@@ -585,7 +528,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'], // max is 30
         bulkCreateTimes: ['5', '15', '25'], // max is 25
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -597,7 +539,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: [],
@@ -609,7 +550,6 @@ describe('utils', () => {
         searchAfterTimes: ['40', '5', '15'],
         bulkCreateTimes: ['50', '5', '15'],
         enrichmentTimes: ['5', '2', '3'],
-        lastLookBackDate: null,
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
         errors: [],
@@ -622,7 +562,6 @@ describe('utils', () => {
         searchAfterTimes: ['70'], // max value between newResult1 and newResult2 + max array value of existingResult (40 + 30 = 70)
         bulkCreateTimes: ['75'], // max value between newResult1 and newResult2 + max array value of existingResult (50 + 25 = 75)
         enrichmentTimes: ['8'], // max value between newResult1 and newResult2 + max array value of existingResult (5 + 3 = 8)
-        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'), // max lastLookBackDate
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
         errors: [],
@@ -641,7 +580,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -654,7 +592,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['5', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -671,7 +608,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -684,7 +620,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -694,36 +629,6 @@ describe('utils', () => {
       expect(combinedResults.success).toEqual(false);
     });
 
-    test('it should use the latest date if it is set in the new result', () => {
-      const existingResult: SearchAfterAndBulkCreateReturnType = {
-        success: false,
-        warning: false,
-        searchAfterTimes: ['10', '20', '30'],
-        bulkCreateTimes: ['5', '15', '25'],
-        enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
-        createdSignalsCount: 3,
-        createdSignals: Array(3).fill(sampleSignalHit()),
-        errors: [],
-        warningMessages: [],
-      };
-
-      const newResult: SearchAfterAndBulkCreateReturnType = {
-        success: true,
-        warning: false,
-        searchAfterTimes: ['10', '20', '30'],
-        bulkCreateTimes: ['5', '15', '25'],
-        enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
-        createdSignalsCount: 3,
-        createdSignals: Array(3).fill(sampleSignalHit()),
-        errors: [],
-        warningMessages: [],
-      };
-      const combinedResults = combineConcurrentResults(existingResult, [newResult]);
-      expect(combinedResults.lastLookBackDate?.toISOString()).toEqual('2020-09-16T03:34:32.390Z');
-    });
-
     test('it should combine the searchAfterTimes and the bulkCreateTimes', () => {
       const existingResult: SearchAfterAndBulkCreateReturnType = {
         success: false,
@@ -731,7 +636,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -744,7 +648,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: [],
@@ -766,7 +669,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'],
@@ -779,7 +681,6 @@ describe('utils', () => {
         searchAfterTimes: ['10', '20', '30'],
         bulkCreateTimes: ['5', '15', '25'],
         enrichmentTimes: ['1', '2', '3'],
-        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
         errors: ['error 4', 'error 1', 'error 3', 'error 5'],
@@ -800,8 +701,7 @@ describe('utils', () => {
         const encoded = encodeThreatMatchNamedQuery({
           id: 'id',
           index: 'index',
-          field: 'field',
-          value: 'value',
+          threatMappingIndex: 0,
           queryType: 'mq',
         });
 
@@ -814,8 +714,7 @@ describe('utils', () => {
         const query: ThreatMatchNamedQuery = {
           id: 'my_id',
           index: 'index',
-          field: 'threat.indicator.domain',
-          value: 'host.name',
+          threatMappingIndex: 0,
           queryType: 'mq',
         };
 
@@ -826,10 +725,24 @@ describe('utils', () => {
         expect(decoded).toEqual(query);
       });
 
+      it('can decode an encoded query with negate=true', () => {
+        const query: ThreatMatchNamedQuery = {
+          id: 'my_id',
+          index: 'index',
+          threatMappingIndex: 0,
+          queryType: 'mq',
+        };
+
+        const encoded = encodeThreatMatchNamedQuery(query);
+        const decoded = decodeThreatMatchNamedQuery(encoded);
+        // Check that `query` and `encoded` contain the same data but are different objects by reference
+        expect(decoded).not.toBe(query);
+        expect(decoded).toEqual(query);
+      });
+
       it('can decode if some parameters not passed', () => {
         const query: ThreatTermNamedQuery = {
-          field: 'threat.indicator.domain',
-          value: 'host.name',
+          threatMappingIndex: 0,
           queryType: 'tq',
         };
 
@@ -841,40 +754,38 @@ describe('utils', () => {
       });
 
       it('raises an error if the input is invalid', () => {
-        const badInput = 'nope';
+        const badInput = 'id__SEP__index__SEP__0';
 
         expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
-          'Decoded query is invalid. Decoded value: {"id":"nope"}'
+          'Decoded query is invalid. Decoded value: {"id":"id","index":"index","threatMappingIndex":0}'
         );
       });
 
-      it('raises an error if the query is missing a value for match query', () => {
+      it('raises an error if the query has NaN for threatMappingIndex', () => {
         const badQuery: ThreatMatchNamedQuery = {
           id: 'my_id',
           index: 'index',
-          // @ts-expect-error field intentionally undefined
-          field: undefined,
-          value: 'host.name',
+          // @ts-expect-error
+          threatMappingIndex: 'nan',
           queryType: 'mq',
         };
         const badInput = encodeThreatMatchNamedQuery(badQuery);
 
         expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
-          'Decoded query is invalid. Decoded value: {"id":"my_id","index":"index","field":"","value":"host.name","queryType":"mq"}'
+          'Decoded threat mapping index is invalid. Decoded value: nan'
         );
       });
 
-      it('raises an error if the query is invalid a value for term query', () => {
+      it('raises an error if the query has NaN for threatMappingIndex for term query', () => {
         const badQuery: ThreatTermNamedQuery = {
-          // @ts-expect-error field intentionally undefined
-          field: undefined,
-          value: 'host.name',
+          // @ts-expect-error
+          threatMappingIndex: 'nan',
           queryType: 'tq',
         };
         const badInput = encodeThreatMatchNamedQuery(badQuery);
 
         expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
-          'Decoded query is invalid. Decoded value: {"id":"","index":"","field":"","value":"host.name","queryType":"tq"}'
+          'Decoded threat mapping index is invalid. Decoded value: nan'
         );
       });
     });
@@ -958,7 +869,6 @@ describe('utils', () => {
           searchAfterTimes: ['10', '20', '30'],
           bulkCreateTimes: ['5', '15', '25'],
           enrichmentTimes: ['1', '2', '3'],
-          lastLookBackDate: undefined,
           createdSignalsCount: 3,
           createdSignals: Array(3).fill(sampleSignalHit()),
           errors: [],
@@ -984,7 +894,6 @@ describe('utils', () => {
           searchAfterTimes: ['10', '20', '30'],
           bulkCreateTimes: ['5', '15', '25'],
           enrichmentTimes: ['1', '2', '3'],
-          lastLookBackDate: undefined,
           createdSignalsCount: 3,
           createdSignals: Array(3).fill(sampleSignalHit()),
           errors: [
@@ -1016,7 +925,6 @@ describe('utils', () => {
           searchAfterTimes: ['10', '20', '30'],
           bulkCreateTimes: ['5', '15', '25'],
           enrichmentTimes: ['1', '2', '3'],
-          lastLookBackDate: undefined,
           createdSignalsCount: 3,
           createdSignals: Array(3).fill(sampleSignalHit()),
           errors: [
@@ -1048,7 +956,6 @@ describe('utils', () => {
           searchAfterTimes: ['10', '20', '30'],
           bulkCreateTimes: ['5', '15', '25'],
           enrichmentTimes: ['1', '2', '3'],
-          lastLookBackDate: undefined,
           createdSignalsCount: 3,
           createdSignals: Array(3).fill(sampleSignalHit()),
           errors: [
@@ -1081,9 +988,9 @@ describe('utils', () => {
     });
   });
 
-  describe('getSignalValueMap', () => {
+  describe('getFieldAndValueToDocIdsMap', () => {
     it('return empty object if there no events', () => {
-      const valueMap = getSignalValueMap({
+      const valueMap = getFieldAndValueToDocIdsMap({
         eventList: [],
         threatMatchedFields: {
           source: [],
@@ -1094,7 +1001,7 @@ describe('utils', () => {
     });
 
     it('return empty object if there some events but no fields', () => {
-      const valueMap = getSignalValueMap({
+      const valueMap = getFieldAndValueToDocIdsMap({
         eventList: [
           {
             _id: '1',
@@ -1117,7 +1024,7 @@ describe('utils', () => {
         _index: `index`,
         fields,
       });
-      const valueMap = getSignalValueMap({
+      const valueMap = getFieldAndValueToDocIdsMap({
         eventList: [
           createEvent('1', {
             'host.name': ['host-1'],

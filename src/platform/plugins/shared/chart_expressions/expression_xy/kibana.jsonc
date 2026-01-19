@@ -23,6 +23,9 @@
     "optionalPlugins": [
       "usageCollection"
     ],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "extraPublicDirs": [
+      "common",
+    ]
   }
 }

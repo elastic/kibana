@@ -6,31 +6,30 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { LicensingPluginSetup, LicensingPluginStart } from './types';
+import { lazyObject } from '@kbn/lazy-object';
+import type { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { licenseMock } from '../common/licensing.mock';
 import { featureUsageMock } from './services/feature_usage_service.mock';
 
 const createSetupMock = () => {
   const license = licenseMock.createLicense();
-  const mock: jest.Mocked<LicensingPluginSetup> = {
+  const mock: jest.Mocked<LicensingPluginSetup> = lazyObject({
     license$: new BehaviorSubject(license),
-    refresh: jest.fn(),
+    refresh: jest.fn().mockResolvedValue(license),
     featureUsage: featureUsageMock.createSetup(),
-  };
-  mock.refresh.mockResolvedValue(license);
+  });
 
   return mock;
 };
 
 const createStartMock = () => {
   const license = licenseMock.createLicense();
-  const mock: jest.Mocked<LicensingPluginStart> = {
+  const mock: jest.Mocked<LicensingPluginStart> = lazyObject({
     license$: new BehaviorSubject(license),
     getLicense: jest.fn(),
-    refresh: jest.fn(),
+    refresh: jest.fn().mockResolvedValue(license),
     featureUsage: featureUsageMock.createStart(),
-  };
-  mock.refresh.mockResolvedValue(license);
+  });
 
   return mock;
 };

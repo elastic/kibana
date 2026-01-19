@@ -113,7 +113,12 @@ export const createRegisteredAttachmentUserActionBuilder = <
           'data-test-subj': `comment-${attachment.type}-not-found`,
           timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
           children: (
-            <EuiCallOut title={ATTACHMENT_NOT_REGISTERED_ERROR} color="danger" iconType="warning" />
+            <EuiCallOut
+              announceOnMount={false}
+              title={ATTACHMENT_NOT_REGISTERED_ERROR}
+              color="danger"
+              iconType="warning"
+            />
           ),
         },
       ];

@@ -10,7 +10,6 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { PolicyData } from '../../../../common/endpoint/types';
 
 export interface ArtifactListPageUrlParams {
   /** The page number for the list. Must be 1 based. */
@@ -29,10 +28,6 @@ export interface ArtifactFormComponentProps {
   disabled: boolean;
   /** Error will be set if the submission of the form to the api results in an API error. Form can use it to provide feedback to the user */
   error: IHttpFetchError | undefined;
-
-  policies: PolicyData[];
-  policiesIsLoading: boolean;
-
   /** reports the state of the form data and the current updated item */
   onChange(formStatus: ArtifactFormComponentOnChangeCallbackProps): void;
 }

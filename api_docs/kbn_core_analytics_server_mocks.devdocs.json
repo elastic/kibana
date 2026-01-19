@@ -22,7 +22,9 @@
         "tags": [],
         "label": "analyticsServiceMock",
         "description": [],
-        "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
+        "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +38,9 @@
             "signature": [
               "() => jest.Mocked<AnalyticsServiceContract>"
             ],
-            "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
+            "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +58,9 @@
               "AnalyticsServicePreboot",
               ">"
             ],
-            "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
+            "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -72,7 +78,9 @@
               "AnalyticsServiceSetup",
               ">"
             ],
-            "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
+            "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -90,7 +98,9 @@
               "AnalyticsServiceStart",
               ">"
             ],
-            "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
+            "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

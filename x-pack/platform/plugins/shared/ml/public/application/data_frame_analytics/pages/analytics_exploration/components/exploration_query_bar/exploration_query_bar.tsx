@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
@@ -54,9 +54,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
   const { services } = useMlKibana();
   const {
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = services;
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
-import {
+import type { UMElasticsearchQueryFn } from '../adapters/framework';
+import type {
   GetPingsParams,
   HttpResponseBody,
   PingsResponse,
@@ -80,7 +80,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
     body: {
       hits: { hits, total },
     },
-  } = await uptimeEsClient.search({ body: searchBody });
+  } = await uptimeEsClient.search(searchBody);
 
   const pings: Ping[] = hits.map((doc: any) => {
     const { _id, _source } = doc;

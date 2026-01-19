@@ -13,6 +13,13 @@ export const GAPS_TABLE_STATUS_LABEL = i18n.translate(
   }
 );
 
+export const GAPS_TABLE_STATUS_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.statusLabelTooltip',
+  {
+    defaultMessage: 'Status of gap',
+  }
+);
+
 export const GAPS_TABLE_ACTIONS_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.actionsLabel',
   {
@@ -48,6 +55,13 @@ export const GAPS_TABLE_MANUAL_FILL_TASKS_LABEL = i18n.translate(
   }
 );
 
+export const GAPS_TABLE_MANUAL_FILL_TASKS_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.manualFillTasksLabelTooltip',
+  {
+    defaultMessage: 'Status of manual run filling the gap',
+  }
+);
+
 export const GAPS_TABLE_IN_PROGRESS_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.inProgressIntervalsLabel',
   {
@@ -62,6 +76,13 @@ export const GAPS_TABLE_EVENT_TIME_COVERED_LABEL = i18n.translate(
   }
 );
 
+export const GAPS_TABLE_EVENT_TIME_COVERED_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.eventTimeCoveredLabelTooltip',
+  {
+    defaultMessage: 'Progress of manual run filling the gap',
+  }
+);
+
 export const GAPS_TABLE_GAP_RANGE_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.gapRangeLabel',
   {
@@ -69,10 +90,24 @@ export const GAPS_TABLE_GAP_RANGE_LABEL = i18n.translate(
   }
 );
 
-export const GAPS_TABLE_GAP_DURATION_TOOLTIP = i18n.translate(
+export const GAPS_TABLE_GAP_RANGE_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.gapRangeLabelTooltip',
+  {
+    defaultMessage: 'Time range of gap',
+  }
+);
+
+export const GAPS_TABLE_GAP_DURATION_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.gapDurationTooltip',
   {
     defaultMessage: 'Total gap duration',
+  }
+);
+
+export const GAPS_TABLE_GAP_DURATION_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.gapDurationLabelTooltip',
+  {
+    defaultMessage: 'How long gap lasted',
   }
 );
 
@@ -125,9 +160,88 @@ export const GAPS_TABLE_EVENT_TIME_LABEL = i18n.translate(
   }
 );
 
+export const GAPS_TABLE_EVENT_TIME_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.eventTimeLabelTooltip',
+  {
+    defaultMessage: 'Date and time gap was discovered',
+  }
+);
+
 export const GAP_FILL_DISABLED_MESSAGE = i18n.translate(
   'xpack.securitySolution.gapsTable.gapFillDisabledMessage',
   {
     defaultMessage: 'Rule should be enabled to fill gaps',
+  }
+);
+
+export const GAPS_TABLE_TOTAL_GAPS_LABEL = (totalItems: number, maxItems: number) =>
+  i18n.translate('xpack.securitySolution.gapsTable.totalGapsLabel', {
+    values: { totalItems, maxItems },
+    defaultMessage: `More than {totalItems} gaps match filters provided. Showing first {maxItems}. Constrain filters further to view additional gaps.`,
+  });
+
+export const GAPS_FILL_ALL_GAPS_ERROR_DISABLED_RULE_MESSAGE = i18n.translate(
+  'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalDisabledRuleErrorLabel',
+  {
+    defaultMessage: 'Enable the rule to schedule gap fills.',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_UNKNOWN_ERROR_MESSAGE = (message: string) =>
+  i18n.translate(
+    'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalUnknownErrorLabel',
+    {
+      values: { message },
+      defaultMessage: 'Cannot fill gaps for 1 rule ({message})',
+    }
+  );
+
+export const GAPS_FILL_ALL_GAPS_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.gaps.fillAllGapsButtonLabel',
+  {
+    defaultMessage: 'Fill gaps',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_DRY_RUN_FAILED_MODAL_CLOSE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalCloseButtonLabel',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_DRY_RUN_MODAL_HEADING = i18n.translate(
+  'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalHeading',
+  {
+    defaultMessage: 'Unable to schedule gap fills for a disabled rule',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.gaps.fillRuleGapsLongRunWarningToastTitle',
+  {
+    defaultMessage: 'Scheduling gap fills',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.gaps.fillRuleGapsLongRunWarningToastMessage',
+  {
+    defaultMessage: 'Scheduling gap fills for 1 rule.',
+  }
+);
+
+export const GAPS_FAILED_AUTO_FILL_ATTEMPTS_TOOLTIP = (failedAutoFillAttempts: number) =>
+  i18n.translate('xpack.securitySolution.gaps.failedAutoFillAttemptsTooltip', {
+    defaultMessage: 'Auto fill failed attempts: {failedAutoFillAttempts}',
+    values: {
+      failedAutoFillAttempts,
+    },
+  });
+
+export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_NOTIFY = i18n.translate(
+  'xpack.securitySolution.gaps.fillRuleGapsLongRunWarningToastNotifyLabel',
+  {
+    defaultMessage: `Notify me when done`,
   }
 );

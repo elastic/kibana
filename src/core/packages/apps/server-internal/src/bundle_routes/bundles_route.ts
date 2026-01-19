@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
 import { createDynamicAssetHandler } from './dynamic_asset_response';
-import { FileHashCache } from './file_hash_cache';
+import type { FileHashCache } from './file_hash_cache';
 
 export function registerRouteForBundle(
   router: IRouter,
@@ -35,11 +35,18 @@ export function registerRouteForBundle(
         httpResource: true,
         authRequired: false,
         access: 'public',
+        excludeFromRateLimiter: true,
       },
       validate: {
         params: schema.object({
           path: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is used for serving assets and does not require authorization.',
+        },
       },
     },
     createDynamicAssetHandler({

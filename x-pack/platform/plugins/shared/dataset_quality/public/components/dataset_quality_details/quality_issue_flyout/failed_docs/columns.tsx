@@ -7,8 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiBasicTableColumn, EuiCode, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { FailedDocsError } from '../../../../../common/api_types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import type { FailedDocsError } from '../../../../../common/api_types';
+import { ErrorStacktraceLink } from './error_stacktrace_link';
+import { ErrorMessage } from './error_message';
 
 const contentColumnName = i18n.translate(
   'xpack.datasetQuality.details.qualityIssue.failedDocs.erros.contentLabel',
@@ -36,25 +39,24 @@ export const getFailedDocsErrorsColumns = (): Array<EuiBasicTableColumn<FailedDo
     name: contentColumnName,
     field: 'message',
     render: (_, { message }) => {
-      return <EuiCode language="js">{message}</EuiCode>;
+      return <ErrorMessage errorMessage={message} />;
+    },
+    mobileOptions: {
+      width: '100%',
     },
   },
   {
     name: (
       <EuiToolTip content={typeColumnTooltip}>
-        <span>
+        <span tabIndex={0}>
           {`${typeColumnName} `}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
         </span>
       </EuiToolTip>
     ),
     field: 'type',
     render: (_, { type }) => {
-      return (
-        <EuiBadge color="hollow">
-          <strong>{type}</strong>
-        </EuiBadge>
-      );
+      return <ErrorStacktraceLink errorType={type} />;
     },
     sortable: true,
   },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
@@ -23,14 +23,6 @@ export const FlexItem = styled(EuiFlexItem)`
 `;
 
 FlexItem.displayName = 'FlexItem';
-
-export const MetricItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    flex-basis: 0;
-    flex-grow: 0;
-  }
-`;
-MetricItem.displayName = 'MetricItem';
 
 export const StatValue = styled(EuiTitle)`
   overflow: hidden;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleType } from '../../types';
+import type { RuleType } from '../../types';
 import { checkRuleTypeEnabled } from './check_rule_type_enabled';
 
 describe('checkRuleTypeEnabled', () => {
@@ -34,6 +34,8 @@ describe('checkRuleTypeEnabled', () => {
       minimumLicenseRequired: 'basic',
       enabledInLicense: true,
       category: 'my-category',
+      isExportable: true,
+      isInternallyManaged: false,
     };
     expect(checkRuleTypeEnabled(alertType)).toMatchInlineSnapshot(`
           Object {
@@ -59,6 +61,8 @@ describe('checkRuleTypeEnabled', () => {
       minimumLicenseRequired: 'gold',
       enabledInLicense: false,
       category: 'my-category',
+      isExportable: true,
+      isInternallyManaged: false,
     };
     expect(checkRuleTypeEnabled(alertType)).toMatchInlineSnapshot(`
       Object {

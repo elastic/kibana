@@ -11,7 +11,6 @@ import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { UserPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -20,11 +19,6 @@ import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_a
 interface Props {
   contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  eventId: string;
-  fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isDraggable: boolean;
   isButton?: boolean;
   onClick?: () => void;
   value: string | number | undefined | null;
@@ -32,13 +26,8 @@ interface Props {
 }
 
 const UserNameComponent: React.FC<Props> = ({
-  fieldName,
   Component,
   contextId,
-  eventId,
-  fieldType,
-  isAggregatable,
-  isDraggable,
   isButton,
   onClick,
   title,
@@ -72,12 +61,11 @@ const UserNameComponent: React.FC<Props> = ({
             userName,
             contextID: contextId,
             scopeId: timelineID,
-            isDraggable,
           },
         },
       });
     },
-    [contextId, eventContext, isDraggable, isInTimelineContext, onClick, openFlyout, userName]
+    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, userName]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -105,25 +93,7 @@ const UserNameComponent: React.FC<Props> = ({
     ]
   );
 
-  return isString(value) && userName.length > 0 ? (
-    isDraggable ? (
-      <DefaultDraggable
-        field={fieldName}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        isDraggable={isDraggable}
-        tooltipContent={fieldName}
-        value={userName}
-      >
-        {content}
-      </DefaultDraggable>
-    ) : (
-      content
-    )
-  ) : (
-    getEmptyTagValue()
-  );
+  return isString(value) && userName.length > 0 ? content : getEmptyTagValue();
 };
 
 export const UserName = React.memo(UserNameComponent);

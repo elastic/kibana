@@ -20,6 +20,8 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  GLOBAL_SETTINGS_ID,
+  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
@@ -188,6 +190,11 @@ describe('enableSpaceAwareness', () => {
         refresh: 'wait_for',
       }
     );
+
+    // Ensure we are always starting from a non-migrated state
+    await soClient.update(GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, GLOBAL_SETTINGS_ID, {
+      use_space_awareness_migration_status: null,
+    });
   });
   it('should support concurrent calls', async () => {
     const res = await Promise.allSettled([

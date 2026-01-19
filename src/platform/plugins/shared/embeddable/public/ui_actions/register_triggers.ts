@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import {
   contextMenuTrigger,
   multiValueClickTrigger,

@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import { useMemo, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import type {
+  AlertsTableProps,
+  BulkActionsPanelConfig,
+  ItemsPanelConfig,
+} from '@kbn/response-ops-alerts-table/types';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
@@ -60,66 +65,77 @@ function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] 
   ];
 }
 
-export const getBulkActionHook =
-  (tableId: TableId): AlertsTableConfigurationRegistry['useBulkActions'] =>
-  (query, refresh) => {
-    const { from, to } = useGlobalTime();
-    const filters = useMemo(() => {
-      return getFiltersForDSLQuery(query);
-    }, [query]);
-    const assigneeProps = useMemo(() => {
-      return {
-        onAssigneesUpdate: refresh,
-      };
-    }, [refresh]);
+export const useBulkActionsByTableType = (
+  tableId: TableId,
+  query: AlertsTableProps['query'],
+  refresh: () => void
+): [ItemsPanelConfig, ...BulkActionsPanelConfig[]] => {
+  const { from, to } = useGlobalTime();
+  const filters = useMemo(() => {
+    return getFiltersForDSLQuery(query);
+  }, [query]);
+  const assigneeProps = useMemo(() => {
+    return {
+      onAssigneesUpdate: refresh,
+    };
+  }, [refresh]);
 
-    const { alertAssigneesItems, alertAssigneesPanels } = useBulkAlertAssigneesItems(assigneeProps);
+  const { alertAssigneesItems, alertAssigneesPanels } = useBulkAlertAssigneesItems(assigneeProps);
 
-    const timelineActionParams = useMemo(() => {
-      return {
-        localFilters: filters,
-        from,
-        to,
-        scopeId: SourcererScopeName.detections,
-        tableId,
-      };
-    }, [filters, from, to]);
+  const timelineActionParams = useMemo(() => {
+    return {
+      localFilters: filters,
+      from,
+      to,
+      scopeId: PageScope.alerts,
+      tableId,
+    };
+  }, [filters, from, to, tableId]);
 
-    const getGlobalQueriesSelector = useMemo(() => inputsSelectors.globalQuery(), []);
-    const globalQueries = useDeepEqualSelector(getGlobalQueriesSelector);
+  const getGlobalQueriesSelector = useMemo(() => inputsSelectors.globalQuery(), []);
+  const globalQueries = useDeepEqualSelector(getGlobalQueriesSelector);
 
-    const refetch = useCallback(() => {
-      refresh();
-      globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-    }, [globalQueries, refresh]);
+  const refetch = useCallback(() => {
+    refresh();
+    globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  }, [globalQueries, refresh]);
 
-    const alertActionParams = useMemo(() => {
-      return {
-        scopeId: SourcererScopeName.detections,
-        filters,
-        from,
-        to,
-        tableId,
-        refetch,
-      };
-    }, [from, to, filters, refetch]);
+  const alertActionParams = useMemo(() => {
+    return {
+      scopeId: PageScope.alerts,
+      filters,
+      from,
+      to,
+      tableId,
+      refetch,
+    };
+  }, [from, to, filters, refetch, tableId]);
 
-    const bulkAlertTagParams = useMemo(() => {
-      return {
-        refetch: refresh,
-      };
-    }, [refresh]);
+  const bulkAlertTagParams = useMemo(() => {
+    return {
+      refetch: refresh,
+    };
+  }, [refresh]);
 
-    const timelineAction = useAddBulkToTimelineAction(timelineActionParams);
+  const {
+    timelinePrivileges: { read: hasTimelineReadPrivilege },
+  } = useUserPrivileges();
+  const addBulkToTimelineAction = useAddBulkToTimelineAction(timelineActionParams);
 
-    const alertActions = useBulkAlertActionItems(alertActionParams);
+  const timelineActions = useMemo(
+    () => (hasTimelineReadPrivilege ? [addBulkToTimelineAction] : []),
+    [hasTimelineReadPrivilege, addBulkToTimelineAction]
+  );
 
-    const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
+  const { items: alertActions, panels: alertActionsPanels } =
+    useBulkAlertActionItems(alertActionParams);
 
-    const items = useMemo(() => {
-      return [...alertActions, timelineAction, ...alertTagsItems, ...alertAssigneesItems];
-    }, [alertActions, alertTagsItems, timelineAction, alertAssigneesItems]);
-    return useMemo(() => {
-      return [{ id: 0, items }, ...alertTagsPanels, ...alertAssigneesPanels];
-    }, [alertTagsPanels, items, alertAssigneesPanels]);
-  };
+  const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
+
+  const items = useMemo(() => {
+    return [...alertActions, ...timelineActions, ...alertTagsItems, ...alertAssigneesItems];
+  }, [alertActions, alertTagsItems, timelineActions, alertAssigneesItems]);
+  return useMemo(() => {
+    return [{ id: 0, items }, ...alertActionsPanels, ...alertTagsPanels, ...alertAssigneesPanels];
+  }, [alertActionsPanels, alertTagsPanels, items, alertAssigneesPanels]);
+};

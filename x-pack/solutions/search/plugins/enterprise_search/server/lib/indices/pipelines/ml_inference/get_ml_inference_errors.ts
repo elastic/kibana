@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceError } from '../../../../../common/types/pipelines';
+import type { MlInferenceError } from '../../../../../common/types/pipelines';
 
 export interface ErrorAggregationBucket extends AggregationsStringRareTermsBucketKeys {
   max_error_timestamp: {
@@ -38,27 +38,25 @@ export const getMlInferenceErrors = async (
     }
   >({
     index: indexName,
-    body: {
-      aggs: {
-        errors: {
-          terms: {
-            field: '_ingest.inference_errors.message.enum',
-            order: {
-              max_error_timestamp: 'desc',
-            },
-            size: 20,
+    aggs: {
+      errors: {
+        terms: {
+          field: '_ingest.inference_errors.message.enum',
+          order: {
+            max_error_timestamp: 'desc',
           },
-          aggs: {
-            max_error_timestamp: {
-              max: {
-                field: '_ingest.inference_errors.timestamp',
-              },
+          size: 20,
+        },
+        aggs: {
+          max_error_timestamp: {
+            max: {
+              field: '_ingest.inference_errors.timestamp',
             },
           },
         },
       },
-      size: 0,
     },
+    size: 0,
   });
 
   const errorBuckets = searchResult.aggregations?.errors.buckets;

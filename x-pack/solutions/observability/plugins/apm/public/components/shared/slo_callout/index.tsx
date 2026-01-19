@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { sloEditLocatorID } from '@kbn/observability-plugin/common';
+import { sloEditLocatorID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';

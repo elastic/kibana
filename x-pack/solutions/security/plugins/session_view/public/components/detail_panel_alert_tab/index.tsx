@@ -101,7 +101,6 @@ export const DetailPanelAlertTab = ({
     <div css={styles.container}>
       <EuiButtonGroup
         data-test-subj={VIEW_MODE_TOGGLE}
-        css={styles.viewMode}
         legend={i18n.translate('xpack.sessionView.alertDetailsTab.toggleViewMode', {
           defaultMessage: 'Toggle view mode',
         })}

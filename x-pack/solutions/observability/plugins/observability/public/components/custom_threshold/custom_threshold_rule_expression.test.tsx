@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { Query } from '@kbn/data-plugin/common';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act } from 'react-dom/test-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';
-import { AlertParams, CustomThresholdPrefillOptions } from './types';
+import type { AlertParams, CustomThresholdPrefillOptions } from './types';
 
 jest.mock('../../utils/kibana_react');
 jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
@@ -155,7 +155,7 @@ describe('Expression', () => {
         ],
         comparator: COMPARATORS.GREATER_THAN,
         threshold: [100],
-        timeSize: 1,
+        timeSize: 5,
         timeUnit: 'm',
       },
     ]);
@@ -276,7 +276,7 @@ describe('Expression', () => {
   });
 
   it('should show an error message when searchSource throws an error', async () => {
-    const errorMessage = 'Error in searchSource create';
+    const errorMessage = 'Error fetching search sourceCould not locate that data view (id: )';
     const kibanaMock = kibanaStartMock.startContract();
     useKibanaMock.mockReturnValue({
       ...kibanaMock,
@@ -303,7 +303,7 @@ describe('Expression', () => {
     });
     const { wrapper } = await setup();
     expect(wrapper.find(`[data-test-subj="thresholdRuleExpressionError"]`).first().text()).toBe(
-      errorMessage
+      errorMessage + 'Click here to choose a new data view'
     );
   });
 

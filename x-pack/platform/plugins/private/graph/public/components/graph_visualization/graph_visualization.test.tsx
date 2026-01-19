@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { GraphVisualization } from './graph_visualization';
-import { Workspace, WorkspaceEdge, WorkspaceNode } from '../../types';
+import type { Workspace, WorkspaceEdge, WorkspaceNode } from '../../types';
 
 describe('graph_visualization', () => {
   const nodes: WorkspaceNode[] = [
@@ -135,7 +135,7 @@ describe('graph_visualization', () => {
       )
     ).toMatchInlineSnapshot(`
       <svg
-        className="gphGraph"
+        css="unknown styles"
         height="100%"
         id="graphSvg"
         pointerEvents="all"

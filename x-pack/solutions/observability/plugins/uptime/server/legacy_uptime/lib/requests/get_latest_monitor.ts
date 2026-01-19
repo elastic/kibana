@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { UMElasticsearchQueryFn } from '../adapters';
-import { Ping } from '../../../../common/runtime_types';
+import type { UMElasticsearchQueryFn } from '../adapters';
+import type { Ping } from '../../../../common/runtime_types';
 
 export interface GetLatestMonitorParams {
   /** @member dateRangeStart timestamp bounds */
@@ -60,7 +60,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
     },
   };
 
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search(params);
 
   const doc = result.hits?.hits?.[0];
   const docId = (doc?._id as string | undefined) ?? '';

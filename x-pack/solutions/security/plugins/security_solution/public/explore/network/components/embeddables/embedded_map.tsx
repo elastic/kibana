@@ -7,15 +7,17 @@
 
 // embedded map v2
 
-import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { EuiAccordion, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import type { Filter, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
 import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
@@ -29,7 +31,8 @@ import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { State } from '../../../../common/store';
 import type { SourcererDataView } from '../../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
@@ -37,23 +40,19 @@ interface EmbeddableMapProps {
   maintainRatio?: boolean;
 }
 
-const EmbeddableMapRatioHolder = styled.div.attrs(() => ({
-  className: 'siemEmbeddable__map',
-}))<EmbeddableMapProps>`
+const EmbeddableMapRatioHolder = styled.div<EmbeddableMapProps>`
   .mapToolbarOverlay__button {
     display: none;
   }
-
-  ${({ maintainRatio }) =>
+  ${({ maintainRatio, theme: { euiTheme } }) =>
     maintainRatio &&
     css`
       padding-top: calc(3 / 4 * 100%); /* 4:3 (standard) ratio */
       position: relative;
 
-      @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+      @media only screen and (min-width: ${euiTheme.breakpoint.m}) {
         padding-top: calc(9 / 32 * 100%); /* 32:9 (ultra widescreen) ratio */
       }
-
       @media only screen and (min-width: 1441px) and (min-height: 901px) {
         padding-top: calc(9 / 21 * 100%); /* 21:9 (ultrawide) ratio */
       }
@@ -106,6 +105,7 @@ export const EmbeddedMapComponent = ({
   setQuery,
   startDate,
 }: EmbeddedMapProps) => {
+  const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const { storage } = services;
 
@@ -115,9 +115,12 @@ export const EmbeddedMapComponent = ({
 
   const { addError } = useAppToasts();
 
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView: experimentalDataView } = useDataView(PageScope.explore);
+  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
   const selectedPatterns = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.default);
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, PageScope.default);
   });
 
   const isFieldInIndexPattern = useIsFieldInIndexPattern();
@@ -125,7 +128,23 @@ export const EmbeddedMapComponent = ({
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const [availableDataViews, setAvailableDataViews] = useState<SourcererDataView[]>([]);
 
+  const experimentalDataViewLayerList = useMemo(
+    () =>
+      experimentalDataView.id && experimentalDataView.getIndexPattern()
+        ? getLayerList({ euiTheme }, [
+            {
+              id: experimentalDataView.id,
+              title: experimentalDataView.getIndexPattern(),
+            },
+          ])
+        : [],
+    [euiTheme, experimentalDataView]
+  );
+
+  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
   useEffect(() => {
+    if (newDataViewPickerEnabled) return;
+
     let canceled = false;
 
     const fetchData = async () => {
@@ -136,7 +155,7 @@ export const EmbeddedMapComponent = ({
         // ensures only index patterns with maps fields are passed
         const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
         if (!canceled) {
-          setLayerList(getLayerList(goodDataViews));
+          setLayerList(getLayerList({ euiTheme }, goodDataViews));
         }
       } catch (e) {
         if (!canceled) {
@@ -152,9 +171,12 @@ export const EmbeddedMapComponent = ({
     return () => {
       canceled = true;
     };
-  }, [addError, availableDataViews, isFieldInIndexPattern]);
+  }, [addError, availableDataViews, euiTheme, isFieldInIndexPattern, newDataViewPickerEnabled]);
 
+  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
   useEffect(() => {
+    if (newDataViewPickerEnabled) return;
+
     const dataViews = kibanaDataViews.filter((dataView) =>
       selectedPatterns.includes(dataView.title)
     );
@@ -162,7 +184,7 @@ export const EmbeddedMapComponent = ({
       setIsIndexError(true);
     }
     setAvailableDataViews((prevViews) => (isEqual(prevViews, dataViews) ? prevViews : dataViews));
-  }, [kibanaDataViews, selectedPatterns]);
+  }, [kibanaDataViews, selectedPatterns, newDataViewPickerEnabled]);
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
@@ -188,7 +210,7 @@ export const EmbeddedMapComponent = ({
         <MapToolTip />
       </InPortal>
       <EmbeddableMapWrapper>
-        <EmbeddableMapRatioHolder maintainRatio={!isIndexError} />
+        <EmbeddableMapRatioHolder className="siemEmbeddable__map" maintainRatio={!isIndexError} />
         {isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
         ) : (
@@ -198,7 +220,7 @@ export const EmbeddedMapComponent = ({
               getTooltipRenderer={() => (tooltipProps: RenderTooltipContentParams) =>
                 <OutPortal node={portalNode} {...tooltipProps} />}
               mapCenter={{ lon: -1.05469, lat: 15.96133, zoom: 1 }}
-              layerList={layerList}
+              layerList={newDataViewPickerEnabled ? experimentalDataViewLayerList : layerList}
               filters={appliedFilters}
               query={query}
               onApiAvailable={(api: MapApi) => {

@@ -11,9 +11,10 @@ import {
   FILE_SIZE_DISPLAY_FORMAT,
   MAX_FILE_SIZE,
   MAX_FILE_SIZE_BYTES,
-  UI_SETTING_MAX_FILE_SIZE,
   MAX_TIKA_FILE_SIZE_BYTES,
-} from '../../common/constants';
+  UI_SETTING_MAX_FILE_SIZE,
+} from '@kbn/file-upload-common/src/constants';
+
 import { getUiSettings } from '../kibana_services';
 
 export function getMaxBytes() {

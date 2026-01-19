@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { FieldFormatParams, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { useMlKibana } from './kibana_context';
 
 /**
@@ -23,7 +24,7 @@ const defaultParam: Record<string, FieldFormatParams> = {
 };
 
 export const getFieldFormatterProvider =
-  (fieldFormats: FieldFormatsRegistry) =>
+  (fieldFormats: FieldFormatsStart) =>
   (fieldType: FIELD_FORMAT_IDS, params?: FieldFormatParams) => {
     const fieldFormatter = fieldFormats.deserialize({
       id: fieldType,

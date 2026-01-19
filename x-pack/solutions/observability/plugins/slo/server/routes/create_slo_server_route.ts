@@ -5,6 +5,53 @@
  * 2.0.
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { SLORouteHandlerResources } from './types';
+import type { Boom } from '@hapi/boom';
+import { forbidden, notFound, conflict, badRequest } from '@hapi/boom';
+import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
+import type { SLORouteHandlerResources } from './types';
+import {
+  SLOError,
+  SLONotFound,
+  SLOIdConflict,
+  SecurityException,
+  SLOTemplateNotFound,
+} from '../errors';
 
-export const createSloServerRoute = createServerRouteFactory<SLORouteHandlerResources>();
+function handleSLOError(error: SLOError): Boom {
+  if (error instanceof SLONotFound) {
+    return notFound(error.message);
+  }
+
+  if (error instanceof SLOTemplateNotFound) {
+    return notFound(error.message);
+  }
+
+  if (error instanceof SLOIdConflict) {
+    return conflict(error.message);
+  }
+
+  if (error instanceof SecurityException) {
+    return forbidden(error.message);
+  }
+
+  return badRequest(error.message);
+}
+
+const createPlainSloServerRoute = createServerRouteFactory<SLORouteHandlerResources>();
+
+export const createSloServerRoute: CreateServerRouteFactory<
+  SLORouteHandlerResources,
+  undefined
+> = ({ handler, ...config }) => {
+  return createPlainSloServerRoute({
+    ...config,
+    handler: (options) => {
+      return handler(options).catch((error) => {
+        if (error instanceof SLOError) {
+          throw handleSLOError(error);
+        }
+        throw error;
+      });
+    },
+  });
+};

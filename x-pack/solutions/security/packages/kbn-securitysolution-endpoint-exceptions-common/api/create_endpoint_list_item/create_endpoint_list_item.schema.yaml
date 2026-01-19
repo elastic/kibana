@@ -8,8 +8,8 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: CreateEndpointListItem
-      summary: Create an endpoint exception list item
-      description: Create an endpoint exception list item, and associate it with the endpoint exception list.
+      summary: Create an Elastic Endpoint rule exception list item
+      description: Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.
       requestBody:
         description: Exception list item's properties
         required: true

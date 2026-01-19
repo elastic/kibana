@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './agent';
+export type * from './agent';

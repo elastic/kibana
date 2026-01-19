@@ -5,19 +5,32 @@
  * 2.0.
  */
 
-import { createWriteStream } from 'fs';
-import { mkdir } from 'fs/promises';
-import Path from 'path';
+import { type ReadStream, createReadStream } from 'fs';
 import fetch from 'node-fetch';
+import { createWriteStream, getSafePath } from '@kbn/fs';
+import { pipeline } from 'stream/promises';
+import { resolveLocalArtifactsPath } from './local_artifacts';
 
-export const downloadToDisk = async (fileUrl: string, filePath: string) => {
-  const dirPath = Path.dirname(filePath);
-  await mkdir(dirPath, { recursive: true });
-  const res = await fetch(fileUrl);
-  const fileStream = createWriteStream(filePath);
-  await new Promise((resolve, reject) => {
-    res.body.pipe(fileStream);
-    res.body.on('error', reject);
-    fileStream.on('finish', resolve);
-  });
+export const downloadToDisk = async (
+  fileUrl: string,
+  filePathAtVolume: string
+): Promise<string> => {
+  const { fullPath: artifactFullPath } = getSafePath(filePathAtVolume);
+  const writeStream = createWriteStream(filePathAtVolume);
+  let readStream: ReadStream;
+
+  const parsedUrl = new URL(fileUrl);
+
+  if (parsedUrl.protocol === 'file:') {
+    const path = resolveLocalArtifactsPath(parsedUrl);
+    readStream = createReadStream(path);
+  } else {
+    const res = await fetch(fileUrl);
+
+    readStream = res.body as ReadStream;
+  }
+
+  await pipeline(readStream, writeStream);
+
+  return artifactFullPath;
 };

@@ -12,8 +12,9 @@ import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
-import { FlyoutClass as Flyout, FlyoutProps, FlyoutState } from './flyout';
-import { ShallowWrapper } from 'enzyme';
+import type { FlyoutProps, FlyoutState } from './flyout';
+import { FlyoutClass as Flyout } from './flyout';
+import type { ShallowWrapper } from 'enzyme';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const mockFile = {

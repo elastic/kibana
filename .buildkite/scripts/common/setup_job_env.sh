@@ -122,14 +122,14 @@ EOF
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
-  SONAR_LOGIN=$(vault_get sonarqube token)
-  export SONAR_LOGIN
+  # unset APM creds to ensure APM data gets sent to preconfigured APM cluster (kibana-cloud-apm)
+  if ! is_pr_with_label "ci:collect-apm"; then
+    ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
+    export ELASTIC_APM_SERVER_URL
 
-  ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
-  export ELASTIC_APM_SERVER_URL
-
-  ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
-  export ELASTIC_APM_API_KEY
+    ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
+    export ELASTIC_APM_API_KEY
+  fi
 }
 
 # Set up GenAI keys
@@ -137,6 +137,14 @@ EOF
   if [[ "${FTR_GEN_AI:-}" =~ ^(1|true)$ ]]; then
     echo "FTR_GEN_AI was set - exposing LLM connectors"
     export KIBANA_TESTING_AI_CONNECTORS="$(vault_get ai-infra-ci-connectors connectors-config)"
+  fi
+}
+
+# Set up Security GenAI keys
+{
+  if [[ "${FTR_SECURITY_GEN_AI:-}" =~ ^(1|true)$ ]]; then
+    echo "FTR_SECURITY_GEN_AI was set - exposing LLM connectors"
+    export KIBANA_SECURITY_GEN_AI_CONFIG="$(vault_get security-gen-ai config)"
   fi
 }
 
@@ -178,23 +186,26 @@ EOF
   export SCOUT_REPORTER_ES_API_KEY
 }
 
-# Setup Bazel Remote/Local Cache Credentials
-{
-  BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
-  export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
-  vault_get kibana-ci-bazel-remote-cache-local-dev service_account_json > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
-
-  BAZEL_REMOTE_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-gcs.json"
-  export BAZEL_REMOTE_CACHE_CREDENTIALS_FILE
-  vault_get kibana-ci-bazel-remote-cache-sa-key key | base64 -d > "$BAZEL_REMOTE_CACHE_CREDENTIALS_FILE"
-}
-
 # Setup GCS Service Account Proxy for CI
 {
   KIBANA_SERVICE_ACCOUNT_PROXY_KEY="$(mktemp -d)/kibana-gcloud-service-account.json"
   export KIBANA_SERVICE_ACCOUNT_PROXY_KEY
   vault_get kibana-ci-sa-proxy-key key | base64 -d > "$KIBANA_SERVICE_ACCOUNT_PROXY_KEY"
 }
+
+# Acquire credentials for legacy vault if needed
+{
+  VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
+  export VAULT_ROLE_ID
+  VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
+  export VAULT_SECRET_ID
+}
+
+# Inject moon remote-cache credentials on CI
+if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
+  MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
+  export MOON_REMOTE_CACHE_TOKEN
+fi
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

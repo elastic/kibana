@@ -9,11 +9,75 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { css } from '@emotion/react';
+
 import { getLastValue, isEmptyValue } from '../../../../common/last_value_utils';
 import { getValueOrEmpty } from '../../../../common/empty_label';
 import { RenderCounter } from '../../components/render_counter';
 
-import './_top_n.scss';
+import { getVisVariables } from './_variables';
+
+const topNContainerStyle = ({ euiTheme }) => css`
+  position: relative;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+
+  tr:hover td {
+    background-color: ${getVisVariables({ euiTheme }).tvbHoverBackgroundColor};
+  }
+`;
+
+const topNValueStyle = ({ euiTheme }) => css`
+  text-align: right;
+  white-space: nowrap;
+  line-height: 0;
+  vertical-align: middle;
+  color: ${getVisVariables({ euiTheme }).tvbValueColor};
+  padding: ${euiTheme.size.xs};
+  padding-bottom: 0;
+`;
+
+const topNLabelStyle = ({ euiTheme }) => css`
+  color: ${getVisVariables({ euiTheme }).tvbTextColor};
+  padding: ${euiTheme.size.xs} 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const topNBarStyle = ({ euiTheme }) => css`
+  padding: ${euiTheme.size.xs} ${euiTheme.size.m};
+  vertical-align: middle;
+`;
+
+const topNInnerBarStyle = ({ euiTheme }) => css`
+  position: relative;
+
+  > div {
+    width: 100%;
+    min-height: ${euiTheme.size.base};
+  }
+`;
+
+const topNReversedStyles = ({ euiTheme }) => {
+  const { tvbHoverBackgroundColorReversed, tvbTextColorReversed, tvbValueColorReversed } =
+    getVisVariables({ euiTheme });
+
+  return css`
+    tr:hover td {
+      background-color: ${tvbHoverBackgroundColorReversed};
+    }
+
+    .tvbVisTopN__label {
+      color: ${tvbTextColorReversed};
+    }
+
+    .tvbVisTopN__value {
+      color: ${tvbValueColorReversed};
+    }
+  `;
+};
 
 const RENDER_MODES = {
   POSITIVE: 'positive',
@@ -119,13 +183,15 @@ export class TopN extends Component {
           <td
             title={item.label}
             className="tvbVisTopN__label"
+            css={topNLabelStyle}
             style={{ maxWidth: `${this.state.labelMaxWidth}px` }}
           >
             {getValueOrEmpty(label)}
           </td>
-          <td width="100%" className="tvbVisTopN__bar">
+          <td width="100%" className="tvbVisTopN__bar" css={topNBarStyle}>
             <div
               className="tvbVisTopN__innerBar"
+              css={topNInnerBarStyle}
               style={TopN.calcInnerBarStyles(renderMode, isPositiveValue)}
             >
               <div
@@ -134,7 +200,7 @@ export class TopN extends Component {
               />
             </div>
           </td>
-          <td className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">
+          <td className="tvbVisTopN__value" css={topNValueStyle} data-test-subj="tsvbTopNValue">
             {/* eslint-disable-next-line react/no-danger */}
             <span dangerouslySetInnerHTML={{ __html: formatter(lastValue) }} />
           </td>
@@ -166,7 +232,10 @@ export class TopN extends Component {
 
     return (
       <RenderCounter initialRender={this.props.initialRender}>
-        <div className={className}>
+        <div
+          className={className}
+          css={[topNContainerStyle, this.props.reversed && topNReversedStyles]}
+        >
           <table className="tvbVisTopN__table" data-test-subj="tvbVisTopNTable" ref={this.tableRef}>
             <tbody>{rows}</tbody>
           </table>

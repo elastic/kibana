@@ -18,6 +18,7 @@ import {
 } from 'rxjs';
 import { map, distinctUntilChanged, shareReplay, takeUntil, debounceTime } from 'rxjs';
 import { isDeepStrictEqual } from 'util';
+import { isNil, omitBy } from 'lodash';
 
 import type { RootSchema } from '@elastic/ebt/client';
 import type { Logger, LogMeta } from '@kbn/logging';
@@ -29,6 +30,7 @@ import type {
   InternalHttpServiceSetup,
   InternalHttpServicePreboot,
 } from '@kbn/core-http-server-internal';
+import type { InternalRateLimiterSetup } from '@kbn/core-http-rate-limiter-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
@@ -63,6 +65,7 @@ export interface StatusServiceSetupDeps {
   environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
   http: InternalHttpServiceSetup;
+  httpRateLimiter: Pick<InternalRateLimiterSetup, 'status$'>;
   metrics: InternalMetricsServiceSetup;
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
   coreUsageData: Pick<InternalCoreUsageDataSetup, 'incrementUsageCounter'>;
@@ -94,13 +97,18 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     elasticsearch,
     pluginDependencies,
     http,
+    httpRateLimiter,
     metrics,
     savedObjects,
     environment,
     coreUsageData,
   }: StatusServiceSetupDeps) {
     const statusConfig = await firstValueFrom(this.config$);
-    const core$ = (this.core$ = this.setupCoreStatus({ elasticsearch, savedObjects }));
+    const core$ = (this.core$ = this.setupCoreStatus({
+      elasticsearch,
+      httpRateLimiter,
+      savedObjects,
+    }));
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
     this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
@@ -198,13 +206,28 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
   private setupCoreStatus({
     elasticsearch,
+    httpRateLimiter,
     savedObjects,
-  }: Pick<StatusServiceSetupDeps, 'elasticsearch' | 'savedObjects'>): Observable<CoreStatus> {
-    return combineLatest([elasticsearch.status$, savedObjects.status$]).pipe(
-      map(([elasticsearchStatus, savedObjectsStatus]) => ({
-        elasticsearch: elasticsearchStatus,
-        savedObjects: savedObjectsStatus,
-      })),
+  }: Pick<
+    StatusServiceSetupDeps,
+    'elasticsearch' | 'httpRateLimiter' | 'savedObjects'
+  >): Observable<CoreStatus> {
+    return combineLatest([
+      elasticsearch.status$,
+      httpRateLimiter.status$,
+      savedObjects.status$,
+    ]).pipe(
+      map(
+        ([elasticsearchStatus, httpRateLimiterStatus, savedObjectsStatus]) =>
+          omitBy(
+            {
+              elasticsearch: elasticsearchStatus,
+              http: httpRateLimiterStatus,
+              savedObjects: savedObjectsStatus,
+            } as CoreStatus,
+            isNil
+          ) as CoreStatus
+      ),
       distinctUntilChanged<CoreStatus>(isDeepStrictEqual),
       shareReplay(1)
     );

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
@@ -21,7 +22,8 @@ import {
 import { useKibana } from '../../../../../../shared_imports';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, from, to } from './shared';
+import type { FieldsConfig } from './shared';
+import { from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { PropertiesField } from './common_fields/properties_field';
 import type { GeoipDatabase } from '../../../../../../../common/types';

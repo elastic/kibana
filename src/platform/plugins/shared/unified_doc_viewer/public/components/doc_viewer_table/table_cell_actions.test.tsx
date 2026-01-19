@@ -13,7 +13,22 @@ import { FieldRow } from './field_row';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { copyToClipboard } from '@elastic/eui';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  copyToClipboard: jest.fn(),
+}));
+const mockCopyToClipboard = jest.mocked(copyToClipboard);
+
+const toastsMock = notificationServiceMock.createSetupContract().toasts;
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('TableActions', () => {
   const getRows = (fieldName = 'message', fieldValue: unknown = 'test'): FieldRow[] => [
@@ -83,24 +98,87 @@ describe('TableActions', () => {
   describe('getFieldValueCellActions', () => {
     it('should render correctly for undefined functions', () => {
       expect(
-        getFieldValueCellActions({ rows: getRows(), isEsqlMode: false, onFilter: undefined }).map(
-          (item) => item(EuiCellParams)
-        )
+        getFieldValueCellActions({
+          rows: getRows(),
+          isEsqlMode: false,
+          onFilter: undefined,
+          toasts: toastsMock,
+        }).map((item) => item(EuiCellParams))
       ).toMatchSnapshot();
     });
 
     it('should render the panels correctly for defined onFilter function', () => {
       expect(
-        getFieldValueCellActions({ rows: getRows(), isEsqlMode: false, onFilter: jest.fn() }).map(
-          (item) => item(EuiCellParams)
-        )
+        getFieldValueCellActions({
+          rows: getRows(),
+          isEsqlMode: false,
+          onFilter: jest.fn(),
+          toasts: toastsMock,
+        }).map((item) => item(EuiCellParams))
       ).toMatchSnapshot();
+    });
+
+    describe('when clicking "Copy value"', () => {
+      beforeEach(() => {
+        const actions = getFieldValueCellActions({
+          rows: getRows(),
+          toasts: toastsMock,
+          isEsqlMode: false,
+          onFilter: undefined,
+        }).map((Action, i) => (
+          <Action
+            key={i}
+            {...EuiCellParams}
+            Component={(props: any) => <div {...props}>{props.children}</div>}
+          />
+        ));
+
+        render(<>{actions}</>);
+      });
+
+      it('should call the copy function', async () => {
+        // When
+        const user = userEvent.setup();
+        await user.click(screen.getByText('Copy value'));
+
+        // Then
+        expect(mockCopyToClipboard).toHaveBeenCalledWith(EuiCellParams.columnId);
+      });
+
+      describe('when the copy fails', () => {
+        it('should show a warning toast', async () => {
+          // Given
+          mockCopyToClipboard.mockReturnValue(false);
+          const user = userEvent.setup();
+
+          // When
+          await user.click(screen.getByText('Copy value'));
+
+          // Then
+          expect(toastsMock.addWarning).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe('when the copy succeeds', () => {
+        it('should show an info toast', async () => {
+          // Given
+          mockCopyToClipboard.mockReturnValue(true);
+          const user = userEvent.setup();
+
+          // When
+          await user.click(screen.getByText('Copy value'));
+
+          // Then
+          expect(toastsMock.addInfo).toHaveBeenCalledTimes(1);
+        });
+      });
     });
 
     it('should allow filtering in ES|QL mode', () => {
       const actions = getFieldValueCellActions({
         rows: getRows('extension'),
         isEsqlMode: true,
+        toasts: toastsMock,
         onFilter: jest.fn(),
       }).map((Action, i) => (
         <Action
@@ -128,6 +206,7 @@ describe('TableActions', () => {
       const actions = getFieldValueCellActions({
         rows: getRows('extension', ['foo', 'bar']),
         isEsqlMode: true,
+        toasts: toastsMock,
         onFilter: jest.fn(),
       }).map((Action, i) => (
         <Action

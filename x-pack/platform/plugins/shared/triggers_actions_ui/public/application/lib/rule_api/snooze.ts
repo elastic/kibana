@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
-import { KueryNode } from '@kbn/es-query';
-import { SnoozeSchedule, BulkEditResponse } from '../../../types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { KueryNode } from '@kbn/es-query';
+import type { SnoozeSchedule, BulkEditResponse } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 function rewriteSnoozeSchedule({ id, duration, rRule }: SnoozeSchedule) {

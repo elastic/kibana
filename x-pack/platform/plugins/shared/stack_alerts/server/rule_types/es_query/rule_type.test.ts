@@ -7,18 +7,20 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from '@kbn/utility-types';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getRuleType } from './rule_type';
-import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
-import { ActionContext } from './action_context';
+import type { EsQueryRuleState } from './rule_type_params';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { ActionContext } from './action_context';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
-import {
+import { ActionGroupId, ConditionMetAlertInstanceId } from '../../../common/es_query';
+import type {
   OnlyEsqlQueryRuleParams,
   OnlyEsQueryRuleParams,
   OnlySearchSourceRuleParams,
@@ -85,6 +87,10 @@ describe('ruleType', () => {
              the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.",
             "name": "link",
             "usesPublicBaseUrl": true,
+          },
+          Object {
+            "description": "The object containing groups that are reporting data",
+            "name": "grouping",
           },
         ],
         "params": Array [
@@ -865,8 +871,8 @@ describe('ruleType', () => {
 
 function generateResults(
   docs: Array<{ 'time-field': unknown; [key: string]: unknown }>,
-  includeTieBreaker: boolean = false,
-  skipSortOnFirst: boolean = false
+  includeTieBreaker = false,
+  skipSortOnFirst = false
 ): ESSearchResponse<unknown, ESSearchRequest> {
   const hits = docs.map((doc, index) => ({
     _index: 'foo',

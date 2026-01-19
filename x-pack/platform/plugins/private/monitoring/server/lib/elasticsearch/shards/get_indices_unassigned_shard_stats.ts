@@ -9,8 +9,8 @@ import { get } from 'lodash';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
 import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
-import { LegacyRequest } from '../../../types';
-import { ElasticsearchModifiedSource } from '../../../../common/types/es';
+import type { LegacyRequest } from '../../../types';
+import type { ElasticsearchModifiedSource } from '../../../../common/types/es';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
@@ -45,35 +45,33 @@ async function getUnassignedShardData(req: LegacyRequest, cluster: Elasticsearch
     index: indexPattern,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        type,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
-        metric,
-        filters,
-      }),
-      aggs: {
-        indices: {
-          terms: {
-            field: 'shard.index',
-            size: maxBucketSize,
-          },
-          aggs: {
-            state: {
-              filter: {
-                terms: {
-                  'shard.state': ['UNASSIGNED', 'INITIALIZING'],
-                },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
+      metric,
+      filters,
+    }),
+    aggs: {
+      indices: {
+        terms: {
+          field: 'shard.index',
+          size: maxBucketSize,
+        },
+        aggs: {
+          state: {
+            filter: {
+              terms: {
+                'shard.state': ['UNASSIGNED', 'INITIALIZING'],
               },
-              aggs: {
-                primary: {
-                  terms: {
-                    field: 'shard.primary',
-                    size: 2,
-                  },
+            },
+            aggs: {
+              primary: {
+                terms: {
+                  field: 'shard.primary',
+                  size: 2,
                 },
               },
             },

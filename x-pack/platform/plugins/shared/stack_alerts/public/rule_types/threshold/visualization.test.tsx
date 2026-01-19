@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ThresholdVisualization } from './visualization';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';

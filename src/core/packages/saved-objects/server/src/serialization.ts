@@ -8,7 +8,8 @@
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import type { SavedObjectReference } from '..';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectReference, SavedObjectsRawDocSource } from '..';
 
 /**
  * A serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or
@@ -75,28 +76,6 @@ export interface SavedObjectsRawDoc {
 }
 
 /**
- * Saved object document as stored in `_source` of doc in ES index
- * Similar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]
- *
- * @public
- */
-export interface SavedObjectsRawDocSource {
-  type: string;
-  namespace?: string;
-  namespaces?: string[];
-  migrationVersion?: SavedObjectsMigrationVersion;
-  typeMigrationVersion?: string;
-  updated_at?: string;
-  created_at?: string;
-  created_by?: string;
-  references?: SavedObjectReference[];
-  originId?: string;
-  managed?: boolean;
-
-  [typeMapping: string]: any;
-}
-
-/**
  * Saved Object base document
  *
  * @public
@@ -117,6 +96,7 @@ export interface SavedObjectDoc<T = unknown> {
   created_by?: string;
   originId?: string;
   managed?: boolean;
+  accessControl?: SavedObjectAccessControl;
 }
 
 /**

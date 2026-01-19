@@ -7,7 +7,7 @@
 
 import { cloneDeep, get, isEmpty, isNull, isUndefined, merge, omit } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { RuleAlertData } from '../../types';
+import type { RuleAlertData } from '../../types';
 import { REFRESH_FIELDS_ALL } from './alert_conflict_resolver';
 
 const expandDottedField = (dottedFieldName: string, val: unknown): object => {
@@ -95,4 +95,17 @@ export const replaceRefreshableAlertFields = <AlertData extends RuleAlertData>(
     },
     {}
   );
+};
+
+export const replaceEmptyAlertFields = (
+  alert: Record<string, unknown>,
+  payload: RuleAlertData = {}
+) => {
+  Object.keys(alert).forEach((key: string) => {
+    const value = get(payload, key, null);
+    if (isNull(value) && Array.isArray(alert[key])) {
+      payload[key] = [];
+    }
+  });
+  return payload;
 };

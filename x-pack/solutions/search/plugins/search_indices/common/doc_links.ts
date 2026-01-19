@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 
 class SearchIndicesDocLinks {
   public apiReference: string = '';
+  public searchAPIReference: string = '';
   public setupSemanticSearch: string = '';
   public analyzeLogs: string = '';
+  public elasticInferenceService: string = '';
+  public elasticInferenceServicePricing: string = '';
 
   constructor() {}
 
@@ -18,6 +21,9 @@ class SearchIndicesDocLinks {
     this.apiReference = newDocLinks.apiReference;
     this.setupSemanticSearch = newDocLinks.enterpriseSearch.semanticSearch;
     this.analyzeLogs = newDocLinks.serverlessSearch.integrations;
+    this.searchAPIReference = newDocLinks.query.queryDsl;
+    this.elasticInferenceService = newDocLinks.elasticsearch.elasticInferenceService;
+    this.elasticInferenceServicePricing = newDocLinks.elasticsearch.elasticInferenceServicePricing;
   }
 }
 export const docLinks = new SearchIndicesDocLinks();

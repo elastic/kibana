@@ -6,13 +6,16 @@
  */
 
 import React, { useState, lazy, useEffect, useCallback } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
-import { Section, routeToRules, routeToLogs } from './constants';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import type { Section } from './constants';
+import { routeToRules, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 
@@ -20,7 +23,6 @@ import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
-import { useLoadRuleTypesQuery } from './hooks/use_load_rule_types_query';
 
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
 const LogsList = lazy(
@@ -38,8 +40,17 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   history,
 }) => {
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
-  const { chrome, setBreadcrumbs } = useKibana().services;
-  const { authorizedToReadAnyRules } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
+  const {
+    chrome,
+    setBreadcrumbs,
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
+    http,
+    toasts,
+    filteredRuleTypes: [],
+  });
 
   const tabs: Array<{
     id: Section;
@@ -72,7 +83,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       'xl'
     )({
       showCreateRuleButtonInPrompt: true,
-      useNewRuleForm: true,
       setHeaderActions,
     });
   }, []);
@@ -123,12 +133,14 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       />
       <EuiSpacer size="l" />
       <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <Routes>
-            <Route exact path={routeToLogs} component={renderLogsList} />
-            <Route exact path={routeToRules} component={renderRulesList} />
-          </Routes>
-        </HealthCheck>
+        <PerformanceContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <Routes>
+              <Route exact path={routeToLogs} component={renderLogsList} />
+              <Route exact path={routeToRules} component={renderRulesList} />
+            </Routes>
+          </HealthCheck>
+        </PerformanceContextProvider>
       </HealthContextProvider>
     </>
   );

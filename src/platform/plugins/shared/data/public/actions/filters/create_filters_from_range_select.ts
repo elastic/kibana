@@ -9,12 +9,13 @@
 
 import { last } from 'lodash';
 import moment from 'moment';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { type AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { buildRangeFilter, DataViewFieldBase, RangeFilterParams } from '@kbn/es-query';
+import type { DataViewFieldBase, RangeFilterParams } from '@kbn/es-query';
+import { buildRangeFilter } from '@kbn/es-query';
 import { getIndexPatterns, getSearchService } from '../../services';
-import { AggConfigSerialized } from '../../../common/search/aggs';
+import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
 export interface RangeSelectDataContext {
@@ -28,9 +29,9 @@ export interface RangeSelectDataContext {
 const getParameters = async (event: RangeSelectDataContext) => {
   const column: Record<string, any> = event.table.columns[event.column];
   // Handling of the ES|QL datatable
-  if (isOfAggregateQueryType(event.query)) {
+  if (isOfAggregateQueryType(event.query) || event.table.meta?.type === 'es_ql') {
     const field = new DataViewField({
-      name: column.name,
+      name: column.meta?.sourceParams?.sourceField || column.name,
       type: column.meta?.type ?? 'unknown',
       esTypes: column.meta?.esType ? ([column.meta.esType] as string[]) : undefined,
       searchable: true,
@@ -43,7 +44,9 @@ const getParameters = async (event: RangeSelectDataContext) => {
     };
   }
   if (column.meta && 'sourceParams' in column.meta) {
-    const { indexPatternId, ...aggConfigs } = column.meta.sourceParams;
+    const { sourceField, ...aggConfigs } = column.meta.sourceParams;
+    const indexPatternId =
+      column.meta.sourceParams.indexPatternId || column.meta.sourceParams.indexPattern;
     const indexPattern = await getIndexPatterns().get(indexPatternId);
     const aggConfigsInstance = getSearchService().aggs.createAggConfigs(indexPattern, [
       aggConfigs as AggConfigSerialized,

@@ -9,11 +9,12 @@ import type {
   AggregationsExtendedStatsAggregation,
   AggregationsPercentilesAggregation,
   AggregationsTermsAggregation,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TileMetaFeature } from '../../../common/descriptor_types';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { TileMetaFeature } from '../../../common/descriptor_types';
 import { FIELD_ORIGIN } from '../../../common/constants';
-import { IVectorSource } from '../sources/vector_source';
-import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
+import type { IVectorSource } from '../sources/vector_source';
+import type { ITooltipProperty } from '../tooltips/tooltip_property';
+import { TooltipProperty } from '../tooltips/tooltip_property';
 
 export interface IField {
   getName(): string;

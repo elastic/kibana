@@ -6,8 +6,12 @@
  */
 
 import moment from 'moment';
-import type { AnalyticsServiceSetup, AuditLogger } from '@kbn/core/server';
-import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  type Logger,
+  type AnalyticsServiceSetup,
+  type AuditLogger,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -29,10 +33,14 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT } from '../../../../telemetry/event_based/events';
 import { entityStoreTaskDebugLogFactory, entityStoreTaskLogFactory } from '../utils';
 import type { AppClientFactory } from '../../../../../client';
+import { PrivilegeMonitoringDataClient } from '../../../privilege_monitoring/engine/data_client';
+import { createPrivmonIndexService } from '../../../privilege_monitoring/engine/elasticsearch/indices';
+import { checkandInitPrivilegeMonitoringResourcesNoContext } from '../../../privilege_monitoring/check_and_init_privmon_resources';
 
 const getTaskName = (): string => TYPE;
 
-const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION}`;
+export const getDataViewRefreshTaskId = (namespace: string): string =>
+  `${TYPE}:${namespace}:${VERSION}`;
 
 export const registerEntityStoreDataViewRefreshTask = ({
   getStartServices,
@@ -44,6 +52,7 @@ export const registerEntityStoreDataViewRefreshTask = ({
   entityStoreConfig,
   experimentalFeatures,
   kibanaVersion,
+  isServerless,
 }: {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
@@ -54,6 +63,7 @@ export const registerEntityStoreDataViewRefreshTask = ({
   entityStoreConfig: EntityStoreConfig;
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
+  isServerless: boolean;
 }): void => {
   if (!taskManager) {
     logger.info(
@@ -89,7 +99,9 @@ export const registerEntityStoreDataViewRefreshTask = ({
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, internalUserClient);
 
-    const appClient = appClientFactory.create(await apiKeyManager.getRequestFromApiKey(apiKey));
+    const request = await apiKeyManager.getRequestFromApiKey(apiKey);
+
+    const appClient = appClientFactory.create(request);
 
     const entityStoreClient: EntityStoreDataClient = new EntityStoreDataClient({
       namespace,
@@ -104,9 +116,35 @@ export const registerEntityStoreDataViewRefreshTask = ({
       kibanaVersion,
       dataViewsService,
       config: entityStoreConfig,
+      security,
+      request,
+      uiSettingsClient: core.uiSettings.asScopedToClient(soClient),
+      isServerless,
     });
 
-    await entityStoreClient.applyDataViewIndices();
+    // as we have added the privmon index to the list of indices
+    // for existing customers, this index may not exist so we need to create it
+    const privmonDataClient = new PrivilegeMonitoringDataClient({
+      logger,
+      clusterClient,
+      namespace,
+      savedObjects: core.savedObjects,
+      taskManager: taskManagerStart,
+      auditLogger,
+      kibanaVersion,
+      telemetry,
+      experimentalFeatures,
+    });
+    const privmonIndexService = createPrivmonIndexService(privmonDataClient);
+    await checkandInitPrivilegeMonitoringResourcesNoContext(privmonIndexService, logger);
+
+    const { errors } = await entityStoreClient.applyDataViewIndices();
+
+    if (errors.length > 0) {
+      logger.error(
+        `Errors applying data view changes to the entity store. Errors: \n${errors.join('\n\n')}`
+      );
+    }
   };
 
   taskManager.registerTaskDefinitions({
@@ -133,7 +171,7 @@ export const startEntityStoreDataViewRefreshTask = async ({
   namespace: string;
   taskManager: TaskManagerStartContract;
 }) => {
-  const taskId = getTaskId(namespace);
+  const taskId = getDataViewRefreshTaskId(namespace);
   const log = entityStoreTaskLogFactory(logger, taskId);
 
   log('attempting to schedule');
@@ -164,7 +202,7 @@ export const removeEntityStoreDataViewRefreshTask = async ({
   taskManager: TaskManagerStartContract;
 }) => {
   try {
-    await taskManager.remove(getTaskId(namespace));
+    await taskManager.remove(getDataViewRefreshTaskId(namespace));
     logger.info(
       `[Entity Store] Removed entity store data view refresh task for namespace ${namespace}`
     );
@@ -209,7 +247,7 @@ export const runEntityStoreDataViewRefreshTask = async ({
       runs: state.runs + 1,
     };
 
-    if (taskId !== getTaskId(state.namespace)) {
+    if (taskId !== getDataViewRefreshTaskId(state.namespace)) {
       log('outdated task; exiting');
       return { state: updatedState };
     }
@@ -279,7 +317,7 @@ export const getEntityStoreDataViewRefreshTaskState = async ({
   namespace: string;
   taskManager: TaskManagerStartContract;
 }) => {
-  const taskId = getTaskId(namespace);
+  const taskId = getDataViewRefreshTaskId(namespace);
   try {
     const taskState = await taskManager.get(taskId);
 

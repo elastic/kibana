@@ -14,8 +14,10 @@ import { ACTION_REMOVE_PANEL } from './remove_panel_action/constants';
 import {
   ACTION_CUSTOMIZE_PANEL,
   CUSTOM_TIME_RANGE_BADGE,
+  CPS_USAGE_OVERRIDES_BADGE,
 } from './customize_panel_action/constants';
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER } from './triggers';
+import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
 
 export const registerActions = () => {
   uiActions.registerActionAsync(ACTION_REMOVE_PANEL, async () => {
@@ -29,6 +31,12 @@ export const registerActions = () => {
     return new CustomTimeRangeBadge();
   });
   uiActions.attachAction(PANEL_BADGE_TRIGGER, CUSTOM_TIME_RANGE_BADGE);
+
+  uiActions.registerActionAsync(CPS_USAGE_OVERRIDES_BADGE, async () => {
+    const { CpsUsageOverridesBadge } = await import('../panel_component/panel_module');
+    return new CpsUsageOverridesBadge();
+  });
+  uiActions.attachAction(PANEL_BADGE_TRIGGER, CPS_USAGE_OVERRIDES_BADGE);
 
   uiActions.registerActionAsync(ACTION_INSPECT_PANEL, async () => {
     const { InspectPanelAction } = await import('../panel_component/panel_module');
@@ -47,4 +55,10 @@ export const registerActions = () => {
     return new CustomizePanelAction();
   });
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CUSTOMIZE_PANEL);
+
+  uiActions.registerActionAsync(ACTION_SHOW_CONFIG_PANEL, async () => {
+    const { ShowConfigPanelAction } = await import('../panel_component/panel_module');
+    return new ShowConfigPanelAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_SHOW_CONFIG_PANEL);
 };

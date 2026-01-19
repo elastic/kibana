@@ -4,60 +4,116 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import type { DefendInsightsResponse, DefendInsightType } from '@kbn/elastic-assistant-common';
+import type { Moment } from 'moment';
+import moment from 'moment';
+import { useQuery } from '@kbn/react-query';
 import {
   API_VERSIONS,
   DEFEND_INSIGHTS,
-  type DefendInsightsResponse,
   DefendInsightStatusEnum,
 } from '@kbn/elastic-assistant-common';
-import { useEffect, useRef } from 'react';
+
 import { WORKFLOW_INSIGHTS } from '../../translations';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 
 interface UseFetchOngoingScansConfig {
   isPolling: boolean;
   endpointId: string;
-  onSuccess: () => void;
+  insightTypes: DefendInsightType[];
+  onSuccess: (expectedCount: number, timestamp: Moment | null) => void;
+  onInsightGenerationFailure: () => void;
 }
 
-export const useFetchOngoingScans = ({
+export const useFetchLatestScan = ({
   isPolling,
   endpointId,
+  insightTypes,
   onSuccess,
+  onInsightGenerationFailure,
 }: UseFetchOngoingScansConfig) => {
   const { http } = useKibana().services;
   const toasts = useToasts();
 
-  // Ref to track if polling was active in the previous render
-  const wasPolling = useRef(isPolling);
-
-  useEffect(() => {
-    // If polling was active and isPolling is false, it means the condition has been met and we can run onSuccess logic (i.e. refetch insights)
-    if (wasPolling.current && !isPolling) {
-      onSuccess();
-    }
-    wasPolling.current = isPolling;
-  }, [isPolling, onSuccess]);
-
-  return useQuery<DefendInsightsResponse[], { body?: { error: string } }, DefendInsightsResponse[]>(
-    [`fetchOngoingTasks-${endpointId}`],
-    async () => {
+  return useQuery<{ hasRunning: boolean }, { body?: { error: string } }, { hasRunning: boolean }>(
+    [`fetchOngoingTasks-${endpointId}`, insightTypes.length],
+    async ({ signal }) => {
       try {
         const response = await http.get<{ data: DefendInsightsResponse[] }>(DEFEND_INSIGHTS, {
           version: API_VERSIONS.internal.v1,
           query: {
-            status: DefendInsightStatusEnum.running,
             endpoint_ids: [endpointId],
+            size: insightTypes.length,
           },
+          signal,
         });
-        return response.data;
+        const timestampStr = response.data[response.data.length - 1]?.timestamp;
+        const timestamp = timestampStr ? moment(timestampStr) : null;
+
+        // we only want latest for each type
+        const insightsMap = response.data.reduce((acc, curr) => {
+          if (!acc[curr.insightType]) {
+            acc[curr.insightType] = curr;
+          }
+
+          return acc;
+        }, {} as Record<DefendInsightType, DefendInsightsResponse>);
+        const insights = Object.values(insightsMap);
+
+        const processQueryResults = (insightResults: DefendInsightsResponse[]) => {
+          if (!insightResults.length) {
+            // no previous scan record - treat as 0 expected insights
+            onSuccess(0, null);
+            return { hasRunning: false };
+          }
+
+          const expectedCount = insightResults.reduce(
+            (total, defendInsight) =>
+              total +
+              defendInsight.insights.reduce((acc, insight) => {
+                if (!insight.events) return acc;
+                return acc + insight.events.length;
+              }, 0),
+            0
+          );
+
+          const hasRunningInsight = insightResults.some(
+            (insight) => insight.status === DefendInsightStatusEnum.running
+          );
+
+          const hasFailedInsight = insightResults.some(
+            (insight) => insight.status === DefendInsightStatusEnum.failed
+          );
+
+          if (hasFailedInsight) {
+            const failureReasons = insightResults
+              .filter((insight) => insight.status === DefendInsightStatusEnum.failed)
+              .map((insight) => insight.failureReason)
+              .filter(Boolean);
+
+            toasts.addDanger({
+              title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
+              text: failureReasons.join('; '),
+            });
+            onInsightGenerationFailure();
+          }
+
+          if (!hasRunningInsight) {
+            onSuccess(expectedCount, timestamp);
+          }
+
+          return { hasRunning: hasRunningInsight };
+        };
+
+        return processQueryResults(insights);
       } catch (error) {
-        toasts.addDanger({
-          title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
-          text: error?.body?.error,
-        });
-        return [];
+        if (error.name !== 'AbortError') {
+          toasts.addDanger({
+            title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
+            text: error?.body?.error,
+          });
+        }
+        return { hasRunning: false };
       }
     },
     {

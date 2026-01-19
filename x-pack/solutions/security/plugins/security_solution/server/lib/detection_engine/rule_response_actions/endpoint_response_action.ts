@@ -6,6 +6,7 @@
  */
 
 import { each } from 'lodash';
+import { EndpointError } from '../../../../common/endpoint/errors';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type {
   RuleResponseEndpointAction,
@@ -30,16 +31,25 @@ export const endpointResponseAction = async (
   );
   const ruleId = alerts[0].kibana.alert?.rule.uuid;
   const ruleName = alerts[0].kibana.alert?.rule.name;
-  const logMsgPrefix = `Rule [${ruleName}][${ruleId}]:`;
-  const { comment, command } = responseAction.params;
   const errors: string[] = [];
+  const spaceId = (alerts[0].kibana.space_ids ?? [])[0];
+
+  if (!spaceId) {
+    logger.error(
+      new EndpointError(
+        `Unable to identify the space ID from alert data ('kibana.space_ids') for rule [${ruleName}][${ruleId}]`
+      )
+    );
+    return;
+  }
+
+  const logMsgPrefix = `Rule [${ruleName}][${ruleId}][${spaceId}]:`;
+  const { comment, command } = responseAction.params;
   const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
     agentType: 'endpoint',
     username: 'unknown',
+    spaceId,
   });
-
-  const automatedProcessActionsEnabled =
-    endpointAppContextService.experimentalFeatures.automatedProcessActionsEnabled;
 
   const processResponseActionClientError = (err: Error, endpointIds: string[]): Promise<void> => {
     errors.push(
@@ -56,7 +66,6 @@ export const endpointResponseAction = async (
       response.push(
         Promise.all(
           Object.values(getIsolateAlerts(alerts)).map(
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
               logger.info(
                 `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
@@ -91,57 +100,54 @@ export const endpointResponseAction = async (
 
     case 'suspend-process':
     case 'kill-process':
-      if (automatedProcessActionsEnabled) {
-        const processesActionRuleConfig: ProcessesParams['config'] = (
-          responseAction.params as ProcessesParams
-        ).config;
+      const processesActionRuleConfig: ProcessesParams['config'] = (
+        responseAction.params as ProcessesParams
+      ).config;
 
-        const createProcessActionFromAlerts = (
-          actionAlerts: Record<string, Record<string, AlertsAction>>
-        ) => {
-          return each(actionAlerts, (actionPerAgent) => {
-            return each(
-              actionPerAgent,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
-                logger.info(
-                  `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
-                    endpoint_ids
-                  )}`
-                );
+      const createProcessActionFromAlerts = (
+        actionAlerts: Record<string, Record<string, AlertsAction>>
+      ) => {
+        return each(actionAlerts, (actionPerAgent) => {
+          return each(
+            actionPerAgent,
+            ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
+              logger.info(
+                `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
+                  endpoint_ids
+                )}`
+              );
 
-                return responseActionsClient[
-                  command === 'kill-process' ? 'killProcess' : 'suspendProcess'
-                ](
-                  {
-                    comment,
-                    endpoint_ids,
-                    alert_ids,
-                    parameters: parameters as
-                      | ResponseActionParametersWithPid
-                      | ResponseActionParametersWithEntityId,
-                  },
-                  {
-                    hosts,
-                    ruleId,
-                    ruleName,
-                    error,
-                  }
-                ).catch((err) => {
-                  return processResponseActionClientError(err, endpoint_ids);
-                });
-              }
-            );
-          });
-        };
+              return responseActionsClient[
+                command === 'kill-process' ? 'killProcess' : 'suspendProcess'
+              ](
+                {
+                  comment,
+                  endpoint_ids,
+                  alert_ids,
+                  parameters: parameters as
+                    | ResponseActionParametersWithPid
+                    | ResponseActionParametersWithEntityId,
+                },
+                {
+                  hosts,
+                  ruleId,
+                  ruleName,
+                  error,
+                }
+              ).catch((err) => {
+                return processResponseActionClientError(err, endpoint_ids);
+              });
+            }
+          );
+        });
+      };
 
-        const foundFields = getProcessAlerts(alerts, processesActionRuleConfig);
-        const notFoundField = getErrorProcessAlerts(alerts, processesActionRuleConfig);
-        const processActions = createProcessActionFromAlerts(foundFields);
-        const processActionsWithError = createProcessActionFromAlerts(notFoundField);
+      const foundFields = getProcessAlerts(alerts, processesActionRuleConfig);
+      const notFoundField = getErrorProcessAlerts(alerts, processesActionRuleConfig);
+      const processActions = createProcessActionFromAlerts(foundFields);
+      const processActionsWithError = createProcessActionFromAlerts(notFoundField);
 
-        response.push(Promise.all([processActions, processActionsWithError]));
-      }
+      response.push(Promise.all([processActions, processActionsWithError]));
 
       break;
 

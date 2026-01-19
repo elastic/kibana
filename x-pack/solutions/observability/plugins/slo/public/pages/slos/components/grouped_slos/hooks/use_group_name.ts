@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, GroupSummary } from '@kbn/slo-schema';
+import type { GroupSummary } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { SLI_OPTIONS } from '../../../../slo_edit/constants';
 import type { GroupByField } from '../../../types';
@@ -18,9 +19,10 @@ export function useGroupName(groupBy: GroupByField, group: string, summary?: Gro
     case 'ungrouped':
     case 'slo.tags':
     case 'status':
+    case 'slo.id':
       return groupName;
     case 'slo.instanceId':
-      if (groupName === ALL_VALUE || !summary) {
+      if (groupName === ALL_VALUE || !summary?.worst?.slo?.groupings) {
         return i18n.translate('xpack.slo.group.ungroupedInstanceId', {
           defaultMessage: 'Ungrouped',
         });

@@ -6,15 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import {
-  ConversationCategoryEnum,
-  ConversationCreateProps,
-  ConversationResponse,
-} from '@kbn/elastic-assistant-common';
+import type { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
+import { ConversationCategoryEnum } from '@kbn/elastic-assistant-common';
 import { getConversation } from './get_conversation';
-import { CreateMessageSchema } from './types';
+import type { CreateMessageSchema } from './types';
 
 export interface CreateConversationParams {
   esClient: ElasticsearchClient;
@@ -34,10 +31,10 @@ export const createConversation = async ({
   logger,
 }: CreateConversationParams): Promise<ConversationResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = transformToCreateScheme(createdAt, spaceId, user, conversation);
+  const document = transformToCreateScheme(createdAt, spaceId, user, conversation);
   try {
     const response = await esClient.create({
-      body,
+      document,
       id: conversation?.id || uuidv4(),
       index: conversationIndex,
       refresh: 'wait_for',
@@ -66,7 +63,6 @@ export const transformToCreateScheme = (
     apiConfig,
     category,
     excludeFromLastConversationStorage,
-    isDefault,
     messages,
     replacements,
   }: ConversationCreateProps
@@ -74,6 +70,10 @@ export const transformToCreateScheme = (
   return {
     '@timestamp': createdAt,
     created_at: createdAt,
+    created_by: {
+      id: user.profile_uid,
+      name: user.username,
+    },
     users: [
       {
         id: user.profile_uid,
@@ -92,18 +92,27 @@ export const transformToCreateScheme = (
         }
       : undefined,
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
-    is_default: isDefault,
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
+      id: message.id ?? uuidv4(),
       content: message.content,
+      ...(message.refusal ? { refusal: message.refusal } : {}),
       is_error: message.isError,
       reader: message.reader,
       role: message.role,
+      user: message.user,
       ...(message.traceData
         ? {
             trace_data: {
               trace_id: message.traceData.traceId,
               transaction_id: message.traceData.transactionId,
+            },
+          }
+        : {}),
+      ...(message.metadata
+        ? {
+            metadata: {
+              content_references: message.metadata.contentReferences,
             },
           }
         : {}),

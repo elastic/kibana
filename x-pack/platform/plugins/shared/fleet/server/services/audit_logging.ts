@@ -52,10 +52,12 @@ class AuditLoggingService {
   public writeCustomSoAuditLog({
     action,
     id,
+    name,
     savedObjectType,
   }: {
     action: 'find' | 'get' | 'create' | 'update' | 'delete';
     id: string;
+    name?: string;
     savedObjectType: string;
   }) {
     this.writeCustomAuditLog({
@@ -71,6 +73,7 @@ class AuditLoggingService {
       kibana: {
         saved_object: {
           id,
+          name,
           type: savedObjectType,
         },
       },

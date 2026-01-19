@@ -8,8 +8,8 @@
 import { merge } from 'lodash';
 import { MissingRequiredError } from '../error_missing_required';
 import { calculateAvailability } from '../calculate_availability';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
 import { getIndexPatterns } from '../../../common/get_index_patterns';
@@ -70,15 +70,13 @@ export function getNodeInfo(
       'hits.hits._source.logstash_stats.timestamp',
       'hits.hits._source.logstash.node.stats.timestamp',
     ],
-    body: {
-      query: {
-        bool: {
-          filter: [clusterFilter, { term: { 'logstash_stats.logstash.uuid': logstashUuid } }],
-        },
+    query: {
+      bool: {
+        filter: [clusterFilter, { term: { 'logstash_stats.logstash.uuid': logstashUuid } }],
       },
-      collapse: { field: 'logstash_stats.logstash.uuid' },
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
+    collapse: { field: 'logstash_stats.logstash.uuid' },
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

@@ -7,14 +7,14 @@
 
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiLoadingChart, OnTimeChangeProps } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
+import type { OnTimeChangeProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import { flyoutDegradedDocsTrendText } from '../../../../../common/translations';
 import { useKibanaContextForPlugin } from '../../../../utils';
-import { TimeRangeConfig } from '../../../../../common/types';
-import { useQualityIssuesDocsChart } from '../../../../hooks';
+import type { TimeRangeConfig } from '../../../../../common/types';
+import type { useQualityIssuesDocsChart } from '../../../../hooks';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [
@@ -64,7 +64,7 @@ export function TrendDocsChart({
           alignItems={isChartLoading === undefined ? 'center' : undefined}
         >
           {!attributes ? (
-            <EuiLoadingChart title={flyoutDegradedDocsTrendText} size="l" mono={true} />
+            <EuiLoadingChart title={flyoutDegradedDocsTrendText} size="l" />
           ) : (
             <lens.EmbeddableComponent
               id="datasetQualityFlyoutDegradedDocsTrend"
@@ -73,7 +73,7 @@ export function TrendDocsChart({
               overrides={{
                 settings: { legendAction: 'ignore' },
               }}
-              viewMode={ViewMode.VIEW}
+              viewMode={'view'}
               hidePanelTitles={true}
               disabledActions={DISABLED_ACTIONS}
               timeRange={timeRange}

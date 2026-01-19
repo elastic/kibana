@@ -10,6 +10,8 @@
         "label": "SpacesManager",
         "description": [],
         "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -38,6 +42,8 @@
                   "HttpSetup"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 40,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -65,6 +71,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -95,6 +103,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -115,6 +125,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 55,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -141,6 +153,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -155,6 +169,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 61,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -181,6 +197,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -195,6 +213,8 @@
                   "{ forceRefresh?: boolean | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 65,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -221,6 +241,8 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -241,6 +263,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 75,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -267,6 +291,8 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -287,6 +313,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 82,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -313,6 +341,8 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -333,6 +363,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 98,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -353,6 +385,8 @@
               "[]) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -368,6 +402,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 102,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -394,6 +430,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -408,6 +446,8 @@
                   "SavedObjectTarget[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 109,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -423,6 +463,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 110,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -438,6 +480,8 @@
                   "boolean"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 111,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -453,6 +497,8 @@
                   "boolean"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 112,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -468,6 +514,8 @@
                   "boolean"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 113,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -494,6 +542,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -508,6 +558,8 @@
                   "SavedObjectTarget[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 127,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -523,6 +575,8 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 128,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -538,6 +592,8 @@
                   "boolean"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 129,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -553,6 +609,8 @@
                   "boolean"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 130,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -571,6 +629,8 @@
               "(type: string) => Promise<{ shareToAllSpaces: boolean; }>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -585,6 +645,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 143,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -605,6 +667,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -619,6 +683,8 @@
                   "SavedObjectTarget[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 160,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -637,6 +703,8 @@
               "(objects: SavedObjectTarget[], spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 179,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -651,6 +719,8 @@
                   "SavedObjectTarget[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 180,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -666,6 +736,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 181,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -681,6 +753,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 182,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -699,6 +773,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 189,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -717,6 +793,8 @@
               "[]; total: number; }>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 206,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -731,6 +809,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 207,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -757,6 +837,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -771,6 +853,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/spaces_manager/spaces_manager.ts",
+                "lineNumber": 212,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -804,6 +888,8 @@
           ">) => string"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/space_attributes.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -828,6 +914,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/space_attributes.ts",
+            "lineNumber": 23,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -857,6 +945,8 @@
           ">) => string"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/space_attributes.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -881,6 +971,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/space_attributes.ts",
+            "lineNumber": 63,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -910,6 +1002,8 @@
           ">) => string"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/space_attributes.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -934,6 +1028,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/space_attributes.ts",
+            "lineNumber": 42,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -952,6 +1048,8 @@
         "label": "CopySavedObjectsToSpaceResponse",
         "description": [],
         "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -967,6 +1065,8 @@
               "SavedObjectsImportResponse"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -983,6 +1083,8 @@
           "\nProperties for the CopyToSpaceFlyout."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1005,6 +1107,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1021,6 +1125,8 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1039,6 +1145,8 @@
           "\nDescribes the target saved object during a copy operation."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1052,6 +1160,8 @@
               "\nThe object's type."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1065,6 +1175,8 @@
               "\nThe object's ID."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1081,6 +1193,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1097,6 +1211,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1113,6 +1229,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/copy_saved_objects_to_space/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1129,6 +1247,8 @@
           "\nProperties for the EmbeddableLegacyUrlConflict component."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1142,6 +1262,8 @@
               "\nThe target type of the legacy URL alias."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1155,6 +1277,8 @@
               "\nThe source ID of the legacy URL alias."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1188,6 +1312,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1212,6 +1338,8 @@
               ", boolean> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1228,6 +1356,8 @@
           "\nProperties for the LegacyUrlConflict component."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1244,6 +1374,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1257,6 +1389,8 @@
               "\nThe ID of the object that is currently shown on the page."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1270,6 +1404,8 @@
               "\nThe ID of the other object that the legacy URL alias points to."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1283,6 +1419,8 @@
               "\n The path within your application to use for the new URL, optionally including `search` and/or `hash` URL components. Do not include\n `/app/my-app` or the current base path."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1299,6 +1437,8 @@
           "\nParameters for the redirectLegacyUrl function."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1312,6 +1452,8 @@
               "\nThe path to use for the new URL, optionally including `search` and/or `hash` URL components."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1328,6 +1470,8 @@
               "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1344,6 +1488,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/legacy_urls/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1360,6 +1506,8 @@
           "\nProperties for the ShareToSpaceFlyout."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1382,6 +1530,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1398,6 +1548,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1414,6 +1566,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1430,6 +1584,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1446,6 +1602,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1462,6 +1620,8 @@
               "\"within-space\" | \"outside-space\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1478,6 +1638,8 @@
               "((objects: { type: string; id: string; }[], spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1492,6 +1654,8 @@
                   "{ type: string; id: string; }[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+                "lineNumber": 69,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1507,6 +1671,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+                "lineNumber": 70,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1522,6 +1688,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+                "lineNumber": 71,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1542,6 +1710,8 @@
               "((updatedObjects: { type: string; id: string; }[]) => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1556,6 +1726,8 @@
                   "{ type: string; id: string; }[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+                "lineNumber": 76,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1576,6 +1748,8 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1594,6 +1768,8 @@
           "\nDescribes the target saved object during a share operation."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1607,6 +1783,8 @@
               "\nThe object's type."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1620,6 +1798,8 @@
               "\nThe object's ID."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1636,6 +1816,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1652,6 +1834,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1668,6 +1852,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1684,6 +1870,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/share_saved_objects_to_space/types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1700,6 +1888,8 @@
           "\nA Space."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1713,6 +1903,8 @@
               "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1726,6 +1918,8 @@
               "\nDisplay name for this space."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1742,6 +1936,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1758,6 +1954,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1774,6 +1972,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1790,6 +1990,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1806,24 +2008,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-public.Space._reserved",
-            "type": "CompoundType",
-            "tags": [
-              "private"
-            ],
-            "label": "_reserved",
-            "description": [
-              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1847,6 +2033,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1863,6 +2051,8 @@
           "\nProperties for the SpaceAvatar component."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1887,6 +2077,8 @@
               " | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1903,6 +2095,8 @@
               "\"m\" | \"s\" | \"l\" | \"xl\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1919,6 +2113,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1935,6 +2131,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1951,6 +2149,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1967,6 +2167,8 @@
               "((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1981,6 +2183,8 @@
                   "React.MouseEvent<HTMLDivElement, MouseEvent>"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+                "lineNumber": 40,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2001,6 +2205,8 @@
               "((event: React.KeyboardEvent<HTMLDivElement>) => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2015,6 +2221,8 @@
                   "React.KeyboardEvent<HTMLDivElement>"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+                "lineNumber": 45,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2035,6 +2243,8 @@
               "React.CSSProperties | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_avatar/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2051,6 +2261,8 @@
           "\nProperties for the SpaceList component."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/space_list/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2067,6 +2279,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_list/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2083,6 +2297,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_list/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2099,6 +2315,8 @@
               "\"within-space\" | \"outside-space\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_list/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2115,6 +2333,8 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_list/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2133,6 +2353,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/space_list/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2149,6 +2371,8 @@
           "\nUI components and services to add spaces capabilities to an application."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2171,6 +2395,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2195,6 +2421,8 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2215,6 +2443,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+                "lineNumber": 52,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2245,6 +2475,8 @@
               "<Services>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2263,6 +2495,8 @@
           "\nReact UI components to be used to display the Spaces feature in any application."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2287,6 +2521,8 @@
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2302,6 +2538,8 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2328,6 +2566,8 @@
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2343,6 +2583,8 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2369,6 +2611,8 @@
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2384,6 +2628,8 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2410,6 +2656,8 @@
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2425,6 +2673,8 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2451,6 +2701,8 @@
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2466,6 +2718,8 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2492,6 +2746,8 @@
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2507,6 +2763,8 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2533,6 +2791,8 @@
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2548,6 +2808,8 @@
                   "T"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2566,6 +2828,8 @@
           "\nProperties for the SpacesContext."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/spaces_context/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2582,6 +2846,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_context/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2596,6 +2862,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_context/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2612,6 +2880,8 @@
           "\nThe structure for all of the space data that must be loaded for share-to-space components to function."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2636,6 +2906,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2649,6 +2921,8 @@
               "The ID of the active space."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2683,6 +2957,8 @@
           ", \"disabledFeatures\" | \"authorizedPurposes\">"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2699,6 +2975,8 @@
               "true | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2715,6 +2993,8 @@
               "true | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2739,6 +3019,8 @@
               ") => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2759,6 +3041,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+                "lineNumber": 34,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2787,6 +3071,8 @@
           "<Services>"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/spaces_context/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2807,6 +3093,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_context/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2829,6 +3117,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_context/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2843,6 +3133,8 @@
               "Services"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_context/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2865,6 +3157,8 @@
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2882,6 +3176,8 @@
           "(props: T) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2897,6 +3193,8 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2918,6 +3216,8 @@
         "{ hasOnlyDefaultSpace: boolean; isSolutionViewEnabled: boolean; }"
       ],
       "path": "x-pack/platform/plugins/shared/spaces/public/plugin.tsx",
+      "lineNumber": 39,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -2933,6 +3233,8 @@
         "\nClient-side Spaces API."
       ],
       "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+      "lineNumber": 37,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2959,6 +3261,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+          "lineNumber": 41,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -2985,6 +3289,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+          "lineNumber": 47,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -3000,6 +3306,8 @@
             "\nDetermines whether Kibana supports multiple spaces or only the default space.\n\nWhen `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden."
           ],
           "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+          "lineNumber": 52,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3022,6 +3330,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+          "lineNumber": 59,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3035,6 +3345,8 @@
             "\nIndicates whether the solution view is enabled."
           ],
           "path": "x-pack/platform/plugins/shared/spaces/public/types.ts",
+          "lineNumber": 64,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3058,7 +3370,9 @@
         "signature": [
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
-        "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+        "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3074,7 +3388,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3091,7 +3407,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3108,7 +3426,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3131,6 +3451,8 @@
           "\nControls how spaces are retrieved."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3156,6 +3478,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3174,6 +3498,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3207,6 +3533,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3231,6 +3559,8 @@
               ", boolean> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3247,6 +3577,8 @@
           "\nClient interface for interacting with spaces."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3279,6 +3611,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3302,6 +3636,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+                "lineNumber": 42,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3330,6 +3666,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3346,6 +3684,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+                "lineNumber": 48,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3382,6 +3722,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3404,6 +3746,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+                "lineNumber": 54,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3440,6 +3784,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3456,6 +3802,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+                "lineNumber": 61,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3479,6 +3827,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+                "lineNumber": 61,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3501,6 +3851,8 @@
               "<unknown, unknown>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3517,6 +3869,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+                "lineNumber": 68,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3537,6 +3891,8 @@
               "(id: string) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3553,6 +3909,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+                "lineNumber": 74,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3575,6 +3933,8 @@
               "[]) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3592,6 +3952,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client.ts",
+                "lineNumber": 80,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3612,6 +3974,8 @@
           "\nA Space."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3625,6 +3989,8 @@
               "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3638,6 +4004,8 @@
               "\nDisplay name for this space."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3654,6 +4022,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3670,6 +4040,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3686,6 +4058,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3702,6 +4076,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3718,24 +4094,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.Space._reserved",
-            "type": "CompoundType",
-            "tags": [
-              "private"
-            ],
-            "label": "_reserved",
-            "description": [
-              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3759,6 +4119,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3775,6 +4137,8 @@
           "\nThe Spaces service setup contract."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3793,6 +4157,8 @@
               "<unknown, unknown, unknown, any>) => string"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3810,6 +4176,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+                "lineNumber": 24,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3830,6 +4198,8 @@
               "(spaceId: string) => string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3846,6 +4216,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+                "lineNumber": 30,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3866,6 +4238,8 @@
               "(namespace: string | undefined) => string"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3882,6 +4256,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+                "lineNumber": 36,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3902,6 +4278,8 @@
           "\nThe Spaces service start contract."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3927,6 +4305,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3944,6 +4324,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+                "lineNumber": 47,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3966,6 +4348,8 @@
               "<unknown, unknown, unknown, any>) => string"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3983,6 +4367,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+                "lineNumber": 53,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4005,6 +4391,8 @@
               "<unknown, unknown, unknown, any>) => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4022,6 +4410,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+                "lineNumber": 59,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4052,6 +4442,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4069,6 +4461,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+                "lineNumber": 65,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4089,6 +4483,8 @@
               "(spaceId: string) => string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4105,6 +4501,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+                "lineNumber": 71,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4125,6 +4523,8 @@
               "(namespace: string | undefined) => string"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4141,6 +4541,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/spaces/server/spaces_service/spaces_service.ts",
+                "lineNumber": 77,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4167,138 +4569,10 @@
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "spaces",
-        "id": "def-server.SpacesClientRepositoryFactory",
-        "type": "Type",
-        "tags": [
-          "private"
-        ],
-        "label": "SpacesClientRepositoryFactory",
-        "description": [
-          "\nFor consumption by the security plugin only."
-        ],
-        "signature": [
-          "(request: ",
-          "KibanaRequest",
-          "<unknown, unknown, unknown, any>, savedObjectsStart: ",
-          "SavedObjectsServiceStart",
-          ") => ",
-          "ISavedObjectsRepository"
-        ],
-        "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.SpacesClientRepositoryFactory.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.SpacesClientRepositoryFactory.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "savedObjectsStart",
-            "description": [],
-            "signature": [
-              "SavedObjectsServiceStart"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "spaces",
-        "id": "def-server.SpacesClientWrapper",
-        "type": "Type",
-        "tags": [
-          "private"
-        ],
-        "label": "SpacesClientWrapper",
-        "description": [
-          "\nFor consumption by the security plugin only."
-        ],
-        "signature": [
-          "(request: ",
-          "KibanaRequest",
-          "<unknown, unknown, unknown, any>, baseClient: ",
-          {
-            "pluginId": "spaces",
-            "scope": "server",
-            "docId": "kibSpacesPluginApi",
-            "section": "def-server.ISpacesClient",
-            "text": "ISpacesClient"
-          },
-          ") => ",
-          {
-            "pluginId": "spaces",
-            "scope": "server",
-            "docId": "kibSpacesPluginApi",
-            "section": "def-server.ISpacesClient",
-            "text": "ISpacesClient"
-          }
-        ],
-        "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.SpacesClientWrapper.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.SpacesClientWrapper.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "baseClient",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "spaces",
-                "scope": "server",
-                "docId": "kibSpacesPluginApi",
-                "section": "def-server.ISpacesClient",
-                "text": "ISpacesClient"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ],
@@ -4313,6 +4587,8 @@
         "\nSetup contract for the Spaces plugin."
       ],
       "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts",
+      "lineNumber": 55,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -4335,40 +4611,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "spaces",
-          "id": "def-server.SpacesPluginSetup.spacesClient",
-          "type": "Object",
-          "tags": [
-            "private"
-          ],
-          "label": "spacesClient",
-          "description": [
-            "\nRegistries exposed for the security plugin to transparently provide authorization and audit logging."
-          ],
-          "signature": [
-            "{ setClientRepositoryFactory: (factory: ",
-            {
-              "pluginId": "spaces",
-              "scope": "server",
-              "docId": "kibSpacesPluginApi",
-              "section": "def-server.SpacesClientRepositoryFactory",
-              "text": "SpacesClientRepositoryFactory"
-            },
-            ") => void; registerClientWrapper: (wrapper: ",
-            {
-              "pluginId": "spaces",
-              "scope": "server",
-              "docId": "kibSpacesPluginApi",
-              "section": "def-server.SpacesClientWrapper",
-              "text": "SpacesClientWrapper"
-            },
-            ") => void; }"
-          ],
-          "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts",
+          "lineNumber": 59,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -4386,6 +4630,8 @@
             "<boolean>"
           ],
           "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts",
+          "lineNumber": 81,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -4403,6 +4649,8 @@
         "\nStart contract for the Spaces plugin."
       ],
       "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts",
+      "lineNumber": 89,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -4425,6 +4673,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts",
+          "lineNumber": 93,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -4442,6 +4692,8 @@
             "<boolean>"
           ],
           "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts",
+          "lineNumber": 96,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -4465,7 +4717,9 @@
         "signature": [
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
-        "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+        "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4481,7 +4735,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4498,7 +4754,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4515,7 +4773,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4528,60 +4788,62 @@
       },
       {
         "parentPluginId": "spaces",
-        "id": "def-common.getSpaceIdFromPath",
+        "id": "def-common.getRouteUrlForSpace",
         "type": "Function",
-        "tags": [
-          "private"
-        ],
-        "label": "getSpaceIdFromPath",
+        "tags": [],
+        "label": "getRouteUrlForSpace",
         "description": [
-          "\nExtracts the space id from the given path.\n"
+          "\nWraps the provided Kibana route URL with the Kibana space ID.\n\"default\" space is equivalent to an empty value and doesn't lead to adding any space aware path.\n"
         ],
         "signature": [
-          "(requestBasePath: string | null | undefined, serverBasePath: string | null | undefined) => { spaceId: string; pathHasExplicitSpaceIdentifier: boolean; }"
+          "(routeUrl: string, spaceId: string | undefined) => string"
         ],
-        "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+        "path": "x-pack/platform/plugins/shared/spaces/common/get_spaced_route_url.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "spaces",
-            "id": "def-common.getSpaceIdFromPath.$1",
-            "type": "CompoundType",
+            "id": "def-common.getRouteUrlForSpace.$1",
+            "type": "string",
             "tags": [],
-            "label": "requestBasePath",
+            "label": "routeUrl",
             "description": [
-              "The base path of the current request."
+              "the route url string"
             ],
             "signature": [
-              "string | null | undefined"
+              "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "x-pack/platform/plugins/shared/spaces/common/get_spaced_route_url.ts",
+            "lineNumber": 20,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           },
           {
             "parentPluginId": "spaces",
-            "id": "def-common.getSpaceIdFromPath.$2",
-            "type": "CompoundType",
+            "id": "def-common.getRouteUrlForSpace.$2",
+            "type": "string",
             "tags": [],
-            "label": "serverBasePath",
+            "label": "spaceId",
             "description": [
-              "The server's base path."
+              "[optional] the Kibana space to account for in the route url\n\nExamples:\n- `getRouteUrlForSpace('/api/some_endpoint')` returns `/api/some_endpoint`\n- `getRouteUrlForSpace('/api/some_endpoint', 'default')` returns `/api/some_endpoint`\n- `getRouteUrlForSpace('/api/some_endpoint', 'my_space') returns `/s/my_space/api/some_endpoint`"
             ],
             "signature": [
-              "string | null | undefined"
+              "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "x-pack/platform/plugins/shared/spaces/common/get_spaced_route_url.ts",
+            "lineNumber": 20,
+            "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [
-          "the space id."
-        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -4605,6 +4867,8 @@
           "> | null | undefined) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/is_reserved_space.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4629,6 +4893,8 @@
               "> | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/is_reserved_space.ts",
+            "lineNumber": 18,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -4651,6 +4917,8 @@
           "\nControls how spaces are retrieved."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4676,6 +4944,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4694,6 +4964,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4727,6 +4999,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4751,6 +5025,8 @@
               ", boolean> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4767,6 +5043,8 @@
           "\nA Space."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4780,6 +5058,8 @@
               "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4793,6 +5073,8 @@
               "\nDisplay name for this space."
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4809,6 +5091,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4825,6 +5109,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4841,6 +5127,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4857,6 +5145,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4873,24 +5163,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-common.Space._reserved",
-            "type": "CompoundType",
-            "tags": [
-              "private"
-            ],
-            "label": "_reserved",
-            "description": [
-              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4914,6 +5188,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4934,6 +5210,8 @@
           "\"default\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4951,6 +5229,8 @@
           "\"/spaces/enter\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/constants.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4968,6 +5248,8 @@
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4985,6 +5267,8 @@
           "2"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/constants.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4997,10 +5281,11 @@
         "label": "SolutionView",
         "description": [],
         "signature": [
-          "SolutionId",
-          " | \"classic\""
+          "\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | \"classic\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5018,6 +5303,8 @@
           "8"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5034,6 +5321,8 @@
           "\nThe API version numbers used with the versioned router."
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/constants.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5045,6 +5334,8 @@
             "label": "public",
             "description": [],
             "path": "x-pack/platform/plugins/shared/spaces/common/constants.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5056,6 +5347,8 @@
                 "label": "v1",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/spaces/common/constants.ts",
+                "lineNumber": 52,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }

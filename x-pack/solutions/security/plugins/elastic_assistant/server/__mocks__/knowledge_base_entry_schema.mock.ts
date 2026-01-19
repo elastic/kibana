@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import {
+import type { estypes } from '@elastic/elasticsearch';
+import type {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import {
+import type {
   EsKnowledgeBaseEntrySchema,
   EsDocumentEntry,
 } from '../ai_assistant_data_clients/knowledge_base/types';
@@ -38,7 +38,7 @@ const indexEntry: EsKnowledgeBaseEntrySchema = {
   ],
   users: [
     {
-      name: 'my_username',
+      name: 'elastic',
       id: 'my_profile_uid',
     },
   ],
@@ -54,13 +54,13 @@ export const documentEntry: EsDocumentEntry = {
   namespace: 'default',
   semantic_text: 'test',
   type: 'document',
-  kb_resource: 'test',
+  kb_resource: 'user',
   required: true,
   source: 'test',
   text: 'test',
   users: [
     {
-      name: 'my_username',
+      name: 'elastic',
       id: 'my_profile_uid',
     },
   ],
@@ -105,7 +105,7 @@ export const getCreateKnowledgeBaseEntrySchemaMock = (
       source: 'test',
       text: 'test',
       name: 'test',
-      kbResource: 'test',
+      kbResource: 'user',
       ...restProps,
     };
   }
@@ -135,7 +135,7 @@ export const getUpdateKnowledgeBaseEntrySchemaMock = (
   type: 'document',
   source: 'test',
   text: 'test',
-  kbResource: 'test',
+  kbResource: 'user',
   id: entryId,
 });
 
@@ -146,7 +146,7 @@ export const getKnowledgeBaseEntryMock = (
     type: 'document',
     text: 'test',
     source: 'test',
-    kbResource: 'test',
+    kbResource: 'user',
     required: true,
   }
 ): KnowledgeBaseEntryResponse => ({
@@ -157,9 +157,10 @@ export const getKnowledgeBaseEntryMock = (
   createdAt: '2020-04-20T15:25:31.830Z',
   updatedAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
+  global: false,
   users: [
     {
-      name: 'my_username',
+      name: 'elastic',
       id: 'my_profile_uid',
     },
   ],

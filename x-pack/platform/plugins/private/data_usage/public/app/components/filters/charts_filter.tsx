@@ -14,7 +14,8 @@ import { METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP } from '../../../../common/res
 import { UX_LABELS } from '../../../translations';
 import { ChartsFilterPopover } from './charts_filter_popover';
 import { ToggleAllButton } from './toggle_all_button';
-import { FilterItems, FilterName, useChartsFilter } from '../../hooks';
+import type { FilterItems, FilterName } from '../../hooks';
+import { useChartsFilter } from '../../hooks';
 
 const getSearchPlaceholder = (filterName: FilterName) => {
   if (filterName === 'dataStreams') {

@@ -18,6 +18,7 @@ import {
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type {
+  SavedObjectAccessControl,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
@@ -27,6 +28,7 @@ import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { isValidRequest } from '../utils';
 import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
 import type { ApiExecutionContext } from './types';
+import { setAccessControl } from './utils/internal_utils';
 
 export interface PerformUpdateParams<T = unknown> {
   type: string;
@@ -110,9 +112,21 @@ export const executeUpdate = async <T>(
   });
 
   const existingNamespaces = preflightDocNSResult.savedObjectNamespaces ?? [];
+  const accessControl = preflightDocNSResult.rawDocSource?._source.accessControl;
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
-    object: { type, id, existingNamespaces },
+    object: {
+      type,
+      id,
+      existingNamespaces,
+      ...(accessControl && {
+        accessControl,
+      }),
+      objectNamespace: namespace && registry.isSingleNamespace(type) ? namespace : undefined,
+      name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+        attributes: { ...(preflightDocResult.rawDocSource?._source?.[type] ?? {}), ...attributes },
+      }),
+    },
   });
 
   // validate if an update (directly update or create the object instead) can be done, based on if the doc exists or not
@@ -170,6 +184,18 @@ export const executeUpdate = async <T>(
 
   // UPSERT CASE START
   if (shouldPerformUpsert) {
+    // Note: Update does not support accessControl parameters. If applicable and possible (type supports access control
+    // and there is an active user profile), the default access control metadata will be set.
+    // To explicitly set access control for a new object, the `create` API should be used.
+    let accessControlToWrite: SavedObjectAccessControl | undefined;
+    if (securityExtension) {
+      accessControlToWrite = setAccessControl({
+        typeSupportsAccessControl: registry.supportsAccessControl(type),
+        createdBy: updatedBy,
+        accessMode: 'default',
+      });
+    }
+
     // ignore attributes if creating a new doc: only use the upsert attributes
     // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
     const migratedUpsert = migrationHelper.migrateInputDocument({
@@ -184,6 +210,7 @@ export const executeUpdate = async <T>(
       updated_at: time,
       ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
       ...(Array.isArray(references) && { references }),
+      ...(accessControlToWrite && { accessControl: accessControlToWrite }),
     }) as SavedObjectSanitizedDoc<T>;
     validationHelper.validateObjectForCreate(type, migratedUpsert);
     const rawUpsert = serializer.savedObjectToRaw(migratedUpsert);
@@ -194,7 +221,6 @@ export const executeUpdate = async <T>(
       refresh,
       document: rawUpsert._source,
       ...(version ? decodeRequestVersion(version) : {}),
-      // @ts-expect-error
       require_alias: true,
     };
 
@@ -283,6 +309,7 @@ export const executeUpdate = async <T>(
       attributes: updatedAttributes,
       updated_at: time,
       updated_by: updatedBy,
+      ...(accessControl ? { accessControl } : {}),
       ...(Array.isArray(references) && { references }),
     });
 

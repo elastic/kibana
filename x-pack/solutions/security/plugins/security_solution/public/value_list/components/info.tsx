@@ -6,19 +6,19 @@
  */
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
+import styled from '@emotion/styled';
 
-const info = css`
-  margin-right: ${euiThemeVars.euiSizeS};
+const InfoContainer = styled(EuiText)`
+  margin-right: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
-const infoLabel = css`
-  margin-right: ${euiThemeVars.euiSizeXS};
+const Label = styled.span`
+  font-weight: ${({ theme }) => theme.euiTheme.font.weight.bold};
+  margin-right: ${({ theme }) => theme.euiTheme.size.xs};
 `;
 
 export const Info = ({ label, value }: { value: React.ReactNode; label: string }) => (
-  <EuiText size="xs" className={info}>
-    <b className={infoLabel}>{label} </b> {value}
-  </EuiText>
+  <InfoContainer size="xs">
+    <Label>{label} </Label> {value}
+  </InfoContainer>
 );

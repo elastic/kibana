@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { PanelData } from '../../../../common/types';
-import { TimeseriesVisParams } from '../../../types';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { PanelData } from '../../../../common/types';
+import type { TimeseriesVisParams } from '../../../types';
 import { convertSeriesToDataTable, addMetaToColumns } from './convert_series_to_datatable';
 
 jest.mock('../../../services', () => {

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { EsQuerySortValue } from './types';
+import type { EsQuerySortValue } from './types';
 
 type FieldSortOptions = estypes.FieldSort &
   estypes.ScoreSort &
@@ -68,7 +68,6 @@ function normalize(
     defaultSortOptions = JSON.parse(defaultSortOptions) as FieldSortOptions;
   }
   // Don't include unmapped_type for _score field
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { unmapped_type, ...otherSortOptions } = defaultSortOptions;
   return {
     [sortField]: {

@@ -17,6 +17,15 @@ export const FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}FieldNameCellText` as const;
 export const FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}PreviewLinkField` as const;
+export const FLYOUT_TABLE_PIN_ACTION_TEST_ID = `${FLYOUT_TABLE_TEST_ID}PinAction` as const;
+export const TABLE_TAB_SETTING_BUTTON_TEST_ID = `${PREFIX}TableTabSettingButton` as const;
+export const TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HighlightedFieldsOnly` as const;
+export const TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HideEmptyFields` as const;
+export const TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HideAlertFields` as const;
+export const TABLE_TAB_TOUR_TEST_ID = `${FLYOUT_TABLE_TEST_ID}Tour` as const;
 
 /* Header */
 
@@ -32,6 +41,7 @@ export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle`
 export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
 export const CHAT_BUTTON_TEST_ID = 'newChatByTitle' as const;
+export const AGENT_ATTACHMENT_BUTTON_TEST_ID = 'newAgentBuilderAttachment' as const;
 
 export const NOTES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesTitle` as const;
 export const NOTES_ADD_NOTE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesAddNoteButton` as const;
@@ -100,6 +110,26 @@ export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
   `${HIGHLIGHTED_FIELDS_TEST_ID}LinkedCell` as const;
 export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
   `${HIGHLIGHTED_FIELDS_TEST_ID}AgentStatusCell` as const;
+
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}EditButton` as const;
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}Loading` as const;
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_TOOLTIP_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}Tooltip` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Modal` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_TITLE_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}Title` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_DESCRIPTION_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}Description` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_DEFAULT_FIELDS_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}DefaultFields` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}CustomFields` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_SAVE_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}SaveButton` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}CancelButton` as const;
 
 /* Insights section */
 

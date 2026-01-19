@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import { throwBadResponse } from '../../../model/helpers';
 import { setMetaDocMigrationComplete } from '../../utils';
 import type { ModelStage } from '../types';

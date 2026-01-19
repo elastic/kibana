@@ -8,7 +8,7 @@
  */
 
 import { extname } from 'path';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { chain } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -47,6 +47,12 @@ export const registerResolveImportErrorsRoute = (
           maxBytes: maxImportPayloadBytes,
           output: 'stream',
           accepts: 'multipart/form-data',
+        },
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
         },
       },
       validate: {

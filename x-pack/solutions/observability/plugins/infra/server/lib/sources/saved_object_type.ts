@@ -6,13 +6,12 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
+import { infraSourceConfigurationSavedObjectName } from '@kbn/observability-plugin/server/saved_objects/infra_saved_objects';
 import { addNewIndexingStrategyIndexNames } from './migrations/7_9_0_add_new_indexing_strategy_index_names';
 import { convertLogAliasToLogIndices } from './migrations/7_13_0_convert_log_alias_to_log_indices';
 import { composeMigrations } from './migrations/compose_migrations';
 import { extractInventoryDefaultViewReference } from './migrations/7_16_2_extract_inventory_default_view_reference';
 import { extractMetricsExplorerDefaultViewReference } from './migrations/7_16_2_extract_metrics_explorer_default_view_reference';
-
-export const infraSourceConfigurationSavedObjectName = 'infrastructure-ui-source';
 
 export const infraSourceConfigurationSavedObjectType: SavedObjectsType = {
   name: infraSourceConfigurationSavedObjectName,
@@ -34,3 +33,5 @@ export const infraSourceConfigurationSavedObjectType: SavedObjectsType = {
     ),
   },
 };
+
+export { infraSourceConfigurationSavedObjectName };

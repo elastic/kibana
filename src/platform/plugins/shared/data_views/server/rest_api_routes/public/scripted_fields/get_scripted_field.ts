@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
 import type {
@@ -17,7 +17,7 @@ import type {
 } from '../../../types';
 import { INITIAL_REST_VERSION } from '../../../constants';
 import { fieldSpecSchemaFields } from '../../../schemas';
-import { FieldSpecRestResponse } from '../../route_types';
+import type { FieldSpecRestResponse } from '../../route_types';
 
 export const registerGetScriptedFieldRoute = (
   router: IRouter,
@@ -27,16 +27,19 @@ export const registerGetScriptedFieldRoute = (
   >
 ) => {
   router.versioned
-    .get({ path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}', access: 'public' })
+    .get({
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
+      access: 'public',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization provided by saved objects client',
+        },
+      },
+    })
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'Authorization provided by saved objects client',
-          },
-        },
         validate: {
           request: {
             params: schema.object(

@@ -384,21 +384,22 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
     }),
     textPre: i18n.translate('xpack.apm.tutorial.dotNetClient.configureApplication.textPre', {
       defaultMessage:
-        'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
-      method in the `Configure` method within the `Startup.cs` file.',
+        'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `AddAllElasticApm` \
+      extension method on the `IServiceCollection` available via the `WebApplicationBuilder` \
+      within the `Program.cs` file.',
     }),
-    commands: `public class Startup
-{curlyOpen}
-  public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-  {curlyOpen}
-    app.UseAllElasticApm(Configuration);
-    //…rest of the method
-  {curlyClose}
-  //…rest of the class
-{curlyClose}`.split('\n'),
+    commands: `var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAllElasticApm();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+
+app.Run();`.split('\n'),
     textPost: i18n.translate('xpack.apm.tutorial.dotNetClient.configureApplication.textPost', {
       defaultMessage:
-        'Passing an `IConfiguration` instance is optional and by doing so, the agent will read config settings through this \
+        'The agent will implicitly read config settings from the applications \
       `IConfiguration` instance (e.g. from the `appsettings.json` file).',
     }),
   },
@@ -409,8 +410,7 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
     customComponentName: 'TutorialConfigAgent',
     textPost: i18n.translate('xpack.apm.tutorial.dotNetClient.configureAgent.textPost', {
       defaultMessage:
-        'In case you don’t pass an `IConfiguration` instance to the agent (e.g. in case of non ASP.NET Core applications) \
-      you can also configure the agent through environment variables. \n \
+        'You can also configure the agent through environment variables. \n \
       See [the documentation]({documentationLink}) for advanced usage, including the [Profiler Auto instrumentation]({profilerLink}) quick start.',
       values: {
         documentationLink:

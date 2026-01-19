@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { AlertInstanceContext, RuleTypeParams, RuleTypeState } from '@kbn/alerting-plugin/common';
-import { IRuleDataClient } from '../rule_data_client';
-import { AlertTypeWithExecutor } from '../types';
+import type {
+  AlertInstanceContext,
+  RuleTypeParams,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
+import type { IRuleDataClient } from '../rule_data_client';
+import type { AlertTypeWithExecutor } from '../types';
 
 export const withRuleDataClientFactory =
   (ruleDataClient: IRuleDataClient) =>

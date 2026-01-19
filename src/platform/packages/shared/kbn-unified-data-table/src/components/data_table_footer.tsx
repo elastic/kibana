@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -16,6 +17,7 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { MAX_LOADED_GRID_ROWS } from '../constants';
+import type { DataGridPaginationMode } from '../..';
 
 export interface UnifiedDataTableFooterProps {
   isLoadingMore?: boolean;
@@ -27,6 +29,8 @@ export interface UnifiedDataTableFooterProps {
   onFetchMoreRecords?: () => void;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
+  paginationMode: DataGridPaginationMode;
+  hasScrolledToBottom: boolean;
 }
 
 export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooterProps>> = (
@@ -41,6 +45,8 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
     totalHits = 0,
     onFetchMoreRecords,
     data,
+    paginationMode,
+    hasScrolledToBottom,
   } = props;
   const timefilter = data.query.timefilter.timefilter;
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
@@ -60,7 +66,10 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
   const { euiTheme } = useEuiTheme();
   const isOnLastPage = pageIndex === pageCount - 1 && rowCount < totalHits;
 
-  if (!isOnLastPage) {
+  if (
+    (paginationMode === 'multiPage' && !isOnLastPage) ||
+    (paginationMode === 'singlePage' && !hasScrolledToBottom && !isLoadingMore)
+  ) {
     return null;
   }
 

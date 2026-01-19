@@ -59,12 +59,18 @@ export const QueryEditor: React.FC<QueryEditorProps> = React.memo(
           alignItems="flexStart"
         >
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onCancel} size="xs">
+            <EuiButtonEmpty aria-label={i18n.CANCEL} iconType="cross" onClick={onCancel} size="xs">
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="save" onClick={handleSaveButtonClick} size="xs">
+            <EuiButtonEmpty
+              aria-label={i18n.SAVE}
+              data-test-subj="saveTranslatedRuleBtn"
+              iconType="save"
+              onClick={handleSaveButtonClick}
+              size="xs"
+            >
               {i18n.SAVE}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -73,9 +79,9 @@ export const QueryEditor: React.FC<QueryEditorProps> = React.memo(
           path="ruleName"
           componentProps={{
             idAria: 'ruleMigrationTranslationRuleName',
-            'data-test-subj': 'ruleMigrationTranslationRuleName',
             euiFieldProps: {
               fullWidth: true,
+              'data-test-subj': 'ruleMigrationTranslationRuleName',
             },
           }}
         />

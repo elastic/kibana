@@ -6,17 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { DataViewsPublicPluginSetup } from '@kbn/data-views-plugin/public/types';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { DataViewsPublicPluginSetup } from '@kbn/data-views-plugin/public/types';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 import { UIM_APP_NAME } from '../common';
 import { setHttp, init as initDocumentation } from './crud_app/services';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
-import { ClientConfigType } from './types';
+import type { ClientConfigType } from './types';
 
 export interface RollupPluginSetupDependencies {
   home?: HomePublicPluginSetup;

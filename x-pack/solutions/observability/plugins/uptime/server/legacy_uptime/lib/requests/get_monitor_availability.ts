@@ -9,10 +9,10 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { UMElasticsearchQueryFn } from '../adapters';
-import { GetMonitorAvailabilityParams, Ping } from '../../../../common/runtime_types';
+import type { UMElasticsearchQueryFn } from '../adapters';
+import type { GetMonitorAvailabilityParams, Ping } from '../../../../common/runtime_types';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { AfterKey } from './get_monitor_status';
+import type { AfterKey } from './get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
 
 export interface AvailabilityKey {
@@ -30,7 +30,6 @@ export interface GetMonitorAvailabilityResult {
 }
 
 export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabilityResult[]> =>
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   buckets.map(({ key, fields, up_sum, down_sum, ratio }: any) => ({
     ...key,
     location: key.location === null ? UNNAMED_LOCATION : (key.location as string),
@@ -155,7 +154,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
       },
     };
 
-    const { body: result } = await uptimeEsClient.search({ body: esParams });
+    const { body: result } = await uptimeEsClient.search(esParams);
     afterKey = result?.aggregations?.monitors?.after_key as AfterKey;
     queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || []));
   } while (afterKey !== undefined);

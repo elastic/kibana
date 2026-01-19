@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren, HTMLAttributes } from 'react';
+import type { FC, PropsWithChildren, HTMLAttributes } from 'react';
+import React from 'react';
 import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 
 interface Props {
@@ -33,7 +34,7 @@ export const ChartWrapper: FC<PropsWithChildren<Props>> = ({
 
   return (
     <EuiErrorBoundary>
-      <div
+      <figure
         style={{
           height,
           opacity,
@@ -42,7 +43,7 @@ export const ChartWrapper: FC<PropsWithChildren<Props>> = ({
         {...(rest as HTMLAttributes<HTMLDivElement>)}
       >
         {children}
-      </div>
+      </figure>
       {loading === true && (
         <EuiFlexGroup
           justifyContent="spaceAround"

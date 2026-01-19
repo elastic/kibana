@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 
 import { getImageMetadata } from '@kbn/shared-ux-file-util';
 import { getImageData as getBlob, base64dLogo } from '@kbn/shared-ux-file-image-mocks';
-import { Image, Props } from './image';
+import type { Props } from './image';
+import { Image } from './image';
 
 const defaultArgs: Props = { alt: 'test', src: `data:image/png;base64,${base64dLogo}` };
 
@@ -38,47 +39,62 @@ export default {
       );
     },
   ],
-} as ComponentMeta<typeof Image>;
+} as Meta<typeof Image>;
 
-const Template: ComponentStory<typeof Image> = (props: Props, { loaded: { meta } }) => (
+const Template: StoryFn<typeof Image> = (props: Props, { loaded: { meta } }) => (
   <Image {...props} meta={meta} />
 );
 
-export const Basic = Template.bind({});
-
-export const WithBlurhash = Template.bind({});
-WithBlurhash.storyName = 'With blurhash';
-WithBlurhash.loaders = [
-  async () => ({
-    meta: await getImageMetadata(getBlob()),
-  }),
-];
-
-export const BrokenSrc = Template.bind({});
-BrokenSrc.storyName = 'Broken src';
-BrokenSrc.args = {
-  src: 'foo',
+export const Basic = {
+  render: Template,
 };
 
-export const WithBlurhashAndBrokenSrc = Template.bind({});
-WithBlurhashAndBrokenSrc.storyName = 'With blurhash and broken src';
-WithBlurhashAndBrokenSrc.args = {
-  src: 'foo',
+export const WithBlurhash = {
+  render: Template,
+  name: 'With blurhash',
+
+  loaders: [
+    async () => ({
+      meta: await getImageMetadata(getBlob()),
+    }),
+  ],
 };
 
-WithBlurhashAndBrokenSrc.loaders = [
-  async () => ({
-    blurhash: await getImageMetadata(getBlob()),
-  }),
-];
+export const BrokenSrc = {
+  render: Template,
+  name: 'Broken src',
 
-export const WithCustomSizing = Template.bind({});
-WithCustomSizing.storyName = 'With custom sizing';
-WithCustomSizing.loaders = [
-  async () => ({
-    meta: await getImageMetadata(getBlob()),
-  }),
-];
-WithCustomSizing.args = {
-  css: `width: 100px; height: 500px; object-fit: fill`,
+  args: {
+    src: 'foo',
+  },
+};
+
+export const WithBlurhashAndBrokenSrc = {
+  render: Template,
+  name: 'With blurhash and broken src',
+
+  args: {
+    src: 'foo',
+  },
+
+  loaders: [
+    async () => ({
+      blurhash: await getImageMetadata(getBlob()),
+    }),
+  ],
+};
+
+export const WithCustomSizing = {
+  render: Template,
+  name: 'With custom sizing',
+
+  loaders: [
+    async () => ({
+      meta: await getImageMetadata(getBlob()),
+    }),
+  ],
+
+  args: {
+    css: `width: 100px; height: 500px; object-fit: fill`,
+  },
 };

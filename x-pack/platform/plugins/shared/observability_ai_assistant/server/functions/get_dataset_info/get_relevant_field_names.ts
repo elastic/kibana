@@ -5,13 +5,24 @@
  * 2.0.
  */
 import datemath from '@elastic/datemath';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { isInferenceRequestAbortedError } from '@kbn/inference-common';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
-import { lastValueFrom } from 'rxjs';
-import { MessageRole, ShortIdTable, type Message } from '../../../common';
+import { catchError, lastValueFrom, of } from 'rxjs';
+import {
+  MessageRole,
+  ShortIdTable,
+  type Message,
+  SELECT_RELEVANT_FIELDS_NAME,
+} from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
-import { FunctionCallChatFunction } from '../../service/types';
+import type { FunctionCallChatFunction } from '../../service/types';
+
+export const GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE = `You are a helpful assistant for Elastic Observability. 
+Your task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list. 
+The list in the user message consists of JSON objects that map a human-readable field "name" to its unique "id". 
+You must not output any field names — only the corresponding "id" values. Ensure that your output follows the exact JSON format specified.`;
 
 export async function getRelevantFieldNames({
   index,
@@ -23,6 +34,7 @@ export async function getRelevantFieldNames({
   chat,
   messages,
   signal,
+  logger,
 }: {
   index: string | string[];
   start?: string;
@@ -33,6 +45,7 @@ export async function getRelevantFieldNames({
   messages: Message[];
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
+  logger: Logger;
 }): Promise<{ fields: string[]; stats: { analyzed: number; total: number } }> {
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
 
@@ -100,36 +113,32 @@ export async function getRelevantFieldNames({
         await chat('get_relevant_dataset_names', {
           signal,
           stream: true,
+          systemMessage: GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE,
           messages: [
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.System,
-                content: `You are a helpful assistant for Elastic Observability.
-            Your task is to create a list of field names that are relevant
-            to the conversation, using ONLY the list of fields and
-            types provided in the last user message. DO NOT UNDER ANY
-            CIRCUMSTANCES include fields not mentioned in this list.`,
-              },
-            },
-            // remove the system message and the function request
-            ...messages.slice(1, -1),
+            // remove the last function request
+            ...messages.slice(0, -1),
             {
               '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.User,
-                content: `This is the list:
+                content: `Below is a list of fields. Each entry is a JSON object that contains a "name" (the field name) and an "id" (the unique identifier). Use only the "id" values from this list when selecting relevant fields:
 
             ${fieldsInChunk
-              .map((field) => JSON.stringify({ field, id: shortIdTable.take(field) }))
+              .map((fieldName) =>
+                JSON.stringify({ name: fieldName, id: shortIdTable.take(fieldName) })
+              )
               .join('\n')}`,
               },
             },
           ],
           functions: [
             {
-              name: 'select_relevant_fields',
-              description: 'The IDs of the fields you consider relevant to the conversation',
+              name: SELECT_RELEVANT_FIELDS_NAME,
+              description: `Return only the field IDs (from the provided list) that you consider relevant to the conversation. Do not use any of the field names. Your response must be in the exact JSON format:
+              {
+                "fieldIds": ["id1", "id2", "id3"]
+              }
+              Only include IDs from the list provided in the user message.`,
               parameters: {
                 type: 'object',
                 properties: {
@@ -144,9 +153,33 @@ export async function getRelevantFieldNames({
               } as const,
             },
           ],
-          functionCall: 'select_relevant_fields',
+          functionCall: SELECT_RELEVANT_FIELDS_NAME,
         })
-      ).pipe(concatenateChatCompletionChunks());
+      ).pipe(
+        concatenateChatCompletionChunks(),
+        catchError((error) => {
+          logger.error(
+            `Encountered error running function ${SELECT_RELEVANT_FIELDS_NAME}: ${JSON.stringify(
+              error
+            )}`
+          );
+
+          if (isInferenceRequestAbortedError(error)) {
+            // return empty fieldIds for chunk
+            return of({
+              message: {
+                content: '',
+                function_call: {
+                  name: SELECT_RELEVANT_FIELDS_NAME,
+                  arguments: JSON.stringify({ fieldIds: [] }),
+                },
+                role: 'assistant',
+              },
+            });
+          }
+          throw error;
+        })
+      );
 
       const chunkResponse = await lastValueFrom(chunkResponse$);
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiStepsProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -17,13 +18,13 @@ import {
   EuiSkeletonRectangle,
   EuiSpacer,
   EuiSteps,
-  EuiStepsProps,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Buffer } from 'buffer';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { intersection } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { StepStatus } from './step_status';

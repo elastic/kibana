@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { kvState } from '../../../__jest__/fixtures/kv';
 import type { KVState } from '../../types';
 import { handleKV } from './kv';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const model = new FakeLLM({
   response: JSON.stringify('exampleAnswer'),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 const state: KVState = kvState;
 
@@ -56,8 +53,8 @@ describe('Testing kv header', () => {
           field: 'message',
           field_split: '',
           target_field: 'testPackage.testDatastream',
-          trim_key: '',
-          trim_value: '',
+          trim_key: null,
+          trim_value: null,
           value_split: '',
         },
       },

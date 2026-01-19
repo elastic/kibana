@@ -6,7 +6,8 @@
  */
 
 import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useRef, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
@@ -19,14 +20,17 @@ import {
 import { useFilters } from '../../../common/monitor_filters/use_filters';
 import { GroupGridItem } from './grid_group_item';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
+import type { OverviewView } from '../../../../../state';
 import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
-import { FlyoutParamProps } from '../types';
+import type { FlyoutParamProps } from '../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 
 export const GridItemsByGroup = ({
   setFlyoutConfigCallback,
+  view,
 }: {
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  view: OverviewView;
 }) => {
   const [fullScreenGroup, setFullScreenGroup] = useState('');
   const {
@@ -50,7 +54,8 @@ export const GridItemsByGroup = ({
     values: getSyntheticsFilterDisplayValues(locations, 'locations', allLocations),
     otherValues: {
       label: 'Without any location',
-      items: allConfigs?.filter((monitor) => get(monitor, 'locations', []).length === 0),
+      // All monitors should have a locationId. This array tracks monitors that are missing it, which helps identify potential issues
+      items: allConfigs?.filter((monitor) => !get(monitor, 'locationId')),
     },
   };
 
@@ -80,7 +85,8 @@ export const GridItemsByGroup = ({
               defaultMessage: 'Without any location',
             }
           ),
-          items: allConfigs?.filter((monitor) => !get(monitor, 'location')),
+          // All monitors should have a locationId. This array tracks monitors that are missing it, which helps identify potential issues
+          items: allConfigs?.filter((monitor) => !get(monitor, 'locationId')),
         },
       };
       break;
@@ -147,6 +153,7 @@ export const GridItemsByGroup = ({
                 setFlyoutConfigCallback={setFlyoutConfigCallback}
                 setFullScreenGroup={setFullScreenGroup}
                 fullScreenGroup={fullScreenGroup}
+                view={view}
               />
             </WrappedPanel>
             <EuiSpacer size="m" />
@@ -162,6 +169,7 @@ export const GridItemsByGroup = ({
             setFlyoutConfigCallback={setFlyoutConfigCallback}
             setFullScreenGroup={setFullScreenGroup}
             fullScreenGroup={fullScreenGroup}
+            view={view}
           />
         </WrappedPanel>
       )}

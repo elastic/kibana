@@ -18,6 +18,7 @@ export interface AgentStatusClientOptions {
   endpointService: EndpointAppContextService;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  spaceId: string;
   connectorActionsClient?: ActionsClient;
 }
 

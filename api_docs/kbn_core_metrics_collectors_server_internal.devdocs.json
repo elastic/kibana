@@ -26,6 +26,8 @@
           ">"
         ],
         "path": "src/core/packages/metrics/collectors-server-internal/src/elasticsearch_client.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/elasticsearch_client.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -54,6 +58,8 @@
                   "AgentStatsProvider"
                 ],
                 "path": "src/core/packages/metrics/collectors-server-internal/src/elasticsearch_client.ts",
+                "lineNumber": 16,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -74,6 +80,8 @@
               ">"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/elasticsearch_client.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -90,6 +98,8 @@
               "() => void"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/elasticsearch_client.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -114,6 +124,8 @@
           ">"
         ],
         "path": "src/core/packages/metrics/collectors-server-internal/src/event_loop_delays_monitor.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -130,6 +142,8 @@
               "any"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/event_loop_delays_monitor.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -149,6 +163,8 @@
               "IntervalHistogram"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/event_loop_delays_monitor.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -167,6 +183,8 @@
               "() => void"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/event_loop_delays_monitor.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -185,6 +203,8 @@
               "() => void"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/event_loop_delays_monitor.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -209,6 +229,8 @@
           ">"
         ],
         "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,6 +245,8 @@
               "any"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -237,6 +261,8 @@
                   "OsMetricsCollectorOptions"
                 ],
                 "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+                "lineNumber": 37,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -257,6 +283,8 @@
               ">"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -273,6 +301,26 @@
               "() => void"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.OsMetricsCollector.registerMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "registerMetrics",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -297,6 +345,8 @@
           "[]>"
         ],
         "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -315,6 +365,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -330,6 +382,8 @@
                   "[]"
                 ],
                 "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
+                "lineNumber": 18,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -350,6 +404,26 @@
               "[]"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.ProcessMetricsCollector.registerMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "registerMetrics",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -366,6 +440,8 @@
               "() => void"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -390,6 +466,8 @@
           ">"
         ],
         "path": "src/core/packages/metrics/collectors-server-internal/src/server.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -404,6 +482,8 @@
               "any"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/server.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -421,6 +501,8 @@
                   ">"
                 ],
                 "path": "src/core/packages/metrics/collectors-server-internal/src/server.ts",
+                "lineNumber": 31,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -441,6 +523,8 @@
               ">"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/server.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -457,6 +541,8 @@
               "() => void"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/server.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -476,6 +562,8 @@
         "label": "OsMetricsCollectorOptions",
         "description": [],
         "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -496,6 +584,8 @@
               }
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -510,6 +600,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -524,6 +616,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

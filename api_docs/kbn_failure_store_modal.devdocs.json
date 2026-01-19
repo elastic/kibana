@@ -1,0 +1,83 @@
+{
+  "id": "@kbn/failure-store-modal",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/failure-store-modal",
+        "id": "def-public.FailureStoreModal",
+        "type": "Function",
+        "tags": [],
+        "label": "FailureStoreModal",
+        "description": [],
+        "signature": [
+          "({ onCloseModal, onSaveModal, failureStoreProps, showIlmDescription, inheritOptions, canShowDisableLifecycle, disableButtonLabel, }: Props) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-failure-store-modal/src/components/failure_store_modal/failure_store_modal.tsx",
+        "lineNumber": 71,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/failure-store-modal",
+            "id": "def-public.FailureStoreModal.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onCloseModal,\n  onSaveModal,\n  failureStoreProps,\n  showIlmDescription = true,\n  inheritOptions,\n  canShowDisableLifecycle = false,\n  disableButtonLabel,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-failure-store-modal/src/components/failure_store_modal/failure_store_modal.tsx",
+            "lineNumber": 71,
+            "columnNumber": 61,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/failure-store-modal",
+        "id": "def-public.FailureStoreFormData",
+        "type": "Type",
+        "tags": [],
+        "label": "FailureStoreFormData",
+        "description": [],
+        "signature": [
+          "{ failureStoreEnabled: boolean; } & ({ inherit: boolean; } | { customRetentionPeriod?: string | undefined; } | { retentionDisabled?: boolean | undefined; })"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-failure-store-modal/src/components/failure_store_modal/failure_store_modal.tsx",
+        "lineNumber": 51,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

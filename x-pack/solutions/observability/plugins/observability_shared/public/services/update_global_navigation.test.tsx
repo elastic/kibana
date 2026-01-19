@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
+import type { Subject } from 'rxjs';
+import type { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
+import { type PricingServiceStart } from '@kbn/core/public';
 import { casesFeatureId } from '../../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
 const app = {} as unknown as App;
+const pricing = {
+  isFeatureAvailable: (featureId: string) => {
+    // Mock implementation for testing purposes
+    return featureId === 'observability:complete_overview';
+  },
+} as unknown as PricingServiceStart;
 
 describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
     it('hides the overview link', () => {
       const capabilities = {
+        logs: { show: false },
         navLinks: { apm: false, logs: false, metrics: false, uptime: false },
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
@@ -25,7 +33,7 @@ describe('updateGlobalNavigation', () => {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
 
-      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+      updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
@@ -37,6 +45,7 @@ describe('updateGlobalNavigation', () => {
   describe('when one observability app is enabled', () => {
     it('shows the overview link', () => {
       const capabilities = {
+        logs: { show: true },
         navLinks: { apm: true, logs: false, metrics: false, uptime: false },
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
@@ -45,11 +54,11 @@ describe('updateGlobalNavigation', () => {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
 
-      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+      updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
-        visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+        visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
       });
     });
 
@@ -57,6 +66,7 @@ describe('updateGlobalNavigation', () => {
       it('shows the cases deep link', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
+          logs: { show: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
@@ -75,7 +85,7 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
@@ -84,7 +94,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'], // visibility set
             },
           ],
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });
@@ -93,6 +103,7 @@ describe('updateGlobalNavigation', () => {
       it('hides the cases deep link', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: false },
+          logs: { show: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
@@ -111,11 +122,11 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [], // Deeplink has been filtered out
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });
@@ -124,6 +135,7 @@ describe('updateGlobalNavigation', () => {
       it('shows the alerts deep link', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
+          logs: { show: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
@@ -141,7 +153,7 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
@@ -153,7 +165,44 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'],
             },
           ],
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+        });
+      });
+
+      it('shows the alerts deep link for logs', () => {
+        const capabilities = {
+          [casesFeatureId]: { read_cases: true },
+          logs: { show: true },
+          navLinks: { apm: false, logs: false, metrics: false, uptime: false },
+        } as unknown as ApplicationStart['capabilities'];
+
+        const deepLinks = [
+          {
+            id: 'alerts',
+            title: 'Alerts',
+            order: 8001,
+            path: '/alerts',
+            visibleIn: [],
+          },
+        ];
+        const callback = jest.fn();
+        const updater$ = {
+          next: (cb: AppUpdater) => callback(cb(app)),
+        } as unknown as Subject<AppUpdater>;
+
+        updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
+
+        expect(callback).toHaveBeenCalledWith({
+          deepLinks: [
+            {
+              id: 'alerts',
+              title: 'Alerts',
+              order: 8001,
+              path: '/alerts',
+              visibleIn: ['sideNav', 'globalSearch'],
+            },
+          ],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });

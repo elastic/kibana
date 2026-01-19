@@ -16,7 +16,7 @@ import { createValidationFunction } from '../../../../lib/create_route_validatio
 import { getMlJobs } from '../../../../lib/elasticsearch/get_ml_jobs';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 
 export function mlJobRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postElasticsearchMlJobsRequestParamsRT);
@@ -25,6 +25,12 @@ export function mlJobRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ml_jobs',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

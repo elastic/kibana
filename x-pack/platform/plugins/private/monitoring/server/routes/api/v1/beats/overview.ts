@@ -15,7 +15,7 @@ import { createValidationFunction } from '../../../../lib/create_route_validatio
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
 import { getIndexPatterns } from '../../../../../common/get_index_patterns';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_overview';
 
 export function beatsOverviewRoute(server: MonitoringCore) {
@@ -25,6 +25,12 @@ export function beatsOverviewRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/beats',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

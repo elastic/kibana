@@ -16,6 +16,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type {
   UpdatePacksRequestParamsSchema,
   UpdatePacksRequestBodySchema,
@@ -34,10 +35,11 @@ import {
   findMatchingShards,
 } from './utils';
 
-import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
+import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
+import { getUserInfo } from '../../lib/get_user_info';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -69,24 +71,31 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       async (context, request, response) => {
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
-        const savedObjectsClient = coreContext.savedObjects.client;
-        const internalSavedObjectsClient = await getInternalSavedObjectsClient(
-          osqueryContext.getStartServices
+
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
         );
+
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const currentUser = await getUserInfo({
+          request,
+          security: osqueryContext.security,
+          logger: osqueryContext.logFactory.get('pack'),
+        });
+        const username = currentUser?.username ?? undefined;
+
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
 
-        const currentPackSO = await savedObjectsClient.get<{ name: string; enabled: boolean }>(
+        const currentPackSO = await spaceScopedClient.get<{ name: string; enabled: boolean }>(
           packSavedObjectType,
           request.params.id
         );
 
         if (name) {
-          const conflictingEntries = await savedObjectsClient.find<PackSavedObject>({
+          const conflictingEntries = await spaceScopedClient.find<PackSavedObject>({
             type: packSavedObjectType,
             filter: `${packSavedObjectType}.attributes.name: "${name}"`,
           });
@@ -101,14 +110,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }
         }
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(
-          internalSavedObjectsClient,
-          {
-            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-            perPage: 1000,
-            page: 1,
-          }
-        )) ?? { items: [] };
+        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          perPage: 1000,
+          page: 1,
+        })) ?? { items: [] };
         const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
           has(
             packagePolicy,
@@ -128,10 +134,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           });
         }
 
-        const agentPolicies = await agentPolicyService?.getByIds(
-          internalSavedObjectsClient,
-          policiesList
-        );
+        const agentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, policiesList);
 
         const policyShards = findMatchingShards(agentPolicies, shards);
 
@@ -158,7 +161,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const references = getUpdatedReferences();
 
-        await savedObjectsClient.update<PackSavedObject>(
+        await spaceScopedClient.update<PackSavedObject>(
           packSavedObjectType,
           request.params.id,
           {
@@ -167,7 +170,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             description: description || '',
             queries: queries && convertPackQueriesToSO(queries),
             updated_at: moment().toISOString(),
-            updated_by: currentUser,
+            updated_by: username,
             shards: convertShardsToArray(shards),
           },
           {
@@ -180,7 +183,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           filter(currentPackSO.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
         );
-        const updatedPackSO = await savedObjectsClient.get<PackSavedObject>(
+        const updatedPackSO = await spaceScopedClient.get<PackSavedObject>(
           packSavedObjectType,
           request.params.id
         );
@@ -203,7 +206,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 );
                 if (packagePolicy) {
                   return packagePolicyService?.update(
-                    internalSavedObjectsClient,
+                    spaceScopedClient,
                     esClient,
                     packagePolicy.id,
                     produce<PackagePolicy>(packagePolicy, (draft) => {
@@ -235,7 +238,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 if (!packagePolicy) return;
 
                 return packagePolicyService?.update(
-                  internalSavedObjectsClient,
+                  spaceScopedClient,
                   esClient,
                   packagePolicy.id,
                   produce<PackagePolicy>(packagePolicy, (draft) => {
@@ -266,7 +269,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               );
               if (packagePolicy) {
                 return packagePolicyService?.update(
-                  internalSavedObjectsClient,
+                  spaceScopedClient,
                   esClient,
                   packagePolicy.id,
                   produce<PackagePolicy>(packagePolicy, (draft) => {
@@ -290,7 +293,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               );
               if (packagePolicy) {
                 return packagePolicyService?.update(
-                  internalSavedObjectsClient,
+                  spaceScopedClient,
                   esClient,
                   packagePolicy.id,
                   produce<PackagePolicy>(packagePolicy, (draft) => {
@@ -326,7 +329,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
               if (packagePolicy) {
                 return packagePolicyService?.update(
-                  internalSavedObjectsClient,
+                  spaceScopedClient,
                   esClient,
                   packagePolicy.id,
                   produce<PackagePolicy>(packagePolicy, (draft) => {

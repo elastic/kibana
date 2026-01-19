@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
-import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../../common/constants';
+import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { EmptyState } from '../../../components/empty_state';
 import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -125,7 +125,6 @@ export const LatestFindingsContainer = () => {
               ...currentGroupFilters,
               ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
             ]}
-            height={DEFAULT_GROUPING_TABLE_HEIGHT}
             showDistributionBar={selectedGroupOptions.includes('none')}
           />
         );
@@ -145,7 +144,12 @@ export const LatestFindingsContainer = () => {
   if (error || isEmptyResults) {
     return (
       <>
-        <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
+        <FindingsSearchBar
+          query={urlQuery}
+          setQuery={setUrlQuery}
+          loading={isFetching}
+          refreshQueryKey={CDR_MISCONFIGURATIONS_INDEX_PATTERN}
+        />
         <EuiSpacer size="m" />
         {error && <ErrorCallout error={error} />}
         {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
@@ -155,7 +159,12 @@ export const LatestFindingsContainer = () => {
 
   return (
     <>
-      <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
+      <FindingsSearchBar
+        query={urlQuery}
+        setQuery={setUrlQuery}
+        loading={isFetching}
+        refreshQueryKey={CDR_MISCONFIGURATIONS_INDEX_PATTERN}
+      />
       <div>
         {renderChildComponent({
           level: 0,

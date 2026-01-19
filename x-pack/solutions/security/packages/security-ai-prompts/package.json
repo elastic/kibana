@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/security-ai-prompts",
+  "version": "1.0.0",
+  "description": "Utility library for Elasticsearch index management",
+  "license": "Elastic License 2.0",
+  "private": true
+}

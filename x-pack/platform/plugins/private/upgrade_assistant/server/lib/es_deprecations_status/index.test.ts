@@ -7,14 +7,14 @@
 
 import _ from 'lodash';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import fakeDeprecations from '../__fixtures__/fake_deprecations.json';
 import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
 import * as esMigrationsMock from '../__fixtures__/es_deprecations';
-import type { FeatureSet } from '../../../common/types';
+import type { DataSourceExclusions, FeatureSet } from '../../../common/types';
 import { getESUpgradeStatus } from '.';
-import { MigrationDeprecationsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { MigrationDeprecationsResponse } from '@elastic/elasticsearch/lib/api/types';
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
 
 describe('getESUpgradeStatus', () => {
@@ -24,6 +24,7 @@ describe('getESUpgradeStatus', () => {
     mlSnapshots: true,
     migrateDataStreams: true,
   };
+  const dataSourceExclusions: DataSourceExclusions = {};
 
   const resolvedIndices = {
     indices: fakeIndexNames.map((indexName) => {
@@ -38,13 +39,13 @@ describe('getESUpgradeStatus', () => {
   // @ts-expect-error mock data is too loosely typed
   const deprecationsResponse: estypes.MigrationDeprecationsResponse = _.cloneDeep(fakeDeprecations);
 
-  const esClient = elasticsearchServiceMock.createScopedClusterClient();
+  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 
-  esClient.asCurrentUser.healthReport.mockResponse({ cluster_name: 'mock', indicators: {} });
+  esClient.healthReport.mockResponse({ cluster_name: 'mock', indicators: {} });
 
-  esClient.asCurrentUser.migration.deprecations.mockResponse(deprecationsResponse);
+  esClient.migration.deprecations.mockResponse(deprecationsResponse);
 
-  esClient.asCurrentUser.transport.request.mockResolvedValue({
+  esClient.transport.request.mockResolvedValue({
     features: [
       {
         feature_name: 'machine_learning',
@@ -62,20 +63,44 @@ describe('getESUpgradeStatus', () => {
   });
 
   // @ts-expect-error not full interface of response
-  esClient.asCurrentUser.indices.resolveIndex.mockResponse(resolvedIndices);
+  esClient.indices.resolveIndex.mockResponse(resolvedIndices);
+
+  // Mock the indices.stats API call for index sizes
+  esClient.indices.stats.mockResponse({
+    _shards: { failed: 0, successful: 1, total: 1 },
+    _all: {},
+    indices: {
+      'test-index-1': {
+        total: {
+          store: {
+            size_in_bytes: 500000000, // 500MB
+            reserved_in_bytes: 500000000, // 500MB
+          },
+        },
+      },
+      'test-index-2': {
+        total: {
+          store: {
+            size_in_bytes: 1500000000, // 1.5GB
+            reserved_in_bytes: 500000000, // 500MB
+          },
+        },
+      },
+    },
+  });
 
   it('calls /_migration/deprecations', async () => {
-    await getESUpgradeStatus(esClient, featureSet);
-    expect(esClient.asCurrentUser.migration.deprecations).toHaveBeenCalled();
+    await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
+    expect(esClient.migration.deprecations).toHaveBeenCalled();
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getESUpgradeStatus(esClient, featureSet);
+    const resp = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
     expect(resp).toMatchSnapshot();
   });
 
   it('returns totalCriticalDeprecations > 0 when critical issues found', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       // @ts-expect-error not full interface
       cluster_settings: [{ level: 'critical', message: 'Do count me', url: 'https://...' }],
       node_settings: [],
@@ -86,14 +111,13 @@ describe('getESUpgradeStatus', () => {
       templates: {},
     });
 
-    await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
-      'totalCriticalDeprecations',
-      1
-    );
+    await expect(
+      getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions })
+    ).resolves.toHaveProperty('totalCriticalDeprecations', 1);
   });
 
   it('returns totalCriticalDeprecations === 0 when no critical issues found', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       // @ts-expect-error not full interface
       cluster_settings: [{ level: 'warning', message: 'Do not count me', url: 'https://...' }],
       node_settings: [],
@@ -104,14 +128,13 @@ describe('getESUpgradeStatus', () => {
       templates: {},
     });
 
-    await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
-      'totalCriticalDeprecations',
-      0
-    );
+    await expect(
+      getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions })
+    ).resolves.toHaveProperty('totalCriticalDeprecations', 0);
   });
 
   it('filters out system indices returned by upgrade system indices API', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       cluster_settings: [],
       node_settings: [],
       ml_settings: [],
@@ -127,12 +150,11 @@ describe('getESUpgradeStatus', () => {
         ],
       },
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
+    const upgradeStatus = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
     const {
       totalCriticalDeprecations,
       migrationsDeprecations,
@@ -149,10 +171,13 @@ describe('getESUpgradeStatus', () => {
       ...esMigrationsMock.getMockEsDeprecations(),
       ...esMigrationsMock.getMockMlSettingsDeprecations(),
     };
-    // @ts-ignore missing property definitions in ES resolve_during_rolling_upgrade and _meta
-    esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
+    // @ts-expect-error missing property definitions in ES resolve_during_rolling_upgrade and _meta
+    esClient.migration.deprecations.mockResponse(mockResponse);
 
-    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
+    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, {
+      featureSet,
+      dataSourceExclusions,
+    });
     expect([
       ...enabledUpgradeStatus.migrationsDeprecations,
       ...enabledUpgradeStatus.enrichedHealthIndicators,
@@ -160,8 +185,11 @@ describe('getESUpgradeStatus', () => {
     expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
 
     const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
-      ...featureSet,
-      mlSnapshots: false,
+      featureSet: {
+        ...featureSet,
+        mlSnapshots: false,
+      },
+      dataSourceExclusions,
     });
 
     expect([
@@ -176,9 +204,12 @@ describe('getESUpgradeStatus', () => {
       ...esMigrationsMock.getMockEsDeprecations(),
       ...esMigrationsMock.getMockDataStreamDeprecations(),
     } as MigrationDeprecationsResponse;
-    esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
+    esClient.migration.deprecations.mockResponse(mockResponse);
 
-    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
+    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, {
+      featureSet,
+      dataSourceExclusions,
+    });
     expect([
       ...enabledUpgradeStatus.migrationsDeprecations,
       ...enabledUpgradeStatus.enrichedHealthIndicators,
@@ -186,8 +217,11 @@ describe('getESUpgradeStatus', () => {
     expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
 
     const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
-      ...featureSet,
-      migrateDataStreams: false,
+      featureSet: {
+        ...featureSet,
+        migrateDataStreams: false,
+      },
+      dataSourceExclusions,
     });
 
     expect([
@@ -198,7 +232,7 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('filters out reindex corrective actions if featureSet.reindexCorrectiveActions is set to false', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       cluster_settings: [],
       node_settings: [
         {
@@ -206,29 +240,35 @@ describe('getESUpgradeStatus', () => {
           message: 'Index created before 7.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
           details: 'This index was created using version: 6.8.13',
-          // @ts-ignore
           resolve_during_rolling_upgrade: false,
+          _meta: {
+            reindex_required: true,
+          },
         },
         {
           level: 'critical',
           message: 'Index created before 7.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
           details: 'This index was created using version: 6.8.13',
-          // @ts-ignore
           resolve_during_rolling_upgrade: false,
+          _meta: {
+            reindex_required: true,
+          },
         },
       ],
       ml_settings: [],
       index_settings: {},
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, {
-      ...featureSet,
-      reindexCorrectiveActions: false,
+      dataSourceExclusions,
+      featureSet: {
+        ...featureSet,
+        reindexCorrectiveActions: false,
+      },
     });
 
     expect([
@@ -239,7 +279,7 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('returns health indicators', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       cluster_settings: [],
       node_settings: [
         {
@@ -247,28 +287,29 @@ describe('getESUpgradeStatus', () => {
           message: 'Index created before 7.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
           details: 'This index was created using version: 6.8.13',
-          // @ts-ignore
           resolve_during_rolling_upgrade: false,
+          _meta: {
+            reindex_required: true,
+          },
         },
       ],
       ml_settings: [],
       index_settings: {},
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
 
-    esClient.asCurrentUser.healthReport.mockResponse({
+    esClient.healthReport.mockResponse({
       cluster_name: 'mock',
       indicators: {
         disk: healthIndicatorsMock.diskIndicatorGreen,
-        // @ts-ignore
+        // @ts-expect-error
         shards_capacity: healthIndicatorsMock.shardCapacityIndicatorRed,
       },
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
+    const upgradeStatus = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
     expect(upgradeStatus.totalCriticalHealthIssues + upgradeStatus.totalCriticalDeprecations).toBe(
       2
     );
@@ -296,7 +337,7 @@ describe('getESUpgradeStatus', () => {
             "type": "healthIndicator",
           },
           "details": "Cluster is close to reaching the configured maximum number of shards for data nodes.",
-          "isCritical": true,
+          "level": "critical",
           "message": "Elasticsearch is about to reach the maximum number of shards it can host, based on your current settings.",
           "resolveDuringUpgrade": false,
           "type": "health_indicator",
@@ -304,11 +345,17 @@ describe('getESUpgradeStatus', () => {
         },
         Object {
           "correctiveAction": Object {
+            "excludedActions": Array [],
+            "metadata": Object {
+              "isClosedIndex": false,
+              "isFrozenIndex": false,
+              "isInDataStream": false,
+            },
             "type": "reindex",
           },
           "details": "This index was created using version: 6.8.13",
           "index": undefined,
-          "isCritical": true,
+          "level": "critical",
           "message": "Index created before 7.0",
           "resolveDuringUpgrade": false,
           "type": "node_settings",

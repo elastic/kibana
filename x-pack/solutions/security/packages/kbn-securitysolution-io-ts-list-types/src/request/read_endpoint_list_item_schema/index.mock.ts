@@ -7,7 +7,7 @@
 
 import { ID, ITEM_ID } from '../../constants/index.mock';
 
-import { ReadEndpointListItemSchema } from '.';
+import type { ReadEndpointListItemSchema } from '.';
 
 export const getReadEndpointListItemSchemaMock = (): ReadEndpointListItemSchema => ({
   id: ID,

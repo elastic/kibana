@@ -5,48 +5,96 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import rison from '@kbn/rison';
-import {
+import type {
   DataStreamDegradedDocsResponse,
   DataStreamFailedDocsResponse,
   DataStreamTotalDocsResponse,
+  IntegrationsResponse,
+  NonAggregatableDatasets,
+  UpdateFailureStoreResponse,
+} from '../../../common/api_types';
+import {
   getDataStreamDegradedDocsResponseRt,
   getDataStreamFailedDocsResponseRt,
   getDataStreamsStatsResponseRt,
+  getDataStreamsTypesPrivilegesResponseRt,
   getDataStreamTotalDocsResponseRt,
   getIntegrationsResponseRt,
   getNonAggregatableDatasetsRt,
-  IntegrationsResponse,
-  NonAggregatableDatasets,
+  updateFailureStoreResponseRt,
 } from '../../../common/api_types';
 import { KNOWN_TYPES } from '../../../common/constants';
-import {
+import type {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsFailedDocsStatsQuery,
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
   GetDataStreamsTotalDocsQuery,
+  GetDataStreamsTypesPrivilegesQuery,
+  GetDataStreamsTypesPrivilegesResponse,
   GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { DatasetQualityError } from '../../../common/errors';
-import { IDataStreamsStatsClient } from './types';
+import type { IDataStreamsStatsClient } from './types';
+import type { ITelemetryClient } from '../telemetry';
 
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(
+    private readonly http: HttpStart,
+    private readonly telemetryClient?: ITelemetryClient
+  ) {}
+
+  public async getDataStreamsTypesPrivileges(
+    params: GetDataStreamsTypesPrivilegesQuery
+  ): Promise<GetDataStreamsTypesPrivilegesResponse> {
+    const types =
+      'types' in params
+        ? rison.encodeArray(params.types.length === 0 ? KNOWN_TYPES : params.types)
+        : undefined;
+
+    const response = await this.http
+      .get<GetDataStreamsTypesPrivilegesResponse>(
+        '/internal/dataset_quality/data_streams/types_privileges',
+        {
+          query: {
+            ...params,
+            types,
+          },
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(
+          `Failed to fetch data streams types privileges: ${error}`,
+          error
+        );
+      });
+
+    const { datasetTypesPrivileges } = decodeOrThrow(
+      getDataStreamsTypesPrivilegesResponseRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode data streams types privileges: ${message}`)
+    )(response);
+
+    return { datasetTypesPrivileges };
+  }
 
   public async getDataStreamsStats(
     params: GetDataStreamsStatsQuery
   ): Promise<DataStreamStatServiceResponse> {
-    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
+    const types =
+      'types' in params
+        ? rison.encodeArray(params.types.length === 0 ? KNOWN_TYPES : params.types)
+        : undefined;
     const response = await this.http
       .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/data_streams/stats', {
         query: {
           ...params,
-          types: rison.encodeArray(types),
+          types,
         },
       })
       .catch((error) => {
@@ -85,12 +133,11 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   }
 
   public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {
-    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
     const response = await this.http
       .get<DataStreamDegradedDocsResponse>('/internal/dataset_quality/data_streams/degraded_docs', {
         query: {
           ...params,
-          types: rison.encodeArray(types),
+          types: rison.encodeArray(params.types),
         },
       })
       .catch((error) => {
@@ -112,12 +159,11 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   }
 
   public async getDataStreamsFailedStats(params: GetDataStreamsFailedDocsStatsQuery) {
-    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
     const response = await this.http
       .get<DataStreamFailedDocsResponse>('/internal/dataset_quality/data_streams/failed_docs', {
         query: {
           ...params,
-          types: rison.encodeArray(types),
+          types: rison.encodeArray(params.types),
         },
       })
       .catch((error) => {
@@ -136,12 +182,11 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   }
 
   public async getNonAggregatableDatasets(params: GetNonAggregatableDataStreamsParams) {
-    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
     const response = await this.http
       .get<NonAggregatableDatasets>('/internal/dataset_quality/data_streams/non_aggregatable', {
         query: {
           ...params,
-          types: rison.encodeArray(types),
+          types: rison.encodeArray(params.types),
         },
       })
       .catch((error) => {
@@ -171,5 +216,41 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return integrations.map(Integration.create);
+  }
+
+  public async updateFailureStore({
+    dataStream,
+    failureStoreEnabled,
+    customRetentionPeriod,
+  }: {
+    dataStream: string;
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  }): Promise<UpdateFailureStoreResponse> {
+    const response = await this.http
+      .put<UpdateFailureStoreResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/update_failure_store`,
+        {
+          body: JSON.stringify({
+            failureStoreEnabled,
+            customRetentionPeriod,
+          }),
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
+      });
+
+    this.telemetryClient?.trackFailureStoreUpdated({
+      data_stream_name: dataStream,
+      failure_store_enabled: failureStoreEnabled,
+      custom_retention_period: customRetentionPeriod,
+    });
+
+    return decodeOrThrow(
+      updateFailureStoreResponseRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode update failure store response: ${message}"`)
+    )(response);
   }
 }

@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosHeaders, AxiosInstance, AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
+import type { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosHeaders } from 'axios';
+import type { Logger } from '@kbn/core/server';
 import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import {
+import type {
+  ServiceNowSecretConfigurationType,
+  ServiceNowPublicConfigurationType,
+} from '@kbn/connector-schemas/servicenow';
+import type {
   ExternalServiceCredentials,
   Incident,
   PartialIncident,
   ResponseError,
   ServiceNowError,
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
 } from './types';
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';
@@ -53,20 +56,12 @@ const createErrorMessage = (errorResponse?: ServiceNowError): string => {
     : 'unknown: no error in error response';
 };
 
-export const createServiceError = (error: ResponseError, message: string): AxiosError => {
-  const serviceError = new AxiosError(
-    getErrorMessage(
-      i18n.SERVICENOW,
-      `${message}. Error: ${error.message} Reason: ${createErrorMessage(error.response?.data)}`
-    )
+export const addServiceMessageToError = (error: ResponseError, message: string): AxiosError => {
+  error.message = getErrorMessage(
+    i18n.SERVICENOW,
+    `${message}. Error: ${error.message} Reason: ${createErrorMessage(error.response?.data)}`
   );
-
-  serviceError.code = error.code;
-  serviceError.config = error.config;
-  serviceError.request = error.request;
-  serviceError.response = error.response;
-
-  return serviceError;
+  return error;
 };
 
 export const getPushedDate = (timestamp?: string) => {

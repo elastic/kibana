@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { OBSERVABLE_TYPE_IPV4 } from '../../common/constants';
+import { OBSERVABLE_TYPE_EMAIL, OBSERVABLE_TYPE_IPV4 } from '../../common/constants';
 import { createCasesClientMock } from './mocks';
 import {
   validateDuplicatedKeysInRequest,
   validateDuplicatedObservableTypesInRequest,
   validateDuplicatedObservablesInRequest,
   validateObservableTypeKeyExists,
+  validateObservableValue,
 } from './validators';
 
 describe('validators', () => {
@@ -218,6 +219,22 @@ describe('validators', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Invalid observable type, key does not exist: random key"`
       );
+    });
+  });
+
+  describe('validateObservableValue', () => {
+    it('throws an error if any observable value is not valid', async () => {
+      expect(() =>
+        validateObservableValue(OBSERVABLE_TYPE_EMAIL.key, 'test')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Observable value \\"test\\" is not valid for selected observable type observable-type-email."`
+      );
+    });
+
+    it('does not throw when obserable value is valid', async () => {
+      expect(() =>
+        validateObservableValue(OBSERVABLE_TYPE_EMAIL.key, 'test@test.com')
+      ).not.toThrow();
     });
   });
 });

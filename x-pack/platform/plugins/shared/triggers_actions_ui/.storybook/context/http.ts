@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { DecoratorFn } from '@storybook/react';
+import type { StoryContext } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { HttpStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
 import {
@@ -304,7 +304,7 @@ const rulesListIds = [
   'app-ruleslist--with-paginated-rules',
 ];
 
-export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
+export const getHttp = (context: StoryContext) => {
   return {
     get: (async (path: string, options: HttpFetchOptions) => {
       const { id } = context;

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 import { aggCountFnName } from './count_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
@@ -47,6 +47,10 @@ export const getCountMetricAgg = () =>
       }
       if (value === 0 && agg.params.emptyAsNull) {
         return null;
+      }
+      if (value == null) {
+        // if the value is undefined, respect the emptyAsNull flag
+        return agg.params.emptyAsNull ? null : 0;
       }
       return value;
     },

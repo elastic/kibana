@@ -14,7 +14,7 @@ import { ThresholdIndicator } from '../components/thershold_indicator';
 import { useNetworkTimings } from '../../step_details_page/hooks/use_network_timings';
 import { useNetworkTimingsPrevious24Hours } from '../../step_details_page/hooks/use_network_timings_prev';
 import { formatMillisecond } from '../../step_details_page/common/network_data/data_formatting';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { parseBadgeStatus, StatusBadge } from './status_badge';
 import { useStepPrevMetrics } from '../../step_details_page/hooks/use_step_prev_metrics';
 
@@ -31,8 +31,8 @@ export const ResultDetails = ({
 }) => {
   return (
     <div>
-      <EuiText className="eui-textNoWrap" size="s">
-        <StatusBadge status={parseBadgeStatus(pingStatus)} />{' '}
+      <StatusBadge status={parseBadgeStatus(pingStatus)} />
+      <EuiText size="s">
         {!testNowMode
           ? i18n.translate('xpack.synthetics.step.duration.label', {
               defaultMessage: 'after {value}',

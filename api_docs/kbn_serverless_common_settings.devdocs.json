@@ -32,7 +32,9 @@
         "signature": [
           "string[]"
         ],
-        "path": "src/platform/packages/private/serverless/settings/common/index.ts",
+        "path": "src/platform/packages/shared/serverless/settings/common/index.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

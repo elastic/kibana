@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
-import { ActionType } from '../types';
-import { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
+import type { ActionType } from '../types';
+import type { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
 
 const ServerLogActionTypeId = '.server-log';
 const IndexActionTypeId = '.index';

@@ -8,14 +8,13 @@
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplatesList } from './templates_list';
 import userEvent from '@testing-library/user-event';
+import { renderWithTestingProviders } from '../../common/mock';
 
-describe('TemplatesList', () => {
-  let appMockRender: AppMockRenderer;
+// FLAKY: https://github.com/elastic/kibana/issues/208265
+describe.skip('TemplatesList', () => {
   const onDeleteTemplate = jest.fn();
   const onEditTemplate = jest.fn();
 
@@ -27,17 +26,16 @@ describe('TemplatesList', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders correctly', () => {
-    appMockRender.render(<TemplatesList {...props} />);
+    renderWithTestingProviders(<TemplatesList {...props} />);
 
     expect(screen.getByTestId('templates-list')).toBeInTheDocument();
   });
 
   it('renders all templates', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <TemplatesList {...{ ...props, templates: templatesConfigurationMock }} />
     );
 
@@ -49,7 +47,7 @@ describe('TemplatesList', () => {
   });
 
   it('renders template details correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <TemplatesList {...{ ...props, templates: [templatesConfigurationMock[3]] }} />
     );
 
@@ -71,13 +69,13 @@ describe('TemplatesList', () => {
   });
 
   it('renders empty state correctly', () => {
-    appMockRender.render(<TemplatesList {...{ ...props, templates: [] }} />);
+    renderWithTestingProviders(<TemplatesList {...{ ...props, templates: [] }} />);
 
     expect(screen.queryAllByTestId(`template-`, { exact: false })).toHaveLength(0);
   });
 
   it('renders edit button', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <TemplatesList {...{ ...props, templates: [templatesConfigurationMock[0]] }} />
     );
 
@@ -87,7 +85,7 @@ describe('TemplatesList', () => {
   });
 
   it('renders delete button', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <TemplatesList {...{ ...props, templates: [templatesConfigurationMock[0]] }} />
     );
 
@@ -97,7 +95,7 @@ describe('TemplatesList', () => {
   });
 
   it('renders delete modal', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <TemplatesList {...{ ...props, templates: [templatesConfigurationMock[0]] }} />
     );
 
@@ -111,7 +109,7 @@ describe('TemplatesList', () => {
   });
 
   it('calls onEditTemplate correctly', async () => {
-    appMockRender.render(<TemplatesList {...props} />);
+    renderWithTestingProviders(<TemplatesList {...props} />);
 
     const list = await screen.findByTestId('templates-list');
 
@@ -125,7 +123,7 @@ describe('TemplatesList', () => {
   });
 
   it('calls onDeleteTemplate correctly', async () => {
-    appMockRender.render(<TemplatesList {...props} />);
+    renderWithTestingProviders(<TemplatesList {...props} />);
 
     const list = await screen.findByTestId('templates-list');
 
@@ -139,7 +137,8 @@ describe('TemplatesList', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
-      expect(props.onDeleteTemplate).toHaveBeenCalledWith(templatesConfigurationMock[0].key);
     });
+
+    expect(props.onDeleteTemplate).toHaveBeenCalledWith(templatesConfigurationMock[0].key);
   });
 });

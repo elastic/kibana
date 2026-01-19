@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -23,6 +23,9 @@ import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 import { CaseViewSimilarCases } from './components/case_view_similar_cases';
+import { CaseViewEvents } from './components/case_view_events';
+import { CaseViewAttachments } from './components/case_view_attachments';
+import { filterCaseAttachmentsBySearchTerm } from './components/helpers';
 
 const getActiveTabId = (tabId?: string) => {
   if (tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(tabId as CASE_VIEW_PAGE_TABS)) {
@@ -31,6 +34,13 @@ const getActiveTabId = (tabId?: string) => {
 
   return CASE_VIEW_PAGE_TABS.ACTIVITY;
 };
+
+const ATTACHMENT_TABS = [
+  CASE_VIEW_PAGE_TABS.ALERTS,
+  CASE_VIEW_PAGE_TABS.EVENTS,
+  CASE_VIEW_PAGE_TABS.FILES,
+  CASE_VIEW_PAGE_TABS.OBSERVABLES,
+];
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
@@ -41,10 +51,26 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     showAlertDetails,
     useFetchAlertData,
     onAlertsTableLoaded,
+    renderAlertsTable,
+    renderEventsTable,
   }) => {
     const { features } = useCasesContext();
     const { urlParams } = useUrlParams();
     const refreshCaseViewPage = useRefreshCaseViewPage();
+
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const onSearch = useCallback(
+      (newSearch: string) => {
+        const trimSearch = newSearch.trim();
+        setSearchTerm(trimSearch);
+      },
+      [setSearchTerm]
+    );
+
+    const caseWithFilteredAttachments = useMemo(
+      () => filterCaseAttachmentsBySearchTerm(caseData, searchTerm),
+      [caseData, searchTerm]
+    );
 
     useCasesTitleBreadcrumbs(caseData.title);
 
@@ -87,7 +113,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       <>
         <HeaderPage
           border={false}
-          showBackButton={true}
           data-test-subj="case-view-title"
           titleNode={
             <EditableTitle
@@ -98,6 +123,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             />
           }
           title={caseData.title}
+          incrementalId={caseData.incrementalId}
         >
           <CaseActionBar
             caseData={caseData}
@@ -115,21 +141,50 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
             <CaseViewActivity
               ruleDetailsNavigation={ruleDetailsNavigation}
-              caseData={caseData}
+              caseData={caseWithFilteredAttachments}
+              searchTerm={searchTerm}
               actionsNavigation={actionsNavigation}
               showAlertDetails={showAlertDetails}
               useFetchAlertData={useFetchAlertData}
             />
           )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
-            <CaseViewAlerts caseData={caseData} onAlertsTableLoaded={onAlertsTableLoaded} />
-          )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
-          {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
-            <CaseViewObservables isLoading={isLoading} caseData={caseData} />
+          {ATTACHMENT_TABS.includes(activeTabId as CASE_VIEW_PAGE_TABS) && (
+            <CaseViewAttachments
+              onSearch={onSearch}
+              searchTerm={searchTerm}
+              activeTab={activeTabId as CASE_VIEW_PAGE_TABS}
+              caseData={caseWithFilteredAttachments}
+            >
+              <>
+                {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
+                  <CaseViewAlerts
+                    caseData={caseWithFilteredAttachments}
+                    renderAlertsTable={renderAlertsTable}
+                    onAlertsTableLoaded={onAlertsTableLoaded}
+                  />
+                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && (
+                  <CaseViewEvents
+                    caseData={caseWithFilteredAttachments}
+                    renderEventsTable={renderEventsTable}
+                  />
+                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.FILES && (
+                  <CaseViewFiles caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
+                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
+                  <CaseViewObservables
+                    isLoading={false}
+                    caseData={caseWithFilteredAttachments}
+                    searchTerm={searchTerm}
+                    onUpdateField={onUpdateField}
+                  />
+                )}
+              </>
+            </CaseViewAttachments>
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
-            <CaseViewSimilarCases caseData={caseData} />
+            <CaseViewSimilarCases caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
           )}
         </EuiFlexGroup>
       </>

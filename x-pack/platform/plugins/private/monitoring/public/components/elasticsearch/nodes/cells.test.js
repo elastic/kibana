@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { renderWithIntl } from '@kbn/test-jest-helpers';
+import { EuiThemeProvider } from '@elastic/eui';
 import { MetricCell } from './cells';
 
 describe('Node Listing Metric Cell', () => {
@@ -63,6 +64,12 @@ describe('Node Listing Metric Cell', () => {
 
   it('should format N/A as the metric for an offline node', () => {
     const props = { isOnline: false };
-    expect(renderWithIntl(<MetricCell {...props} />)).toMatchSnapshot();
+    expect(
+      renderWithIntl(
+        <EuiThemeProvider>
+          <MetricCell {...props} />
+        </EuiThemeProvider>
+      )
+    ).toMatchSnapshot();
   });
 });

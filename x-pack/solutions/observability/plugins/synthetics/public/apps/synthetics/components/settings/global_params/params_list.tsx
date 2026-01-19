@@ -20,11 +20,11 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import useDebounce from 'react-use/lib/useDebounce';
 import { TableTitle } from '../../common/components/table_title';
 import { ParamsText } from './params_text';
-import { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
@@ -232,7 +232,7 @@ export const ParamsList = () => {
             learnMore: (
               <EuiLink
                 data-test-subj="syntheticsParamsListLink"
-                href="https://www.elastic.co/guide/en/observability/master/synthetics-params-secrets.html"
+                href="https://www.elastic.co/guide/en/observability/current/synthetics-params-secrets.html"
                 target="_blank"
               >
                 {LEARN_MORE}
@@ -293,7 +293,7 @@ export const ParamsList = () => {
             },
           ],
         }}
-        message={isLoading ? LOADING_TEXT : undefined}
+        noItemsMessage={isLoading ? LOADING_TEXT : undefined}
       />
       {isDeleteModalVisible && deleteParam && (
         <DeleteParam items={deleteParam} setIsDeleteModalVisible={setIsDeleteModalVisible} />

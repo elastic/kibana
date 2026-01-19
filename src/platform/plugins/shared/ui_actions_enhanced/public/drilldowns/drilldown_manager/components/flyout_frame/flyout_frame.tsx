@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import {
   EuiFlyoutHeader,
   EuiTitle,
@@ -57,7 +58,7 @@ export const FlyoutFrame: FC<PropsWithChildren<FlyoutFrameProps>> = ({
           )}
           {title && (
             <EuiFlexItem grow={true}>
-              <h1>{title}</h1>
+              <h1 id="drilldownFlyoutTitleAriaId">{title}</h1>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

@@ -14,8 +14,8 @@ import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Tags } from './tags';
 import { schema } from '../create/schema';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+
+import { TestProviders, renderWithTestingProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { MAX_LENGTH_PER_TAG } from '../../../common/constants';
 import type { CaseFormFieldsSchemaProps } from './schema';
@@ -27,7 +27,6 @@ const useGetTagsMock = useGetTags as jest.Mock;
 
 describe('Tags', () => {
   let globalForm: FormHook;
-  let appMockRender: AppMockRenderer;
 
   const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm<CaseFormFieldsSchemaProps>({
@@ -48,7 +47,6 @@ describe('Tags', () => {
 
   beforeEach(() => {
     useGetTagsMock.mockReturnValue({ data: ['test'] });
-    appMockRender = createAppMockRenderer();
   });
 
   afterEach(() => {
@@ -56,7 +54,7 @@ describe('Tags', () => {
   });
 
   it('it renders', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Tags isLoading={false} />
       </MockHookWrapperComponent>
@@ -68,7 +66,7 @@ describe('Tags', () => {
   });
 
   it('it changes the tags', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Tags isLoading={false} />
       </MockHookWrapperComponent>
@@ -81,7 +79,7 @@ describe('Tags', () => {
   });
 
   it('it shows error when tag is empty', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Tags isLoading={false} />
       </MockHookWrapperComponent>
@@ -97,7 +95,7 @@ describe('Tags', () => {
   it('it shows error when tag is too long', async () => {
     const longTag = 'z'.repeat(MAX_LENGTH_PER_TAG + 1);
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Tags isLoading={false} />
       </MockHookWrapperComponent>

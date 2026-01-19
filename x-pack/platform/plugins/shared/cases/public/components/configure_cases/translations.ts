@@ -31,6 +31,13 @@ export const INCIDENT_MANAGEMENT_SYSTEM_LABEL = i18n.translate(
   }
 );
 
+export const CONNECTOR_DROPDOWN_LABEL = i18n.translate(
+  'xpack.cases.configureCases.connectorDropdownLabel',
+  {
+    defaultMessage: 'Connector dropdown',
+  }
+);
+
 export const ADD_NEW_CONNECTOR = i18n.translate('xpack.cases.configureCases.addNewConnector', {
   defaultMessage: 'Add new connector',
 });

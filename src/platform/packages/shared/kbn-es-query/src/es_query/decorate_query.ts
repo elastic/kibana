@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { estypes } from '@elastic/elasticsearch';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { extend, defaults } from 'lodash';
 import { getTimeZoneFromSettings } from '../utils';
 import { isEsQueryString } from './es_query_dsl';

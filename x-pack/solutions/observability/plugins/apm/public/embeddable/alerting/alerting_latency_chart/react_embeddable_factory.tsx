@@ -6,9 +6,14 @@
  */
 import React from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { initializeTitleManager, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import {
+  initializeTitleManager,
+  titleComparators,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
 import { ApmEmbeddableContext } from '../../embeddable_context';
@@ -16,16 +21,13 @@ import { APMAlertingLatencyChart } from './chart';
 import { APM_ALERTING_LATENCY_CHART_EMBEDDABLE } from '../constants';
 
 export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: ReactEmbeddableFactory<
-    EmbeddableApmAlertingLatencyVizProps,
+  const factory: EmbeddableFactory<
     EmbeddableApmAlertingLatencyVizProps,
     DefaultEmbeddableApi<EmbeddableApmAlertingLatencyVizProps>
   > = {
     type: APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
-    deserializeState: (state) => {
-      return state.rawState as EmbeddableApmAlertingLatencyVizProps;
-    },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState;
       const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject(state.serviceName);
       const transactionType$ = new BehaviorSubject(state.transactionType);
@@ -41,46 +43,76 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      const api = buildApi(
-        {
-          ...titleManager.api,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...titleManager.serialize(),
-                serviceName: serviceName$.getValue(),
-                transactionType: transactionType$.getValue(),
-                transactionName: transactionName$.getValue(),
-                environment: environment$.getValue(),
-                latencyThresholdInMicroseconds: latencyThresholdInMicroseconds$.getValue(),
-                rangeFrom: rangeFrom$.getValue(),
-                rangeTo: rangeTo$.getValue(),
-                rule: rule$.getValue(),
-                alert: alert$.getValue(),
-                kuery: kuery$.getValue(),
-                filters: filters$.getValue(),
-              },
-            };
-          },
+      function serializeState() {
+        return {
+          ...titleManager.getLatestState(),
+          serviceName: serviceName$.getValue(),
+          transactionType: transactionType$.getValue(),
+          transactionName: transactionName$.getValue(),
+          environment: environment$.getValue(),
+          latencyThresholdInMicroseconds: latencyThresholdInMicroseconds$.getValue(),
+          rangeFrom: rangeFrom$.getValue(),
+          rangeTo: rangeTo$.getValue(),
+          rule: rule$.getValue(),
+          alert: alert$.getValue(),
+          kuery: kuery$.getValue(),
+          filters: filters$.getValue(),
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges({
+        parentApi,
+        uuid,
+        serializeState,
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          serviceName$,
+          transactionType$,
+          transactionName$,
+          environment$,
+          latencyThresholdInMicroseconds$,
+          rangeFrom$,
+          rangeTo$,
+          rule$,
+          alert$,
+          kuery$,
+          filters$
+        ).pipe(map(() => undefined)),
+        getComparators: () => ({
+          ...titleComparators,
+          serviceName: 'referenceEquality',
+          transactionType: 'referenceEquality',
+          transactionName: 'referenceEquality',
+          environment: 'referenceEquality',
+          latencyThresholdInMicroseconds: 'referenceEquality',
+          rangeFrom: 'referenceEquality',
+          rangeTo: 'referenceEquality',
+          rule: 'referenceEquality',
+          alert: 'referenceEquality',
+          kuery: 'referenceEquality',
+          filters: 'referenceEquality',
+        }),
+        onReset: (lastSaved) => {
+          titleManager.reinitializeState(lastSaved);
+          serviceName$.next(lastSaved?.serviceName ?? '');
+          transactionType$.next(lastSaved?.transactionType);
+          transactionName$.next(lastSaved?.transactionName);
+          environment$.next(lastSaved?.environment);
+          latencyThresholdInMicroseconds$.next(lastSaved?.latencyThresholdInMicroseconds);
+          rangeFrom$.next(lastSaved?.rangeFrom);
+          rangeTo$.next(lastSaved?.rangeTo);
+          rule$.next(lastSaved?.rule as EmbeddableApmAlertingLatencyVizProps['rule']);
+          alert$.next(lastSaved?.alert as EmbeddableApmAlertingLatencyVizProps['alert']);
+          kuery$.next(lastSaved?.kuery);
+          filters$.next(lastSaved?.filters);
         },
-        {
-          serviceName: [serviceName$, (value) => serviceName$.next(value)],
-          transactionType: [transactionType$, (value) => transactionType$.next(value)],
-          transactionName: [transactionName$, (value) => transactionName$.next(value)],
-          environment: [environment$, (value) => environment$.next(value)],
-          latencyThresholdInMicroseconds: [
-            latencyThresholdInMicroseconds$,
-            (value) => latencyThresholdInMicroseconds$.next(value),
-          ],
-          rangeFrom: [rangeFrom$, (value) => rangeFrom$.next(value)],
-          rangeTo: [rangeTo$, (value) => rangeTo$.next(value)],
-          rule: [rule$, (value) => rule$.next(value)],
-          alert: [alert$, (value) => alert$.next(value)],
-          kuery: [kuery$, (value) => kuery$.next(value)],
-          filters: [filters$, (value) => filters$.next(value)],
-          ...titleManager.comparators,
-        }
-      );
+      });
+
+      const api = finalizeApi({
+        ...titleManager.api,
+        ...unsavedChangesApi,
+        serializeState,
+      });
 
       return {
         api,

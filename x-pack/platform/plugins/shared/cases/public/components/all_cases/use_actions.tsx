@@ -38,6 +38,8 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
+  const { permissions } = useCasesContext();
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
 
   const shouldDisable = useShouldDisableStatus();
 
@@ -83,6 +85,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
 
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
+  const canAssign = permissions.assign;
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
@@ -136,6 +139,9 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
 
     if (canUpdate) {
       mainPanelItems.push(tagsAction.getAction([theCase]));
+    }
+
+    if (canAssign) {
       mainPanelItems.push(assigneesAction.getAction([theCase]));
     }
 
@@ -164,6 +170,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
   }, [
     assigneesAction,
     canDelete,
+    canAssign,
     canUpdate,
     copyIDAction,
     deleteAction,
@@ -189,6 +196,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
             key={`case-action-popover-button-${theCase.id}`}
             data-test-subj={`case-action-popover-button-${theCase.id}`}
             disabled={disableActions}
+            buttonRef={buttonRef}
           />
         }
         isOpen={isPopoverOpen}
@@ -208,6 +216,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           totalCasesToBeDeleted={1}
           onCancel={deleteAction.onCloseModal}
           onConfirm={deleteAction.onConfirmDeletion}
+          focusButtonRef={buttonRef}
         />
       ) : null}
       {tagsAction.isFlyoutOpen ? (
@@ -215,6 +224,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           onClose={tagsAction.onFlyoutClosed}
           selectedCases={[theCase]}
           onSaveTags={tagsAction.onSaveTags}
+          focusButtonRef={buttonRef}
         />
       ) : null}
       {assigneesAction.isFlyoutOpen ? (
@@ -222,6 +232,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           onClose={assigneesAction.onFlyoutClosed}
           selectedCases={[theCase]}
           onSaveAssignees={assigneesAction.onSaveAssignees}
+          focusButtonRef={buttonRef}
         />
       ) : null}
     </>
@@ -242,7 +253,8 @@ interface UseBulkActionsProps {
 
 export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
   const { permissions } = useCasesContext();
-  const shouldShowActions = permissions.update || permissions.delete || permissions.reopenCase;
+  const shouldShowActions =
+    permissions.update || permissions.delete || permissions.reopenCase || permissions.assign;
 
   return {
     actions: shouldShowActions

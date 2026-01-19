@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertSchema } from './alert_schema';
 import { EcsSchema } from './ecs_schema';
 import { LegacyAlertSchema } from './legacy_alert_schema';
@@ -127,6 +127,7 @@ const SecurityAlertOptional = rt.partial({
   'host.asset.criticality': schemaString,
   'kibana.alert.action_group': schemaString,
   'kibana.alert.ancestors.rule': schemaString,
+  'kibana.alert.attack_ids': schemaStringArray,
   'kibana.alert.building_block_type': schemaString,
   'kibana.alert.case_ids': schemaStringArray,
   'kibana.alert.consecutive_matches': schemaStringOrNumber,
@@ -137,10 +138,16 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.group.id': schemaString,
   'kibana.alert.group.index': schemaNumber,
   'kibana.alert.host.criticality_level': schemaString,
+  'kibana.alert.index_pattern': schemaString,
   'kibana.alert.intended_timestamp': schemaDate,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
+  'kibana.alert.maintenance_window_names': schemaStringArray,
+  'kibana.alert.muted': schemaBoolean,
   'kibana.alert.new_terms': schemaStringArray,
+  'kibana.alert.original_data_stream.dataset': schemaString,
+  'kibana.alert.original_data_stream.namespace': schemaString,
+  'kibana.alert.original_data_stream.type': schemaString,
   'kibana.alert.original_event.agent_id_status': schemaString,
   'kibana.alert.original_event.code': schemaString,
   'kibana.alert.original_event.duration': schemaString,
@@ -154,6 +161,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.original_event.start': schemaDate,
   'kibana.alert.original_event.timezone': schemaString,
   'kibana.alert.original_event.url': schemaString,
+  'kibana.alert.pending_recovered_count': schemaStringOrNumber,
   'kibana.alert.previous_action_group': schemaString,
   'kibana.alert.reason': schemaString,
   'kibana.alert.risk_score': schemaNumber,
@@ -184,6 +192,8 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.rule.updated_at': schemaDate,
   'kibana.alert.rule.updated_by': schemaString,
   'kibana.alert.rule.version': schemaString,
+  'kibana.alert.scheduled_action.date': schemaString,
+  'kibana.alert.scheduled_action.group': schemaString,
   'kibana.alert.severity': schemaString,
   'kibana.alert.severity_improving': schemaBoolean,
   'kibana.alert.start': schemaDate,
@@ -203,6 +213,9 @@ const SecurityAlertOptional = rt.partial({
     })
   ),
   'kibana.alert.time_range': schemaDateRange,
+  'kibana.alert.updated_at': schemaDate,
+  'kibana.alert.updated_by.user.id': schemaString,
+  'kibana.alert.updated_by.user.name': schemaString,
   'kibana.alert.url': schemaString,
   'kibana.alert.user.criticality_level': schemaString,
   'kibana.alert.workflow_assignee_ids': schemaStringArray,

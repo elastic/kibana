@@ -7,35 +7,34 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
-import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import { ReportingStart } from '@kbn/reporting-plugin/public';
-import {
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { ReportingStart } from '@kbn/reporting-plugin/public';
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
   AppMountParameters,
   AppUpdater,
-  DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
-  AppStatus,
 } from '@kbn/core/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { DEFAULT_APP_CATEGORIES, AppStatus } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { CanvasAppLocatorDefinition } from '../common/locator';
 import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
 import { getSessionStorage } from './lib/storage';
 import { initLoadingIndicator } from './lib/loading_indicator';
-import { getPluginApi, CanvasApi } from './plugin_api';
+import type { CanvasApi } from './plugin_api';
+import { getPluginApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { addCanvasElementTrigger } from './state/triggers/add_canvas_element_trigger';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
@@ -68,7 +67,6 @@ export interface CanvasStartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  visualizations: VisualizationsStart;
   spaces?: SpacesPluginStart;
   contentManagement: ContentManagementPublicStart;
 }
@@ -130,10 +128,9 @@ export class CanvasPlugin
 
         srcPlugin.start(coreStart, startPlugins);
 
-        const { expressions, presentationUtil } = startPlugins;
-        await presentationUtil.registerExpressionsLanguage(
-          Object.values(expressions.getFunctions())
-        );
+        const { expressions } = startPlugins;
+        const languages = await import('./components/expression_input/language');
+        languages.registerExpressionsLanguage(Object.values(expressions.getFunctions()));
 
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');

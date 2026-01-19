@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Page } from '@elastic/synthetics';
+import type { Page } from '@elastic/synthetics';
 import { byTestId, delay, getQuerystring } from '../../helpers/utils';
 import { loginPageProvider } from '../../page_objects/login';
 import { utilsPageProvider } from '../../page_objects/utils';
@@ -112,11 +112,13 @@ export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; ki
     },
 
     async updateAlert({ id, threshold }: AlertType) {
-      await this.fillByTestSubj('ruleNameInput', id);
       await this.selectAlertThreshold(threshold);
+      await page.click(byTestId('ruleFormStep-details'));
+      await this.fillByTestSubj('ruleDetailsNameInput', id);
     },
 
     async selectAlertThreshold(threshold: string) {
+      await page.click(byTestId('ruleFormStep-definition'));
       await page.click(byTestId('uptimeAnomalySeverity'));
       await page.click(byTestId('anomalySeveritySelect'));
       await page.click(`text=${threshold}`);

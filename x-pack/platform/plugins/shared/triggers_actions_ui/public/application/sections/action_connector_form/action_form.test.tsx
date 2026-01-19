@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiAccordion } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
-import { act } from 'react-dom/test-utils';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, GenericValidationResult, RuleUiAction } from '../../../types';
-import ActionForm from './action_form';
-import { useKibana } from '../../../common/lib/kibana';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-  SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
+import { coreMock } from '@kbn/core/public/mocks';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import React, { lazy } from 'react';
+import { act } from 'react-dom/test-utils';
+import { useKibana } from '../../../common/lib/kibana';
+import type { GenericValidationResult, RuleUiAction, ValidationResult } from '../../../types';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import ActionForm from './action_form';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -118,6 +119,19 @@ describe('action_form', () => {
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
     actionTypeTitle: 'system-action-type-title',
+  };
+
+  const workflowsSystemActionType = {
+    id: '.workflows',
+    iconClass: 'test',
+    selectMessage: 'workflows system action',
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
+      const validationResult = { errors: {} };
+      return Promise.resolve(validationResult);
+    },
+    actionConnectorFields: null,
+    actionParamsFields: mockedActionParamsFields,
+    actionTypeTitle: 'workflows-system-action-title',
   };
 
   const allActions = [
@@ -241,6 +255,7 @@ describe('action_form', () => {
       disabledByActionType,
       preconfiguredOnly,
       systemActionType,
+      workflowsSystemActionType,
     ]);
 
     actionTypeRegistry.has.mockReturnValue(true);
@@ -309,6 +324,15 @@ describe('action_form', () => {
         supportedFeatureIds: ['alerting'],
       },
       {
+        id: 'hidden-in-ui',
+        name: 'Hidden in UI',
+        enabled: false,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
+      },
+      {
         id: 'disabled-by-license',
         name: 'Disabled by license',
         enabled: false,
@@ -336,71 +360,84 @@ describe('action_form', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: true,
       },
+      {
+        id: '.workflows',
+        name: 'Workflows',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
+        allowMultipleSystemActions: true,
+      },
     ]);
 
     const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
     const wrapper = mountWithIntl(
-      <ActionForm
-        actions={initialAlert.actions}
-        messageVariables={{
-          params: [
-            { name: 'testVar1', description: 'test var1' },
-            { name: 'testVar2', description: 'test var2' },
-          ],
-          state: [],
-          context: [{ name: 'contextVar', description: 'context var1' }],
-        }}
-        featureId="alerting"
-        producerId="alerting"
-        defaultActionGroupId={'default'}
-        isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
-          const recoveryActionGroupId = customRecoveredActionGroup
-            ? customRecoveredActionGroup
-            : 'recovered';
-          return isActionGroupDisabledForActionTypeId(
-            actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
-            actionTypeId
-          );
-        }}
-        setActionIdByIndex={(id: string, index: number) => {
-          initialAlert.actions[index].id = id;
-        }}
-        actionGroups={[
-          { id: 'default', name: 'Default', defaultActionMessage },
-          {
-            id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
-            name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
-          },
-        ]}
-        setActionGroupIdByIndex={(group: string, index: number) => {
-          initialAlert.actions[index].group = group;
-        }}
-        setActions={(_updatedActions: RuleUiAction[]) => {}}
-        setActionParamsProperty={(key: string, value: any, index: number) =>
-          (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-        }
-        setActionFrequencyProperty={(key: string, value: any, index: number) =>
-          (initialAlert.actions[index] = {
-            ...initialAlert.actions[index],
-            frequency: {
-              ...initialAlert.actions[index].frequency!,
-              [key]: value,
+      <QueryClientProvider client={new QueryClient()}>
+        <ActionForm
+          actions={initialAlert.actions}
+          messageVariables={{
+            params: [
+              { name: 'testVar1', description: 'test var1' },
+              { name: 'testVar2', description: 'test var2' },
+            ],
+            state: [],
+            context: [{ name: 'contextVar', description: 'context var1' }],
+          }}
+          featureId="alerting"
+          producerId="alerting"
+          defaultActionGroupId={'default'}
+          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
+            const recoveryActionGroupId = customRecoveredActionGroup
+              ? customRecoveredActionGroup
+              : 'recovered';
+            return isActionGroupDisabledForActionTypeId(
+              actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
+              actionTypeId
+            );
+          }}
+          setActionIdByIndex={(id: string, index: number) => {
+            initialAlert.actions[index].id = id;
+          }}
+          actionGroups={[
+            { id: 'default', name: 'Default', defaultActionMessage },
+            {
+              id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
+              name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
             },
-          })
-        }
-        setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
-          (initialAlert.actions[index] = {
-            ...initialAlert.actions[index],
-            alertsFilter: {
-              ...initialAlert.actions[index].alertsFilter,
-              [key]: value,
-            },
-          })
-        }
-        actionTypeRegistry={actionTypeRegistry}
-        setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-        ruleTypeId=".es-query"
-      />
+          ]}
+          setActionGroupIdByIndex={(group: string, index: number) => {
+            initialAlert.actions[index].group = group;
+          }}
+          setActions={(_updatedActions: RuleUiAction[]) => {}}
+          setActionParamsProperty={(key: string, value: any, index: number) =>
+            (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+          }
+          setActionFrequencyProperty={(key: string, value: any, index: number) =>
+            (initialAlert.actions[index] = {
+              ...initialAlert.actions[index],
+              frequency: {
+                ...initialAlert.actions[index].frequency!,
+                [key]: value,
+              },
+            })
+          }
+          setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
+            (initialAlert.actions[index] = {
+              ...initialAlert.actions[index],
+              alertsFilter: {
+                ...initialAlert.actions[index].alertsFilter,
+                [key]: value,
+              },
+            })
+          }
+          actionTypeRegistry={actionTypeRegistry}
+          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+          ruleTypeId=".es-query"
+        />
+      </QueryClientProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -444,6 +481,14 @@ describe('action_form', () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
         '[data-test-subj="disabled-by-config-alerting-ActionTypeSelectOption"]'
+      );
+      expect(actionOption.exists()).toBeFalsy();
+    });
+
+    it('does not render action types hidden in ui', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find(
+        '[data-test-subj="hidden-in-ui-alerting-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeFalsy();
     });
@@ -752,6 +797,18 @@ describe('action_form', () => {
       );
 
       expect(actionOption.at(1).prop('disabled')).toBe(true);
+    });
+
+    it('allows multiple instances of workflows system action', async () => {
+      const wrapper = await setup([
+        { id: 'system-connector-.workflows', actionTypeId: '.workflows', params: {} },
+      ]);
+
+      const actionOption = wrapper.find(
+        `[data-test-subj=".workflows-alerting-ActionTypeSelectOption"]`
+      );
+
+      expect(actionOption.at(1).prop('disabled')).toBe(false);
     });
   });
 });

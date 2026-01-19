@@ -8,24 +8,22 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  EuiAccordion,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { EuiAccordion, EuiToolTip, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { TimeRange } from '@kbn/es-query';
-import { IAggConfig } from '@kbn/data-plugin/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DefaultEditorAggParams } from './agg_params';
-import { DefaultEditorAggCommonProps } from './agg_common_props';
-import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
+import type { DefaultEditorAggCommonProps } from './agg_common_props';
+import type { AggsAction } from './agg_group_state';
+import { AGGS_ACTION_KEYS } from './agg_group_state';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
 import { getSchemaByName } from '../schemas';
 import { buildAggDescription } from './agg_params_helper';
+import { visEditorSidebarStyles } from '../_sidebar.styles';
 
 export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: IAggConfig;
@@ -63,6 +61,7 @@ function DefaultEditorAgg({
   schemas,
   timeRange,
 }: DefaultEditorAggProps) {
+  const styles = useMemoCss(visEditorSidebarStyles);
   const [isEditorOpen, setIsEditorOpen] = useState((agg as any).brandNew);
   const [validState, setValidState] = useState(true);
   const showDescription = !isEditorOpen && validState;
@@ -224,7 +223,12 @@ function DefaultEditorAgg({
     return actionIcons.length ? (
       <>
         {actionIcons.map((icon) => (
-          <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
+          <EuiToolTip
+            key={icon.id}
+            position="bottom"
+            content={icon.tooltip}
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               disabled={icon.disabled}
               iconType={icon.type}
@@ -261,6 +265,12 @@ function DefaultEditorAgg({
       data-test-subj={`visEditorAggAccordion${agg.id}`}
       extraAction={renderAggButtons()}
       onToggle={onToggle}
+      css={[
+        styles.section,
+        styles.collapsible,
+        styles.collapsibleMarginBottom,
+        styles.aggGroupAccordionButtonContent,
+      ]}
     >
       <>
         <EuiSpacer size="m" />

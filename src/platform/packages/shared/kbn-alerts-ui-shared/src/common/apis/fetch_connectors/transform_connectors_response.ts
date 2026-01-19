@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
-import { ActionConnectorProps } from '../../types';
+import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
+import type { ActionConnectorProps } from '../../types';
 
 export const transformConnectorResponse = (
   results: Array<
@@ -27,6 +27,7 @@ const transformConnector: RewriteRequestCase<
   referenced_by_count: referencedByCount,
   is_missing_secrets: isMissingSecrets,
   is_system_action: isSystemAction,
+  is_connector_type_deprecated: isConnectorTypeDeprecated,
   ...res
 }) => ({
   actionTypeId,
@@ -35,5 +36,6 @@ const transformConnector: RewriteRequestCase<
   referencedByCount,
   isMissingSecrets,
   isSystemAction,
+  isConnectorTypeDeprecated,
   ...res,
 });

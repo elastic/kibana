@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109900
-
-import './index.scss';
-
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { InspectorPublicPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {

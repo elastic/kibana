@@ -7,8 +7,11 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import moment from 'moment';
+import { useGeneratedHtmlId } from '@elastic/eui';
 import type { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { useStorage } from '@kbn/ml-local-storage';
+import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 import { useMlKibana } from '../kibana';
 import {
   JobSelectorFlyoutContent,
@@ -23,6 +26,10 @@ export type GetJobSelection = ReturnType<typeof useJobSelectionFlyout>;
  */
 export function useJobSelectionFlyout() {
   const { overlays, services } = useMlKibana();
+  const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage(
+    ML_APPLY_TIME_RANGE_CONFIG,
+    true
+  );
 
   const flyoutRef = useRef<ReturnType<KibanaReactOverlays['openFlyout']>>();
 
@@ -34,16 +41,20 @@ export function useJobSelectionFlyout() {
     };
   }, []);
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return useCallback(
     (
       config: {
         singleSelection?: boolean;
         withTimeRangeSelector?: boolean;
         timeseriesOnly?: boolean;
+        selectedIds?: string[];
       } = {
         singleSelection: false,
         withTimeRangeSelector: true,
         timeseriesOnly: false,
+        selectedIds: [],
       }
     ): Promise<JobSelectionResult> => {
       const { uiSettings } = services;
@@ -56,8 +67,11 @@ export function useJobSelectionFlyout() {
           flyoutRef.current = overlays.openFlyout(
             <KibanaContextProvider services={services}>
               <JobSelectorFlyoutContent
-                selectedIds={[]}
+                flyoutTitleId={flyoutTitleId}
+                selectedIds={config.selectedIds}
                 withTimeRangeSelector={config.withTimeRangeSelector}
+                applyTimeRangeConfig={applyTimeRangeConfig}
+                onTimeRangeConfigChange={setApplyTimeRangeConfig}
                 dateFormatTz={dateFormatTz}
                 singleSelection={!!config.singleSelection}
                 timeseriesOnly={!!config.timeseriesOnly}
@@ -70,13 +84,16 @@ export function useJobSelectionFlyout() {
                   flyoutRef.current!.close();
                 }}
               />
-            </KibanaContextProvider>
+            </KibanaContextProvider>,
+            {
+              'aria-labelledby': flyoutTitleId,
+            }
           );
         } catch (error) {
           reject(error);
         }
       });
     },
-    [overlays, services]
+    [services, overlays, applyTimeRangeConfig, setApplyTimeRangeConfig, flyoutTitleId]
   );
 }

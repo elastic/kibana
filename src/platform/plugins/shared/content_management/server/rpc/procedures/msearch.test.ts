@@ -7,32 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
-import { MSearchIn, MSearchQuery } from '../../../common';
+import type { MSearchIn, MSearchQuery } from '../../../common';
 import { validate, disableTransformsCache } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
 import { MSearchService } from '../../core/msearch';
-import { mSearch } from './msearch';
+import { getMSearch } from './msearch';
 
 disableTransformsCache();
 const storageContextGetTransforms = jest.fn();
 const spy = () => storageContextGetTransforms;
+const mockLoggerFactory = loggingSystemMock.create();
+const mockLogger = mockLoggerFactory.get('mock logger');
 
 jest.mock('@kbn/object-versioning', () => {
   const original = jest.requireActual('@kbn/object-versioning');
   return {
     ...original,
-    getContentManagmentServicesTransforms: (...args: any[]) => {
+    getContentManagementServicesTransforms: (...args: any[]) => {
       spy()(...args);
-      return original.getContentManagmentServicesTransforms(...args);
+      return original.getContentManagementServicesTransforms(...args);
     },
   };
 });
 
-const { fn, schemas } = mSearch;
+const { fn, schemas } = getMSearch(mockLogger);
 
 const inputSchema = schemas?.in;
 const outputSchema = schemas?.out;

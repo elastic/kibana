@@ -31,10 +31,10 @@ import registerCypressGrep from '@cypress/grep';
 
 registerCypressGrep();
 
-import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
-import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
+import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/cypress-test-helper/src/utils';
+import { login } from '@kbn/cypress-test-helper/src/auth/login';
 
-import type { LoadedRoleAndUser } from '@kbn/test-suites-serverless/shared/lib';
+import type { LoadedRoleAndUser } from '../lib';
 import type { ServerlessRoleName } from './roles';
 
 import { waitUntil } from '../tasks/wait_until';

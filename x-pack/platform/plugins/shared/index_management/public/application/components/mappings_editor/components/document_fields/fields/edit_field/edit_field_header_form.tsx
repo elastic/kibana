@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FormDataProvider } from '../../../../shared_imports';
-import { MainType, SubType, Field, DataTypeDefinition } from '../../../../types';
+import type { MainType, SubType, Field, DataTypeDefinition } from '../../../../types';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
 import { FieldBetaBadge } from '../field_beta_badge';

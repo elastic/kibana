@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SearchListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
+import type { estypes } from '@elastic/elasticsearch';
+import type { SearchListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SearchEsListItemSchema } from '../../schemas/elastic_response';
+import type { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 import { transformElasticHitsToListItem } from './transform_elastic_to_list_item';
 

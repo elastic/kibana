@@ -11,7 +11,12 @@ import { routes } from './routes';
 export class CloudDefend {
   public setup() {}
 
-  public start(): SecuritySubPlugin {
+  /* Currently we are hiding the route in serverless due to Billing. Once we finished Billing for Cloud defend we can remove this */
+  public start(isServerless: boolean = false): SecuritySubPlugin {
+    if (isServerless) {
+      return { routes: [] };
+    }
+
     return { routes };
   }
 }

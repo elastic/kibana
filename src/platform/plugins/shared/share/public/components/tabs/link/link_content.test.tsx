@@ -15,17 +15,36 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { urlServiceTestSetup } from '../../../../common/url_service/__tests__/setup';
 import { MockLocatorDefinition } from '../../../../common/url_service/mocks';
 import { BrowserShortUrlClientFactory } from '../../../url_service/short_urls/short_url_client_factory';
-import {
-  BrowserShortUrlClientHttp,
-  BrowserShortUrlClient,
-} from '../../../url_service/short_urls/short_url_client';
-import { BrowserUrlService } from '../../../types';
+import type { BrowserShortUrlClientHttp } from '../../../url_service/short_urls/short_url_client';
+import { BrowserShortUrlClient } from '../../../url_service/short_urls/short_url_client';
+import type { BrowserUrlService } from '../../../types';
 import { LinkContent } from './link_content';
+import type { IShareContext } from '../../context';
+import { ShareProvider } from '../../context';
 
-const renderComponent = (props: ComponentProps<typeof LinkContent>) => {
+const mockShareContext: IShareContext = {
+  isDirty: false,
+  onClose: () => {},
+  shareMenuItems: [],
+  objectType: 'dashboard',
+  shareableUrl: '',
+  allowShortUrl: false,
+  objectTypeMeta: {
+    title: 'title',
+    config: {},
+  },
+  sharingData: { title: 'title', url: 'url' },
+};
+
+const renderComponent = (
+  props: ComponentProps<typeof LinkContent>,
+  shareContext: IShareContext = mockShareContext
+) => {
   render(
     <IntlProvider locale="en">
-      <LinkContent {...props} />
+      <ShareProvider shareContext={shareContext}>
+        <LinkContent {...props} />
+      </ShareProvider>
     </IntlProvider>
   );
 };
@@ -44,7 +63,7 @@ describe('LinkContent', () => {
 
   let urlService: BrowserUrlService;
 
-  // @ts-expect-error there is a type because we override the shortUrls implementation
+  // @ts-expect-error there is a type error because we override the shortUrls implementation
   // eslint-disable-next-line prefer-const
   ({ service: urlService } = urlServiceTestSetup({
     shortUrls: ({ locators }) =>
@@ -53,6 +72,8 @@ describe('LinkContent', () => {
         locators,
       }),
   }));
+
+  const shortUrlService = urlService.shortUrls.get(null)!;
 
   beforeAll(() => {
     Object.defineProperty(document, 'execCommand', {
@@ -71,11 +92,13 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {
+        delegatedShareUrlHandler,
+      },
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: true,
-      delegatedShareUrlHandler,
     });
 
     await user.click(screen.getByTestId('copyShareUrlButton'));
@@ -92,9 +115,10 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {},
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: false,
     });
 
@@ -102,7 +126,7 @@ describe('LinkContent', () => {
 
     await user.click(copyButton);
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(copyButton.getAttribute('data-share-url')).toBe(shareableUrl);
     });
   });
@@ -131,9 +155,10 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {},
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: true,
       // @ts-ignore this locator is passed mainly to test the code path that invokes createWithLocator
       shareableUrlLocatorParams,
@@ -170,9 +195,10 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {},
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: true,
     });
 
@@ -187,5 +213,106 @@ describe('LinkContent', () => {
     // should only invoke once no matter how many times the button is clicked
     expect(createFromLongUrlSpy).toHaveBeenCalledTimes(1);
     expect(copyButton.getAttribute('data-share-url')).toBe(shortURL);
+  });
+
+  it('renders a draft mode callout when dirty and triggers its save button', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const shareContext: IShareContext = {
+      ...mockShareContext,
+      onSave,
+      isDirty: true,
+    };
+    renderComponent(
+      {
+        objectType: 'dashboard',
+        isDirty: true,
+        shareableUrl,
+        shortUrlService,
+        allowShortUrl: false,
+        objectConfig: {
+          draftModeCallOut: true,
+        },
+      },
+      shareContext
+    );
+    const draftModeCallout = screen.getByTestId('unsavedChangesDraftModeCallOut');
+    expect(draftModeCallout).toBeInTheDocument();
+    const saveButton = screen.getByRole('button', { name: 'Save changes' });
+    expect(saveButton).toBeInTheDocument();
+    await user.click(saveButton);
+    expect(onSave).toHaveBeenCalled();
+  });
+
+  it('renders a draft mode callout when dirty and does not render a save button when onSave is not provided', () => {
+    const shareContext: IShareContext = {
+      ...mockShareContext,
+      isDirty: true,
+    };
+    renderComponent(
+      {
+        objectType: 'dashboard',
+        isDirty: true,
+        shareableUrl,
+        shortUrlService,
+        allowShortUrl: false,
+        objectConfig: {
+          draftModeCallOut: true,
+        },
+      },
+      shareContext
+    );
+    const draftModeCallout = screen.getByTestId('unsavedChangesDraftModeCallOut');
+    expect(draftModeCallout).toBeInTheDocument();
+    const saveButton = screen.queryByRole('button', { name: 'Save changes' });
+    expect(saveButton).not.toBeInTheDocument();
+  });
+
+  it('should show toggle when time range is relative', () => {
+    const shareableUrlLocatorParams = {
+      locator: new MockLocatorDefinition('TEST_LOCATOR'),
+      params: {
+        timeRange: { from: 'now-15m', to: 'now' },
+      },
+    };
+
+    renderComponent({
+      objectType: 'dashboard',
+      isDirty: false,
+      shareableUrl,
+      shortUrlService,
+      allowShortUrl: false,
+      // @ts-expect-error Test mock - MockLocatorDefinition is sufficient for testing but doesn't match full LocatorPublic type
+      shareableUrlLocatorParams,
+    });
+
+    const toggle = screen.getByTestId('timeRangeSwitch');
+    expect(toggle).toBeInTheDocument();
+    expect(toggle).not.toBeChecked();
+  });
+
+  it('should not show toggle and show callout when time range is absolute', () => {
+    const shareableUrlLocatorParams = {
+      locator: new MockLocatorDefinition('TEST_LOCATOR'),
+      params: {
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-02T00:00:00.000Z',
+        },
+      },
+    };
+
+    renderComponent({
+      objectType: 'dashboard',
+      isDirty: false,
+      shareableUrl,
+      shortUrlService,
+      allowShortUrl: false,
+      // @ts-expect-error Test mock - MockLocatorDefinition is sufficient for testing but doesn't match full LocatorPublic type
+      shareableUrlLocatorParams,
+    });
+
+    expect(screen.queryByTestId('timeRangeSwitch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('relativeTimeCallout')).toBeInTheDocument();
   });
 });

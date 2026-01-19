@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-export * from './types';
+export type * from './types';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -24,6 +25,9 @@ const configSchema = schema.object({
 type SearchNotebooksSchema = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<SearchNotebooksSchema> = {
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('xpack.search.notebooks', 'xpack.searchNotebooks', { level: 'critical' }),
+  ],
   schema: configSchema,
 };
 

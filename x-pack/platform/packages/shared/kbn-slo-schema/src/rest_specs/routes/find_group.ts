@@ -14,6 +14,7 @@ const groupBySchema = t.union([
   t.literal('slo.indicator.type'),
   t.literal('slo.instanceId'),
   t.literal('_index'),
+  t.literal('slo.id'),
 ]);
 
 const findSLOGroupsParamsSchema = t.partial({

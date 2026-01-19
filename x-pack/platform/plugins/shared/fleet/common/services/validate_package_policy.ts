@@ -34,6 +34,92 @@ import { isValidDataset } from './is_valid_namespace';
 
 type Errors = string[] | null;
 
+interface DurationParseResult {
+  isValid: boolean;
+  valueNs: number; // in nanoseconds
+  errors: string[];
+}
+
+/**
+ * Parses a duration string into nanoseconds and validates the format.
+ * Valid time units are "ms", "s", "m", "h".
+ *
+ * @param durationStr - The duration string to parse (e.g., "1h30m45s")
+ * @returns An object with parsing results
+ */
+export const parseDuration = (durationStr: string): DurationParseResult => {
+  const result: DurationParseResult = {
+    isValid: true,
+    valueNs: 0,
+    errors: [],
+  };
+
+  if (!durationStr || typeof durationStr !== 'string' || durationStr.trim() === '') {
+    result.isValid = false;
+    result.errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.emptyDurationErrorMessage', {
+        defaultMessage: 'Duration cannot be empty',
+      })
+    );
+    return result;
+  }
+
+  // Regular expression to match duration components.
+  const durationRegex = /(\d+)(ms|s|m|h)/g;
+  const matches = [...durationStr.matchAll(durationRegex)];
+
+  if (matches.length === 0) {
+    result.isValid = false;
+    result.errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.invalidDurationFormatErrorMessage', {
+        defaultMessage: 'Invalid duration format. Expected format like "1h30m45s"',
+      })
+    );
+    return result;
+  }
+
+  // Check if the entire string is matched
+  const fullMatch = matches.reduce((acc, match) => acc + match[0], '');
+  if (fullMatch !== durationStr) {
+    result.isValid = false;
+    result.errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.invalidDurationCharactersErrorMessage', {
+        defaultMessage: 'Duration contains invalid characters',
+      })
+    );
+  }
+
+  const NANOSECONDS_PER_MS = 1_000_000;
+  const NANOSECONDS_PER_SECOND = 1_000_000_000;
+  const NANOSECONDS_PER_MINUTE = 60 * NANOSECONDS_PER_SECOND;
+  const NANOSECONDS_PER_HOUR = 60 * NANOSECONDS_PER_MINUTE;
+
+  // Calculate the total duration in nanoseconds
+  let totalNs = 0;
+  for (const match of matches) {
+    const value = parseFloat(match[1]);
+    const unit = match[2];
+
+    switch (unit) {
+      case 'h':
+        totalNs += value * NANOSECONDS_PER_HOUR;
+        break;
+      case 'm':
+        totalNs += value * NANOSECONDS_PER_MINUTE;
+        break;
+      case 's':
+        totalNs += value * NANOSECONDS_PER_SECOND;
+        break;
+      case 'ms':
+        totalNs += value * NANOSECONDS_PER_MS;
+        break;
+    }
+  }
+
+  result.valueNs = totalNs;
+  return result;
+};
+
 type ValidationEntry = Record<string, Errors>;
 interface ValidationRequiredVarsEntry {
   name: string;
@@ -54,16 +140,17 @@ export type PackagePolicyValidationResults = {
   name: Errors;
   description: Errors;
   namespace: Errors;
+  additional_datastreams_permissions: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
 
 const validatePackageRequiredVars = (
-  stream: NewPackagePolicyInputStream,
+  streamOrInput: Pick<NewPackagePolicyInputStream | PackagePolicyInput, 'vars' | 'enabled'>,
   requiredVars?: RegistryRequiredVars
 ) => {
   const evaluatedRequiredVars: ValidationRequiredVars = {};
 
-  if (!requiredVars || !stream.vars || !stream.enabled) {
+  if (!requiredVars || !streamOrInput.vars || !streamOrInput.enabled) {
     return null;
   }
 
@@ -82,8 +169,8 @@ const validatePackageRequiredVars = (
 
     if (evaluatedRequiredVars[requiredVarDefinitionName]) {
       requiredVarDefinitionConstraints.forEach((requiredCondition) => {
-        if (stream.vars && stream.vars[requiredCondition.name]) {
-          const varItem = stream.vars[requiredCondition.name];
+        if (streamOrInput.vars && streamOrInput.vars[requiredCondition.name]) {
+          const varItem = streamOrInput.vars[requiredCondition.name];
 
           if (varItem) {
             if (
@@ -109,6 +196,9 @@ const validatePackageRequiredVars = (
   return hasMetRequiredCriteria ? null : evaluatedRequiredVars;
 };
 
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+
 /*
  * Returns validation information for a given package policy and package info
  * Note: this method assumes that `packagePolicy` is correctly structured for the given package
@@ -124,6 +214,7 @@ export const validatePackagePolicy = (
     name: null,
     description: null,
     namespace: null,
+    additional_datastreams_permissions: null,
     inputs: {},
     vars: {},
   };
@@ -144,6 +235,24 @@ export const validatePackagePolicy = (
     if (!namespaceValidation.valid && namespaceValidation.error) {
       validationResults.namespace = [namespaceValidation.error];
     }
+  }
+
+  if (packagePolicy?.additional_datastreams_permissions) {
+    validationResults.additional_datastreams_permissions =
+      packagePolicy?.additional_datastreams_permissions.reduce<null | string[]>(
+        (acc, additionalDatastreamsPermission) => {
+          if (!additionalDatastreamsPermission.match(VALIDATE_DATASTREAMS_PERMISSION_REGEX)) {
+            if (!acc) {
+              acc = [];
+            }
+            acc.push(
+              `${additionalDatastreamsPermission} is not valid, should match ${VALIDATE_DATASTREAMS_PERMISSION_REGEX.toString()}`
+            );
+          }
+          return acc;
+        },
+        null
+      );
   }
 
   // Validate package-level vars
@@ -181,6 +290,21 @@ export const validatePackagePolicy = (
     });
     return varDefs;
   }, {});
+  const inputRequiredVarsDefsByPolicyTemplateAndType = packageInfo.policy_templates.reduce<
+    Record<string, RegistryRequiredVars | undefined>
+  >((reqVarDefs, policyTemplate) => {
+    const inputs = getNormalizedInputs(policyTemplate);
+    inputs.forEach((input) => {
+      const requiredVarDefKey = hasIntegrations
+        ? `${policyTemplate.name}-${input.type}`
+        : input.type;
+
+      if ((input.vars || []).length) {
+        reqVarDefs[requiredVarDefKey] = input.required_vars;
+      }
+    });
+    return reqVarDefs;
+  }, {});
 
   const dataStreams = getNormalizedDataStreams(packageInfo);
   const streamsByDatasetAndInput = dataStreams.reduce<Record<string, RegistryStream>>(
@@ -214,6 +338,7 @@ export const validatePackagePolicy = (
     const inputKey = hasIntegrations ? `${input.policy_template}-${input.type}` : input.type;
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
+      required_vars: undefined,
       streams: {},
     };
 
@@ -231,8 +356,18 @@ export const validatePackagePolicy = (
           : null;
         return results;
       }, {} as ValidationEntry);
+
+      const requiredVars =
+        input.enabled &&
+        validatePackageRequiredVars(input, inputRequiredVarsDefsByPolicyTemplateAndType[inputKey]);
+      if (requiredVars) {
+        inputValidationResults.required_vars = requiredVars;
+      } else {
+        delete inputValidationResults.required_vars;
+      }
     } else {
       delete inputValidationResults.vars;
+      delete inputValidationResults.required_vars;
     }
 
     // Validate each input stream with var definitions
@@ -296,7 +431,7 @@ export const validatePackagePolicyConfig = (
   safeLoadYaml: (yaml: string) => any,
   packageType?: string
 ): string[] | null => {
-  const errors = [];
+  const errors: string[] = [];
 
   const value = configEntry?.value;
 
@@ -328,19 +463,42 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef.secret === true && parsedValue && parsedValue.isSecretRef === true) {
-    if (
-      parsedValue.id === undefined ||
-      parsedValue.id === '' ||
-      typeof parsedValue.id !== 'string'
-    ) {
+    if (!parsedValue.id && (!parsedValue.ids || parsedValue.ids.length === 0)) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, id or ids must be provided',
+        })
+      );
+      return errors;
+    }
+
+    if (parsedValue.id && parsedValue.ids) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, id or ids cannot both be provided',
+        })
+      );
+      return errors;
+    }
+
+    if (parsedValue.id && typeof parsedValue.id !== 'string') {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
           defaultMessage: 'Secret reference is invalid, id must be a string',
         })
       );
-
       return errors;
     }
+
+    if (parsedValue.ids && !parsedValue.ids.every((id: string) => typeof id === 'string')) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, ids must be an array of strings',
+        })
+      );
+      return errors;
+    }
+
     return null;
   }
 
@@ -445,11 +603,91 @@ export const validatePackagePolicyConfig = (
     }
   }
 
+  if (varDef.type === 'duration' && parsedValue !== undefined && !Array.isArray(parsedValue)) {
+    const durationResult = parseDuration(parsedValue);
+
+    if (!durationResult.isValid) {
+      errors.push(...durationResult.errors);
+    } else {
+      // Check min_duration if specified
+      if (varDef.min_duration !== undefined) {
+        const minDurationResult = parseDuration(varDef.min_duration as string);
+        if (!minDurationResult.isValid) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.invalidMinDurationErrorMessage', {
+              defaultMessage: 'Invalid min_duration specification',
+            })
+          );
+        } else if (durationResult.valueNs < minDurationResult.valueNs) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.durationBelowMinErrorMessage', {
+              defaultMessage: 'Duration is below the minimum allowed value of {minDuration}',
+              values: {
+                minDuration: varDef.min_duration,
+              },
+            })
+          );
+        }
+      }
+
+      // Check max_duration if specified
+      if (varDef.max_duration !== undefined) {
+        const maxDurationResult = parseDuration(varDef.max_duration as string);
+        if (!maxDurationResult.isValid) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.invalidMaxDurationErrorMessage', {
+              defaultMessage: 'Invalid max_duration specification',
+            })
+          );
+        } else if (durationResult.valueNs > maxDurationResult.valueNs) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.durationAboveMaxErrorMessage', {
+              defaultMessage: 'Duration is above the maximum allowed value of {maxDuration}',
+              values: {
+                maxDuration: varDef.max_duration,
+              },
+            })
+          );
+        }
+      }
+    }
+  }
+
   if (varDef.type === 'select' && parsedValue !== undefined) {
     if (!varDef.options?.map((o) => o.value).includes(parsedValue)) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidSelectValueErrorMessage', {
           defaultMessage: 'Invalid value for select type',
+        })
+      );
+    }
+  }
+
+  if (varDef.type === 'url' && parsedValue !== undefined && parsedValue !== '') {
+    try {
+      // Validate URL against RFC3986 using the URL constructor
+      new URL(parsedValue);
+
+      // Validate the scheme against url_allowed_schemes.
+      if (varDef.url_allowed_schemes && varDef.url_allowed_schemes.length > 0) {
+        const urlScheme = parsedValue.split(':')[0].toLowerCase();
+        if (!varDef.url_allowed_schemes.includes(urlScheme)) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.invalidUrlSchemeErrorMessage', {
+              defaultMessage:
+                'URL scheme "{urlScheme}" is not allowed. Allowed schemes: {allowedSchemes}',
+              values: {
+                urlScheme,
+                allowedSchemes: varDef.url_allowed_schemes.join(', '),
+              },
+            })
+          );
+        }
+      }
+    } catch (e) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidUrlFormatErrorMessage', {
+          defaultMessage: 'Invalid URL format',
         })
       );
     }
@@ -474,9 +712,24 @@ export const countValidationErrors = (
     | PackagePolicyInputValidationResults
     | PackagePolicyConfigValidationResults
 ): number => {
-  const flattenedValidation = getFlattenedObject(validationResults);
-  const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
-  return errors.length;
+  const requiredVarGroupErrorKeys: Record<string, boolean> = {};
+  let otherErrors = 0;
+
+  // Flatten validation results and map to retrieve required var group errors vs other errors
+  // because required var groups should only count as 1 error
+  const flattenedValidation = getFlattenedObject(validationResults ?? {});
+  Object.entries(flattenedValidation).forEach(([key, value]) => {
+    if (key.startsWith('required_vars.')) {
+      requiredVarGroupErrorKeys.required_vars = true;
+    } else if (key.includes('.required_vars.')) {
+      const groupKey = key.replace(/^(.*)\.required_vars\..*$/, '$1');
+      requiredVarGroupErrorKeys[groupKey] = true;
+    } else if (Boolean(value)) {
+      otherErrors++;
+    }
+  });
+
+  return otherErrors + Object.keys(requiredVarGroupErrorKeys).length;
 };
 
 export const validationHasErrors = (

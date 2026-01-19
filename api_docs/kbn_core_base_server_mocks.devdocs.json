@@ -22,7 +22,9 @@
         "tags": [],
         "label": "mockCoreContext",
         "description": [],
-        "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
+        "path": "src/core/packages/base/server-mocks/src/core_context.mock.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -64,7 +66,9 @@
               "CoreContext",
               ">"
             ],
-            "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
+            "path": "src/core/packages/base/server-mocks/src/core_context.mock.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -97,7 +101,9 @@
                   "IConfigService",
                   "> | undefined; }"
                 ],
-                "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
+                "path": "src/core/packages/base/server-mocks/src/core_context.mock.ts",
+                "lineNumber": 18,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               }

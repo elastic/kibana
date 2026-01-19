@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   ExecutionTimeRange,
   GroupedSearchQueryResponse,
@@ -92,8 +93,8 @@ export async function getChartPreviewData(
 }
 
 // Expand the same query that powers the executor with a date histogram aggregation
-const addHistogramAggregationToQuery = (
-  query: any,
+export const addHistogramAggregationToQuery = (
+  query: estypes.SearchRequest,
   rangeFilter: any,
   interval: string,
   timestampField: string,
@@ -114,24 +115,48 @@ const addHistogramAggregationToQuery = (
     },
   };
 
-  if (isGrouped) {
-    const isOptimizedQuery = !query.body.aggregations.groups.aggregations?.filtered_results;
-
-    if (isOptimizedQuery) {
-      query.body.aggregations.groups.aggregations = {
-        ...query.body.aggregations.groups.aggregations,
-        ...histogramAggregation,
-      };
-    } else {
-      query.body.aggregations.groups.aggregations.filtered_results = {
-        ...query.body.aggregations.groups.aggregations.filtered_results,
-        aggregations: histogramAggregation,
-      };
-    }
-  } else {
-    query.body = {
-      ...query.body,
+  if (!isGrouped) {
+    query = {
+      ...query,
       aggregations: histogramAggregation,
+    };
+    return query;
+  }
+
+  const aggs = query.aggregations;
+  const groups = aggs?.groups;
+  const groupsAggs = groups?.aggregations;
+
+  if (!aggs || !groups || !groupsAggs) {
+    return query;
+  }
+
+  const isOptimizedQuery = !groupsAggs.filtered_results;
+
+  if (isOptimizedQuery) {
+    query.aggregations = {
+      ...aggs,
+      groups: {
+        ...groups,
+        aggregations: {
+          ...groupsAggs,
+          ...histogramAggregation,
+        },
+      },
+    };
+  } else {
+    query.aggregations = {
+      ...aggs,
+      groups: {
+        ...groups,
+        aggregations: {
+          ...groupsAggs,
+          filtered_results: {
+            ...groupsAggs.filtered_results,
+            aggregations: histogramAggregation,
+          },
+        },
+      },
     };
   }
 
@@ -158,7 +183,7 @@ const getGroupedResults = async (
 
   while (true) {
     const queryWithAfterKey: any = { ...query };
-    queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
+    queryWithAfterKey.aggregations.groups.composite.after = lastAfterKey;
     const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
       await callWithRequest(requestContext, 'search', queryWithAfterKey)
     );

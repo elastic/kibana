@@ -7,22 +7,28 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React from 'react';
-import styled from 'styled-components';
+import React, { useMemo } from 'react';
+import styled from '@emotion/styled';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
-import { DefaultDraggable } from '../draggables';
+import { CellActionsRenderer } from '../cell_actions/cell_actions_renderer';
 import { useUiSetting$ } from '../../lib/kibana';
 import { EMPTY_VALUE_LABEL } from './translation';
 import { hasValueToDisplay } from '../../utils/validators';
+import {
+  SecurityCellActions,
+  SecurityCellActionType,
+  SecurityCellActionsTrigger,
+  CellActionsMode,
+} from '../cell_actions';
+import { getSourcererScopeId } from '../../../helpers';
 
 const CountFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin-right: ${theme.eui.euiSizeS};`}
+  ${({ theme }) => `margin-right: ${theme.euiTheme.size.s};`}
 `;
 
 export interface LegendItem {
   color?: string;
-  dataProviderId: string;
   render?: (fieldValuePair?: { field: string; value: string | number }) => React.ReactNode;
   field: string;
   scopeId?: string;
@@ -45,9 +51,19 @@ ValueWrapper.displayName = 'ValueWrapper';
 
 const DraggableLegendItemComponent: React.FC<{
   legendItem: LegendItem;
-}> = ({ legendItem }) => {
+  isInlineActions?: boolean;
+}> = ({ legendItem, isInlineActions = false }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const { color, count, dataProviderId, field, scopeId, value } = legendItem;
+  const { color, count, field, scopeId, value } = legendItem;
+
+  const sourcererScopeId = getSourcererScopeId(scopeId ?? '');
+  const content = useMemo(() => {
+    return legendItem.render == null ? (
+      <ValueWrapper value={value} />
+    ) : (
+      legendItem.render({ field, value })
+    );
+  }, [field, value, legendItem]);
 
   return (
     <EuiText size="xs">
@@ -65,22 +81,14 @@ const DraggableLegendItemComponent: React.FC<{
             gutterSize="none"
             responsive={false}
           >
-            <EuiFlexItem grow={false}>
-              <DefaultDraggable
-                data-test-subj={`legend-item-${dataProviderId}`}
-                field={field}
-                hideTopN={true}
-                id={dataProviderId}
-                isDraggable={false}
-                scopeId={scopeId}
-                value={value}
-              >
-                {legendItem.render == null ? (
-                  <ValueWrapper value={value} />
-                ) : (
-                  legendItem.render({ field, value })
-                )}
-              </DefaultDraggable>
+            <EuiFlexItem grow={false} data-test-subj={'legend-item'}>
+              {isInlineActions ? (
+                content
+              ) : (
+                <CellActionsRenderer field={field} hideTopN={true} scopeId={scopeId} value={value}>
+                  {content}
+                </CellActionsRenderer>
+              )}
             </EuiFlexItem>
 
             {count != null && (
@@ -90,6 +98,22 @@ const DraggableLegendItemComponent: React.FC<{
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
+
+        {isInlineActions && (
+          <EuiFlexItem grow={false} data-test-subj="legendItemInlineActions">
+            <SecurityCellActions
+              mode={CellActionsMode.INLINE}
+              visibleCellActions={0}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              data={{ field, value }}
+              sourcererScopeId={sourcererScopeId}
+              metadata={{ scopeId }}
+              disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
+              extraActionsIconType="boxesVertical"
+              extraActionsColor="text"
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiText>
   );

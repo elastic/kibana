@@ -6,13 +6,17 @@
  */
 
 import type { IKibanaResponse, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  InferenceInferenceEndpointInfo,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/types';
 
-import { InferenceServicesGetResponse } from '../types';
+import type { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
-import { addInferenceEndpoint } from '../lib/add_inference_endpoint';
+import { inferenceEndpointExists } from '../lib/inference_endpoint_exists';
+import { unflattenObject } from '../utils/unflatten_object';
 
 const inferenceEndpointSchema = schema.object({
   config: schema.object({
@@ -20,6 +24,7 @@ const inferenceEndpointSchema = schema.object({
     provider: schema.string(),
     taskType: schema.string(),
     providerConfig: schema.any(),
+    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
   secrets: schema.object({
     providerSecrets: schema.any(),
@@ -34,6 +39,12 @@ export const getInferenceServicesRoute = (
     .get({
       access: 'internal',
       path: '/internal/_inference/_services',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to es client',
+        },
+      },
     })
     .addVersion(
       {
@@ -70,6 +81,12 @@ export const getInferenceServicesRoute = (
     .post({
       access: 'internal',
       path: '/internal/_inference/_add',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to es client',
+        },
+      },
     })
     .addVersion(
       {
@@ -89,7 +106,37 @@ export const getInferenceServicesRoute = (
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           const { config, secrets } = request.body;
-          const result = await addInferenceEndpoint(esClient, config, secrets);
+
+          // NOTE: This is a temporary workaround for anthropic max_tokens handling until the services endpoint is updated to reflect the correct structure.
+          // Anthropic is unique in that it requires max_tokens to be sent as part of the task_settings instead of the usual service_settings.
+          // Until the services endpoint is updated to reflect that, there is no way for the form UI to know where to put max_tokens. This can be removed once that update is made.
+          let taskSettings: Record<string, Record<string, string>> | undefined = config?.headers
+            ? { headers: config.headers }
+            : undefined;
+
+          if (config?.provider === 'anthropic' && config?.providerConfig?.max_tokens) {
+            taskSettings = {
+              ...(taskSettings ?? {}),
+              max_tokens: config.providerConfig.max_tokens,
+            };
+            // This field is unknown to the anthropic service config, so we remove it
+            delete config.providerConfig.max_tokens;
+          }
+
+          const serviceSettings = {
+            ...unflattenObject(config?.providerConfig ?? {}),
+            ...unflattenObject(secrets?.providerSecrets ?? {}),
+          };
+
+          const result = await esClient.inference.put({
+            inference_id: config?.inferenceId ?? '',
+            task_type: config?.taskType as InferenceTaskType,
+            inference_config: {
+              service: config?.provider,
+              service_settings: serviceSettings,
+              ...(taskSettings ? { task_settings: taskSettings } : {}),
+            },
+          });
 
           return response.ok({
             body: result,
@@ -105,9 +152,60 @@ export const getInferenceServicesRoute = (
     );
 
   router.versioned
+    .get({
+      access: 'internal',
+      path: '/internal/_inference/_exists/{inferenceId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to es client',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: schema.object({
+              inferenceId: schema.string(),
+            }),
+          },
+        },
+      },
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<{ isEndpointExists: boolean }>> => {
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+          const result = await inferenceEndpointExists(esClient, request.params.inferenceId);
+
+          return response.ok({
+            body: { isEndpointExists: result },
+          });
+        } catch (err) {
+          logger.error(err);
+          return response.customError({
+            body: err.message,
+            statusCode: err.statusCode,
+          });
+        }
+      }
+    );
+
+  router.versioned
     .put({
       access: 'internal',
       path: '/internal/_inference/_update',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to es client',
+        },
+      },
     })
     .addVersion(
       {
@@ -128,8 +226,10 @@ export const getInferenceServicesRoute = (
 
           const { config, secrets } = request.body;
 
+          const taskSettings = config?.headers ? { headers: config.headers } : undefined;
+
           // currently update api only allows api_key and num_allocations
-          const serviceSettings = {
+          const body = {
             service_settings: {
               ...(secrets?.providerSecrets?.api_key && {
                 api_key: secrets.providerSecrets.api_key,
@@ -138,13 +238,14 @@ export const getInferenceServicesRoute = (
                 num_allocations: config.providerConfig.num_allocations,
               }),
             },
+            ...(taskSettings ? { task_settings: taskSettings } : {}),
           };
 
           const result = await esClient.transport.request<InferenceInferenceEndpointInfo>(
             {
               method: 'PUT',
               path: `/_inference/${config.taskType}/${config.inferenceId}/_update`,
-              body: JSON.stringify(serviceSettings),
+              body: JSON.stringify(body),
             },
             {
               headers: {

@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexItem, EuiPanel, EuiText, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import fastIsEqual from 'fast-deep-equal';
 import { getFieldIconType } from '@kbn/field-utils';
 import { useExistingFieldsReader } from '@kbn/unified-field-list';
+import type { FieldOption, FieldOptionValue } from '@kbn/visualization-ui-components';
 import {
-  FieldOption,
-  FieldOptionValue,
   FieldPicker,
   NewBucketButton,
   DragDropBuckets,
@@ -23,7 +23,7 @@ import {
   FieldsBucketContainer,
   isFieldLensCompatible,
 } from '@kbn/visualization-ui-components';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 3;
@@ -42,6 +42,10 @@ function removeNewEmptyField(v: string) {
 }
 
 const generateId = htmlIdGenerator();
+
+const NewBucketButtonStyles = ({ euiTheme }: UseEuiTheme) => `
+ margin-top: ${euiTheme.size.xs};
+`;
 
 interface LocalFieldEntry {
   name: string;
@@ -78,7 +82,7 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
 
   const addFieldButton = (
     <NewBucketButton
-      className="lnsConfigPanelAnnotations__addButton"
+      css={NewBucketButtonStyles}
       data-test-subj={`lnsXY-annotation-tooltip-add_field`}
       onClick={() => {
         setFields([...currentFields, { name: '', id: generateId() }]);

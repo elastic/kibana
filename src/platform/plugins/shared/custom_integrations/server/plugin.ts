@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '@kbn/core/server';
 
-import { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
-import { CustomIntegration } from '../common';
+import type { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
+import type { CustomIntegration } from '../common';
 import { CustomIntegrationRegistry } from './custom_integration_registry';
 import { defineRoutes } from './routes/define_routes';
 import { registerLanguageClients } from './language_clients';

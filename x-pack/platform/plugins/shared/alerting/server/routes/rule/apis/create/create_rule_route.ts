@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteOptions } from '../../..';
+import type { RouteOptions } from '../../..';
 import type {
   CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
@@ -14,9 +14,11 @@ import type {
 import {
   createBodySchemaV1,
   createParamsSchemaV1,
+  createRuleParamsExamplesV1,
 } from '../../../../../common/routes/rule/apis/create';
-import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
-import { Rule } from '../../../../application/rule/types';
+import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+import type { Rule } from '../../../../application/rule/types';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
@@ -25,6 +27,7 @@ import {
   handleDisabledApiKeysError,
   verifyAccessAndContext,
 } from '../../../lib';
+import { validateInternalRuleType } from '../../../lib/validate_internal_rule_type';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformCreateBodyV1 } from './transforms';
@@ -38,6 +41,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
         access: 'public',
         summary: `Create a rule`,
         tags: ['oas-tag:alerting'],
+        oasOperationObject: createRuleParamsExamplesV1,
       },
       validate: {
         request: {
@@ -67,7 +71,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
-          const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
+          const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
           const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
@@ -80,6 +84,12 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
+            validateInternalRuleType({
+              ruleTypeId: createRuleData.rule_type_id,
+              ruleTypes,
+              operationText: 'create',
+            });
+
             /**
              * Throws an error if the group is not defined in default actions
              */
@@ -94,8 +104,6 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               actionsClient.isSystemAction(action.id)
             );
 
-            const flappingSettings = await rulesSettingsClient.flapping().get();
-
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({
@@ -104,7 +112,6 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 actions,
                 systemActions,
               }),
-              isFlappingEnabled: flappingSettings.enabled,
               options: { id: params?.id },
             })) as Rule<RuleParamsV1>;
 

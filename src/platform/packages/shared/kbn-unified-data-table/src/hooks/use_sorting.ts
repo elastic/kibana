@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getSortingCriteria } from '@kbn/sort-predicates';
+import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
 import type { SortOrder } from '../components/data_table';
 import type { DataTableColumnsMeta } from '../types';
+import { kibanaJSON } from '../constants';
+import { SOURCE_COLUMN } from '../utils/columns';
 
 export const useSorting = ({
   rows,
@@ -49,17 +52,17 @@ export const useSorting = ({
 
     return sortingColumns.reduce<Array<(a: DataTableRecord, b: DataTableRecord) => number>>(
       (acc, { id, direction }) => {
-        const field = dataView.fields.getByName(id);
+        const field = getDataViewFieldOrCreateFromColumnMeta({
+          dataView,
+          fieldName: id,
+          columnMeta: columnsMeta?.[id],
+        });
 
         if (!field) {
           return acc;
         }
 
-        const sortField = getSortingCriteria(
-          columnsMeta?.[id]?.type ?? field.type,
-          id,
-          dataView.getFormatterForField(field)
-        );
+        const sortField = getSortingCriteria(field.type, id, dataView.getFormatterForField(field));
 
         acc.push((a, b) => sortField(a.flattened, b.flattened, direction as 'asc' | 'desc'));
 
@@ -111,4 +114,32 @@ export const useSorting = ({
   }, [isSortEnabled, isPlainRecord, defaultColumns, sortingColumns, onSort]);
 
   return { sortedRows, sorting };
+};
+
+export const isSortable = ({
+  isPlainRecord,
+  columnName,
+  columnSchema,
+  dataViewField,
+}: {
+  isPlainRecord: boolean | undefined;
+  columnName: string;
+  columnSchema: string;
+  dataViewField: DataViewField | undefined;
+}): boolean => {
+  if (isPlainRecord) {
+    // TODO: would be great to have something like `sortable` flag for text based columns too
+    if (columnName === SOURCE_COLUMN) {
+      return false; // _source column is not sortable
+    }
+    return Boolean(
+      columnSchema !== kibanaJSON ||
+        (dataViewField?.type &&
+          Object.values(NonStringSortableFieldType).includes(
+            dataViewField.type as NonStringSortableFieldType
+          ))
+    );
+  }
+
+  return dataViewField?.sortable === true;
 };

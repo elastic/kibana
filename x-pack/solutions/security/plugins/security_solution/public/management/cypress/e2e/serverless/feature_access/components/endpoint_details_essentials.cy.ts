@@ -12,8 +12,7 @@ import { login, ROLE } from '../../../../tasks/login';
 
 const { insightsComponentDoesntExist } = workflowInsightsSelectors;
 
-// Unskip when defendInsights assistant feature is enabled by default
-describe.skip(
+describe(
   'Endpoint details',
   {
     tags: [
@@ -23,9 +22,6 @@ describe.skip(
     ],
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['defendInsights'])}`,
-        ],
         productTypes: [
           { product_line: 'security', product_tier: 'essentials' },
           { product_line: 'endpoint', product_tier: 'essentials' },

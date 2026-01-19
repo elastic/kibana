@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { SlmPolicyEs, PolicyIndicesResponse } from '../../../common/types';
+import type { SlmPolicyEs, PolicyIndicesResponse } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
 import { getManagedPolicyNames } from '../../lib';
-import { RouteDependencies, ResolveIndexResponseFromES } from '../../types';
+import type { RouteDependencies, ResolveIndexResponseFromES } from '../../types';
 import { addBasePath } from '../helpers';
 import { nameParameterSchema, policySchema } from './validate_schemas';
 
@@ -95,7 +96,16 @@ export function registerPolicyRoutes({
 
   // Create policy
   router.post(
-    { path: addBasePath('policies'), validate: { body: policySchema } },
+    {
+      path: addBasePath('policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: policySchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -134,6 +144,12 @@ export function registerPolicyRoutes({
   router.put(
     {
       path: addBasePath('policies/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { params: nameParameterSchema, body: policySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -162,7 +178,16 @@ export function registerPolicyRoutes({
 
   // Delete policy
   router.delete(
-    { path: addBasePath('policies/{name}'), validate: { params: nameParameterSchema } },
+    {
+      path: addBasePath('policies/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { params: nameParameterSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
@@ -193,7 +218,16 @@ export function registerPolicyRoutes({
 
   // Execute policy
   router.post(
-    { path: addBasePath('policy/{name}/run'), validate: { params: nameParameterSchema } },
+    {
+      path: addBasePath('policy/{name}/run'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { params: nameParameterSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
@@ -212,7 +246,16 @@ export function registerPolicyRoutes({
 
   // Get policy indices
   router.get(
-    { path: addBasePath('policies/indices'), validate: false },
+    {
+      path: addBasePath('policies/indices'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -243,7 +286,16 @@ export function registerPolicyRoutes({
 
   // Get policy feature states
   router.get(
-    { path: addBasePath('policies/features'), validate: false },
+    {
+      path: addBasePath('policies/features'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -259,7 +311,16 @@ export function registerPolicyRoutes({
 
   // Get retention settings
   router.get(
-    { path: addBasePath('policies/retention_settings'), validate: false },
+    {
+      path: addBasePath('policies/retention_settings'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { persistent, transient, defaults } =
@@ -288,6 +349,12 @@ export function registerPolicyRoutes({
   router.put(
     {
       path: addBasePath('policies/retention_settings'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { body: retentionSettingsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -296,11 +363,9 @@ export function registerPolicyRoutes({
 
       try {
         const response = await clusterClient.asCurrentUser.cluster.putSettings({
-          body: {
-            persistent: {
-              slm: {
-                retention_schedule: retentionSchedule,
-              },
+          persistent: {
+            slm: {
+              retention_schedule: retentionSchedule,
             },
           },
         });
@@ -314,7 +379,16 @@ export function registerPolicyRoutes({
 
   // Execute retention
   router.post(
-    { path: addBasePath('policies/retention'), validate: false },
+    {
+      path: addBasePath('policies/retention'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const response = await clusterClient.asCurrentUser.slm.executeRetention();
@@ -324,7 +398,16 @@ export function registerPolicyRoutes({
 
   // Get snapshot lifecycle management status
   router.get(
-    { path: addBasePath('policies/slm_status'), validate: false },
+    {
+      path: addBasePath('policies/slm_status'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 

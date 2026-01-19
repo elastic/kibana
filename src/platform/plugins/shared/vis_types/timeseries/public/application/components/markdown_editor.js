@@ -13,11 +13,12 @@
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
+import { css } from '@emotion/react';
 import { createTickFormatter } from './lib/tick_formatter';
 import { convertSeriesToVars } from './lib/convert_series_to_vars';
 import _ from 'lodash';
 
-import { CodeEditor, MarkdownLang } from '@kbn/code-editor';
+import { CodeEditor, MARKDOWN_LANG_ID } from '@kbn/code-editor';
 
 import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -25,7 +26,33 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataViewsStart } from '../../services';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
-import './_markdown_editor.scss';
+const editorStyle = ({ euiTheme }) => css`
+  display: flex;
+  background-color: ${euiTheme.colors.emptyShade};
+  height: 500px;
+`;
+
+const panelStyle = css`
+  width: 50%;
+  flex: 1 0 auto;
+`;
+
+const editorPanelStyle = ({ euiTheme }) => css`
+  border-right: 2px solid ${euiTheme.colors.lightestShade};
+`;
+
+const variablesPanelStyle = ({ euiTheme }) => css`
+  padding: ${euiTheme.size.s};
+  overflow: auto;
+`;
+
+const noVariablesStyle = ({ euiTheme }) => css`
+  display: block;
+  padding-bottom: ${euiTheme.size.xxl};
+  padding-top: calc(${euiTheme.size.xxl} - ${euiTheme.size.l});
+  text-align: center;
+  border-bottom: ${euiTheme.border.thin};
+`;
 
 export class MarkdownEditor extends Component {
   constructor(props) {
@@ -122,11 +149,11 @@ export class MarkdownEditor extends Component {
     walk(variables);
 
     return (
-      <div className="tvbMarkdownEditor">
-        <div className="tvbMarkdownEditor__editor">
+      <div className="tvbMarkdownEditor" css={editorStyle}>
+        <div className="tvbMarkdownEditor__editor" css={[panelStyle, editorPanelStyle]}>
           <CodeEditor
             editorDidMount={this.handleOnLoad}
-            languageId={MarkdownLang}
+            languageId={MARKDOWN_LANG_ID}
             options={{
               fontSize: '14px',
               wordWrap: 'on',
@@ -135,7 +162,7 @@ export class MarkdownEditor extends Component {
             onChange={this.handleChange}
           />
         </div>
-        <div className="tvbMarkdownEditor__variables">
+        <div className="tvbMarkdownEditor__variables" css={[panelStyle, variablesPanelStyle]}>
           <EuiText>
             <p>
               <FormattedMessage
@@ -184,6 +211,7 @@ export class MarkdownEditor extends Component {
               size="xxs"
               className="tsvbMarkdownVariablesTable__noVariables"
               data-test-subj="tvbMarkdownEditor__noVariables"
+              css={noVariablesStyle}
             >
               <span>
                 <FormattedMessage

@@ -41,7 +41,7 @@ open target/coverage/jest/index.html
 | --inspect    | Add --inspect-brk flag to the ftr for debugging |
 | --times      | Repeat the test n number of times               |
 
-The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/apm_api_integration/).
+The API tests are located in [`x-pack/solutions/observability/test/apm_api_integration/`](/x-pack/solutions/observability/test/apm_api_integration/).
 
 #### Start server and run test (single process)
 
@@ -75,7 +75,7 @@ node x-pack/solutions/observability/plugins/apm/scripts/test/api --runner --basi
 
 #### API Test tips
 
-- For data generation in API tests have a look at the [kbn-apm-synthtrace](../../../../../../packages/kbn-apm-synthtrace/README.md) package
+- For data generation in API tests have a look at the [kbn-synthtrace](../../../../../../src/platform/packages/shared/kbn-synthtrace/README.md) package
 - For debugging access Elasticsearch on http://localhost:9220 and Kibana on http://localhost:5620 (`elastic` / `changeme`)
 
 ---
@@ -93,7 +93,7 @@ node x-pack/solutions/observability/plugins/apm/scripts/test/api --runner --basi
 | --inspect    | Add --inspect-brk flag to the ftr for debugging |
 | --times      | Repeat the test n number of times               |
 
-Deployment-agnostic tests are located in [`x-pack/test/deployment_agnostic/apis/observability/apm/index.ts`](../../../../../test/api_integration/deployment_agnostic/apis/observability/apm/index.ts).
+Deployment-agnostic tests are located in [`x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/index.ts`](../../../test/api_integration_deployment_agnostic/apis/apm/index.ts).
 
 #### Start server and run test (single process)
 
@@ -127,7 +127,7 @@ node x-pack/solutions/observability/plugins/apm/scripts/test/dat --runner --stat
 
 #### API Test tips
 
-- For data generation in Deployment-agnostic tests have a look at the [kbn-apm-synthtrace](../../../../../../packages/kbn-apm-synthtrace/README.md) package
+- For data generation in Deployment-agnostic tests have a look at the [kbn-synthtrace](../../../../../../src/platform/packages/shared/kbn-synthtrace/README.md) package
 - For debugging access Elasticsearch on http://localhost:9220 and Kibana on http://localhost:5620 (`elastic` / `changeme`)
 
 ---
@@ -175,13 +175,13 @@ Accessibility tests are added on the e2e with `checkA11y()`, they will run toget
 
 ```sh
 # Start server
-node scripts/functional_tests_server --config x-pack/test/functional/apps/apm/config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/functional/apps/apm/config.ts
 
 # Run tests
-node scripts/functional_test_runner --config x-pack/test/functional/apps/apm/config.ts --grep='APM specs'
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/functional/apps/apm/config.ts --grep='APM specs'
 ```
 
-APM tests are located in `x-pack/test/functional/apps/apm`.
+APM tests are located in `x-pack/solutions/observability/test/functional/apps/apm`.
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 diff --git a/x-pack/solutions/observability/plugins/apm/scripts/test/README.md b/x-pack/solutions/observability/plugins/apm/scripts/test/README.md
 
@@ -190,17 +190,17 @@ diff --git a/x-pack/solutions/observability/plugins/apm/scripts/test/README.md b
 #### Start server and run tests (single process)
 
 ```
-node scripts/functional_tests.js --config x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+node scripts/functional_tests.js --config x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts
 ```
 
 #### Start server and run tests (separate processes)
 
 ```sh
 # Start server
-node scripts/functional_tests_server.js --config x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+node scripts/functional_tests_server.js --config x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts
 
 # Run tests
-node scripts/functional_test_runner --config=x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+node scripts/functional_test_runner --config=x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts
 ```
 
 ## Storybook
@@ -217,7 +217,7 @@ All files with a .stories.tsx extension will be loaded. You can access the devel
 
 For end-to-end (e.g. agent -> apm server -> elasticsearch <- kibana) development and testing of Elastic APM please check the the [APM Integration Testing repository](https://github.com/elastic/apm-integration-testing).
 
-Data can also be generated using the [kbn-apm-synthtrace](../../../../../packages/kbn-apm-synthtrace/README.md) CLI.
+Data can also be generated using the [kbn-synthtrace](../../../../../src/platform/packages/shared/kbn-synthtrace/README.md) CLI.
 
 ## Best practices for API tests
 

@@ -8,7 +8,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { css, CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
+import { css } from '@emotion/react';
 import { EuiIconTip, useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
@@ -134,5 +135,44 @@ export const DataTableTimeColumnHeader = ({
         {timeFieldName} <EuiIconTip type="clock" content={primaryTimeTooltip} />
       </ColumnHeaderTruncateContainer>
     </div>
+  );
+};
+
+export const DataTableScoreColumnHeader = ({
+  isSorted,
+  showColumnTokens,
+  columnName,
+  columnsMeta,
+  dataView,
+  headerRowHeight,
+  columnDisplayName,
+}: DataTableColumnHeaderProps & { isSorted?: boolean }) => {
+  const tooltipContent = i18n.translate('unifiedDataTable.tableHeader.scoreFieldIconTooltip', {
+    defaultMessage: 'In order to retrieve values for _score, you must sort by it.',
+  });
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+      {showColumnTokens && isSorted && (
+        <DataTableColumnToken
+          columnName={columnName}
+          columnsMeta={columnsMeta}
+          dataView={dataView}
+        />
+      )}
+      {!isSorted && (
+        <span css={{ paddingRight: euiTheme.size.xs }}>
+          <EuiIconTip
+            content={tooltipContent}
+            color="warning"
+            size="s"
+            type="alert"
+            position="left"
+          />
+        </span>
+      )}
+      <DataTableColumnTitle columnDisplayName={columnDisplayName} />
+    </ColumnHeaderTruncateContainer>
   );
 };

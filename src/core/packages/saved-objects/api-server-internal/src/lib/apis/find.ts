@@ -8,29 +8,28 @@
  */
 
 import Boom from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
-import {
-  SavedObjectsErrorHelpers,
-  type SavedObjectsRawDoc,
+import type {
   CheckAuthorizationResult,
   SavedObjectsRawDocSource,
   GetFindRedactTypeMapParams,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, type SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_NAMESPACE_STRING,
   FIND_DEFAULT_PAGE,
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from '@kbn/core-saved-objects-utils-server';
-import {
+import type {
   SavedObjectsFindOptions,
   SavedObjectsFindInternalOptions,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { ApiExecutionContext } from './types';
+import type { ApiExecutionContext } from './types';
 import {
   validateConvertFilterToKueryNode,
   getSearchDsl,
@@ -171,10 +170,15 @@ export const performFind = async <T = unknown, A = unknown>(
       // If the user is unauthorized to find *anything* they requested, return an empty response
       return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
     }
-    if (authorizationResult?.status === 'partially_authorized') {
+    if (
+      authorizationResult?.status === 'fully_authorized' ||
+      authorizationResult?.status === 'partially_authorized'
+    ) {
       typeToNamespacesMap = new Map<string, string[]>();
       for (const [objType, entry] of authorizationResult.typeMap) {
         if (!entry.find) continue;
+        // Discard the types that the SO repository doesn't know about (typically hidden objects).
+        if (!allowedTypes.includes(objType)) continue;
         // This ensures that the query DSL can filter only for object types that the user is authorized to access for a given space
         const { authorizedSpaces, isGloballyAuthorized } = entry.find;
         typeToNamespacesMap.set(objType, isGloballyAuthorized ? namespaces : authorizedSpaces);

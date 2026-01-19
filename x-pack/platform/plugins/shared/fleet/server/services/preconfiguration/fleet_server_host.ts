@@ -9,23 +9,19 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
-import { DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
+import { DEFAULT_FLEET_SERVER_HOST_ID, ECH_AGENTLESS_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import { FleetError } from '../../errors';
 
 import type { FleetServerHost } from '../../types';
 import { appContextService } from '../app_context';
-import {
-  bulkGetFleetServerHosts,
-  createFleetServerHost,
-  deleteFleetServerHost,
-  listFleetServerHosts,
-  updateFleetServerHost,
-  getDefaultFleetServerHost,
-} from '../fleet_server_host';
+import { fleetServerHostService } from '../fleet_server_host';
+import { isAgentlessEnabled } from '../utils/agentless';
+
 import { agentPolicyService } from '../agent_policy';
 
 import { isDifferent } from './utils';
+import { hashSecret, isSecretDifferent } from './outputs';
 
 export function getCloudFleetServersHosts() {
   const cloudSetup = appContextService.getCloud();
@@ -50,6 +46,7 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
   const { fleetServerHosts: fleetServerHostsFromConfig } = config;
 
   const legacyFleetServerHostsConfig = getConfigFleetServerHosts(config);
+  const cloudServerHosts = getCloudFleetServersHosts();
 
   const fleetServerHosts: FleetServerHost[] = (fleetServerHostsFromConfig || []).concat([
     ...(legacyFleetServerHostsConfig
@@ -59,6 +56,18 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
             is_default: true,
             id: DEFAULT_FLEET_SERVER_HOST_ID,
             host_urls: legacyFleetServerHostsConfig,
+          },
+        ]
+      : []),
+    // Include agentless Fleet Server host in ECH
+    ...(isAgentlessEnabled() && cloudServerHosts
+      ? [
+          {
+            id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+            name: 'Internal Fleet Server for agentless',
+            host_urls: cloudServerHosts,
+            is_default: false,
+            is_preconfigured: true,
           },
         ]
       : []),
@@ -81,7 +90,7 @@ export async function ensurePreconfiguredFleetServerHosts(
     esClient,
     preconfiguredFleetServerHosts
   );
-  await createCloudFleetServerHostIfNeeded(soClient);
+  await createCloudFleetServerHostIfNeeded(soClient, esClient);
   await cleanPreconfiguredFleetServerHosts(soClient, esClient, preconfiguredFleetServerHosts);
 }
 
@@ -90,8 +99,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
   esClient: ElasticsearchClient,
   preconfiguredFleetServerHosts: FleetServerHost[]
 ) {
-  const existingFleetServerHosts = await bulkGetFleetServerHosts(
-    soClient,
+  const existingFleetServerHosts = await fleetServerHostService.bulkGet(
     preconfiguredFleetServerHosts.map(({ id }) => id),
     { ignoreNotFound: true }
   );
@@ -105,36 +113,37 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
       const { id, ...data } = preconfiguredFleetServerHost;
 
       const isCreate = !existingHost;
+
       const isUpdateWithNewData =
-        (existingHost &&
-          (!existingHost.is_preconfigured ||
-            existingHost.is_default !== preconfiguredFleetServerHost.is_default ||
-            existingHost.name !== preconfiguredFleetServerHost.name ||
-            isDifferent(existingHost.is_internal, preconfiguredFleetServerHost.is_internal) ||
-            isDifferent(
-              existingHost.host_urls.map(normalizeHostsForAgents),
-              preconfiguredFleetServerHost.host_urls.map(normalizeHostsForAgents)
-            ))) ||
-        isDifferent(existingHost?.proxy_id, preconfiguredFleetServerHost.proxy_id);
+        existingHost &&
+        (!existingHost.is_preconfigured ||
+          (await isPreconfiguredFleetServerHostDifferentFromCurrent(
+            existingHost,
+            preconfiguredFleetServerHost
+          )));
+
+      const secretHashes = await hashSecrets(preconfiguredFleetServerHost);
 
       if (isCreate) {
-        await createFleetServerHost(
+        await fleetServerHostService.create(
           soClient,
+          esClient,
           {
             ...data,
             is_preconfigured: true,
           },
-          { id, overwrite: true, fromPreconfiguration: true }
+          { id, overwrite: true, fromPreconfiguration: true, secretHashes }
         );
       } else if (isUpdateWithNewData) {
-        await updateFleetServerHost(
+        await fleetServerHostService.update(
           soClient,
+          esClient,
           id,
           {
             ...data,
             is_preconfigured: true,
           },
-          { fromPreconfiguration: true }
+          { fromPreconfiguration: true, secretHashes }
         );
         if (data.is_default) {
           await agentPolicyService.bumpAllAgentPolicies(esClient);
@@ -146,16 +155,20 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
   );
 }
 
-export async function createCloudFleetServerHostIfNeeded(soClient: SavedObjectsClientContract) {
+export async function createCloudFleetServerHostIfNeeded(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) {
   const cloudServerHosts = getCloudFleetServersHosts();
   if (!cloudServerHosts || cloudServerHosts.length === 0) {
     return;
   }
 
-  const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
+  const defaultFleetServerHost = await fleetServerHostService.getDefaultFleetServerHost();
   if (!defaultFleetServerHost) {
-    await createFleetServerHost(
+    await fleetServerHostService.create(
       soClient,
+      esClient,
       {
         name: 'Default',
         is_default: true,
@@ -172,7 +185,7 @@ export async function cleanPreconfiguredFleetServerHosts(
   esClient: ElasticsearchClient,
   preconfiguredFleetServerHosts: FleetServerHost[]
 ) {
-  const existingFleetServerHosts = await listFleetServerHosts(soClient);
+  const existingFleetServerHosts = await fleetServerHostService.list();
   const existingPreconfiguredHosts = existingFleetServerHosts.items.filter(
     (o) => o.is_preconfigured === true
   );
@@ -186,8 +199,9 @@ export async function cleanPreconfiguredFleetServerHosts(
     }
 
     if (existingFleetServerHost.is_default) {
-      await updateFleetServerHost(
+      await fleetServerHostService.update(
         soClient,
+        esClient,
         existingFleetServerHost.id,
         { is_preconfigured: false },
         {
@@ -195,7 +209,7 @@ export async function cleanPreconfiguredFleetServerHosts(
         }
       );
     } else {
-      await deleteFleetServerHost(soClient, esClient, existingFleetServerHost.id, {
+      await fleetServerHostService.delete(esClient, existingFleetServerHost.id, {
         fromPreconfiguration: true,
       });
     }
@@ -206,4 +220,65 @@ function getConfigFleetServerHosts(config?: FleetConfigType) {
   return config?.agents?.fleet_server?.hosts && config.agents.fleet_server.hosts.length > 0
     ? config?.agents?.fleet_server?.hosts
     : undefined;
+}
+
+async function hashSecrets(preconfiguredFleetServerHost: FleetServerHost) {
+  let secrets: Record<string, any> = {};
+  if (typeof preconfiguredFleetServerHost.secrets?.ssl?.key === 'string') {
+    const key = await hashSecret(preconfiguredFleetServerHost.secrets?.ssl?.key);
+    secrets = {
+      ssl: {
+        key,
+      },
+    };
+  }
+  if (typeof preconfiguredFleetServerHost.secrets?.ssl?.key === 'string') {
+    const esKey = await hashSecret(preconfiguredFleetServerHost.secrets?.ssl?.key);
+    secrets = {
+      ...(secrets ? secrets : {}),
+      ssl: { es_key: esKey },
+    };
+  }
+  if (typeof preconfiguredFleetServerHost.secrets?.ssl?.agent_key === 'string') {
+    const agentKey = await hashSecret(preconfiguredFleetServerHost.secrets?.ssl?.agent_key);
+    secrets = {
+      ...(secrets ? secrets : {}),
+      ssl: { agent_key: agentKey },
+    };
+  }
+  return secrets;
+}
+
+async function isPreconfiguredFleetServerHostDifferentFromCurrent(
+  existingFleetServerHost: FleetServerHost,
+  preconfiguredFleetServerHost: Partial<FleetServerHost>
+): Promise<boolean> {
+  const secretFieldsAreDifferent = async (): Promise<boolean> => {
+    const sslKeyHashIsDifferent = await isSecretDifferent(
+      preconfiguredFleetServerHost.secrets?.ssl?.key,
+      existingFleetServerHost.secrets?.ssl?.key
+    );
+    const sslESKeyHashIsDifferent = await isSecretDifferent(
+      preconfiguredFleetServerHost.secrets?.ssl?.es_key,
+      existingFleetServerHost.secrets?.ssl?.es_key
+    );
+    const sslAgentKeyHashIsDifferent = await isSecretDifferent(
+      preconfiguredFleetServerHost.secrets?.ssl?.agent_key,
+      existingFleetServerHost.secrets?.ssl?.agent_key
+    );
+    return sslKeyHashIsDifferent || sslESKeyHashIsDifferent || sslAgentKeyHashIsDifferent;
+  };
+
+  return (
+    existingFleetServerHost.is_default !== preconfiguredFleetServerHost.is_default ||
+    existingFleetServerHost.name !== preconfiguredFleetServerHost.name ||
+    isDifferent(existingFleetServerHost.is_internal, preconfiguredFleetServerHost.is_internal) ||
+    isDifferent(
+      existingFleetServerHost.host_urls.map(normalizeHostsForAgents),
+      preconfiguredFleetServerHost?.host_urls?.map(normalizeHostsForAgents)
+    ) ||
+    isDifferent(existingFleetServerHost?.proxy_id, preconfiguredFleetServerHost.proxy_id) ||
+    isDifferent(existingFleetServerHost?.ssl, preconfiguredFleetServerHost?.ssl) ||
+    secretFieldsAreDifferent()
+  );
 }

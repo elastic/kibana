@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, IRouter } from '@kbn/core/server';
+import type { CoreSetup, IRouter } from '@kbn/core/server';
 
 /**
  * This endpoint maintains the legacy /goto/<short_url_id> route. It loads the
@@ -18,6 +18,12 @@ export const registerGotoRoute = (router: IRouter, core: CoreSetup) => {
   core.http.resources.register(
     {
       path: '/goto/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route handles redirection',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string({

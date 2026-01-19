@@ -7,11 +7,10 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import * as api from './api';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana/hooks';
 import { useGetSimilarCases } from './use_get_similar_cases';
 import { mockCase } from './mock';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana/hooks');
@@ -21,11 +20,8 @@ describe('useGetSimilarCases', () => {
   const addSuccess = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('calls getSimilarCases with correct arguments', async () => {
@@ -33,7 +29,7 @@ describe('useGetSimilarCases', () => {
     renderHook(
       () => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0, enabled: true }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -54,7 +50,7 @@ describe('useGetSimilarCases', () => {
     renderHook(
       () => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0, enabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -73,7 +69,7 @@ describe('useGetSimilarCases', () => {
     renderHook(
       () => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0, enabled: true }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 

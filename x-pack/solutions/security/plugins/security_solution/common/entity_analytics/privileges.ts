@@ -7,7 +7,17 @@
 
 import type { EntityAnalyticsPrivileges } from '../api/entity_analytics';
 
-export const getAllMissingPrivileges = (privilege: EntityAnalyticsPrivileges) => {
+export interface MissingPrivileges {
+  elasticsearch: {
+    index: Array<{ indexName: string; privileges: string[] }>;
+    cluster: string[];
+  };
+  kibana: string[];
+}
+
+export const getAllMissingPrivileges = (
+  privilege: EntityAnalyticsPrivileges
+): MissingPrivileges => {
   const esPrivileges = privilege.privileges.elasticsearch;
   const kbnPrivileges = privilege.privileges.kibana;
 
@@ -23,6 +33,20 @@ export const getAllMissingPrivileges = (privilege: EntityAnalyticsPrivileges) =>
     kibana: filterUnauthorized(kbnPrivileges),
   };
 };
+
+export const getMissingPrivilegesErrorMessage = ({ elasticsearch, kibana }: MissingPrivileges) =>
+  [
+    ...elasticsearch.index.map(
+      ({ indexName, privileges }) =>
+        `Missing [${privileges.join(', ')}] privileges for index '${indexName}'.`
+    ),
+
+    ...(elasticsearch.cluster.length > 0
+      ? [`Missing [${elasticsearch.cluster.join(', ')}] cluster privileges.`]
+      : []),
+
+    ...(kibana.length > 0 ? [`Missing [${kibana.join(', ')}] Kibana privileges.`] : []),
+  ].join('\n');
 
 const filterUnauthorized = (obj: Record<string, boolean> | undefined) =>
   Object.entries(obj ?? {})

@@ -11,6 +11,8 @@ import { BehaviorSubject } from 'rxjs';
 import { mlApiServicesMock } from '../../../services/__mocks__/ml_api_services';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { LIGHT_THEME } from '@elastic/charts';
+import type { MlCapabilities } from '../../../../../common/types/capabilities';
+import { getDefaultCapabilities } from '../../../../../common/types/capabilities';
 
 export const chartsServiceMock = {
   theme: {
@@ -25,10 +27,16 @@ export const chartsServiceMock = {
   },
 };
 
+const defaultCapabilities = Object.keys(getDefaultCapabilities()).reduce((acc, key) => {
+  acc[key] = true;
+  return acc;
+}, {} as Record<string, boolean>);
+
 export const kibanaContextMock = {
   services: {
+    docLinks: { links: { ml: { guide: '' } } },
     uiSettings: { get: jest.fn() },
-    chrome: { recentlyAccessed: { add: jest.fn() } },
+    chrome: { recentlyAccessed: { add: jest.fn() }, setHelpExtension: jest.fn() },
     application: {
       navigateToApp: jest.fn(),
       navigateToUrl: jest.fn(),
@@ -63,6 +71,8 @@ export const kibanaContextMock = {
     mlServices: {
       mlApi: mlApiServicesMock,
       mlCapabilities: {
+        capabilities$: new BehaviorSubject(defaultCapabilities),
+        getCapabilities: jest.fn().mockResolvedValue(defaultCapabilities),
         refreshCapabilities: jest.fn(),
       },
       mlFieldFormatService: {
@@ -76,3 +86,20 @@ export const kibanaContextMock = {
 export const useMlKibana = jest.fn(() => {
   return kibanaContextMock;
 });
+
+export const getMockedContextWithCapabilities = (capabilities: Partial<MlCapabilities>) => {
+  return {
+    ...kibanaContextMock,
+    services: {
+      ...kibanaContextMock.services,
+      mlServices: {
+        ...kibanaContextMock.services.mlServices,
+        mlCapabilities: {
+          ...kibanaContextMock.services.mlServices.mlCapabilities,
+          getCapabilities: jest.fn().mockResolvedValue(capabilities),
+          capabilities$: new BehaviorSubject(capabilities),
+        },
+      },
+    },
+  };
+};

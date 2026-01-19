@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -8,7 +8,8 @@
       "react",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
+      "../../../../../typings/emotion.d.ts"
     ]
   },
   "include": [
@@ -40,12 +41,7 @@
     "@kbn/core-custom-branding-common",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-analytics-browser",
-    "@kbn/default-nav-analytics",
-    "@kbn/default-nav-ml",
-    "@kbn/default-nav-management",
-    "@kbn/default-nav-devtools",
     "@kbn/shared-ux-router",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-http-browser-internal",
     "@kbn/core-base-browser-internal",
     "@kbn/core-base-browser-mocks",
@@ -61,8 +57,16 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-user-profile-common",
-    "@kbn/react-kibana-mount",
-    "@kbn/core-theme-browser-internal"
+    "@kbn/core-theme-browser-internal",
+    "@kbn/core-chrome-navigation",
+    "@kbn/core-chrome-layout-components",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/core-feature-flags-browser",
+    "@kbn/core-feature-flags-browser-mocks",
+    "@kbn/shared-ux-feedback-snippet",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/core-chrome-app-menu-components",
+    "@kbn/shared-ux-label-formatter",
   ],
   "exclude": [
     "target/**/*",

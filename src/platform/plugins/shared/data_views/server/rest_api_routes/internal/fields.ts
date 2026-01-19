@@ -8,25 +8,24 @@
  */
 
 import { createHash } from 'crypto';
-import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
+import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { unwrapEtag } from '../../../common/utils';
 import { IndexPatternsFetcher } from '../../fetcher';
-import type {
-  DataViewsServerPluginStart,
-  DataViewsServerPluginStartDependencies,
-} from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
-import { parseFields, IBody, IQuery, querySchema, validate } from './fields_for';
+import type { IBody, IQuery } from './fields_for';
+import { parseFields, querySchema, validate } from './fields_for';
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 
 export function calculateHash(srcBuffer: Buffer) {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha256');
   hash.update(srcBuffer);
   return hash.digest('hex');
 }
 
-const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
+export const createHandler: (
+  isRollupsEnabled: () => boolean
+) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
@@ -44,6 +43,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       allow_no_index: allowNoIndex,
       include_unmapped: includeUnmapped,
       field_types: fieldTypes,
+      allow_hidden: allowHidden,
     } = request.query;
 
     let parsedFields: string[] = [];
@@ -67,6 +67,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
+        allowHidden,
         fieldTypes: parsedFieldTypes,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
@@ -138,25 +139,24 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     }
   };
 
-export const registerFields = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<
-    DataViewsServerPluginStartDependencies,
-    DataViewsServerPluginStart
-  >,
-  isRollupsEnabled: () => boolean
-) => {
-  router.versioned.get({ path, access: 'internal', enableQueryVersion: true }).addVersion(
-    {
-      version: '1',
+export const registerFields = (router: IRouter, isRollupsEnabled: () => boolean) => {
+  router.versioned
+    .get({
+      path,
+      access: 'internal',
+      enableQueryVersion: true,
       security: {
         authz: {
           enabled: false,
           reason: 'Authorization provided by Elasticsearch',
         },
       },
-      validate: { request: { query: querySchema }, response: validate.response },
-    },
-    handler(isRollupsEnabled)
-  );
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { query: querySchema }, response: validate.response },
+      },
+      createHandler(isRollupsEnabled)
+    );
 };

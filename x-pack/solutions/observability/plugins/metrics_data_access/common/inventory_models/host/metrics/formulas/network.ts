@@ -6,22 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { SchemaBasedFormula } from '../../../shared/metrics/types';
 
-export const rx: LensBaseLayer = {
+export const rx: SchemaBasedFormula = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.rx', {
     defaultMessage: 'Network Inbound (RX)',
   }),
-  value: 'sum(host.network.ingress.bytes) * 8',
+  value: {
+    ecs: '8 * counter_rate(max(system.network.in.bytes))',
+    semconv: "8 * counter_rate(max(metrics.system.network.io, kql='direction: receive'))",
+  },
   format: 'bits',
   decimals: 1,
+  normalizeByUnit: 's',
 };
 
-export const tx: LensBaseLayer = {
+export const tx: SchemaBasedFormula = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.tx', {
     defaultMessage: 'Network Outbound (TX)',
   }),
-  value: 'sum(host.network.egress.bytes) * 8',
+  value: {
+    ecs: '8 * counter_rate(max(system.network.out.bytes))',
+    semconv: "8 * counter_rate(max(metrics.system.network.io, kql='direction: transmit'))",
+  },
   format: 'bits',
   decimals: 1,
+  normalizeByUnit: 's',
 };

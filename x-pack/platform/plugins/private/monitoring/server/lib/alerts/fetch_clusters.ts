@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { AlertCluster } from '../../../common/types/alerts';
+import type { AlertCluster } from '../../../common/types/alerts';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
@@ -39,25 +39,23 @@ export async function fetchClusters(
       'hits.hits._source.cluster_name',
       'hits.hits._source.elasticsearch.cluster.name',
     ],
-    body: {
-      size: 1000,
-      query: {
-        bool: {
-          filter: [
-            createDatasetFilter(
-              'cluster_stats',
-              'cluster_stats',
-              getElasticsearchDataset('cluster_stats')
-            ),
-            {
-              range: rangeFilter,
-            },
-          ],
-        },
+    size: 1000,
+    query: {
+      bool: {
+        filter: [
+          createDatasetFilter(
+            'cluster_stats',
+            'cluster_stats',
+            getElasticsearchDataset('cluster_stats')
+          ),
+          {
+            range: rangeFilter,
+          },
+        ],
       },
-      collapse: {
-        field: 'cluster_uuid',
-      },
+    },
+    collapse: {
+      field: 'cluster_uuid',
     },
   };
 

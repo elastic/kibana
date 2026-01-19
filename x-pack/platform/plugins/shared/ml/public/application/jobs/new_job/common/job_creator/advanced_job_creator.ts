@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Field, Aggregation, SplitField } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';

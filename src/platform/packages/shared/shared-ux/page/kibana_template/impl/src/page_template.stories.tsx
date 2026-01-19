@@ -42,42 +42,50 @@ const solutionNavMock = new SolutionNavStorybookMock();
 const noDataConfigMock = new NoDataConfigStorybookMock();
 const innerMock = new InnerPageTemplateStorybookMock();
 
-export const WithNoDataConfig = (params: NoDataConfigStorybookParams) => {
-  return (
-    <KibanaPageTemplateProvider {...noDataConfigMock.getServices(params)}>
-      <Component {...noDataConfigMock.getProps(params)} />
-    </KibanaPageTemplateProvider>
-  );
+export const WithNoDataConfig = {
+  render: (params: NoDataConfigStorybookParams) => {
+    return (
+      <KibanaPageTemplateProvider {...noDataConfigMock.getServices(params)}>
+        <Component {...noDataConfigMock.getProps(params)} />
+      </KibanaPageTemplateProvider>
+    );
+  },
+
+  argTypes: noDataConfigMock.getArgumentTypes(),
 };
 
-WithNoDataConfig.argTypes = noDataConfigMock.getArgumentTypes();
+export const WithSolutionNav = {
+  render: (params: SolutionNavStorybookParams) => {
+    return (
+      <KibanaPageTemplateProvider {...solutionNavMock.getServices(params)}>
+        <Component {...solutionNavMock.getProps(params)} />
+      </KibanaPageTemplateProvider>
+    );
+  },
 
-export const WithSolutionNav = (params: SolutionNavStorybookParams) => {
-  return (
-    <KibanaPageTemplateProvider {...solutionNavMock.getServices(params)}>
-      <Component {...solutionNavMock.getProps(params)} />
-    </KibanaPageTemplateProvider>
-  );
+  argTypes: solutionNavMock.getArgumentTypes(),
 };
 
-WithSolutionNav.argTypes = solutionNavMock.getArgumentTypes();
+export const WithBoth = {
+  render: (params: KibanaPageTemplateStorybookParams) => {
+    return (
+      <KibanaPageTemplateProvider {...templateMock.getServices(params)}>
+        <Component {...templateMock.getProps(params)} />
+      </KibanaPageTemplateProvider>
+    );
+  },
 
-export const WithBoth = (params: KibanaPageTemplateStorybookParams) => {
-  return (
-    <KibanaPageTemplateProvider {...templateMock.getServices(params)}>
-      <Component {...templateMock.getProps(params)} />
-    </KibanaPageTemplateProvider>
-  );
+  argTypes: templateMock.getArgumentTypes(),
 };
 
-WithBoth.argTypes = templateMock.getArgumentTypes();
+export const WithNeither = {
+  render: (params: InnerPageTemplateStorybookParams) => {
+    return (
+      <KibanaPageTemplateProvider {...innerMock.getServices(params)}>
+        <Component {...innerMock.getProps(params)} />
+      </KibanaPageTemplateProvider>
+    );
+  },
 
-export const WithNeither = (params: InnerPageTemplateStorybookParams) => {
-  return (
-    <KibanaPageTemplateProvider {...innerMock.getServices(params)}>
-      <Component {...innerMock.getProps(params)} />
-    </KibanaPageTemplateProvider>
-  );
+  argTypes: innerMock.getArgumentTypes(),
 };
-
-WithNeither.argTypes = innerMock.getArgumentTypes();

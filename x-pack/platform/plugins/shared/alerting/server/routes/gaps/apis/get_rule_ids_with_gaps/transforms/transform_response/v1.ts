@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { GetRuleIdsWithGapsResponse } from '../../../../../../application/rule/methods/get_rule_ids_with_gaps/types';
-import { GetRuleIdsWithGapResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_rules_with_gaps';
+import type { GetRuleIdsWithGapsResponse } from '../../../../../../application/gaps/methods/get_rule_ids_with_gaps/types';
+import type { GetRuleIdsWithGapResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_rules_with_gaps';
 
 export const transformResponse = (
   response: GetRuleIdsWithGapsResponse
 ): GetRuleIdsWithGapResponseBodyV1 => ({
   total: response.total,
   rule_ids: response.ruleIds,
+  latest_gap_timestamp: response.latestGapTimestamp,
 });

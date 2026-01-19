@@ -10,8 +10,8 @@ import {
   postElasticsearchCcrShardRequestPayloadRT,
   postElasticsearchCcrShardResponsePayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
-import { TimeRange } from '../../../../../common/http_api/shared';
-import { ElasticsearchResponse } from '../../../../../common/types/es';
+import type { TimeRange } from '../../../../../common/http_api/shared';
+import type { ElasticsearchResponse } from '../../../../../common/types/es';
 import {
   getIndexPatterns,
   getElasticsearchDataset,
@@ -20,7 +20,7 @@ import { createValidationFunction } from '../../../../lib/create_route_validatio
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { Globals } from '../../../../static_globals';
-import { LegacyRequest, MonitoringCore } from '../../../../types';
+import type { LegacyRequest, MonitoringCore } from '../../../../types';
 
 function getFormattedLeaderIndex(leaderIndex: string) {
   let leader = leaderIndex;
@@ -52,31 +52,29 @@ async function getCcrStat(
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.failed_read_requests',
       'hits.hits.inner_hits.oldest.hits.hits._source.elasticsearch.ccr.requests.failed.read.count',
     ],
-    body: {
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-      query: {
-        bool: {
-          must: [
-            ...filters,
-            {
-              range: {
-                timestamp: {
-                  format: 'epoch_millis',
-                  gte: min,
-                  lte: max,
-                },
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+    query: {
+      bool: {
+        must: [
+          ...filters,
+          {
+            range: {
+              timestamp: {
+                format: 'epoch_millis',
+                gte: min,
+                lte: max,
               },
             },
-          ],
-        },
+          },
+        ],
       },
-      collapse: {
-        field: 'ccr_stats.follower_index',
-        inner_hits: {
-          name: 'oldest',
-          size: 1,
-          sort: [{ timestamp: { order: 'asc', unmapped_type: 'long' } }],
-        },
+    },
+    collapse: {
+      field: 'ccr_stats.follower_index',
+      inner_hits: {
+        name: 'oldest',
+        size: 1,
+        sort: [{ timestamp: { order: 'asc', unmapped_type: 'long' } }],
       },
     },
   };
@@ -91,6 +89,12 @@ export function ccrShardRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr/{index}/shard/{shardId}',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

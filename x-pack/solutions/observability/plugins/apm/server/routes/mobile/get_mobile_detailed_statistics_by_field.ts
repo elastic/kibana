@@ -74,42 +74,40 @@ async function getMobileDetailedStatisticsByField({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        detailed_statistics: {
-          terms: {
-            field,
-            include: fieldValues,
-            size: fieldValues.length,
-          },
-          aggs: {
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: {
-                  min: startWithOffset,
-                  max: endWithOffset,
-                },
+    },
+    aggs: {
+      detailed_statistics: {
+        terms: {
+          field,
+          include: fieldValues,
+          size: fieldValues.length,
+        },
+        aggs: {
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: intervalString,
+              min_doc_count: 0,
+              extended_bounds: {
+                min: startWithOffset,
+                max: endWithOffset,
               },
-              aggs: {
-                latency: {
-                  avg: {
-                    field: TRANSACTION_DURATION,
-                  },
+            },
+            aggs: {
+              latency: {
+                avg: {
+                  field: TRANSACTION_DURATION,
                 },
               },
             },

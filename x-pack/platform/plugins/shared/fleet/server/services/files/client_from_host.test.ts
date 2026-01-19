@@ -145,18 +145,16 @@ describe('FleetFromHostFilesClient', () => {
       await getFleetFilesInstance().doesFileHaveData('123');
 
       expect(esClientMock.search).toHaveBeenCalledWith({
-        body: {
-          _source: false,
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    bid: '123',
-                  },
+        _source: false,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  bid: '123',
                 },
-              ],
-            },
+              },
+            ],
           },
         },
         index: '.fleet-fileds-fromhost-data-foo',

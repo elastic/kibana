@@ -9,8 +9,9 @@
 
 import type { Dimension } from '@kbn/vis-type-xy-plugin/public';
 
-import { addToSiri, Serie } from './_add_to_siri';
-import { Point } from './_get_point';
+import type { Serie } from './_add_to_siri';
+import { addToSiri } from './_add_to_siri';
+import type { Point } from './_get_point';
 
 describe('addToSiri', function () {
   it('creates a new series the first time it sees an id', function () {

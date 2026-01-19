@@ -11,8 +11,8 @@ import Path from 'path';
 
 import loadJsonFile from 'load-json-file';
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { Plugin } from './load_kibana_platform_plugin';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Plugin } from './load_kibana_platform_plugin';
 
 export interface Config {
   skipInstallDependencies: boolean;

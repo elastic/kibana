@@ -73,4 +73,4 @@ RUN echo "source ${KBN_DIR}/.devcontainer/scripts/env.sh" >> ${HOME}/.bashrc && 
   echo "source ${KBN_DIR}/.devcontainer/scripts/env.sh" >> ${HOME}/.zshrc
 
 # This is for documentation. Ports are exposed via devcontainer.json
-EXPOSE 9200 5601 9229 9230 9231
+EXPOSE 9200 5601 9229 9230 9231 9001

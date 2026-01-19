@@ -6,12 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Group } from '@kbn/observability-alerting-rule-utils';
+import { unflattenGrouping, type Group } from '@kbn/alerting-rule-utils';
 import type { ALERT_GROUP } from '@kbn/rule-data-utils';
 import {
   ALERT_REASON,
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
 } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import type {
@@ -23,8 +25,13 @@ import type {
 import type { RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { convertToBuiltInComparators, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  getFieldByType,
+  type InventoryItemType,
+  type SnapshotMetricType,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import type {
   InventoryMetricConditions,
@@ -36,7 +43,6 @@ import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_m
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
-import type { LogQueryFields } from '../../metrics/types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
@@ -77,10 +83,7 @@ export type InventoryMetricThresholdAlert = Omit<
 };
 
 export const createInventoryMetricThresholdExecutor =
-  (
-    libs: InfraBackendLibs,
-    { alertsLocator, assetDetailsLocator, inventoryLocator }: InfraLocators
-  ) =>
+  (libs: InfraBackendLibs, { assetDetailsLocator, inventoryLocator }: InfraLocators) =>
   async (
     options: RuleExecutorOptions<
       InventoryMetricThresholdParams & Record<string, unknown>,
@@ -103,7 +106,7 @@ export const createInventoryMetricThresholdExecutor =
 
     const startTime = Date.now();
 
-    const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
+    const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData, schema } = params;
 
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
@@ -142,7 +145,7 @@ export const createInventoryMetricThresholdExecutor =
             [ALERT_REASON]: reason,
           },
           context: {
-            alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, uuid),
+            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
             alertState: stateToAlertMessage[AlertStates.ERROR],
             group: UNGROUPED_FACTORY_KEY,
             metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -155,6 +158,7 @@ export const createInventoryMetricThresholdExecutor =
               timestamp: indexedStartedAt,
               assetDetailsLocator,
               inventoryLocator,
+              schema,
             }),
           },
         });
@@ -194,6 +198,7 @@ export const createInventoryMetricThresholdExecutor =
           logQueryFields,
           nodeType,
           source,
+          schema,
         })
       )
     );
@@ -277,6 +282,8 @@ export const createInventoryMetricThresholdExecutor =
 
         const evaluationValues = getEvaluationValues<ConditionResult>(results, group);
         const thresholds = getThresholds<InventoryMetricConditions>(criteria);
+        const field = getFieldByType(nodeType);
+        const grouping = field ? unflattenGrouping({ [field]: group }) : undefined;
 
         const { uuid, start } = alertsClient.report({
           id: group,
@@ -288,9 +295,10 @@ export const createInventoryMetricThresholdExecutor =
         scheduledActionsCount++;
 
         const context = {
-          alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, uuid),
+          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
           alertState: stateToAlertMessage[nextState],
           group,
+          grouping,
           reason,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
           timestamp: startedAt.toISOString(),
@@ -305,14 +313,21 @@ export const createInventoryMetricThresholdExecutor =
             hostName: additionalContext?.host?.name,
             assetDetailsLocator,
             inventoryLocator,
+            schema,
           }),
           ...additionalContext,
         };
+
+        const {
+          configuration: { metricAlias },
+        } = source;
 
         const payload = {
           [ALERT_REASON]: reason,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
+          [ALERT_GROUPING]: grouping,
+          [ALERT_INDEX_PATTERN]: metricAlias,
           ...flattenAdditionalContext(additionalContext),
         };
 
@@ -336,9 +351,10 @@ export const createInventoryMetricThresholdExecutor =
       const originalActionGroup = getOriginalActionGroup(alertHits);
 
       const recoveredContext = {
-        alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+        alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
+        grouping: alertHits?.[ALERT_GROUPING],
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         timestamp: startedAt.toISOString(),
@@ -349,7 +365,9 @@ export const createInventoryMetricThresholdExecutor =
           hostName: additionalContext?.host?.name,
           assetDetailsLocator,
           inventoryLocator,
+          schema,
         }),
+        reason: alertHits?.[ALERT_REASON],
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS_ID,
         originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS_ID,

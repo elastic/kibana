@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { InventoryMetric } from '../../types';
+import type { InventoryTsvbType } from '../../types';
 
-export const nginx: InventoryMetric[] = [
+export const nginx: InventoryTsvbType[] = [
   'nginxHits',
   'nginxRequestRate',
   'nginxActiveConnections',
   'nginxRequestsPerConnection',
 ];
 
-export const aws: InventoryMetric[] = [
+export const aws: InventoryTsvbType[] = [
   'awsOverview',
   'awsCpuUtilization',
   'awsNetworkBytes',

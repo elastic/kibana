@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/observability-onboarding-plugin",
   "owner": [
-    "@elastic/obs-ux-logs-team"
+    "@elastic/obs-onboarding-team"
   ],
   "group": "observability",
   "visibility": "private",
@@ -22,11 +22,11 @@
       "discover",
       "share",
       "fleet",
-      "customIntegrations"
+      "customIntegrations",
     ],
     "optionalPlugins": [
       "cloud",
-      "usageCollection"
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact"

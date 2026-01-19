@@ -10,7 +10,7 @@ import type {
   SavedObjectsBulkResponse,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { isSOError } from '../../../common/error';
 import { decodeOrThrow } from '../../../common/runtime_types';
@@ -27,12 +27,16 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
-import type { AlertAttachmentAttributes, AttachmentTotals } from '../../../../common/types/domain';
-import { AttachmentType, AlertAttachmentAttributesRt } from '../../../../common/types/domain';
+import type {
+  AttachmentTotals,
+  DocumentAttachmentAttributes,
+} from '../../../../common/types/domain';
+import { AttachmentType, DocumentAttachmentAttributesRt } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
-  GetAllAlertsAttachToCaseArgs,
+  EventIdsAggsResult,
+  GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
   GetAttachmentArgs,
   ServiceContext,
 } from '../types';
@@ -136,22 +140,23 @@ export class AttachmentGetter {
   }
 
   /**
-   * Retrieves all the alerts attached to a case.
+   * Retrieves all the documents attached to a case.
    */
-  public async getAllAlertsAttachToCase({
+  public async getAllDocumentsAttachedToCase({
     caseId,
     filter,
-  }: GetAllAlertsAttachToCaseArgs): Promise<Array<SavedObject<AlertAttachmentAttributes>>> {
+    attachmentTypes = [AttachmentType.alert, AttachmentType.event],
+  }: GetAllDocumentsAttachedToCaseArgs): Promise<Array<SavedObject<DocumentAttachmentAttributes>>> {
     try {
-      this.context.log.debug(`Attempting to GET all alerts for case id ${caseId}`);
-      const alertsFilter = buildFilter({
-        filters: [AttachmentType.alert],
+      this.context.log.debug(`Attempting to GET all documents for case id ${caseId}`);
+      const documentsFilter = buildFilter({
+        filters: attachmentTypes,
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
       });
 
-      const combinedFilter = combineFilters([alertsFilter, filter]);
+      const combinedFilter = combineFilters([documentsFilter, filter]);
 
       const finder =
         this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentPersistedAttributes>(
@@ -165,23 +170,23 @@ export class AttachmentGetter {
           }
         );
 
-      let result: Array<SavedObject<AlertAttachmentAttributes>> = [];
+      let result: Array<SavedObject<DocumentAttachmentAttributes>> = [];
       for await (const userActionSavedObject of finder.find()) {
-        result = result.concat(AttachmentGetter.decodeAlerts(userActionSavedObject));
+        result = result.concat(AttachmentGetter.decodeDocuments(userActionSavedObject));
       }
 
       return result;
     } catch (error) {
-      this.context.log.error(`Error on GET all alerts for case id ${caseId}: ${error}`);
+      this.context.log.error(`Error on GET all documents for case id ${caseId}: ${error}`);
       throw error;
     }
   }
 
-  private static decodeAlerts(
+  private static decodeDocuments(
     response: SavedObjectsFindResponse<AttachmentPersistedAttributes>
-  ): Array<SavedObject<AlertAttachmentAttributes>> {
+  ): Array<SavedObject<DocumentAttachmentAttributes>> {
     return response.saved_objects.map((so) => {
-      const validatedAttributes = decodeOrThrow(AlertAttachmentAttributesRt)(so.attributes);
+      const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRt)(so.attributes);
 
       return Object.assign(so, { attributes: validatedAttributes });
     });
@@ -225,6 +230,44 @@ export class AttachmentGetter {
     }
   }
 
+  /**
+   * Retrieves all the events attached to a case.
+   */
+  public async getAllEventIds({ caseId }: { caseId: string }): Promise<Set<string>> {
+    try {
+      this.context.log.debug(`Attempting to GET all event ids for case id ${caseId}`);
+      const eventsFilter = buildFilter({
+        filters: [AttachmentType.event],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const res = await this.context.unsecuredSavedObjectsClient.find<unknown, EventIdsAggsResult>({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        filter: eventsFilter,
+        perPage: 0,
+        aggs: {
+          eventIds: {
+            terms: {
+              field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.eventId`,
+              size: MAX_ALERTS_PER_CASE,
+            },
+          },
+        },
+      });
+
+      const eventIds = res.aggregations?.eventIds.buckets.map((bucket) => bucket.key) ?? [];
+      return new Set(eventIds);
+    } catch (error) {
+      this.context.log.error(`Error on GET all event ids for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
   public async get({ attachmentId }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
     try {
       this.context.log.debug(`Attempting to GET attachment ${attachmentId}`);
@@ -249,7 +292,7 @@ export class AttachmentGetter {
     }
   }
 
-  public async getCaseCommentStats({
+  public async getCaseAttatchmentStats({
     caseIds,
   }: {
     caseIds: string[];
@@ -271,6 +314,9 @@ export class AttachmentGetter {
               comments: {
                 doc_count: number;
               };
+              events: {
+                value: number;
+              };
             };
           }>;
         };
@@ -290,6 +336,7 @@ export class AttachmentGetter {
         acc.set(idBucket.key, {
           userComments: idBucket.reverse.comments.doc_count,
           alerts: idBucket.reverse.alerts.value,
+          events: idBucket.reverse.events.value,
         });
         return acc;
       }, new Map<string, AttachmentTotals>()) ?? new Map()
@@ -324,6 +371,11 @@ export class AttachmentGetter {
                       term: {
                         [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: AttachmentType.user,
                       },
+                    },
+                  },
+                  events: {
+                    cardinality: {
+                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.eventId`,
                     },
                   },
                 },

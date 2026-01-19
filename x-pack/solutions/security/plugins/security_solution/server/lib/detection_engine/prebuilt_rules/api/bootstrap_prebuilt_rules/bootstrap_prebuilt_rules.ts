@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { INITIALIZE_SECURITY_SOLUTION } from '@kbn/security-solution-features/constants';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { buildSiemResponse } from '../../../routes/utils';
-import {
-  installEndpointPackage,
-  installPrebuiltRulesPackage,
-} from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
+import { bootstrapPrebuiltRulesHandler } from './bootstrap_prebuilt_rules_handler';
+import { throttleRequests } from '../../../../../utils/throttle_requests';
 
-export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) => {
+export const bootstrapPrebuiltRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'internal',
       path: BOOTSTRAP_PREBUILT_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [INITIALIZE_SECURITY_SOLUTION],
+        },
+      },
+      options: {
+        timeout: {
+          idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
       },
     })
@@ -32,37 +37,8 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
         version: '1',
         validate: {},
       },
-      async (context, _, response): Promise<IKibanaResponse<BootstrapPrebuiltRulesResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-
-        try {
-          const ctx = await context.resolve(['securitySolution']);
-          const securityContext = ctx.securitySolution;
-          const config = securityContext.getConfig();
-
-          const results = await Promise.all([
-            installPrebuiltRulesPackage(config, securityContext),
-            installEndpointPackage(config, securityContext),
-          ]);
-
-          const responseBody: BootstrapPrebuiltRulesResponse = {
-            packages: results.map((result) => ({
-              name: result.package.name,
-              version: result.package.version,
-              status: result.status,
-            })),
-          };
-
-          return response.ok({
-            body: responseBody,
-          });
-        } catch (err) {
-          const error = transformError(err);
-          return siemResponse.error({
-            body: error.message,
-            statusCode: error.statusCode,
-          });
-        }
-      }
+      throttleRequests((context, request, response) => {
+        return bootstrapPrebuiltRulesHandler(context, request, response, logger);
+      })
     );
 };

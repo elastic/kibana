@@ -6,10 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { CreateSLOForm } from '../../../types';
+import type { CreateSLOForm } from '../../../types';
 import { TimestampFieldSelector } from '../../common/timestamp_field_selector';
 import { IndexSelection } from './index_selection';
 

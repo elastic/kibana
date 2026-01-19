@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Trigger } from '.';
+import type { Trigger } from '.';
 
 export const DEFAULT_TRIGGER = '';
 export const defaultTrigger: Trigger = {

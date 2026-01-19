@@ -68,7 +68,7 @@ export const TotalCountHeader = ({
               'Approximate values are shown in the total document count and chart, which use random sampler aggregations.',
           })}
           position="right"
-          type="iInCircle"
+          type="info"
         />
       ) : null}
     </EuiFlexItem>

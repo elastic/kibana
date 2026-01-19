@@ -13,8 +13,8 @@ import {
   createTestServers,
   getSupertest,
 } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObject } from '../types';
-import { SavedObjectsType } from '../server';
+import type { SavedObject } from '../types';
+import type { SavedObjectsType } from '../server';
 
 type ExportOptions = { type: string } | { objects: Array<{ id: string; type: string }> };
 
@@ -152,8 +152,8 @@ export const createTestHarness = () => {
       if (stopped)
         throw new Error(`SavedObjectTestHarness already stopped! Cannot call stop again`);
 
-      await root.shutdown();
-      await esServer.stop();
+      await root?.shutdown();
+      await esServer?.stop();
       stopped = true;
     },
 

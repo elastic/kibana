@@ -20,4 +20,10 @@ export interface Error {
   error: string;
   cause?: string[];
   message?: string;
+  statusCode?: number;
+  attributes?: {
+    error?: {
+      type?: string;
+    };
+  };
 }

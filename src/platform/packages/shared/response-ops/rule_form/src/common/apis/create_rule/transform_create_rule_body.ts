@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RewriteResponseCase } from '@kbn/actions-types';
-import { CreateRuleBody } from './types';
-import { Rule } from '../../types';
+import type { RewriteResponseCase } from '@kbn/actions-types';
+import type { CreateRuleBody } from './types';
+import type { Rule } from '../../types';
 
 const transformCreateRuleFlapping = (flapping: Rule['flapping']) => {
   if (!flapping) {
@@ -17,6 +17,7 @@ const transformCreateRuleFlapping = (flapping: Rule['flapping']) => {
   }
 
   return {
+    enabled: flapping.enabled,
     look_back_window: flapping.lookBackWindow,
     status_change_threshold: flapping.statusChangeThreshold,
   };

@@ -6,6 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { flappingSchemaV1 } from '../..';
+import type { flappingSchemaV1 } from '../..';
 
 export type Flapping = TypeOf<typeof flappingSchemaV1>;

@@ -6,10 +6,9 @@
  */
 
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-// import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 import { TIMESTAMP_FIELD } from '../../common/constants';
-import type { ESSearchClient } from '../lib/metrics/types';
 
 interface Options {
   indexPattern: string;
@@ -27,7 +26,7 @@ export const calculateMetricInterval = async (
   client: ESSearchClient,
   options: Options,
   modules?: string[],
-  nodeType?: InventoryItemType // TODO: check that this type still makes sense
+  nodeType?: InventoryItemType
 ) => {
   let from = options.timerange.from;
   if (nodeType) {
@@ -38,34 +37,32 @@ export const calculateMetricInterval = async (
     allow_no_indices: true,
     index: options.indexPattern,
     ignore_unavailable: true,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                [TIMESTAMP_FIELD]: {
-                  gte: from,
-                  lte: options.timerange.to,
-                  format: 'epoch_millis',
-                },
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              [TIMESTAMP_FIELD]: {
+                gte: from,
+                lte: options.timerange.to,
+                format: 'epoch_millis',
               },
             },
-          ],
-        },
-      },
-      size: 0,
-      aggs: {
-        modules: {
-          terms: {
-            field: 'event.dataset',
-            include: modules,
           },
-          aggs: {
-            period: {
-              max: {
-                field: 'metricset.period',
-              },
+        ],
+      },
+    },
+    size: 0,
+    aggs: {
+      modules: {
+        terms: {
+          field: 'event.dataset',
+          include: modules,
+        },
+        aggs: {
+          period: {
+            max: {
+              field: 'metricset.period',
             },
           },
         },

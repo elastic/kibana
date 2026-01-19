@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { omit } from 'lodash';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { SavedObject } from '@kbn/core/server';
 
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -15,33 +20,69 @@ import {
   DEFAULT_DOWNLOAD_SOURCE_ID,
 } from '../constants';
 
-import type { DownloadSource, DownloadSourceSOAttributes, DownloadSourceBase } from '../types';
-import { DownloadSourceError, FleetError } from '../errors';
+import type {
+  DownloadSource,
+  DownloadSourceSOAttributes,
+  DownloadSourceBase,
+  SecretReference,
+} from '../types';
+import {
+  DownloadSourceError,
+  FleetEncryptedSavedObjectEncryptionKeyRequired,
+  FleetError,
+} from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
+
+import { deleteDownloadSourceSecrets, deleteSecrets, isSecretStorageEnabled } from './secrets';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import { getFleetProxy } from './fleet_proxies';
+import {
+  extractAndWriteDownloadSourcesSecrets,
+  extractAndUpdateDownloadSourceSecrets,
+} from './secrets';
+import { isSSLSecretStorageEnabled } from './secrets';
 
 function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
-  const { source_id: sourceId, ...attributes } = so.attributes;
+  const { ssl, source_id: sourceId, ...attributes } = so.attributes;
 
   return {
     id: sourceId ?? so.id,
-    name: attributes.name,
-    host: attributes.host,
-    is_default: attributes.is_default,
-    proxy_id: attributes.proxy_id,
+    ...attributes,
+    ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
   };
 }
-
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+} as unknown as KibanaRequest;
 class DownloadSourceService {
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<DownloadSource> {
-    const soResponse = await soClient.get<DownloadSourceSOAttributes>(
-      DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-      id
-    );
+  private get soClient() {
+    return appContextService.getInternalUserSOClient(fakeRequest);
+  }
+
+  private get encryptedSoClient() {
+    return appContextService.getEncryptedSavedObjects();
+  }
+
+  public async get(id: string): Promise<DownloadSource> {
+    const soResponse =
+      await this.encryptedSoClient.getDecryptedAsInternalUser<DownloadSourceSOAttributes>(
+        DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+        id
+      );
 
     if (soResponse.error) {
       throw new FleetError(soResponse.error.message);
@@ -50,34 +91,58 @@ class DownloadSourceService {
     return savedObjectToDownloadSource(soResponse);
   }
 
-  public async list(soClient: SavedObjectsClientContract) {
-    const downloadSources = await soClient.find<DownloadSourceSOAttributes>({
-      type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-      page: 1,
-      perPage: SO_SEARCH_LIMIT,
-      sortField: 'is_default',
-      sortOrder: 'desc',
-    });
+  public async list() {
+    const downloadSourcesFinder =
+      await this.encryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser<DownloadSourceSOAttributes>(
+        {
+          type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+          perPage: SO_SEARCH_LIMIT,
+          sortField: 'is_default',
+          sortOrder: 'desc',
+        }
+      );
+
+    let downloadSources: SavedObject<DownloadSourceSOAttributes>[] = [];
+    let total = 0;
+    let page = 0;
+    let perPage = 0;
+
+    for await (const result of downloadSourcesFinder.find()) {
+      downloadSources = result.saved_objects;
+      total = result.total;
+      page = result.page;
+      perPage = result.per_page;
+      break; // Return first page;
+    }
+
+    await downloadSourcesFinder.close();
 
     return {
-      items: downloadSources.saved_objects.map<DownloadSource>(savedObjectToDownloadSource),
-      total: downloadSources.total,
-      page: downloadSources.page,
-      perPage: downloadSources.per_page,
+      items: downloadSources.map<DownloadSource>(savedObjectToDownloadSource),
+      total,
+      page,
+      perPage,
     };
   }
 
   public async create(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     downloadSource: DownloadSourceBase,
     options?: { id?: string; overwrite?: boolean }
   ): Promise<DownloadSource> {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new download source`);
 
-    const data: DownloadSourceSOAttributes = downloadSource;
+    const data: DownloadSourceSOAttributes = { ...omit(downloadSource, ['ssl', 'secrets']) };
 
-    await this.requireUniqueName(soClient, {
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
+        `Agent binary source needs encrypted saved object api key to be set`
+      );
+    }
+
+    await this.requireUniqueName({
       name: downloadSource.name,
       id: options?.id,
     });
@@ -88,17 +153,35 @@ class DownloadSourceService {
 
     // default should be only one
     if (data.is_default) {
-      const defaultDownloadSourceId = await this.getDefaultDownloadSourceId(soClient);
+      const defaultDownloadSourceId = await this.getDefaultDownloadSourceId();
 
       if (defaultDownloadSourceId) {
-        await this.update(soClient, defaultDownloadSourceId, { is_default: false });
+        await this.update(soClient, esClient, defaultDownloadSourceId, { is_default: false });
       }
     }
     if (options?.id) {
       data.source_id = options?.id;
     }
+    if (downloadSource.ssl) {
+      data.ssl = JSON.stringify(downloadSource.ssl);
+    }
+    // Store secret values if enabled; if not, store plain text values
+    if (await isSSLSecretStorageEnabled(esClient, soClient)) {
+      const { downloadSource: downloadSourceWithSecrets } =
+        await extractAndWriteDownloadSourcesSecrets({
+          downloadSource,
+          esClient,
+        });
 
-    const newSo = await soClient.create<DownloadSourceSOAttributes>(
+      if (downloadSourceWithSecrets.secrets)
+        data.secrets = downloadSourceWithSecrets.secrets as DownloadSourceSOAttributes['secrets'];
+    } else {
+      if (!downloadSource.ssl?.key && downloadSource.secrets?.ssl?.key) {
+        data.ssl = JSON.stringify({ ...downloadSource.ssl, ...downloadSource.secrets.ssl });
+      }
+    }
+
+    const newSo = await this.soClient.create<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       data,
       {
@@ -107,37 +190,81 @@ class DownloadSourceService {
       }
     );
     logger.debug(`Creating new download source ${options?.id}`);
-    return savedObjectToDownloadSource(newSo);
+    // soClient.create doesn't return the decrypted attributes, so we need to fetch it again.
+    const retrievedSo =
+      await this.encryptedSoClient.getDecryptedAsInternalUser<DownloadSourceSOAttributes>(
+        DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+        newSo.id
+      );
+    return savedObjectToDownloadSource(retrievedSo);
   }
 
   public async update(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     newData: Partial<DownloadSource>
   ) {
+    let secretsToDelete: SecretReference[] = [];
+
     const logger = appContextService.getLogger();
-    logger.debug(`Updating download source ${id} with ${newData}`);
-    const updateData: Partial<DownloadSourceSOAttributes> = newData;
+    logger.debug(`Updating download source ${id}`);
+
+    const originalItem = await this.get(id);
+    const updateData: Partial<DownloadSourceSOAttributes> = {
+      ...omit(newData, ['ssl', 'secrets']),
+    };
 
     if (updateData.proxy_id) {
       await this.throwIfProxyNotFound(soClient, updateData.proxy_id);
     }
 
     if (updateData.name) {
-      await this.requireUniqueName(soClient, {
+      await this.requireUniqueName({
         name: updateData.name,
         id,
       });
     }
+    if (newData.ssl) {
+      updateData.ssl = JSON.stringify(newData.ssl);
+    } else if (newData.ssl === null) {
+      // Explicitly set to null to allow to delete the field
+      updateData.ssl = null;
+    }
 
     if (updateData.is_default) {
-      const defaultDownloadSourceId = await this.getDefaultDownloadSourceId(soClient);
+      const defaultDownloadSourceId = await this.getDefaultDownloadSourceId();
 
       if (defaultDownloadSourceId && defaultDownloadSourceId !== id) {
-        await this.update(soClient, defaultDownloadSourceId, { is_default: false });
+        await this.update(soClient, esClient, defaultDownloadSourceId, { is_default: false });
       }
     }
-    const soResponse = await soClient.update<DownloadSourceSOAttributes>(
+    // Store secret values if enabled; if not, store plain text values
+    if (await isSecretStorageEnabled(esClient, soClient)) {
+      const secretsRes = await extractAndUpdateDownloadSourceSecrets({
+        oldDownloadSource: originalItem,
+        downloadSourceUpdate: newData,
+        esClient,
+      });
+
+      updateData.secrets = secretsRes.downloadSourceUpdate
+        .secrets as DownloadSourceSOAttributes['secrets'];
+      secretsToDelete = secretsRes.secretsToDelete;
+    } else {
+      if (!newData.ssl?.key && newData.secrets?.ssl?.key) {
+        updateData.ssl = JSON.stringify({ ...newData.ssl, ...newData.secrets.ssl });
+      }
+    }
+
+    if (secretsToDelete.length) {
+      try {
+        await deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) });
+      } catch (err) {
+        logger.warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
+      }
+    }
+
+    const soResponse = await this.soClient.update<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       id,
       updateData
@@ -149,11 +276,11 @@ class DownloadSourceService {
     }
   }
 
-  public async delete(soClient: SavedObjectsClientContract, id: string) {
+  public async delete(id: string) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting download source ${id}`);
 
-    const targetDS = await this.get(soClient, id);
+    const targetDS = await this.get(id);
 
     if (targetDS.is_default) {
       throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
@@ -162,12 +289,17 @@ class DownloadSourceService {
       appContextService.getInternalUserESClient(),
       id
     );
-    logger.debug(`Deleted download source ${id}`);
-    return soClient.delete(DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE, id);
+    await deleteDownloadSourceSecrets({
+      esClient: appContextService.getInternalUserESClient(),
+      downloadSource: targetDS,
+    });
+
+    logger.debug(`Deleting download source ${id}`);
+    return this.soClient.delete(DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE, id);
   }
 
-  public async getDefaultDownloadSourceId(soClient: SavedObjectsClientContract) {
-    const results = await this._getDefaultDownloadSourceSO(soClient);
+  public async getDefaultDownloadSourceId() {
+    const results = await this._getDefaultDownloadSourceSO();
 
     if (!results.saved_objects.length) {
       return null;
@@ -176,8 +308,8 @@ class DownloadSourceService {
     return savedObjectToDownloadSource(results.saved_objects[0]).id;
   }
 
-  public async ensureDefault(soClient: SavedObjectsClientContract) {
-    const downloadSources = await this.list(soClient);
+  public async ensureDefault(soClient: SavedObjectsClientContract, esClient: ElasticsearchClient) {
+    const downloadSources = await this.list();
 
     const defaultDS = downloadSources.items.find((o) => o.is_default);
 
@@ -188,7 +320,7 @@ class DownloadSourceService {
         host: DEFAULT_DOWNLOAD_SOURCE_URI,
       };
 
-      return await this.create(soClient, newDefaultDS, {
+      return await this.create(soClient, esClient, newDefaultDS, {
         id: DEFAULT_DOWNLOAD_SOURCE_ID,
         overwrite: true,
       });
@@ -197,11 +329,8 @@ class DownloadSourceService {
     return defaultDS;
   }
 
-  public async requireUniqueName(
-    soClient: SavedObjectsClientContract,
-    downloadSource: { name: string; id?: string }
-  ) {
-    const results = await soClient.find<DownloadSourceSOAttributes>({
+  public async requireUniqueName(downloadSource: { name: string; id?: string }) {
+    const results = await this.soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       searchFields: ['name'],
       search: escapeSearchQueryPhrase(downloadSource.name),
@@ -222,8 +351,8 @@ class DownloadSourceService {
     }
   }
 
-  public async listAllForProxyId(soClient: SavedObjectsClientContract, proxyId: string) {
-    const downloadSources = await soClient.find<DownloadSourceSOAttributes>({
+  public async listAllForProxyId(proxyId: string) {
+    const downloadSources = await this.soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       searchFields: ['proxy_id'],
       search: proxyId,
@@ -247,8 +376,8 @@ class DownloadSourceService {
     }
   }
 
-  private async _getDefaultDownloadSourceSO(soClient: SavedObjectsClientContract) {
-    return await soClient.find<DownloadSourceSOAttributes>({
+  private async _getDefaultDownloadSourceSO() {
+    return await this.soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',

@@ -11,49 +11,44 @@ import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
 import {
-  DiscoverCustomizationProvider,
+  type ConnectedCustomizationService,
+  getConnectedCustomizationService,
   useDiscoverCustomization,
   useDiscoverCustomization$,
-  useDiscoverCustomizationService,
 } from './customization_provider';
-import {
-  createCustomizationService,
-  DiscoverCustomization,
-  DiscoverCustomizationId,
-  DiscoverCustomizationService,
-} from './customization_service';
+import type { DiscoverCustomization, DiscoverCustomizationId } from './customization_service';
+import { createCustomizationService } from './customization_service';
+import type { CustomizationCallback } from './types';
+import { DiscoverTestProvider } from '../__mocks__/test_provider';
+import { createDiscoverServicesMock } from '../__mocks__/services';
 
-describe('useDiscoverCustomizationService', () => {
+describe('getConnectedCustomizationService', () => {
   it('should provide customization service', async () => {
     let resolveCallback = (_: () => void) => {};
     const promise = new Promise<() => void>((resolve) => {
       resolveCallback = resolve;
     });
-    let service: DiscoverCustomizationService | undefined;
     const callback = jest.fn(({ customizations }) => {
-      service = customizations;
       return promise;
     });
-    const wrapper = renderHook(() =>
-      useDiscoverCustomizationService({
-        stateContainer: getDiscoverStateMock({ isTimeBased: true }),
-        customizationCallbacks: [callback],
-      })
-    );
-    expect(wrapper.result.current.isInitialized).toBe(false);
-    expect(wrapper.result.current.customizationService).toBeUndefined();
+    const customizationCallbacks: CustomizationCallback[] = [callback];
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const servicePromise = getConnectedCustomizationService({
+      stateContainer,
+      customizationCallbacks,
+      services: createDiscoverServicesMock(),
+    });
+    let service: ConnectedCustomizationService | undefined;
     expect(callback).toHaveBeenCalledTimes(1);
     const cleanup = jest.fn();
     await act(async () => {
       resolveCallback(cleanup);
       await promise;
+      service = await servicePromise;
     });
-    expect(wrapper.result.current.isInitialized).toBe(true);
-    expect(wrapper.result.current.customizationService).toBeDefined();
-    expect(wrapper.result.current.customizationService).toBe(service);
     expect(callback).toHaveBeenCalledTimes(1);
     expect(cleanup).not.toHaveBeenCalled();
-    wrapper.unmount();
+    await service?.cleanup();
     await act(async () => {
       await promise;
     });
@@ -70,7 +65,7 @@ describe('useDiscoverCustomization', () => {
         const service = createCustomizationService();
         service.set(customization);
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });
@@ -87,7 +82,7 @@ describe('useDiscoverCustomization', () => {
       wrapper: ({ children }) => {
         service.set(customization);
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });
@@ -103,7 +98,7 @@ describe('useDiscoverCustomization', () => {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });
@@ -119,7 +114,7 @@ describe('useDiscoverCustomization$', () => {
         const service = createCustomizationService();
         service.set(customization);
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });
@@ -140,7 +135,7 @@ describe('useDiscoverCustomization$', () => {
       wrapper: ({ children }) => {
         service.set(customization);
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });
@@ -163,7 +158,7 @@ describe('useDiscoverCustomization$', () => {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });

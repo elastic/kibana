@@ -9,11 +9,11 @@ import { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common';
+import { LeftPanelVisualizeTab } from '../../left';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SESSION_VIEW_ID } from '../../left/components/session_view';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export interface UseNavigateToSessionViewParams {
   /**
@@ -59,10 +59,6 @@ export const useNavigateToSessionView = ({
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
-  );
-
   const right: FlyoutPanelProps = useMemo(
     () => ({
       id: DocumentDetailsRightPanelKey,
@@ -84,7 +80,7 @@ export const useNavigateToSessionView = ({
         scopeId,
       },
       path: {
-        tab: 'visualize',
+        tab: LeftPanelVisualizeTab,
         subTab: SESSION_VIEW_ID,
       },
     }),
@@ -98,12 +94,12 @@ export const useNavigateToSessionView = ({
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
-        tabId: 'visualize',
+        tabId: LeftPanelVisualizeTab,
       });
     }
     // if flyout is not currently open, open flyout with right and left panels
     // if new navigation is enabled and in preview mode, open flyout with right and left panels
-    else if (!isFlyoutOpen || (isNewNavigationEnabled && isPreviewMode)) {
+    else {
       openFlyout({
         right,
         left,
@@ -113,17 +109,7 @@ export const useNavigateToSessionView = ({
         panel: 'left',
       });
     }
-  }, [
-    openFlyout,
-    openLeftPanel,
-    right,
-    left,
-    scopeId,
-    telemetry,
-    isFlyoutOpen,
-    isNewNavigationEnabled,
-    isPreviewMode,
-  ]);
+  }, [openFlyout, openLeftPanel, right, left, scopeId, telemetry, isFlyoutOpen, isPreviewMode]);
 
   return useMemo(() => ({ navigateToSessionView }), [navigateToSessionView]);
 };

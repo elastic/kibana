@@ -47,12 +47,12 @@ describe('when rendering the endpoint list `AdminSearchBar`', () => {
     });
 
     // Wait for the search bar to actually display our value
-    await act(async () => {
-      await waitFor(() => !!searchBarInput.value);
-    });
+    await waitFor(() => !!searchBarInput.value);
 
     await act(async () => {
       fireEvent.click(querySubmitButton);
+    });
+    await act(async () => {
       await changeUrlActionDone;
     });
   };

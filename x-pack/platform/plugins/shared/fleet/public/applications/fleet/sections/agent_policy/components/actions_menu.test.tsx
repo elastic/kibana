@@ -5,8 +5,10 @@
  * 2.0.
  */
 import React from 'react';
+import { userEvent } from '@testing-library/user-event';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../../common/types';
+import { useCanEnableAutomaticAgentUpgrades } from '../../../../../hooks/use_can_enable_auto_upgrades';
 import { useAuthz } from '../../../hooks';
 import { createFleetTestRendererMock } from '../../../../../mock';
 
@@ -15,6 +17,10 @@ import { AgentPolicyActionMenu } from './actions_menu';
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
   useAuthz: jest.fn(),
+}));
+
+jest.mock('../../../../../hooks/use_can_enable_auto_upgrades', () => ({
+  useCanEnableAutomaticAgentUpgrades: jest.fn(),
 }));
 
 describe('AgentPolicyActionMenu', () => {
@@ -39,10 +45,12 @@ describe('AgentPolicyActionMenu', () => {
         writeIntegrationPolicies: true,
       },
     } as any);
+
+    jest.mocked(useCanEnableAutomaticAgentUpgrades).mockReturnValue(true);
   });
 
   describe('delete action', () => {
-    it('is enabled when a managed package policy is not present', () => {
+    it('is enabled when a managed package policy is not present', async () => {
       const testRenderer = createFleetTestRendererMock();
       const agentPolicyWithStandardPackagePolicy: AgentPolicy = {
         ...baseAgentPolicy,
@@ -70,13 +78,13 @@ describe('AgentPolicyActionMenu', () => {
       );
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      await userEvent.click(agentActionsButton);
 
       const deleteButton = result.getByTestId('agentPolicyActionMenuDeleteButton');
       expect(deleteButton).not.toHaveAttribute('disabled');
     });
 
-    it('is disabled when a managed package policy is present', () => {
+    it('is disabled when a managed package policy is present', async () => {
       const testRenderer = createFleetTestRendererMock();
       const agentPolicyWithManagedPackagePolicy: AgentPolicy = {
         ...baseAgentPolicy,
@@ -104,13 +112,13 @@ describe('AgentPolicyActionMenu', () => {
       );
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      await userEvent.click(agentActionsButton);
 
       const deleteButton = result.getByTestId('agentPolicyActionMenuDeleteButton');
       expect(deleteButton).toHaveAttribute('disabled');
     });
 
-    it('is disabled when agent policy support agentless  is true', () => {
+    it('is disabled when agent policy support agentless  is true', async () => {
       const testRenderer = createFleetTestRendererMock();
       const agentlessPolicy: AgentPolicy = {
         ...baseAgentPolicy,
@@ -137,7 +145,7 @@ describe('AgentPolicyActionMenu', () => {
       const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={agentlessPolicy} />);
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      await userEvent.click(agentActionsButton);
 
       const deleteButton = result.getByTestId('agentPolicyActionMenuDeleteButton');
       expect(deleteButton).not.toHaveAttribute('disabled');
@@ -165,7 +173,7 @@ describe('AgentPolicyActionMenu', () => {
         },
       ],
     };
-    it('is enabled if user is authorized', () => {
+    it('is enabled if user is authorized', async () => {
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: true,
@@ -182,12 +190,12 @@ describe('AgentPolicyActionMenu', () => {
       );
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      await userEvent.click(agentActionsButton);
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).not.toHaveAttribute('disabled');
     });
-    it('is disabled if user is not authorized', () => {
+    it('is disabled if user is not authorized', async () => {
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: false,
@@ -204,13 +212,13 @@ describe('AgentPolicyActionMenu', () => {
       );
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      await userEvent.click(agentActionsButton);
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).toHaveAttribute('disabled');
     });
 
-    it('should remove add agent button when agent policy support agentless  is true', () => {
+    it('should remove add agent button when agent policy support agentless  is true', async () => {
       const testRenderer = createFleetTestRendererMock();
       const agentlessPolicy: AgentPolicy = {
         ...baseAgentPolicy,
@@ -237,7 +245,7 @@ describe('AgentPolicyActionMenu', () => {
       const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={agentlessPolicy} />);
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      await userEvent.click(agentActionsButton);
 
       const addAgentActionButton = result.queryByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addAgentActionButton).toBeNull();
@@ -270,7 +278,7 @@ describe('AgentPolicyActionMenu', () => {
         },
       ],
     };
-    it('is enabled if user is authorized', () => {
+    it('is enabled if user is authorized', async () => {
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: true,
@@ -286,13 +294,13 @@ describe('AgentPolicyActionMenu', () => {
       const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={fleetServerPolicy} />);
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      await userEvent.click(agentActionsButton);
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).not.toHaveAttribute('disabled');
     });
 
-    it('is disabled if user is only authorized to add agents', () => {
+    it('is disabled if user is only authorized to add agents', async () => {
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: true,
@@ -308,12 +316,12 @@ describe('AgentPolicyActionMenu', () => {
       const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={fleetServerPolicy} />);
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      await userEvent.click(agentActionsButton);
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).toHaveAttribute('disabled');
     });
-    it('is disabled if user is not authorized', () => {
+    it('is disabled if user is not authorized', async () => {
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: false,
@@ -328,10 +336,83 @@ describe('AgentPolicyActionMenu', () => {
       const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={fleetServerPolicy} />);
 
       const agentActionsButton = result.getByTestId('agentActionsBtn');
-      agentActionsButton.click();
+      await userEvent.click(agentActionsButton);
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).toHaveAttribute('disabled');
+    });
+  });
+
+  describe('manage auto-upgrade agents', () => {
+    const agentPolicyWithStandardPackagePolicy: AgentPolicy = {
+      ...baseAgentPolicy,
+      package_policies: [
+        {
+          id: 'test-package-policy',
+          is_managed: false,
+          created_at: new Date().toISOString(),
+          created_by: 'test',
+          enabled: true,
+          inputs: [],
+          name: 'test-package-policy',
+          namespace: 'default',
+          policy_id: 'test',
+          policy_ids: ['test'],
+          revision: 1,
+          updated_at: new Date().toISOString(),
+          updated_by: 'test',
+        },
+      ],
+    };
+    it('is enabled if user is authorized', async () => {
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgentPolicies: true,
+          allAgents: true,
+        },
+        integrations: {
+          writeIntegrationPolicies: true,
+        },
+      } as any);
+
+      const testRenderer = createFleetTestRendererMock();
+
+      const result = testRenderer.render(
+        <AgentPolicyActionMenu agentPolicy={agentPolicyWithStandardPackagePolicy} />
+      );
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      await userEvent.click(agentActionsButton);
+
+      const manageAutoUpgradesButton = result.getByTestId(
+        'agentPolicyActionMenuManageAutoUpgradeAgentsButton'
+      );
+      expect(manageAutoUpgradesButton).not.toHaveAttribute('disabled');
+    });
+    it('is disabled if user is not authorized', async () => {
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgentPolicies: true,
+          allAgents: false,
+        },
+        integrations: {
+          writeIntegrationPolicies: true,
+        },
+      } as any);
+
+      const testRenderer = createFleetTestRendererMock();
+
+      const result = testRenderer.render(
+        <AgentPolicyActionMenu agentPolicy={agentPolicyWithStandardPackagePolicy} />
+      );
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      await userEvent.click(agentActionsButton);
+
+      const manageAutoUpgradesButton = result.getByTestId(
+        'agentPolicyActionMenuManageAutoUpgradeAgentsButton'
+      );
+      expect(manageAutoUpgradesButton).toHaveAttribute('disabled');
     });
   });
 });

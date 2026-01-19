@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloListError as Component } from './slo_list_error';
@@ -17,9 +17,11 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = () => <Component />;
+const Template: StoryFn<typeof Component> = () => <Component />;
 
 const defaultProps = {};
 
-export const SloListError = Template.bind({});
-SloListError.args = defaultProps;
+export const SloListError = {
+  render: Template,
+  args: defaultProps,
+};

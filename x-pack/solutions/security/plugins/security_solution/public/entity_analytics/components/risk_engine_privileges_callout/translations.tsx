@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { MissingPrivileges } from '../../../../common/entity_analytics/risk_engine';
 import { useKibana } from '../../../common/lib/kibana';
-import { CommaSeparatedValues } from '../../../detections/components/callouts/missing_privileges_callout/comma_separated_values';
+import { CommaSeparatedValues } from '../../../common/components/missing_privileges';
 
 export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageTitle',
@@ -66,20 +66,36 @@ export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
               </ul>
             </>
           ) : null,
-        clusterPrivileges:
-          clusterPrivileges.length > 0 ? (
-            <>
-              <FormattedMessage
-                id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesTitle"
-                defaultMessage="Missing Elasticsearch cluster privileges:"
-              />
-              <ul>
-                {clusterPrivileges.map((privilege) => (
-                  <li key={privilege}>{privilege}</li>
-                ))}
-              </ul>
-            </>
-          ) : null,
+        clusterPrivileges: (
+          <>
+            {clusterPrivileges.enable.length > 0 && (
+              <>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesEnableTitle"
+                  defaultMessage="Missing Elasticsearch cluster privileges to enable Risk Score engine:"
+                />
+                <ul>
+                  {clusterPrivileges.enable.map((privilege) => (
+                    <li key={privilege}>{privilege}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {clusterPrivileges.run.length > 0 && (
+              <>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesRunTitle"
+                  defaultMessage="Missing Elasticsearch cluster privileges to run Risk Score engine:"
+                />
+                <ul>
+                  {clusterPrivileges.run.map((privilege) => (
+                    <li key={privilege}>{privilege}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </>
+        ),
       }}
     />
   );

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertConsumers, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { BrushEndListener } from '@elastic/charts';
 import { type XYBrushEvent } from '@elastic/charts';
-import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { useSummaryTimeRange, ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
 import type { TimeRange } from '@kbn/es-query';
 import { INFRA_ALERT_CONSUMERS } from '../../../../../../../common/constants';
@@ -19,6 +19,7 @@ import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useAlertsQuery } from '../../../hooks/use_alerts_query';
 import type { HostsState } from '../../../hooks/use_unified_search_url_state';
 import type { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_query';
+import { createFocusTrapProps } from '../../../../../../utils/create_focus_trap_props';
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
@@ -31,20 +32,21 @@ import { usePluginConfig } from '../../../../../../containers/plugin_config_cont
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
 export const AlertsTabContent = () => {
-  const { services } = useKibanaContextForPlugin();
   const { featureFlags } = usePluginConfig();
   const { hostNodes } = useHostsViewContext();
+  const { services } = useKibanaContextForPlugin();
+  const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
+    services;
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
+  const createAlertRuleButtonRef = useRef<HTMLButtonElement>(null);
 
   const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
 
-  const { triggersActionsUi } = services;
-
-  const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
-    triggersActionsUi;
   const hostNamesKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
+
+  const focusTrapProps = createFocusTrapProps(createAlertRuleButtonRef.current);
 
   return (
     <HeightRetainer>
@@ -57,6 +59,7 @@ export const AlertsTabContent = () => {
             {featureFlags.inventoryThresholdAlertRuleEnabled && (
               <EuiFlexItem grow={false}>
                 <CreateAlertRuleButton
+                  buttonRef={createAlertRuleButtonRef}
                   onClick={toggleAlertFlyout}
                   data-test-subj="infraHostAlertsTabCreateAlertsRuleButton"
                 />
@@ -80,15 +83,22 @@ export const AlertsTabContent = () => {
         </EuiFlexItem>
         {alertsEsQueryByStatus && (
           <EuiFlexItem>
-            <AlertsStateTable
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              configurationId={AlertConsumers.OBSERVABILITY}
+            <ObservabilityAlertsTable
+              id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
               consumers={INFRA_ALERT_CONSUMERS}
-              id={ALERTS_TABLE_ID}
-              initialPageSize={ALERTS_PER_PAGE}
+              pageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
-              showAlertStatusWithFlapping
+              services={{
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                licensing,
+                cases,
+                settings,
+              }}
             />
           </EuiFlexItem>
         )}
@@ -98,6 +108,8 @@ export const AlertsTabContent = () => {
           nodeType="host"
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}
+          schema={searchCriteria.preferredSchema}
+          focusTrapProps={focusTrapProps}
         />
       )}
     </HeightRetainer>

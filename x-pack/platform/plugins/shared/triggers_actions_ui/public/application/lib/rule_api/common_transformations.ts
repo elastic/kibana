@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
+import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import type { Rule, RuleUiAction, ResolvedRule, RuleLastRun } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
@@ -62,6 +62,7 @@ const transformFlapping = (flapping: AsApiContract<Rule['flapping']>) => {
     return flapping;
   }
   return {
+    enabled: flapping.enabled,
     lookBackWindow: flapping.look_back_window,
     statusChangeThreshold: flapping.status_change_threshold,
   };
@@ -116,9 +117,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
 });
 
 export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   alias_target_id,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   alias_purpose,
   outcome,
   ...rest

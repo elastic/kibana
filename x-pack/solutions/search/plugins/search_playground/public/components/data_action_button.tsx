@@ -9,12 +9,13 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { useWatch } from 'react-hook-form';
-import { ChatForm, ChatFormFields } from '../types';
+import type { PlaygroundForm } from '../types';
+import { PlaygroundFormFields } from '../types';
 import { SelectIndicesFlyout } from './select_indices_flyout';
 
 export const DataActionButton: React.FC = () => {
-  const selectedIndices = useWatch<ChatForm, ChatFormFields.indices>({
-    name: ChatFormFields.indices,
+  const selectedIndices = useWatch<PlaygroundForm, PlaygroundFormFields.indices>({
+    name: PlaygroundFormFields.indices,
   });
   const [showFlyout, setShowFlyout] = useState(false);
   const handleFlyoutClose = () => setShowFlyout(false);
@@ -29,6 +30,7 @@ export const DataActionButton: React.FC = () => {
         onClick={handleShowFlyout}
         disabled={!selectedIndices?.length}
         data-test-subj="dataSourceActionButton"
+        color="text"
       >
         <FormattedMessage id="xpack.searchPlayground.dataActionButton" defaultMessage="Data" />
       </EuiButton>

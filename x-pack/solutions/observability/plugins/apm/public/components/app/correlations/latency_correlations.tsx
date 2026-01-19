@@ -51,6 +51,7 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
+import { OpenInDiscoverButton } from '../../shared/links/discover_links/open_in_discover_button';
 
 export function FallbackCorrelationBadge() {
   return (
@@ -140,7 +141,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </>
@@ -205,10 +206,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterLabel',
               { defaultMessage: 'Filter' }
             ),
-            description: i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
-              { defaultMessage: 'Filter by value' }
-            ),
+            description: ({ fieldName }) =>
+              i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
+                { defaultMessage: 'Filter by {fieldName}', values: { fieldName } }
+              ),
             icon: 'plusInCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
@@ -223,10 +225,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeLabel',
               { defaultMessage: 'Exclude' }
             ),
-            description: i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
-              { defaultMessage: 'Filter out value' }
-            ),
+            description: ({ fieldName }) =>
+              i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
+                { defaultMessage: 'Filter out {fieldName}', values: { fieldName } }
+              ),
             icon: 'minusInCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
@@ -316,6 +319,10 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             eventType={ProcessorEvent.transaction}
             totalDocCount={response.totalDocCount}
           />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <OpenInDiscoverButton dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

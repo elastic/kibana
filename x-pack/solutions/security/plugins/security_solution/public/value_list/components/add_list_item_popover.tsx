@@ -77,7 +77,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
     >
-      <div style={{ width: 500 }}>
+      <div css={{ width: 500 }}>
         <EuiForm onSubmit={formik.handleSubmit} component="form">
           <EuiFlexGroup>
             <EuiFlexItem>

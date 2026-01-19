@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { TileMetaFeature, TileError } from '../../../../common/descriptor_types';
+import type { TileMetaFeature, TileError } from '../../../../common/descriptor_types';
 import { setTileState } from '../../../actions';
 import { getLayerList } from '../../../selectors/map_selectors';
-import { MapStoreState } from '../../../reducers/store';
+import type { MapStoreState } from '../../../reducers/store';
 import { TileStatusTracker } from './tile_status_tracker';
 
 function mapStateToProps(state: MapStoreState) {

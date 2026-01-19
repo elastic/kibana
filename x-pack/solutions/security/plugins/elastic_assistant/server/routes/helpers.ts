@@ -5,52 +5,58 @@
  * 2.0.
  */
 
-import {
+import type {
   AnalyticsServiceSetup,
-  type AuthenticatedUser,
   IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
   SavedObjectsClientContract,
+  AuthenticatedUser,
 } from '@kbn/core/server';
-import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 
-import {
+import type {
   TraceData,
   Message,
   Replacements,
-  replaceAnonymizedValuesWithOriginalValues,
-  DEFEND_INSIGHTS_TOOL_ID,
   ContentReferencesStore,
   ContentReferences,
   MessageMetadata,
+  ScreenContext,
+  InterruptValue,
 } from '@kbn/elastic-assistant-common';
-import { ILicense } from '@kbn/licensing-plugin/server';
+import {
+  replaceAnonymizedValuesWithOriginalValues,
+  DEFEND_INSIGHTS_ID,
+} from '@kbn/elastic-assistant-common';
+import type { ILicense } from '@kbn/licensing-types';
 import { i18n } from '@kbn/i18n';
-import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
+import type { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import { isEmpty } from 'lodash';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
-import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
-import { FindResponse } from '../ai_assistant_data_clients/find';
-import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
-import { AIAssistantDataClient } from '../ai_assistant_data_clients';
+import type { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import type { FindResponse } from '../ai_assistant_data_clients/find';
+import type { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
+import type { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
 import { SECURITY_LABS_RESOURCE, SECURITY_LABS_LOADED_QUERY } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
-import {
+import type {
   AgentExecutorParams,
   AssistantDataClients,
+  OnLlmResponse,
   StaticReturnType,
 } from '../lib/langchain/executors/types';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
-import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
+import type { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
+import type { ElasticAssistantRequestHandlerContext } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 interface GetPluginNameFromRequestParams {
@@ -103,11 +109,13 @@ export const getPluginNameFromRequest = ({
 export const getMessageFromRawResponse = ({
   rawContent,
   metadata,
+  refusal,
   isError,
   traceData,
 }: {
   rawContent?: string;
   metadata?: MessageMetadata;
+  refusal?: string;
   traceData?: TraceData;
   isError?: boolean;
 }): Message => {
@@ -116,6 +124,7 @@ export const getMessageFromRawResponse = ({
     return {
       role: 'assistant',
       content: rawContent,
+      ...(refusal ? { refusal } : {}),
       timestamp: dateTimeString,
       metadata,
       isError,
@@ -149,6 +158,27 @@ const extractPromptFromESResult = (result: FindResponse<EsPromptsSchema>): strin
   return undefined;
 };
 
+export interface GetSystemPromptFromPromptIdParams {
+  promptId: string;
+  promptsDataClient: AIAssistantDataClient;
+}
+
+/**
+ * Fetches a system prompt by saved object id, when a request passes `promptId`.
+ */
+export const getSystemPromptFromPromptId = async ({
+  promptId,
+  promptsDataClient,
+}: GetSystemPromptFromPromptIdParams): Promise<string | undefined> => {
+  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
+    perPage: 1,
+    page: 1,
+    filter: `_id: "${promptId}"`,
+  });
+
+  return extractPromptFromESResult(result);
+};
+
 export const getSystemPromptFromUserConversation = async ({
   conversationsDataClient,
   conversationId,
@@ -162,31 +192,34 @@ export const getSystemPromptFromUserConversation = async ({
   if (!currentSystemPromptId) {
     return undefined;
   }
-  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
-    perPage: 1,
-    page: 1,
-    filter: `_id: "${currentSystemPromptId}"`,
+
+  return getSystemPromptFromPromptId({
+    promptId: currentSystemPromptId,
+    promptsDataClient,
   });
-  return extractPromptFromESResult(result);
 };
 
 export interface AppendAssistantMessageToConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   messageContent: string;
+  messageRefusal?: string;
   replacements: Replacements;
   conversationId: string;
-  contentReferences?: ContentReferences | false;
+  contentReferences: ContentReferences;
   isError?: boolean;
   traceData?: Message['traceData'];
+  interruptValue?: InterruptValue;
 }
 export const appendAssistantMessageToConversation = async ({
   conversationsDataClient,
   messageContent,
+  messageRefusal,
   replacements,
   conversationId,
   contentReferences,
   isError = false,
   traceData = {},
+  interruptValue = undefined,
 }: AppendAssistantMessageToConversationParams) => {
   const conversation = await conversationsDataClient.getConversation({ id: conversationId });
   if (!conversation) {
@@ -194,10 +227,9 @@ export const appendAssistantMessageToConversation = async ({
   }
 
   const metadata: MessageMetadata = {
-    ...(contentReferences ? { contentReferences } : {}),
+    ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
+    interruptValue,
   };
-
-  const isMetadataPopulated = Boolean(contentReferences) !== false;
 
   await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,
@@ -207,7 +239,8 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
-        metadata: isMetadataPopulated ? metadata : undefined,
+        refusal: messageRefusal,
+        metadata: !isEmpty(metadata) ? metadata : undefined,
         traceData,
         isError,
       }),
@@ -232,9 +265,11 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
-  contentReferencesStore: ContentReferencesStore | false;
+  threadId: string;
+  contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  inferenceChatModelDisabled?: boolean;
   isOssModel?: boolean;
   conversationId?: string;
   context: AwaitedProperties<
@@ -244,16 +279,13 @@ export interface LangChainExecuteParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<unknown, unknown, any>;
   logger: Logger;
-  onLlmResponse?: (
-    content: string,
-    traceData?: Message['traceData'],
-    isError?: boolean
-  ) => Promise<void>;
-  getElser: GetElser;
+  onLlmResponse?: OnLlmResponse;
   response: KibanaResponseFactory;
   responseLanguage?: string;
   savedObjectsClient: SavedObjectsClientContract;
+  screenContext?: ScreenContext;
   systemPrompt?: string;
+  timeout?: number;
 }
 export const langChainExecute = async ({
   messages,
@@ -263,7 +295,9 @@ export const langChainExecute = async ({
   telemetry,
   actionTypeId,
   connectorId,
+  threadId,
   contentReferencesStore,
+  inferenceChatModelDisabled,
   isOssModel,
   context,
   actionsClient,
@@ -273,12 +307,13 @@ export const langChainExecute = async ({
   logger,
   conversationId,
   onLlmResponse,
-  getElser,
   response,
   responseLanguage,
   isStream = true,
   savedObjectsClient,
+  screenContext,
   systemPrompt,
+  timeout,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -288,15 +323,17 @@ export const langChainExecute = async ({
   });
   const assistantContext = context.elasticAssistant;
   // We don't (yet) support invoking these tools interactively
-  const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_TOOL_ID]);
+  const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_ID]);
+  const pluginNames = Array.from(new Set([pluginName, DEFAULT_PLUGIN_NAME]));
+
   const assistantTools = assistantContext
-    .getRegisteredTools(pluginName)
+    .getRegisteredTools(pluginNames)
     .filter((tool) => !unsupportedTools.has(tool.id));
 
   // get a scoped esClient for assistant memory
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-  // convert the assistant messages to LangChain messages:
+  // convert the new messages to LangChain messages:
   const langChainMessages = getLangChainMessages(messages);
 
   const anonymizationFieldsDataClient =
@@ -317,16 +354,20 @@ export const langChainExecute = async ({
   // Shared executor params
   const executorParams: AgentExecutorParams<boolean> = {
     abortSignal,
+    assistantContext,
     dataClients,
-    alertsIndexPattern: request.body.alertsIndexPattern,
+    alertsIndexPattern: request.body.alertsIndexPattern || '.alerts-security.alerts-default',
+    core: context.core,
     actionsClient,
     assistantTools,
     conversationId,
+    threadId,
     connectorId,
     contentReferencesStore,
     esClient,
     llmTasks,
     inference,
+    inferenceChatModelDisabled,
     isStream,
     llmType: getLlmType(actionTypeId),
     isOssModel,
@@ -338,8 +379,10 @@ export const langChainExecute = async ({
     replacements,
     responseLanguage,
     savedObjectsClient,
-    size: request.body.size,
+    screenContext,
+    size: request.body.size || 10,
     systemPrompt,
+    timeout,
     telemetry,
     telemetryParams: {
       actionTypeId,
@@ -440,12 +483,12 @@ type PerformChecks =
       isSuccess: false;
       response: IKibanaResponse;
     };
-export const performChecks = ({
+export const performChecks = async ({
   capability,
   context,
   request,
   response,
-}: PerformChecksParams): PerformChecks => {
+}: PerformChecksParams): Promise<PerformChecks> => {
   const assistantResponse = buildResponse(response);
 
   if (!hasAIAssistantLicense(context.licensing.license)) {
@@ -459,7 +502,7 @@ export const performChecks = ({
     };
   }
 
-  const currentUser = context.elasticAssistant.getCurrentUser();
+  const currentUser = await context.elasticAssistant.getCurrentUser();
 
   if (currentUser == null) {
     return {

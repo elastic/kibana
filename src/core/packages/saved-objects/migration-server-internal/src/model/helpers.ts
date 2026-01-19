@@ -13,12 +13,18 @@ import type {
   QueryDslBoolQuery,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
-import type { BaseState, OutdatedDocumentsSearchRead, ReindexSourceToTempRead } from '../state';
+import type {
+  BaseState,
+  CleanupUnknownAndExcluded,
+  CleanupUnknownAndExcludedWaitForTaskState,
+  OutdatedDocumentsSearchRead,
+  ReindexSourceToTempRead,
+} from '../state';
 
 /** @internal */
 export const REINDEX_TEMP_SUFFIX = '_reindex_temp';
@@ -42,6 +48,32 @@ export function throwBadResponse(state: { controlState: string }, res: unknown):
   throw new Error(
     `${state.controlState} received unexpected action response: ` + JSON.stringify(res)
   );
+}
+
+/**
+ * A helper function used by CLEANUP_UNKNOWN_AND_EXCLUDED and CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
+ * to pass some needed properties to PREPARE_COMPATIBLE_MIGRATION
+ */
+export function getPrepareCompatibleMigrationStateProperties(
+  state: CleanupUnknownAndExcluded | CleanupUnknownAndExcludedWaitForTaskState
+) {
+  const source = state.sourceIndex.value;
+  return {
+    targetIndexMappings: mergeMappingMeta(
+      state.targetIndexMappings,
+      state.sourceIndexMappings.value
+    ),
+    preTransformDocsActions: [
+      // Point the version alias to the source index. This let's other Kibana
+      // instances know that a migration for the current version is "done"
+      // even though we may be waiting for document transformations to finish.
+      { add: { index: source!, alias: state.versionAlias } },
+      ...buildRemoveAliasActions(source!, Object.keys(state.aliases), [
+        state.currentAlias,
+        state.versionAlias,
+      ]),
+    ],
+  };
 }
 
 /**
@@ -251,6 +283,7 @@ export const createBulkIndexOperationTuple = (
   doc: SavedObjectsRawDoc,
   typeIndexMap: Record<string, string> = {}
 ): BulkIndexOperationTuple => {
+  const idChanged = doc._source.originId && doc._source.originId !== doc._id;
   return [
     {
       index: {
@@ -260,8 +293,9 @@ export const createBulkIndexOperationTuple = (
         }),
         // use optimistic concurrency control to ensure that outdated
         // documents are only overwritten once with the latest version
-        ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
-        ...(typeof doc._primary_term !== 'undefined' && { if_primary_term: doc._primary_term }),
+        ...(typeof doc._seq_no !== 'undefined' && !idChanged && { if_seq_no: doc._seq_no }),
+        ...(typeof doc._primary_term !== 'undefined' &&
+          !idChanged && { if_primary_term: doc._primary_term }),
       },
     },
     doc._source,

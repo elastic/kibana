@@ -9,12 +9,13 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiProgress, EuiText } from '@elastic/eui';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { ImportResults } from '@kbn/file-upload-common';
 import { getDataViewsService } from '../kibana_services';
-import { GeoUploadForm, OnFileSelectParameters } from './geo_upload_form';
+import type { OnFileSelectParameters } from './geo_upload_form';
+import { GeoUploadForm } from './geo_upload_form';
 import { ImportCompleteView } from './import_complete_view';
 import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
-import { ImportResults } from '../importer';
-import { GeoFileImporter } from '../importer/geo';
+import type { GeoFileImporter } from '../importer/geo';
 import { hasImportPermission } from '../api';
 import { getPartialImportMessage } from './utils';
 
@@ -38,6 +39,7 @@ interface State {
   importResults?: ImportResults;
   indexName: string;
   indexNameError?: string;
+  indexSettings: string;
   dataViewResp?: object;
   phase: PHASE;
   smallChunks: boolean;
@@ -52,6 +54,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     geoFieldType: ES_FIELD_TYPES.GEO_SHAPE,
     importStatus: '',
     indexName: '',
+    indexSettings: JSON.stringify({}, null, 2),
     phase: PHASE.CONFIGURE,
     smallChunks: false,
   };
@@ -76,6 +79,14 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
 
   _import = async () => {
     if (!this._geoFileImporter) {
+      return;
+    }
+
+    let indexSettings = {};
+    try {
+      indexSettings = JSON.parse(this.state.indexSettings);
+    } catch (error) {
+      // allow user to fix index setting parse error in editor
       return;
     }
 
@@ -109,10 +120,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         },
       },
     };
-    const ingestPipeline = {
-      description: '',
-      processors: [],
-    };
+
     this.setState({
       importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.dataIndexingStarted', {
         defaultMessage: 'Creating index: {indexName}',
@@ -123,9 +131,9 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     this._geoFileImporter.setGeoFieldType(this.state.geoFieldType);
     const initializeImportResp = await this._geoFileImporter.initializeImport(
       this.state.indexName,
-      {},
+      indexSettings,
       mappings,
-      ingestPipeline
+      []
     );
     if (!this._isMounted) {
       return;
@@ -147,9 +155,8 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     });
     this._geoFileImporter.setSmallChunks(this.state.smallChunks);
     const importResults = await this._geoFileImporter.import(
-      initializeImportResp.id,
       this.state.indexName,
-      initializeImportResp.pipelineId,
+      initializeImportResp.pipelineIds[0],
       (progress) => {
         if (this._isMounted) {
           this.setState({
@@ -300,6 +307,16 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     }
   };
 
+  _onIndexSettingsChange = (indexSettings: string) => {
+    this.setState({ indexSettings });
+    try {
+      JSON.parse(indexSettings);
+      this.props.enableImportBtn();
+    } catch (error) {
+      this.props.disableImportBtn();
+    }
+  };
+
   _onSmallChunksChange = (smallChunks: boolean) => {
     this.setState({ smallChunks });
   };
@@ -332,6 +349,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         geoFieldType={this.state.geoFieldType}
         indexName={this.state.indexName}
         indexNameError={this.state.indexNameError}
+        indexSettings={this.state.indexSettings}
         onFileClear={this._onFileClear}
         onFileSelect={this._onFileSelect}
         smallChunks={this.state.smallChunks}
@@ -339,6 +357,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         onIndexNameChange={this._onIndexNameChange}
         onIndexNameValidationStart={this.props.disableImportBtn}
         onIndexNameValidationEnd={this.props.enableImportBtn}
+        onIndexSettingsChange={this._onIndexSettingsChange}
         onSmallChunksChange={this._onSmallChunksChange}
       />
     );

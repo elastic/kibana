@@ -1,24 +1,19 @@
 {
   "type": "plugin",
   "id": "@kbn/slo-plugin",
-  "owner": [
-    "@elastic/obs-ux-management-team"
-  ],
+  "owner": ["@elastic/actionable-obs-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "slo",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "slo"
-    ],
+    "configPath": ["xpack", "slo"],
     "requiredPlugins": [
       "aiops",
       "alerting",
-      "cases",
       "charts",
+      "contentManagement",
       "dashboard",
       "data",
       "dataViewEditor",
@@ -35,13 +30,17 @@
       "presentationUtil",
       "ruleRegistry",
       "share",
+      "sloShared",
       "taskManager",
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
-      "usageCollection"
+      "usageCollection",
+      "fieldsMetadata",
+      "apmSourcesAccess"
     ],
     "optionalPlugins": [
+      "cases",
       "cloud",
       "discover",
       "embeddableEnhanced",
@@ -51,7 +50,6 @@
       "spaces"
     ],
     "requiredBundles": [
-      "controls",
       "embeddable",
       "ingestPipelines",
       "kibanaReact",

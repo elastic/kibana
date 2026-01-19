@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ListItemSchema } from '.';
+import type { ListItemSchema } from '.';
 import {
   DATE_NOW,
   ELASTIC_USER,

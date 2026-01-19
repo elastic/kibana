@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { DeprecationsClient, DomainDeprecationDetails } from '@kbn/core/server';
+import type { DeprecationsClient, DomainDeprecationDetails } from '@kbn/core/server';
 
 export const getKibanaUpgradeStatus = async (deprecationsClient: DeprecationsClient) => {
   const kibanaDeprecations: DomainDeprecationDetails[] =
     await deprecationsClient.getAllDeprecations();
 
-  const totalCriticalDeprecations = kibanaDeprecations.filter((d) => d.level === 'critical').length;
+  const totalCriticalDeprecations = kibanaDeprecations.filter(
+    (d) => d.deprecationType !== 'api' && d.level === 'critical'
+  ).length;
+
+  const apiDeprecations = kibanaDeprecations.filter((d) => d.deprecationType === 'api');
 
   return {
     totalCriticalDeprecations,
+    apiDeprecations,
   };
 };

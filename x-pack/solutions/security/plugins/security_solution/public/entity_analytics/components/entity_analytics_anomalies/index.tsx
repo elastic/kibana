@@ -165,6 +165,7 @@ export const EntityAnalyticsAnomalies = () => {
           {incompatibleJobCount > 0 && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
                 data-test-subj="incompatible_jobs_warnings"
                 color="warning"
@@ -203,6 +204,7 @@ export const EntityAnalyticsAnomalies = () => {
             loading={isSearchLoading}
             id={TABLE_QUERY_ID}
             sorting={TABLE_SORTING}
+            tableCaption={i18n.ANOMALIES_TITLE}
           />
         </>
       )}

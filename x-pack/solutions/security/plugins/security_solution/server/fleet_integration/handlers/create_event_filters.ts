@@ -6,11 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_NAME,
-  ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
@@ -33,24 +29,45 @@ export const createEventFilters = async (
   if (!eventFilters?.nonInteractiveSession) {
     return;
   }
+
   try {
-    // Attempt to Create the Event Filter List. It won't create the list if it already exists.
-    // So we can skip the validation and ignore the conflict error
-    await exceptionsClient.createExceptionList({
-      name: ENDPOINT_EVENT_FILTERS_LIST_NAME,
+    const existingList = await exceptionsClient.getExceptionList({
+      listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       namespaceType: 'agnostic',
-      description: ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
-      listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
-      type: ExceptionListTypeEnum.ENDPOINT_EVENTS,
-      immutable: false,
-      meta: undefined,
-      tags: [],
-      version: 1,
+      id: undefined,
     });
+
+    if (existingList) {
+      logger.debug(
+        `Event Filter List with id "${ENDPOINT_ARTIFACT_LISTS.eventFilters.id}" already exists. Skipping creation.`
+      );
+    } else {
+      logger.debug(
+        `Event Filter List with id "${ENDPOINT_ARTIFACT_LISTS.eventFilters.id}" not found. Attempting creation.`
+      );
+      await exceptionsClient.createExceptionList({
+        name: ENDPOINT_ARTIFACT_LISTS.eventFilters.name,
+        namespaceType: 'agnostic',
+        description: ENDPOINT_ARTIFACT_LISTS.eventFilters.description,
+        listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+        type: ExceptionListTypeEnum.ENDPOINT_EVENTS,
+        immutable: false,
+        meta: undefined,
+        tags: [],
+        version: 1,
+      });
+      logger.debug(
+        `Successfully created Event Filter List with id "${ENDPOINT_ARTIFACT_LISTS.eventFilters.id}".`
+      );
+    }
   } catch (err) {
-    // Ignoring error 409 (Conflict)
-    if (!SavedObjectsErrorHelpers.isConflictError(err)) {
-      logger.error(`Error creating Event Filter List: ${wrapErrorIfNeeded(err)}`);
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
+      logger.debug(
+        `Event Filter List with id "${ENDPOINT_ARTIFACT_LISTS.eventFilters.id}" already exists. Skipping creation.`
+      );
+    } else {
+      logger.error(`Error during Event Filter List handling: ${wrapErrorIfNeeded(err)}`);
+
       return;
     }
   }
@@ -61,14 +78,14 @@ export const createEventFilters = async (
 /**
  * Create an Event Filter for non-interactive sessions and attach it to the policy
  */
-export const createNonInteractiveSessionEventFilter = async (
+const createNonInteractiveSessionEventFilter = async (
   logger: Logger,
   exceptionsClient: ExceptionListClient,
   packagePolicy: PackagePolicy
 ): Promise<void> => {
   try {
     await exceptionsClient.createExceptionListItem({
-      listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       description: i18n.translate(
         'xpack.securitySolution.fleetIntegration.elasticDefend.eventFilter.nonInteractiveSessions.description',
         {
@@ -95,7 +112,7 @@ export const createNonInteractiveSessionEventFilter = async (
         },
       ],
       itemId: uuidv4(),
-      meta: [],
+      meta: undefined,
       comments: [],
       expireTime: undefined,
     });

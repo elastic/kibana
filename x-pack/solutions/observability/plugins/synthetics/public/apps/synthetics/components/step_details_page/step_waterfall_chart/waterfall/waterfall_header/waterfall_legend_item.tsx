@@ -8,7 +8,8 @@
 import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React, { AriaRole, MouseEventHandler, useCallback, useState } from 'react';
+import type { AriaRole, MouseEventHandler } from 'react';
+import React, { useCallback, useState } from 'react';
 
 export function WaterfallLegendItem<T = string>({
   id,

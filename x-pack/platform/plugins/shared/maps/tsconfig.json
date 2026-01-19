@@ -1,15 +1,17 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "allowJs": true
   },
   "include": [
+    "*.ts",
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "server/config.ts",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -58,7 +60,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/custom-integrations-plugin",
     "@kbn/config-schema",
-    "@kbn/controls-plugin",
     "@kbn/shared-ux-router",
     "@kbn/content-management-plugin",
     "@kbn/core-saved-objects-api-server",
@@ -90,9 +91,19 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/presentation-containers",
     "@kbn/field-utils",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/scout",
+    "@kbn/react-kibana-mount",
+    "@kbn/css-utils",
+    "@kbn/licensing-types",
+    "@kbn/control-group-renderer",
+    "@kbn/es-query-server",
+    "@kbn/data-service-server",
+    "@kbn/visualizations-common",
+    "@kbn/lens-common",
+    "@kbn/crypto-browser",
+    "@kbn/cps",
+    "@kbn/kql",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

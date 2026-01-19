@@ -7,13 +7,13 @@
 
 import { URL } from 'url';
 import { isString } from 'lodash';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import type { AxiosError, AxiosResponse } from 'axios';
+import axios from 'axios';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/pipeable';
+import { map, getOrElse } from 'fp-ts/Option';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -23,55 +23,53 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
+import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+} from '@kbn/connector-schemas/teams';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  ParamsSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/teams';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import { isOk, promiseResult, Result } from '../lib/result_type';
+import type { Result } from '../lib/result_type';
+import { isOk, promiseResult } from '../lib/result_type';
 
 export type TeamsConnectorType = ConnectorType<
-  {},
+  ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   ActionParamsType,
   unknown
 >;
+
 export type TeamsConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
+  ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   ActionParamsType
 >;
 
-// secrets definition
-
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
-
-const secretsSchemaProps = {
-  webhookUrl: schema.string(),
-};
-const SecretsSchema = schema.object(secretsSchemaProps);
-
-// params definition
-
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-
-const ParamsSchema = schema.object({
-  message: schema.string({ minLength: 1 }),
-});
-
-export const ConnectorTypeId = '.teams';
 // connector type definition
 export function getConnectorType(): TeamsConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.teams.title', {
-      defaultMessage: 'Microsoft Teams',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: ConfigSchema },
       secrets: {
         schema: SecretsSchema,
         customValidator: validateConnectorTypeConfig,
@@ -175,7 +173,7 @@ async function teamsExecutor(
         return retryResult(actionId, serviceMessage);
       }
 
-      return errorResultInvalid(actionId, serviceMessage);
+      return errorResultInvalid(actionId, serviceMessage, getErrorSource(error));
     }
 
     logger.debug(`error on ${actionId} Microsoft Teams action: unexpected error`);
@@ -200,7 +198,8 @@ function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResu
 
 function errorResultInvalid(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  errorSource?: TaskErrorSource
 ): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.teams.invalidResponseErrorMessage', {
     defaultMessage: 'error posting to Microsoft Teams, invalid response',
@@ -210,6 +209,7 @@ function errorResultInvalid(
     message: errMessage,
     actionId,
     serviceMessage,
+    errorSource,
   };
 }
 

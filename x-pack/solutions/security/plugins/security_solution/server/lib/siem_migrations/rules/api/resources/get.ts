@@ -7,14 +7,16 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import {
   GetRuleMigrationResourcesRequestParams,
   GetRuleMigrationResourcesRequestQuery,
   type GetRuleMigrationResourcesResponse,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { withLicense } from '../util/with_license';
+import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
+import { authz } from '../util/authz';
+import { withLicense } from '../../../common/api/util/with_license';
 
 export const registerSiemRuleMigrationsResourceGetRoute = (
   router: SecuritySolutionPluginRouter,
@@ -24,7 +26,7 @@ export const registerSiemRuleMigrationsResourceGetRoute = (
     .get({
       path: SIEM_RULE_MIGRATION_RESOURCES_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {
@@ -40,17 +42,24 @@ export const registerSiemRuleMigrationsResourceGetRoute = (
         async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResourcesResponse>> => {
           const migrationId = req.params.migration_id;
           const { type, names, from, size } = req.query;
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'rules'
+          );
           try {
             const ctx = await context.resolve(['securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
 
             const options = { filters: { type, names }, from, size };
             const resources = await ruleMigrationsClient.data.resources.get(migrationId, options);
 
+            await siemMigrationAuditLogger.logGetResources({ migrationId });
+
             return res.ok({ body: resources });
-          } catch (err) {
-            logger.error(err);
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logGetResources({ migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

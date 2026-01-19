@@ -8,11 +8,11 @@
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
-import { merge } from 'lodash';
+import { merge, isPlainObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type { ITelemetryReceiver } from './receiver';
@@ -24,11 +24,15 @@ import type {
   ExtraInfo,
   ListTemplate,
   Nullable,
+  ResponseActionsRuleTelemetryTemplate,
+  ResponseActionRules,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
   TimelineTelemetryEvent,
   ValueListResponse,
+  AnyObject,
+  PrebuiltRuleCustomizations,
 } from './types';
 import type { TaskExecutionPeriod } from './task';
 import {
@@ -45,6 +49,8 @@ import {
   TelemetryLoggerImpl,
   tlog as telemetryLogger,
 } from './telemetry_logger';
+import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
+import { FUNCTIONAL_FIELD_MAP } from '../detection_engine/rule_management/constants';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -237,6 +243,34 @@ export const templateExceptionList = (
 };
 
 /**
+ * Constructs the response actions custom rule telemetry schema from a list of rule params
+ * */
+export const responseActionsCustomRuleTelemetryData = (
+  responseActionsRules: ResponseActionRules,
+  clusterInfo: ESClusterInfo,
+  licenseInfo: Nullable<ESLicense>
+): ResponseActionsRuleTelemetryTemplate => {
+  const baseTelemetryData: ResponseActionsRuleTelemetryTemplate = {
+    '@timestamp': moment().toISOString(),
+    cluster_uuid: clusterInfo.cluster_uuid,
+    cluster_name: clusterInfo.cluster_name,
+    license_id: licenseInfo?.uid,
+    response_actions_rules: {
+      endpoint: 0,
+      osquery: 0,
+    },
+  };
+
+  return {
+    ...baseTelemetryData,
+    response_actions_rules: {
+      endpoint: responseActionsRules.endpoint,
+      osquery: responseActionsRules.osquery,
+    },
+  };
+};
+
+/**
  * Convert counter label list to kebab case
  *
  * @param labelList the list of labels to create standardized UsageCounter from
@@ -358,6 +392,29 @@ export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): T
   return event;
 };
 
+export const processDetectionRuleCustomizations = (
+  event: TelemetryEvent
+): PrebuiltRuleCustomizations | undefined => {
+  const ruleSource = event['kibana.alert.rule.parameters']?.rule_source;
+  if (
+    !ruleSource ||
+    ruleSource.type === 'internal' ||
+    ruleSource.is_customized === false ||
+    ruleSource.customized_fields == null || // New fields might not appear on alert documents
+    ruleSource.has_base_version == null || // New fields might not appear on alert documents
+    ruleSource.has_base_version === false
+  ) {
+    return undefined; // Don't return anything if rule is not customized or base version doesn't exist
+  }
+  const numberOfFunctionalFields = ruleSource.customized_fields.filter(
+    (field) => FUNCTIONAL_FIELD_MAP[field.field_name as keyof RuleResponse]
+  ).length;
+  return {
+    customized_fields: ruleSource.customized_fields.map((fieldObj) => fieldObj.field_name),
+    num_functional_fields: numberOfFunctionalFields,
+  };
+};
+
 export const ranges = (
   taskExecutionPeriod: TaskExecutionPeriod,
   defaultIntervalInHours: number = 3
@@ -389,11 +446,14 @@ export class TelemetryTimelineFetcher {
     this.timeFrame = this.calculateTimeFrame();
   }
 
-  async fetchTimeline(event: estypes.SearchHit<EnhancedAlertEvent>): Promise<TimelineResult> {
-    const eventId = event._source ? event._source['event.id'] : 'unknown';
-    const alertUUID = event._source ? event._source['kibana.alert.uuid'] : 'unknown';
+  async fetchTimeline(event: EnhancedAlertEvent): Promise<TimelineResult> {
+    const eventId = event ? event['event.id'] : 'unknown';
+    const alertUUID = event ? event['kibana.alert.uuid'] : 'unknown';
 
-    const entities = resolverEntity([event], this.receiver.getExperimentalFeatures());
+    const entities = resolverEntity(
+      [{ _source: event } as estypes.SearchHit],
+      this.receiver.getExperimentalFeatures()
+    );
 
     // Build Tree
     const tree = await this.receiver.buildProcessTree(
@@ -475,5 +535,41 @@ export class TelemetryTimelineFetcher {
     const startOfDay = now.startOf('day').toISOString();
     const endOfDay = now.endOf('day').toISOString();
     return { startOfDay, endOfDay };
+  }
+}
+
+const contiguousDotRegex = new RegExp('\\.{2,}');
+
+export function unflatten<T extends AnyObject = AnyObject>(object: AnyObject): T {
+  return Object.entries(object).reduce<AnyObject>((accum, [key, value]) => {
+    if (Array.isArray(value) && value.every((v) => isPlainObject(v))) {
+      _set(
+        accum,
+        key,
+        value.map((v) => unflatten(v))
+      );
+    } else if (isPlainObject(value)) {
+      _set(accum, key, unflatten(value as AnyObject));
+    } else {
+      _set(accum, key, value);
+    }
+    return accum;
+  }, {}) as T;
+}
+
+export function withErrorMessage(error?: Error, meta?: LogMeta): LogMeta {
+  return {
+    error,
+    error_message: error?.message,
+    ...(meta ?? {}),
+  } as LogMeta;
+}
+
+function _set(object: AnyObject, key: string, value: unknown) {
+  if (key.startsWith('.') || key.endsWith('.') || contiguousDotRegex.test(key)) {
+    // Preserve original keys with dots used in non-path representations (e.g. '.kibana_field_name')
+    object[key] = value;
+  } else {
+    set(object, key, value);
   }
 }

@@ -9,12 +9,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
-  convertToLensModule,
+  getConvertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
-import { ConvertMetricVisToLensVisualization } from './types';
+import type { ConvertMetricVisToLensVisualization } from './types';
 import { getConfiguration } from './configurations';
 
 export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, timefilter) => {
@@ -29,7 +29,7 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     return null;
   }
 
-  const { getColumnsFromVis, getPalette, getPercentageModeConfig } = await convertToLensModule;
+  const { getColumnsFromVis, getPalette, getPercentageModeConfig } = await getConvertToLensModule();
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.metric);
   const layers = getColumnsFromVis(

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ScreenshotBlockDoc } from '../../../../common/runtime_types';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
+import type { ScreenshotBlockDoc } from '../../../../common/runtime_types';
+import type { UMElasticsearchQueryFn } from '../adapters/framework';
 
 interface ScreenshotBlockResultType {
   _id: string;
@@ -37,7 +37,7 @@ export const getJourneyScreenshotBlocks: UMElasticsearchQueryFn<
     size: 1000,
   };
 
-  const fetchScreenshotBlocksResult = await uptimeEsClient.search({ body });
+  const fetchScreenshotBlocksResult = await uptimeEsClient.search(body);
 
   return (fetchScreenshotBlocksResult.body.hits.hits as ScreenshotBlockResultType[]).map(
     ({ _id, _source }) => ({

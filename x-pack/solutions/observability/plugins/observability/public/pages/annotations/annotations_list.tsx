@@ -7,13 +7,8 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useState } from 'react';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiTableSelectionType,
-  EuiSearchBarProps,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableSelectionType, EuiSearchBarProps } from '@elastic/eui';
+import { EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { DeleteAnnotationsModal } from '../../components/annotations/components/common/delete_annotations_modal';
 import { useDeleteAnnotation } from '../../components/annotations/hooks/use_delete_annotation';
@@ -23,7 +18,7 @@ import { AnnotationApplyTo } from './annotation_apply_to';
 import { TimestampRangeLabel } from '../../components/annotations/components/timestamp_range_label';
 import { DatePicker } from './date_picker';
 import { AnnotationsListChart } from './annotations_list_chart';
-import { Annotation } from '../../../common/annotations';
+import type { Annotation } from '../../../common/annotations';
 import { useFetchAnnotations } from '../../components/annotations/hooks/use_fetch_annotations';
 
 export function AnnotationsList() {
@@ -56,6 +51,7 @@ export function AnnotationsList() {
   const renderToolsLeft = () => {
     return (
       <DeleteAnnotations
+        key="delete-annotations"
         selection={selection}
         isLoading={isDeleteLoading}
         permissions={permissions}
@@ -65,7 +61,14 @@ export function AnnotationsList() {
   };
   const renderToolsRight = () => {
     return [
-      <DatePicker start={start} end={end} setStart={setStart} setEnd={setEnd} refetch={refetch} />,
+      <DatePicker
+        key="date-picker"
+        start={start}
+        end={end}
+        setStart={setStart}
+        setEnd={setEnd}
+        refetch={refetch}
+      />,
     ];
   };
   const allTags = data?.items?.map((obj) => obj.tags ?? []).flat() ?? [];

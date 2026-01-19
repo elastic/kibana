@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   MlGetTrainedModelsStatsRequest,
   MlGetTrainedModelsRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
+import type { MlModelDeploymentStatus } from '../../../common/types/ml';
+import { MlModelDeploymentState } from '../../../common/types/ml';
 
 import { isNotFoundExceptionError } from './ml_model_deployment_common';
 
@@ -70,11 +71,11 @@ export const getMlModelDeploymentStatus = async (
   const modelDeployment = modelStatsResponse.trained_model_stats[0].deployment_stats;
 
   return {
-    deploymentState: getMlModelDeploymentStateForStatus(modelDeployment?.allocation_status.state),
+    deploymentState: getMlModelDeploymentStateForStatus(modelDeployment?.allocation_status?.state),
     modelId: modelName,
-    nodeAllocationCount: modelDeployment?.allocation_status.allocation_count || 0,
+    nodeAllocationCount: modelDeployment?.allocation_status?.allocation_count || 0,
     startTime: modelDeployment?.start_time || 0,
-    targetAllocationCount: modelDeployment?.allocation_status.target_allocation_count || 0,
+    targetAllocationCount: modelDeployment?.allocation_status?.target_allocation_count || 0,
     threadsPerAllocation: modelDeployment?.threads_per_allocation || 0,
   };
 };

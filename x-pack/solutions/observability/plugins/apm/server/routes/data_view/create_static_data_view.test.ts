@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -40,6 +40,7 @@ const coreMock = {
 
 const logger = {
   info: jest.fn,
+  debug: jest.fn,
 } as unknown as Logger;
 
 const apmEventClientMock = {
@@ -110,7 +111,7 @@ describe('createStaticDataView', () => {
     jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService('apm-*');
-    const expectedDataViewTitle = 'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
+    const expectedDataViewTitle = 'apm-*-error-*,apm-*-metrics-*,apm-*-span-*,apm-*-transaction-*';
 
     await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
@@ -136,7 +137,7 @@ describe('createStaticDataView', () => {
     jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService(
-      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
+      'apm-*-error-*,apm-*-metrics-*,apm-*-span-*,apm-*-transaction-*'
     );
 
     await createOrUpdateStaticDataView({

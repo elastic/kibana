@@ -39,7 +39,16 @@ export function defineLoginRoutes({
           { unknowns: 'allow' }
         ),
       },
-      options: { authRequired: 'optional', excludeFromOAS: true },
+      options: { excludeFromOAS: true, excludeFromRateLimiter: true },
+      security: {
+        authc: {
+          enabled: 'optional',
+        },
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization because it is a host for login view.',
+        },
+      },
     },
     async (context, request, response) => {
       // Default to true if license isn't available or it can't be resolved for some reason.
@@ -76,7 +85,9 @@ export function defineLoginRoutes({
       const providers = sortedProviders.map(({ type, name }) => {
         // Since `config.authc.sortedProviders` is based on `config.authc.providers` config we can
         // be sure that config is present for every provider in `config.authc.sortedProviders`.
-        const { showInSelector, description, hint, icon } = config.authc.providers[type]?.[name]!;
+
+        const { showInSelector, description, hint, icon, origin } =
+          config.authc.providers[type]?.[name]!;
         const usesLoginForm = shouldProviderUseLoginForm(type);
         return {
           type,
@@ -86,6 +97,7 @@ export function defineLoginRoutes({
           description,
           hint,
           icon,
+          origin,
         };
       });
 

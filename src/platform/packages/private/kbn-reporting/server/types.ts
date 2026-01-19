@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Writable } from 'stream';
-
+import type { Writable } from 'stream';
 import type { TypeOf } from '@kbn/config-schema';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -20,7 +19,7 @@ import type {
   TaskRunResult,
 } from '@kbn/reporting-common/types';
 
-import { ConfigSchema } from './config_schema';
+import type { ConfigSchema } from './config_schema';
 import type { ExportType } from './export_type';
 
 export interface ReportingServerPluginSetup {
@@ -36,13 +35,18 @@ export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload
   req: KibanaRequest
 ) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
+export interface RunTaskOpts<TaskPayloadType = BasePayload> {
+  jobId: string;
+  payload: TaskPayloadType;
+  request: KibanaRequest;
+  taskInstanceFields: TaskInstanceFields;
+  cancellationToken: CancellationToken;
+  stream: Writable;
+}
+
 // standard type for run task function of any ExportType implementation
 export type RunTaskFn<TaskPayloadType = BasePayload> = (
-  jobId: string,
-  payload: TaskPayloadType,
-  taskInstanceFields: TaskInstanceFields,
-  cancellationToken: CancellationToken,
-  stream: Writable
+  opts: RunTaskOpts<TaskPayloadType>
 ) => Promise<TaskRunResult>;
 
 export interface TimeRangeParams {

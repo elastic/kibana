@@ -9,19 +9,14 @@
 
 import 'source-map-support/register';
 
-import webpack, { Stats } from 'webpack';
+import type { Stats } from 'webpack';
+import webpack from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs';
 import { isFailureStats, failedStatsToErrorMessage } from '@kbn/optimizer-webpack-helpers';
 
-import {
-  CompilerMsgs,
-  CompilerMsg,
-  maybeMap,
-  Bundle,
-  WorkerConfig,
-  BundleRemotes,
-} from '../common';
+import type { CompilerMsg, Bundle, WorkerConfig, BundleRemotes } from '../common';
+import { CompilerMsgs, maybeMap } from '../common';
 import { getWebpackConfig } from './webpack.config';
 
 const PLUGIN_NAME = '@kbn/optimizer';
@@ -53,7 +48,6 @@ const observeCompiler = (
    */
   const complete$ = Rx.fromEventPattern<Stats>((cb) => done.tap(PLUGIN_NAME, cb)).pipe(
     maybeMap((stats) => {
-      // @ts-expect-error not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
       if (stats.compilation.needAdditionalPass) {
         return undefined;
       }

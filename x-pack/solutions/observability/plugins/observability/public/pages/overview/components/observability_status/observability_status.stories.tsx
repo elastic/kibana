@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
-import { ObservabilityStatusBoxes, ObservabilityStatusProps } from './observability_status_boxes';
+import type { StoryFn } from '@storybook/react';
+import type { ObservabilityStatusProps } from './observability_status_boxes';
+import { ObservabilityStatusBoxes } from './observability_status_boxes';
 
 export default {
   title: 'app/ObservabilityStatusBoxes',
@@ -57,19 +58,6 @@ const testBoxes = [
     weight: 3,
   },
   {
-    id: 'synthetics',
-    title: 'Uptime',
-    description: 'Proactively monitor the availability and functionality of user journeys.',
-    addTitle: 'Add monitors',
-    addLink: '/app/home#/tutorial/uptimeMonitors',
-    learnMoreLink: 'http://lean-more-link-example.com',
-    goToAppTitle: 'Show monitors ',
-    goToAppLink: '/app/uptime',
-    hasData: false,
-    modules: [],
-    weight: 4,
-  },
-  {
     id: 'ux',
     title: 'User Experience',
     description:
@@ -81,7 +69,7 @@ const testBoxes = [
     goToAppLink: '/app/ux',
     hasData: true,
     modules: [],
-    weight: 5,
+    weight: 4,
   },
   {
     id: 'alert',
@@ -95,18 +83,22 @@ const testBoxes = [
     goToAppLink: '/app/observability/alerts',
     hasData: true,
     modules: [],
-    weight: 6,
+    weight: 5,
   },
 ];
 
-const Template: Story<ObservabilityStatusProps> = ({ boxes }: ObservabilityStatusProps) => {
+const Template: StoryFn<ObservabilityStatusProps> = ({ boxes }: ObservabilityStatusProps) => {
   return (
     <div style={{ width: 380, backgroundColor: '#fff', padding: 40 }}>
       <ObservabilityStatusBoxes boxes={boxes} />
     </div>
   );
 };
-export const Example = Template.bind({});
-Example.args = {
-  boxes: testBoxes,
+
+export const Example = {
+  render: Template,
+
+  args: {
+    boxes: testBoxes,
+  },
 };

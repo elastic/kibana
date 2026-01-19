@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
-import { FindBackfillRequestQueryV1 } from '../../../../../../../common/routes/backfill/apis/find';
-import { FindBackfillParams } from '../../../../../../application/backfill/methods/find/types';
+import type { FindBackfillRequestQueryV1 } from '../../../../../../../common/routes/backfill/apis/find';
+import type { FindBackfillParams } from '../../../../../../application/backfill/methods/find/types';
 
 export const transformRequest = ({
   end,
@@ -17,6 +16,7 @@ export const transformRequest = ({
   start,
   sort_field,
   sort_order,
+  initiator,
 }: FindBackfillRequestQueryV1): FindBackfillParams => ({
   end,
   page,
@@ -25,4 +25,5 @@ export const transformRequest = ({
   start,
   sortField: sort_field,
   sortOrder: sort_order,
+  initiator,
 });

@@ -7,20 +7,14 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-  UseEuiTheme,
-  logicalCSS,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiBadge, logicalCSS } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
-import { Vertex } from './types';
+import type { Vertex } from './types';
 
 const pluginStyle = ({ euiTheme }: UseEuiTheme) => css`
   ${logicalCSS('margin-left', euiTheme.size.xs)}
@@ -107,6 +101,7 @@ export function PluginStatement({
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj={`pluginStatement-${pluginType}-${name}-EmptyButton`}
               aria-label={name}
               color="primary"
               css={pluginStyle}
@@ -121,6 +116,7 @@ export function PluginStatement({
           {hasExplicitId && (
             <EuiFlexItem grow={false}>
               <EuiBadge
+                data-test-subj={`pluginStatement-${pluginType}-${name}-Badge`}
                 onClick={onNameButtonClick}
                 onClickAriaLabel={i18n.translate(
                   'xpack.monitoring.logstash.pipelineStatement.viewDetailsAriaLabel',

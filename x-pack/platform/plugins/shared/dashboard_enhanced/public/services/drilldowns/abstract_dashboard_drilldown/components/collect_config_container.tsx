@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce, findIndex } from 'lodash';
-import { SimpleSavedObject } from '@kbn/core/public';
-import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
-import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
+import type { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
+import { DashboardDrilldownEditor } from './dashboard_drilldown_editor';
 import { txtDestinationDashboardNotFound } from './i18n';
-import { Config } from '../types';
-import { Params } from '../abstract_dashboard_drilldown';
+import type { DashboardDrilldownConfig } from '../types';
+import type { Params } from '../abstract_dashboard_drilldown';
 
 const mergeDashboards = (
   dashboards: Array<EuiComboBoxOptionOption<string>>,
@@ -26,16 +25,13 @@ const mergeDashboards = (
   return dashboards;
 };
 
-const dashboardSavedObjectToMenuItem = (
-  savedObject: SimpleSavedObject<{
-    title: string;
-  }>
-) => ({
-  value: savedObject.id,
-  label: savedObject.attributes.title,
+const dashboardToMenuItem = (dashboardId: string, title: string) => ({
+  value: dashboardId,
+  label: title,
 });
 
-export interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config, object> {
+export interface DashboardDrilldownCollectConfigProps
+  extends CollectConfigProps<DashboardDrilldownConfig, object> {
   params: Params;
 }
 
@@ -79,7 +75,7 @@ export class CollectConfigContainer extends React.Component<
     const { dashboards, selectedDashboard, isLoading, error } = this.state;
 
     return (
-      <DashboardDrilldownConfig
+      <DashboardDrilldownEditor
         dashboards={mergeDashboards(dashboards, selectedDashboard)}
         isLoading={isLoading}
         error={error}
@@ -91,7 +87,7 @@ export class CollectConfigContainer extends React.Component<
         }}
         onSearchChange={this.debouncedLoadDashboards}
         config={config}
-        onConfigChange={(changes: Partial<Config>) => {
+        onConfigChange={(changes: Partial<DashboardDrilldownConfig>) => {
           onConfig({ ...config, ...changes });
         }}
       />
@@ -104,15 +100,14 @@ export class CollectConfigContainer extends React.Component<
       params: { start },
     } = this.props;
     if (!config.dashboardId) return;
-    const savedObject = await start().core.savedObjects.client.get<{ title: string }>(
-      'dashboard',
-      config.dashboardId
-    );
+    const { dashboard } = await start().plugins;
+    const findDashboardsService = await dashboard.findDashboardsService();
+    const dashboardResponse = await findDashboardsService.findById(config.dashboardId);
 
     if (!this.isMounted) return;
 
     // handle case when destination dashboard no longer exists
-    if (savedObject.error?.statusCode === 404) {
+    if (dashboardResponse.status === 'error' && dashboardResponse.notFound) {
       this.setState({
         error: txtDestinationDashboardNotFound(config.dashboardId),
       });
@@ -120,34 +115,39 @@ export class CollectConfigContainer extends React.Component<
       return;
     }
 
-    if (savedObject.error) {
+    if (dashboardResponse.status === 'error') {
       this.setState({
-        error: savedObject.error.message,
+        error: dashboardResponse.error.message,
       });
       this.props.onConfig({ ...config, dashboardId: undefined });
       return;
     }
 
-    this.setState({ selectedDashboard: dashboardSavedObjectToMenuItem(savedObject) });
+    this.setState({
+      selectedDashboard: dashboardToMenuItem(
+        config.dashboardId,
+        dashboardResponse.attributes.title
+      ),
+    });
   }
 
   private readonly debouncedLoadDashboards: (searchString?: string) => void;
   private async loadDashboards(searchString?: string) {
     this.setState({ searchString, isLoading: true });
-    const savedObjectsClient = this.props.params.start().core.savedObjects.client;
-    const { savedObjects } = await savedObjectsClient.find<{ title: string }>({
-      type: 'dashboard',
-      search: searchString ? `${searchString}*` : undefined,
-      searchFields: ['title^3', 'description'],
-      defaultSearchOperator: 'AND',
-      perPage: 100,
+    const { dashboard } = this.props.params.start().plugins;
+    const findDashboardsService = await dashboard.findDashboardsService();
+    const results = await findDashboardsService.search({
+      search: searchString ?? '',
+      per_page: 100,
     });
 
     // bail out if this response is no longer needed
     if (!this.isMounted) return;
     if (searchString !== this.state.searchString) return;
 
-    const dashboardList = savedObjects.map(dashboardSavedObjectToMenuItem);
+    const dashboardList = results.dashboards.map(({ id, data }) =>
+      dashboardToMenuItem(id, data.title)
+    );
 
     this.setState({ dashboards: dashboardList, isLoading: false });
   }

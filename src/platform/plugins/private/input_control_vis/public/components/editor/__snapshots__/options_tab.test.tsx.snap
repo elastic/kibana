@@ -1,51 +1,148 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`OptionsTab should renders OptionsTab 1`] = `
-<EuiForm>
-  <EuiFormRow
-    id="updateFiltersOnChange"
+<div>
+  <div
+    class="euiForm"
   >
-    <EuiSwitch
-      checked={false}
-      data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
-      label={
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="Update Kibana filters on each change"
-          id="inputControl.editor.optionsTab.updateFilterLabel"
-        />
-      }
-      onChange={[Function]}
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    id="useTimeFilter"
-  >
-    <EuiSwitch
-      checked={false}
-      data-test-subj="inputControlEditorUseTimeFilterCheckbox"
-      label={
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="Use time filter"
-          id="inputControl.editor.optionsTab.useTimeFilterLabel"
-        />
-      }
-      onChange={[Function]}
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    id="pinFilters"
-  >
-    <EuiSwitch
-      checked={false}
-      data-test-subj="inputControlEditorPinFiltersCheckbox"
-      label={
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="Pin filters for all applications"
-          id="inputControl.editor.optionsTab.pinFiltersLabel"
-        />
-      }
-      onChange={[Function]}
-    />
-  </EuiFormRow>
-</EuiForm>
+    <div
+      class="euiFormRow emotion-euiFormRow"
+      id="updateFiltersOnChange-row"
+    >
+      <div
+        class="euiFormRow__fieldWrapper"
+      >
+        <div
+          class="euiSwitch emotion-euiSwitch"
+        >
+          <button
+            aria-checked="false"
+            aria-labelledby="generated-id"
+            class="euiSwitch__button emotion-euiSwitch__button"
+            data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
+            id="updateFiltersOnChange"
+            role="switch"
+            type="button"
+          >
+            <span
+              class="euiSwitch__body emotion-euiSwitch__body-off"
+            >
+              <span
+                class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
+              >
+                <span
+                  data-euiicon-type="check"
+                />
+                <span
+                  data-euiicon-type="cross"
+                />
+              </span>
+            </span>
+            <span
+              class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+            />
+          </button>
+          <span
+            class="euiSwitch__label emotion-euiSwitch__label"
+            id="generated-id"
+          >
+            Update Kibana filters on each change
+          </span>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFormRow emotion-euiFormRow"
+      id="useTimeFilter-row"
+    >
+      <div
+        class="euiFormRow__fieldWrapper"
+      >
+        <div
+          class="euiSwitch emotion-euiSwitch"
+        >
+          <button
+            aria-checked="false"
+            aria-labelledby="generated-id"
+            class="euiSwitch__button emotion-euiSwitch__button"
+            data-test-subj="inputControlEditorUseTimeFilterCheckbox"
+            id="useTimeFilter"
+            role="switch"
+            type="button"
+          >
+            <span
+              class="euiSwitch__body emotion-euiSwitch__body-off"
+            >
+              <span
+                class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
+              >
+                <span
+                  data-euiicon-type="check"
+                />
+                <span
+                  data-euiicon-type="cross"
+                />
+              </span>
+            </span>
+            <span
+              class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+            />
+          </button>
+          <span
+            class="euiSwitch__label emotion-euiSwitch__label"
+            id="generated-id"
+          >
+            Use time filter
+          </span>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFormRow emotion-euiFormRow"
+      id="pinFilters-row"
+    >
+      <div
+        class="euiFormRow__fieldWrapper"
+      >
+        <div
+          class="euiSwitch emotion-euiSwitch"
+        >
+          <button
+            aria-checked="false"
+            aria-labelledby="generated-id"
+            class="euiSwitch__button emotion-euiSwitch__button"
+            data-test-subj="inputControlEditorPinFiltersCheckbox"
+            id="pinFilters"
+            role="switch"
+            type="button"
+          >
+            <span
+              class="euiSwitch__body emotion-euiSwitch__body-off"
+            >
+              <span
+                class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
+              >
+                <span
+                  data-euiicon-type="check"
+                />
+                <span
+                  data-euiicon-type="cross"
+                />
+              </span>
+            </span>
+            <span
+              class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+            />
+          </button>
+          <span
+            class="euiSwitch__label emotion-euiSwitch__label"
+            id="generated-id"
+          >
+            Pin filters for all applications
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;

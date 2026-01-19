@@ -6,18 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
-import {
+import type {
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
   UserMessage,
   VisualizationType,
-} from '../../types';
-import {
-  State,
+} from '@kbn/lens-common';
+import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
+import type {
   XYState,
   XYAnnotationLayerConfig,
   XYLayerConfig,
@@ -26,11 +26,9 @@ import {
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
-  visualizationTypes,
-  visualizationSubtypes,
 } from './types';
+import { visualizationTypes, visualizationSubtypes } from './types';
 import { isHorizontalChart } from './state_helpers';
-import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';
 import { XY_BREAKDOWN_MISSING_AXIS, XY_Y_MISSING_AXIS } from '../../user_messages_ids';
 
@@ -192,7 +190,7 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
   return options[layerTypes.ANNOTATIONS](layer);
 };
 
-export function getVisualizationSubtypeId(state: State) {
+export function getVisualizationSubtypeId(state: XYState) {
   if (!state.layers.length) {
     return (
       visualizationSubtypes.find((t) => t.id === state.preferredSeriesType) ??
@@ -208,7 +206,10 @@ export function getVisualizationSubtypeId(state: State) {
   return subtype && seriesTypes.length === 1 ? subtype : 'mixed';
 }
 
-export function getVisualizationType(state: State, layerId?: string): VisualizationType | 'mixed' {
+export function getVisualizationType(
+  state: XYState,
+  layerId?: string
+): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
       visualizationTypes.find((t) => t.subtypes?.includes(state.preferredSeriesType)) ??
@@ -233,7 +234,7 @@ export function getVisualizationType(state: State, layerId?: string): Visualizat
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
 
-export function getDescription(state?: State, layerId?: string) {
+export function getDescription(state?: XYState, layerId?: string) {
   if (!state) {
     return {
       icon: defaultIcon,
@@ -355,7 +356,7 @@ const newLayerFn = {
         layerType: layerTypes.ANNOTATIONS,
         annotationGroupId,
 
-        annotations: cloneDeep(libraryGroupConfig.annotations),
+        annotations: structuredClone(libraryGroupConfig.annotations),
         indexPatternId: libraryGroupConfig.indexPatternId,
         ignoreGlobalFilters: libraryGroupConfig.ignoreGlobalFilters,
         __lastSaved: libraryGroupConfig,
@@ -392,7 +393,7 @@ export function newLayerState({
   return newLayerFn[layerType]({ layerId, seriesType, indexPatternId, extraArg });
 }
 
-export function getLayersByType(state: State, byType?: string) {
+export function getLayersByType(state: XYState, byType?: string) {
   return state.layers.filter(({ layerType = layerTypes.DATA }) =>
     byType ? layerType === byType : true
   );

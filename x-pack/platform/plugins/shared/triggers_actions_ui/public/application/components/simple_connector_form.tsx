@@ -5,29 +5,35 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
   ComboBoxField,
   Field,
   PasswordField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { ValidationConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES, getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
 
-export interface CommonFieldSchema {
+type Validations<T = any> = Array<ValidationConfig<FormData, string, T>>;
+
+export interface CommonFieldSchema<T = any> {
   id: string;
   label: string;
   helpText?: string | ReactNode;
   isRequired?: boolean;
   type?: keyof typeof FIELD_TYPES;
   euiFieldProps?: Record<string, unknown>;
+  validations?: Validations<T>;
 }
 
-export interface ConfigFieldSchema extends CommonFieldSchema {
+export interface ConfigFieldSchema<T = any> extends CommonFieldSchema<T> {
   isUrlField?: boolean;
-  defaultValue?: string | string[];
+  requireTld?: boolean;
+  defaultValue?: T;
 }
 
 export interface SecretsFieldSchema extends CommonFieldSchema {
@@ -39,7 +45,6 @@ interface SimpleConnectorFormProps {
   readOnly: boolean;
   configFormSchema: ConfigFieldSchema[];
   secretsFormSchema: SecretsFieldSchema[];
-  configFormSchemaAfterSecrets?: ConfigFieldSchema[];
 }
 
 type FormRowProps = ConfigFieldSchema & SecretsFieldSchema & { readOnly: boolean };
@@ -48,18 +53,22 @@ const UseTextField = getUseField({ component: Field });
 const UseComboBoxField = getUseField({ component: ComboBoxField });
 const { emptyField, urlField } = fieldValidators;
 
-const getFieldConfig = ({
+const getFieldConfig = <T,>({
   label,
   isRequired = true,
   isUrlField = false,
+  requireTld = true,
   defaultValue,
   type,
+  validations = [],
 }: {
   label: string;
   isRequired?: boolean;
   isUrlField?: boolean;
-  defaultValue?: string | string[];
+  requireTld?: boolean;
+  defaultValue?: T;
   type?: keyof typeof FIELD_TYPES;
+  validations?: Validations<T>;
 }) => ({
   label,
   validations: [
@@ -87,11 +96,13 @@ const getFieldConfig = ({
                 {
                   defaultMessage: 'Invalid URL',
                 }
-              )
+              ),
+              { requireTld }
             ),
           },
         ]
       : []),
+    ...validations,
   ],
   defaultValue,
   ...(type && FIELD_TYPES[type]
@@ -118,6 +129,8 @@ const FormRow: React.FC<FormRowProps> = ({
   defaultValue,
   euiFieldProps = {},
   type,
+  requireTld,
+  validations = [],
 }) => {
   const dataTestSub = `${id}-input`;
   const UseField = getComponentByType(type);
@@ -128,7 +141,15 @@ const FormRow: React.FC<FormRowProps> = ({
           {!isPasswordField ? (
             <UseField
               path={id}
-              config={getFieldConfig({ label, isUrlField, defaultValue, type, isRequired })}
+              config={getFieldConfig({
+                label,
+                isUrlField,
+                defaultValue,
+                type,
+                isRequired,
+                requireTld,
+                validations,
+              })}
               helpText={helpText}
               componentProps={{
                 euiFieldProps: {
@@ -142,7 +163,7 @@ const FormRow: React.FC<FormRowProps> = ({
           ) : (
             <UseField
               path={id}
-              config={getFieldConfig({ label, type, isRequired })}
+              config={getFieldConfig({ label, type, isRequired, validations })}
               helpText={helpText}
               component={PasswordField}
               componentProps={{
@@ -165,7 +186,6 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
   readOnly,
   configFormSchema,
   secretsFormSchema,
-  configFormSchemaAfterSecrets = [],
 }) => {
   return (
     <>
@@ -199,12 +219,6 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
             readOnly={readOnly}
           />
           {index !== secretsFormSchema.length ? <EuiSpacer size="m" /> : null}
-        </React.Fragment>
-      ))}
-      {configFormSchemaAfterSecrets.map(({ id, ...restConfigSchemaAfterSecrets }, index) => (
-        <React.Fragment key={`config.${id}`}>
-          <FormRow id={`config.${id}`} {...restConfigSchemaAfterSecrets} readOnly={readOnly} />
-          {index !== configFormSchemaAfterSecrets.length ? <EuiSpacer size="m" /> : null}
         </React.Fragment>
       ))}
     </>

@@ -1,96 +1,297 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ConditionsSectionExpression don't render when not enabled with conditions 1`] = `""`;
+exports[`ConditionsSectionExpression don't render when not enabled with conditions 1`] = `<div />`;
 
-exports[`ConditionsSectionExpression don't render when the section is not enabled 1`] = `""`;
+exports[`ConditionsSectionExpression don't render when the section is not enabled 1`] = `<div />`;
 
 exports[`ConditionsSectionExpression renders when enabled with empty conditions supplied 1`] = `
-<Fragment>
-  <EuiSpacer
-    size="s"
+<div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiButtonEmpty
-    onClick={[Function]}
+  <button
+    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+    type="button"
   >
-    <MemoizedFormattedMessage
-      defaultMessage="Add new condition"
-      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
-    />
-  </EuiButtonEmpty>
-</Fragment>
+    <span
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+    >
+      <span
+        class="eui-textTruncate euiButtonEmpty__text"
+      >
+        Add new condition
+      </span>
+    </span>
+  </button>
+</div>
 `;
 
 exports[`ConditionsSectionExpression renders when enabled with no conditions supplied 1`] = `
-<Fragment>
-  <EuiSpacer
-    size="s"
+<div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
-  <EuiButtonEmpty
-    onClick={[Function]}
+  <button
+    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+    type="button"
   >
-    <MemoizedFormattedMessage
-      defaultMessage="Add new condition"
-      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
-    />
-  </EuiButtonEmpty>
-</Fragment>
+    <span
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+    >
+      <span
+        class="eui-textTruncate euiButtonEmpty__text"
+      >
+        Add new condition
+      </span>
+    </span>
+  </button>
+</div>
 `;
 
 exports[`ConditionsSectionExpression renders when enabled with one condition 1`] = `
-<Fragment>
-  <ConditionExpression
-    appliesTo="actual"
-    deleteCondition={[MockFunction]}
-    index={0}
-    key="0"
-    operator="lt"
-    updateCondition={[MockFunction]}
-    value={1}
-  />
-  <EuiSpacer
-    size="s"
-  />
-  <EuiButtonEmpty
-    onClick={[Function]}
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
   >
-    <MemoizedFormattedMessage
-      defaultMessage="Add new condition"
-      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
-    />
-  </EuiButtonEmpty>
-</Fragment>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="appliesToPopover"
+      >
+        <button
+          class="euiExpression emotion-euiExpression-isClickable-success"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            when
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            actual
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="operatorValuePopover"
+      >
+        <button
+          class="euiExpression emotion-euiExpression-isClickable-success"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            is less than
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            1
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        aria-label="Delete condition"
+        class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="trash"
+        />
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <button
+    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+    type="button"
+  >
+    <span
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+    >
+      <span
+        class="eui-textTruncate euiButtonEmpty__text"
+      >
+        Add new condition
+      </span>
+    </span>
+  </button>
+</div>
 `;
 
 exports[`ConditionsSectionExpression renders when enabled with two conditions 1`] = `
-<Fragment>
-  <ConditionExpression
-    appliesTo="actual"
-    deleteCondition={[MockFunction]}
-    index={0}
-    key="0"
-    operator="lt"
-    updateCondition={[MockFunction]}
-    value={1}
-  />
-  <ConditionExpression
-    appliesTo="typical"
-    deleteCondition={[MockFunction]}
-    index={1}
-    key="1"
-    operator="gte"
-    updateCondition={[MockFunction]}
-    value={1.23}
-  />
-  <EuiSpacer
-    size="s"
-  />
-  <EuiButtonEmpty
-    onClick={[Function]}
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
   >
-    <MemoizedFormattedMessage
-      defaultMessage="Add new condition"
-      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
-    />
-  </EuiButtonEmpty>
-</Fragment>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="appliesToPopover"
+      >
+        <button
+          class="euiExpression emotion-euiExpression-isClickable-success"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            when
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            actual
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="operatorValuePopover"
+      >
+        <button
+          class="euiExpression emotion-euiExpression-isClickable-success"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            is less than
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            1
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        aria-label="Delete condition"
+        class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="trash"
+        />
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="appliesToPopover"
+      >
+        <button
+          class="euiExpression emotion-euiExpression-isClickable-success"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            when
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            typical
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="operatorValuePopover"
+      >
+        <button
+          class="euiExpression emotion-euiExpression-isClickable-success"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            is greater than or equal to
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            1.23
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        aria-label="Delete condition"
+        class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="trash"
+        />
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <button
+    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+    type="button"
+  >
+    <span
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+    >
+      <span
+        class="eui-textTruncate euiButtonEmpty__text"
+      >
+        Add new condition
+      </span>
+    </span>
+  </button>
+</div>
 `;

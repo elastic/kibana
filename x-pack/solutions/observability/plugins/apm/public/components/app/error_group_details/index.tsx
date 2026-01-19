@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -82,8 +84,8 @@ export function ErrorGroupDetails() {
 
   const apmRouter = useApmRouter();
   const history = useHistory();
-
-  const { observabilityAIAssistant } = useApmPluginContext();
+  const { onPageReady } = usePerformanceContext();
+  const { observabilityAIAssistant, agentBuilder } = useApmPluginContext();
 
   const {
     path: { groupId },
@@ -170,6 +172,20 @@ export function ErrorGroupDetails() {
     }
   }, [history, errorId, errorSamplesData, errorSamplesFetchStatus]);
 
+  useEffect(() => {
+    if (
+      errorSamplesFetchStatus === FETCH_STATUS.SUCCESS &&
+      errorDistributionStatus === FETCH_STATUS.SUCCESS
+    ) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+    }
+  }, [onPageReady, errorSamplesFetchStatus, errorDistributionStatus, rangeFrom, rangeTo]);
+
   const { agentName } = useApmServiceContext();
   const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
   const isRumAgent = isRumAgentName(agentName as AgentName);
@@ -182,6 +198,33 @@ export function ErrorGroupDetails() {
       screenDescription: `The user is looking at the error details view. The current error group name is ${groupId}. There have been ${errorSamplesData.occurrencesCount} occurrences in the currently selected time range`,
     });
   }, [observabilityAIAssistant, errorSamplesData.occurrencesCount, groupId]);
+
+  // Configure agent builder global flyout with the error attachment
+  useEffect(() => {
+    if (!agentBuilder || !errorId) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      newConversation: true,
+      attachments: [
+        {
+          type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+          data: {
+            errorId,
+            serviceName,
+            environment,
+            start,
+            end,
+          },
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, errorId, serviceName, environment, start, end]);
 
   return (
     <>

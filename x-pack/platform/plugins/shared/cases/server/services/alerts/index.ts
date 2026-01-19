@@ -11,6 +11,7 @@ import { isEmpty } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
+  ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
@@ -169,21 +170,24 @@ export class AlertService {
         this.scopedClusterClient.updateByQuery({
           index,
           conflicts: 'abort',
-          body: {
-            script: {
-              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
-                ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
-                ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
-              }
-              if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                ctx._source.signal.status = '${status}'
-              }`,
-              lang: 'painless',
-            },
-            // the query here will contain all the ids that have the same status for the same index
-            // being updated
-            query: { ids: { values: translatedAlerts.map(({ id }) => id) } },
+          script: {
+            source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+              ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
+              ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
+            }
+            if (ctx._source.signal != null && ctx._source.signal.status != null) {
+              ctx._source.signal.status = '${status}'
+            }${
+              status !== 'closed'
+                ? `
+            ctx._source.remove('${ALERT_WORKFLOW_REASON}')`
+                : ''
+            }`,
+            lang: 'painless',
           },
+          // the query here will contain all the ids that have the same status for the same index
+          // being updated
+          query: { ids: { values: translatedAlerts.map(({ id }) => id) } },
           ignore_unavailable: true,
         })
       )
@@ -205,7 +209,7 @@ export class AlertService {
         return;
       }
 
-      const results = await this.scopedClusterClient.mget<Alert>({ body: { docs } });
+      const results = await this.scopedClusterClient.mget<Alert>({ docs });
 
       return results;
     } catch (error) {

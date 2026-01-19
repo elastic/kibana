@@ -5,15 +5,35 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { screen, render } from '@testing-library/react';
 import React from 'react';
-
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-
 import { Ip } from '.';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/mock_flyout_context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useWhichFlyout } from '../../../../flyout/document_details/shared/hooks/use_which_flyout';
+import { NetworkPanelKey } from '../../../../flyout/network_details';
 
-jest.mock('../../../../common/lib/kibana');
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
+
+jest.mock('../../../../flyout/document_details/shared/hooks/use_which_flyout', () => ({
+  useWhichFlyout: jest.fn(),
+}));
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -26,34 +46,43 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../../../common/components/links/link_props');
 
 describe('Port', () => {
-  const mount = useMountAppended();
+  beforeEach(() => {
+    jest.mocked(useWhichFlyout).mockReturnValue(null);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+  });
 
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
+    const { container } = render(
+      <TestProviders>
+        <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
+      </TestProviders>
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders the the ip address', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="formatted-ip"]').first().text()).toEqual('10.1.2.3');
+    expect(screen.getByTestId('network-details')).toHaveTextContent('10.1.2.3');
   });
 
-  test('it dispalys a button which opens the network/ip side panel', () => {
-    const wrapper = mount(
+  test('it displays a button which opens the network flyout', () => {
+    render(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
       </TestProviders>
     );
-
-    expect(
-      wrapper.find('[data-test-subj="draggable-truncatable-content"]').find('a').first().text()
-    ).toEqual('10.1.2.3');
+    const link = screen.getByTestId('network-details');
+    link.click();
+    expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
+      right: {
+        id: NetworkPanelKey,
+        params: { ip: '10.1.2.3', scopeId: '', flowTarget: 'destination' },
+      },
+    });
   });
 });

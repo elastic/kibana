@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useEffect } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
+import type { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
 
 import { nextAriaLabel, prevAriaLabel } from './translations';
 

@@ -6,7 +6,7 @@
  */
 
 import { Command } from 'commander';
-import { CliOptions } from '../types';
+import type { CliOptions } from '../types';
 import { DEFAULTS } from '../constants';
 
 export function parseCliOptions(): CliOptions {

@@ -39,10 +39,6 @@ Some Cypress test suites are only run when code changes are made in certain file
 
 Build Windows, macOS, and Linux archives.
 
-#### `ci:build-canvas-shareable-runtime`
-
-Build the Canvas shareable runtime and include it in the distribution.
-
 #### `ci:build-cdn-assets`
 
 Build an archive that can be used to serve Kibana's static assets.
@@ -51,9 +47,13 @@ Build an archive that can be used to serve Kibana's static assets.
 
 Build cloud Docker images that can be used for testing deployments on Elastic Cloud.
 
+#### `ci:build-cloud-fips-image`
+
+Build FIPS cloud Docker images that can be used for testing deployments on Elastic Cloud.
+
 #### `ci:build-docker-fips`
 
-Build Docker UBI x64 image with FIPS enabled.
+Build Docker Wolfi image with FIPS enabled.
 
 #### `ci:build-os-packages`
 
@@ -87,6 +87,10 @@ Create a new deployment on Elastic Cloud.  Previous deployments linked to a pull
 
 Collect APM metrics, available for viewing on the Kibana CI APM cluster.
 
+#### `ci:entity-store-performance`
+
+Run entity store performance tests on Elastic Cloud. A fresh deployment is created for each test run (previous deployments are automatically cleaned up). Results are posted as PR comments.
+
 #### `ci:no-auto-commit`
 
 Skip auto-committing changed files.
@@ -99,10 +103,22 @@ Create or update a serverless Elasticsearch project on Elastic Cloud QA.
 
 Create or update a serverless Observability project on Elastic Cloud QA.
 
+#### `ci:project-deploy-log_essentials`
+
+Create or update a serverless Observability project (in the Log Essentials tier) on Elastic Cloud QA.
+
 #### `ci:project-deploy-security`
 
 Create or update a serverless Security project on Elastic Cloud QA.
 
+#### `ci:project-deploy-ai4soc`
+
+Create or update a serverless Security project of type AI for SOC on Elastic Cloud QA.
+
 #### `ci:project-persist-deployment`
 
 Prevents an existing deployment from being shutdown due to inactivity.
+
+#### `ci:security-genai-run-evals`
+
+Run evaluations for the GenAI security evaluation suite.

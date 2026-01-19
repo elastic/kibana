@@ -9,13 +9,8 @@
 
 import React from 'react';
 import { sortBy } from 'lodash';
-import {
-  EuiButton,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiIcon,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';

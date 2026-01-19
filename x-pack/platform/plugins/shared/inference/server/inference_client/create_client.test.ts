@@ -11,24 +11,31 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 jest.mock('./inference_client');
-jest.mock('./bind_client');
+jest.mock('../../common/inference_client/bind_client');
 import { createInferenceClient } from './inference_client';
-import { bindClient } from './bind_client';
+import { bindClient } from '../../common/inference_client/bind_client';
+import { createRegexWorkerServiceMock } from '../test_utils';
 
 const bindClientMock = bindClient as jest.MockedFn<typeof bindClient>;
 const createInferenceClientMock = createInferenceClient as jest.MockedFn<
   typeof createInferenceClient
 >;
-
+const mockEsClient = {
+  ml: {
+    inferTrainedModel: jest.fn(),
+  },
+} as any;
 describe('createClient', () => {
   let logger: MockedLogger;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+  let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
 
   beforeEach(() => {
     logger = loggerMock.create();
     actions = actionsMock.createStart();
     request = httpServerMock.createKibanaRequest();
+    regexWorker = createRegexWorkerServiceMock();
   });
 
   afterEach(() => {
@@ -45,10 +52,20 @@ describe('createClient', () => {
         request,
         actions,
         logger,
+        esClient: mockEsClient,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
-      expect(createInferenceClientMock).toHaveBeenCalledWith({ request, actions, logger });
+      expect(createInferenceClientMock).toHaveBeenCalledWith({
+        request,
+        actions,
+        logger: logger.get('client'),
+        esClient: mockEsClient,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+      });
 
       expect(bindClientMock).not.toHaveBeenCalled();
 
@@ -64,6 +81,9 @@ describe('createClient', () => {
         request,
         actions,
         logger,
+        esClient: mockEsClient,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
       });
 
       // type check on client.chatComplete
@@ -89,13 +109,19 @@ describe('createClient', () => {
         bindTo: {
           connectorId: '.my-connector',
         },
+        esClient: mockEsClient,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
       expect(createInferenceClientMock).toHaveBeenCalledWith({
         request,
         actions,
-        logger,
+        logger: logger.get('client'),
+        esClient: mockEsClient,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
       });
 
       expect(bindClientMock).toHaveBeenCalledTimes(1);
@@ -118,6 +144,9 @@ describe('createClient', () => {
         bindTo: {
           connectorId: '.foo',
         },
+        esClient: mockEsClient,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
       });
 
       // type check on client.chatComplete

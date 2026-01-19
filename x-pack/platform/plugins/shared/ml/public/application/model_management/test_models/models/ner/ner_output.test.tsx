@@ -22,11 +22,11 @@ describe('NER output', () => {
     });
 
     test('returns the correct icon for class MISC', () => {
-      expect(getClassIcon('MISC')).toBe('questionInCircle');
+      expect(getClassIcon('MISC')).toBe('question');
     });
 
     test('returns the default icon for an unknown class', () => {
-      expect(getClassIcon('UNKNOWN')).toBe('questionInCircle');
+      expect(getClassIcon('UNKNOWN')).toBe('question');
     });
   });
 
@@ -54,23 +54,23 @@ describe('NER output', () => {
 
   describe('getClassColor', () => {
     test('returns the correct color for class PER', () => {
-      expect(getClassColor('PER', true)).toBe('#f1d86f');
+      expect(getClassColor('PER')).toBe('#FCD883');
     });
 
     test('returns the correct color for class LOC', () => {
-      expect(getClassColor('LOC', true)).toBe('#79aad9');
+      expect(getClassColor('LOC')).toBe('#61A2FF');
     });
 
     test('returns the correct color for class ORG', () => {
-      expect(getClassColor('ORG', true)).toBe('#6dccb1');
+      expect(getClassColor('ORG')).toBe('#16C5C0');
     });
 
     test('returns the correct color for class MISC', () => {
-      expect(getClassColor('MISC', true)).toBe('#f5a35c');
+      expect(getClassColor('MISC')).toBe('#EAAE01');
     });
 
     test('returns the default color for an unknown class', () => {
-      expect(getClassColor('UNKNOWN', true)).toBe('#f1d86f');
+      expect(getClassColor('UNKNOWN')).toBe('#FCD883');
     });
   });
 });

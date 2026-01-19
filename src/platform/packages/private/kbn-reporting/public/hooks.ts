@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
-import { useRequest, UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
+import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+import { useRequest } from '@kbn/es-ui-shared-plugin/public';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { useKibana } from '.';
 

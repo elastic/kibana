@@ -6,7 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

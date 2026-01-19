@@ -6,15 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
-import { RawRule } from '../../../../types';
+import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import { updateMetaAttributes } from '../../../../rules_client/lib';
 import { clearUnscheduledSnoozeAttributes } from '../../../../rules_client/common';
-import { MuteAllRuleParams } from './types';
+import type { MuteAllRuleParams } from './types';
 import { muteAllRuleParamsSchema } from './schemas';
 
 export async function muteAll(
@@ -73,6 +73,8 @@ async function muteAllWithOCC(context: RulesClientContext, params: MuteAllRulePa
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
+  const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
   const updateAttributes = updateMetaAttributes(context, {
     muteAll: true,
     mutedInstanceIds: [],
@@ -88,4 +90,12 @@ async function muteAllWithOCC(context: RulesClientContext, params: MuteAllRulePa
     updateAttributes,
     updateOptions
   );
+
+  if (indices && indices.length > 0) {
+    await context.alertsService?.muteAllAlerts({
+      ruleId: id,
+      indices,
+      logger: context.logger,
+    });
+  }
 }

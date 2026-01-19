@@ -15,6 +15,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
 import {
   type KibanaEnvContext,
   useKibanaContextForPluginProvider,
@@ -23,7 +24,6 @@ import {
 import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../containers/header_action_menu_provider';
 import { TriggersActionsProvider } from '../containers/triggers_actions_context';
-import { useIsDarkMode } from '../hooks/use_is_dark_mode';
 
 export const CommonInfraProviders: FC<
   PropsWithChildren<{
@@ -34,7 +34,7 @@ export const CommonInfraProviders: FC<
     theme$: AppMountParameters['theme$'];
   }>
 > = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
-  const darkMode = useIsDarkMode();
+  const darkMode = useKibanaIsDarkMode();
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>

@@ -53,7 +53,7 @@ export const logLevelFromNumber = (num: number | null | undefined): LogLevel => 
   return LogLevelEnum.error;
 };
 
-export const logLevelFromExecutionStatus = (status: RuleExecutionStatus): LogLevel => {
+export const eventLogLevelFromExecutionStatus = (status: RuleExecutionStatus): LogLevel => {
   switch (status) {
     case RuleExecutionStatusEnum['going to run']:
     case RuleExecutionStatusEnum.running:
@@ -67,4 +67,14 @@ export const logLevelFromExecutionStatus = (status: RuleExecutionStatus): LogLev
       assertUnreachable(status);
       return LogLevelEnum.trace;
   }
+};
+
+export const consoleLogLevelFromExecutionStatus = (
+  status: RuleExecutionStatus,
+  userError?: boolean
+): LogLevel => {
+  if (!userError && status === RuleExecutionStatusEnum.failed) {
+    return LogLevelEnum.error;
+  }
+  return LogLevelEnum.debug;
 };

@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 export const fetchInferenceEndpoints = async (
   client: ElasticsearchClient
 ): Promise<{
   inferenceEndpoints: InferenceAPIConfigResponse[];
 }> => {
-  const { endpoints } = await client.transport.request<{
-    endpoints: any;
-  }>({
-    method: 'GET',
-    path: `/_inference/_all`,
+  const { endpoints } = await client.inference.get({
+    inference_id: '_all',
   });
 
   return {
-    inferenceEndpoints: endpoints,
+    inferenceEndpoints: endpoints as InferenceAPIConfigResponse[],
   };
 };

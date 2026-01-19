@@ -8,21 +8,29 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
+import useLatest from 'react-use/lib/useLatest';
 import { isValidRowHeight } from '../utils/validate_row_height';
-import {
-  DataGridOptionsRecord,
-  getStoredRowHeight,
-  updateStoredRowHeight,
-} from '../utils/row_heights';
+import type { DataGridOptionsRecord } from '../utils/row_heights';
+import { getStoredRowHeight, updateStoredRowHeight } from '../utils/row_heights';
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
-import { RowHeightMode, RowHeightSettingsProps } from '../components/row_height_settings';
+import type { RowHeightSettingsProps } from '../components/row_height_settings';
+import { RowHeightMode } from '../components/row_height_settings';
+import { useRestorableRef } from '../restorable_state';
 
-interface UseRowHeightProps {
+export enum RowHeightType {
+  header = 'header',
+  row = 'row',
+}
+
+export interface UseRowHeightProps {
+  type: RowHeightType;
   storage: Storage;
   consumer: string;
   key: string;
-  configRowHeight: number;
+  defaultRowHeight: number;
+  configRowHeight?: number;
   rowHeightState?: number;
   onUpdateRowHeight?: (rowHeight: number) => void;
 }
@@ -58,7 +66,7 @@ const resolveRowHeight = ({
     currentRowLines = configRowHeight;
   }
 
-  return currentRowLines;
+  return currentRowLines === 0 ? 1 : currentRowLines;
 };
 
 export const ROW_HEIGHT_STORAGE_KEY = 'dataGridRowHeight';
@@ -81,66 +89,111 @@ export const getRowHeight = ({
 };
 
 export const useRowHeight = ({
+  type,
   storage,
   consumer,
   key,
-  configRowHeight,
+  defaultRowHeight,
+  configRowHeight = defaultRowHeight,
   rowHeightState,
   onUpdateRowHeight,
 }: UseRowHeightProps) => {
+  const [initialValue] = useState(() =>
+    resolveRowHeight({
+      storage,
+      consumer,
+      key,
+      configRowHeight,
+      rowHeightState,
+    })
+  );
+
+  const restorableRowHeightRef = useRestorableRef(
+    type === RowHeightType.header ? 'headerRowHeight' : 'rowHeight',
+    initialValue
+  );
+
   const rowHeightLines = useMemo(() => {
     return resolveRowHeight({
       storage,
       consumer,
       key,
       configRowHeight,
-      rowHeightState,
+      rowHeightState: rowHeightState ?? restorableRowHeightRef.current,
     });
-  }, [configRowHeight, consumer, key, rowHeightState, storage]);
+  }, [configRowHeight, consumer, key, rowHeightState, storage, restorableRowHeightRef]);
 
-  const rowHeight = useMemo<RowHeightSettingsProps['rowHeight']>(() => {
-    switch (rowHeightLines) {
-      case ROWS_HEIGHT_OPTIONS.auto:
-        return RowHeightMode.auto;
-      case ROWS_HEIGHT_OPTIONS.single:
-        return RowHeightMode.single;
-      default:
-        return RowHeightMode.custom;
-    }
+  restorableRowHeightRef.current = rowHeightLines; // Update the ref with the latest row height lines
+
+  const getAdjustedLineCount = useCallback(
+    (lineCount: number | undefined) => {
+      return lineCount !== undefined && lineCount > 0
+        ? lineCount
+        : configRowHeight > 0
+        ? configRowHeight
+        : defaultRowHeight;
+    },
+    [configRowHeight, defaultRowHeight]
+  );
+
+  const [lineCountInput, setLineCountInput] = useState<number | undefined>(
+    getAdjustedLineCount(rowHeightLines)
+  );
+
+  const rowHeight = useMemo(() => {
+    return rowHeightLines === ROWS_HEIGHT_OPTIONS.auto ? RowHeightMode.auto : RowHeightMode.custom;
   }, [rowHeightLines]);
 
   const onChangeRowHeight = useCallback(
     (newRowHeight: RowHeightSettingsProps['rowHeight']) => {
-      let newRowHeightLines: number;
-
-      switch (newRowHeight) {
-        case RowHeightMode.auto:
-          newRowHeightLines = ROWS_HEIGHT_OPTIONS.auto;
-          break;
-        case RowHeightMode.single:
-          newRowHeightLines = ROWS_HEIGHT_OPTIONS.single;
-          break;
-        default:
-          newRowHeightLines = configRowHeight;
-      }
+      const newRowHeightLines =
+        newRowHeight === RowHeightMode.auto
+          ? ROWS_HEIGHT_OPTIONS.auto
+          : getAdjustedLineCount(lineCountInput);
 
       updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
       onUpdateRowHeight?.(newRowHeightLines);
     },
-    [configRowHeight, consumer, key, onUpdateRowHeight, storage]
+    [
+      configRowHeight,
+      consumer,
+      getAdjustedLineCount,
+      key,
+      lineCountInput,
+      onUpdateRowHeight,
+      storage,
+    ]
   );
 
   const onChangeRowHeightLines = useCallback(
-    (newRowHeightLines: number) => {
-      updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
-      onUpdateRowHeight?.(newRowHeightLines);
+    (newRowHeightLines: number, isValid: boolean) => {
+      if (isValid) {
+        updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
+        onUpdateRowHeight?.(newRowHeightLines);
+      }
+
+      setLineCountInput(newRowHeightLines === 0 ? undefined : newRowHeightLines);
     },
     [configRowHeight, consumer, key, onUpdateRowHeight, storage]
   );
+
+  const prevRowHeight = useLatest(usePrevious(rowHeight) ?? rowHeight);
+  const prevRowHeightLines = useLatest(usePrevious(rowHeightLines) ?? rowHeightLines);
+
+  useEffect(() => {
+    if (rowHeight === RowHeightMode.auto && prevRowHeight.current === RowHeightMode.custom) {
+      // If switching from custom to auto, reset the line count input to the last valid line count
+      setLineCountInput(getAdjustedLineCount(prevRowHeightLines.current));
+    } else if (rowHeight === RowHeightMode.custom) {
+      // If row height lines change while in custom mode (e.g. by consumer), sync the line count input
+      setLineCountInput(getAdjustedLineCount(rowHeightLines));
+    }
+  }, [getAdjustedLineCount, prevRowHeight, prevRowHeightLines, rowHeight, rowHeightLines]);
 
   return {
     rowHeight,
     rowHeightLines,
+    lineCountInput,
     onChangeRowHeight: onUpdateRowHeight ? onChangeRowHeight : undefined,
     onChangeRowHeightLines: onUpdateRowHeight ? onChangeRowHeightLines : undefined,
   };

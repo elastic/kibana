@@ -5,27 +5,13 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { chunk } from 'lodash';
 import type { EuiTableFieldDataColumnType, CriteriaWithPagination } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { HeaderSection } from '../../../common/components/header_section';
 import type { LinkPanelListItem } from './types';
-
-// @ts-expect-error TS2769
-const StyledTable = styled(EuiBasicTable)`
-  [data-test-subj='panel-link'],
-  [data-test-subj='panel-no-link'] {
-    opacity: 0;
-  }
-  tr:hover {
-    [data-test-subj='panel-link'],
-    [data-test-subj='panel-no-link'] {
-      opacity: 1;
-    }
-  }
-`;
 
 const PAGE_SIZE = 5;
 
@@ -128,7 +114,19 @@ const LinkPanelComponent = ({
               {splitPanel}
               {infoPanel}
               {chunkedItems.length > 0 && (
-                <StyledTable
+                <EuiBasicTable
+                  css={css`
+                    [data-test-subj='panel-link'],
+                    [data-test-subj='panel-no-link'] {
+                      opacity: 0;
+                    }
+                    tr:hover {
+                      [data-test-subj='panel-link'],
+                      [data-test-subj='panel-no-link'] {
+                        opacity: 1;
+                      }
+                    }
+                  `}
                   columns={columns}
                   itemId="id"
                   items={chunkedItems[pageIndex] || []}

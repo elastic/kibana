@@ -12,10 +12,13 @@ import {
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { Logger } from '@kbn/core/server';
-import { actionsClientMock, ActionsClientMock } from './actions_client/actions_client.mock';
-import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
-import { Services, UnsecuredServices } from './types';
+import type { Logger } from '@kbn/core/server';
+import { lazyObject } from '@kbn/lazy-object';
+import type { ActionsClientMock } from './actions_client/actions_client.mock';
+import { actionsClientMock } from './actions_client/actions_client.mock';
+import type { PluginSetupContract, PluginStartContract } from './plugin';
+import { renderActionParameterTemplates } from './plugin';
+import type { Services, UnsecuredServices } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
@@ -26,25 +29,30 @@ export type { ActionsClientMock };
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const createSetupMock = () => {
-  const mock: jest.Mocked<PluginSetupContract> = {
+  const mock: jest.Mocked<PluginSetupContract> = lazyObject({
     registerType: jest.fn(),
     registerSubActionConnectorType: jest.fn(),
+    getAxiosInstanceWithAuth: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),
     getActionsHealth: jest.fn(),
-    getActionsConfigurationUtilities: jest.fn(),
+    getActionsConfigurationUtilities: jest.fn().mockReturnValue({
+      getAwsSesConfig: jest.fn(),
+      getWebhookSettings: jest.fn(),
+    }),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
-  };
+  });
   return mock;
 };
 
 const createStartMock = () => {
-  const mock: jest.Mocked<PluginStartContract> = {
+  const mock: jest.Mocked<PluginStartContract> = lazyObject({
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
     getAllTypes: jest.fn(),
+    listTypes: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
     getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
     getActionsAuthorizationWithRequest: jest
@@ -53,7 +61,8 @@ const createStartMock = () => {
     inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
     isSystemActionConnector: jest.fn(),
-  };
+  });
+
   return mock;
 };
 
@@ -79,7 +88,7 @@ const createServicesMock = () => {
     Services & {
       savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
     }
-  > = {
+  > = lazyObject({
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
     connectorTokenClient: new ConnectorTokenClient({
@@ -87,7 +96,7 @@ const createServicesMock = () => {
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
     }),
-  };
+  });
   return mock;
 };
 
@@ -96,7 +105,7 @@ const createUnsecuredServicesMock = () => {
     UnsecuredServices & {
       savedObjectsClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
     }
-  > = {
+  > = lazyObject({
     savedObjectsClient: savedObjectsRepositoryMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
     connectorTokenClient: new ConnectorTokenClient({
@@ -104,7 +113,7 @@ const createUnsecuredServicesMock = () => {
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
     }),
-  };
+  });
   return mock;
 };
 

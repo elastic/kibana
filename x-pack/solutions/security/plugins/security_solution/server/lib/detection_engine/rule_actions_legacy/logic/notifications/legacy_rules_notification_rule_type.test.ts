@@ -42,7 +42,7 @@ const reported = {
       },
     ],
     results_link:
-      '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:1576255233400,kind:absolute,to:1576341633400)),timeline:(linkTo:!(global),timerange:(from:1576255233400,kind:absolute,to:1576341633400)))',
+      '/app/security/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:1576255233400,kind:absolute,to:1576341633400)),timeline:(linkTo:!(global),timerange:(from:1576255233400,kind:absolute,to:1576341633400)))',
     rule: {
       alert_suppression: undefined,
       author: ['Elastic'],
@@ -294,7 +294,7 @@ describe('legacyRules_notification_rule_type', () => {
         context: {
           ...reported.context,
           results_link:
-            'http://localhost/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:1576255233400,kind:absolute,to:1576341633400)),timeline:(linkTo:!(global),timerange:(from:1576255233400,kind:absolute,to:1576341633400)))',
+            'http://localhost/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:1576255233400,kind:absolute,to:1576341633400)),timeline:(linkTo:!(global),timerange:(from:1576255233400,kind:absolute,to:1576341633400)))',
           rule: {
             ...reported.context.rule,
             meta: {
@@ -347,7 +347,7 @@ describe('legacyRules_notification_rule_type', () => {
             },
           ],
           results_link:
-            '/app/security/detections/rules/id/id?timerange=(global:(linkTo:!(timeline),timerange:(from:1576255233400,kind:absolute,to:1576341633400)),timeline:(linkTo:!(global),timerange:(from:1576255233400,kind:absolute,to:1576341633400)))',
+            '/app/security/rules/id/id?timerange=(global:(linkTo:!(timeline),timerange:(from:1576255233400,kind:absolute,to:1576341633400)),timeline:(linkTo:!(global),timerange:(from:1576255233400,kind:absolute,to:1576341633400)))',
           rule: {
             ...reported.context.rule,
             id: 'id',

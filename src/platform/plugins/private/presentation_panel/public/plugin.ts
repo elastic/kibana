@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { setKibanaServices } from './kibana_services';
 import { registerActions } from './panel_actions/register_actions';
 

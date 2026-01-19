@@ -8,42 +8,40 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, merge } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
-import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import {
-  FetchContext,
-  getUnchangingComparator,
-  initializeTimeRange,
+  initializeTimeRangeManager,
   initializeTitleManager,
+  timeRangeComparators,
+  titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
+import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
-import { DiscoverServices } from '../build_services';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import {
-  NonPersistedDisplayOptions,
-  SearchEmbeddableApi,
-  SearchEmbeddableRuntimeState,
-  SearchEmbeddableSerializedState,
-} from './types';
+import type { SearchEmbeddableState } from '../../common/embeddable/types';
+import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
+import { ScopedServicesProvider } from '../components/scoped_services_provider';
+import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -57,36 +55,36 @@ export const getSearchEmbeddableFactory = ({
 }) => {
   const { save, checkForDuplicateTitle } = discoverServices.savedSearch;
 
-  const savedSearchEmbeddableFactory: ReactEmbeddableFactory<
-    SearchEmbeddableSerializedState,
-    SearchEmbeddableRuntimeState,
+  const savedSearchEmbeddableFactory: EmbeddableFactory<
+    SearchEmbeddableState,
     SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
-    deserializeState: async (serializedState) => {
-      return deserializeState({ serializedState, discoverServices });
-    },
-    buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+      const runtimeState = await deserializeState({
+        serializedState: initialState,
+        discoverServices,
+      });
+
       /** One Discover context awareness */
       const solutionNavId =
-        initialState.nonPersistedDisplayOptions?.solutionNavIdOverride ??
+        runtimeState.nonPersistedDisplayOptions?.solutionNavIdOverride ??
         (await firstValueFrom(discoverServices.core.chrome.getActiveSolutionNavId$()));
       const { getRenderAppWrapper } = await discoverServices.profilesManager.resolveRootProfile({
         solutionNavId,
       });
       const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
+      const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
+      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
+        scopedEbtManager,
+      });
 
       /** Specific by-reference state */
-      const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
-      const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectTitle);
+      const savedObjectId$ = new BehaviorSubject<string | undefined>(runtimeState?.savedObjectId);
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(runtimeState?.savedObjectTitle);
       const defaultDescription$ = new BehaviorSubject<string | undefined>(
-        initialState?.savedObjectDescription
+        runtimeState?.savedObjectDescription
       );
-
-      /** By-value SavedSearchComponent package (non-dashboard contexts) state, to adhere to the comparator contract of an embeddable. */
-      const nonPersistedDisplayOptions$ = new BehaviorSubject<
-        NonPersistedDisplayOptions | undefined
-      >(initialState?.nonPersistedDisplayOptions);
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -96,15 +94,139 @@ export const getSearchEmbeddableFactory = ({
 
       /** Build API */
       const titleManager = initializeTitleManager(initialState);
-      const timeRange = initializeTimeRange(initialState);
-      const searchEmbeddable = await initializeSearchEmbeddableApi(initialState, {
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const dynamicActionsManager =
+        discoverServices.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+          uuid,
+          () => titleManager.api.title$.getValue(),
+          initialState
+        );
+      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+      const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
         discoverServices,
       });
+
+      const serialize = (savedObjectId?: string) =>
+        serializeState({
+          uuid,
+          initialState: runtimeState,
+          savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
+          serializeTitles: titleManager.getLatestState,
+          serializeTimeRange: timeRangeManager.getLatestState,
+          serializeDynamicActions: dynamicActionsManager?.getLatestState,
+          savedObjectId,
+        });
+
+      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => serialize(savedObjectId$.getValue()),
+        anyStateChange$: merge(
+          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
+          searchEmbeddable.anyStateChange$,
+          titleManager.anyStateChange$,
+          timeRangeManager.anyStateChange$
+        ),
+        getComparators: () => {
+          return {
+            ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+            ...titleComparators,
+            ...timeRangeComparators,
+            ...searchEmbeddable.comparators,
+            attributes: 'skip',
+            breakdownField: 'skip',
+            hideAggregatedPreview: 'skip',
+            hideChart: 'skip',
+            isTextBasedQuery: 'skip',
+            kibanaSavedObjectMeta: 'skip',
+            nonPersistedDisplayOptions: 'skip',
+            refreshInterval: 'skip',
+            savedObjectId: 'skip',
+            timeRestore: 'skip',
+            usesAdHocDataView: 'skip',
+            controlGroupJson: 'skip',
+            visContext: 'skip',
+            tabs: 'skip',
+          };
+        },
+        onReset: async (lastSaved) => {
+          dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) {
+            const lastSavedRuntimeState = await deserializeState({
+              serializedState: lastSaved,
+              discoverServices,
+            });
+            searchEmbeddable.reinitializeState(lastSavedRuntimeState);
+          }
+        },
+      });
+
+      const api: SearchEmbeddableApi = finalizeApi({
+        ...unsavedChangesApi,
+        ...titleManager.api,
+        ...searchEmbeddable.api,
+        ...timeRangeManager.api,
+        ...dynamicActionsManager?.api,
+        ...initializeEditApi({
+          uuid,
+          parentApi,
+          partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
+          discoverServices,
+          isEditable: startServices.isEditable,
+        }),
+        dataLoading$,
+        blockingError$,
+        savedObjectId$,
+        defaultTitle$,
+        defaultDescription$,
+        hasTimeRange: () => {
+          const fetchContext = fetchContext$.getValue();
+          return fetchContext?.timeslice !== undefined || fetchContext?.timeRange !== undefined;
+        },
+        getTypeDisplayName: () =>
+          i18n.translate('discover.embeddable.search.displayName', {
+            defaultMessage: 'Discover session',
+          }),
+        canLinkToLibrary: async () => {
+          return (
+            discoverServices.capabilities.discover_v2.save && !Boolean(savedObjectId$.getValue())
+          );
+        },
+        canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
+        saveToLibrary: async (title: string) => {
+          const savedObjectId = await save({
+            ...api.savedSearch$.getValue(),
+            title,
+          });
+          defaultTitle$.next(title);
+          return savedObjectId!;
+        },
+        checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
+          checkForDuplicateTitle({
+            newTitle,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          }),
+        getSerializedStateByValue: () => serialize(undefined),
+        getSerializedStateByReference: (newId: string) => serialize(newId),
+        serializeState: () => serialize(savedObjectId$.getValue()),
+        getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
+        supportedTriggers: () => {
+          // No triggers are supported, but this is still required to pass the drilldown
+          // compatibilty check and ensure top-level drilldowns (e.g. URL) work as expected
+          return [];
+        },
+      });
+
       const unsubscribeFromFetch = initializeFetch({
         api: {
+          ...api,
           parentApi,
           ...titleManager.api,
-          ...timeRange.api,
+          ...timeRangeManager.api,
+          defaultTitle$,
           savedSearch$: searchEmbeddable.api.savedSearch$,
           dataViews$: searchEmbeddable.api.dataViews$,
           savedObjectId$,
@@ -115,84 +237,10 @@ export const getSearchEmbeddableFactory = ({
         },
         discoverServices,
         stateManager: searchEmbeddable.stateManager,
+        scopedProfilesManager,
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
-
-      const serialize = (savedObjectId?: string) =>
-        serializeState({
-          uuid,
-          initialState,
-          savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
-          serializeTitles: titleManager.serialize,
-          serializeTimeRange: timeRange.serialize,
-          savedObjectId,
-        });
-
-      const api: SearchEmbeddableApi = buildApi(
-        {
-          ...titleManager.api,
-          ...searchEmbeddable.api,
-          ...timeRange.api,
-          ...initializeEditApi({
-            uuid,
-            parentApi,
-            partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
-            discoverServices,
-            isEditable: startServices.isEditable,
-          }),
-          dataLoading$,
-          blockingError$,
-          savedObjectId$,
-          defaultTitle$,
-          defaultDescription$,
-          hasTimeRange: () => {
-            const fetchContext = fetchContext$.getValue();
-            return fetchContext?.timeslice !== undefined || fetchContext?.timeRange !== undefined;
-          },
-          getTypeDisplayName: () =>
-            i18n.translate('discover.embeddable.search.displayName', {
-              defaultMessage: 'Discover session',
-            }),
-          canLinkToLibrary: async () => {
-            return (
-              discoverServices.capabilities.discover_v2.save && !Boolean(savedObjectId$.getValue())
-            );
-          },
-          canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
-          saveToLibrary: async (title: string) => {
-            const savedObjectId = await save({
-              ...api.savedSearch$.getValue(),
-              title,
-            });
-            defaultTitle$.next(title);
-            return savedObjectId!;
-          },
-          checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
-            checkForDuplicateTitle({
-              newTitle,
-              isTitleDuplicateConfirmed,
-              onTitleDuplicate,
-            }),
-          getSerializedStateByValue: () => serialize(undefined),
-          getSerializedStateByReference: (newId: string) => serialize(newId),
-          serializeState: () => serialize(savedObjectId$.getValue()),
-          getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
-        },
-        {
-          ...titleManager.comparators,
-          ...timeRange.comparators,
-          ...searchEmbeddable.comparators,
-          rawSavedObjectAttributes: getUnchangingComparator(),
-          savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
-          savedObjectTitle: [defaultTitle$, (value) => defaultTitle$.next(value)],
-          savedObjectDescription: [defaultDescription$, (value) => defaultDescription$.next(value)],
-          nonPersistedDisplayOptions: [
-            nonPersistedDisplayOptions$,
-            (value) => nonPersistedDisplayOptions$.next(value),
-          ],
-        }
-      );
 
       return {
         api,
@@ -206,16 +254,9 @@ export const getSearchEmbeddableFactory = ({
             return () => {
               searchEmbeddable.cleanup();
               unsubscribeFromFetch();
+              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
-
-          const viewMode = useMemo(() => {
-            if (!savedSearch.searchSource) return;
-            return getValidViewMode({
-              viewMode: savedSearch.viewMode,
-              isEsqlMode: isEsqlMode(savedSearch),
-            });
-          }, [savedSearch]);
 
           const dataView = useMemo(() => {
             const hasDataView = (dataViews ?? []).length > 0;
@@ -226,9 +267,9 @@ export const getSearchEmbeddableFactory = ({
                     defaultMessage: 'Missing data view {indexPatternId}',
                     values: {
                       indexPatternId:
-                        typeof initialState.serializedSearchSource?.index === 'string'
-                          ? initialState.serializedSearchSource.index
-                          : initialState.serializedSearchSource?.index?.id ?? '',
+                        typeof runtimeState.serializedSearchSource?.index === 'string'
+                          ? runtimeState.serializedSearchSource.index
+                          : runtimeState.serializedSearchSource?.index?.id ?? '',
                     },
                   })
                 )
@@ -263,54 +304,55 @@ export const getSearchEmbeddableFactory = ({
           );
 
           const renderAsFieldStatsTable = useMemo(
-            () =>
-              Boolean(discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS)) &&
-              viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
-              Boolean(dataView) &&
-              Array.isArray(savedSearch.columns),
-            [savedSearch, dataView, viewMode]
+            () => isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings),
+            [savedSearch, dataView]
           );
 
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
               <KibanaContextProvider services={discoverServices}>
-                <AppWrapper>
-                  {renderAsFieldStatsTable ? (
-                    <SearchEmbeddablFieldStatsTableComponent
-                      api={{
-                        ...api,
-                        fetchContext$,
-                      }}
-                      dataView={dataView!}
-                      onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
-                      stateManager={searchEmbeddable.stateManager}
-                    />
-                  ) : (
-                    <CellActionsProvider
-                      getTriggerCompatibleActions={
-                        discoverServices.uiActions.getTriggerCompatibleActions
-                      }
-                    >
-                      <SearchEmbeddableGridComponent
-                        api={{ ...api, fetchWarnings$, fetchContext$ }}
+                <ScopedServicesProvider
+                  scopedProfilesManager={scopedProfilesManager}
+                  scopedEBTManager={scopedEbtManager}
+                >
+                  <AppWrapper>
+                    {renderAsFieldStatsTable ? (
+                      <SearchEmbeddablFieldStatsTableComponent
+                        api={{
+                          ...api,
+                          fetchContext$,
+                        }}
                         dataView={dataView!}
-                        onAddFilter={
-                          isEsqlMode(savedSearch) ||
-                          initialState.nonPersistedDisplayOptions?.enableFilters === false
-                            ? undefined
-                            : onAddFilter
-                        }
-                        enableDocumentViewer={
-                          initialState.nonPersistedDisplayOptions?.enableDocumentViewer !==
-                          undefined
-                            ? initialState.nonPersistedDisplayOptions?.enableDocumentViewer
-                            : true
-                        }
+                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
                         stateManager={searchEmbeddable.stateManager}
                       />
-                    </CellActionsProvider>
-                  )}
-                </AppWrapper>
+                    ) : (
+                      <CellActionsProvider
+                        getTriggerCompatibleActions={
+                          discoverServices.uiActions.getTriggerCompatibleActions
+                        }
+                      >
+                        <SearchEmbeddableGridComponent
+                          api={{ ...api, fetchWarnings$, fetchContext$ }}
+                          dataView={dataView!}
+                          onAddFilter={
+                            isEsqlMode(savedSearch) ||
+                            runtimeState.nonPersistedDisplayOptions?.enableFilters === false
+                              ? undefined
+                              : onAddFilter
+                          }
+                          enableDocumentViewer={
+                            runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                            undefined
+                              ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
+                              : true
+                          }
+                          stateManager={searchEmbeddable.stateManager}
+                        />
+                      </CellActionsProvider>
+                    )}
+                  </AppWrapper>
+                </ScopedServicesProvider>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>
           );

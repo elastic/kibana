@@ -12,23 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  /*
-   * Enables experimental feature flag for eql sequence alert suppression.
-   *
-   * Ticket: https://github.com/elastic/security-team/issues/9608
-   * Owners: https://github.com/orgs/elastic/teams/security-detection-engine
-   * Added: on October 1st, 2024 in https://github.com/elastic/kibana/pull/189725
-   * Turned: on (TBD)
-   * Expires: on (TBD)
-   */
-  alertSuppressionForSequenceEqlRuleEnabled: true,
-
-  // FIXME:PT delete?
-  excludePoliciesInFilterEnabled: false,
-
-  kubernetesEnabled: false,
-  donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
-
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -54,60 +37,29 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the `upload` endpoint response action (v8.9)
-   */
-  responseActionUploadEnabled: true,
-
-  /**
-   * Enables Automated Endpoint Process actions
-   */
-  automatedProcessActionsEnabled: true,
-
-  /**
-   * Enables the ability to send Response actions to SentinelOne and persist the results
-   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
-   * response actions in Response Console.
+   * `runscript` response actions for SentinelOne hosts.
    *
-   * Release: v8.13.0
+   * Release: 9.2.0 (earlier for serverless)
    */
-  responseActionsSentinelOneV1Enabled: true,
+  responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
-   * Enables use of SentinelOne response actions that complete asynchronously
-   *
-   * Release: v8.14.0
+   * Memory Dump response actions support for Elastic Defend.
+   * Release: v9.3
    */
-  responseActionsSentinelOneV2Enabled: true,
-
-  /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: true,
-
-  /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: true,
-
-  /** Enable the `processes` response actions for SentinelOne */
-  responseActionsSentinelOneProcessesEnabled: true,
+  responseActionsEndpointMemoryDump: false,
 
   /**
-   * Enables the ability to send Response actions to Crowdstrike and persist the results
-   * in ES.
+   * `runscript` response action for Elastic Defend Endpoint
+   * Release: 9.4
    */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+  responseActionsEndpointRunScript: false,
 
   /**
-   * Space awareness for Elastic Defend management.
-   * Feature depends on Fleet's corresponding features also being enabled:
-   * - `subfeaturePrivileges`
-   * - `useSpaceAwareness`
-   * and Fleet must set it runtime mode to spaces by calling the following API:
-   * - `POST /internal/fleet/enable_space_awareness`
+   * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
+   * Release: 9.4
    */
-  endpointManagementSpaceAwarenessEnabled: false,
-
-  /**
-   * Disables new notes
-   */
-  securitySolutionNotesDisabled: false,
+  responseActionsScriptLibraryManagement: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -115,29 +67,29 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables filtering of Attack Discovery alerts in a flyout
+   * Enable resetting risk scores to zero for outdated entities
    */
-  attackDiscoveryAlertFiltering: false,
+  enableRiskScoreResetToZero: true,
 
   /**
-   * Enables content references (citations) in the AI Assistant
+   * Enable privmon modifier in risk scoring calculation
    */
-  contentReferencesEnabled: false,
+  enableRiskScorePrivmonModifier: true,
 
   /**
-   * Enables the Managed User section inside the new user details flyout.
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
-  newUserDetailsFlyoutManagedUser: false,
+  riskScoreAssistantToolDisabled: false,
 
   /**
-   * Enable risk engine client and initialisation of datastream, component templates and mappings
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
-  riskScoringPersistence: true,
+  entityDetailsHighlightsEnabled: true,
 
   /**
-   * Enables experimental Entity Analytics HTTP endpoints
+   * Enables the experimental Threat Hunting home experience.
    */
-  riskScoringRoutesEnabled: true,
+  entityThreatHuntingEnabled: false,
 
   /**
    * disables ES|QL rules
@@ -145,90 +97,34 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables Protection Updates tab in the Endpoint Policy Details page
+   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
    */
-  protectionUpdatesEnabled: true,
-
-  /**
-   * Disables the timeline save tour.
-   * This flag is used to disable the tour in cypress tests.
-   */
-  disableTimelineSaveTour: false,
-
-  /**
-   * Enables the risk engine privileges route
-   * and associated callout in the UI
-   */
-  riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables experimental Experimental S1 integration data to be available in Analyzer
-   */
-  sentinelOneDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables SentinelOne manual host isolation response actions directly through the connector
-   * sub-actions framework.
-   * v8.12.0
-   */
-  sentinelOneManualHostActionsEnabled: true,
-
-  /**
-   * Enables experimental Crowdstrike integration data to be available in Analyzer
-   */
-  crowdstrikeDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables Response actions telemetry collection
-   * Should be enabled in 8.17.0
-   */
-  responseActionsTelemetryEnabled: false,
-
-  /**
-   * Enables experimental JAMF integration data to be available in Analyzer
-   */
-  jamfDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables an ability to customize Elastic prebuilt rules.
-   *
-   * Ticket: https://github.com/elastic/kibana/issues/174168
-   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
-   * Added: on Jun 24, 2024 in https://github.com/elastic/kibana/pull/186823
-   * Turned: TBD
-   * Expires: TBD
-   */
-  prebuiltRulesCustomizationEnabled: false,
-
-  /**
-   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
-   */
-  malwareOnWriteScanOptionAvailable: true,
-
-  /**
-   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
-   */
-  unifiedManifestEnabled: true,
-
-  /**
-   * Enables the new modal for the value list items
-   */
-  valueListItemsModalEnabled: true,
+  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
    * Enables the storing of gaps in the event log
    */
-  storeGapsInEventLogEnabled: false,
+  storeGapsInEventLogEnabled: true,
 
   /**
-   * Adds a new option to filter descendants of a process for Management / Event Filters
+   * Enables scheduling gap fills for rules
    */
-  filterProcessDescendantsForEventFiltersEnabled: true,
+  bulkFillRuleGapsEnabled: true,
 
   /**
-   * Enables the new data ingestion hub
+   * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  dataIngestionHubEnabled: false,
+  filterProcessDescendantsForTrustedAppsEnabled: false,
+
+  /**
+   * Enables the rule's bulk action to manage alert suppression
+   */
+  bulkEditAlertSuppressionEnabled: true,
+
+  /**
+   * Enables the ability to use does not match condition for indicator match rules
+   */
+  doesNotMatchForIndicatorMatchRuleEnabled: true,
 
   /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
@@ -237,24 +133,19 @@ export const allowedExperimentalValues = Object.freeze({
   entityStoreDisabled: false,
 
   /**
-   * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
-   */
-  serviceEntityStoreEnabled: true,
-
-  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
 
   /**
-   * Enables the Defend Insights feature
+   * Enables the Defend Insights Policy Response Failure feature
    */
-  defendInsights: true,
+  defendInsightsPolicyResponseFailure: true,
 
   /**
-   * Enables flyout history and new preview navigation
+   * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
    */
-  newExpandableFlyoutNavigationEnabled: false,
+  endpointExceptionsMovedUnderManagement: false,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
@@ -262,27 +153,67 @@ export const allowedExperimentalValues = Object.freeze({
    */
   crowdstrikeRunScriptEnabled: true,
 
-  /**
-   * Enables the Asset Inventory Entity Store feature.
-   * Allows initializing the Universal Entity Store via the API.
-   */
-  assetInventoryStoreEnabled: false,
+  /** Enables new Data View Picker */
+  newDataViewPickerEnabled: true,
 
   /**
-   * Enables the Asset Inventory feature
+   * Enables Microsoft Defender for Endpoint's RunScript command
+   * Release: 8.19/9.1
    */
-  assetInventoryUXEnabled: false,
+  microsoftDefenderEndpointRunScriptEnabled: true,
 
   /**
-   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
-   * Release: 8.18/9.0
+   * Enables advanced mode for Trusted Apps creation and update
    */
-  responseActionsMSDefenderEndpointEnabled: true,
+  trustedAppsAdvancedMode: true,
 
   /**
-   * Enables banner for informing users about changes in data collection.
+   * Enables Trusted Devices artifact management for device control protections.
+   * Allows users to manage trusted USB and external devices
    */
-  eventCollectionDataReductionBannerEnabled: false,
+  trustedDevices: true,
+
+  /**
+   * Enables the ability to import and migration dashboards through automatic migration service
+   */
+  automaticDashboardsMigration: true,
+
+  /**
+   * Enables the SIEM Readiness Dashboard feature
+   */
+  siemReadinessDashboard: false,
+  /**
+   * Enables Microsoft Defender for Endpoint's Cancel command
+   * Release: 9.2.0
+   */
+  microsoftDefenderEndpointCancelEnabled: true,
+  /**
+   * Protects all the work related to the attacks and alerts alignment effort
+   */
+  attacksAlertsAlignment: false,
+  /**
+   *  Enables the QRadar rules import feature
+   */
+  qradarRulesMigration: false,
+  /**
+   * Enables the Kubernetes Dashboard in Security Solution
+   */
+  kubernetesEnabled: true,
+
+  /**
+   * Enables the Entity Analytics Watchlist feature.
+   */
+  entityAnalyticsWatchlistEnabled: false,
+
+  /**
+   * Enables the Gap Auto Fill Scheduler feature.
+   */
+  gapAutoFillSchedulerEnabled: false,
+  /**
+   * Enables DNS events toggle for Linux in Endpoint policy configuration.
+   * When disabled, DNS field is not added to Linux policies and not shown in UI.
+   */
+  linuxDnsEvents: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -290,12 +221,14 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
+const disableExperimentalPrefix = 'disable:' as const;
+
 /**
  * Parses the string value used in `xpack.securitySolution.enableExperimental` kibana configuration,
- * which should be a string of values delimited by a comma (`,`)
+ * which should be an array of strings corresponding to allowedExperimentalValues keys.
+ * Use the `disable:` prefix to disable a feature.
  *
  * @param configValue
- * @throws SecuritySolutionInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (
   configValue: string[]
@@ -303,11 +236,15 @@ export const parseExperimentalConfigValue = (
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
   const invalidKeys: string[] = [];
 
-  for (const value of configValue) {
+  for (let value of configValue) {
+    const isDisabled = value.startsWith(disableExperimentalPrefix);
+    if (isDisabled) {
+      value = value.replace(disableExperimentalPrefix, '');
+    }
     if (!allowedKeys.includes(value as keyof ExperimentalFeatures)) {
       invalidKeys.push(value);
     } else {
-      enabledFeatures[value as keyof ExperimentalFeatures] = true;
+      enabledFeatures[value as keyof ExperimentalFeatures] = !isDisabled;
     }
   }
 

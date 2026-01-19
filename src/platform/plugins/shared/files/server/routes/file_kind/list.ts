@@ -11,7 +11,8 @@ import { schema } from '@kbn/config-schema';
 import type { FileJSON, FileKind } from '../../../common/types';
 import type { FilesClient } from '../../../common/files_client';
 import * as commonSchemas from '../common_schemas';
-import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import type { CreateRouteDefinition } from '../api_routes';
+import { FILES_API_ROUTES } from '../api_routes';
 import * as cs from '../common_schemas';
 import type { CreateHandler, FileKindRouter } from './types';
 import {

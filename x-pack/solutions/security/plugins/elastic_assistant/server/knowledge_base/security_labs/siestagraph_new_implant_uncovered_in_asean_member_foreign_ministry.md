@@ -214,7 +214,7 @@ Elastic Security utilizes the [Diamond Model](https://www.activeresponse.org/wp-
 
 The victim is the foreign ministry of a nation in Southeast Asia. The threat actor appeared to focus priority intelligence collection efforts on personnel and positions of authority related to the victim's relationship with [ASEAN](https://asean.org/what-we-do) (Association of Southeast Asian Nations).
 
-ASEAN is a regional partnership union founded in 1967 to promote intergovernmental cooperation among member states. This has been expressed through economic, security, trade, and educational cooperation with expanding international and domestic significance for partner nations. The union itself has expanded to 10 member countries with 2 more currently seeking accession. It is exerting this international influence over the development of a [Regional Comprehensive Economic Partnership](https://rcepsec.org/about/) trade agreement with a broader periphery of member nations (16 members and 2 applicants).
+ASEAN is a regional partnership union founded in 1967 to promote intergovernmental cooperation among member states. This has been expressed through economic, security, trade, and educational cooperation with expanding international and domestic significance for partner nations. The union itself has expanded to 10 member countries with 2 more currently seeking accession. It is exerting this international influence over the development of a Regional Comprehensive Economic Partnership trade agreement with a broader periphery of member nations (16 members and 2 applicants).
 
 ![ASEAN and RCEP member countries](/assets/images/siestagraph-new-implant-uncovered-in-asean-member-foreign-ministry/image12.jpg)
 

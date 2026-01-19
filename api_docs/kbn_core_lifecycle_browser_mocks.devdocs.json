@@ -14,7 +14,9 @@
         "tags": [],
         "label": "coreLifecycleMock",
         "description": [],
-        "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/index.ts",
+        "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +32,9 @@
               "AnalyticsServiceSetup",
               ">; application: jest.Mocked<",
               "ApplicationSetup",
-              ">; customBranding: { customBranding$: ",
+              ">; chrome: ",
+              "InternalChromeSetup",
+              "; customBranding: { customBranding$: ",
               "Observable",
               "<",
               "CustomBranding",
@@ -69,15 +73,11 @@
               ">; featureFlags: jest.Mocked<",
               "FeatureFlagsStart",
               ">; http: ",
-              {
-                "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-public.HttpSetupMock",
-                "text": "HttpSetupMock"
-              },
+              "HttpSetupMock",
               "; i18n: jest.Mocked<",
               "I18nStart",
+              ">; injection: jest.MockedObjectDeep<",
+              "CoreDiServiceStart",
               ">; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
@@ -104,9 +104,7 @@
               "IUiSettingsClient",
               ">; globalClient: jest.Mocked<",
               "IUiSettingsClient",
-              ">; }; savedObjects: jest.Mocked<",
-              "SavedObjectsStart",
-              ">; deprecations: jest.Mocked<",
+              ">; }; deprecations: jest.Mocked<",
               "DeprecationsServiceStart",
               ">; theme: jest.Mocked<",
               "ThemeServiceSetup",
@@ -116,21 +114,21 @@
               "SecurityServiceStart",
               ">; userProfile: jest.Mocked<",
               "UserProfileService",
+              ">; rendering: jest.Mocked<",
+              "RenderingService",
+              ">; pricing: jest.Mocked<",
+              "PricingServiceStart",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }, any, any]>, [], any>; http: ",
-              {
-                "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-public.HttpSetupMock",
-                "text": "HttpSetupMock"
-              },
-              "; notifications: ",
+              "HttpSetupMock",
+              "; injection: jest.MockedObjectDeep<",
+              "CoreDiServiceSetup",
+              ">; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
                 "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-common.MockedKeys",
-                "text": "MockedKeys"
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
               },
               "<",
               "NotificationsSetup",
@@ -148,7 +146,9 @@
               "UserProfileServiceSetup",
               ">; plugins: { onSetup: jest.Mock<any, any, any>; onStart: jest.Mock<any, any, any>; }; }"
             ],
-            "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/index.ts",
+            "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -163,7 +163,9 @@
                 "signature": [
                   "{ basePath?: string | undefined; pluginStartDeps?: object | undefined; pluginStartContract?: any; }"
                 ],
-                "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/core_setup.mock.ts",
+                "path": "src/core/packages/lifecycle/browser-mocks/src/core_setup.mock.ts",
+                "lineNumber": 29,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -204,15 +206,11 @@
               ">; featureFlags: jest.Mocked<",
               "FeatureFlagsStart",
               ">; http: ",
-              {
-                "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-public.HttpSetupMock",
-                "text": "HttpSetupMock"
-              },
+              "HttpSetupMock",
               "; i18n: jest.Mocked<",
               "I18nStart",
+              ">; injection: jest.MockedObjectDeep<",
+              "CoreDiServiceStart",
               ">; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
@@ -239,9 +237,7 @@
               "IUiSettingsClient",
               ">; globalClient: jest.Mocked<",
               "IUiSettingsClient",
-              ">; }; savedObjects: jest.Mocked<",
-              "SavedObjectsStart",
-              ">; deprecations: jest.Mocked<",
+              ">; }; deprecations: jest.Mocked<",
               "DeprecationsServiceStart",
               ">; theme: jest.Mocked<",
               "ThemeServiceSetup",
@@ -251,9 +247,15 @@
               "SecurityServiceStart",
               ">; userProfile: jest.Mocked<",
               "UserProfileService",
+              ">; rendering: jest.Mocked<",
+              "RenderingService",
+              ">; pricing: jest.Mocked<",
+              "PricingServiceStart",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }"
             ],
-            "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/index.ts",
+            "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -268,7 +270,9 @@
                 "signature": [
                   "{ basePath?: string | undefined; }"
                 ],
-                "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/core_start.mock.ts",
+                "path": "src/core/packages/lifecycle/browser-mocks/src/core_start.mock.ts",
+                "lineNumber": 32,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }

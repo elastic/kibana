@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -24,7 +24,6 @@
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/kibana-utils-plugin",
-    "@kbn/unified-search-plugin",
     "@kbn/content-management-table-list-view-table",
     "@kbn/content-management-tabbed-table-list-view",
     "@kbn/content-management-plugin",
@@ -33,15 +32,14 @@
     "@kbn/event-annotation-common",
     "@kbn/lens-plugin",
     "@kbn/ui-theme",
-    "@kbn/test-jest-helpers",
     "@kbn/expressions-plugin",
     "@kbn/es-query",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-notifications-browser",
-    "@kbn/core-saved-objects-api-browser",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/test-eui-helpers"
+    "@kbn/test-eui-helpers",
+    "@kbn/kql"
   ],
   "exclude": [
     "target/**/*",

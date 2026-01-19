@@ -6,7 +6,7 @@
  */
 
 import { INITIAL_LOCATION, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
-import { MapSettings } from '../../../common/descriptor_types';
+import type { MapSettings } from '../../../common/descriptor_types';
 
 export function getDefaultMapSettings(): MapSettings {
   return {
@@ -24,6 +24,7 @@ export function getDefaultMapSettings(): MapSettings {
     keydownScrollZoom: false,
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
+    projection: 'globeInterpolate',
     showScaleControl: false,
     showSpatialFilters: true,
     showTimesliderToggleButton: true,

@@ -31,6 +31,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'dependencies'
     | 'errors-and-crashes'
     | 'service-map'
+    | 'logs'
     | 'alerts'
     | 'dashboards';
   hidden?: boolean;
@@ -73,7 +74,7 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
     () => [
       {
         title: i18n.translate('xpack.apm.mobileServices.breadcrumb.title', {
-          defaultMessage: 'Services',
+          defaultMessage: 'Service inventory',
         }),
         href: servicesLink,
       },
@@ -198,8 +199,19 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         query,
       }),
       label: i18n.translate('xpack.apm.mobileServiceDetails.serviceMapTabLabel', {
-        defaultMessage: 'Service Map',
+        defaultMessage: 'Service map',
       }),
+    },
+    {
+      key: 'logs',
+      href: router.link('/mobile-services/{serviceName}/logs', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
+        defaultMessage: 'Logs',
+      }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
     },
     {
       key: 'alerts',

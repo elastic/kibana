@@ -6,13 +6,12 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { useContext, useEffect, useMemo, useState, type FC } from 'react';
+import React, { useContext, useEffect, useState, type FC } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { useGlobalUrlState } from '@kbn/ml-url-state/src/url_state';
 import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import { useMlKibana } from '../contexts/kibana';
-import { mlResultsServiceProvider } from '../services/results_service';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useExplorerUrlState } from './hooks/use_explorer_url_state';
 import { AnomalyChartsStateService } from './anomaly_charts_state_service';
@@ -20,6 +19,10 @@ import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_chart
 import { useTableSeverity } from '../components/controls/select_severity';
 import { AnomalyDetectionAlertsStateService } from './alerts';
 import { useMlJobService } from '../services/job_service';
+import { useTableInterval } from '../components/controls/select_interval';
+import { AnomalyTableStateService } from './anomaly_table_state_service';
+import { AnnotationsStateService } from './annotations_state_service';
+import { InfluencersStateService } from './influencers_state_service';
 
 export interface AnomalyExplorerContextValue {
   anomalyExplorerChartsService: AnomalyExplorerChartsService;
@@ -28,6 +31,9 @@ export interface AnomalyExplorerContextValue {
   anomalyTimelineStateService: AnomalyTimelineStateService;
   chartsStateService: AnomalyChartsStateService;
   anomalyDetectionAlertsStateService: AnomalyDetectionAlertsStateService;
+  anomalyTableService: AnomalyTableStateService;
+  annotationsStateService: AnnotationsStateService;
+  influencersStateService: InfluencersStateService;
 }
 
 /**
@@ -68,10 +74,8 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
   } = useMlKibana();
   const mlJobService = useMlJobService();
 
-  const [, , tableSeverityState] = useTableSeverity();
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApi), []);
+  const [, , tableSeverityUrlStateService] = useTableSeverity();
+  const [, , tableIntervalUrlStateService] = useTableInterval();
 
   const [anomalyExplorerContextValue, setAnomalyExplorerContextValue] = useState<
     AnomalyExplorerContextValue | undefined
@@ -82,11 +86,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
   // updates so using `useEffect` is the right thing to do here to not get errors
   // related to React lifecycle methods.
   useEffect(() => {
-    const anomalyTimelineService = new AnomalyTimelineService(
-      timefilter,
-      uiSettings,
-      mlResultsService
-    );
+    const anomalyTimelineService = new AnomalyTimelineService(timefilter, uiSettings, mlApi);
 
     const anomalyExplorerCommonStateService = new AnomalyExplorerCommonStateService(
       anomalyExplorerUrlStateService,
@@ -102,24 +102,45 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       timefilter
     );
 
-    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
-      timefilter,
-      mlApi,
-      mlResultsService
-    );
+    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(timefilter, mlApi);
 
     const chartsStateService = new AnomalyChartsStateService(
       anomalyExplorerCommonStateService,
       anomalyTimelineStateService,
       anomalyExplorerChartsService,
       anomalyExplorerUrlStateService,
-      tableSeverityState
+      tableSeverityUrlStateService
     );
 
     const anomalyDetectionAlertsStateService = new AnomalyDetectionAlertsStateService(
       anomalyTimelineStateService,
       data,
       timefilter
+    );
+
+    const anomalyTableService = new AnomalyTableStateService(
+      mlApi,
+      mlJobService,
+      uiSettings,
+      timefilter,
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService,
+      tableSeverityUrlStateService,
+      tableIntervalUrlStateService
+    );
+
+    const annotationsStateService = new AnnotationsStateService(
+      mlApi,
+      timefilter,
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService
+    );
+
+    const influencersStateService = new InfluencersStateService(
+      mlApi,
+      timefilter,
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService
     );
 
     setAnomalyExplorerContextValue({
@@ -129,6 +150,9 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       anomalyTimelineStateService,
       chartsStateService,
       anomalyDetectionAlertsStateService,
+      anomalyTableService,
+      annotationsStateService,
+      influencersStateService,
     });
 
     return () => {
@@ -138,6 +162,9 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       anomalyTimelineStateService.destroy();
       chartsStateService.destroy();
       anomalyDetectionAlertsStateService.destroy();
+      anomalyTableService.destroy();
+      annotationsStateService.destroy();
+      influencersStateService.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

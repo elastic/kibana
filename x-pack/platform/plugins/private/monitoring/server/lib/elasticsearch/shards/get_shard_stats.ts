@@ -6,9 +6,12 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchModifiedSource, ElasticsearchResponse } from '../../../../common/types/es';
+import type {
+  ElasticsearchModifiedSource,
+  ElasticsearchResponse,
+} from '../../../../common/types/es';
 import { Globals } from '../../../static_globals';
-import { LegacyRequest } from '../../../types';
+import type { LegacyRequest } from '../../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
@@ -110,19 +113,17 @@ export function getShardStats(
     index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        type,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
-        metric,
-        filters,
-      }),
-      aggs: {
-        ...getShardAggs(config, includeNodes, includeIndices),
-      },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
+      metric,
+      filters,
+    }),
+    aggs: {
+      ...getShardAggs(config, includeNodes, includeIndices),
     },
   };
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

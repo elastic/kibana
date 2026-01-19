@@ -7,7 +7,7 @@
 
 import type cytoscape from 'cytoscape';
 import type { CSSProperties } from 'react';
-import type { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
@@ -99,9 +99,10 @@ function isService(el: cytoscape.NodeSingular) {
 
 const getStyle = (
   euiTheme: EuiThemeComputed,
-  isTraceExplorerEnabled: boolean
+  colorMode: EuiThemeColorModeStandard
 ): cytoscape.StylesheetJson => {
   const lineColor = euiTheme.colors.mediumShade;
+  const isDarkMode = colorMode === 'DARK';
   return [
     {
       selector: 'core',
@@ -114,7 +115,7 @@ const getStyle = (
         'background-color': euiTheme.colors.backgroundBasePlain,
         // The DefinitelyTyped definitions don't specify that a function can be
         // used here.
-        'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
+        'background-image': (el: cytoscape.NodeSingular) => iconForNode(el, isDarkMode),
         'background-height': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
         'background-width': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
         'border-color': getBorderColorFn(euiTheme),
@@ -196,20 +197,6 @@ const getStyle = (
         'target-arrow-color': euiTheme.colors.darkShade,
       },
     },
-    ...(isTraceExplorerEnabled
-      ? [
-          {
-            selector: 'edge.hover',
-            style: {
-              width: 4,
-              'z-index': zIndexEdgeHover,
-              'line-color': euiTheme.colors.darkShade,
-              'source-arrow-color': euiTheme.colors.darkShade,
-              'target-arrow-color': euiTheme.colors.darkShade,
-            },
-          },
-        ]
-      : []),
     {
       selector: 'node.hover',
       style: {
@@ -256,10 +243,10 @@ ${euiTheme.colors.lightShade}`,
 
 export const getCytoscapeOptions = (
   euiTheme: EuiThemeComputed,
-  isTraceExplorerEnabled: boolean
+  colorMode: EuiThemeColorModeStandard
 ): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
-  style: getStyle(euiTheme, isTraceExplorerEnabled),
+  style: getStyle(euiTheme, colorMode),
 });

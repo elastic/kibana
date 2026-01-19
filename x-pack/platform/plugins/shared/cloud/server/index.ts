@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export type { CloudSetup, CloudStart } from './plugin';
 export { config } from './config';
@@ -13,3 +13,5 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { CloudPlugin } = await import('./plugin');
   return new CloudPlugin(initializerContext);
 };
+
+export { getOnboardingToken } from './saved_objects';

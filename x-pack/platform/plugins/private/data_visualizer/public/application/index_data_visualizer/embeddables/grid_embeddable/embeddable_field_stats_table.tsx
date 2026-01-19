@@ -44,9 +44,12 @@ const EmbeddableFieldStatsTableWrapper = (
     searchString,
     extendedColumns,
     progress,
+    overallStats,
     overallStatsProgress,
     setLastRefresh,
   } = useDataVisualizerGridData(props, dataVisualizerListState);
+
+  const totalCount = overallStats?.totalCount;
 
   useEffect(() => {
     setLastRefresh(Date.now());
@@ -93,6 +96,7 @@ const EmbeddableFieldStatsTableWrapper = (
       onChange={onTableUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
+      totalCount={totalCount}
       renderFieldName={props.renderFieldName}
     />
   );

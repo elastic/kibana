@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { omit } from 'lodash/fp';
-import { waitFor, screen, fireEvent, within } from '@testing-library/react';
+import { screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { connector, issues } from '../mock';
@@ -16,8 +16,8 @@ import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { useGetIssue } from './use_get_issue';
 import Fields from './case_fields';
 import { useGetIssues } from './use_get_issues';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 import { MockFormWrapperComponent } from '../test_utils';
 
 jest.mock('./use_get_issue_types');
@@ -93,10 +93,7 @@ describe('Jira Fields', () => {
     data: { data: issues[0] },
   };
 
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
@@ -105,7 +102,7 @@ describe('Jira Fields', () => {
   });
 
   it('all params fields are rendered', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -113,14 +110,13 @@ describe('Jira Fields', () => {
 
     expect(await screen.findByTestId('prioritySelect')).toBeInTheDocument();
     expect(await screen.findByTestId('issueTypeSelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('otherFieldsEditor')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('search-parent-issues')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('search-parent-issues')).toBeInTheDocument();
   });
 
   it('renders the fields correctly when selecting an issue type', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -138,7 +134,7 @@ describe('Jira Fields', () => {
   });
 
   it('sets parent correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -151,7 +147,7 @@ describe('Jira Fields', () => {
   });
 
   it('searches parent correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -171,7 +167,7 @@ describe('Jira Fields', () => {
   it('disabled the fields when loading issue types', async () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -187,7 +183,7 @@ describe('Jira Fields', () => {
       isLoading: true,
     });
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -201,7 +197,7 @@ describe('Jira Fields', () => {
 
     useGetFieldsByIssueTypeMock.mockReturnValue(response);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -215,7 +211,7 @@ describe('Jira Fields', () => {
 
     useGetFieldsByIssueTypeMock.mockReturnValue(response);
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -225,7 +221,7 @@ describe('Jira Fields', () => {
   });
 
   it('sets issue type correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -236,7 +232,7 @@ describe('Jira Fields', () => {
   });
 
   it('sets priority correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -250,7 +246,7 @@ describe('Jira Fields', () => {
   it('sets existing parent correctly', async () => {
     const newFields = { ...fields, parent: 'personKey' };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={newFields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -262,7 +258,7 @@ describe('Jira Fields', () => {
   it('resets existing parent correctly', async () => {
     const newFields = { ...fields, parent: 'personKey' };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={newFields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -280,7 +276,7 @@ describe('Jira Fields', () => {
   });
 
   it('should submit Jira connector', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -309,7 +305,7 @@ describe('Jira Fields', () => {
   });
 
   it('should validate the issue type correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -318,9 +314,7 @@ describe('Jira Fields', () => {
     expect(await screen.findByTestId('prioritySelect')).toBeInTheDocument();
     expect(await screen.findByTestId('issueTypeSelect')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('search-parent-issues')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('search-parent-issues')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('submit-form'));
 
@@ -330,7 +324,7 @@ describe('Jira Fields', () => {
   it('should not show the loading skeleton when loading issue types', async () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -342,7 +336,7 @@ describe('Jira Fields', () => {
   it('should not show the loading skeleton when issueType is null', async () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={{ ...fields, issueType: null }}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -352,7 +346,7 @@ describe('Jira Fields', () => {
   });
 
   it('should not show the loading skeleton when does not load fields', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -367,7 +361,7 @@ describe('Jira Fields', () => {
       isLoading: true,
     });
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>

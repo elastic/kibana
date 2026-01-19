@@ -12,8 +12,6 @@ import {
   startSelector,
   endSelector,
 } from '../../common/components/super_date_picker/selectors';
-import { SourcererScopeName } from '../../sourcerer/store/model';
-import { useSourcererDataView } from '../../sourcerer/containers';
 
 export function useTimelineDataFilters(isActiveTimelines: boolean) {
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -42,14 +40,11 @@ export function useTimelineDataFilters(isActiveTimelines: boolean) {
     }
   });
 
-  const { selectedPatterns: analyzerPatterns } = useSourcererDataView(SourcererScopeName.analyzer);
-
   return useMemo(() => {
     return {
-      selectedPatterns: analyzerPatterns,
       from,
       to,
       shouldUpdate,
     };
-  }, [from, to, shouldUpdate, analyzerPatterns]);
+  }, [from, to, shouldUpdate]);
 }

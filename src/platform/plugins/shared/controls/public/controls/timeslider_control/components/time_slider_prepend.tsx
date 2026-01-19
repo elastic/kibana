@@ -8,9 +8,11 @@
  */
 
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import { ViewMode } from '@kbn/presentation-publishing';
-import React, { FC, useCallback, useState } from 'react';
-import { first, Observable, Subscription } from 'rxjs';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
+import type { Observable, Subscription } from 'rxjs';
+import { first } from 'rxjs';
 import { PlayButton } from './play_button';
 import { TimeSliderStrings } from './time_slider_strings';
 
@@ -75,7 +77,6 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
           }}
           iconType="framePrevious"
           color="text"
-          className={'timeSlider-prependButton'}
           aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
           data-test-subj="timeSlider-previousTimeWindow"
         />
@@ -98,7 +99,6 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
           }}
           iconType="frameNext"
           color="text"
-          className={'timeSlider-prependButton'}
           aria-label={TimeSliderStrings.control.getNextButtonAriaLabel()}
           data-test-subj="timeSlider-nextTimeWindow"
         />

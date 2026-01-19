@@ -6,14 +6,19 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { TextBasedPersistedState, TextBasedPrivateState } from './types';
+import type {
+  TextBasedPersistedState,
+  TextBasedPrivateState,
+  DatasourcePublicAPI,
+  Datasource,
+  FramePublicAPI,
+} from '@kbn/lens-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
-import { DatasourcePublicAPI, Datasource, FramePublicAPI } from '../../types';
 jest.mock('../../id_generator');
 
 const fieldsOne = [
@@ -143,6 +148,52 @@ describe('Textbased Data Source', () => {
     } as unknown as TextBasedPrivateState;
   });
 
+  describe('#isEqual', () => {
+    const mockState = {
+      layers: {
+        a: {
+          columns: [
+            {
+              columnId: 'a',
+              fieldName: 'Foo',
+              meta: {
+                type: 'number',
+              },
+            },
+            {
+              columnId: 'b',
+              fieldName: 'Foo',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+          index: 'foo',
+        },
+      },
+    } as unknown as TextBasedPrivateState;
+
+    it('should return true comparing same state', () => {
+      const isEqual = TextBasedDatasource.isEqual(mockState, [], { ...mockState }, []);
+
+      expect(isEqual).toBe(true);
+    });
+
+    it('should ignore undefined initialContext property', () => {
+      const isEqual = TextBasedDatasource.isEqual(
+        mockState,
+        [],
+        {
+          ...mockState,
+          initialContext: undefined,
+        },
+        []
+      );
+
+      expect(isEqual).toBe(true);
+    });
+  });
+
   describe('uniqueLabels', () => {
     it('appends a suffix to duplicates', () => {
       const map = TextBasedDatasource.uniqueLabels(
@@ -187,7 +238,7 @@ describe('Textbased Data Source', () => {
         state: {
           layers: baseState.layers,
         },
-        savedObjectReferences: [
+        references: [
           { name: 'textBasedLanguages-datasource-layer-a', type: 'index-pattern', id: 'foo' },
         ],
       });
@@ -383,6 +434,8 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'bytes',
                 fieldName: 'bytes',
+                customLabel: false,
+                label: 'bytes',
                 inMetricDimension: true,
                 meta: {
                   type: 'number',
@@ -391,6 +444,8 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'dest',
                 fieldName: 'dest',
+                customLabel: false,
+                label: 'dest',
                 meta: {
                   type: 'string',
                 },
@@ -471,6 +526,8 @@ describe('Textbased Data Source', () => {
         {
           id: '@timestamp',
           name: '@timestamp',
+          customLabel: false,
+          label: '@timestamp',
           meta: {
             type: 'date',
           },
@@ -478,6 +535,8 @@ describe('Textbased Data Source', () => {
         {
           id: 'dest',
           name: 'dest',
+          customLabel: false,
+          label: 'dest',
           meta: {
             type: 'string',
           },
@@ -517,6 +576,8 @@ describe('Textbased Data Source', () => {
               {
                 columnId: '@timestamp',
                 fieldName: '@timestamp',
+                customLabel: false,
+                label: '@timestamp',
                 inMetricDimension: true,
                 meta: {
                   type: 'date',
@@ -525,6 +586,8 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'dest',
                 fieldName: 'dest',
+                customLabel: false,
+                label: 'dest',
                 inMetricDimension: true,
                 meta: {
                   type: 'string',
@@ -971,6 +1034,34 @@ describe('Textbased Data Source', () => {
         'reduced',
         'reduced',
       ]);
+    });
+  });
+
+  describe('#getRenderEventCounters', () => {
+    it('should return correct counter for esql query', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [
+              {
+                columnId: 'col1',
+                fieldName: 'Test 1',
+                meta: {
+                  type: 'number',
+                },
+              },
+            ],
+            query: { esql: 'FROM foo' },
+            index: 'foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const counters =
+        TextBasedDatasource.getRenderEventCounters &&
+        TextBasedDatasource.getRenderEventCounters(state);
+
+      expect(counters).toEqual(['esql_chart']);
     });
   });
 });

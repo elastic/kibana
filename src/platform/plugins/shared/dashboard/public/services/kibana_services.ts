@@ -28,11 +28,13 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import type { DashboardStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
+export let cpsService: CPSPluginStart | undefined;
 export let contentManagementService: ContentManagementPublicStart;
 export let dataService: DataPublicPluginStart;
 export let dataViewEditorService: DataViewEditorStart;
@@ -49,14 +51,15 @@ export let serverlessService: ServerlessPluginStart | undefined;
 export let shareService: SharePluginStart | undefined;
 export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
+export let unifiedSearchService: UnifiedSearchPublicPluginStart;
 export let urlForwardingService: UrlForwardingStart;
 export let usageCollectionService: UsageCollectionStart | undefined;
-export let visualizationsService: VisualizationsStart;
 
 const servicesReady$ = new BehaviorSubject(false);
 
 export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
   coreServices = kibanaCore;
+  cpsService = deps.cps;
   contentManagementService = deps.contentManagement;
   dataService = deps.data;
   dataViewEditorService = deps.dataViewEditor;
@@ -73,9 +76,9 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   shareService = deps.share;
   spacesService = deps.spaces;
   uiActionsService = deps.uiActions;
+  unifiedSearchService = deps.unifiedSearch;
   urlForwardingService = deps.urlForwarding;
   usageCollectionService = deps.usageCollection;
-  visualizationsService = deps.visualizations;
 
   servicesReady$.next(true);
 };

@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
-import { History, createMemoryHistory } from 'history';
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
 
 interface SyntheticsEmbeddableContext {
   history: History;

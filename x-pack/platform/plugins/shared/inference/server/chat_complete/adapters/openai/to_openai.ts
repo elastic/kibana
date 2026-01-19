@@ -15,7 +15,9 @@ import type {
   ChatCompletionToolMessageParam,
   ChatCompletionUserMessageParam,
 } from 'openai/resources';
-import { Message, MessageRole, ToolOptions } from '@kbn/inference-common';
+import type { Message, ToolOptions, InferenceConnector } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
+import { OpenAiProviderType } from './types';
 
 export function toolsToOpenAI(
   tools: ToolOptions['tools']
@@ -38,18 +40,47 @@ export function toolsToOpenAI(
 }
 
 export function toolChoiceToOpenAI(
-  toolChoice: ToolOptions['toolChoice']
+  toolChoice: ToolOptions['toolChoice'],
+  context?: { connector?: InferenceConnector; tools?: ToolOptions['tools'] }
 ): OpenAI.ChatCompletionCreateParams['tool_choice'] {
-  return typeof toolChoice === 'string'
-    ? toolChoice
-    : toolChoice
-    ? {
-        function: {
-          name: toolChoice.function,
-        },
-        type: 'function' as const,
+  // Base mapping
+  const mapped =
+    typeof toolChoice === 'string'
+      ? toolChoice
+      : toolChoice
+      ? {
+          function: {
+            name: toolChoice.function,
+          },
+          type: 'function' as const,
+        }
+      : undefined;
+
+  // For OpenAI-compatible ("Other") providers:
+  // - When native tool calling is enabled (enableNativeFunctionCalling), and
+  // - There is exactly one tool defined, and
+  // - The caller explicitly selected that same tool by name (named toolChoice),
+  // some providers expect `tool_choice: 'required'` instead of the named-function variant.
+  // In that case, return 'required' to ensure the tool is invoked natively.
+  if (mapped && context?.connector && context?.tools) {
+    const isOtherProvider =
+      (context.connector.config?.apiProvider as OpenAiProviderType) === OpenAiProviderType.Other;
+
+    const isNativeToolCallingEnabled =
+      context.connector.config?.enableNativeFunctionCalling === true;
+
+    if (isOtherProvider && isNativeToolCallingEnabled) {
+      const toolNames = Object.keys(context.tools);
+      if (toolNames.length === 1 && typeof toolChoice !== 'string' && toolChoice) {
+        const selectedTool = toolChoice.function;
+        if (selectedTool === toolNames[0]) {
+          return 'required';
+        }
       }
-    : undefined;
+    }
+  }
+
+  return mapped;
 }
 
 export function messagesToOpenAI({

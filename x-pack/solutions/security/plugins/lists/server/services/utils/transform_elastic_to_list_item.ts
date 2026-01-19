@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
-import { SearchEsListItemSchema } from '../../schemas/elastic_response';
+import type { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 import { findSourceValue } from './find_source_value';
+import { convertDateNumberToString } from './convert_date_number_to_string';
 
 export interface TransformElasticToListItemOptions {
   response: estypes.SearchResponse<SearchEsListItemSchema>;
@@ -38,7 +39,6 @@ export const transformElasticHitsToListItem = ({
   return hits.map((hit) => {
     const { _id, _source } = hit;
     const {
-      /* eslint-disable @typescript-eslint/naming-convention */
       created_at,
       deserializer,
       serializer,
@@ -48,7 +48,6 @@ export const transformElasticHitsToListItem = ({
       list_id,
       tie_breaker_id,
       meta,
-      /* eslint-enable @typescript-eslint/naming-convention */
     } = _source!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
     // @ts-expect-error _source is optional
     const value = findSourceValue(hit._source);
@@ -56,7 +55,7 @@ export const transformElasticHitsToListItem = ({
       throw new ErrorWithStatusCode(`Was expected ${type} to not be null/undefined`, 400);
     } else {
       return {
-        '@timestamp': _source?.['@timestamp'],
+        '@timestamp': convertDateNumberToString(_source?.['@timestamp']),
         _version: encodeHitVersion(hit),
         created_at,
         created_by,

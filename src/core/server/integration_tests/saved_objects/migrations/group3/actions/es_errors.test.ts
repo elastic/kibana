@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { Root } from '@kbn/core-root-server-internal';
+import type { estypes } from '@elastic/elasticsearch';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ElasticsearchClient } from '../../../../..';
 import {
@@ -57,8 +57,8 @@ describe('Elasticsearch Errors', () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   describe('isWriteBlockException', () => {
@@ -68,7 +68,7 @@ describe('Elasticsearch Errors', () => {
           index: 'existing_index_with_write_block',
           id: 'some-id',
           op_type: 'index',
-          body: {
+          document: {
             hello: 'dolly',
           },
         },
@@ -98,7 +98,7 @@ describe('Elasticsearch Errors', () => {
     it('correctly identify errors from bulk index operations', async () => {
       const res = await client.bulk({
         refresh: 'wait_for',
-        body: [
+        operations: [
           {
             index: {
               _index: 'existing_index_with_write_block',
@@ -119,7 +119,7 @@ describe('Elasticsearch Errors', () => {
     it('correctly identify errors from bulk create operations', async () => {
       const res = await client.bulk({
         refresh: 'wait_for',
-        body: [
+        operations: [
           {
             create: {
               _index: 'existing_index_with_write_block',

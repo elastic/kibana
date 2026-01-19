@@ -20,6 +20,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -27,6 +28,7 @@ import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useLocation } from 'react-router-dom';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
 import { useMarkInsightAsRemediated } from '../hooks/use_mark_workflow_insight_as_remediated';
 import type { WorkflowInsightRouteState } from '../../../pages/endpoint_hosts/types';
 import { useUrlParams } from '../../../hooks/use_url_params';
@@ -45,8 +47,8 @@ import { createExceptionListItemForCreate } from '../../../../../common/endpoint
 import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
 import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
 import { useGetArtifact } from '../../../hooks/artifacts';
-import type { PolicyData } from '../../../../../common/endpoint/types';
 import { ArtifactConfirmModal } from './artifact_confirm_modal';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -159,8 +161,6 @@ const createFormInitialState = (
 export interface ArtifactFlyoutProps {
   apiClient: ExceptionsListApiClient;
   FormComponent: React.ComponentType<ArtifactFormComponentProps>;
-  policies: PolicyData[];
-  policiesIsLoading: boolean;
   onSuccess(): void;
   onClose(): void;
   submitHandler?: (
@@ -185,8 +185,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
   ({
     apiClient,
     item,
-    policies,
-    policiesIsLoading,
     FormComponent,
     onSuccess,
     onClose,
@@ -201,6 +199,12 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       },
     } = useKibana().services;
 
+    const { euiTheme } = useEuiTheme();
+    const maskProps = useMemo(
+      () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
+      [euiTheme.levels.flyout]
+    );
+
     const location = useLocation<WorkflowInsightRouteState>();
     const [sourceInsight, setSourceInsight] = useState<{ id: string; back_url: string } | null>(
       null
@@ -211,6 +215,8 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     const setUrlParams = useSetUrlParams();
     const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
     const isMounted = useIsMounted();
+    const canManageGlobalArtifacts =
+      useUserPrivileges().endpointPrivileges.canManageGlobalArtifacts;
     const labels = useMemo<typeof ARTIFACT_FLYOUT_LABELS>(() => {
       return {
         ...ARTIFACT_FLYOUT_LABELS,
@@ -255,9 +261,18 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       enabled: false,
     });
 
-    const [formState, setFormState] = useState<ArtifactFormComponentOnChangeCallbackProps>(
-      createFormInitialState.bind(null, apiClient.listId, item)
-    );
+    const [formState, setFormState] = useState<ArtifactFormComponentOnChangeCallbackProps>(() => {
+      const initialFormState = createFormInitialState(apiClient.listId, item);
+
+      // for Create Mode: If user is not able to manage global artifacts then the initial item should be per-policy
+      if (!item && !canManageGlobalArtifacts) {
+        initialFormState.item.tags = (initialFormState.item.tags ?? []).filter(
+          (tag) => tag !== GLOBAL_ARTIFACT_TAG
+        );
+      }
+
+      return initialFormState;
+    });
     const showExpiredLicenseBanner = useIsArtifactAllowedPerPolicyUsage(
       { tags: formState.item.tags ?? [] },
       formMode
@@ -447,6 +462,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         onClose={handleFlyoutClose}
         data-test-subj={dataTestSubj}
         aria-labelledby={artifactFlyoutTitleId}
+        maskProps={maskProps}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
@@ -457,9 +473,10 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         </EuiFlyoutHeader>
         {!isInitializing && showExpiredLicenseBanner && (
           <EuiCallOut
+            announceOnMount={false}
             title={labels.flyoutDowngradedLicenseTitle}
             color="warning"
-            iconType="help"
+            iconType="question"
             data-test-subj={getTestId('expiredLicenseCallout')}
           >
             {labels.flyoutDowngradedLicenseInfo}{' '}
@@ -476,8 +493,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
               item={formState.item}
               error={submitError ?? undefined}
               mode={formMode}
-              policies={policies}
-              policiesIsLoading={policiesIsLoading}
             />
           )}
         </EuiFlyoutBody>

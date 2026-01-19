@@ -17,6 +17,7 @@ import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data'
 import {
   buildUnitedIndexQuery,
   getESQueryHostMetadataByFleetAgentIds,
+  getESQueryHostMetadataByIDs,
 } from '../../routes/metadata/query_builders';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -177,9 +178,9 @@ describe('EndpointMetadataService', () => {
         packagePolicyIds
       );
 
-      expect(unitedIndexQuery.body.runtime_mappings.status).toBeDefined();
+      expect(unitedIndexQuery.runtime_mappings?.status).toBeDefined();
       // @ts-expect-error runtime_mappings is not typed
-      unitedIndexQuery.body.runtime_mappings.status.script.source = expect.any(String);
+      unitedIndexQuery.runtime_mappings.status.script.source = expect.any(String);
 
       expect(esClient.search).toBeCalledWith(unitedIndexQuery);
       expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), agentPolicyIds);
@@ -247,6 +248,21 @@ describe('EndpointMetadataService', () => {
   });
 
   describe('#getMetadataForEndpoints()', () => {
+    it('should call Elastic Search with correct `size`', async () => {
+      testMockedContext.applyMetadataMocks(
+        testMockedContext.esClient,
+        testMockedContext.fleetServices
+      );
+      const agentIds = Array.from({ length: 25 }, () => Math.random().toString(32));
+
+      await metadataService.getMetadataForEndpoints(agentIds);
+
+      expect(testMockedContext.esClient.search).toBeCalledWith({
+        ...getESQueryHostMetadataByIDs(agentIds),
+        size: agentIds.length,
+      });
+    });
+
     it('should validate agent is visible in current space', async () => {
       const data = testMockedContext.applyMetadataMocks(
         testMockedContext.esClient,

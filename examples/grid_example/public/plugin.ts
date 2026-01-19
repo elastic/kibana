@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export const GRID_EXAMPLE_APP_ID = 'gridExample';
 const gridExampleTitle = 'Grid Example';

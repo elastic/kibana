@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
@@ -14,6 +14,8 @@
     "@kbn/i18n",
     "@kbn/logging-mocks",
     "@kbn/react-kibana-mount",
+    "@kbn/licensing-types",
+    "@kbn/lazy-object",
   ],
   "exclude": ["target/**/*"]
 }

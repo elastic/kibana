@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
-import { VulnStatsTrend } from '../../../common/types_old';
+import type { VulnStatsTrend } from '../../../common/types_old';
 
 interface LastDocBucket {
   key_as_string: string;
@@ -53,9 +53,9 @@ export const getVulnTrendsQuery = () => ({
     vuln_severity_per_day: {
       date_histogram: {
         field: '@timestamp',
-        calendar_interval: '1d',
+        calendar_interval: '1d' as const,
         order: {
-          _key: 'asc',
+          _key: 'asc' as const,
         },
       },
       aggs: {
@@ -65,7 +65,7 @@ export const getVulnTrendsQuery = () => ({
             sort: [
               {
                 '@timestamp': {
-                  order: 'desc',
+                  order: 'desc' as const,
                 },
               },
             ],

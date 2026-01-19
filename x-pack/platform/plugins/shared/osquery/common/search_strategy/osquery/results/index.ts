@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { Inspect, Maybe, SortField } from '../../common';
@@ -23,4 +23,5 @@ export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'so
   agentId?: string;
   startDate?: string;
   sort: SortField[];
+  integrationNamespaces?: string[];
 }

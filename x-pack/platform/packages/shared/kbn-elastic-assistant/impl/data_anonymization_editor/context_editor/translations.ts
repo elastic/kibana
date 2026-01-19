@@ -88,6 +88,12 @@ export const SELECT_ALL_FIELDS = (totalFields: number) =>
     defaultMessage: 'Select all {totalFields} fields',
   });
 
+export const UNSELECT_ALL_FIELDS = (totalFields: number) =>
+  i18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.contextEditor.unselectAllFields', {
+    defaultMessage: 'Unselect all {totalFields} fields',
+    values: { totalFields },
+  });
+
 export const SELECTED_FIELDS = (selected: number) =>
   i18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.contextEditor.selectedFields', {
     values: { selected },

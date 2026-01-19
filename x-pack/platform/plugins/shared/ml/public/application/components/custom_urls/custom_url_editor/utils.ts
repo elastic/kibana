@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import moment, { type Moment } from 'moment';
 import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -28,6 +28,8 @@ import {
 import { isDefined } from '@kbn/ml-is-defined';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DashboardItems } from '../../../services/dashboard_service';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
@@ -221,12 +223,13 @@ export function isValidCustomUrlSettings(
 
 export function buildCustomUrlFromSettings(
   dashboardService: DashboardStart,
+  share: SharePluginStart,
   settings: CustomUrlSettings
 ): Promise<MlUrlConfig> {
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
-    return buildDashboardUrlFromSettings(dashboardService, settings);
+    return buildDashboardUrlFromSettings(dashboardService, share, settings);
   } else if (settings.type === URL_TYPE.KIBANA_DISCOVER) {
     return Promise.resolve(buildDiscoverUrlFromSettings(settings));
   } else {
@@ -256,6 +259,7 @@ function getUrlRangeFromSettings(settings: CustomUrlSettings) {
 
 async function buildDashboardUrlFromSettings(
   dashboardService: DashboardStart,
+  share: SharePluginStart,
   settings: CustomUrlSettings,
   isPartialDFAJob?: boolean
 ): Promise<MlUrlConfig> {
@@ -277,32 +281,22 @@ async function buildDashboardUrlFromSettings(
   }
   const dashboard = responses[0];
 
-  // Query from the datafeed config will be saved as custom filters
-  // Use them if there are set.
-  let filters = settings?.kibanaSettings?.filters;
-
-  // Use the query from the dashboard only if no job entities are selected.
-  let query;
-
-  // Override with filters and queries from saved dashboard if they are available.
-  const { searchSource } = dashboard.attributes.kibanaSavedObjectMeta;
-  if (searchSource !== undefined) {
-    if (Array.isArray(searchSource.filter) && searchSource.filter.length > 0) {
-      filters = searchSource.filter;
-    }
-    query = searchSource.query;
-  }
+  const filters =
+    Array.isArray(dashboard.attributes.filters) && dashboard.attributes.filters.length > 0
+      ? dashboard.attributes.filters
+      : settings?.kibanaSettings?.filters;
 
   const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames ?? []);
-  if (queryFromEntityFieldNames !== undefined) {
-    query = queryFromEntityFieldNames;
-  }
+  const query =
+    queryFromEntityFieldNames !== undefined
+      ? queryFromEntityFieldNames
+      : dashboard.attributes.query;
 
   const { from, to } = getUrlRangeFromSettings(settings);
 
-  const location = await dashboardService.locator?.getLocation({
+  const location = await share.url.locators.get(DASHBOARD_APP_LOCATOR)?.getLocation({
     dashboardId,
-    timeRange: {
+    time_range: {
       from,
       to,
       mode: 'absolute',
@@ -439,7 +433,7 @@ async function getAnomalyDetectionJobTestUrl(
   let testUrl = customUrl.url_value;
 
   // Query to look for the highest scoring anomaly.
-  const body: estypes.SearchRequest['body'] = {
+  const body: estypes.SearchRequest = {
     query: {
       bool: {
         must: [{ term: { job_id: job.job_id } }, { term: { result_type: 'record' } }],
@@ -454,12 +448,7 @@ async function getAnomalyDetectionJobTestUrl(
 
   let resp;
   try {
-    resp = await mlApi.results.anomalySearch(
-      {
-        body,
-      },
-      [job.job_id]
-    );
+    resp = await mlApi.results.anomalySearch(body, [job.job_id]);
   } catch (error) {
     // search may fail if the job doesn't already exist
     // ignore this error as the outer function call will raise a toast
@@ -477,12 +466,12 @@ async function getAnomalyDetectionJobTestUrl(
     let { datafeed_config: datafeedConfig } = jobConfig;
     try {
       // attempt load the non-combined job and datafeed so they can be used in the datafeed preview
-      const [{ jobs }, { datafeeds }] = await Promise.all([
-        mlApi.getJobs({ jobId: job.job_id }),
-        mlApi.getDatafeeds({ datafeedId: job.datafeed_config?.datafeed_id ?? '' }),
-      ]);
-      datafeedConfig = datafeeds[0];
-      jobConfig = jobs[0];
+      // use jobForCloning to omit fields that shouldn't be included in datafeed preview requests
+      const response = await mlApi.jobs.jobForCloning(job.job_id);
+      if (response?.job && response?.datafeed) {
+        datafeedConfig = response.datafeed;
+        jobConfig = response.job;
+      }
     } catch (error) {
       // jobs may not exist as this might be called from the AD job wizards
       // ignore this error as the outer function call will raise a toast

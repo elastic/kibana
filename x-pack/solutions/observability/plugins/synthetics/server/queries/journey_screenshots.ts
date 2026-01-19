@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IKibanaResponse } from '@kbn/core-http-server';
-import { getJourneyScreenshot, ScreenshotReturnTypesUnion } from './get_journey_screenshot';
-import { isRefResult, RefResult } from '../../common/runtime_types';
-import { RouteContext, UptimeRouteContext } from '../routes/types';
+import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { ScreenshotReturnTypesUnion } from './get_journey_screenshot';
+import { getJourneyScreenshot } from './get_journey_screenshot';
+import type { RefResult } from '../../common/runtime_types';
+import { isRefResult } from '../../common/runtime_types';
+import type { RouteContext } from '../routes/types';
 
 export interface ClientContract {
   screenshotRef: RefResult;
@@ -25,7 +27,7 @@ export const journeyScreenshotHandler = async ({
   response,
   request,
   syntheticsEsClient,
-}: RouteContext | UptimeRouteContext): Promise<IKibanaResponse<ClientContract>> => {
+}: RouteContext): Promise<IKibanaResponse<ClientContract>> => {
   const { checkGroup, stepIndex } = request.params;
 
   const result: ScreenshotReturnTypesUnion | null = await getJourneyScreenshot({
@@ -33,6 +35,10 @@ export const journeyScreenshotHandler = async ({
     checkGroup,
     stepIndex,
   });
+
+  if (result === null) {
+    return response.notFound();
+  }
 
   if (isRefResult(result)) {
     return response.ok({
@@ -43,5 +49,11 @@ export const journeyScreenshotHandler = async ({
     });
   }
 
-  return response.notFound();
+  return response.custom({
+    statusCode: 500,
+    body: {
+      message: 'Screenshot metadata is not in the expected format',
+      screenshotRef: result,
+    },
+  });
 };

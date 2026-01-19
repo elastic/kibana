@@ -6,14 +6,14 @@
  */
 
 import { css } from '@emotion/react';
-import { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { skip } from 'rxjs';
-import { SearchState } from '../../hooks/use_url_search_state';
+import type { SearchState } from '../../hooks/use_url_search_state';
 
 interface Props {
   initialState: SearchState;
@@ -33,16 +33,18 @@ export function QuickFilters({
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.filters$.pipe(skip(1)).subscribe((newFilters = []) => {
-      if (newFilters.length === 0) {
-        onStateChange({ tagsFilter: undefined, statusFilter: undefined });
-      } else {
-        onStateChange({
-          tagsFilter: newFilters.filter((filter) => filter.meta.key === 'slo.tags')?.[0],
-          statusFilter: newFilters.filter((filter) => filter.meta.key === 'status')?.[0],
-        });
-      }
-    });
+    const subscription = controlGroupAPI.appliedFilters$
+      .pipe(skip(1))
+      .subscribe((newFilters = []) => {
+        if (newFilters.length === 0) {
+          onStateChange({ tagsFilter: undefined, statusFilter: undefined });
+        } else {
+          onStateChange({
+            tagsFilter: newFilters.filter((filter) => filter.meta.key === 'slo.tags')?.[0],
+            statusFilter: newFilters.filter((filter) => filter.meta.key === 'status')?.[0],
+          });
+        }
+      });
     return () => {
       subscription.unsubscribe();
     };
@@ -58,6 +60,9 @@ export function QuickFilters({
         .controlsWrapper {
           align-items: flex-start;
           min-height: initial;
+        }
+        .controlPanel {
+          height: initial;
         }
         .controlGroup {
           min-height: initial;
@@ -78,7 +83,7 @@ export function QuickFilters({
               exclude: statusFilter?.meta?.negate,
               selectedOptions: getSelectedOptions(statusFilter),
               existsSelected: Boolean(statusFilter?.query?.exists?.field === 'status'),
-              placeholder: ALL_LABEL,
+              displaySettings: { placeholder: ALL_LABEL },
             },
             'slo-status-filter'
           );
@@ -93,7 +98,7 @@ export function QuickFilters({
               selectedOptions: getSelectedOptions(tagsFilter),
               exclude: statusFilter?.meta?.negate,
               existsSelected: Boolean(tagsFilter?.query?.exists?.field === 'slo.tags'),
-              placeholder: ALL_LABEL,
+              displaySettings: { placeholder: ALL_LABEL },
             },
             'slo-tags-filter'
           );
@@ -102,7 +107,7 @@ export function QuickFilters({
           };
         }}
         timeRange={{ from: 'now-24h', to: 'now' }}
-        compressed={false}
+        compressed
       />
     </div>
   );

@@ -9,5 +9,4 @@ export const MANAGEMENT_API_KEYS = '/app/management/security/api_keys';
 
 // Server Routes
 export const CREATE_API_KEY_PATH = '/internal/serverless_search/api_key';
-export const FETCH_INDICES_PATH = '/internal/serverless_search/indices';
 export const CREATE_CONNECTORS_PATH = '/internal/connectors';

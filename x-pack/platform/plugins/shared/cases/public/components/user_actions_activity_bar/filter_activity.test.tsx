@@ -6,29 +6,43 @@
  */
 
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { CaseUserActionsStats } from '../../containers/types';
 
 import { FilterActivity } from './filter_activity';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('FilterActivity ', () => {
   const onFilterActivityChange = jest.fn();
-  let appMockRender: AppMockRenderer;
+
   const userActionsStats: CaseUserActionsStats = {
     total: 20,
+    totalDeletions: 0,
     totalComments: 11,
+    totalCommentCreations: 2,
+    totalCommentDeletions: 0,
+    totalHiddenCommentUpdates: 0,
     totalOtherActions: 9,
+    totalOtherActionDeletions: 0,
   };
 
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-  });
+  const userActionsStatsWithDeletions: CaseUserActionsStats = {
+    total: 20,
+    totalDeletions: 2,
+    totalComments: 11,
+    totalCommentDeletions: 3,
+    totalCommentCreations: 5,
+    totalHiddenCommentUpdates: 1,
+    totalOtherActions: 9,
+    totalOtherActionDeletions: 4,
+  };
 
   it('renders filters correctly', () => {
-    appMockRender.render(<FilterActivity type="all" onFilterChange={onFilterActivityChange} />);
+    renderWithTestingProviders(
+      <FilterActivity type="all" onFilterChange={onFilterActivityChange} />
+    );
 
     expect(screen.getByTestId('user-actions-filter-activity-group')).toBeInTheDocument();
     expect(screen.getByTestId('user-actions-filter-activity-button-all')).toBeInTheDocument();
@@ -36,8 +50,26 @@ describe('FilterActivity ', () => {
     expect(screen.getByTestId('user-actions-filter-activity-button-history')).toBeInTheDocument();
   });
 
+  it('renders filters correctly with deletions', () => {
+    renderWithTestingProviders(
+      <FilterActivity
+        type="all"
+        onFilterChange={onFilterActivityChange}
+        userActionsStats={userActionsStatsWithDeletions}
+      />
+    );
+
+    expect(screen.getByTestId('user-actions-filter-activity-button-all')).toHaveTextContent('17');
+    expect(screen.getByTestId('user-actions-filter-activity-button-comments')).toHaveTextContent(
+      '2'
+    );
+    expect(screen.getByTestId('user-actions-filter-activity-button-history')).toHaveTextContent(
+      '5'
+    );
+  });
+
   it('renders loading state correctly', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FilterActivity type="all" onFilterChange={onFilterActivityChange} isLoading />
     );
 
@@ -46,7 +78,9 @@ describe('FilterActivity ', () => {
   });
 
   it('renders all as active filter by default', () => {
-    appMockRender.render(<FilterActivity type="all" onFilterChange={onFilterActivityChange} />);
+    renderWithTestingProviders(
+      <FilterActivity type="all" onFilterChange={onFilterActivityChange} />
+    );
 
     expect(
       screen
@@ -56,7 +90,9 @@ describe('FilterActivity ', () => {
   });
 
   it('renders comments as active filter', async () => {
-    appMockRender.render(<FilterActivity type="user" onFilterChange={onFilterActivityChange} />);
+    renderWithTestingProviders(
+      <FilterActivity type="user" onFilterChange={onFilterActivityChange} />
+    );
 
     await waitFor(() => {
       expect(
@@ -68,7 +104,7 @@ describe('FilterActivity ', () => {
   });
 
   it('renders user actions stats correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FilterActivity
         type="all"
         onFilterChange={onFilterActivityChange}
@@ -78,7 +114,11 @@ describe('FilterActivity ', () => {
 
     expect(screen.getByLabelText(`${userActionsStats.total} active filters`)).toBeInTheDocument();
     expect(
-      screen.getByLabelText(`${userActionsStats.totalComments} available filters`)
+      screen.getByLabelText(
+        `${
+          userActionsStats.totalCommentCreations - userActionsStats.totalCommentDeletions
+        } available filters`
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
@@ -86,7 +126,9 @@ describe('FilterActivity ', () => {
   });
 
   it('onChange is called with user filter type', async () => {
-    appMockRender.render(<FilterActivity type="all" onFilterChange={onFilterActivityChange} />);
+    renderWithTestingProviders(
+      <FilterActivity type="all" onFilterChange={onFilterActivityChange} />
+    );
 
     const commentsFilter = screen.getByTestId('user-actions-filter-activity-button-comments');
 
@@ -96,7 +138,9 @@ describe('FilterActivity ', () => {
   });
 
   it('onChange is called with action filter type', async () => {
-    appMockRender.render(<FilterActivity type="user" onFilterChange={onFilterActivityChange} />);
+    renderWithTestingProviders(
+      <FilterActivity type="user" onFilterChange={onFilterActivityChange} />
+    );
 
     const actionsFilter = screen.getByTestId('user-actions-filter-activity-button-history');
 
@@ -113,7 +157,9 @@ describe('FilterActivity ', () => {
   });
 
   it('onChange is called with all filter type', async () => {
-    appMockRender.render(<FilterActivity type="action" onFilterChange={onFilterActivityChange} />);
+    renderWithTestingProviders(
+      <FilterActivity type="action" onFilterChange={onFilterActivityChange} />
+    );
 
     const actionsFilter = screen.getByTestId('user-actions-filter-activity-button-all');
 

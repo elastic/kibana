@@ -75,8 +75,11 @@ export class FollowerIndicesList extends PureComponent {
           search: '',
         });
       } else {
+        // Preserve existing query params (e.g., waitForActive)
+        const searchParams = new URLSearchParams(history.location.search);
+        searchParams.set('name', lastFollowerIndexId);
         history.replace({
-          search: `?name=${encodeURIComponent(lastFollowerIndexId)}`,
+          search: `?${searchParams.toString()}`,
         });
       }
     }

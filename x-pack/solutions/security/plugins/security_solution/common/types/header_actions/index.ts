@@ -11,13 +11,13 @@ import type {
   EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
-import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
+import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { ComponentType, JSXElementConstructor } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
-import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
+import type { BrowserFields } from '../../search_strategy';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
@@ -81,40 +81,31 @@ export type RowCellRender =
   | ((props: ActionProps) => JSX.Element);
 
 export interface ActionProps {
-  action?: RowCellRender;
   ariaRowindex: number;
   checked: boolean;
-  columnId: string;
   columnValues: string;
-  data: TimelineNonEcsData[];
-  disableExpandAction?: boolean;
   disabled?: boolean;
+  disableExpandAction?: boolean;
+  disablePinAction?: boolean;
+  disableTimelineAction?: boolean;
   ecsData: Ecs;
   eventId: string;
   eventIdToNoteIds?: Readonly<Record<string, string[]>>;
-  index: number;
-  isEventPinned?: boolean;
+  index?: number;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   refetch?: () => void;
-  rowIndex: number;
-  setEventsDeleted: SetEventsDeleted;
-  setEventsLoading: SetEventsLoading;
-  showCheckboxes: boolean;
-  /**
-   * This prop is used to determine if the notes button should be displayed
-   * as the part of Row Actions
-   * */
+  setEventsDeleted?: SetEventsDeleted;
+  setEventsLoading?: SetEventsLoading;
+  showCheckboxes?: boolean;
   showNotes?: boolean;
   tabType?: string;
   timelineId: string;
   toggleShowNotes?: () => void;
   width?: number;
-  disablePinAction?: boolean;
-  disableTimelineAction?: boolean;
 }
 
 interface AdditionalControlColumnProps {

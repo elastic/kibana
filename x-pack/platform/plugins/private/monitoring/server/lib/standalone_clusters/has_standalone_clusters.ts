@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { get } from 'lodash';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { standaloneClusterFilter } from '.';
 import { Globals } from '../../static_globals';
 import {
@@ -86,13 +86,11 @@ export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
 
   const params = {
     index: indexPatternList,
-    body: {
-      size: 0,
-      terminate_after: 1,
-      query: {
-        bool: {
-          filter: filters,
-        },
+    size: 0,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: filters,
       },
     },
   };

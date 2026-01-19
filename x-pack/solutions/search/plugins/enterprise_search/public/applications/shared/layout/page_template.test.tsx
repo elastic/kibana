@@ -208,7 +208,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
         <EnterpriseSearchPageTemplateWrapper className="hello" mainProps={{ className: 'world' }} />
       );
 
-      expect(wrapper.find(KibanaPageTemplate).prop('className')).toEqual(
+      expect(wrapper.find(KibanaPageTemplate).prop('className')).toContain(
         'enterpriseSearchPageTemplate hello'
       );
       expect(wrapper.find(KibanaPageTemplate).prop('mainProps')!.className).toEqual(
@@ -222,7 +222,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       );
 
       expect(wrapper.find(KibanaPageTemplate).prop('solutionNav')).toEqual({
-        icon: 'logoEnterpriseSearch',
+        icon: 'logoElasticsearch',
         name: 'Elasticsearch',
         items: [],
       });

@@ -21,7 +21,7 @@
 // the decrypted migrated objects.                                                                                  //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-import {
+import type {
   CoreSetup,
   IRouter,
   Plugin,
@@ -29,14 +29,14 @@ import {
   SavedObjectsBulkResponse,
 } from '@kbn/core/server';
 
-import {
+import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import { schema } from '@kbn/config-schema';
 
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   esoModelVersionExampleV1,
@@ -104,9 +104,10 @@ export class EsoModelVersionExample
             changes: [
               {
                 type: 'unsafe_transform',
-                transformFn: (document) => {
-                  return { document };
-                },
+                transformFn: (typeSafeGuard) =>
+                  typeSafeGuard((document) => {
+                    return { document };
+                  }),
               },
             ],
             schemas: {
@@ -307,6 +308,12 @@ export class EsoModelVersionExample
       {
         path: '/internal/eso_mv_example/generate',
         validate: false,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This routes delegates authorization to SO client.',
+          },
+        },
       },
       async (context, request, response) => {
         const { elasticsearch } = await context.core;
@@ -330,7 +337,7 @@ export class EsoModelVersionExample
           const objectsCreated = await Promise.all(
             documentVersionConstants.map(async (obj) => {
               const createdDoc: WriteResponseBase =
-                await elasticsearch.client.asInternalUser.create(obj);
+                await elasticsearch.client.asInternalUser.create<unknown>(obj);
               const parts = createdDoc._id.split(':', 2);
               return { type: parts[0], id: parts[1] };
             })
@@ -358,6 +365,12 @@ export class EsoModelVersionExample
       {
         path: '/internal/eso_mv_example/read_raw',
         validate: false,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This routes delegates authorization to SO client.',
+          },
+        },
       },
       async (context, request, response) => {
         // Read the raw documents so we can display the model versions prior to migration transformations
@@ -394,6 +407,9 @@ export class EsoModelVersionExample
       {
         path: '/internal/eso_mv_example/get_objects',
         validate: false,
+        security: {
+          authz: { enabled: false, reason: 'This routes delegates authorization to SO client.' },
+        },
       },
       async (context, request, response) => {
         // Get the objects via the SO client so we can display how the objects are migrated via the MV definitions
@@ -431,6 +447,9 @@ export class EsoModelVersionExample
       {
         path: '/internal/eso_mv_example/get_decrypted',
         validate: false,
+        security: {
+          authz: { enabled: false, reason: 'This route delegates authorization to SO client.' },
+        },
       },
       async (context, request, response) => {
         // Decrypt the objects as the internal user so we can display the secrets

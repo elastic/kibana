@@ -16,7 +16,8 @@ import {
 } from './rule_execution_status';
 import { ErrorWithReason } from './error_with_reason';
 import { translations } from '../constants/translations';
-import { RuleRunMetrics, RuleRunMetricsStore } from './rule_run_metrics_store';
+import type { RuleRunMetrics } from './rule_run_metrics_store';
+import { RuleRunMetricsStore } from './rule_run_metrics_store';
 import { RuleResultService } from '../monitoring/rule_result_service';
 
 const MockLogger = loggingSystemMock.create().get();
@@ -58,7 +59,7 @@ describe('RuleExecutionStatus', () => {
     test('empty task state', () => {
       const emptyRuleRunState = new RuleRunMetricsStore().getMetrics();
       const { status, metrics } = executionStatusFromState({
-        stateWithMetrics: { metrics: emptyRuleRunState },
+        runRuleResult: { metrics: emptyRuleRunState, state: {} },
         ruleResultService: new RuleResultService(),
       });
       checkDateIsNearNow(status.lastExecutionDate);
@@ -71,8 +72,8 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with no instances', () => {
       const { status, metrics } = executionStatusFromState({
-        stateWithMetrics: {
-          alertInstances: {},
+        runRuleResult: {
+          state: { alertInstances: {} },
           metrics: executionMetrics,
         },
         ruleResultService: new RuleResultService(),
@@ -87,8 +88,8 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with one instance', () => {
       const { status, metrics } = executionStatusFromState({
-        stateWithMetrics: {
-          alertInstances: { a: {} },
+        runRuleResult: {
+          state: { alertInstances: { a: {} } },
           metrics: executionMetrics,
         },
         ruleResultService: new RuleResultService(),
@@ -103,8 +104,8 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with max executable actions warning', () => {
       const { status, metrics } = executionStatusFromState({
-        stateWithMetrics: {
-          alertInstances: { a: {} },
+        runRuleResult: {
+          state: { alertInstances: { a: {} } },
           metrics: { ...executionMetrics, triggeredActionsStatus: ActionsCompletion.PARTIAL },
         },
         ruleResultService: new RuleResultService(),
@@ -125,8 +126,8 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with max queued actions warning', () => {
       const { status, metrics } = executionStatusFromState({
-        stateWithMetrics: {
-          alertInstances: { a: {} },
+        runRuleResult: {
+          state: { alertInstances: { a: {} } },
           metrics: {
             ...executionMetrics,
             triggeredActionsStatus: ActionsCompletion.PARTIAL,
@@ -152,8 +153,8 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with max alerts warning', () => {
       const { status, metrics } = executionStatusFromState({
-        stateWithMetrics: {
-          alertInstances: { a: {} },
+        runRuleResult: {
+          state: { alertInstances: { a: {} } },
           metrics: { ...executionMetrics, hasReachedAlertLimit: true },
         },
         ruleResultService: new RuleResultService(),
@@ -178,8 +179,8 @@ describe('RuleExecutionStatus', () => {
       lastRunSetters.addLastRunError('an error');
 
       const { status } = executionStatusFromState({
-        stateWithMetrics: {
-          alertInstances: {},
+        runRuleResult: {
+          state: { alertInstances: {} },
           metrics: executionMetrics,
         },
         ruleResultService,
@@ -194,8 +195,8 @@ describe('RuleExecutionStatus', () => {
       const lastRunSetters = ruleResultService.getLastRunSetters();
       lastRunSetters.addLastRunWarning('a rule execution warning');
       const { status, metrics } = executionStatusFromState({
-        stateWithMetrics: {
-          alertInstances: { a: {} },
+        runRuleResult: {
+          state: { alertInstances: { a: {} } },
           metrics: executionMetrics,
         },
         ruleResultService,
@@ -216,8 +217,8 @@ describe('RuleExecutionStatus', () => {
       const lastRunSetters = ruleResultService.getLastRunSetters();
       lastRunSetters.addLastRunWarning('a rule execution warning');
       const { status, metrics } = executionStatusFromState({
-        stateWithMetrics: {
-          alertInstances: { a: {} },
+        runRuleResult: {
+          state: { alertInstances: { a: {} } },
           metrics: { ...executionMetrics, triggeredActionsStatus: ActionsCompletion.PARTIAL },
         },
         ruleResultService,

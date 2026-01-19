@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 const dashboardSchema = schema.object({
   // Dashboard saved object id
@@ -52,6 +53,7 @@ const statusCheckSchema = schema.object({
     query: schema.recordOf(schema.string(), schema.any()),
   }),
 });
+export type StatusCheckSchema = TypeOf<typeof statusCheckSchema>;
 
 const instructionSchema = schema.object({
   title: schema.maybe(schema.string()),
@@ -85,24 +87,8 @@ const instructionSetSchema = schema.object({
 });
 export type InstructionSetSchema = TypeOf<typeof instructionSetSchema>;
 
-const idRegExp = /^[a-zA-Z_]+$/;
-const paramSchema = schema.object({
-  defaultValue: schema.any(),
-  id: schema.string({
-    validate(value: string) {
-      if (!idRegExp.test(value)) {
-        return `Does not satisfy regexp ${idRegExp.toString()}`;
-      }
-    },
-  }),
-  label: schema.string(),
-  type: schema.oneOf([schema.literal('number'), schema.literal('string')]),
-});
-export type ParamsSchema = TypeOf<typeof paramSchema>;
-
 const instructionsSchema = schema.object({
   instructionSets: schema.arrayOf(instructionSetSchema),
-  params: schema.maybe(schema.arrayOf(paramSchema)),
 });
 export type InstructionsSchema = TypeOf<typeof instructionsSchema>;
 
@@ -152,10 +138,9 @@ export const tutorialSchema = schema.object({
   onPremElasticCloud: schema.maybe(instructionsSchema),
   // Elastic stack artifacts produced by product when it is setup and run.
   artifacts: schema.maybe(artifactsSchema),
+  // Indicates the tutorial will not be available in serverless
+  omitServerless: schema.maybe(schema.boolean()),
 
-  // saved objects used by data module.
-  savedObjects: schema.maybe(schema.arrayOf(schema.any())),
-  savedObjectsInstallMsg: schema.maybe(schema.string()),
   customStatusCheckName: schema.maybe(schema.string()),
 
   // Category assignment for the integration browser

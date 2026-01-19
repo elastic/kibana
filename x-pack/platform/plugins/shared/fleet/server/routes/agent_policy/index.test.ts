@@ -22,6 +22,7 @@ import {
   GetFullAgentPolicyResponseSchema,
   DownloadFullAgentPolicyResponseSchema,
   GetK8sManifestResponseScheme,
+  CreateAgentAndPackagePolicyRequestSchema,
 } from '../../types';
 
 import { ListResponseSchema } from '../schema/utils';
@@ -40,6 +41,7 @@ import {
   downloadK8sManifest,
   getK8sManifest,
   bulkGetAgentPoliciesHandler,
+  createAgentAndPackagePoliciesHandler,
 } from './handlers';
 
 jest.mock('./handlers', () => ({
@@ -53,6 +55,7 @@ jest.mock('./handlers', () => ({
   getFullAgentPolicy: jest.fn(),
   getK8sManifest: jest.fn(),
   bulkGetAgentPoliciesHandler: jest.fn(),
+  createAgentAndPackagePoliciesHandler: jest.fn(),
 }));
 
 jest.mock('../../services', () => ({
@@ -66,7 +69,7 @@ jest.mock('../../services', () => ({
 }));
 
 jest.mock('../../services/agents', () => ({
-  getLatestAvailableAgentVersion: jest.fn().mockResolvedValue('1.0.0'),
+  getLatestAgentAvailableDockerImageVersion: jest.fn().mockResolvedValue('1.0.0'),
 }));
 
 describe('schema validation', () => {
@@ -147,6 +150,7 @@ describe('schema validation', () => {
       revision: 1,
       agents: 1,
       unprivileged_agents: 1,
+      fips_agents: 1,
       is_protected: true,
       version: '1',
       name: 'name',
@@ -209,7 +213,7 @@ describe('schema validation', () => {
           hosts: ['host'],
           ca_sha256: 'ca_sha256',
           proxy_url: 'proxy_url',
-          proxy_headers: 'proxy_headers',
+          proxy_headers: { ProxyHeader1: 'Test' },
           key: 'value',
         },
       },
@@ -224,7 +228,7 @@ describe('schema validation', () => {
       fleet: {
         hosts: ['host'],
         proxy_url: 'proxy_url',
-        proxy_headers: 'proxy_headers',
+        proxy_headers: { ProxyHeader1: 'Test' },
         ssl: {
           verification_mode: 'verification_mode',
           certificate_authorities: ['certificate_authorities'],
@@ -412,6 +416,65 @@ describe('schema validation', () => {
     expect(validationResp).toEqual(expectedResponse);
   });
 
+  describe('create agent policy with package policies', () => {
+    const validRequestBody = {
+      name: 'Test Agent Policy',
+      namespace: 'default',
+      description: 'Test description',
+      package_policies: [
+        {
+          name: 'Test Package Policy',
+          namespace: 'default',
+          policy_ids: [],
+          enabled: true,
+          inputs: [],
+        },
+      ],
+    };
+
+    it('should return valid response', async () => {
+      const expectedResponse = {
+        item: agentPolicy,
+      };
+      (createAgentAndPackagePoliciesHandler as jest.Mock).mockImplementation(
+        (ctx, request, res) => {
+          return res.ok({ body: expectedResponse });
+        }
+      );
+      await createAgentAndPackagePoliciesHandler(context, {} as any, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expectedResponse,
+      });
+      const validationResp = GetAgentPolicyResponseSchema.validate(expectedResponse);
+      expect(validationResp).toEqual(expectedResponse);
+    });
+
+    it('should validate request schema', async () => {
+      expect(() =>
+        CreateAgentAndPackagePolicyRequestSchema.body.validate(validRequestBody)
+      ).not.toThrow();
+
+      const invalidRequest = {
+        id: 'policy-missing-name',
+        namespace: 'default',
+        package_policies: [
+          {
+            name: 'Test Package Policy',
+            namespace: 'default',
+            policy_ids: [],
+            enabled: true,
+            inputs: [],
+          },
+        ],
+      };
+
+      expect(() =>
+        CreateAgentAndPackagePolicyRequestSchema.body.validate(invalidRequest)
+      ).toThrow();
+    });
+  });
+
   it('update agent policy should return valid response', async () => {
     const expectedResponse = {
       item: agentPolicy,
@@ -454,7 +517,7 @@ describe('schema validation', () => {
           hosts: ['host'],
           ca_sha256: 'ca_sha256',
           proxy_url: 'proxy_url',
-          proxy_headers: 'proxy_headers',
+          proxy_headers: { ProxyHeader1: 'Test' },
           key: 'value',
         },
       },
@@ -469,7 +532,7 @@ describe('schema validation', () => {
       fleet: {
         hosts: ['host'],
         proxy_url: 'proxy_url',
-        proxy_headers: 'proxy_headers',
+        proxy_headers: { ProxyHeader1: 'Test' },
         ssl: {
           verification_mode: 'verification_mode',
           certificate_authorities: ['certificate_authorities'],

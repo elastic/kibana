@@ -8,7 +8,8 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { duration } from 'moment';
-import { CloudFullStoryConfig, CloudFullStoryPlugin } from './plugin';
+import type { CloudFullStoryConfig } from './plugin';
+import { CloudFullStoryPlugin } from './plugin';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -31,6 +32,9 @@ describe('Cloud Plugin', () => {
         const plugin = new CloudFullStoryPlugin(initContext);
 
         const coreSetup = coreMock.createSetup();
+        jest
+          .spyOn(coreSetup.http.staticAssets, 'getPluginAssetHref')
+          .mockReturnValue('/cloudFullStory/assets/fs.js');
 
         const cloud = { ...cloudMock.createSetup(), isCloudEnabled, isElasticStaffOwned };
 
@@ -50,7 +54,7 @@ describe('Cloud Plugin', () => {
         expect(coreSetup.analytics.registerShipper).toHaveBeenCalled();
         expect(coreSetup.analytics.registerShipper).toHaveBeenCalledWith(expect.anything(), {
           fullStoryOrgId: 'foo',
-          scriptUrl: '/internal/cloud/100/fullstory.js',
+          scriptUrl: '/cloudFullStory/assets/fs.js',
           namespace: 'FSKibana',
           captureOnStartup: false,
         });
@@ -65,7 +69,7 @@ describe('Cloud Plugin', () => {
         expect(coreSetup.analytics.registerShipper).toHaveBeenCalledWith(expect.anything(), {
           fullStoryOrgId: 'foo',
           pageVarsDebounceTimeMs: 500,
-          scriptUrl: '/internal/cloud/100/fullstory.js',
+          scriptUrl: '/cloudFullStory/assets/fs.js',
           namespace: 'FSKibana',
           captureOnStartup: false,
         });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 import { registerGetAllRoute } from './register_get_route';
 import { registerCreateRoute } from './register_create_route';

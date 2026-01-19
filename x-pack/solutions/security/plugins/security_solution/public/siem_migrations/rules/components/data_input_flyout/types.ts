@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import type {
-  RuleMigrationResourceBase,
-  RuleMigrationTaskStats,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationStats } from '../../types';
 
-export type OnMigrationCreated = (migrationStats: RuleMigrationTaskStats) => void;
+export type OnMigrationCreated = (migrationStats: RuleMigrationStats) => void;
 export type OnResourcesCreated = () => void;
-export type OnMissingResourcesFetched = (missingResources: RuleMigrationResourceBase[]) => void;
+
+export enum QradarDataInputStepId {
+  Rules = 'qradar_rules',
+  ReferenceSet = 'qradar_reference_set',
+  Enhancements = 'qradar_enhancements',
+}
+
+export enum QradarDataInputStep {
+  Rules = 1,
+  ReferenceSet = 2,
+  Enhancements = 3,
+  End = 10,
+}

@@ -40,7 +40,10 @@ describe('When on the Event Filters list page', () => {
       history.push(EVENT_FILTERS_PATH);
     });
 
-    mockedEndpointPrivileges = { canWriteTrustedApplications: true };
+    mockedEndpointPrivileges = {
+      canManageGlobalArtifacts: true,
+      canWriteTrustedApplications: true,
+    };
     mockUserPrivileges.mockReturnValue({ endpointPrivileges: mockedEndpointPrivileges });
   });
 
@@ -91,45 +94,27 @@ describe('When on the Event Filters list page', () => {
 
         render();
 
-        await act(async () => {
-          await waitFor(() => {
-            expect(renderResult.getByTestId('EventFiltersListPage-list')).toBeTruthy();
-          });
+        await waitFor(() => {
+          expect(renderResult.getByTestId('EventFiltersListPage-list')).toBeTruthy();
         });
 
         return renderResult;
       };
     });
 
-    it('should not show indication if feature flag is disabled', async () => {
-      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: false });
-
-      await renderWithData();
-
-      expect(renderResult.getAllByTestId('EventFiltersListPage-card')).toHaveLength(3);
-      expect(
-        renderResult.queryAllByTestId(
-          'EventFiltersListPage-card-decorator-processDescendantIndication'
-        )
-      ).toHaveLength(0);
-    });
-
     it('should indicate to user if event filter filters process descendants', async () => {
-      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
-
       await renderWithData();
 
       expect(renderResult.getAllByTestId('EventFiltersListPage-card')).toHaveLength(3);
       expect(
         renderResult.getAllByTestId(
-          'EventFiltersListPage-card-decorator-processDescendantIndication'
+          'EventFiltersListPage-card-decorator-processDescendantsIndication'
         )
       ).toHaveLength(2);
     });
 
     it('should display additional `event.category is process` entry in tooltip', async () => {
-      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
-      const prefix = 'EventFiltersListPage-card-decorator-processDescendantIndicationTooltip';
+      const prefix = 'EventFiltersListPage-card-decorator-processDescendantsIndicationTooltip';
 
       await renderWithData();
 

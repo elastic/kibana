@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { ExpressionValueSearchContext } from './kibana_context_type';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ExpressionValueSearchContext } from './kibana_context_type';
 import { functionWrapper } from './utils';
 import { luceneFunction } from './lucene';
 

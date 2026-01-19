@@ -17,18 +17,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit, pick } from 'lodash';
-import {
-  ActionGroupWithCondition,
-  AlertConditions,
-  AlertConditionsGroup,
+import type {
   RuleTypeModel,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  AlwaysFiringParams,
-  AlwaysFiringActionGroupIds,
-  DEFAULT_INSTANCES_TO_GENERATE,
-} from '../../common/constants';
+import type { AlwaysFiringParams, AlwaysFiringActionGroupIds } from '../../common/constants';
+import { DEFAULT_INSTANCES_TO_GENERATE } from '../../common/constants';
+import type { ActionGroupWithCondition } from '../components';
+import { RuleConditions, RuleConditionsGroup } from '../components';
 
 export function getAlertType(): RuleTypeModel {
   return {
@@ -101,7 +97,7 @@ export const AlwaysFiringExpression: React.FunctionComponent<
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
-          <AlertConditions
+          <RuleConditions
             headline={'Set different thresholds for randomly generated T-Shirt sizes'}
             actionGroups={actionGroupsWithConditions}
             onInitializeConditionsFor={(actionGroup) => {
@@ -111,7 +107,7 @@ export const AlwaysFiringExpression: React.FunctionComponent<
               });
             }}
           >
-            <AlertConditionsGroup
+            <RuleConditionsGroup
               onResetConditionsFor={(actionGroup) => {
                 setRuleParams('thresholds', omit(thresholds, actionGroup.id));
               }}
@@ -124,8 +120,8 @@ export const AlwaysFiringExpression: React.FunctionComponent<
                   });
                 }}
               />
-            </AlertConditionsGroup>
-          </AlertConditions>
+            </RuleConditionsGroup>
+          </RuleConditions>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -21,19 +21,25 @@
     "@kbn/language-documentation",
     "@kbn/test-jest-helpers",
     "@kbn/data-plugin",
-    "@kbn/expressions-plugin",
-    "@kbn/data-views-plugin",
-    "@kbn/index-management-shared-types",
     "@kbn/code-editor",
     "@kbn/fields-metadata-plugin",
-    "@kbn/esql-validation-autocomplete",
     "@kbn/esql-utils",
     "@kbn/content-management-favorites-public",
     "@kbn/usage-collection-plugin",
     "@kbn/content-management-favorites-common",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/shared-ux-table-persist"
+    "@kbn/esql-types",
+    "@kbn/i18n-react",
+    "@kbn/esql-language",
+    "@kbn/restorable-state",
+    "@kbn/licensing-types",
+    "@kbn/index-editor",
+    "@kbn/react-hooks",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/ebt-tools",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",

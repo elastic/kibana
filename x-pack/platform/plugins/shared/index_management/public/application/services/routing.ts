@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
-import { HttpSetup } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { Section } from '../../../common/constants';
 import type { IndexDetailsTabId } from '../../../common/constants';
-import { ExtensionsService } from '../../services/extensions_service';
-import { IndexDetailsSection } from '../../../common/constants';
+import type { ExtensionsService } from '../../services/extensions_service';
+import type { IndexDetailsSection } from '../../../common/constants';
 
 export const getTemplateListLink = () => `/templates`;
 
@@ -37,6 +37,8 @@ export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
   }
   return encodeURI(url);
 };
+
+export const getTemplateCreateLink = () => `/create_template`;
 
 export const getIndexListUri = (filter?: string, includeHiddenIndices?: boolean) => {
   let url = `/${Section.Indices}`;
@@ -85,6 +87,26 @@ export const getComponentTemplatesLink = (usedByTemplateName?: string) => {
 
 export const getComponentTemplateDetailLink = (name: string) => {
   return `/component_templates/${encodeURIComponent(name)}`;
+};
+
+export const getComponentTemplateListLink = (filter?: string) => {
+  let url = '/component_templates';
+  if (filter) {
+    url = `${url}?filter=${encodeURIComponent(filter)}`;
+  }
+  return url;
+};
+
+export const getComponentTemplateEditLink = (name: string) => {
+  return `/edit_component_template/${encodeURIComponent(name)}`;
+};
+
+export const getComponentTemplateCloneLink = (name: string) => {
+  return `/create_component_template/${encodeURIComponent(name)}`;
+};
+
+export const getComponentTemplateCreateLink = (name: string) => {
+  return `/create_component_template?name=${encodeURIComponent(name)}`;
 };
 
 export const navigateToIndexDetailsPage = (

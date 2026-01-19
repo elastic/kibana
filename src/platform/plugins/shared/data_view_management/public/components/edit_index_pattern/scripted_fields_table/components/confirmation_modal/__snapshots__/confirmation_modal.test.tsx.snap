@@ -2,11 +2,17 @@
 
 exports[`DeleteScritpedFieldConfirmationModal should render normally 1`] = `
 <EuiConfirmModal
+  aria-labelledby="generated-id"
   cancelButtonText="Cancel"
   confirmButtonText="Delete"
   defaultFocusedButton="confirm"
   onCancel={[Function]}
   onConfirm={[Function]}
   title="Delete scripted field ''?"
+  titleProps={
+    Object {
+      "id": "generated-id",
+    }
+  }
 />
 `;

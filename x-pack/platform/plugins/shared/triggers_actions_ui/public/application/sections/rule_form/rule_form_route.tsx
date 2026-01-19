@@ -7,12 +7,14 @@
 
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { RuleForm } from '@kbn/response-ops-rule-form';
-import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
+import { AlertConsumers, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { useLocation, useParams } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
+import { RuleTemplateError } from './components/rule_template_error';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 export const RuleFormRoute = () => {
   const {
@@ -27,17 +29,38 @@ export const RuleFormRoute = () => {
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    contentManagement,
+    uiActions,
     chrome,
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
 
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
-  const { id, ruleTypeId } = useParams<{
+  const {
+    id,
+    ruleTypeId: ruleTypeIdParams,
+    templateId: templateIdParams,
+  } = useParams<{
     id?: string;
     ruleTypeId?: string;
+    templateId?: string;
   }>();
   const { returnApp, returnPath } = location.state || {};
+
+  const templateId = templateIdParams;
+
+  const {
+    data: ruleTemplate,
+    error: ruleTemplateError,
+    isLoading: isLoadingRuleTemplate,
+    isError: isErrorRuleTemplate,
+  } = useRuleTemplate({
+    http,
+    templateId,
+  });
+
+  const ruleTypeId = ruleTypeIdParams ?? ruleTemplate?.ruleTypeId;
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -48,7 +71,7 @@ export const RuleFormRoute = () => {
       ]);
       chrome.docTitle.change(getCurrentDocTitle('editRule'));
     }
-    if (ruleTypeId) {
+    if (ruleTypeId || templateId) {
       setBreadcrumbs([
         getAlertingSectionBreadcrumb('rules', true),
         getAlertingSectionBreadcrumb('createRule'),
@@ -56,7 +79,15 @@ export const RuleFormRoute = () => {
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ruleTypeId, templateId]);
+
+  if (isLoadingRuleTemplate) {
+    return <CenterJustifiedSpinner />;
+  }
+
+  if (isErrorRuleTemplate) {
+    return <RuleTemplateError error={ruleTemplateError as Error} />; // TODO
+  }
 
   return (
     <IntlProvider locale="en">
@@ -73,8 +104,13 @@ export const RuleFormRoute = () => {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          contentManagement,
+          uiActions,
           ...startServices,
         }}
+        initialValues={ruleTemplate}
+        id={id}
+        ruleTypeId={ruleTypeId}
         onCancel={() => {
           if (returnApp && returnPath) {
             application.navigateToApp(returnApp, { path: returnPath });
@@ -85,10 +121,22 @@ export const RuleFormRoute = () => {
           }
         }}
         onSubmit={(ruleId) => {
-          application.navigateToApp('management', {
-            path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
-          });
+          if (returnApp === 'rules') {
+            // Navigate to rule details page in the rules app
+            application.navigateToApp('rules', {
+              path: getRuleDetailsRoute(ruleId),
+            });
+          } else if (returnApp && returnPath) {
+            // Navigate back to the original app/path for other apps
+            application.navigateToApp(returnApp, { path: returnPath });
+          } else {
+            // Default: navigate to management app rule details (existing behavior)
+            application.navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
+            });
+          }
         }}
+        multiConsumerSelection={AlertConsumers.ALERTS}
       />
     </IntlProvider>
   );

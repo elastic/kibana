@@ -9,15 +9,13 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
+import { generateBenchmarkRuleTags } from '@kbn/cloud-security-posture-common';
 import type {
   CspBenchmarkRule,
   RulesToUpdate,
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
-import {
-  convertRuleTagsToMatchAllKQL,
-  generateBenchmarkRuleTags,
-} from '../../../../common/utils/detection_rules';
+import { convertRuleTagsToMatchAllKQL } from '../../../../common/utils/detection_rules';
 
 import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,

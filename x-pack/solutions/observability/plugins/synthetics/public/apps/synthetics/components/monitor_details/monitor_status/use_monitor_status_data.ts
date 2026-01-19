@@ -13,14 +13,13 @@ import { useLocation } from 'react-router-dom';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import type { MonitorStatusPanelProps, MonitorStatusTimeBin } from './monitor_status_data';
 import {
   dateToMilli,
   createTimeBuckets,
   CHART_CELL_WIDTH,
   indexBinsByEndTime,
-  MonitorStatusPanelProps,
   createStatusTimeBins,
-  MonitorStatusTimeBin,
 } from './monitor_status_data';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import {
@@ -53,11 +52,23 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
   const dispatch = useDispatch();
   const { heatmap: dateHistogram, loading } = useSelector(selectHeatmap);
 
+  const getBinsNo = useCallback(
+    (maxNoOfBins: number) => {
+      // Each bin represents a time interval of at least 1 minute. If the available width allows for more bins
+      // than there are minutes in the time range, we cap the number of bins to match the number of minutes
+      // to ensure each bin represents a meaningful time interval.
+      return Math.min(maxNoOfBins, totalMinutes);
+    },
+    [totalMinutes]
+  );
+
   useEffect(() => {
     if (binsAvailableByWidth === null && initialSizeRef?.current) {
-      setBinsAvailableByWidth(Math.floor(initialSizeRef?.current?.clientWidth / CHART_CELL_WIDTH));
+      setBinsAvailableByWidth(
+        getBinsNo(Math.floor(initialSizeRef?.current?.clientWidth / CHART_CELL_WIDTH))
+      );
     }
-  }, [binsAvailableByWidth, initialSizeRef]);
+  }, [binsAvailableByWidth, initialSizeRef, getBinsNo]);
 
   useEffect(() => {
     if (monitor?.id && location?.label && debouncedBinsCount !== null && !!minsPerBin) {
@@ -88,12 +99,12 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
 
   const handleResize = useCallback(
     (e: { width: number; height: number }) =>
-      setBinsAvailableByWidth(Math.floor(e.width / CHART_CELL_WIDTH)),
-    []
+      setBinsAvailableByWidth(getBinsNo(Math.floor(e.width / CHART_CELL_WIDTH))),
+    [getBinsNo]
   );
 
   useDebounce(
-    async () => {
+    () => {
       setDebouncedCount(binsAvailableByWidth === 0 ? null : binsAvailableByWidth);
     },
     500,

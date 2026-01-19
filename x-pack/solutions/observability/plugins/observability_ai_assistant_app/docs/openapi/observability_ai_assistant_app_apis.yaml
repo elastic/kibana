@@ -1,0 +1,252 @@
+openapi: 3.0.3
+info:
+  title: Observability AI Assistant API
+  description: Kibana API for the Observability AI Assistant
+  version: '1.0.1'
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: observability_ai_assistant
+    x-displayName: Observability AI Assistant
+    externalDocs:
+      url: https://www.elastic.co/docs/solutions/observability/observability-ai-assistant
+      description: Observability AI Assistant
+    description: Interact with the Observability AI Assistant resources.
+servers:
+  - url: /
+paths:
+  /api/observability_ai_assistant/chat/complete:
+    post:
+      summary: Generate a chat completion
+      operationId: observability-ai-assistant-chat-complete
+      description: |
+        Create a new chat completion by using the Observability AI Assistant. 
+
+        The API returns the model's response based on the current conversation context. 
+
+        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
+
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      x-state: Technical Preview
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl --request POST 'localhost:5601/api/observability_ai_assistant/chat/complete' -u <username>:<password> -H 'kbn-xsrf: true' -H "Content-Type: application/json" --data '
+            {
+            "connectorId": "<connectorId>",
+            "disableFunctions": false,
+              "messages": [
+                {
+                  "@timestamp": "2025-06-25T23:45:00.000Z",
+                  "message": {
+                    "role": "user",
+                    "content": "Is my Elasticsearch cluster healthy right now?"
+                  }
+                }
+              ],
+            "persist": false,
+            "actions": [
+              {
+                "name": "get_cluster_health",
+                "description": "Fetch the current Elasticsearch cluster-health status and key metrics.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "includeShardStats": {
+                      "type": "boolean",
+                      "default": false
+                    }
+                  }
+                }
+              }
+            ],
+            "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
+            }'
+      tags:
+        - observability_ai_assistant
+      security:
+        - authz: ['ai_assistant']
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                messages:
+                  type: array
+                  description: An array of message objects containing the conversation history.
+                  items:
+                    $ref: '#/components/schemas/Message'
+                connectorId:
+                  type: string
+                  description: A unique identifier for the connector.
+                conversationId:
+                  type: string
+                  description: A unique identifier for the conversation if you are continuing an existing conversation.
+                title:
+                  type: string
+                  description: A title for the conversation.
+                persist:
+                  type: boolean
+                  description: Indicates whether the conversation should be saved to storage. If true, the conversation will be saved and will be available in Kibana.
+                actions:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Function'
+                disableFunctions:
+                  type: boolean
+                  description: Flag indicating whether all function calls should be disabled for the conversation. If true, no calls to functions will be made.
+                instructions:
+                  type: array
+                  description: An array of instruction objects, which can be either simple strings or detailed objects.
+                  items:
+                    $ref: '#/components/schemas/Instruction'
+              required:
+                - messages
+                - connectorId
+                - persist
+            examples:
+              chatCompleteRequestExample:
+                $ref: '#/components/schemas/ChatCompleteRequestExample'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                chatCompleteResponseExample:
+                  $ref: '#/components/schemas/ChatCompleteResponseExample'
+
+components:
+  schemas:
+    Message:
+      type: object
+      name: Message
+      properties:
+        '@timestamp':
+          type: string
+          description: The timestamp when the message was created.
+        message:
+          type: object
+          description: The main content of the message.
+          properties:
+            role:
+              $ref: '#/components/schemas/MessageRoleEnum'
+            content:
+              type: string
+              description: The content of the message.
+            name:
+              type: string
+              description: The name associated with the message.
+            event:
+              type: string
+              description: The event related to the message.
+            data:
+              type: string
+              description: Additional data associated with the message.
+            function_call:
+              $ref: '#/components/schemas/FunctionCall'
+          required:
+            - role
+      required:
+        - '@timestamp'
+        - message
+    MessageRoleEnum:
+      description: The role of the message sender.
+      type: string
+      enum:
+        - system
+        - assistant
+        - function
+        - user
+        - elastic
+    FunctionCall:
+      type: object
+      description: Details of the function call within the message.
+      properties:
+        name:
+          type: string
+          description: The name of the function.
+        trigger:
+          type: string
+          enum:
+            - assistant
+            - user
+            - elastic
+          description: The trigger of the function call.
+        arguments:
+          type: string
+          description: The arguments for the function call.
+      required:
+        - name
+        - trigger
+    Function:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the function.
+        description:
+          type: string
+          description: The description of the function.
+        parameters:
+          type: object
+          description: The parameters of the function.
+    Instruction:
+      oneOf:
+        - type: string
+          description: A simple instruction represented as a string.
+        - type: object
+          description: A detailed instruction with an ID and text.
+          properties:
+            id:
+              type: string
+              description: A unique identifier for the instruction.
+            text:
+              type: string
+              description: The text of the instruction.
+          required:
+            - id
+            - text
+    ChatCompleteResponseExample:
+      summary: Get a chat completion from the Observability AI Assistant
+      value: |
+        data: {"model":"unknown","choices":[{"delta":{"content":"","function_call":{"name":"get_cluster_health","arguments":"{\"includeShardStats\":true}"}},"finish_reason":null,"index":0}],"created":1750936626911,"id":"9c8eff9b-4fd4-4203-a4ab-2e364688deff","object":"chat.completion.chunk"}
+
+        data: [DONE]
+    ChatCompleteRequestExample:
+      summary: Example of completing a chat interaction
+      value: |
+        {
+          "connectorId": "<connectorId>",
+          "disableFunctions": false,
+          "messages": [
+            {
+              "@timestamp": "2025-06-25T23:45:00.000Z",
+              "message": {
+                "role": "user",
+                "content": "Is my Elasticsearch cluster healthy right now?"
+              }
+            }
+          ],
+          "persist": false,
+          "actions": [
+            {
+              "name": "get_cluster_health",
+              "description": "Fetch the current Elasticsearch cluster-health status and key metrics.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "includeShardStats": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
+            }
+          ],
+          "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
+        }

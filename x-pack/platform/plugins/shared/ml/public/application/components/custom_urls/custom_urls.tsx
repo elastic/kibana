@@ -20,6 +20,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalFooter,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -151,9 +152,9 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
   };
 
   addNewCustomUrl = () => {
-    const { dashboard } = this.context.services;
+    const { dashboard, share } = this.context.services;
 
-    buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings)
+    buildCustomUrlFromSettings(dashboard, share, this.state.editorSettings as CustomUrlSettings)
       .then((customUrl) => {
         const customUrls = [...this.state.customUrls, customUrl];
         this.props.setCustomUrls(customUrls);
@@ -179,6 +180,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       data: { dataViews },
       dashboard,
       mlServices: { mlApi },
+      share,
     } = this.context.services;
     const dataViewId = this.state?.editorSettings?.kibanaSettings?.discoverIndexPatternId;
     const job = this.props.job;
@@ -191,33 +193,34 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       })
       .then((dataView) => {
         const timefieldName = dataView?.timeFieldName ?? null;
-        buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings).then(
-          (customUrl) => {
-            getTestUrl(
-              mlApi,
-              job,
-              customUrl,
-              timefieldName,
-              this.props.currentTimeFilter,
-              this.props.isPartialDFAJob
-            )
-              .then((testUrl) => {
-                openCustomUrlWindow(testUrl, customUrl, basePath.get());
-              })
-              .catch((error) => {
-                this.toastNotificationService!.displayErrorToast(
-                  error,
-                  i18n.translate(
-                    'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
-                    {
-                      defaultMessage:
-                        'An error occurred obtaining the URL to test the configuration',
-                    }
-                  )
-                );
-              });
-          }
-        );
+        buildCustomUrlFromSettings(
+          dashboard,
+          share,
+          this.state.editorSettings as CustomUrlSettings
+        ).then((customUrl) => {
+          getTestUrl(
+            mlApi,
+            job,
+            customUrl,
+            timefieldName,
+            this.props.currentTimeFilter,
+            this.props.isPartialDFAJob
+          )
+            .then((testUrl) => {
+              openCustomUrlWindow(testUrl, customUrl, basePath.get());
+            })
+            .catch((error) => {
+              this.toastNotificationService!.displayErrorToast(
+                error,
+                i18n.translate(
+                  'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
+                  {
+                    defaultMessage: 'An error occurred obtaining the URL to test the configuration',
+                  }
+                )
+              );
+            });
+        });
       })
       .catch((error) => {
         this.toastNotificationService!.displayErrorToast(
@@ -316,6 +319,12 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
         initialFocus="[name=label]"
         style={{ width: 500 }}
         data-test-subj="mlJobNewCustomUrlFormModal"
+        aria-label={i18n.translate(
+          'xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlAriaLabel',
+          {
+            defaultMessage: 'Add custom URL to the job',
+          }
+        )}
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
@@ -342,21 +351,29 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
 
     return (
       <>
+        <EuiScreenReaderOnly>
+          <div aria-live="polite" aria-atomic="true">
+            <h2>
+              <FormattedMessage
+                id="xpack.ml.customUrls.screenReader.configurationTitle"
+                defaultMessage="Custom URL Configuration"
+              />
+            </h2>
+            {customUrls.length === 0 ? (
+              <FormattedMessage
+                id="xpack.ml.customUrls.screenReader.noConfiguredUrls"
+                defaultMessage="No custom URLs configured"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.customUrls.screenReader.configuredUrlsCount"
+                defaultMessage="{count, plural, one {# custom URL} other {# custom URLs}} configured"
+                values={{ count: customUrls.length }}
+              />
+            )}
+          </div>
+        </EuiScreenReaderOnly>
         <EuiSpacer size="m" />
-        {(!editorOpen || editMode === 'modal') && (
-          <EuiButton
-            size="s"
-            onClick={this.editNewCustomUrl}
-            data-test-subj="mlJobOpenCustomUrlFormButton"
-          >
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
-              defaultMessage="Add custom URL"
-            />
-          </EuiButton>
-        )}
-        {editorOpen && this.renderEditor()}
-        <EuiSpacer size="l" />
         <CustomUrlList
           job={this.props.job}
           customUrls={customUrls}
@@ -364,6 +381,27 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
           dataViewListItems={this.state.dataViewListItems}
           isPartialDFAJob={this.props.isPartialDFAJob}
         />
+        {(!editorOpen || editMode === 'modal') && (
+          <>
+            <EuiButton
+              size="s"
+              iconType="plusInCircle"
+              iconSide="left"
+              aria-label={i18n.translate(
+                'xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel',
+                { defaultMessage: 'Add custom URL' }
+              )}
+              onClick={this.editNewCustomUrl}
+              data-test-subj="mlJobOpenCustomUrlFormButton"
+            >
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
+                defaultMessage="Add custom URL"
+              />
+            </EuiButton>
+          </>
+        )}
+        {editorOpen && this.renderEditor()}
       </>
     );
   }

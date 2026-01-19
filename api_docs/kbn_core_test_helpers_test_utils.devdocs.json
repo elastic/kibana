@@ -32,6 +32,8 @@
           "<any>"
         ],
         "path": "src/core/packages/test-helpers/test-utils/src/create_exportable_type.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "string"
             ],
             "path": "src/core/packages/test-helpers/test-utils/src/create_exportable_type.ts",
+            "lineNumber": 11,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +71,8 @@
           "<any>"
         ],
         "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,6 +84,8 @@
             "label": "createOptions",
             "description": [],
             "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
+            "lineNumber": 12,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -89,6 +97,8 @@
                 "label": "name",
                 "description": [],
                 "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
+                "lineNumber": 13,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -103,6 +113,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
+                "lineNumber": 14,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -117,6 +129,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
+                "lineNumber": 15,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -134,30 +148,36 @@
         "label": "setupServer",
         "description": [],
         "signature": [
-          "(coreId?: symbol) => Promise<{ server: ",
-          "HttpService",
-          "; httpSetup: ",
-          "InternalHttpServiceSetup",
+          "(coreId?: symbol) => Promise<{ server: { listener: ",
+          "Server",
+          "<typeof ",
+          "IncomingMessage",
+          ", typeof ",
+          "ServerResponse",
+          ">; start: () => Promise<void>; stop: () => Promise<void>; }; createRouter: <Context extends ",
+          "RequestHandlerContextBase",
+          " = ",
+          "RequestHandlerContextBase",
+          ">(path: string, plugin?: symbol | undefined) => ",
+          "IRouter",
+          "<Context>; registerRouteHandlerContext: <Context extends ",
+          "RequestHandlerContextBase",
+          ", ContextName extends Exclude<keyof Context, \"resolve\">>(pluginOpaqueId: symbol, contextName: ContextName, provider: ",
+          "IContextProvider",
+          "<Context, ContextName>) => ",
+          "IContextContainer",
           "; handlerContext: { savedObjects: { client: jest.Mocked<",
           "SavedObjectsClientContract",
           ">; typeRegistry: jest.Mocked<",
-          "ISavedObjectTypeRegistry",
-          " & Pick<",
-          "SavedObjectTypeRegistry",
-          ", \"registerType\">>; getClient: () => jest.Mocked<",
+          "ISavedObjectTypeRegistryInternal",
+          ">; getClient: () => jest.Mocked<",
           "SavedObjectsClientContract",
           ">; getExporter: () => jest.Mocked<",
           "ISavedObjectsExporter",
           ">; getImporter: () => jest.Mocked<",
           "ISavedObjectsImporter",
           ">; }; elasticsearch: { client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ScopedClusterClientMock",
-            "text": "ScopedClusterClientMock"
-          },
+          "ScopedClusterClientMock",
           "; }; uiSettings: { client: jest.Mocked<",
           "IUiSettingsClient",
           ">; }; deprecations: { client: jest.Mocked<",
@@ -165,6 +185,8 @@
           ">; }; }; }>"
         ],
         "path": "src/core/packages/test-helpers/test-utils/src/setup_server.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,6 +201,8 @@
               "symbol"
             ],
             "path": "src/core/packages/test-helpers/test-utils/src/setup_server.ts",
+            "lineNumber": 45,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -190,7 +214,59 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-test-helpers-test-utils",
+        "id": "def-common.SetupServerReturn",
+        "type": "Type",
+        "tags": [],
+        "label": "SetupServerReturn",
+        "description": [],
+        "signature": [
+          "{ server: { listener: ",
+          "Server",
+          "<typeof ",
+          "IncomingMessage",
+          ", typeof ",
+          "ServerResponse",
+          ">; start: () => Promise<void>; stop: () => Promise<void>; }; createRouter: <Context extends ",
+          "RequestHandlerContextBase",
+          " = ",
+          "RequestHandlerContextBase",
+          ">(path: string, plugin?: symbol | undefined) => ",
+          "IRouter",
+          "<Context>; registerRouteHandlerContext: <Context extends ",
+          "RequestHandlerContextBase",
+          ", ContextName extends Exclude<keyof Context, \"resolve\">>(pluginOpaqueId: symbol, contextName: ContextName, provider: ",
+          "IContextProvider",
+          "<Context, ContextName>) => ",
+          "IContextContainer",
+          "; handlerContext: { savedObjects: { client: jest.Mocked<",
+          "SavedObjectsClientContract",
+          ">; typeRegistry: jest.Mocked<",
+          "ISavedObjectTypeRegistryInternal",
+          ">; getClient: () => jest.Mocked<",
+          "SavedObjectsClientContract",
+          ">; getExporter: () => jest.Mocked<",
+          "ISavedObjectsExporter",
+          ">; getImporter: () => jest.Mocked<",
+          "ISavedObjectsImporter",
+          ">; }; elasticsearch: { client: ",
+          "ScopedClusterClientMock",
+          "; }; uiSettings: { client: jest.Mocked<",
+          "IUiSettingsClient",
+          ">; }; deprecations: { client: jest.Mocked<",
+          "DeprecationsClient",
+          ">; }; }; }"
+        ],
+        "path": "src/core/packages/test-helpers/test-utils/src/setup_server.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

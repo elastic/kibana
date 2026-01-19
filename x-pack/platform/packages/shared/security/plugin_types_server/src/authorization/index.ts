@@ -15,7 +15,6 @@ export type {
   SpaceActions,
   UIActions,
 } from './actions';
-export { ApiOperation } from './actions';
 export type { AuthorizationServiceSetup } from './authorization_service';
 export type {
   CheckPrivilegesOptions,

@@ -13,7 +13,7 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
+import type { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../contexts';
 import { useLocations } from './use_locations';
 
@@ -35,34 +35,32 @@ export function useStatusByLocation({
   const { data, loading } = useEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              FINAL_SUMMARY_FILTER,
-              EXCLUDE_RUN_ONCE_FILTER,
-              {
-                term: {
-                  config_id: configId,
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            FINAL_SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
+            {
+              term: {
+                config_id: configId,
               },
-            ],
-          },
-        },
-        sort: [{ '@timestamp': 'desc' }],
-        aggs: {
-          locations: {
-            terms: {
-              field: 'observer.geo.name',
-              missing: UNNAMED_LOCATION,
-              size: 1000,
             },
-            aggs: {
-              summary: {
-                top_hits: {
-                  size: 1,
-                },
+          ],
+        },
+      },
+      sort: [{ '@timestamp': 'desc' }],
+      aggs: {
+        locations: {
+          terms: {
+            field: 'observer.geo.name',
+            missing: UNNAMED_LOCATION,
+            size: 1000,
+          },
+          aggs: {
+            summary: {
+              top_hits: {
+                size: 1,
               },
             },
           },
@@ -75,13 +73,11 @@ export function useStatusByLocation({
 
   return useMemo(() => {
     const getColor = (status: string) => {
-      const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
-
       switch (status) {
         case 'up':
-          return isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.success;
+          return euiTheme.colors.success;
         case 'down':
-          return isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis6;
+          return euiTheme.colors.vis.euiColorVis6;
         default:
           return euiTheme.colors.backgroundBaseSubdued;
       }
@@ -115,11 +111,8 @@ export function useStatusByLocation({
     data?.aggregations?.locations.buckets,
     loading,
     monitorLocations,
-    euiTheme.themeName,
     euiTheme.colors.success,
-    euiTheme.colors.vis.euiColorVis0,
     euiTheme.colors.vis.euiColorVis6,
-    euiTheme.colors.vis.euiColorVis9,
     euiTheme.colors.backgroundBaseSubdued,
   ]);
 }

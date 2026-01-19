@@ -16,9 +16,10 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { useAgentPolicyWithPackagePolicies } from '../../../../../../../../components/agent_enrollment_flyout/hooks';
 
@@ -35,6 +36,8 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
 }> = ({ onConfirm, onCancel, agentPolicy, packagePolicy }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { data: apiKeysData, isLoading } = useQuery(['cloudFormationApiKeys'], () =>
     sendGetEnrollmentAPIKeys({
       page: 1,
@@ -57,9 +60,13 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
   });
 
   return (
-    <EuiModal data-test-subj="postInstallCloudFormationModal" onClose={onCancel}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      data-test-subj="postInstallCloudFormationModal"
+      onClose={onCancel}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="confirmCloudFormationModalTitleText">
+        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmCloudFormationModalTitleText">
           <FormattedMessage
             id="xpack.fleet.agentPolicy.postInstallCloudFormationModalTitle"
             defaultMessage="CloudFormation deployment"
@@ -72,7 +79,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
         {error && isError && !isLoadingInitialRequest && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut title={error} color="danger" iconType="error" />
+            <EuiCallOut announceOnMount title={error} color="danger" iconType="error" />
           </>
         )}
       </EuiModalBody>

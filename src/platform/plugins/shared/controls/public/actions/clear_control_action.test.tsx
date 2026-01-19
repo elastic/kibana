@@ -7,21 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { getMockedControlGroupApi } from '../controls/mocks/control_mocks';
+import { BehaviorSubject, take } from 'rxjs';
 import { ClearControlAction } from './clear_control_action';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 const dashboardApi = {
   viewMode$: new BehaviorSubject<ViewMode>('view'),
-};
-const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
   removePanel: jest.fn(),
   replacePanel: jest.fn(),
   addNewPanel: jest.fn(),
   children$: new BehaviorSubject({}),
-});
+};
 
 const clearControlAction = new ClearControlAction();
 const hasSelections$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -29,7 +26,7 @@ const hasSelections$ = new BehaviorSubject<boolean | undefined>(undefined);
 const controlApi = {
   type: 'test',
   uuid: '1',
-  parentApi: controlGroupApi,
+  parentApi: dashboardApi,
   hasSelections$,
   clearSelections: jest.fn(),
 };
@@ -46,13 +43,12 @@ describe('ClearControlAction', () => {
     }).rejects.toThrow(Error);
   });
 
-  test('should call onChange when isCompatible changes', () => {
-    const onChange = jest.fn();
-
+  test('should call onChange when isCompatible changes', (done) => {
+    const subject = clearControlAction.getCompatibilityChangesSubject({ embeddable: controlApi });
+    subject?.pipe(take(1)).subscribe(() => {
+      done();
+    });
     hasSelections$.next(true);
-    clearControlAction.subscribeToCompatibilityChanges({ embeddable: controlApi }, onChange);
-
-    expect(onChange).toHaveBeenCalledWith(true, clearControlAction);
   });
 
   describe('Clear control button compatibility', () => {
@@ -63,7 +59,7 @@ describe('ClearControlAction', () => {
     });
 
     test('should be compatible if there is a selection', async () => {
-      const hasSelections = { ...controlApi, hasSelections$: true };
+      const hasSelections = { ...controlApi, hasSelections$: new BehaviorSubject(true) };
 
       expect(await clearControlAction.isCompatible({ embeddable: hasSelections })).toBe(true);
     });

@@ -9,9 +9,8 @@ import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { ObservableTypesList, type ObservableTypesListProps } from '.';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 const observableTypes = [
   { label: 'Test Observable Type', key: 'deb68304-da86-483c-b5ed-ff5b3420e340' },
@@ -19,8 +18,6 @@ const observableTypes = [
 ];
 
 describe('ObservableTypesList', () => {
-  let appMockRender: AppMockRenderer;
-
   const props: ObservableTypesListProps = {
     disabled: false,
     observableTypes,
@@ -30,17 +27,16 @@ describe('ObservableTypesList', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders correctly', () => {
-    appMockRender.render(<ObservableTypesList {...props} />);
+    renderWithTestingProviders(<ObservableTypesList {...props} />);
 
     expect(screen.getByTestId('observable-types-list')).toBeInTheDocument();
   });
 
   it('shows ObservableTypesList correctly', async () => {
-    appMockRender.render(<ObservableTypesList {...props} />);
+    renderWithTestingProviders(<ObservableTypesList {...props} />);
 
     expect(await screen.findByTestId('observable-types-list')).toBeInTheDocument();
 
@@ -59,7 +55,7 @@ describe('ObservableTypesList', () => {
     });
 
     it('shows confirmation modal when deleting a field ', async () => {
-      appMockRender.render(<ObservableTypesList {...props} />);
+      renderWithTestingProviders(<ObservableTypesList {...props} />);
 
       const list = await screen.findByTestId('observable-types-list');
 
@@ -71,7 +67,7 @@ describe('ObservableTypesList', () => {
     });
 
     it('calls onDeleteObservableType when confirm', async () => {
-      appMockRender.render(<ObservableTypesList {...props} />);
+      renderWithTestingProviders(<ObservableTypesList {...props} />);
 
       const list = await screen.findByTestId('observable-types-list');
 
@@ -85,12 +81,13 @@ describe('ObservableTypesList', () => {
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
-        expect(props.onDeleteObservableType).toHaveBeenCalledWith(observableTypes[0].key);
       });
+
+      expect(props.onDeleteObservableType).toHaveBeenCalledWith(observableTypes[0].key);
     });
 
     it('does not call onDeleteObservableType when cancel', async () => {
-      appMockRender.render(<ObservableTypesList {...props} />);
+      renderWithTestingProviders(<ObservableTypesList {...props} />);
 
       const list = await screen.findByTestId('observable-types-list');
 
@@ -104,8 +101,9 @@ describe('ObservableTypesList', () => {
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
-        expect(props.onDeleteObservableType).not.toHaveBeenCalledWith();
       });
+
+      expect(props.onDeleteObservableType).not.toHaveBeenCalledWith();
     });
   });
 
@@ -115,7 +113,7 @@ describe('ObservableTypesList', () => {
     });
 
     it('calls onEditObservableType correctly', async () => {
-      appMockRender.render(<ObservableTypesList {...props} />);
+      renderWithTestingProviders(<ObservableTypesList {...props} />);
 
       const list = await screen.findByTestId('observable-types-list');
 

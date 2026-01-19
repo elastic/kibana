@@ -1,0 +1,23 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          getConversationByIdResponseExample:
+            description: "Example response containing the contents of a convesation with the chat agent"
+            value:
+              id: bcc176c5-38f6-40be-be0c-898e34fa1480
+              agent_id: elastic-ai-agent
+              user:
+                username: elastic
+              title: General Greeting
+              created_at: "2025-09-19T17:45:39.554Z"
+              updated_at: "2025-09-19T17:45:39.554Z"
+              rounds:
+              - id: 170ec3b2-0f5a-4538-8b60-549572386d2a
+                input:
+                  message: "Hello, how are you?"
+                steps: []
+                response:
+                  message: "Since this is a general greeting that doesn't require any organizational or product-specific information, I can respond without using tools.\n\nHello! I'm doing well, thank you for asking. I'm here to help you with any questions you may have. How can I assist you today?"

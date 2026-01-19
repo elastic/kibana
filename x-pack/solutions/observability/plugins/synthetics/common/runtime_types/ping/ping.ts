@@ -74,9 +74,6 @@ export const X509Type = t.intersection([
 export type X509 = t.TypeOf<typeof X509Type>;
 
 export const TlsType = t.partial({
-  // deprecated in favor of server.x509.not_after/not_before
-  certificate_not_valid_after: t.string,
-  certificate_not_valid_before: t.string,
   cipher: t.string,
   established: t.boolean,
   server: t.partial({
@@ -92,6 +89,7 @@ export type Tls = t.TypeOf<typeof TlsType>;
 
 export const MonitorType = t.intersection([
   t.type({
+    name: t.string,
     id: t.string,
     status: t.string,
     type: t.string,
@@ -106,7 +104,6 @@ export const MonitorType = t.intersection([
       us: t.number,
     }),
     ip: t.string,
-    name: t.string,
 
     fleet_managed: t.boolean,
     project: t.type({
@@ -159,13 +156,12 @@ export type TestSummary = t.TypeOf<typeof SummaryCodec>;
 
 export const PingType = t.intersection([
   t.type({
-    timestamp: t.string,
     monitor: MonitorType,
     docId: t.string,
     observer: ObserverCodec,
+    '@timestamp': t.string,
   }),
   t.partial({
-    '@timestamp': t.string,
     agent: AgentType,
     container: t.partial({
       id: t.string,

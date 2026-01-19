@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PieChartType } from '../../types';
+import type { PartitionChartType as PieChartType } from '@kbn/lens-common';
 
 export const isPartitionShape = (shape: PieChartType | string) =>
   ['donut', 'pie', 'treemap', 'mosaic', 'waffle'].includes(shape);

@@ -25,13 +25,18 @@ export const ResponseNote = z.object({
 
 export type PersistNoteRouteRequestBody = z.infer<typeof PersistNoteRouteRequestBody>;
 export const PersistNoteRouteRequestBody = z.object({
+  /**
+   * The note to add or update.
+   */
   note: BareNote,
-  overrideOwner: z.boolean().nullable().optional(),
+  /**
+   * The `savedObjectId` of the note
+   */
   noteId: z.string().nullable().optional(),
+  /**
+   * The version of the note
+   */
   version: z.string().nullable().optional(),
-  eventIngested: z.string().nullable().optional(),
-  eventTimestamp: z.string().nullable().optional(),
-  eventDataView: z.string().nullable().optional(),
 });
 export type PersistNoteRouteRequestBodyInput = z.input<typeof PersistNoteRouteRequestBody>;
 

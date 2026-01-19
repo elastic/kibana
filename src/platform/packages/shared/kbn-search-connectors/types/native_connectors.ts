@@ -9,7 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { DisplayType, FeatureName, FieldType, NativeConnector } from './connectors';
+import type { NativeConnector } from './connectors';
+import { DisplayType, FeatureName, FieldType } from './connectors';
 
 // assigning these to a local var significantly improves bundle size
 // because it reduces references to the imported modules.
@@ -1229,6 +1230,63 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
     },
     serviceType: 'github',
+  },
+  gitlab: {
+    configuration: {
+      token: {
+        default_value: null,
+        depends_on: [],
+        display: TEXTBOX,
+        label: translate('searchConnectors.nativeConnectors.gitlab.token.label', {
+          defaultMessage: 'Personal Access Token',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: true,
+        tooltip: translate('searchConnectors.nativeConnectors.gitlab.token.tooltip', {
+          defaultMessage:
+            'GitLab Personal Access Token with api, read_api, and read_repository scopes.',
+        }),
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      projects: {
+        default_value: null,
+        depends_on: [],
+        display: TEXTAREA,
+        label: translate('searchConnectors.nativeConnectors.gitlab.projects.label', {
+          defaultMessage: 'List of projects',
+        }),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: translate('searchConnectors.nativeConnectors.gitlab.projects.tooltip', {
+          defaultMessage:
+            "List of project paths (e.g., 'group/project'). Use '*' to sync all accessible projects.",
+        }),
+        type: LIST,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+    },
+    name: translate('searchConnectors.nativeConnectors.gitlab.name', {
+      defaultMessage: 'GitLab',
+    }),
+    features: {
+      [SYNC_RULES]: {
+        advanced: { enabled: false },
+        basic: { enabled: true },
+      },
+      [INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
+    serviceType: 'gitlab',
   },
   gmail: {
     configuration: {
@@ -4283,7 +4341,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
       secret_value: {
         default_value: null,
-        depends_on: [],
+        depends_on: [{ field: 'auth_method', value: 'secret' }],
         display: TEXTBOX,
         label: translate(
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.secretValueLabel',

@@ -7,17 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './visualize_listing.scss';
-
-import React, {
-  useCallback,
-  useRef,
-  useMemo,
-  useEffect,
-  MouseEvent,
-  MutableRefObject,
-} from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import type { MouseEvent, MutableRefObject } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import { EuiCallOut, EuiLink, EuiSpacer, type UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -25,31 +17,65 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation, useParams } from 'react-router-dom';
 
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   TabbedTableListView,
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import { TableListViewProps } from '@kbn/content-management-table-list-view';
+import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import {
+  SAVED_OBJECTS_LIMIT_SETTING,
+  SAVED_OBJECTS_PER_PAGE_SETTING,
+  VisualizeConstants,
+} from '@kbn/visualizations-common';
 import { findListItems } from '../../utils/saved_visualize_utils';
-import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
+import {
+  deleteListItems,
+  updateBasicSoAttributes,
+} from '../../utils/saved_objects_utils/update_basic_attributes';
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
-import { SAVED_OBJECTS_LIMIT_SETTING, SAVED_OBJECTS_PER_PAGE_SETTING } from '../..';
 import type { VisualizationListItem } from '../..';
 import type { VisualizeServices } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
 import { getNoItemsMessage, getCustomColumn, getCustomSortingOptions } from '../utils';
-import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
+import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
 import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
 
-type VisualizeUserContent = VisualizationListItem &
+const visualizeListingStyles = {
+  table: ({ euiTheme }: UseEuiTheme) => css`
+    .visListingTable__typeImage,
+    .visListingTable__typeIcon {
+      margin-right: ${euiTheme.size.s};
+      position: relative;
+      top: -1px;
+    }
+
+    .visListingTable__typeImage {
+      ${logicalSizeCSS(euiTheme.size.base, euiTheme.size.base)};
+    }
+
+    .visListingTable__experimentalIcon {
+      width: ${euiTheme.size.l};
+      vertical-align: middle;
+      padding: 0 ${euiTheme.size.s};
+      margin-left: ${euiTheme.size.s};
+    }
+  `,
+
+  calloutLink: css`
+    text-decoration: underline;
+  `,
+};
+
+export type VisualizeUserContent = VisualizationListItem &
   UserContentCommonSchema & {
     type: string;
     attributes: {
@@ -103,11 +129,11 @@ const useTableListViewProps = (
     services: {
       application,
       history,
-      savedObjects,
       savedObjectsTagging,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
+      http,
       ...startServices
     },
   } = useKibana<VisualizeServices>();
@@ -119,7 +145,7 @@ const useTableListViewProps = (
   }, [closeNewVisModal]);
 
   const editItem = useCallback(
-    async ({ attributes: { id }, editor }: VisualizeUserContent) => {
+    async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
       if (!('editApp' in editor || 'editUrl' in editor)) {
         await editor.onEdit(id);
         return;
@@ -145,8 +171,8 @@ const useTableListViewProps = (
         references,
         referencesToExclude,
       }: {
-        references?: SavedObjectReference[];
-        referencesToExclude?: SavedObjectReference[];
+        references?: Reference[];
+        referencesToExclude?: Reference[];
       } = {}
     ) => {
       return findListItems(
@@ -186,12 +212,13 @@ const useTableListViewProps = (
             savedObjectsTagging,
             typesService: getTypes(),
             contentManagement,
+            http,
             ...startServices,
           }
         );
       }
     },
-    [savedObjectsTagging, contentManagement, startServices]
+    [savedObjectsTagging, contentManagement, http, startServices]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -209,12 +236,10 @@ const useTableListViewProps = (
                       id,
                       title: value,
                       lastSavedTitle: content.title,
-                      getEsType: () => content.type,
                     },
                     false,
                     false,
-                    () => {},
-                    startServices
+                    () => {}
                   );
                 } catch (e) {
                   return i18n.translate(
@@ -233,14 +258,18 @@ const useTableListViewProps = (
         },
       ],
     }),
-    [startServices]
+    []
   );
 
   const deleteItems = useCallback(
-    async (selectedItems: object[]) => {
-      await Promise.all(
-        selectedItems.map((item: any) => savedObjects.client.delete(item.savedObjectType, item.id))
-      ).catch((error) => {
+    async (items: object[]) => {
+      await deleteListItems(items, {
+        savedObjectsTagging,
+        typesService: getTypes(),
+        contentManagement,
+        http,
+        ...startServices,
+      }).catch((error) => {
         toastNotifications.addError(error, {
           title: i18n.translate('visualizations.visualizeListingDeleteErrorTitle', {
             defaultMessage: 'Error deleting visualization',
@@ -248,7 +277,7 @@ const useTableListViewProps = (
         });
       });
     },
-    [savedObjects.client, toastNotifications]
+    [contentManagement, http, savedObjectsTagging, startServices, toastNotifications]
   );
 
   const props: CustomTableViewProps = {
@@ -285,6 +314,7 @@ const useTableListViewProps = (
 };
 
 export const VisualizeListing = () => {
+  const styles = useMemoCss(visualizeListingStyles);
   const {
     services: {
       application,
@@ -333,17 +363,22 @@ export const VisualizeListing = () => {
       chrome.setBreadcrumbs([
         {
           text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-            defaultMessage: 'Visualize Library',
+            defaultMessage: 'Visualize library',
           }),
         },
       ]);
     }
 
     chrome.docTitle.change(
-      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize Library' })
+      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize library' })
     );
   });
   useUnmount(() => closeNewVisModal.current());
+
+  const getVisualizeListItemLink = useMemo(
+    () => getVisualizeListItemLinkFn(application, kbnUrlStateStorage),
+    [application, kbnUrlStateStorage]
+  );
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -351,7 +386,7 @@ export const VisualizeListing = () => {
   const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
 
   const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
-    defaultMessage: 'Visualize Library',
+    defaultMessage: 'Visualize library',
   });
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
@@ -364,6 +399,7 @@ export const VisualizeListing = () => {
           dashboardApp: (
             <EuiLink
               className="visListingCallout__link"
+              css={styles.calloutLink}
               onClick={(event: MouseEvent) => {
                 event.preventDefault();
                 application.navigateToUrl(application.getUrlForApp('dashboards'));
@@ -386,54 +422,48 @@ export const VisualizeListing = () => {
         <>
           {dashboardCapabilities.createNew && (
             <>
-              <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+              <EuiCallOut announceOnMount size="s" title={calloutMessage} iconType="info" />
               <EuiSpacer size="m" />
             </>
           )}
-          <TableListViewTable<VisualizeUserContent>
-            id="vis"
-            // we allow users to create visualizations even if they can't save them
-            // for data exploration purposes
-            customTableColumn={getCustomColumn()}
-            customSortingOptions={getCustomSortingOptions()}
-            listingLimit={listingLimit}
-            initialPageSize={initialPageSize}
-            initialFilter={''}
-            entityName={i18n.translate('visualizations.listing.table.entityName', {
-              defaultMessage: 'visualization',
-            })}
-            entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
-              defaultMessage: 'visualizations',
-            })}
-            getOnClickTitle={(item) =>
-              item.attributes.readOnly ? undefined : () => tableViewProps.editItem?.(item)
-            }
-            getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
-              readOnly || (editor && 'onEdit' in editor)
-                ? undefined
-                : getVisualizeListItemLink(
-                    application,
-                    kbnUrlStateStorage,
-                    editor.editApp,
-                    editor.editUrl,
-                    error
-                  )
-            }
-            tableCaption={visualizeLibraryTitle}
-            {...tableViewProps}
-            {...propsFromParent}
-          />
+          <div css={styles.table}>
+            <TableListViewTable<VisualizeUserContent>
+              id="vis"
+              // we allow users to create visualizations even if they can't save them
+              // for data exploration purposes
+              customTableColumn={getCustomColumn()}
+              customSortingOptions={getCustomSortingOptions()}
+              initialPageSize={initialPageSize}
+              initialFilter={''}
+              entityName={i18n.translate('visualizations.listing.table.entityName', {
+                defaultMessage: 'visualization',
+              })}
+              entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
+                defaultMessage: 'visualizations',
+              })}
+              getOnClickTitle={(item) =>
+                item.attributes.readOnly || item.error
+                  ? undefined
+                  : () => tableViewProps.editItem?.(item)
+              }
+              getDetailViewLink={getVisualizeListItemLink}
+              tableCaption={visualizeLibraryTitle}
+              {...tableViewProps}
+              {...propsFromParent}
+            />
+          </div>
         </>
       ),
     };
   }, [
+    styles.calloutLink,
+    styles.table,
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    kbnUrlStateStorage,
-    listingLimit,
-    tableViewProps,
     visualizeLibraryTitle,
+    tableViewProps,
+    getVisualizeListItemLink,
   ]);
 
   const tabs = useMemo(

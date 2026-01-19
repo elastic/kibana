@@ -9,7 +9,7 @@
 
 import { action } from '@storybook/addon-actions';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import {
+import type {
   NoDataViewsPromptServices,
   NoDataViewsPromptProps,
 } from '@kbn/shared-ux-prompt-no-data-views-types';
@@ -30,21 +30,21 @@ export class StorybookMock extends AbstractStorybookMock<
   propArguments = {};
   serviceArguments = {
     canCreateNewDataView: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: true,
     },
     dataViewsDocLink: {
       options: ['dataviews/link', undefined],
-      control: { type: 'radio' },
+      control: { control: 'radio' },
       defaultValue: 'dataviews/link',
     },
     canTryEsql: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: true,
     },
     esqlDocLink: {
       options: ['esql/link', undefined],
-      control: { type: 'radio' },
+      control: { control: 'radio' },
       defaultValue: 'esql/link',
     },
   };

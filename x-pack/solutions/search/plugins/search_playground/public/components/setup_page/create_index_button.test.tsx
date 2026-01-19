@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -18,11 +19,9 @@ jest.mock('../../hooks/use_kibana', () => ({
       application: {
         navigateToUrl: jest.fn(),
       },
-      share: {
-        url: {
-          locators: {
-            get: jest.fn().mockReturnValue(undefined),
-          },
+      chrome: {
+        navLinks: {
+          get: jest.fn().mockReturnValue(undefined),
         },
       },
     },
@@ -38,13 +37,13 @@ const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
 };
 
 describe('CreateIndexButton', () => {
-  it('renders correctly when there is no locator', async () => {
+  it('renders correctly when there is no link to indices', async () => {
     const { queryByTestId } = render(<CreateIndexButton />, { wrapper: Wrapper });
 
     expect(queryByTestId('createIndexButton')).not.toBeInTheDocument();
   });
 
-  it('renders correctly when there is a locator', async () => {
+  it('renders correctly when navlink exists', async () => {
     const navigateToUrl = jest.fn();
 
     (useKibana as unknown as jest.Mock).mockImplementation(() => ({
@@ -52,14 +51,11 @@ describe('CreateIndexButton', () => {
         application: {
           navigateToUrl,
         },
-        share: {
-          url: {
-            locators: {
-              get: jest.fn().mockReturnValue({
-                getUrl: jest.fn().mockReturnValue('mock-url'),
-                getRedirectUrl: jest.fn().mockReturnValue('mock-shown-url'),
-              }),
-            },
+        chrome: {
+          navLinks: {
+            get: jest.fn().mockReturnValue({
+              url: 'mock-url',
+            }),
           },
         },
       },

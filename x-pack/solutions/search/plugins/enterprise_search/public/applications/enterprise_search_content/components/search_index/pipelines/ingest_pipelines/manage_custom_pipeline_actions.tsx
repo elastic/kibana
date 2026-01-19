@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MutableRefObject } from 'react';
 import React, { useState } from 'react';
 
 import { css } from '@emotion/react';
@@ -20,7 +21,11 @@ const revertContextMenuItemCSS = css`
   color: ${euiThemeVars.euiColorDanger};
 `;
 
-export const ManageCustomPipelineActions: React.FC = () => {
+interface ManageCustomPipelineProps {
+  buttonRef: MutableRefObject<HTMLButtonElement | null>;
+}
+
+export const ManageCustomPipelineActions: React.FC<ManageCustomPipelineProps> = ({ buttonRef }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openDeleteModal } = useActions(PipelinesLogic);
 
@@ -32,7 +37,13 @@ export const ManageCustomPipelineActions: React.FC = () => {
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty size="s" iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+        <EuiButtonEmpty
+          buttonRef={buttonRef}
+          size="s"
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={onButtonClick}
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.manageButton',
             { defaultMessage: 'Manage' }

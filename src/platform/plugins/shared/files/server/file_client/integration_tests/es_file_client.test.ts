@@ -9,10 +9,11 @@
 
 import { Readable } from 'stream';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { TestEnvironmentUtils, setupIntegrationEnvironment } from '../../test_utils';
+import type { TestEnvironmentUtils } from '../../test_utils';
+import { setupIntegrationEnvironment } from '../../test_utils';
 import { createEsFileClient } from '../create_es_file_client';
-import { FileClient } from '../types';
-import { FileMetadata } from '../../../common';
+import type { FileClient } from '../types';
+import type { FileMetadata } from '../../../common';
 import { getFips } from 'crypto';
 
 describe('ES-index-backed file client', () => {

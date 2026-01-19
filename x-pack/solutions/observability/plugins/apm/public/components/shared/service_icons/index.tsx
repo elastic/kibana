@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { CloudProvider } from '@kbn/custom-icons';
 import { getAgentIcon, getCloudProviderIcon, getServerlessIcon } from '@kbn/custom-icons';
 import type { ReactChild } from 'react';
@@ -75,10 +76,8 @@ export interface PopoverItem {
 }
 
 export function ServiceIcons({ start, end, serviceName, environment }: Props) {
+  const isDarkMode = useKibanaIsDarkMode();
   const [selectedIconPopover, setSelectedIconPopover] = useState<Icons | null>();
-
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === 'DARK';
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {

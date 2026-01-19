@@ -15,7 +15,10 @@ import type {
 } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 
-import { UninstallTokenError } from '../../common/errors';
+import {
+  AgentlessAgentCreateFleetUnreachableError,
+  UninstallTokenError,
+} from '../../common/errors';
 
 import { appContextService } from '../services';
 
@@ -23,6 +26,8 @@ import {
   AgentPolicyNameExistsError,
   ConcurrentInstallOperationError,
   FleetError,
+  FleetElasticsearchError,
+  isESClientError,
   PackageUnsupportedMediaTypeError,
   RegistryConnectionError,
   RegistryError,
@@ -47,6 +52,11 @@ import {
   AgentlessPolicyExistsRequestError,
   PackageInvalidDeploymentMode,
   PackagePolicyContentPackageError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
+  OutputInvalidError,
+  AgentlessAgentCreateOverProvisionnedError,
+  FleetErrorWithStatusCode,
+  PackageRollbackError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -90,6 +100,12 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 400;
   }
   if (error instanceof PackagePolicyContentPackageError) {
+    return 400;
+  }
+  if (error instanceof CustomPackagePolicyNotAllowedForAgentlessError) {
+    return 400;
+  }
+  if (error instanceof PackageRollbackError) {
     return 400;
   }
   // Unauthorized
@@ -151,20 +167,46 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 502;
   }
 
+  if (error instanceof FleetErrorWithStatusCode && error.statusCode) {
+    return error.statusCode;
+  }
+
   return 400; // Bad Request
 };
+
+function shouldRespondWithErrorType(error: FleetError) {
+  if (error instanceof OutputInvalidError) {
+    return true;
+  } else if (error instanceof AgentlessAgentCreateOverProvisionnedError) {
+    return true;
+  } else if (error instanceof AgentlessAgentCreateFleetUnreachableError) {
+    return true;
+  }
+  return false;
+}
+
+function getErrorExtraAttributes(error: FleetError) {
+  if (error instanceof AgentlessAgentCreateOverProvisionnedError) {
+    return { limit: error.meta?.limit };
+  }
+}
 
 export function fleetErrorToResponseOptions(error: IngestErrorHandlerParams['error']) {
   const logger = appContextService.getLogger();
   // our "expected" errors
   if (error instanceof FleetError) {
     // only log the message
+    const extraAttributes = getErrorExtraAttributes(error);
     logger.error(error.message);
     return {
       statusCode: getHTTPResponseCode(error),
       body: {
         message: error.message,
-        ...(error.attributes && { attributes: error.attributes }),
+        ...(extraAttributes ? { attributes: extraAttributes } : {}),
+        ...(shouldRespondWithErrorType(error)
+          ? { attributes: { type: error.name, ...extraAttributes } }
+          : {}),
+        ...(error.attributes && { attributes: { ...error.attributes, ...extraAttributes } }),
       },
     };
   }
@@ -191,6 +233,12 @@ export const defaultFleetErrorHandler: IngestErrorHandler = async ({
   error,
   response,
 }: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
-  const options = fleetErrorToResponseOptions(error);
+  // Convert ALL Elasticsearch errors to Fleet errors (preserving original status codes)
+  let processedError = error;
+  if (isESClientError(error)) {
+    processedError = new FleetElasticsearchError(error);
+  }
+
+  const options = fleetErrorToResponseOptions(processedError);
   return response.customError(options);
 };

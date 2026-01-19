@@ -17,24 +17,23 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiErrorBoundary,
+  EuiCodeBlock,
+  EuiTitle,
 } from '@elastic/eui';
-import { Option, map, getOrElse } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import type { Option } from 'fp-ts/Option';
+import { map, getOrElse } from 'fp-ts/Option';
+import { pipe } from 'fp-ts/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import {
-  ActionConnector,
-  ActionConnectorMode,
-  ActionTypeRegistryContract,
-  IErrorObject,
-} from '../../../types';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 
 export interface TestConnectorFormProps {
   connector: ActionConnector;
   executeEnabled: boolean;
   isExecutingAction: boolean;
-  setActionParams: (params: Record<string, unknown>) => void;
+  onEditAction: (field: string, value: unknown) => void;
   actionParams: Record<string, unknown>;
   onExecutionAction: () => Promise<void>;
   executionResult: Option<ActionTypeExecutorResult<unknown> | undefined>;
@@ -46,7 +45,7 @@ export const TestConnectorForm = ({
   executeEnabled,
   executionResult,
   actionParams,
-  setActionParams,
+  onEditAction,
   onExecutionAction,
   isExecutingAction,
   actionTypeRegistry,
@@ -58,11 +57,16 @@ export const TestConnectorForm = ({
 
   useEffect(() => {
     (async () => {
-      const res = (await actionTypeModel?.validateParams(actionParams)).errors as IErrorObject;
+      const res = (
+        await actionTypeModel?.validateParams(
+          actionParams,
+          connector && 'config' in connector ? connector.config : undefined
+        )
+      ).errors as IErrorObject;
       setActionErrors({ ...res });
       setHasErrors(!!Object.values(res).find((errors) => (errors.length as number) > 0));
     })();
-  }, [actionTypeModel, actionParams]);
+  }, [actionTypeModel, actionParams, connector]);
 
   const steps = [
     {
@@ -87,12 +91,7 @@ export const TestConnectorForm = ({
               actionParams={actionParams}
               index={0}
               errors={actionErrors}
-              editAction={(field, value) =>
-                setActionParams({
-                  ...actionParams,
-                  [field]: value,
-                })
-              }
+              editAction={onEditAction}
               messageVariables={[]}
               actionConnector={connector}
               executionMode={ActionConnectorMode.Test}
@@ -118,7 +117,7 @@ export const TestConnectorForm = ({
         <>
           {executeEnabled ? null : (
             <>
-              <EuiCallOut iconType="warning" color="warning">
+              <EuiCallOut announceOnMount iconType="warning" color="warning">
                 <p>
                   <FormattedMessage
                     defaultMessage="Save your changes before testing the connector."
@@ -157,7 +156,7 @@ export const TestConnectorForm = ({
         executionResult,
         map((result) =>
           result?.status === 'ok' ? (
-            <SuccessfulExecution />
+            <SuccessfulExecution executionResult={result} />
           ) : (
             <FailedExecussion executionResult={result} />
           )
@@ -181,25 +180,56 @@ const AwaitingExecution = () => (
   </EuiCallOut>
 );
 
-const SuccessfulExecution = () => (
-  <EuiCallOut
-    title={i18n.translate(
-      'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
-      {
-        defaultMessage: 'Test was successful',
-      }
+const SuccessfulExecution = ({
+  executionResult,
+}: {
+  executionResult: ActionTypeExecutorResult<unknown> | undefined;
+}) => (
+  <>
+    <EuiCallOut
+      title={i18n.translate(
+        'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
+        {
+          defaultMessage: 'Test was successful',
+        }
+      )}
+      color="success"
+      data-test-subj="executionSuccessfulResult"
+      iconType="check"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="Ensure the results are what you expect."
+          id="xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulDescription"
+        />
+      </p>
+    </EuiCallOut>
+    {executionResult && (
+      <>
+        <EuiSpacer size="s" />
+        <EuiTitle size="xs">
+          <h4>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.testConnectorForm.executionResultDetails',
+              {
+                defaultMessage: 'Response',
+              }
+            )}
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiCodeBlock
+          language="json"
+          paddingSize="m"
+          overflowHeight={300}
+          isCopyable
+          data-test-subj="executionResultCodeBlock"
+        >
+          {JSON.stringify(executionResult, null, 2)}
+        </EuiCodeBlock>
+      </>
     )}
-    color="success"
-    data-test-subj="executionSuccessfulResult"
-    iconType="check"
-  >
-    <p>
-      <FormattedMessage
-        defaultMessage="Ensure the results are what you expect."
-        id="xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulDescription"
-      />
-    </p>
-  </EuiCallOut>
+  </>
 );
 
 const FailedExecussion = ({

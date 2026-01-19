@@ -6,9 +6,9 @@
  */
 
 import type { Moment } from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
-import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../constants';
+import type { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../constants';
 
 export interface ActionStatusModelEs {
   id: string;

@@ -7,21 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 
 import type { ReportingAPIClient } from '../../reporting_api_client';
+import type { ClientConfigType } from '../../types';
 
 export type StartServices = [
   Pick<
     CoreStart,
     // required for modules that render React
-    | 'analytics'
-    | 'i18n'
-    | 'theme'
-    | 'userProfile'
+    | 'rendering'
     // used extensively in Reporting share context menus and modal
     | 'notifications'
   >,
@@ -31,9 +29,9 @@ export type StartServices = [
 
 export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
-  license: ILicense;
-  application: ApplicationStart;
   startServices$: Rx.Observable<StartServices>;
+  csvConfig?: ClientConfigType['csv'];
+  isServerless?: boolean;
 }
 
 export interface ExportPanelShareOpts {

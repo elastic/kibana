@@ -14,18 +14,17 @@ import {
   sloDefinitionSchema,
   summarySchema,
 } from '../schema';
+import type { SLODefinitionResponse } from './routes/find_definition';
 
 const sloWithDataResponseSchema = t.intersection([
   sloDefinitionSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema }),
+  t.type({ summary: summarySchema, groupings: groupingsSchema, instanceId: allOrAnyString }),
   t.partial({
-    instanceId: allOrAnyString,
     meta: metaSchema,
     remote: remoteSchema,
   }),
 ]);
 
-type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
 
 export { sloWithDataResponseSchema };

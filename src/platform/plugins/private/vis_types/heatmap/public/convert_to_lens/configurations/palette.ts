@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Range } from '@kbn/expressions-plugin/common';
-import { convertToLensModule } from '@kbn/visualizations-plugin/public';
-import { HeatmapVisParams } from '../../types';
+import type { Range } from '@kbn/expressions-plugin/common';
+import { getConvertToLensModule } from '@kbn/visualizations-plugin/public';
+import type { HeatmapVisParams } from '../../types';
 import { getStopsWithColorsFromColorsNumber } from '../../utils/palette';
 
 type HeatmapVisParamsWithRanges = Omit<HeatmapVisParams, 'colorsRange'> & {
@@ -24,7 +24,7 @@ const isHeatmapVisParamsWithRanges = (
 
 export const getPaletteForHeatmap = async (params: HeatmapVisParams) => {
   const { getPalette, getPaletteFromStopsWithColors, getPercentageModeConfig } =
-    await convertToLensModule;
+    await getConvertToLensModule();
 
   if (isHeatmapVisParamsWithRanges(params)) {
     const percentageModeConfig = getPercentageModeConfig(params, false);

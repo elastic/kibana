@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { ShardsView } from './shards_view';
@@ -20,16 +20,17 @@ interface Props {
 
 export function ClusterView({ clusterDetails }: Props) {
   const clusterFailure = (clusterDetails.failures ?? []).find((failure) => {
-    return failure.shard < 0;
+    return typeof failure.shard !== 'undefined' && failure.shard < 0;
   });
   const shardFailures = (clusterDetails.failures ?? []).filter((failure) => {
-    return failure.shard >= 0;
+    return typeof failure.shard !== 'undefined' && failure.shard >= 0;
   });
 
   return (
     <EuiText css={{ width: '100%' }} size="xs" data-test-subj="inspectorRequestClustersDetails">
       {clusterDetails.timed_out ? (
         <EuiCallOut
+          announceOnMount
           size="s"
           color="warning"
           title={i18n.translate('inspector.requests.clusters.timedOutMessage', {
@@ -42,6 +43,7 @@ export function ClusterView({ clusterDetails }: Props) {
 
       {clusterFailure ? (
         <EuiCallOut
+          announceOnMount
           size="s"
           color="warning"
           title={i18n.translate('inspector.requests.clusters.failedClusterMessage', {

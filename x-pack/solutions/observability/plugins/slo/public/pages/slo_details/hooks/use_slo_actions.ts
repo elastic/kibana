@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import path from 'path';
-import { paths } from '../../../../common/locators/paths';
-import { useSpace } from '../../../hooks/use_space';
-import { BurnRateRuleParams } from '../../../typings';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useSpace } from '../../../hooks/use_space';
+import type { BurnRateRuleParams } from '../../../typings';
 import {
   createRemoteSloDeleteUrl,
   createRemoteSloDisableUrl,
@@ -60,7 +60,7 @@ export const useSloActions = ({
       setIsEditRuleFlyoutOpen(true);
       setIsActionsPopoverOpen(false);
     } else {
-      const locator = locators.get<RulesParams>(rulesLocatorID);
+      const locator = locators.get<RulesLocatorParams>(rulesLocatorID);
       if (!locator) return undefined;
 
       if (slo.remote && slo.remote.kibanaUrl !== '') {
@@ -77,11 +77,7 @@ export const useSloActions = ({
     }
   };
 
-  const detailsUrl = paths.sloDetails(
-    slo.id,
-    ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
-    slo.remote?.remoteName
-  );
+  const detailsUrl = paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName);
 
   const remoteDeleteUrl = createRemoteSloDeleteUrl(slo, spaceId);
   const remoteResetUrl = createRemoteSloResetUrl(slo, spaceId);

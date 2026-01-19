@@ -7,9 +7,9 @@
 
 import { useCallback, useRef } from 'react';
 
-type UseAsyncConfirmationReturn = [
-  initConfirmation: () => Promise<boolean>,
-  confirm: () => void,
+type UseAsyncConfirmationReturn<ConfirmResult = unknown> = [
+  initConfirmation: () => Promise<ConfirmResult | boolean>,
+  confirm: (result?: ConfirmResult) => void,
   cancel: () => void
 ];
 
@@ -19,14 +19,15 @@ interface UseAsyncConfirmationArgs {
 }
 
 // TODO move to common hooks
-export const useAsyncConfirmation = ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useAsyncConfirmation = <ConfirmResult = any>({
   onInit,
   onFinish,
-}: UseAsyncConfirmationArgs): UseAsyncConfirmationReturn => {
-  const confirmationPromiseRef = useRef<(result: boolean) => void>();
+}: UseAsyncConfirmationArgs): UseAsyncConfirmationReturn<ConfirmResult> => {
+  const confirmationPromiseRef = useRef<(result: ConfirmResult | boolean) => void>();
 
-  const confirm = useCallback(() => {
-    confirmationPromiseRef.current?.(true);
+  const confirm = useCallback((result?: ConfirmResult) => {
+    confirmationPromiseRef.current?.(result ?? true);
   }, []);
 
   const cancel = useCallback(() => {
@@ -36,7 +37,7 @@ export const useAsyncConfirmation = ({
   const initConfirmation = useCallback(() => {
     onInit();
 
-    return new Promise<boolean>((resolve) => {
+    return new Promise<ConfirmResult | boolean>((resolve) => {
       confirmationPromiseRef.current = resolve;
     }).finally(() => {
       onFinish();

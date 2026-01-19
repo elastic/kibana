@@ -52,6 +52,7 @@ export const createRuleTypeMocks = () => {
     alertsClient: {
       report: jest.fn(),
       setAlertData: jest.fn(),
+      getRecoveredAlerts: jest.fn(),
     },
   };
 

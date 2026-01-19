@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import {
+import type {
   ActionConnector as RawActionConnector,
   ActionType,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { apiService } from '../../../../utils/api_service';
-import {
+import type {
   DynamicSettings,
-  DynamicSettingsCodec,
-  DynamicSettingsSaveCodec,
   DynamicSettingsSaveResponse,
   LocationMonitorsResponse,
+} from '../../../../../common/runtime_types';
+import {
+  DynamicSettingsCodec,
+  DynamicSettingsSaveCodec,
   LocationMonitorsType,
 } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { LocationMonitor } from '.';
+import type { LocationMonitor } from '.';
 
 interface SaveApiRequest {
   settings: DynamicSettings;
@@ -72,8 +74,4 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
   return await apiService.get(SYNTHETICS_API_URLS.GET_CONNECTOR_TYPES, {
     feature_id: 'uptime',
   });
-};
-
-export const syncGlobalParamsAPI = async (): Promise<boolean> => {
-  return await apiService.get(SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS);
 };

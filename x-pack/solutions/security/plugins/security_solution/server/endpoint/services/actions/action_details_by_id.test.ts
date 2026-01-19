@@ -6,8 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   EndpointActionResponse,
   LogsEndpointAction,
@@ -21,11 +20,9 @@ import {
   createActionRequestsEsSearchResultsMock,
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import {
-  createMockEndpointAppContextServiceSetupContract,
-  createMockEndpointAppContextServiceStartContract,
-} from '../../mocks';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { createMockEndpointAppContextService } from '../../mocks';
+import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 
 describe('When using `getActionDetailsById()', () => {
   let esClient: ElasticsearchClientMock;
@@ -35,42 +32,40 @@ describe('When using `getActionDetailsById()', () => {
   let endpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+    endpointAppContextService = createMockEndpointAppContextService();
+    esClient = endpointAppContextService.getInternalEsClient() as ElasticsearchClientMock;
     endpointActionGenerator = new EndpointActionGenerator('seed');
-    endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
-
     actionRequests = createActionRequestsEsSearchResultsMock();
     actionResponses = createActionResponsesEsSearchResultsMock();
 
     applyActionsEsSearchMock(esClient, actionRequests, actionResponses);
+    (
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
   });
 
   it('should return expected output', async () => {
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([
-          {
-            agent: {
-              id: 'agent-a',
-            },
-            host: {
-              hostname: 'Host-agent-a',
-            },
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([
+      new FleetAgentGenerator('seed').generate({
+        id: 'agent-a',
+        local_metadata: {
+          host: {
+            name: 'Host-agent-a',
           },
-        ]),
-      });
+        },
+      }),
+    ]);
     const doc = actionRequests.hits.hits[0]._source;
     await expect(
-      getActionDetailsById(esClient, endpointAppContextService.getEndpointMetadataService(), '123')
+      getActionDetailsById(endpointAppContextService, 'default', '123')
     ).resolves.toEqual({
       action: '123',
       agents: ['agent-a'],
       agentType: 'endpoint',
       hosts: { 'agent-a': { name: 'Host-agent-a' } },
-      command: 'kill-process',
+      command: expect.any(String),
       completedAt: '2022-04-30T16:08:47.449Z',
       wasSuccessful: true,
       errors: undefined,
@@ -84,19 +79,7 @@ describe('When using `getActionDetailsById()', () => {
       parameters: doc?.EndpointActions.data.parameters,
       outputs: {
         'agent-a': {
-          content: {
-            code: 'ra_execute_success_done',
-            cwd: '/some/path',
-            output_file_id: 'some-output-file-id',
-            output_file_stderr_truncated: false,
-            output_file_stdout_truncated: true,
-            shell: 'bash',
-            shell_code: 0,
-            stderr: expect.any(String),
-            stderr_truncated: true,
-            stdout: expect.any(String),
-            stdout_truncated: true,
-          },
+          content: expect.anything(),
           type: 'json',
         },
       },
@@ -117,11 +100,7 @@ describe('When using `getActionDetailsById()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    await getActionDetailsById(
-      esClient,
-      endpointAppContextService.getEndpointMetadataService(),
-      '123'
-    );
+    await getActionDetailsById(endpointAppContextService, 'default', '123');
 
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
@@ -147,7 +126,7 @@ describe('When using `getActionDetailsById()', () => {
     actionRequests = endpointActionGenerator.toEsSearchResponse([]);
 
     await expect(
-      getActionDetailsById(esClient, endpointAppContextService.getEndpointMetadataService(), '123')
+      getActionDetailsById(endpointAppContextService, 'default', '123')
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
@@ -163,7 +142,7 @@ describe('When using `getActionDetailsById()', () => {
     actionResponses.hits.hits.pop(); // remove the endpoint response
 
     await expect(
-      getActionDetailsById(esClient, endpointAppContextService.getEndpointMetadataService(), '123')
+      getActionDetailsById(endpointAppContextService, 'default', '123')
     ).resolves.toEqual(
       expect.objectContaining({
         isExpired: true,
@@ -183,12 +162,25 @@ describe('When using `getActionDetailsById()', () => {
     ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
 
     await expect(
-      getActionDetailsById(esClient, endpointAppContextService.getEndpointMetadataService(), '123')
+      getActionDetailsById(endpointAppContextService, 'default', '123')
     ).resolves.toEqual(
       expect.objectContaining({
         isExpired: false,
         isCompleted: true,
       })
     );
+  });
+
+  it('should not validate against spaces when `bypassSpaceValidation` is `true`', async () => {
+    (
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
+    await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      bypassSpaceValidation: true,
+    });
+
+    expect(
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace
+    ).not.toHaveBeenCalled();
   });
 });

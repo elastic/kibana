@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
-import { createSession, Session } from '../lib/session';
+import type { Logger, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
+import type { Session } from '../lib/session';
+import { createSession } from '../lib/session';
 import { createDeferred } from '../lib/deferred';
 
 type StopProfilingFn = () => Promise<any>;

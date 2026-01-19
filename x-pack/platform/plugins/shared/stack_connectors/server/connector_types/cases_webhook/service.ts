@@ -5,19 +5,29 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
-import { WebhookMethods } from '../../../common/auth/constants';
-import { validateAndNormalizeUrl, validateJson } from './validators';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import {
-  createServiceError,
+  combineHeadersWithBasicAuthHeader,
+  mergeConfigHeadersWithSecretHeaders,
+} from '@kbn/actions-plugin/server/lib';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { CONNECTOR_NAME } from '@kbn/connector-schemas/cases_webhook';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
+import type {
+  CasesWebhookPublicConfigurationType,
+  ExternalServiceIncidentResponse,
+} from '@kbn/connector-schemas/cases_webhook';
+import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
+import { validateAndNormalizeUrl, validateJson } from './validators';
+
+import {
+  addServiceMessageToError,
   getObjectValueByKeyAsString,
   stringifyObjValues,
   removeSlash,
@@ -27,14 +37,10 @@ import type {
   CreateIncidentParams,
   ExternalServiceCredentials,
   ExternalService,
-  CasesWebhookPublicConfigurationType,
-  ExternalServiceIncidentResponse,
   GetIncidentResponse,
   UpdateIncidentParams,
   CreateCommentParams,
 } from './types';
-
-import * as i18n from './translations';
 
 export const createExternalService = (
   actionId: string,
@@ -79,17 +85,19 @@ export const createExternalService = (
     authType,
     basicAuth,
     sslOverrides,
-    connectorName: i18n.NAME,
+    connectorName: CONNECTOR_NAME,
   });
 
   if (!getIncidentUrl || !createIncidentUrlConfig || !viewIncidentUrl || !updateIncidentUrl) {
-    throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
+    throw Error(`[Action]${CONNECTOR_NAME}: Wrong configuration.`);
   }
+
+  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
 
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,
-    headers,
+    headers: mergedHeaders,
   });
 
   const axiosInstance = axios.create({
@@ -152,7 +160,7 @@ export const createExternalService = (
 
       return { id, title };
     } catch (error) {
-      throw createServiceError(error, `Unable to get case with id ${id}`);
+      throw addServiceMessageToError(error, `Unable to get case with id ${id}`);
     }
   };
 
@@ -223,7 +231,7 @@ export const createExternalService = (
         pushedDate: new Date().toISOString(),
       };
     } catch (error) {
-      throw createServiceError(error, 'Unable to create case');
+      throw addServiceMessageToError(error, 'Unable to create case');
     }
   };
 
@@ -305,7 +313,7 @@ export const createExternalService = (
         pushedDate: new Date().toISOString(),
       };
     } catch (error) {
-      throw createServiceError(error, `Unable to update case with id ${incidentId}`);
+      throw addServiceMessageToError(error, `Unable to update case with id ${incidentId}`);
     }
   };
 
@@ -355,7 +363,10 @@ export const createExternalService = (
         res,
       });
     } catch (error) {
-      throw createServiceError(error, `Unable to create comment at case with id ${incidentId}`);
+      throw addServiceMessageToError(
+        error,
+        `Unable to create comment at case with id ${incidentId}`
+      );
     }
   };
 

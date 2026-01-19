@@ -1,0 +1,7 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/security-ai-prompts",
+  "owner": "@elastic/security-generative-ai",
+  "group": "security",
+  "visibility": "private"
+}

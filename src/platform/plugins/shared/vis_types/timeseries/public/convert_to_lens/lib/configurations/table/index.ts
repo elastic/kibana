@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Series } from '../../../../../common/types';
+import type { Series } from '../../../../../common/types';
 import { getPalette } from '../palette';
 
 export const getColumnState = (columnId: string, collapseFn?: string, series?: Series) => {

@@ -19,6 +19,7 @@ import {
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -28,7 +29,6 @@ import {
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 
 import {
   getDetectionEngineUrl,
@@ -48,14 +48,14 @@ import {
   StepRuleActions,
   StepRuleActionsReadOnly,
 } from '../../../rule_creation/components/step_rule_actions';
-import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as RuleI18n from '../../../common/translations';
 import {
   redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
-} from '../../../../detections/pages/detection_engine/rules/helpers';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
+} from '../../../common/helpers';
+import type { DefineStepRule } from '../../../common/types';
+import { RuleStep } from '../../../common/types';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { formatRule } from './helpers';
@@ -68,7 +68,7 @@ import {
   ruleStepsOrder,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
+} from '../../../common/utils';
 import {
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
@@ -77,13 +77,13 @@ import {
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
-import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
 import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -111,15 +111,9 @@ const MyEuiPanel = styled(EuiPanel)<{
 MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC = () => {
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-    },
-  ] = useUserData();
+  const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
+    useUserData();
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { addSuccess } = useAppToasts();
@@ -173,6 +167,7 @@ const CreateRulePageComponent: React.FC = () => {
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
+    handleNewConnectorCreated,
   } = useRuleForms({
     defineStepDefault,
     aboutStepDefault: stepAboutDefaultValue,
@@ -217,24 +212,6 @@ const CreateRulePageComponent: React.FC = () => {
   );
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
-
-  const defineStepFormFields = defineStepForm.getFields();
-  const isPreviewDisabled = getIsRulePreviewDisabled({
-    ruleType,
-    isQueryBarValid,
-    isThreatQueryBarValid:
-      defineStepFormFields.threatIndex?.isValid &&
-      defineStepFormFields.threatQueryBar?.isValid &&
-      defineStepFormFields.threatMapping?.isValid,
-    index: memoizedIndex,
-    dataViewId: defineStepData.dataViewId,
-    dataSourceType: defineStepData.dataSourceType,
-    threatIndex: defineStepData.threatIndex,
-    threatMapping: defineStepData.threatMapping,
-    machineLearningJobId: defineStepData.machineLearningJobId,
-    queryBar: defineStepData.queryBar,
-    newTermsFields: defineStepData.newTermsFields,
-  });
 
   useEffect(() => {
     if (prevRuleType !== ruleType) {
@@ -378,6 +355,11 @@ const CreateRulePageComponent: React.FC = () => {
 
     return { valid, warnings };
   }, [validateStep]);
+
+  const verifyRuleDefinitionForPreview = useCallback(
+    () => defineStepForm.validate(),
+    [defineStepForm]
+  );
 
   const editStep = useCallback(
     async (step: RuleStep) => {
@@ -731,10 +713,13 @@ const CreateRulePageComponent: React.FC = () => {
           }}
         >
           <StepRuleActions
+            ruleTypeId={ruleTypeMappings[ruleType]}
             isLoading={isCreateRuleLoading || loading || isStartingJobs}
             actionMessageParams={actionMessageParams}
             summaryActionMessageParams={actionMessageParams}
             form={actionsStepForm}
+            ruleInterval={scheduleStepData.interval}
+            onNewConnectorCreated={handleNewConnectorCreated}
           />
 
           <EuiHorizontalRule margin="m" />
@@ -785,8 +770,11 @@ const CreateRulePageComponent: React.FC = () => {
       isCreateRuleLoading,
       isStartingJobs,
       loading,
+      ruleType,
       submitRuleDisabled,
       submitRuleEnabled,
+      scheduleStepData.interval,
+      handleNewConnectorCreated,
     ]
   );
   const memoActionsStepExtraAction = useMemo(
@@ -821,7 +809,7 @@ const CreateRulePageComponent: React.FC = () => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!hasUserCRUDPermission(canUserCRUD)) {
+  } else if (!canEditRules) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),
@@ -918,7 +906,7 @@ const CreateRulePageComponent: React.FC = () => {
                   onToggleCollapsed={onToggleCollapsedMemo}
                 >
                   <RulePreview
-                    isDisabled={isPreviewDisabled && activeStep === RuleStep.defineRule}
+                    verifyRuleDefinition={verifyRuleDefinitionForPreview}
                     defineRuleData={defineStepData}
                     aboutRuleData={aboutStepData}
                     scheduleRuleData={scheduleStepData}

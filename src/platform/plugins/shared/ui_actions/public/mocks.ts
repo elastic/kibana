@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Action, FrequentCompatibilityChangeAction } from '.';
-import { UiActionsPublicSetup, UiActionsPublicStart } from './plugin';
+import type { Action, FrequentCompatibilityChangeAction } from '.';
+import type { UiActionsPublicSetup, UiActionsPublicStart } from './plugin';
 import { plugin as pluginInitializer } from '.';
 
 export type Setup = jest.Mocked<UiActionsPublicSetup>;
@@ -19,9 +19,11 @@ export type Start = jest.Mocked<UiActionsPublicStart>;
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     addTriggerAction: jest.fn(),
+    addTriggerActionAsync: jest.fn(),
     attachAction: jest.fn(),
     detachAction: jest.fn(),
     registerAction: jest.fn(),
+    registerActionAsync: jest.fn(),
     registerTrigger: jest.fn(),
     unregisterAction: jest.fn(),
   };

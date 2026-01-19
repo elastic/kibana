@@ -21,7 +21,7 @@ interface Props {
   processExecutable: string | undefined | null;
   processPid: number | undefined | null;
   processName: string | undefined | null;
-  isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const ProcessDraggable = React.memo<Props>(
@@ -33,7 +33,7 @@ export const ProcessDraggable = React.memo<Props>(
     processExecutable,
     processName,
     processPid,
-    isDraggable,
+    scopeId,
   }) => {
     if (
       isNillEmptyOrNotFinite(processName) &&
@@ -50,12 +50,12 @@ export const ProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processName) ? (
           <EuiFlexItem grow={false}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.name"
               value={processName}
               iconType="console"
-              isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -63,12 +63,12 @@ export const ProcessDraggable = React.memo<Props>(
         ) : !isNillEmptyOrNotFinite(processExecutable) ? (
           <EuiFlexItem grow={false}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.executable"
               value={processExecutable}
               iconType="console"
-              isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -76,12 +76,12 @@ export const ProcessDraggable = React.memo<Props>(
         ) : !isNillEmptyOrNotFinite(endgameProcessName) ? (
           <EuiFlexItem grow={false}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.process_name"
               value={endgameProcessName}
               iconType="console"
-              isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -91,12 +91,12 @@ export const ProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processPid) ? (
           <EuiFlexItem grow={false}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.pid"
               queryValue={String(processPid)}
               value={`(${String(processPid)})`}
-              isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -104,12 +104,12 @@ export const ProcessDraggable = React.memo<Props>(
         ) : !isNillEmptyOrNotFinite(endgamePid) ? (
           <EuiFlexItem grow={false}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.pid"
               queryValue={String(endgamePid)}
               value={`(${String(endgamePid)})`}
-              isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -131,7 +131,7 @@ export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
     processExecutable,
     processName,
     processPid,
-    isDraggable,
+    scopeId,
   }) => {
     if (
       endgamePid == null &&
@@ -151,7 +151,7 @@ export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
           processExecutable={processExecutable}
           processName={processName}
           processPid={processPid}
-          isDraggable={isDraggable}
+          scopeId={scopeId}
         />
       );
     }

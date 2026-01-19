@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { createHash } from 'crypto';
 import pRetry from 'p-retry';
 import stringify from 'json-stable-stringify';
@@ -18,7 +18,7 @@ import type {
   PublicFeatures,
   LicenseType,
   LicenseStatus,
-} from '../common/types';
+} from '@kbn/licensing-types';
 import { License } from '../common/license';
 import type { ElasticsearchError, LicenseFetcher } from './types';
 
@@ -108,8 +108,8 @@ function normalizeServerLicense(
 
 function normalizeFeatures(rawFeatures: estypes.XpackInfoFeatures) {
   const features: PublicFeatures = {};
-  for (const [name, feature] of Object.entries(rawFeatures)) {
-    features[name] = {
+  for (const [id, feature] of Object.entries(rawFeatures)) {
+    features[id] = {
       isAvailable: feature.available,
       isEnabled: feature.enabled,
     };

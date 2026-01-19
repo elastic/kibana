@@ -7,13 +7,33 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DELETE_CONVERSATION_ARIA_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.sidePanel.deleteConversationAriaLabel',
+export const CONVERSATION_CONTEXT_MENU = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.contextMenuLabel',
   {
-    defaultMessage: 'Delete conversation',
+    defaultMessage: 'Conversation options',
   }
 );
 
+export const DELETE_CONVERSATION = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.deleteConversation',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const SHARED_BY_YOU = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.sharedByYou',
+  {
+    defaultMessage: 'Shared by you',
+  }
+);
+
+export const SHARED_WITH_YOU = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.sharedWithYou',
+  {
+    defaultMessage: 'Shared with you',
+  }
+);
 export const NEW_CHAT = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.sidePanel.newChatButtonLabel',
   {
@@ -41,3 +61,30 @@ export const DELETE_BUTTON_TEXT = i18n.translate(
     defaultMessage: 'Delete',
   }
 );
+
+export const DATE_CATEGORY_LABELS: Record<string, string> = {
+  TODAY: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.today', {
+    defaultMessage: 'Today',
+  }),
+  YESTERDAY: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.yesterday', {
+    defaultMessage: 'Yesterday',
+  }),
+  THIS_WEEK: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.thisWeek', {
+    defaultMessage: 'This Week',
+  }),
+  LAST_WEEK: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.lastWeek', {
+    defaultMessage: 'Last Week',
+  }),
+  THIS_MONTH: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.thisMonth', {
+    defaultMessage: 'This Month',
+  }),
+  LAST_MONTH: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.lastMonth', {
+    defaultMessage: 'Last Month',
+  }),
+  THIS_YEAR: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.thisYear', {
+    defaultMessage: 'This Year',
+  }),
+  OLDER: i18n.translate('xpack.elasticAssistant.conversationList.dateGroupTitle.older', {
+    defaultMessage: 'Older',
+  }),
+};

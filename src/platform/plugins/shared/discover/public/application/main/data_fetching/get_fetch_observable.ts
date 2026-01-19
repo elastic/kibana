@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { merge } from 'rxjs';
-import { debounceTime, filter, tap } from 'rxjs';
+import { debounceTime, filter, tap, defer, merge } from 'rxjs';
 
-import type {
-  AutoRefreshDoneFn,
-  DataPublicPluginStart,
-  ISearchSource,
-} from '@kbn/data-plugin/public';
+import type { AutoRefreshDoneFn, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FetchStatus } from '../../types';
-import { DataMain$, DataRefetch$ } from '../state_management/discover_data_state_container';
-import { DiscoverSearchSessionManager } from '../state_management/discover_search_session';
+import type { DataMain$, DataRefetch$ } from '../state_management/discover_data_state_container';
+import type { DiscoverSearchSessionManager } from '../state_management/discover_search_session';
 
 /**
  * This function returns an observable that's used to trigger data fetching
@@ -34,7 +29,6 @@ export function getFetch$({
   main$: DataMain$;
   refetch$: DataRefetch$;
   searchSessionManager: DiscoverSearchSessionManager;
-  searchSource: ISearchSource;
 }) {
   const { timefilter } = data.query.timefilter;
   return merge(
@@ -55,6 +49,14 @@ export function getFetch$({
         );
       })
     ),
-    searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
+    defer(() => {
+      // We defer creating the search session ID observable until it's subscribed to
+      // in order to ensure we get a new instance when switching between tabs.
+      // Otherwise, search session IDs from previous tabs could trigger extra fetches
+      // when initializing a new tab with a different search session ID.
+      return searchSessionManager
+        .getNewSearchSessionIdFromURL$()
+        .pipe(filter((sessionId) => !!sessionId));
+    })
   ).pipe(debounceTime(100));
 }

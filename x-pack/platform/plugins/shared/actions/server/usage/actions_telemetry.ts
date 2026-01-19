@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  AvgActionRunOutcomeByConnectorTypeBucket,
-  parseActionRunOutcomeByConnectorTypesBucket,
-} from './lib/parse_connector_type_bucket';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
+import type { AvgActionRunOutcomeByConnectorTypeBucket } from './lib/parse_connector_type_bucket';
+import { parseActionRunOutcomeByConnectorTypesBucket } from './lib/parse_connector_type_bucket';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
-import { ActionResult, InMemoryConnector } from '../types';
+import type { ActionResult, InMemoryConnector } from '../types';
 import {
   getInMemoryActions,
   getActions,
   getActionExecutions,
   getActionsCount,
 } from './lib/actions_telemetry_util';
+import { parseAndLogError } from './lib/parse_and_log_error';
 
 export interface InMemoryAggRes {
   total: number;
@@ -70,17 +69,15 @@ export async function getTotalCount(
           },
         },
       },
-      body: {
-        query: {
-          bool: {
-            filter: [{ term: { type: 'action' } }],
-          },
+      query: {
+        bool: {
+          filter: [{ term: { type: 'action' } }],
         },
-        aggs: {
-          byActionTypeId: {
-            terms: {
-              field: 'calcActionTypeId',
-            },
+      },
+      aggs: {
+        byActionTypeId: {
+          terms: {
+            field: 'calcActionTypeId',
           },
         },
       },
@@ -108,9 +105,7 @@ export async function getTotalCount(
       countGenAiProviderTypes,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-
-    logger.warn(`Error executing actions telemetry task: getTotalCount - ${JSON.stringify(err)}`);
+    const errorMessage = parseAndLogError(err, `getTotalCount`, logger);
 
     return {
       hasErrors: true,
@@ -210,7 +205,7 @@ export async function getInUseTotalCount(
     },
   ] as QueryDslQueryContainer[];
 
-  if (!!referenceType) {
+  if (referenceType) {
     mustQuery.push({
       term: { type: referenceType },
     });
@@ -226,57 +221,55 @@ export async function getInUseTotalCount(
     >({
       index: kibanaIndex,
       size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: {
-              bool: {
-                must_not: {
-                  term: {
-                    type: 'action_task_params',
-                  },
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              must_not: {
+                term: {
+                  type: 'action_task_params',
                 },
-                must: mustQuery,
+              },
+              must: mustQuery,
+            },
+          },
+        },
+      },
+      aggs: {
+        refs: {
+          nested: {
+            path: 'references',
+          },
+          aggs: {
+            actionRefIds: {
+              multi_terms: {
+                terms: [
+                  {
+                    field: 'references.id',
+                  },
+                  {
+                    field: 'references.name',
+                  },
+                ],
               },
             },
           },
         },
-        aggs: {
-          refs: {
-            nested: {
-              path: 'references',
-            },
-            aggs: {
-              actionRefIds: {
-                multi_terms: {
-                  terms: [
-                    {
-                      field: 'references.id',
-                    },
-                    {
-                      field: 'references.name',
-                    },
-                  ],
-                },
-              },
-            },
+        actions: {
+          nested: {
+            path: 'alert.actions',
           },
-          actions: {
-            nested: {
-              path: 'alert.actions',
-            },
-            aggs: {
-              actionRefIds: {
-                multi_terms: {
-                  terms: [
-                    {
-                      field: 'alert.actions.actionRef',
-                    },
-                    {
-                      field: 'alert.actions.actionTypeId',
-                    },
-                  ],
-                },
+          aggs: {
+            actionRefIds: {
+              multi_terms: {
+                terms: [
+                  {
+                    field: 'alert.actions.actionRef',
+                  },
+                  {
+                    field: 'alert.actions.actionTypeId',
+                  },
+                ],
               },
             },
           },
@@ -299,20 +292,18 @@ export async function getInUseTotalCount(
     }>({
       index: kibanaIndex,
       _source_includes: ['action', 'namespaces'],
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                term: { type: 'action' },
+      query: {
+        bool: {
+          must: [
+            {
+              term: { type: 'action' },
+            },
+            {
+              terms: {
+                _id: Object.entries(aggs?.connectorIds ?? {}).map(([key]) => `action:${key}`),
               },
-              {
-                terms: {
-                  _id: Object.entries(aggs?.connectorIds ?? {}).map(([key]) => `action:${key}`),
-                },
-              },
-            ],
-          },
+            },
+          ],
         },
       },
     });
@@ -387,11 +378,8 @@ export async function getInUseTotalCount(
       countNamespaces: namespacesList.size,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
+    const errorMessage = parseAndLogError(err, `getInUseTotalCount`, logger);
 
-    logger.warn(
-      `Error executing actions telemetry task: getInUseTotalCount - ${JSON.stringify(err)}`
-    );
     return {
       hasErrors: true,
       errorMessage,
@@ -460,73 +448,71 @@ export async function getExecutionsPerDayCount(
     const actionResults = await esClient.search({
       index: eventLogIndex,
       size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: {
-              bool: {
-                must: [
-                  {
-                    term: { 'event.action': 'execute' },
-                  },
-                  {
-                    term: { 'event.provider': 'actions' },
-                  },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: 'now-1d',
-                      },
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              must: [
+                {
+                  term: { 'event.action': 'execute' },
+                },
+                {
+                  term: { 'event.provider': 'actions' },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-1d',
                     },
                   },
-                ],
+                },
+              ],
+            },
+          },
+        },
+      },
+      aggs: {
+        totalExecutions: {
+          nested: {
+            path: 'kibana.saved_objects',
+          },
+          aggs: {
+            refs: {
+              filter: { term: { 'kibana.saved_objects.type': 'action' } },
+              aggs: {
+                byConnectorTypeId: {
+                  terms: {
+                    field: 'kibana.saved_objects.type_id',
+                  },
+                },
               },
             },
           },
         },
-        aggs: {
-          totalExecutions: {
-            nested: {
-              path: 'kibana.saved_objects',
-            },
-            aggs: {
-              refs: {
-                filter: { term: { 'kibana.saved_objects.type': 'action' } },
-                aggs: {
-                  byConnectorTypeId: {
-                    terms: {
-                      field: 'kibana.saved_objects.type_id',
-                    },
+        failedExecutions: {
+          filter: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'event.outcome': 'failure',
                   },
                 },
-              },
+              ],
             },
           },
-          failedExecutions: {
-            filter: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      'event.outcome': 'failure',
-                    },
-                  },
-                ],
+          aggs: {
+            actionSavedObjects: {
+              nested: {
+                path: 'kibana.saved_objects',
               },
-            },
-            aggs: {
-              actionSavedObjects: {
-                nested: {
-                  path: 'kibana.saved_objects',
-                },
-                aggs: {
-                  refs: {
-                    filter: { term: { 'kibana.saved_objects.type': 'action' } },
-                    aggs: {
-                      byConnectorTypeId: {
-                        terms: {
-                          field: 'kibana.saved_objects.type_id',
-                        },
+              aggs: {
+                refs: {
+                  filter: { term: { 'kibana.saved_objects.type': 'action' } },
+                  aggs: {
+                    byConnectorTypeId: {
+                      terms: {
+                        field: 'kibana.saved_objects.type_id',
                       },
                     },
                   },
@@ -534,25 +520,25 @@ export async function getExecutionsPerDayCount(
               },
             },
           },
-          avgDuration: { avg: { field: 'event.duration' } },
-          avgDurationByType: {
-            nested: {
-              path: 'kibana.saved_objects',
-            },
-            aggs: {
-              actionSavedObjects: {
-                filter: { term: { 'kibana.saved_objects.type': 'action' } },
-                aggs: {
-                  byTypeId: {
-                    terms: {
-                      field: 'kibana.saved_objects.type_id',
-                    },
-                    aggs: {
-                      refs: {
-                        reverse_nested: {},
-                        aggs: {
-                          avgDuration: { avg: { field: 'event.duration' } },
-                        },
+        },
+        avgDuration: { avg: { field: 'event.duration' } },
+        avgDurationByType: {
+          nested: {
+            path: 'kibana.saved_objects',
+          },
+          aggs: {
+            actionSavedObjects: {
+              filter: { term: { 'kibana.saved_objects.type': 'action' } },
+              aggs: {
+                byTypeId: {
+                  terms: {
+                    field: 'kibana.saved_objects.type_id',
+                  },
+                  aggs: {
+                    refs: {
+                      reverse_nested: {},
+                      aggs: {
+                        avgDuration: { avg: { field: 'event.duration' } },
                       },
                     },
                   },
@@ -560,26 +546,26 @@ export async function getExecutionsPerDayCount(
               },
             },
           },
-          count_connector_types_by_action_run_outcome_per_day: {
-            nested: {
-              path: 'kibana.saved_objects',
-            },
-            aggs: {
-              actionSavedObjects: {
-                filter: { term: { 'kibana.saved_objects.type': 'action' } },
-                aggs: {
-                  connector_types: {
-                    terms: {
-                      field: 'kibana.saved_objects.type_id',
-                    },
-                    aggs: {
-                      outcome: {
-                        reverse_nested: {},
-                        aggs: {
-                          count: {
-                            terms: {
-                              field: 'event.outcome',
-                            },
+        },
+        count_connector_types_by_action_run_outcome_per_day: {
+          nested: {
+            path: 'kibana.saved_objects',
+          },
+          aggs: {
+            actionSavedObjects: {
+              filter: { term: { 'kibana.saved_objects.type': 'action' } },
+              aggs: {
+                connector_types: {
+                  terms: {
+                    field: 'kibana.saved_objects.type_id',
+                  },
+                  aggs: {
+                    outcome: {
+                      reverse_nested: {},
+                      aggs: {
+                        count: {
+                          terms: {
+                            field: 'event.outcome',
                           },
                         },
                       },
@@ -594,28 +580,28 @@ export async function getExecutionsPerDayCount(
     });
 
     const aggsExecutions = getActionExecutions(
-      // @ts-expect-error aggegation type is not specified
+      // @ts-expect-error aggregation type is not specified
       actionResults.aggregations.totalExecutions?.refs?.byConnectorTypeId.buckets
     );
 
     // convert nanoseconds to milliseconds
     const aggsAvgExecutionTime = Math.round(
-      // @ts-expect-error aggegation type is not specified
+      // @ts-expect-error aggregation type is not specified
       actionResults.aggregations.avgDuration.value / (1000 * 1000)
     );
 
     const aggsFailedExecutions = getActionExecutions(
-      // @ts-expect-error aggegation type is not specified
+      // @ts-expect-error aggregation type is not specified
       actionResults.aggregations.failedExecutions?.actionSavedObjects?.refs?.byConnectorTypeId
         .buckets
     );
 
     const avgDurationByType =
-      // @ts-expect-error aggegation type is not specified
+      // @ts-expect-error aggregation type is not specified
       actionResults.aggregations.avgDurationByType?.actionSavedObjects?.byTypeId?.buckets;
 
     const avgExecutionTimeByType: Record<string, number> = avgDurationByType.reduce(
-      // @ts-expect-error aggegation type is not specified
+      // @ts-expect-error aggregation type is not specified
       (res: Record<string, number>, bucket) => {
         res[replaceFirstAndLastDotSymbols(bucket.key)] = bucket?.refs.avgDuration.value;
         return res;
@@ -657,10 +643,8 @@ export async function getExecutionsPerDayCount(
       ),
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing actions telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`
-    );
+    const errorMessage = parseAndLogError(err, `getExecutionsPerDayCount`, logger);
+
     return {
       hasErrors: true,
       errorMessage,

@@ -13,39 +13,39 @@ import { join } from 'path';
 import fs from 'fs/promises';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { setTimeout as timer } from 'timers/promises';
 const execPromise = promisify(exec);
 
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   defaultKibanaIndex,
   getKibanaMigratorTestKit,
   startElasticsearch,
-} from './kibana_migrator_test_kit';
-import { delay } from './test_utils';
-import { baselineTypes, getBaselineDocuments } from './kibana_migrator_test_kit.fixtures';
+} from '@kbn/migrator-test-kit';
+import { baselineTypes, getBaselineDocuments } from '@kbn/migrator-test-kit/fixtures';
 
-export const BASELINE_ELASTICSEARCH_VERSION = '9.0.0';
-export const BASELINE_DOCUMENTS_PER_TYPE_1K = 200;
-export const BASELINE_DOCUMENTS_PER_TYPE_500K = 100_000;
+export const BASELINE_ELASTICSEARCH_VERSION = '9.4.0';
+export const BASELINE_DOCUMENTS_PER_TYPE_SMALL = 200;
+export const BASELINE_DOCUMENTS_PER_TYPE_LARGE = 100_000;
 // we discard the second half with exclude on upgrade (firstHalf !== true)
 // then we discard half all multiples of 100 (1% of them)
-export const BASELINE_COMPLEX_DOCUMENTS_500K_AFTER =
-  BASELINE_DOCUMENTS_PER_TYPE_500K / 2 - BASELINE_DOCUMENTS_PER_TYPE_500K / 2 / 100;
+export const BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER =
+  BASELINE_DOCUMENTS_PER_TYPE_LARGE / 2 - BASELINE_DOCUMENTS_PER_TYPE_LARGE / 2 / 100;
 
-export const BASELINE_TEST_ARCHIVE_1K = join(
+export const BASELINE_TEST_ARCHIVE_SMALL = join(
   __dirname,
   'archives',
   `${BASELINE_ELASTICSEARCH_VERSION}_baseline_${
-    (BASELINE_DOCUMENTS_PER_TYPE_1K * baselineTypes.length) / 1000
+    (BASELINE_DOCUMENTS_PER_TYPE_SMALL * baselineTypes.length) / 1000
   }k_docs.zip`
 );
 
-export const BASELINE_TEST_ARCHIVE_500K = join(
+export const BASELINE_TEST_ARCHIVE_LARGE = join(
   __dirname,
   'archives',
   `${BASELINE_ELASTICSEARCH_VERSION}_baseline_${
-    (BASELINE_DOCUMENTS_PER_TYPE_500K * baselineTypes.length) / 1000
+    (BASELINE_DOCUMENTS_PER_TYPE_LARGE * baselineTypes.length) / 1000
   }k_docs.zip`
 );
 
@@ -90,21 +90,25 @@ export const createBaselineArchive = async ({
   }
 
   // wait a bit more to make sure everything's persisted to disk
-  await delay(30);
+  await timer(30_000);
 
   await compressBaselineArchive(basePath, dataArchive);
   console.log(`Archive created in: ${(Date.now() - startTime) / 1000} seconds`, dataArchive);
 
   // leave command line enough time to finish creating + closing ZIP file
-  await delay(30);
+  await timer(30_000);
 
   await esServer.stop();
-  await delay(10);
+  await timer(10_000);
   await fs.rm(basePath, { recursive: true, force: true });
 };
 
 const compressBaselineArchive = async (esFolder: string, archiveFile: string) => {
-  const dataFolder = join(esFolder, 'es-test-cluster', 'data');
-  const cmd = `ditto -c -k --sequesterRsrc --keepParent ${dataFolder}  ${archiveFile}`;
-  await execPromise(cmd);
+  const baseName = 'data';
+  const dataFolder = join(esFolder, 'es-test-cluster', baseName);
+  const parentDir = join(dataFolder, '..');
+  const cmd = `zip -rq "${archiveFile}" "${baseName}"`;
+  await execPromise(cmd, {
+    cwd: parentDir,
+  });
 };

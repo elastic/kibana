@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Privileges } from '@kbn/es-ui-shared-plugin/common';
+import type { Privileges } from '@kbn/es-ui-shared-plugin/common';
 import { schema } from '@kbn/config-schema';
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
 
 const requiredPrivilegesMap = {
@@ -60,7 +60,7 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
       const requiredPrivileges = requiredPrivilegesMap[permissionsType];
       const { has_all_requested: hasAllPrivileges, cluster } =
         await clusterClient.asCurrentUser.security.hasPrivileges({
-          body: { cluster: requiredPrivileges },
+          cluster: requiredPrivileges,
         });
 
       if (!hasAllPrivileges) {

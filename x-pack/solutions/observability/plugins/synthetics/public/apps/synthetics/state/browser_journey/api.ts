@@ -6,15 +6,17 @@
  */
 
 import { apiService } from '../../../../utils/api_service';
-import {
+import type {
   FailedStepsApiResponse,
-  FailedStepsApiResponseType,
   ScreenshotBlockDoc,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
-  SyntheticsJourneyApiResponseType,
   Ping,
+} from '../../../../../common/runtime_types';
+import {
+  FailedStepsApiResponseType,
+  SyntheticsJourneyApiResponseType,
   PingType,
 } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
@@ -24,9 +26,13 @@ export interface FetchJourneyStepsParams {
 }
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
-  return apiService.post<ScreenshotBlockDoc[]>(SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {
-    hashes: params,
-  });
+  const response = await apiService.post<{ result: ScreenshotBlockDoc[] }>(
+    SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
+    {
+      hashes: params,
+    }
+  );
+  return response.result;
 }
 
 export async function fetchBrowserJourney(

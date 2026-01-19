@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../../common';
-import { ACTION } from './components/actions';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../../common';
 
 export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
 
@@ -25,6 +25,13 @@ export type PersistedSearchSessionSavedObjectAttributes = SearchSessionSavedObje
   >;
 
 export type UISearchSessionState = SearchSessionStatus;
+
+export enum ACTION {
+  INSPECT = 'inspect',
+  EXTEND = 'extend',
+  DELETE = 'delete',
+  RENAME = 'rename',
+}
 
 export interface UISession {
   id: string;
@@ -43,3 +50,15 @@ export interface UISession {
   version: string;
   errors?: string[];
 }
+
+export type LocatorsStart = SharePluginStart['url']['locators'];
+
+export interface SearchSessionSavedObject {
+  id: string;
+  attributes: PersistedSearchSessionSavedObjectAttributes;
+}
+
+export type BackgroundSearchOpenedHandler = (attrs: {
+  session: UISession;
+  event: React.MouseEvent<HTMLAnchorElement>;
+}) => void;

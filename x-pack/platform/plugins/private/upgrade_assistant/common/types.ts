@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
+import type { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { SavedObject } from '@kbn/core/types';
+import type { DataStreamsAction } from './data_stream_types';
+export { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-common';
+
+export * from './data_stream_types';
 
 export type DeprecationSource = 'Kibana' | 'Elasticsearch';
 
@@ -18,133 +21,6 @@ export interface ResponseError {
   message: string | Error;
   attributes?: {
     allNodesUpgraded: boolean;
-  };
-}
-
-export enum ReindexStep {
-  // Enum values are spaced out by 10 to give us room to insert steps in between.
-  created = 0,
-  readonly = 20,
-  newIndexCreated = 30,
-  reindexStarted = 40,
-  reindexCompleted = 50,
-  indexSettingsRestored = 55,
-  aliasCreated = 60,
-  originalIndexDeleted = 70,
-  existingAliasesUpdated = 80,
-}
-
-export enum ReindexStatus {
-  inProgress,
-  completed,
-  failed,
-  paused,
-  cancelled,
-  // Used by the UI to differentiate if there was a failure retrieving
-  // the status from the server API
-  fetchFailed,
-}
-
-export interface ReindexStatusResponse {
-  meta: {
-    indexName: string;
-    reindexName: string;
-    // Array of aliases pointing to the index being reindexed
-    aliases: string[];
-  };
-  warnings?: ReindexWarning[];
-  reindexOp?: ReindexOperation;
-  hasRequiredPrivileges?: boolean;
-}
-
-export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
-
-export interface QueueSettings {
-  /**
-   * A Unix timestamp of when the reindex operation was enqueued.
-   *
-   * @remark
-   * This is used by the reindexing scheduler to determine execution
-   * order.
-   */
-  queuedAt: number;
-
-  /**
-   * A Unix timestamp of when the reindex operation was started.
-   *
-   * @remark
-   * Updating this field is useful for _also_ updating the saved object "updated_at" field
-   * which is used to determine stale or abandoned reindex operations.
-   *
-   * For now this is used by the reindex worker scheduler to determine whether we have
-   * A queue item at the start of the queue.
-   *
-   */
-  startedAt?: number;
-}
-
-export interface ReindexOptions {
-  /**
-   * Whether to treat the index as if it were closed. This instructs the
-   * reindex strategy to first open the index, perform reindexing and
-   * then close the index again.
-   */
-  openAndClose?: boolean;
-
-  /**
-   * Set this key to configure a reindex operation as part of a
-   * batch to be run in series.
-   */
-  queueSettings?: QueueSettings;
-}
-
-export interface ReindexOperation {
-  indexName: string;
-  newIndexName: string;
-  status: ReindexStatus;
-  lastCompletedStep: ReindexStep;
-  locked: string | null;
-  reindexTaskId: string | null;
-  reindexTaskPercComplete: number | null;
-  errorMessage: string | null;
-  // This field is only used for the singleton IndexConsumerType documents.
-  runningReindexCount: number | null;
-
-  /**
-   * The original index settings to set after reindex is completed.
-   * The target index is created with other defaults to improve reindexing performance.
-   * https://github.com/elastic/kibana/issues/201605
-   */
-  backupSettings?: {
-    'index.number_of_replicas'?: number;
-    'index.refresh_interval'?: number;
-  };
-
-  /**
-   * Options for the reindexing strategy.
-   *
-   * @remark
-   * Marked as optional for backwards compatibility. We should still
-   * be able to handle older ReindexOperation objects.
-   */
-  reindexOptions?: ReindexOptions;
-}
-
-export type ReindexSavedObject = SavedObject<ReindexOperation>;
-
-// 8.0 -> 9.0 warnings
-export type ReindexWarningTypes = 'indexSetting' | 'replaceIndexWithAlias';
-
-export interface ReindexWarning {
-  warningType: ReindexWarningTypes;
-  /**
-   * Optional metadata for deprecations
-   *
-   * @remark
-   * For "indexSetting" we want to surface the deprecated settings.
-   */
-  meta?: {
-    [key: string]: string | string[];
   };
 }
 
@@ -187,16 +63,41 @@ export interface DeprecationInfo {
 export interface IndexSettingsDeprecationInfo {
   [indexName: string]: DeprecationInfo[];
 }
-export interface ReindexAction {
-  type: 'reindex';
+
+export interface IndexMetadata {
+  isFrozenIndex: boolean;
+  isInDataStream: boolean;
+  isClosedIndex: boolean;
+}
+
+export interface IndexAction {
   /**
-   * Indicate what blockers have been detected for calling reindex
-   * against this index.
-   *
-   * @remark
-   * In future this could be an array of blockers.
+   * Includes relevant information about the index related to this action
    */
-  blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
+  metadata: IndexMetadata;
+}
+
+export interface ReindexAction extends IndexAction {
+  type: 'reindex';
+
+  /**
+   * The transform IDs that are currently targeting this index
+   */
+  transformIds?: string[];
+
+  /**
+   * The actions that should be excluded from the reindex corrective action.
+   */
+  excludedActions?: string[];
+
+  /**
+   * The size of the index in bytes
+   */
+  indexSizeInBytes?: number;
+}
+
+export interface UnfreezeAction extends IndexAction {
+  type: 'unfreeze';
 }
 
 export interface MlAction {
@@ -222,25 +123,25 @@ export interface HealthIndicatorAction {
   impacts: HealthReportImpact[];
 }
 
+export type CorrectiveAction =
+  | ReindexAction
+  | UnfreezeAction
+  | MlAction
+  | IndexSettingAction
+  | ClusterSettingAction
+  | DataStreamsAction
+  | HealthIndicatorAction;
+
 export interface EnrichedDeprecationInfo
   extends Omit<
     estypes.MigrationDeprecationsDeprecation,
     'level' | 'resolve_during_rolling_upgrade'
   > {
-  type:
-    | keyof estypes.MigrationDeprecationsResponse
-    | 'health_indicator'
-    | 'ilm_policies'
-    | 'templates';
-  isCritical: boolean;
+  type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator';
+  level: MIGRATION_DEPRECATION_LEVEL;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
-  correctiveAction?:
-    | ReindexAction
-    | MlAction
-    | IndexSettingAction
-    | ClusterSettingAction
-    | HealthIndicatorAction;
+  correctiveAction?: CorrectiveAction;
   resolveDuringUpgrade: boolean;
 }
 
@@ -256,21 +157,6 @@ export interface ESUpgradeStatus {
   enrichedHealthIndicators: EnrichedDeprecationInfo[];
 }
 
-export interface ResolveIndexResponseFromES {
-  indices: Array<{
-    name: string;
-    // per https://github.com/elastic/elasticsearch/pull/57626
-    attributes: Array<'open' | 'closed' | 'hidden' | 'frozen'>;
-    aliases?: string[];
-    data_stream?: string;
-  }>;
-  aliases: Array<{
-    name: string;
-    indices: string[];
-  }>;
-  data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
-}
-
 export const ML_UPGRADE_OP_TYPE = 'upgrade-assistant-ml-upgrade-operation';
 
 export interface MlOperation {
@@ -284,6 +170,23 @@ export interface DeprecationLoggingStatus {
   isDeprecationLoggingEnabled: boolean;
 }
 
+export interface EsDeprecationLog {
+  // Define expected properties from the logs
+  '@timestamp'?: string;
+  message?: string;
+  [key: string]: any; // Allow for any additional ES log properties
+}
+
+export interface StatusResponseBody {
+  readyForUpgrade: boolean;
+  details: string;
+  recentEsDeprecationLogs?: {
+    count: number;
+    logs: EsDeprecationLog[];
+  };
+  kibanaApiDeprecations?: any[]; // Uses DomainDeprecationDetails type from Kibana core
+}
+
 export type MIGRATION_STATUS = 'MIGRATION_NEEDED' | 'NO_MIGRATION_NEEDED' | 'IN_PROGRESS' | 'ERROR';
 export interface SystemIndicesMigrationFeature {
   id?: string;
@@ -292,7 +195,8 @@ export interface SystemIndicesMigrationFeature {
   migration_status: MIGRATION_STATUS;
   indices: Array<{
     index: string;
-    version: string;
+    version?: string;
+    migration_status?: MIGRATION_STATUS;
     failure_cause?: {
       error: {
         type: string;
@@ -316,3 +220,8 @@ export interface FeatureSet {
   reindexCorrectiveActions: boolean;
   migrateDataStreams: boolean;
 }
+
+export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>;
+export type DataSourceAutoResolution = Record<string, 'readOnly'>;
+
+export type IndicesResolutionType = 'readonly' | 'reindex' | 'unfreeze';

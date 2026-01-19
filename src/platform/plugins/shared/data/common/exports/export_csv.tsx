@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { createEscapeValue } from './escape_value';
 
 export const LINE_FEED_CHARACTER = '\r\n';

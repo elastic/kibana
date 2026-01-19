@@ -8,7 +8,7 @@
  */
 
 import { useEffect } from 'react';
-import { AutocompleteInfo, Settings } from '../../../../services';
+import type { AutocompleteInfo, Settings } from '../../../../services';
 
 interface SetupAutocompletePollingParams {
   /** The Console autocomplete service. */

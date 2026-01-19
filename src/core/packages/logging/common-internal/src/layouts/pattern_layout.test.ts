@@ -9,7 +9,8 @@
 
 import stripAnsi from 'strip-ansi';
 import hasAnsi from 'has-ansi';
-import { LogLevel, LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import { PatternLayout } from './pattern_layout';
 
 const stripAnsiSnapshotSerializer: jest.SnapshotSerializerPlugin = {
@@ -23,6 +24,8 @@ const stripAnsiSnapshotSerializer: jest.SnapshotSerializerPlugin = {
 };
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));
+const error = new Error('Meta error');
+error.stack = 'Meta error stack';
 const records: LogRecord[] = [
   {
     context: 'context-1',
@@ -30,6 +33,9 @@ const records: LogRecord[] = [
       message: 'Some error message',
       name: 'Some error name',
       stack: 'Some error stack',
+    },
+    meta: {
+      error,
     },
     level: LogLevel.Fatal,
     message: 'message-1',

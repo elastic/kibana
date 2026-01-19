@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
+import type { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
-  setExecutionContext,
-  LensDispatch,
-  LensStoreDeps,
-  navigateAway,
-  applyChanges,
-  selectAutoApplyEnabled,
-} from '..';
-import { LensAppState, LensState } from '../types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { LensAppState, LensState, LensStoreDeps, DatasourceMap } from '@kbn/lens-common';
+import type { LensDispatch } from '..';
+import { setExecutionContext, navigateAway, applyChanges, selectAutoApplyEnabled } from '..';
 import { getResolvedDateRange, containsDynamicMath } from '../../utils';
 import { subscribeToExternalContext } from './subscribe_to_external_context';
 import { onActiveDataChange } from '../lens_slice';
-import { DatasourceMap } from '../../types';
 
 function isTimeBased(state: LensState, datasourceMap: DatasourceMap) {
   const { activeDatasourceId, datasourceStates, dataViews } = state.lens;
@@ -52,7 +45,7 @@ export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: Middlewar
     // store stopped loading and external context is not subscribed to yet - do it now
     if (!store.getState().lens.isLoading && !unsubscribeFromExternalContext) {
       unsubscribeFromExternalContext = subscribeToExternalContext(
-        storeDeps.lensServices.data,
+        storeDeps.lensServices,
         store.getState,
         store.dispatch
       );

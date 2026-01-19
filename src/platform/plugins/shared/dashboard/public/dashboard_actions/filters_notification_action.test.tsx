@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, FilterStateStore, type AggregateQuery, type Query } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore, type AggregateQuery, type Query } from '@kbn/es-query';
 
-import { BehaviorSubject } from 'rxjs';
-import {
-  FiltersNotificationAction,
-  FiltersNotificationActionApi,
-} from './filters_notification_action';
+import { BehaviorSubject, take } from 'rxjs';
+import type { FiltersNotificationActionApi } from './filters_notification_action';
+import { FiltersNotificationAction } from './filters_notification_action';
 
 const getMockPhraseFilter = (key: string, value: string): Filter => {
   return {
@@ -77,17 +76,19 @@ describe('filters notification action', () => {
     expect(await action.isCompatible(context)).toBe(true);
   });
 
-  it('calls onChange when filters change', async () => {
-    const onChange = jest.fn();
-    action.subscribeToCompatibilityChanges(context, onChange);
+  it('getCompatibilityChangesSubject emits when filters change', (done) => {
+    const subject = action.getCompatibilityChangesSubject(context);
+    subject?.pipe(take(1)).subscribe(() => {
+      done();
+    });
     updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
-    expect(onChange).toHaveBeenCalledWith(true, action);
   });
 
-  it('calls onChange when query changes', async () => {
-    const onChange = jest.fn();
-    action.subscribeToCompatibilityChanges(context, onChange);
+  it('getCompatibilityChangesSubject emits when query changes', (done) => {
+    const subject = action.getCompatibilityChangesSubject(context);
+    subject?.pipe(take(1)).subscribe(() => {
+      done();
+    });
     updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
-    expect(onChange).toHaveBeenCalledWith(true, action);
   });
 });

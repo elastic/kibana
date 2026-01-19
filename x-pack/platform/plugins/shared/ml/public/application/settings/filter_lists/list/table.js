@@ -27,8 +27,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
+import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { MANAGEMENT_SECTION_IDS } from '../../../management';
 
 function UsedByIcon({ usedBy }) {
   // Renders a tick or cross in the 'usedBy' column to indicate whether
@@ -64,7 +65,10 @@ UsedByIcon.propTypes = {
 };
 
 function NewFilterButton({ canCreateFilter }) {
-  const redirectToNewFilterListPage = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_NEW);
+  const redirectToNewFilterListPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.FILTER_LISTS_NEW,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
+  );
 
   return (
     <EuiButton

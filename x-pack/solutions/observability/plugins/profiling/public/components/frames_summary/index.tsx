@@ -9,7 +9,6 @@ import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -19,7 +18,7 @@ import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
-import { calculateBaseComparisonDiff } from '../topn_functions/utils';
+import { calculateBaseComparisonDiff, scaleAndRoundValue } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
 
 interface FrameValue {
@@ -41,10 +40,6 @@ const ESTIMATED_VALUE_LABEL = i18n.translate('xpack.profiling.diffTopNFunctions.
   defaultMessage: 'Estimated value',
 }) as string;
 
-function getScaleFactor(scaleFactor: number = 1) {
-  return scaleFactor;
-}
-
 export function FramesSummary({
   baseValue,
   comparisonValue,
@@ -53,11 +48,14 @@ export function FramesSummary({
   compressed = false,
 }: Props) {
   const baselineScaledTotalSamples = baseValue
-    ? baseValue.totalCount * getScaleFactor(baseValue.scaleFactor)
+    ? scaleAndRoundValue({ value: baseValue.totalCount, scaleFactor: baseValue.scaleFactor })
     : 0;
 
   const comparisonScaledTotalSamples = comparisonValue
-    ? comparisonValue.totalCount * getScaleFactor(comparisonValue.scaleFactor)
+    ? scaleAndRoundValue({
+        value: comparisonValue.totalCount,
+        scaleFactor: comparisonValue.scaleFactor,
+      })
     : 0;
 
   const { co2EmissionDiff, costImpactDiff, totalSamplesDiff } = useMemo(() => {
@@ -96,7 +94,6 @@ export function FramesSummary({
         },
       }) as string,
       baseValue: totalSamplesDiff.label || '0%',
-      baseIcon: totalSamplesDiff.icon,
       baseColor: totalSamplesDiff.color,
       titleHint: ESTIMATED_VALUE_LABEL,
       hidden: isEmpty(comparisonValue),
@@ -108,7 +105,6 @@ export function FramesSummary({
       }) as string,
       baseValue: co2EmissionDiff.baseValue,
       comparisonValue: co2EmissionDiff.comparisonValue,
-      comparisonIcon: co2EmissionDiff.icon,
       comparisonColor: co2EmissionDiff.color,
       comparisonPerc: co2EmissionDiff.label,
       titleHint: ESTIMATED_VALUE_LABEL,
@@ -120,7 +116,6 @@ export function FramesSummary({
       }) as string,
       baseValue: costImpactDiff.baseValue,
       comparisonValue: costImpactDiff.comparisonValue,
-      comparisonIcon: costImpactDiff.icon,
       comparisonColor: costImpactDiff.color,
       comparisonPerc: costImpactDiff.label,
       titleHint: ESTIMATED_VALUE_LABEL,
@@ -132,7 +127,6 @@ export function FramesSummary({
       }) as string,
       baseValue: totalSamplesDiff.baseValue,
       comparisonValue: totalSamplesDiff.comparisonValue,
-      comparisonIcon: totalSamplesDiff.icon,
       comparisonColor: totalSamplesDiff.color,
       comparisonPerc: totalSamplesDiff.label,
       titleHint: ESTIMATED_VALUE_LABEL,
@@ -142,12 +136,12 @@ export function FramesSummary({
   const Summary = (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row">
+      <EuiFlexGroup direction="row" data-test-subj="framesSummary_items">
         {data
           .filter((item) => !item.hidden)
           .map((item) => {
             return (
-              <EuiFlexItem key={item.id}>
+              <EuiFlexItem key={item.id} data-test-subj={`framesSummary_item_${item.id}`}>
                 <SummaryItem
                   {...item}
                   isLoading={isLoading}
@@ -162,32 +156,37 @@ export function FramesSummary({
   );
 
   return compressed ? (
-    <>{Summary}</>
+    <div data-test-subj="framesSummary_compressed">{Summary}</div>
   ) : (
     <EuiAccordion
       initialIsOpen
       id="TopNFunctionsSummary"
+      data-test-subj="framesSummary"
       buttonContent={
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiText color={data[0].baseColor} style={{ fontWeight: 'bold' }} textAlign="left">
+            <EuiText
+              color={data[0].baseColor}
+              style={{ fontWeight: 'bold' }}
+              textAlign="left"
+              data-test-subj="framesSummary_performanceTitle"
+            >
               {data[0].title}
             </EuiText>
           </EuiFlexItem>
-          {data[0].baseIcon && (
-            <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-              <EuiIcon type={data[0].baseIcon} color={data[0].baseColor} size="s" />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
-            <EuiTextColor style={{ fontWeight: 'bold' }} color={data[0].baseColor}>
+            <EuiTextColor
+              style={{ fontWeight: 'bold' }}
+              color={data[0].baseColor}
+              data-test-subj="framesSummary_performanceValue"
+            >
               {data[0].baseValue}
             </EuiTextColor>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
     >
-      {Summary}
+      <div data-test-subj="framesSummary_details">{Summary}</div>
     </EuiAccordion>
   );
 }

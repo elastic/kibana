@@ -16,10 +16,10 @@ const Path = require('path');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const localDist = Path.resolve(__dirname, './shared_built_assets');
-const bazelDist = Path.resolve(REPO_ROOT, 'bazel-bin', Path.relative(REPO_ROOT, localDist));
+const builtDist = Path.resolve(REPO_ROOT, 'target', 'build', Path.relative(REPO_ROOT, localDist));
 
 // extracted const vars
-const distDir = Fs.existsSync(localDist) ? localDist : bazelDist;
+const distDir = Fs.existsSync(localDist) ? localDist : builtDist;
 const dllManifestPath = Path.resolve(distDir, 'kbn-ui-shared-deps-npm-manifest.json');
 const dllFilename = 'kbn-ui-shared-deps-npm.dll.js';
 const publicPathLoader = require.resolve('./src/public_path_loader');

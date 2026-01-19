@@ -7,15 +7,13 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
-import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
-import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { useAssistantContext } from '.';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import { isMac } from '@kbn/shared-ux-utility';
+import { useAssistantContext } from '../..';
 
 const TOOLTIP_CONTENT = i18n.translate(
   'xpack.elasticAssistant.assistantContext.assistantNavLinkShortcutTooltip',
@@ -29,9 +27,13 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 });
 
 export const AssistantNavLink: FC = () => {
-  const { chrome, showAssistantOverlay, assistantAvailability, currentAppId } =
-    useAssistantContext();
-  const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
+  const {
+    chrome,
+    showAssistantOverlay,
+    assistantAvailability,
+    openChatTrigger$,
+    completeOpenChat,
+  } = useAssistantContext();
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
   // useObserverable would change the order of re-renders that are tested against closely.
@@ -40,31 +42,21 @@ export const AssistantNavLink: FC = () => {
     return () => s.unsubscribe();
   }, [chrome]);
 
-  useEffect(() => {
-    const registerPortalNode = () => {
-      chrome.navControls.registerRight({
-        mount: (element: HTMLElement) => {
-          ReactDOM.render(<OutPortal node={portalNode} />, element);
-          return () => ReactDOM.unmountComponentAtNode(element);
-        },
-        // right before the user profile
-        order: 1001,
-      });
-    };
-
-    if (
-      assistantAvailability.hasAssistantPrivilege &&
-      chromeStyle &&
-      currentAppId !== 'management'
-    ) {
-      registerPortalNode();
-    }
-  }, [chrome, portalNode, assistantAvailability.hasAssistantPrivilege, chromeStyle, currentAppId]);
-
   const showOverlay = useCallback(
     () => showAssistantOverlay({ showOverlay: true }),
     [showAssistantOverlay]
   );
+
+  useEffect(() => {
+    if (!openChatTrigger$) return;
+    const sub = openChatTrigger$.subscribe((selection) => {
+      if (selection === AIAssistantType.Security) {
+        showOverlay();
+        completeOpenChat?.();
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [completeOpenChat, openChatTrigger$, showOverlay]);
 
   if (!assistantAvailability.hasAssistantPrivilege || !chromeStyle) {
     return null;
@@ -73,22 +65,16 @@ export const AssistantNavLink: FC = () => {
   const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
 
   return (
-    <InPortal node={portalNode}>
-      <EuiToolTip content={TOOLTIP_CONTENT}>
-        <EuiButtonBasicOrEmpty
-          onClick={showOverlay}
-          color="primary"
-          size="s"
-          data-test-subj="assistantNavLink"
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <AssistantIcon size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{LINK_LABEL}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiButtonBasicOrEmpty>
-      </EuiToolTip>
-    </InPortal>
+    <EuiToolTip content={TOOLTIP_CONTENT}>
+      <EuiButtonBasicOrEmpty
+        onClick={showOverlay}
+        color="primary"
+        size="s"
+        iconType={AssistantIcon}
+        data-test-subj="assistantNavLink"
+      >
+        {LINK_LABEL}
+      </EuiButtonBasicOrEmpty>
+    </EuiToolTip>
   );
 };

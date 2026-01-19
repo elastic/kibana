@@ -57,7 +57,7 @@ export function getAgentAuthorizationSettings(): SettingsRow[] {
       ],
     },
     {
-      type: 'text',
+      type: 'secret',
       key: 'secret_token',
       labelAppend: OPTIONAL_LABEL,
       label: i18n.translate(

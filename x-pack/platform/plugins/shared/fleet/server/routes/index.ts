@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parseExperimentalConfigValue } from '../../common/experimental_features';
 import type { FleetAuthzRouter } from '../services/security';
 
 import type { FleetConfigType } from '../config';
@@ -28,19 +29,30 @@ import { registerRoutes as registerMessageSigningServiceRoutes } from './message
 import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
 import { registerRoutes as registerStandaloneAgentApiKeyRoutes } from './standalone_agent_api_key';
 import { registerRoutes as registerDebugRoutes } from './debug';
+import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_synced_integrations';
+import { registerRoutes as registerCloudConnectorRoutes } from './cloud_connector';
+import { registerRoutes as registerAgentlessPoliciesRoutes } from './agentless_policy'; //
 
-export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
+export function registerRoutes(
+  fleetAuthzRouter: FleetAuthzRouter,
+  config: FleetConfigType,
+  isServerless?: boolean
+) {
+  const experimentalFeatures = parseExperimentalConfigValue(
+    config.enableExperimental || [],
+    config.experimentalFeatures || {}
+  );
   // Always register app routes for permissions checking
-  registerAppRoutes(fleetAuthzRouter, config);
+  registerAppRoutes(fleetAuthzRouter, experimentalFeatures, isServerless);
 
   // The upload package route is only authorized for the superuser
   registerEPMRoutes(fleetAuthzRouter, config);
 
   registerSetupRoutes(fleetAuthzRouter, config);
-  registerAgentPolicyRoutes(fleetAuthzRouter);
+  registerAgentPolicyRoutes(fleetAuthzRouter, experimentalFeatures);
   registerPackagePolicyRoutes(fleetAuthzRouter);
   registerOutputRoutes(fleetAuthzRouter);
-  registerSettingsRoutes(fleetAuthzRouter, config);
+  registerSettingsRoutes(fleetAuthzRouter, experimentalFeatures);
   registerDataStreamRoutes(fleetAuthzRouter);
   registerPreconfigurationRoutes(fleetAuthzRouter);
   registerFleetServerHostRoutes(fleetAuthzRouter);
@@ -50,7 +62,11 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerMessageSigningServiceRoutes(fleetAuthzRouter);
   registerUninstallTokenRoutes(fleetAuthzRouter, config);
   registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
+  registerRemoteSyncedIntegrations(fleetAuthzRouter, isServerless);
   registerDebugRoutes(fleetAuthzRouter);
+  registerCloudConnectorRoutes(fleetAuthzRouter);
+
+  registerAgentlessPoliciesRoutes(fleetAuthzRouter);
 
   // Conditional config routes
   if (config.agents.enabled) {

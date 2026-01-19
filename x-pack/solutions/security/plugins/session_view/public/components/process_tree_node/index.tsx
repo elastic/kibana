@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, {
-  useState,
-  useEffect,
-  MouseEvent,
-  useCallback,
-  useMemo,
-  RefObject,
-  ReactElement,
-} from 'react';
-import { EuiButton, EuiIcon, EuiToolTip, formatDate, EuiButtonIcon } from '@elastic/eui';
+import type { MouseEvent, ReactElement, RefObject } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiIconTip,
+  EuiToolTip,
+  formatDate,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { chain } from 'lodash';
@@ -29,7 +29,7 @@ import { SplitText } from './split_text';
 import { Nbsp } from './nbsp';
 import { useDateFormat } from '../../hooks';
 import { TextHighlight } from './text_highlight';
-import { SessionViewTelemetryKey } from '../../types';
+import type { SessionViewTelemetryKey } from '../../types';
 
 export const EXEC_USER_CHANGE = i18n.translate('xpack.sessionView.execUserChange', {
   defaultMessage: 'Exec user change',
@@ -43,7 +43,7 @@ export interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
   depth?: number;
-  onProcessSelected?: (process: Process) => void;
+  onProcessSelected?: (process: Process, isManualSelection?: boolean) => void;
   jumpToEntityId?: string;
   investigatedAlertId?: string;
   selectedProcess?: Process | null;
@@ -57,6 +57,7 @@ export interface ProcessDeps {
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
   handleCollapseProcessTree?: () => void;
+
   trackEvent(name: SessionViewTelemetryKey): void;
 }
 
@@ -122,7 +123,7 @@ export function ProcessTreeNode({
   const nodeRef = useVisible({
     viewPortEl: scrollerRef.current,
     visibleCallback: useCallback(
-      (isVisible: any, isAbove: any) => {
+      (isVisible: boolean, isAbove: boolean) => {
         onChangeJumpToEventVisibility(isVisible, isAbove);
       },
       [onChangeJumpToEventVisibility]
@@ -187,7 +188,9 @@ export function ProcessTreeNode({
         return;
       }
 
-      onProcessSelected?.(process);
+      // we pass true here to let the parent SessionView component that the process was selected
+      // by a user clicking on a row in the tree
+      onProcessSelected?.(process, true);
 
       if (isSessionLeader && scrollerRef.current) {
         scrollerRef.current.scrollTop = 0;
@@ -326,9 +329,16 @@ export function ProcessTreeNode({
                   {timeStampsNormal}
                 </span>
               )}
-              <EuiToolTip position="top" content={iconTooltip}>
-                <EuiIcon data-test-subj={iconTestSubj} type={processIcon} css={styles.icon} />
-              </EuiToolTip>
+              <EuiIconTip
+                position="top"
+                content={iconTooltip}
+                data-test-subj={iconTestSubj}
+                type={processIcon}
+                css={styles.icon}
+                iconProps={{
+                  'data-test-subj': iconTestSubj,
+                }}
+              />
               <span css={styles.textSection}>
                 <TextHighlight
                   text={promptText}

@@ -1,0 +1,11 @@
+lang: Curl
+# label:
+source: |
+  curl -X POST "http://localhost:5601/api/apm/sourcemaps" \
+  -H 'Content-Type: multipart/form-data' \
+  -H 'kbn-xsrf: true' \
+  -H 'Authorization: ApiKey ${YOUR_API_KEY}' \
+  -F 'service_name="foo"' \
+  -F 'service_version="1.0.0"' \
+  -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
+  -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './login_page.scss';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -15,9 +13,10 @@ import {
   EuiImage,
   EuiSpacer,
   EuiText,
+  type EuiThemeComputed,
   EuiTitle,
 } from '@elastic/eui';
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
@@ -31,9 +30,9 @@ import type {
   NotificationsStart,
 } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import { kbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
@@ -138,13 +137,24 @@ export class LoginPage extends Component<Props, State> {
         ? false
         : allowLogin && layout === 'form';
 
-    const contentHeaderClasses = classNames('loginWelcome__content', 'eui-textCenter', {
-      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
-    });
+    const loginWelcomeStyle = (euiTheme: EuiThemeComputed) =>
+      css`
+        position: relative;
+        margin: auto;
+        max-width: 460px;
+        padding-left: ${euiTheme.size.xl};
+        padding-right: ${euiTheme.size.xl};
+        z-index: 10;
+        text-align: center;
+      `;
 
-    const contentBodyClasses = classNames('loginWelcome__content', 'loginWelcome-body', {
-      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
-    });
+    const contentHeaderStyles = (euiTheme: EuiThemeComputed) => [
+      loginWelcomeStyle(euiTheme),
+      !loginIsSupported &&
+        css`
+          max-width: 700px;
+        `,
+    ];
 
     const customLogo = this.state.customBranding?.logo;
     const logo = customLogo ? (
@@ -155,10 +165,16 @@ export class LoginPage extends Component<Props, State> {
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
     return (
-      <div className="loginWelcome login-form">
-        <header className="loginWelcome__header">
-          <div className={contentHeaderClasses}>
-            <EuiSpacer size="xxl" />
+      <div data-test-subj="loginForm" css={kbnFullScreenBgCss}>
+        <header
+          css={({ euiTheme }) => css`
+            margin-top: calc(${euiTheme.size.xxl} * 3);
+            position: relative;
+            padding: ${euiTheme.size.base};
+            z-index: 10;
+          `}
+        >
+          <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
             <span className="loginWelcome__logo" style={logoStyle}>
               {logo}
             </span>
@@ -170,10 +186,9 @@ export class LoginPage extends Component<Props, State> {
                 />
               </h1>
             </EuiTitle>
-            <EuiSpacer size="xl" />
           </div>
         </header>
-        <div className={contentBodyClasses}>
+        <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
               {this.getLoginForm({
@@ -372,12 +387,7 @@ export function renderLoginPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...services}>
-      <LoginPage {...props} />
-    </KibanaRenderContextProvider>,
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<LoginPage {...props} />), element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 }

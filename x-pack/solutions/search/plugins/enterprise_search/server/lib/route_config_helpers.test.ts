@@ -25,6 +25,12 @@ describe('skipBodyValidation', () => {
       skipBodyValidation({
         path: '/example/path',
         validate: {},
+        security: {
+          authz: {
+            enabled: false,
+            reason: '',
+          },
+        },
       })
     ).toEqual({
       path: '/example/path',
@@ -32,6 +38,12 @@ describe('skipBodyValidation', () => {
         body: mockBuffer,
       },
       options: { body: { parse: false } },
+      security: {
+        authz: {
+          enabled: false,
+          reason: '',
+        },
+      },
     });
   });
 
@@ -45,6 +57,12 @@ describe('skipBodyValidation', () => {
         options: {
           authRequired: true,
         },
+        security: {
+          authz: {
+            enabled: false,
+            reason: '',
+          },
+        },
       })
     ).toEqual({
       path: '/example/path',
@@ -55,6 +73,12 @@ describe('skipBodyValidation', () => {
       options: {
         authRequired: true,
         body: { parse: false },
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: '',
+        },
       },
     });
   });

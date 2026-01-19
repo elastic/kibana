@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { SyntheticsAppState } from '../root_reducer';
+import type { SyntheticsAppState } from '../root_reducer';
 
 export const selectOverviewState = (state: SyntheticsAppState) => state.overview;
 export const selectOverviewPageState = (state: SyntheticsAppState) => state.overview.pageState;

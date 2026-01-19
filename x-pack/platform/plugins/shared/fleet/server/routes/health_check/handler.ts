@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import fetch from 'node-fetch';
 
-import { getFleetServerHost } from '../../services/fleet_server_host';
+import { fleetServerHostService } from '../../services/fleet_server_host';
 
 import type { FleetRequestHandler, PostHealthCheckRequestSchema } from '../../types';
 
@@ -19,11 +19,9 @@ export const postHealthCheckHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const abortController = new AbortController();
   const { id } = request.body;
-  const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
 
   try {
-    const fleetServerHost = await getFleetServerHost(soClient, id);
+    const fleetServerHost = await fleetServerHostService.get(id);
 
     if (
       !fleetServerHost ||

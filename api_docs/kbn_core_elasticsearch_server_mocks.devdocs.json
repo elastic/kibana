@@ -24,7 +24,7 @@
         "signature": [
           "{ readonly publicBaseUrl?: string | undefined; setUnauthorizedErrorHandler: jest.MockInstance<void, [handler: ",
           "UnauthorizedErrorHandler",
-          "], unknown>; } & Omit<",
+          "], unknown>; setCpsFeatureFlag: jest.MockInstance<void, [enabled: boolean], unknown>; } & Omit<",
           "ElasticsearchServiceSetup",
           ", \"legacy\"> & { legacy: { config$: ",
           "BehaviorSubject",
@@ -32,7 +32,9 @@
           "ElasticsearchConfig",
           ">; }; }"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+        "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -50,26 +52,16 @@
           ", [], unknown>; } & Omit<",
           "ElasticsearchServiceStart",
           ", \"client\" | \"createClient\"> & { client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ClusterClientMock",
-            "text": "ClusterClientMock"
-          },
+          "ClusterClientMock",
           "; createClient: jest.MockedFunction<(type: string, config?: Partial<",
           "ElasticsearchClientConfig",
           "> | undefined) => ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.CustomClusterClientMock",
-            "text": "CustomClusterClientMock"
-          },
+          "CustomClusterClientMock",
           ">; }"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+        "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -83,7 +75,9 @@
         "tags": [],
         "label": "elasticsearchServiceMock",
         "description": [],
-        "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+        "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+        "lineNumber": 149,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -97,7 +91,9 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+            "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -111,7 +107,9 @@
             "signature": [
               "() => jest.Mocked<ElasticsearchServiceContract>"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+            "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -127,7 +125,9 @@
             "signature": [
               "() => MockedElasticSearchServicePreboot"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+            "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -143,7 +143,9 @@
             "signature": [
               "() => MockedElasticSearchServicePreboot"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+            "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -159,7 +161,9 @@
             "signature": [
               "() => MockedInternalElasticSearchServiceSetup"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+            "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -174,15 +178,11 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerMocksPluginApi",
-                "section": "def-server.MockedElasticSearchServiceSetup",
-                "text": "MockedElasticSearchServiceSetup"
-              }
+              "MockedElasticSearchServiceSetup"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+            "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -198,7 +198,9 @@
             "signature": [
               "() => MockedInternalElasticsearchServiceStart"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+            "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -213,15 +215,11 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerMocksPluginApi",
-                "section": "def-server.MockedElasticSearchServiceStart",
-                "text": "MockedElasticSearchServiceStart"
-              }
+              "MockedElasticSearchServiceStart"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+            "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -240,7 +238,9 @@
               ">) => ",
               "ElasticsearchCapabilities"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+            "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -255,7 +255,9 @@
                 "signature": [
                   "{ serverless?: boolean | undefined; }"
                 ],
-                "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
+                "path": "src/core/packages/elasticsearch/server-mocks/src/elasticsearch_service.mock.ts",
+                "lineNumber": 141,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

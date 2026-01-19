@@ -5,7 +5,7 @@ All the files in the folder were exported from Lens. These Lens attributes allow
 
 Here are the steps of how to generate them:
 
-1. Launch Kibana, go to `Visualize Library`, `Create visualization`, and select `Lens` to enter the editor.
+1. Launch Kibana, go to `Visualize library`, `Create visualization`, and select `Lens` to enter the editor.
 2. Create the visualization and save it.
 3. Go to `Stack Management` > `Saved Objects`, tick the box of the visualization you just created, and click `Export`
 4. Create a new file in this folder with the attributes below from the exported file:

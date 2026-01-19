@@ -10,7 +10,8 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
-import { DocViewsRegistry } from './doc_views_registry';
+import type { ReactElement } from 'react';
+import type { DocViewsRegistry } from './doc_views_registry';
 
 export interface FieldMapping {
   filterable?: boolean;
@@ -45,31 +46,13 @@ export interface DocViewRenderProps {
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
 }
-export type DocViewerComponent = React.FC<DocViewRenderProps>;
-export type DocViewRenderFn = (
-  domeNode: HTMLDivElement,
-  renderProps: DocViewRenderProps
-) => () => void;
 
-export interface BaseDocViewInput {
+export type DocViewerComponent = React.FC<DocViewRenderProps>;
+
+export interface DocView {
   id: string;
   order: number;
   title: string;
   enabled?: boolean;
+  render: (props: DocViewRenderProps) => ReactElement;
 }
-
-export interface RenderDocViewInput extends BaseDocViewInput {
-  render: DocViewRenderFn;
-  component?: undefined;
-  directive?: undefined;
-}
-
-interface ComponentDocViewInput extends BaseDocViewInput {
-  component: DocViewerComponent;
-  render?: undefined;
-  directive?: undefined;
-}
-
-export type DocView = ComponentDocViewInput | RenderDocViewInput;
-
-export type DocViewFactory = () => DocView;

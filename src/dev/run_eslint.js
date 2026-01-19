@@ -7,39 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import yargs from 'yargs';
+import { run } from '@kbn/dev-cli-runner';
 
 import { eslintBinPath } from './eslint';
 
-let quiet = true;
-if (process.argv.includes('--no-quiet')) {
-  quiet = false;
-} else {
-  process.argv.push('--quiet');
-}
-
-const options = yargs(process.argv).argv;
 process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
 
-if (!options._.length && !options.printConfig) {
-  process.argv.push('.');
-}
+if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  console.log(
+    "This is a wrapper around ESLint's CLI that sets some defaults - see Eslint's help for flags:"
+  );
+  require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
+} else {
+  run(
+    ({ flags }) => {
+      flags._ = flags._ || [];
 
-if (!process.argv.includes('--no-cache')) {
-  process.argv.push('--cache');
-}
+      // verbose is only a flag for our CLI runner, not for ESLint
+      if (process.argv.includes('--verbose')) {
+        process.argv.splice(process.argv.indexOf('--verbose'), 1);
+      } else {
+        process.argv.push('--quiet');
+      }
 
-if (!process.argv.includes('--ext')) {
-  process.argv.push('--ext', '.js,.mjs,.ts,.tsx');
-}
+      if (flags.cache) {
+        process.argv.push('--cache');
+      }
 
-// common-js is required so that logic before this executes before loading eslint
-require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
+      if (!flags._.ext) {
+        process.argv.push('--ext', '.js,.mjs,.ts,.tsx');
+      }
 
-if (quiet) {
-  process.on('exit', (code) => {
-    if (!code) {
-      console.log('✅ no eslint errors found');
+      // common-js is required so that logic before this executes before loading eslint
+      // requiring the module is still going to pass along all flags
+      require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
+
+      process.on('exit', (code) => {
+        if (!code) {
+          console.log('✅ no eslint errors found');
+        }
+      });
+    },
+    {
+      description: 'Run ESLint on all JavaScript/TypeScript files in the repository',
+      usage: 'node scripts/eslint.js [options] [<file>...]',
+      flags: {
+        allowUnexpected: true,
+        boolean: ['cache', 'fix', 'quiet'],
+        string: ['ext'],
+      },
     }
-  });
+  );
 }

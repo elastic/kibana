@@ -1,0 +1,94 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { resolve, dirname } from 'path';
+import { writeFile, readFileSync, mkdir } from 'fs';
+import { promisify } from 'util';
+
+import del from 'del';
+
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { comparePngs } from '../lib/compare_pngs';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrService } from '../../ftr_provider_context';
+
+const mkdirAsync = promisify(mkdir);
+const writeFileAsync = promisify(writeFile);
+
+export class ScreenshotsService extends FtrService {
+  private readonly log = this.ctx.getService('log');
+  private readonly config = this.ctx.getService('config');
+  private readonly browser = this.ctx.getService('browser');
+
+  private readonly SESSION_DIRECTORY = resolve(this.config.get('screenshots.directory'), 'session');
+  private readonly FAILURE_DIRECTORY = resolve(this.config.get('screenshots.directory'), 'failure');
+  private readonly BASELINE_DIRECTORY = resolve(
+    this.config.get('screenshots.directory'),
+    'baseline'
+  );
+
+  constructor(ctx: FtrProviderContext) {
+    super(ctx);
+
+    if (process.env.CI !== 'true' && !process.env.stack_functional_integration) {
+      ctx.getService('lifecycle').beforeTests.add(async () => {
+        await del([this.SESSION_DIRECTORY, this.FAILURE_DIRECTORY]);
+      });
+    }
+  }
+
+  /**
+   *
+   * @param name {string} name of the file to use for comparison
+   * @param updateBaselines {boolean} optional, pass true to update the baseline snapshot.
+   * @return {Promise.<number>} Percentage difference between the baseline and the current snapshot.
+   */
+  async compareAgainstBaseline(name: string, updateBaselines: boolean, el?: WebElementWrapper) {
+    this.log.debug('compareAgainstBaseline');
+    const sessionPath = resolve(this.SESSION_DIRECTORY, `${name}.png`);
+    const baselinePath = resolve(this.BASELINE_DIRECTORY, `${name}.png`);
+    const failurePath = resolve(this.FAILURE_DIRECTORY, `${name}.png`);
+
+    await this.capture(sessionPath, el);
+
+    if (updateBaselines) {
+      this.log.debug('Updating baseline snapshot');
+      // Make the directory if it doesn't exist
+      await mkdirAsync(dirname(baselinePath), { recursive: true });
+      await writeFileAsync(baselinePath, readFileSync(sessionPath));
+      return 0;
+    } else {
+      await mkdirAsync(this.FAILURE_DIRECTORY, { recursive: true });
+      return await comparePngs(
+        sessionPath,
+        baselinePath,
+        failurePath,
+        this.SESSION_DIRECTORY,
+        this.log
+      );
+    }
+  }
+
+  async take(name: string, el?: WebElementWrapper, subDirectories: string[] = []) {
+    const path = resolve(this.SESSION_DIRECTORY, ...subDirectories, `${name}.png`);
+    await this.capture(path, el);
+  }
+
+  async takeForFailure(name: string, el?: WebElementWrapper) {
+    const path = resolve(this.FAILURE_DIRECTORY, `${name}.png`);
+    await this.capture(path, el);
+  }
+
+  private async capture(path: string, el?: WebElementWrapper) {
+    this.log.info(`Taking ${el ? 'element' : 'window'} screenshot "${path}"`);
+    const screenshot = await (el ? el.takeScreenshot() : this.browser.takeScreenshot());
+    await mkdirAsync(dirname(path), { recursive: true });
+    await writeFileAsync(path, screenshot, 'base64');
+  }
+}

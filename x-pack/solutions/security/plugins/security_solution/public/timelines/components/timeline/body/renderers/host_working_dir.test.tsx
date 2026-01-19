@@ -11,6 +11,7 @@ import React from 'react';
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { HostWorkingDir } from './host_working_dir';
+import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -22,13 +23,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../common/components/cell_actions/cell_actions_renderer', () => {
+  return {
+    CellActionsRenderer: jest.fn(),
+  };
+});
+
+const MockedCellActionsRenderer = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-renderer">{children}</div>;
+});
+
 describe('HostWorkingDir', () => {
+  beforeEach(() => {
+    (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
+  });
   const mount = useMountAppended();
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <HostWorkingDir
         eventId={mockTimelineData[0].ecs._id}
+        scopeId="some_scope"
         contextId="test"
         hostName="[hostname-123]"
         workingDirectory="[working-directory-123]"
@@ -43,6 +58,7 @@ describe('HostWorkingDir', () => {
         <div>
           <HostWorkingDir
             eventId={mockTimelineData[0].ecs._id}
+            scopeId="some_scope"
             contextId="test"
             hostName="[hostname-123]"
             workingDirectory={undefined}
@@ -60,6 +76,7 @@ describe('HostWorkingDir', () => {
         <div>
           <HostWorkingDir
             eventId={mockTimelineData[0].ecs._id}
+            scopeId="some_scope"
             contextId="test"
             hostName="[hostname-123]"
             workingDirectory={null}
@@ -77,6 +94,7 @@ describe('HostWorkingDir', () => {
         <div>
           <HostWorkingDir
             eventId={mockTimelineData[0].ecs._id}
+            scopeId="some_scope"
             contextId="test"
             hostName={undefined}
             workingDirectory="[working-directory-123]"
@@ -94,6 +112,7 @@ describe('HostWorkingDir', () => {
         <div>
           <HostWorkingDir
             eventId={mockTimelineData[0].ecs._id}
+            scopeId="some_scope"
             contextId="test"
             hostName={null}
             workingDirectory="[working-directory-123]"
@@ -103,5 +122,28 @@ describe('HostWorkingDir', () => {
     );
 
     expect(wrapper.text()).toEqual('in[working-directory-123]');
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <div>
+          <HostWorkingDir
+            eventId={mockTimelineData[0].ecs._id}
+            scopeId="some_scope"
+            contextId="test"
+            hostName={null}
+            workingDirectory="[working-directory-123]"
+          />
+        </div>
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsRenderer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

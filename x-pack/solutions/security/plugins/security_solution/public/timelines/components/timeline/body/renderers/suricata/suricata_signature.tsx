@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
-
-import type { DraggableWrapperProps } from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../../../../common/components/drag_and_drop/helpers';
 import { GoogleLink } from '../../../../../../common/components/links';
-import { Provider } from '../../../data_providers/provider';
-
+import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 import { TokensFlexItem } from '../helpers';
 import { getBeginningTokens } from './suricata_links';
-import { DefaultDraggable } from '../../../../../../common/components/draggables';
-import type { QueryOperator } from '../../../data_providers/data_provider';
-import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 export const SURICATA_SIGNATURE_FIELD_NAME = 'suricata.eve.alert.signature';
 export const SURICATA_SIGNATURE_ID_FIELD_NAME = 'suricata.eve.alert.signature_id';
@@ -59,93 +48,52 @@ export const Tokens = React.memo<{ tokens: string[] }>(({ tokens }) => (
 
 Tokens.displayName = 'Tokens';
 
-export const DraggableSignatureId = React.memo<{
-  id: string;
-  isDraggable?: boolean;
+export const SignatureId = React.memo<{
+  scopeId: string;
   signatureId: number;
-}>(({ id, isDraggable, signatureId }) => {
-  const dataProviderProp = useMemo(
-    () => ({
-      and: [],
-      enabled: true,
-      id: escapeDataProviderId(`suricata-draggable-signature-id-${id}-sig-${signatureId}`),
-      name: String(signatureId),
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field: SURICATA_SIGNATURE_ID_FIELD_NAME,
-        value: signatureId,
-        operator: IS_OPERATOR as QueryOperator,
-      },
-    }),
-    [id, signatureId]
-  );
-
-  const render: DraggableWrapperProps['render'] = useCallback(
-    (dataProvider, _, snapshot) =>
-      snapshot.isDragging ? (
-        <DragEffects>
-          <Provider dataProvider={dataProvider} />
-        </DragEffects>
-      ) : (
-        <EuiToolTip
-          data-test-subj="signature-id-tooltip"
-          content={SURICATA_SIGNATURE_ID_FIELD_NAME}
-        >
-          <Badge iconType="number" color="hollow" title="">
-            {signatureId}
-          </Badge>
-        </EuiToolTip>
-      ),
-    [signatureId]
-  );
-
+}>(({ scopeId, signatureId }) => {
   return (
     <SignatureFlexItem grow={false}>
-      <DraggableWrapper
-        dataProvider={dataProviderProp}
-        isDraggable={isDraggable}
-        render={render}
-        isAggregatable={true}
-        fieldType={'keyword'}
-      />
+      <CellActionsRenderer
+        field={SURICATA_SIGNATURE_ID_FIELD_NAME}
+        value={signatureId}
+        scopeId={scopeId}
+      >
+        <Badge iconType="number" color="hollow" title="">
+          {signatureId}
+        </Badge>
+      </CellActionsRenderer>
     </SignatureFlexItem>
   );
 });
 
-DraggableSignatureId.displayName = 'DraggableSignatureId';
+SignatureId.displayName = 'SignatureId';
 
 export const SuricataSignature = React.memo<{
-  contextId: string;
+  scopeId: string;
   id: string;
-  isDraggable?: boolean;
   signature: string;
   signatureId: number;
-}>(({ contextId, id, isDraggable, signature, signatureId }) => {
+}>(({ scopeId, id, signature, signatureId }) => {
   const tokens = getBeginningTokens(signature);
   return (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <DraggableSignatureId
-        id={`draggable-signature-id-${contextId}-${id}`}
-        isDraggable={isDraggable}
-        signatureId={signatureId}
-      />
+      <SignatureId scopeId={scopeId} signatureId={signatureId} />
       <Tokens tokens={tokens} />
       <LinkFlexItem grow={false}>
-        <DefaultDraggable
-          data-test-subj="draggable-signature-link"
+        <CellActionsRenderer
+          data-test-subj="signature-link"
           field={SURICATA_SIGNATURE_FIELD_NAME}
-          id={`suricata-signature-default-draggable-${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
-          isDraggable={isDraggable}
           value={signature}
           tooltipPosition="bottom"
+          scopeId={scopeId}
         >
           <div>
             <GoogleLink link={signature}>
               {signature.split(' ').splice(tokens.length).join(' ')}
             </GoogleLink>
           </div>
-        </DefaultDraggable>
+        </CellActionsRenderer>
       </LinkFlexItem>
     </EuiFlexGroup>
   );

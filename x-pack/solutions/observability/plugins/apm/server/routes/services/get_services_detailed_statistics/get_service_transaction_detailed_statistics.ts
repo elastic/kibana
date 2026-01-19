@@ -7,20 +7,20 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
+import {
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+  getDurationFieldForTransactions,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
 import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import type { RollupInterval } from '../../../../common/rollup';
 import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
-import {
-  calculateFailedTransactionRate,
-  getOutcomeAggregation,
-} from '../../../lib/helpers/transaction_error_rate';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { maybe } from '../../../../common/utils/maybe';
 
@@ -82,47 +82,45 @@ export async function getServiceTransactionDetailedStats({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { terms: { [SERVICE_NAME]: serviceNames } },
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { terms: { [SERVICE_NAME]: serviceNames } },
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        sample: {
-          random_sampler: randomSampler,
-          aggs: {
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: serviceNames.length,
-              },
-              aggs: {
-                transactionType: {
-                  terms: {
-                    field: TRANSACTION_TYPE,
-                  },
-                  aggs: {
-                    ...metrics,
-                    timeseries: {
-                      date_histogram: {
-                        field: '@timestamp',
-                        fixed_interval: `${bucketSizeInSeconds}s`,
-                        min_doc_count: 0,
-                        extended_bounds: {
-                          min: startWithOffset,
-                          max: endWithOffset,
-                        },
+    },
+    aggs: {
+      sample: {
+        random_sampler: randomSampler,
+        aggs: {
+          services: {
+            terms: {
+              field: SERVICE_NAME,
+              size: serviceNames.length,
+            },
+            aggs: {
+              transactionType: {
+                terms: {
+                  field: TRANSACTION_TYPE,
+                },
+                aggs: {
+                  ...metrics,
+                  timeseries: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: `${bucketSizeInSeconds}s`,
+                      min_doc_count: 0,
+                      extended_bounds: {
+                        min: startWithOffset,
+                        max: endWithOffset,
                       },
-                      aggs: metrics,
                     },
+                    aggs: metrics,
                   },
                 },
               },

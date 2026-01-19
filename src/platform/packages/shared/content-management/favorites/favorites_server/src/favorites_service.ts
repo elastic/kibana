@@ -10,9 +10,11 @@
 // eslint-disable-next-line max-classes-per-file
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FAVORITES_LIMIT } from '@kbn/content-management-favorites-common';
-import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { favoritesSavedObjectType, FavoritesSavedObjectAttributes } from './favorites_saved_object';
-import { FavoritesRegistry } from './favorites_registry';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { FavoritesSavedObjectAttributes } from './favorites_saved_object';
+import { favoritesSavedObjectType } from './favorites_saved_object';
+import type { FavoritesRegistry } from './favorites_registry';
 
 export interface FavoritesState {
   favoriteIds: string[];

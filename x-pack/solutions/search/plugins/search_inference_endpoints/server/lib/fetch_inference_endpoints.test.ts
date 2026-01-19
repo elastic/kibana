@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { fetchInferenceEndpoints } from './fetch_inference_endpoints';
 
@@ -46,14 +46,14 @@ describe('fetch indices', () => {
 
   const mockClient = {
     asCurrentUser: {
-      transport: {
-        request: jest.fn(),
+      inference: {
+        get: jest.fn(),
       },
     },
   };
 
   it('returns all inference endpoints', async () => {
-    mockClient.asCurrentUser.transport.request.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.inference.get.mockImplementationOnce(() => {
       return Promise.resolve({ endpoints: mockInferenceEndpointsResponse });
     });
 

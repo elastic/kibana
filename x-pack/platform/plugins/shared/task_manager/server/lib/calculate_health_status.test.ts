@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { set } from '@kbn/safer-lodash-set';
-import { HealthStatus, RawMonitoringStats } from '../monitoring';
+import type { RawMonitoringStats } from '../monitoring';
+import { HealthStatus } from '../monitoring';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { calculateHealthStatus } from './calculate_health_status';
 import { cloneDeep } from 'lodash';
@@ -23,6 +24,10 @@ const config = {
   enabled: true,
   index: 'foo',
   max_attempts: 9,
+  invalidate_api_key_task: {
+    interval: '5m',
+    removalDelay: '1h',
+  },
   poll_interval: 3000,
   version_conflict_threshold: 80,
   request_capacity: 1000,

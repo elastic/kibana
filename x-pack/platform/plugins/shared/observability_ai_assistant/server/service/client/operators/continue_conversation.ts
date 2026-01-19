@@ -5,46 +5,54 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
-import { last, pick, take } from 'lodash';
+import { last, omit, pick, take } from 'lodash';
+import type { Observable, OperatorFunction } from 'rxjs';
 import {
   catchError,
   concat,
   EMPTY,
   from,
   isObservable,
-  Observable,
+  map,
   of,
-  OperatorFunction,
   shareReplay,
   switchMap,
+  tap,
   throwError,
 } from 'rxjs';
-import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
-import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
+import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { createToolNotFoundError } from '@kbn/inference-plugin/common/chat_complete/errors';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
+import type { Connector } from '@kbn/actions-plugin/server';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { isToolValidationError } from '@kbn/inference-common';
+import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
+import type { ToolCallEvent } from '../../../analytics/tool_call';
+import { toolCallEventType } from '../../../analytics/tool_call';
+import type { Message, CompatibleJSONSchema, MessageAddEvent } from '../../../../common';
 import {
-  createFunctionLimitExceededError,
-  MessageOrChatEvent,
-} from '../../../../common/conversation_complete';
-import { FunctionVisibility } from '../../../../common/functions/types';
-import { AdHocInstruction, Instruction } from '../../../../common/types';
+  CONTEXT_FUNCTION_NAME,
+  MessageRole,
+  StreamingChatResponseEventType,
+} from '../../../../common';
+import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
+import { createFunctionLimitExceededError } from '../../../../common/conversation_complete';
+import type { Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
-import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
 import type { ChatFunctionClient } from '../../chat_function_client';
 import type { AutoAbortedChatFunction } from '../../types';
 import { createServerSideFunctionResponseError } from '../../util/create_server_side_function_response_error';
-import { getSystemMessageFromInstructions } from '../../util/get_system_message_from_instructions';
-import { replaceSystemMessage } from '../../util/replace_system_message';
-import { LangTracer } from '../instrumentation/lang_tracer';
 import { catchFunctionNotFoundError } from './catch_function_not_found_error';
 import { extractMessages } from './extract_messages';
-import { hideTokenCountEvents } from './hide_token_count_events';
 
 const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
-function executeFunctionAndCatchError({
+const EXIT_LOOP_FUNCTION_NAME = 'exit_loop';
+
+export function executeFunctionAndCatchError({
   name,
   args,
   functionClient,
@@ -52,9 +60,11 @@ function executeFunctionAndCatchError({
   chat,
   signal,
   logger,
-  tracer,
   connectorId,
-  useSimulatedFunctionCalling,
+  simulateFunctionCalling,
+  analytics,
+  connector,
+  scopes,
 }: {
   name: string;
   args: string | undefined;
@@ -63,105 +73,135 @@ function executeFunctionAndCatchError({
   chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   logger: Logger;
-  tracer: LangTracer;
   connectorId: string;
-  useSimulatedFunctionCalling: boolean;
+  simulateFunctionCalling: boolean;
+  analytics: AnalyticsServiceStart;
+  connector?: Connector;
+  scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
-  // hide token count events from functions to prevent them from
-  // having to deal with it as well
+  return withExecuteToolSpan(name, { tool: { input: args } }, (span) => {
+    // hide token count events from functions to prevent them from
+    // having to deal with it as well
 
-  return tracer.startActiveSpan(`execute_function ${name}`, ({ tracer: nextTracer }) =>
-    hideTokenCountEvents((hide) => {
-      const executeFunctionResponse$ = from(
-        functionClient.executeFunction({
-          name,
-          chat: (operationName, params) => {
-            return chat(operationName, {
-              ...params,
-              tracer: nextTracer,
-              connectorId,
-            }).pipe(hide());
-          },
-          args,
-          signal,
-          messages,
-          connectorId,
-          useSimulatedFunctionCalling,
-        })
-      );
+    const executeFunctionResponse$ = from(
+      functionClient.executeFunction({
+        name,
+        chat: (operationName, params) => {
+          return chat(operationName, {
+            ...params,
+            connectorId,
+          });
+        },
+        args,
+        signal,
+        logger,
+        messages,
+        connectorId,
+        simulateFunctionCalling,
+      })
+    );
 
-      return executeFunctionResponse$.pipe(
-        catchError((error) => {
-          logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
-          // We want to catch the error only when a promise occurs
-          // if it occurs in the Observable, we cannot easily recover
-          // from it because the function may have already emitted
-          // values which could lead to an invalid conversation state,
-          // so in that case we let the stream fail.
-          return of(createServerSideFunctionResponseError({ name, error }));
-        }),
-        switchMap((response) => {
-          if (isObservable(response)) {
-            return response;
-          }
+    return executeFunctionResponse$.pipe(
+      tap(() => {
+        analytics.reportEvent<ToolCallEvent>(toolCallEventType, {
+          toolName: name,
+          connector: getInferenceConnectorInfo(connector),
+          scopes,
+        });
+      }),
+      catchError((error) => {
+        span?.recordException(error);
+        logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
 
-          // is messageAdd event
-          if ('type' in response) {
-            return of(response);
-          }
-
-          const encoded = encode(JSON.stringify(response.content || {}));
-
-          const exceededTokenLimit = encoded.length >= MAX_FUNCTION_RESPONSE_TOKEN_COUNT;
-
+        if (isToolValidationError(error)) {
           return of(
             createFunctionResponseMessage({
               name,
-              content: exceededTokenLimit
-                ? {
-                    message:
-                      'Function response exceeded the maximum length allowed and was truncated',
-                    truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
-                  }
-                : response.content,
-              data: response.data,
+              content: { message: error.message, errors: error.meta },
             })
           );
-        })
-      );
-    })
-  );
+        }
+        // We want to catch the error only when a promise occurs
+        // if it occurs in the Observable, we cannot easily recover
+        // from it because the function may have already emitted
+        // values which could lead to an invalid conversation state,
+        // so in that case we let the stream fail.
+        return of(createServerSideFunctionResponseError({ name, error }));
+      }),
+      switchMap((response) => {
+        if (isObservable(response)) {
+          return response;
+        }
+
+        // is messageAdd event
+        if ('type' in response) {
+          return of(response);
+        }
+
+        const encoded = encode(JSON.stringify(response.content || {}));
+
+        const exceededTokenLimit = encoded.length >= MAX_FUNCTION_RESPONSE_TOKEN_COUNT;
+
+        return of(
+          createFunctionResponseMessage({
+            name,
+            content: exceededTokenLimit
+              ? {
+                  message:
+                    'Function response exceeded the maximum length allowed and was truncated',
+                  truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
+                }
+              : response.content,
+            data: response.data,
+          })
+        );
+      })
+    );
+  });
 }
 
-function getFunctionDefinitions({
+function getFunctionOptions({
   functionClient,
-  functionLimitExceeded,
   disableFunctions,
+  functionLimitExceeded,
 }: {
   functionClient: ChatFunctionClient;
+  disableFunctions: boolean;
   functionLimitExceeded: boolean;
-  disableFunctions:
-    | boolean
-    | {
-        except: string[];
-      };
-}) {
-  if (functionLimitExceeded || disableFunctions === true) {
-    return [];
+}): {
+  functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
+  functionCall?: string;
+} {
+  if (disableFunctions === true) {
+    return {};
   }
 
-  let systemFunctions = functionClient
+  if (functionLimitExceeded) {
+    return {
+      functionCall: EXIT_LOOP_FUNCTION_NAME,
+      functions: [
+        {
+          name: EXIT_LOOP_FUNCTION_NAME,
+          description: `You've run out of tool calls. Call this tool, and explain to the user you've run out of budget.`,
+          parameters: {
+            type: 'object',
+            properties: {
+              response: {
+                type: 'string',
+                description: 'Your textual response',
+              },
+            },
+            required: ['response'],
+          },
+        },
+      ],
+    };
+  }
+
+  const systemFunctions = functionClient
     .getFunctions()
     .map((fn) => fn.definition)
-    .filter(
-      (def) =>
-        !def.visibility ||
-        [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
-    );
-
-  if (typeof disableFunctions === 'object') {
-    systemFunctions = systemFunctions.filter((fn) => disableFunctions.except.includes(fn.name));
-  }
+    .filter(({ isInternal }) => !isInternal);
 
   const actions = functionClient.getActions();
 
@@ -169,7 +209,7 @@ function getFunctionDefinitions({
     .concat(actions)
     .map((definition) => pick(definition, 'name', 'description', 'parameters'));
 
-  return allDefinitions;
+  return { functions: allDefinitions };
 }
 
 export function continueConversation({
@@ -178,55 +218,43 @@ export function continueConversation({
   chat,
   signal,
   functionCallsLeft,
-  adHocInstructions = [],
-  userInstructions,
+  apiUserInstructions = [],
+  kbUserInstructions,
   logger,
   disableFunctions,
-  tracer,
   connectorId,
-  useSimulatedFunctionCalling,
+  simulateFunctionCalling,
+  analytics,
+  connector,
+  scopes,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
   chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   functionCallsLeft: number;
-  adHocInstructions: AdHocInstruction[];
-  userInstructions: Instruction[];
+  apiUserInstructions: Instruction[];
+  kbUserInstructions: Instruction[];
   logger: Logger;
-  disableFunctions:
-    | boolean
-    | {
-        except: string[];
-      };
-  tracer: LangTracer;
+  disableFunctions: boolean;
   connectorId: string;
-  useSimulatedFunctionCalling: boolean;
+  simulateFunctionCalling: boolean;
+  analytics: AnalyticsServiceStart;
+  connector?: Connector;
+  scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
   const functionLimitExceeded = functionCallsLeft <= 0;
 
-  const definitions = getFunctionDefinitions({
-    functionLimitExceeded,
+  const functionOptions = getFunctionOptions({
     functionClient,
     disableFunctions,
+    functionLimitExceeded,
   });
 
-  const registeredAdhocInstructions = functionClient.getAdhocInstructions();
-  const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+  const lastMessage = last(initialMessages)?.message;
 
-  const messagesWithUpdatedSystemMessage = replaceSystemMessage(
-    getSystemMessageFromInstructions({
-      applicationInstructions: functionClient.getInstructions(),
-      userInstructions,
-      adHocInstructions: allAdHocInstructions,
-      availableFunctionNames: definitions.map((def) => def.name),
-    }),
-    initialMessages
-  );
-
-  const lastMessage = last(messagesWithUpdatedSystemMessage)?.message;
   const isUserMessage = lastMessage?.role === MessageRole.User;
 
   return executeNextStep().pipe(handleEvents());
@@ -239,11 +267,10 @@ export function continueConversation({
           : 'user_message';
 
       return chat(operationName, {
-        messages: messagesWithUpdatedSystemMessage,
-        functions: definitions,
-        tracer,
+        messages: initialMessages,
         connectorId,
         stream: true,
+        ...functionOptions,
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }
 
@@ -304,7 +331,10 @@ export function continueConversation({
       return of(
         createServerSideFunctionResponseError({
           name: functionCallName,
-          error: createFunctionNotFoundError(functionCallName),
+          error: createToolNotFoundError({
+            name: functionCallName,
+            args: lastMessage.function_call!.arguments ?? '',
+          }),
         })
       );
     }
@@ -314,41 +344,69 @@ export function continueConversation({
       args: lastMessage.function_call!.arguments,
       chat,
       functionClient,
-      messages: messagesWithUpdatedSystemMessage,
+      messages: initialMessages,
       signal,
       logger,
-      tracer,
       connectorId,
-      useSimulatedFunctionCalling,
+      simulateFunctionCalling,
+      analytics,
+      connector,
+      scopes,
     });
   }
 
   function handleEvents(): OperatorFunction<MessageOrChatEvent, MessageOrChatEvent> {
     return (events$) => {
-      const shared$ = events$.pipe(shareReplay());
+      const shared$ = events$.pipe(
+        shareReplay(),
+        map((event) => {
+          if (event.type === StreamingChatResponseEventType.MessageAdd) {
+            const message = event.message;
+
+            if (message.message.function_call?.name === EXIT_LOOP_FUNCTION_NAME) {
+              const args = JSON.parse(message.message.function_call.arguments ?? '{}') as {
+                response: string;
+              };
+
+              return {
+                ...event,
+                message: {
+                  ...message,
+                  message: {
+                    ...omit(message.message, 'function_call', 'content'),
+                    content: args.response ?? `The model returned an empty response`,
+                  },
+                },
+              } satisfies MessageAddEvent;
+            }
+          }
+          return event;
+        })
+      );
 
       return concat(
         shared$,
         shared$.pipe(
-          withoutTokenCountEvents(),
           extractMessages(),
           switchMap((extractedMessages) => {
             if (!extractedMessages.length) {
               return EMPTY;
             }
             return continueConversation({
-              messages: messagesWithUpdatedSystemMessage.concat(extractedMessages),
+              messages: initialMessages.concat(extractedMessages),
               chat,
               functionCallsLeft: nextFunctionCallsLeft,
               functionClient,
               signal,
-              userInstructions,
-              adHocInstructions,
+              kbUserInstructions,
+              apiUserInstructions,
               logger,
               disableFunctions,
-              tracer,
               connectorId,
-              useSimulatedFunctionCalling,
+              simulateFunctionCalling,
+              analytics,
+              connector,
+              scopes,
             });
           })
         )

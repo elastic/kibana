@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataBounds, roundValue, getDataMinMax, CustomPaletteParams } from '../../../../palettes';
+import type { DataBounds, CustomPaletteParams } from '../../../../palettes';
+import { roundValue, getDataMinMax } from '../../../../palettes';
 import type { ColorRange, ColorRangeAccessor } from '../types';
 
 /**
  * Allows to update a ColorRange
- * @private
+ * @internal
  */
 const updateColorRangeItem = (
   colorRanges: ColorRange[],

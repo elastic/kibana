@@ -26,8 +26,10 @@ const TooltipWithKeyboardShortcutComponent = ({
   <>
     <div data-test-subj="content">{content}</div>
     {additionalScreenReaderOnlyContext !== '' && (
-      <EuiScreenReaderOnly data-test-subj="additionalScreenReaderOnlyContext">
-        <p>{additionalScreenReaderOnlyContext}</p>
+      <EuiScreenReaderOnly>
+        <p data-test-subj="additionalScreenReaderOnlyContext">
+          {additionalScreenReaderOnlyContext}
+        </p>
       </EuiScreenReaderOnly>
     )}
     {showShortcut && (

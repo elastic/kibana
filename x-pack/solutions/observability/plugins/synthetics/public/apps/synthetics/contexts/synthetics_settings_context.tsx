@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   AppMountParameters,
   ChromeBadge,
   ChromeBreadcrumb,
   CoreStart,
   I18nStart,
 } from '@kbn/core/public';
-import React, { createContext, useContext, useMemo, PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { useGetUrlParams } from '../hooks';
 
@@ -56,6 +57,7 @@ export interface SyntheticsSettingsContextValues {
   isDev?: boolean;
   isServerless?: boolean;
   setBreadcrumbs?: (crumbs: ChromeBreadcrumb[]) => void;
+  darkMode: boolean;
 }
 
 const { BASE_PATH } = CONTEXT_DEFAULTS;
@@ -76,6 +78,7 @@ const defaultContext: SyntheticsSettingsContextValues = {
   isDev: false,
   canSave: false,
   canManagePrivateLocations: false,
+  darkMode: false,
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
@@ -91,6 +94,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     commonlyUsedRanges,
     isDev,
     isServerless,
+    darkMode,
   } = props;
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
@@ -103,6 +107,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
 
   const value = useMemo(() => {
     return {
+      darkMode,
       canSave,
       isDev,
       basePath,
@@ -116,6 +121,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
       canManagePrivateLocations,
     };
   }, [
+    darkMode,
     canSave,
     isDev,
     basePath,

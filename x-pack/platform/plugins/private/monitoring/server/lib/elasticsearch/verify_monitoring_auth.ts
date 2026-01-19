@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import Boom from '@hapi/boom';
 import { INDEX_PATTERN } from '../../../common/constants';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 
 /*
  * Check the currently logged-in user's privileges for "read" privileges on the

@@ -21,6 +21,12 @@ export function registerConfigDataRoute({
   router.get(
     {
       path: '/internal/enterprise_search/config_data',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: false,
     },
     elasticsearchErrorHandler(log, async (context, _request, response) => {
@@ -48,6 +54,12 @@ export function registerConfigDataRoute({
   router.get(
     {
       path: '/internal/enterprise_search/es_config',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: false,
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {

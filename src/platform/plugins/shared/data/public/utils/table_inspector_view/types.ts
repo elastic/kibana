@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type React from 'react';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 
 type DataViewColumnRender = (value: string, _item: DatatableRow) => React.ReactNode | string;
 

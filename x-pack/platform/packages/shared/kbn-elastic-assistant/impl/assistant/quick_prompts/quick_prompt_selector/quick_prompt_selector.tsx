@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,11 +15,10 @@ import {
   EuiHealth,
   EuiHighlight,
   EuiComboBox,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 
 interface Props {
@@ -176,7 +176,11 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
           </EuiFlexItem>
           {!value?.isDefault && (
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="right" content={i18n.DELETE_QUICK_PROMPT_}>
+              <EuiToolTip
+                position="right"
+                content={i18n.DELETE_QUICK_PROMPT_}
+                disableScreenReaderOutput
+              >
                 <EuiButtonIcon
                   iconType="cross"
                   aria-label={i18n.DELETE_QUICK_PROMPT_}

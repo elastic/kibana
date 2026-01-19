@@ -10,16 +10,24 @@ import type {
   CspFinding,
   MisconfigurationEvaluationStatus,
 } from '@kbn/cloud-security-posture-common';
-import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
-import { getComplianceDashboardSchema } from './schemas/stats';
-
+import type { getComplianceDashboardSchema } from './schemas/stats';
+type CloudConnectorType = 'cloud_connectors';
 export type AwsCredentialsType =
+  | CloudConnectorType
   | 'assume_role'
   | 'direct_access_keys'
   | 'temporary_keys'
   | 'shared_credentials'
   | 'cloud_formation';
+
+export type UpdatePolicy = (params: {
+  updatedPolicy: NewPackagePolicy;
+  isValid?: boolean;
+  isExtensionLoaded?: boolean;
+}) => void;
 
 export type AwsCredentialsTypeFieldMap = {
   [key in AwsCredentialsType]: string[];
@@ -101,10 +109,9 @@ export interface ComplianceDashboardDataV2 {
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   trend: PostureTrend[];
   benchmarks: BenchmarkData[];
+  namespaces: string[];
 }
 
-export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
-export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
 export type RuleSection = CspBenchmarkRuleMetadata['section'];
 
 // Fleet Integration types
@@ -194,3 +201,8 @@ export interface AggFieldBucket {
     doc_count?: string;
   }>;
 }
+
+export type CredentialsType = Extract<
+  AwsCredentialsType,
+  'direct_access_keys' | 'assume_role' | 'temporary_keys' | 'cloud_connectors'
+>;

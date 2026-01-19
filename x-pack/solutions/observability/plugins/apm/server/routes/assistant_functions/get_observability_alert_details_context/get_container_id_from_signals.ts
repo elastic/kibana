@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { rangeQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
@@ -14,7 +14,8 @@ import moment from 'moment';
 import type { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { CONTAINER_ID } from '@kbn/apm-types';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -47,7 +48,7 @@ export async function getContainerIdFromSignals({
   const start = moment(query.alert_started_at).subtract(30, 'minutes').valueOf();
   const end = moment(query.alert_started_at).valueOf();
 
-  const params: APMEventESSearchRequest['body'] = {
+  const params: Omit<APMEventESSearchRequest, 'apm'> = {
     _source: ['container.id'],
     terminate_after: 1,
     size: 1,
@@ -79,7 +80,7 @@ async function getContainerIdFromLogs({
   esClient,
   logSourcesService,
 }: {
-  params: ESSearchRequest['body'];
+  params: ESSearchRequest;
   esClient: ElasticsearchClient;
   logSourcesService: LogSourcesService;
 }) {
@@ -91,20 +92,25 @@ async function getContainerIdFromLogs({
     fields: requiredFields,
   });
 
-  const event = unflattenKnownApmEventFields(maybe(res.hits.hits[0])?.fields, requiredFields);
+  const fields = maybe(res.hits.hits[0])?.fields;
 
-  return event?.container.id;
+  const event =
+    fields &&
+    accessKnownApmEventFields(fields as Partial<FlattenedApmEvent>).requireFields(requiredFields);
+
+  return event?.[CONTAINER_ID];
 }
 
 async function getContainerIdFromTraces({
   params,
   apmEventClient,
 }: {
-  params: APMEventESSearchRequest['body'];
+  params: Omit<APMEventESSearchRequest, 'apm'>;
   apmEventClient: APMEventClient;
 }) {
   const requiredFields = asMutableArray([CONTAINER_ID] as const);
   const res = await apmEventClient.search('get_container_id_from_traces', {
+    ...params,
     apm: {
       sources: [
         {
@@ -113,10 +119,14 @@ async function getContainerIdFromTraces({
         },
       ],
     },
-    body: { ...params, fields: requiredFields },
+    fields: requiredFields,
   });
 
-  const event = unflattenKnownApmEventFields(maybe(res.hits.hits[0])?.fields, requiredFields);
+  const fields = maybe(res.hits.hits[0])?.fields;
 
-  return event?.container.id;
+  const event =
+    fields &&
+    accessKnownApmEventFields(fields as Partial<FlattenedApmEvent>).requireFields(requiredFields);
+
+  return event?.[CONTAINER_ID];
 }

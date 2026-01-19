@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
+import type { SeverityThreshold } from '@kbn/ml-plugin/common/types/anomalies';
 import type { Anomalies, InfluencerInput, CriteriaFields } from '../types';
 import { KibanaServices } from '../../../lib/kibana';
 
@@ -14,7 +15,7 @@ export interface Body {
   criteriaFields: CriteriaFields[];
   influencers: InfluencerInput[];
   aggregationInterval: string;
-  threshold: number;
+  threshold: SeverityThreshold[];
   earliestMs: number;
   latestMs: number;
   dateFormatTz: string;

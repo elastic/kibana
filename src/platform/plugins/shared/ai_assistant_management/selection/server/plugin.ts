@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
-  DEFAULT_APP_CATEGORIES,
+  KibanaRequest,
+  Logger,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -25,8 +23,13 @@ import type {
   AIAssistantManagementSelectionPluginServerSetup,
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
+import {
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+} from '../common/ui_setting_keys';
+import { classicSetting } from './src/settings/classic_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { chatExperienceSetting } from './src/settings/chat_experience_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
@@ -38,122 +41,72 @@ export class AIAssistantManagementSelectionPlugin
     >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
+  private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<
+      AIAssistantManagementSelectionPluginServerDependenciesStart,
+      AIAssistantManagementSelectionPluginServerStart
+    >,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-    core.uiSettings.register({
-      [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'AI Assistant for Observability and Search visibility',
-        }),
-        category: [DEFAULT_APP_CATEGORIES.observability.id],
-        value: this.config.preferredAIAssistantType,
-        description: i18n.translate(
-          'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
-          {
-            defaultMessage:
-              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in Observability and Search, everywhere, or nowhere.',
-            values: {
-              em: (chunks) => `<em>${chunks}</em>`,
-            },
-          }
-        ),
-        schema: schema.oneOf(
-          [
-            schema.literal(AIAssistantType.Default),
-            schema.literal(AIAssistantType.Observability),
-            schema.literal(AIAssistantType.Never),
-          ],
-          { defaultValue: this.config.preferredAIAssistantType }
-        ),
-        options: [AIAssistantType.Default, AIAssistantType.Observability, AIAssistantType.Never],
-        type: 'select',
-        optionLabels: {
-          [AIAssistantType.Default]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
-            { defaultMessage: 'Observability and Search only (default)' }
-          ),
-          [AIAssistantType.Observability]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueObservability',
-            { defaultMessage: 'Everywhere' }
-          ),
-          [AIAssistantType.Never]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
-            { defaultMessage: 'Nowhere' }
-          ),
-        },
-        requiresPageReload: true,
-      },
-    });
-
-    core.capabilities.registerProvider(() => {
-      return {
-        management: {
-          kibana: {
-            aiAssistantManagementSelection: true,
-            observabilityAiAssistantManagement: true,
-            securityAiAssistantManagement: true,
-          },
-        },
-      };
-    });
-
-    plugins.features?.registerKibanaFeature({
-      id: 'aiAssistantManagementSelection',
-      name: i18n.translate('aiAssistantManagementSelection.featureRegistry.featureName', {
-        defaultMessage: 'AI Assistant',
-      }),
-      order: 8600,
-      app: [],
-      category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      management: {
-        kibana: [
-          'aiAssistantManagementSelection',
-          'securityAiAssistantManagement',
-          'observabilityAiAssistantManagement',
-        ],
-      },
-      minimumLicense: 'enterprise',
-      privileges: {
-        all: {
-          management: {
-            kibana: [
-              'aiAssistantManagementSelection',
-              'securityAiAssistantManagement',
-              'observabilityAiAssistantManagement',
-            ],
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
-        read: {
-          management: {
-            kibana: [
-              'aiAssistantManagementSelection',
-              'securityAiAssistantManagement',
-              'observabilityAiAssistantManagement',
-            ],
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
-      },
-    });
+    this.registerUiSettings(core, plugins);
 
     return {};
+  }
+
+  private registerUiSettings(
+    core: CoreSetup<
+      AIAssistantManagementSelectionPluginServerDependenciesStart,
+      AIAssistantManagementSelectionPluginServerStart
+    >,
+    plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
+  ) {
+    const { cloud } = plugins;
+    const serverlessProjectType = cloud?.serverless.projectType;
+
+    // Do not register the setting in a serverless project
+    if (!serverlessProjectType) {
+      core.uiSettings.register({
+        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...classicSetting,
+          value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
+        },
+      });
+    }
+
+    // Register chat experience setting for both stateful and serverless (except workplaceai)
+    if (serverlessProjectType !== 'workplaceai') {
+      // Default Agent for Elasticsearch solution view, Classic for all other cases
+      core.uiSettings.register({
+        [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
+          ...chatExperienceSetting,
+          getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
+            try {
+              const [, startServices] = await core.getStartServices();
+              // Avoid security exceptions before login - only check space when authenticated
+              if (startServices.spaces && request?.auth.isAuthenticated) {
+                const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
+                  request
+                );
+                if (activeSpace?.solution === 'es') {
+                  return AIChatExperience.Agent;
+                }
+              }
+            } catch (e) {
+              this.logger.error('Error getting active space:');
+              this.logger.error(e);
+            }
+            return this.config.preferredChatExperience ?? AIChatExperience.Classic;
+          },
+        },
+      });
+    }
   }
 
   public start(core: CoreStart) {

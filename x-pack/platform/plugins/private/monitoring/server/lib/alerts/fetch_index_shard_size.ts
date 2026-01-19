@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
-import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
-import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
+import type { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
+import type { RegExPatterns } from '../../../common/es_glob_patterns';
+import { ESGlobPatterns } from '../../../common/es_glob_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
@@ -45,57 +46,55 @@ export async function fetchIndexShardSize(
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations.clusters.buckets'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            createDatasetFilter('index_stats', 'index', getElasticsearchDataset('index')),
-            {
-              range: {
-                timestamp: {
-                  gte: 'now-5m',
-                },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          createDatasetFilter('index_stats', 'index', getElasticsearchDataset('index')),
+          {
+            range: {
+              timestamp: {
+                gte: 'now-5m',
               },
             },
-          ],
-        },
-      },
-      aggs: {
-        clusters: {
-          terms: {
-            include: clusters.map((cluster) => cluster.clusterUuid),
-            field: 'cluster_uuid',
-            size,
           },
-          aggs: {
-            index: {
-              terms: {
-                field: 'index_stats.index',
-                size,
-              },
-              aggs: {
-                hits: {
-                  top_hits: {
-                    sort: [
-                      {
-                        timestamp: {
-                          order: 'desc' as const,
-                          unmapped_type: 'long' as const,
-                        },
+        ],
+      },
+    },
+    aggs: {
+      clusters: {
+        terms: {
+          include: clusters.map((cluster) => cluster.clusterUuid),
+          field: 'cluster_uuid',
+          size,
+        },
+        aggs: {
+          index: {
+            terms: {
+              field: 'index_stats.index',
+              size,
+            },
+            aggs: {
+              hits: {
+                top_hits: {
+                  sort: [
+                    {
+                      timestamp: {
+                        order: 'desc' as const,
+                        unmapped_type: 'long' as const,
                       },
-                    ],
-                    _source: {
-                      includes: [
-                        '_index',
-                        'index_stats.shards.primaries',
-                        'index_stats.primaries.store.size_in_bytes',
-                        'elasticsearch.index.shards.primaries',
-                        'elasticsearch.index.primaries.store.size_in_bytes',
-                      ],
                     },
-                    size: 1,
+                  ],
+                  _source: {
+                    includes: [
+                      '_index',
+                      'index_stats.shards.primaries',
+                      'index_stats.primaries.store.size_in_bytes',
+                      'elasticsearch.index.shards.primaries',
+                      'elasticsearch.index.primaries.store.size_in_bytes',
+                    ],
                   },
+                  size: 1,
                 },
               },
             },
@@ -108,7 +107,7 @@ export async function fetchIndexShardSize(
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

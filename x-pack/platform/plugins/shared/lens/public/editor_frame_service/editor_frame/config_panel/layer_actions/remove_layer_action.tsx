@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import type { EuiCheckboxProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiCheckboxProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModalBody,
@@ -22,9 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LayerAction, StartServices } from '../../../../types';
+import type {
+  LayerAction,
+  LensStartServices as StartServices,
+  LensLayerType as LayerType,
+} from '@kbn/lens-common';
 import { LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
-import type { LayerType } from '../../../../../common/types';
 import { LAST_ACTION_ORDER } from './order_bounds';
 
 interface RemoveLayerAction {

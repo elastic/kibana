@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyString, NonEmptyTimestamp, User } from '../common_attributes.gen';
 import { Replacements, ApiConfig } from '../conversations/common_attributes.gen';
 
 /**
@@ -42,7 +42,11 @@ export const DefendInsightEvent = z.object({
  * The insight type (ie. incompatible_antivirus)
  */
 export type DefendInsightType = z.infer<typeof DefendInsightType>;
-export const DefendInsightType = z.enum(['incompatible_antivirus', 'noisy_process_tree']);
+export const DefendInsightType = z.enum([
+  'incompatible_antivirus',
+  'noisy_process_tree',
+  'policy_response_failure',
+]);
 export type DefendInsightTypeEnum = typeof DefendInsightType.enum;
 export const DefendInsightTypeEnum = DefendInsightType.enum;
 
@@ -59,6 +63,10 @@ export const DefendInsight = z.object({
    * An array of event objects
    */
   events: z.array(DefendInsightEvent).optional(),
+  /**
+   * The suggested remediation for the insight
+   */
+  remediation: z.object({}).catchall(z.unknown()).optional(),
 });
 
 /**
@@ -93,7 +101,7 @@ export const DefendInsightGenerationInterval = z.object({
 export type DefendInsightsResponse = z.infer<typeof DefendInsightsResponse>;
 export const DefendInsightsResponse = z.object({
   id: NonEmptyString,
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
   /**
    * The last time the Defend insight was updated.
    */

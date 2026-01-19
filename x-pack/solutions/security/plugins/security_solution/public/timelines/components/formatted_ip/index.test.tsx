@@ -37,14 +37,6 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => {
   };
 });
 
-jest.mock('../../../common/components/drag_and_drop/draggable_wrapper', () => {
-  const original = jest.requireActual('../../../common/components/drag_and_drop/draggable_wrapper');
-  return {
-    ...original,
-    DraggableWrapper: () => <div data-test-subj="DraggableWrapper" />,
-  };
-});
-
 jest.mock('../../store');
 
 const mockOpenFlyout = jest.fn();
@@ -63,7 +55,6 @@ describe('FormattedIp', () => {
     eventId: 'test-event-id',
     isAggregatable: true,
     fieldType: 'ip',
-    isDraggable: false,
     fieldName: 'host.ip',
   };
 
@@ -75,20 +66,6 @@ describe('FormattedIp', () => {
     );
 
     expect(screen.getByText(props.value)).toBeInTheDocument();
-  });
-
-  test('should render DraggableWrapper if isDraggable is true', () => {
-    const testProps = {
-      ...props,
-      isDraggable: true,
-    };
-    render(
-      <TestProviders>
-        <FormattedIp {...testProps} />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('DraggableWrapper')).toBeInTheDocument();
   });
 
   test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', async () => {

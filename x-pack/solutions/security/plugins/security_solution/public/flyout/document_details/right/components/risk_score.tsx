@@ -7,16 +7,20 @@
 
 import React, { memo } from 'react';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertHeaderBlock } from './alert_header_block';
-import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
-import { useDocumentDetailsContext } from '../../shared/context';
+import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
+import { RISK_SCORE_VALUE_TEST_ID } from './test_ids';
+
+export interface RiskScoreProps {
+  /**
+   * Retrieves searchHit values for the provided field
+   */
+  getFieldsData: GetFieldsData;
+}
 
 /**
  * Document details risk score displayed in flyout right section header
  */
-export const RiskScore = memo(() => {
-  const { getFieldsData } = useDocumentDetailsContext();
+export const RiskScore = memo(({ getFieldsData }: RiskScoreProps) => {
   const fieldsData = getFieldsData(ALERT_RISK_SCORE);
 
   if (!fieldsData) {
@@ -32,19 +36,7 @@ export const RiskScore = memo(() => {
     return null;
   }
 
-  return (
-    <AlertHeaderBlock
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.right.header.riskScoreTitle"
-          defaultMessage="Risk score"
-        />
-      }
-      data-test-subj={RISK_SCORE_TITLE_TEST_ID}
-    >
-      <span data-test-subj={RISK_SCORE_VALUE_TEST_ID}>{alertRiskScore}</span>
-    </AlertHeaderBlock>
-  );
+  return <span data-test-subj={RISK_SCORE_VALUE_TEST_ID}>{alertRiskScore}</span>;
 });
 
 RiskScore.displayName = 'RiskScore';

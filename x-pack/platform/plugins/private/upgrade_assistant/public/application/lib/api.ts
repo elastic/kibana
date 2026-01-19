@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
-import {
+import type { ReindexService } from '@kbn/reindex-service-plugin/public';
+import type { ReindexArgs } from '@kbn/reindex-service-plugin/common';
+import type { UpdateIndexOperation } from '../../../common/update_index';
+import type {
   ESUpgradeStatus,
   CloudBackupStatus,
   ClusterUpgradeState,
   ResponseError,
   SystemIndicesMigrationStatus,
-  ReindexStatusResponse,
+  DataStreamReindexStatusResponse,
+  DataStreamMetadata,
 } from '../../../common/types';
 import {
   API_BASE_PATH,
@@ -22,9 +26,9 @@ import {
   CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
 } from '../../../common/constants';
 import {
-  UseRequestConfig,
-  SendRequestConfig,
-  SendRequestResponse,
+  type UseRequestConfig,
+  type SendRequestConfig,
+  type SendRequestResponse,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../shared_imports';
@@ -33,7 +37,9 @@ type ClusterUpgradeStateListener = (clusterUpgradeState: ClusterUpgradeState) =>
 
 export class ApiService {
   private client: HttpSetup | undefined;
+  private reindexService: ReindexService | undefined;
   private clusterUpgradeStateListeners: ClusterUpgradeStateListener[] = [];
+  private lastClusterUpgradeErrorKey: string | null = null;
 
   private handleClusterUpgradeError(error: ResponseError | null) {
     const isClusterUpgradeError = Boolean(error && error.statusCode === 426);
@@ -50,21 +56,21 @@ export class ApiService {
       throw new Error('API service has not been initialized.');
     }
     const response = _useRequest<R, ResponseError>(this.client, config);
-    // NOTE: This will cause an infinite render loop in any component that both
-    // consumes the hook calling this useRequest function and also handles
-    // cluster upgrade errors. Note that sendRequest doesn't have this problem.
-    //
-    // This is due to React's fundamental expectation that hooks be idempotent,
-    // so it can render a component as many times as necessary and thereby call
-    // the hook on each render without worrying about that triggering subsequent
-    // renders.
-    //
-    // In this case we call handleClusterUpgradeError every time useRequest is
-    // called, which is on every render. If handling the cluster upgrade error
-    // causes a state change in the consuming component, that will trigger a
-    // render, which will call useRequest again, calling handleClusterUpgradeError,
-    // causing a state change in the consuming component, and so on.
-    this.handleClusterUpgradeError(response.error);
+    // Avoid triggering synchronous render-phase updates. If we detect a cluster-upgrade error,
+    // defer notifying listeners to the next macrotask tick.
+    const upgradeError =
+      response.error && response.error.statusCode === 426 ? response.error : null;
+    const nextKey = upgradeError
+      ? `${upgradeError.statusCode}:${Boolean(upgradeError.attributes?.allNodesUpgraded)}`
+      : null;
+
+    if (nextKey !== this.lastClusterUpgradeErrorKey) {
+      this.lastClusterUpgradeErrorKey = nextKey;
+      if (upgradeError) {
+        setTimeout(() => this.handleClusterUpgradeError(upgradeError), 0);
+      }
+    }
+
     return response;
   }
 
@@ -79,8 +85,9 @@ export class ApiService {
     return response;
   }
 
-  public setup(httpClient: HttpSetup): void {
+  public setup(httpClient: HttpSetup, reindexService: ReindexService): void {
     this.client = httpClient;
+    this.reindexService = reindexService;
   }
 
   public onClusterUpgradeStateChange(listener: ClusterUpgradeStateListener) {
@@ -209,24 +216,70 @@ export class ApiService {
     });
   }
 
-  public async getReindexStatus(indexName: string) {
-    return await this.sendRequest<ReindexStatusResponse>({
-      path: `${API_BASE_PATH}/reindex/${indexName}`,
+  /**
+   * Data Stream Migrations
+   * Reindex and readonly operations
+   */
+
+  public async getDataStreamMigrationStatus(dataStreamName: string) {
+    return await this.sendRequest<DataStreamReindexStatusResponse>({
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}`,
       method: 'get',
     });
   }
 
-  public async startReindexTask(indexName: string) {
+  public async getDataStreamMetadata(dataStreamName: string) {
+    return await this.sendRequest<DataStreamMetadata>({
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}/metadata`,
+      method: 'get',
+    });
+  }
+
+  public async startDataStreamReindexTask(dataStreamName: string) {
     return await this.sendRequest({
-      path: `${API_BASE_PATH}/reindex/${indexName}`,
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}/reindex`,
       method: 'post',
     });
   }
 
-  public async cancelReindexTask(indexName: string) {
+  public async cancelDataStreamReindexTask(dataStreamName: string) {
     return await this.sendRequest({
-      path: `${API_BASE_PATH}/reindex/${indexName}/cancel`,
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}/reindex/cancel`,
       method: 'post',
+    });
+  }
+
+  public async markIndicesAsReadOnly(dataStreamName: string, indices: string[]) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}/readonly`,
+      method: 'post',
+      body: { indices },
+    });
+  }
+
+  /**
+   * FINISH: Data Stream Migrations
+   */
+
+  public async getReindexStatus(indexName: string) {
+    return this.reindexService!.getReindexStatus(indexName);
+  }
+
+  public async startReindexTask(reindexArgs: Omit<ReindexArgs, 'reindexOptions'>) {
+    return this.reindexService!.startReindex({
+      ...reindexArgs,
+      reindexOptions: { enqueue: true, deleteOldIndex: true },
+    });
+  }
+  public async cancelReindexTask(indexName: string) {
+    return this.reindexService!.cancelReindex(indexName);
+  }
+
+  public async updateIndex(indexName: string, operations: UpdateIndexOperation[]) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/update_index/${indexName}`,
+      method: 'post',
+      body: { operations },
     });
   }
 
@@ -263,7 +316,6 @@ export class ApiService {
         nodeId: string;
         nodeName: string;
         available: string;
-        lowDiskWatermarkSetting: string;
       }>
     >({
       path: `${API_BASE_PATH}/node_disk_space`,

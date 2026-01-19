@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   Logger,
   SavedObject,
@@ -30,6 +30,7 @@ export interface ServiceContext {
 export interface AttachedToCaseArgs {
   caseId: string;
   filter?: KueryNode;
+  attachmentTypes?: AttachmentType[];
 }
 
 export interface GetAttachmentArgs {
@@ -47,6 +48,14 @@ export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
 
 export interface AlertIdsAggsResult {
   alertIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
+export interface EventIdsAggsResult {
+  eventIds: {
     buckets: Array<{
       key: string;
     }>;

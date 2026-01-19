@@ -25,6 +25,7 @@ export function useFleetServerHostsForPolicy(agentPolicy?: Pick<AgentPolicy, 'id
     () => ({
       isLoadingInitialRequest: isLoading && isInitialRequest,
       fleetServerHost: enrollmentSettings?.fleet_server.host?.host_urls[0] || '',
+      fleetServerHostConfig: enrollmentSettings?.fleet_server.host,
       fleetProxy: enrollmentSettings?.fleet_server.host_proxy,
       esOutput: enrollmentSettings?.fleet_server.es_output,
       esOutputProxy: enrollmentSettings?.fleet_server.es_output_proxy,

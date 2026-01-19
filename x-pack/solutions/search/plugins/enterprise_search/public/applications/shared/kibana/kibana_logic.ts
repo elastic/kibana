@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { ConsolePluginStart } from '@kbn/console-plugin/public';
-import {
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type {
   ApplicationStart,
   Capabilities,
   ChromeBreadcrumb,
@@ -21,23 +22,26 @@ import {
   ChromeStart,
   SecurityServiceStart,
 } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-import { FleetStart } from '@kbn/fleet-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { IndexMappingProps } from '@kbn/index-management-shared-types';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import { ConnectorDefinition } from '@kbn/search-connectors';
-import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { IndexMappingProps } from '@kbn/index-management-shared-types';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { ConnectorDefinition } from '@kbn/search-connectors';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
+import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-shared-ui';
+import type { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
-import { ClientConfigType, ProductFeatures } from '../../../../common/types';
-import { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
+import type { ClientConfigType, ProductFeatures } from '../../../../common/types';
+import type { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
 
 import { HttpLogic } from '../http';
-import { createHref, CreateHrefOptions } from '../react_router_helpers';
+import type { CreateHrefOptions } from '../react_router_helpers';
+import { createHref } from '../react_router_helpers';
 
 type RequiredFieldsOnly<T> = {
   [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];
@@ -56,7 +60,6 @@ export interface KibanaLogicProps {
   fleet?: FleetStart;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
   getNavLinks: ChromeStart['navLinks']['getAll'];
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
   isSidebarEnabled: boolean;
@@ -66,11 +69,13 @@ export interface KibanaLogicProps {
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchNavigation: SearchNavigationPluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share?: SharePluginStart;
+  uiActions: UiActionsStart;
   uiSettings?: IUiSettingsClient;
   updateSideNavDefinition: UpdateSideNavDefinitionFn;
 }
@@ -88,7 +93,6 @@ export interface KibanaValues {
   fleet: FleetStart | null;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
   getNavLinks: ChromeStart['navLinks']['getAll'];
-  guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
   isAgentlessEnabled: boolean;
@@ -102,10 +106,12 @@ export interface KibanaValues {
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   security: SecurityPluginStart | null;
+  searchNavigation: SearchNavigationPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share: SharePluginStart | null;
+  uiActions: UiActionsStart | null;
   uiSettings: IUiSettingsClient | null;
   updateSideNavDefinition: UpdateSideNavDefinitionFn;
   user: AuthenticatedUser | null;
@@ -129,7 +135,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     fleet: [props.fleet || null, {}],
     getChromeStyle$: [props.getChromeStyle$, {}],
     getNavLinks: [props.getNavLinks, {}],
-    guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
@@ -146,17 +151,18 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     ],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
+    searchNavigation: [props.searchNavigation, {}],
     security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share || null, {}],
+    uiActions: [props.uiActions, {}],
     uiSettings: [props.uiSettings, {}],
     updateSideNavDefinition: [props.updateSideNavDefinition, {}],
     user: [
       props.user || null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setUser: (_, { user }) => user || null,
       },
     ],

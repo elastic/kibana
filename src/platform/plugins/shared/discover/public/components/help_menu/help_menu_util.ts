@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ChromeStart, DocLinksStart } from '@kbn/core/public';
+import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
 
 export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksStart) {
   chrome.setHelpExtension({

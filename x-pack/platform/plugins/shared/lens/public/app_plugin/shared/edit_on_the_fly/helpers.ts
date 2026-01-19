@@ -12,18 +12,20 @@ import {
   mapVariableToColumn,
 } from '@kbn/esql-utils';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
-import type { LensPluginStartDependencies } from '../../../plugin';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
+import type { DatasourceMap, VisualizationMap } from '@kbn/lens-common';
 import { suggestionsApi } from '../../../lens_suggestions_api';
+import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 
 export interface ESQLDataGridAttrs {
   rows: ESQLRow[];
@@ -31,7 +33,12 @@ export interface ESQLDataGridAttrs {
   columns: DatatableColumn[];
 }
 
-const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldName?: string) => {
+const getDSLFilter = (
+  queryService: DataPublicPluginStart['query'],
+  uiSettings: IUiSettingsClient,
+  timeFieldName?: string
+) => {
+  const esQueryConfigs = getEsQueryConfig(uiSettings);
   const kqlQuery = queryService.queryString.getQuery();
   const filters = queryService.filterManager.getFilters();
   const timeFilter =
@@ -40,16 +47,20 @@ const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldNam
       fieldName: timeFieldName,
     });
 
-  return buildEsQuery(undefined, kqlQuery || [], [
-    ...(filters ?? []),
-    ...(timeFilter ? [timeFilter] : []),
-  ]);
+  return buildEsQuery(
+    undefined,
+    kqlQuery || [],
+    [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])],
+    esQueryConfigs
+  );
 };
 
 export const getGridAttrs = async (
   query: AggregateQuery,
   adHocDataViews: DataViewSpec[],
-  deps: LensPluginStartDependencies,
+  data: DataPublicPluginStart,
+  http: CoreStart['http'],
+  uiSettings: IUiSettingsClient,
   abortController?: AbortController,
   esqlVariables: ESQLControlVariable[] = []
 ): Promise<ESQLDataGridAttrs> => {
@@ -59,22 +70,34 @@ export const getGridAttrs = async (
   });
 
   const dataView = dataViewSpec
-    ? await deps.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview(query.esql, deps.dataViews);
+    ? await data.dataViews.create(dataViewSpec)
+    : await getESQLAdHocDataview({
+        dataViewsService: data.dataViews,
+        query: query.esql,
+        options: { skipFetchFields: true },
+        http,
+      });
 
-  const filter = getDSLFilter(deps.data.query, dataView.timeFieldName);
+  const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
 
   const results = await getESQLResults({
     esqlQuery: query.esql,
-    search: deps.data.search.search,
+    search: data.search.search,
     signal: abortController?.signal,
     filter,
     dropNullColumns: true,
-    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+    timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
     variables: esqlVariables,
   });
 
-  const columns = formatESQLColumns(results.response.columns);
+  let queryColumns = results.response.columns;
+  // Use all_columns property if it exists in the payload
+  // which has all columns regardless if they have data or not
+  if (results.response.all_columns) {
+    queryColumns = results.response.all_columns;
+  }
+
+  const columns = formatESQLColumns(queryColumns);
 
   return {
     rows: results.response.values,
@@ -85,7 +108,9 @@ export const getGridAttrs = async (
 
 export const getSuggestions = async (
   query: AggregateQuery,
-  deps: LensPluginStartDependencies,
+  data: DataPublicPluginStart,
+  http: CoreStart['http'],
+  uiSettings: IUiSettingsClient,
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
@@ -93,13 +118,16 @@ export const getSuggestions = async (
   abortController?: AbortController,
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
   esqlVariables: ESQLControlVariable[] = [],
-  shouldUpdateAttrs = true
+  shouldUpdateAttrs = true,
+  preferredVisAttributes?: TypedLensSerializedState['attributes']
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
       query,
       adHocDataViews,
-      deps,
+      data,
+      http,
+      uiSettings,
       abortController,
       esqlVariables
     );
@@ -117,6 +145,13 @@ export const getSuggestions = async (
       return;
     }
 
+    // User deliberately changed the chart type
+    const userDefinedChartType = readUserChartTypeFromSessionStorage();
+
+    const preferredChartType = userDefinedChartType
+      ? mapVisToChartType(userDefinedChartType)
+      : undefined;
+
     const context = {
       dataViewSpec: dataView?.toSpec(false),
       fieldName: '',
@@ -125,7 +160,14 @@ export const getSuggestions = async (
     };
 
     const allSuggestions =
-      suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
+      suggestionsApi({
+        context,
+        dataView,
+        datasourceMap,
+        visualizationMap,
+        preferredChartType,
+        preferredVisAttributes,
+      }) ?? [];
 
     // Lens might not return suggestions for some cases, i.e. in case of errors
     if (!allSuggestions.length) return undefined;

@@ -15,21 +15,21 @@ import {
 describe('getColorPalette', () => {
   test('Should create RGB color ramp', () => {
     expect(getColorPalette('Blues')).toEqual([
-      '#ecf1f7',
-      '#d9e3ef',
-      '#c5d5e7',
-      '#b2c7df',
-      '#9eb9d8',
-      '#8bacd0',
-      '#769fc8',
-      '#6092c0',
+      '#d8e7ff',
+      '#c8ddff',
+      '#b8d4ff',
+      '#a8caff',
+      '#98c0ff',
+      '#87b6ff',
+      '#75acff',
+      '#61a2ff',
     ]);
   });
 });
 
 describe('getColorRampCenterColor', () => {
   test('Should get center color from color ramp', () => {
-    expect(getColorRampCenterColor('Blues')).toBe('#9eb9d8');
+    expect(getColorRampCenterColor('Blues')).toBe('#98c0ff');
   });
 });
 
@@ -37,47 +37,47 @@ describe('getOrdinalMbColorRampStops', () => {
   test('Should create color stops', () => {
     expect(getOrdinalMbColorRampStops('Blues', 0, 1000, false)).toEqual([
       0,
-      '#ecf1f7',
+      '#d8e7ff',
       125,
-      '#d9e3ef',
+      '#c8ddff',
       250,
-      '#c5d5e7',
+      '#b8d4ff',
       375,
-      '#b2c7df',
+      '#a8caff',
       500,
-      '#9eb9d8',
+      '#98c0ff',
       625,
-      '#8bacd0',
+      '#87b6ff',
       750,
-      '#769fc8',
+      '#75acff',
       875,
-      '#6092c0',
+      '#61a2ff',
     ]);
   });
 
   test('Should create inverted color stops', () => {
     expect(getOrdinalMbColorRampStops('Blues', 0, 1000, true)).toEqual([
       0,
-      '#6092c0',
+      '#61a2ff',
       125,
-      '#769fc8',
+      '#75acff',
       250,
-      '#8bacd0',
+      '#87b6ff',
       375,
-      '#9eb9d8',
+      '#98c0ff',
       500,
-      '#b2c7df',
+      '#a8caff',
       625,
-      '#c5d5e7',
+      '#b8d4ff',
       750,
-      '#d9e3ef',
+      '#c8ddff',
       875,
-      '#ecf1f7',
+      '#d8e7ff',
     ]);
   });
 
-  test('Should snap to end of color stops for identical range', () => {
-    expect(getOrdinalMbColorRampStops('Blues', 23, 23, false)).toEqual([23, '#6092c0']);
+  test('xShould snap to end of color stops for identical range', () => {
+    expect(getOrdinalMbColorRampStops('Blues', 23, 23, false)).toEqual([23, '#61a2ff']);
   });
 });
 
@@ -92,15 +92,15 @@ describe('getPercentilesMbColorRampStops', () => {
     ];
     expect(getPercentilesMbColorRampStops('Blues', percentiles, false)).toEqual([
       5567.83,
-      '#e0e8f2',
+      '#cee1ff',
       8069,
-      '#c2d2e6',
+      '#b5d2ff',
       9581.13,
-      '#a2bcd9',
+      '#9bc2ff',
       11145.5,
-      '#82a7cd',
+      '#80b2ff',
       16958.18,
-      '#6092c0',
+      '#61a2ff',
     ]);
   });
 
@@ -114,15 +114,15 @@ describe('getPercentilesMbColorRampStops', () => {
     ];
     expect(getPercentilesMbColorRampStops('Blues', percentiles, true)).toEqual([
       5567.83,
-      '#6092c0',
+      '#61a2ff',
       8069,
-      '#82a7cd',
+      '#80b2ff',
       9581.13,
-      '#a2bcd9',
+      '#9bc2ff',
       11145.5,
-      '#c2d2e6',
+      '#b5d2ff',
       16958.18,
-      '#e0e8f2',
+      '#cee1ff',
     ]);
   });
 });

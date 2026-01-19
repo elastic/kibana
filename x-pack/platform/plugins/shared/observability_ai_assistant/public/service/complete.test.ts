@@ -6,6 +6,7 @@
  */
 import { filter, last, lastValueFrom, map, of, throwError, toArray } from 'rxjs';
 import { v4 } from 'uuid';
+import type { MessageAddEvent, StreamingChatResponseEventWithoutError } from '../../common';
 import {
   type Message,
   MessageRole,
@@ -13,10 +14,8 @@ import {
   type StreamingChatResponseEvent,
   ChatCompletionErrorCode,
   ChatCompletionError,
-  MessageAddEvent,
   createInternalServerError,
   createConversationNotFoundError,
-  StreamingChatResponseEventWithoutError,
 } from '../../common';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { complete } from './complete';
@@ -28,14 +27,8 @@ const client = {
 
 const connectorId = 'foo';
 
+const systemMessage = 'System message';
 const messages: Message[] = [
-  {
-    '@timestamp': new Date().toISOString(),
-    message: {
-      role: MessageRole.System,
-      content: 'System message',
-    },
-  },
   {
     '@timestamp': new Date().toISOString(),
     message: {
@@ -97,6 +90,7 @@ describe('complete', () => {
         client,
         connectorId,
         getScreenContexts: () => [],
+        systemMessage,
         messages,
         persist: false,
         disableFunctions: false,

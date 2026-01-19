@@ -1,6 +1,6 @@
 # CEIL
 
-The CEIL function rounds a number up to the nearest integer.
+Rounds a number up to the nearest integer.
 
 ## Syntax
 
@@ -8,17 +8,21 @@ The CEIL function rounds a number up to the nearest integer.
 
 ### Parameters
 
-#### number
+#### `number`
 
-This is a numeric expression. If the parameter is `null`, the function will also return `null`.
+Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
+Rounding up a decimal number
+
 ```esql
 ROW a=1.8
-| EVAL a=CEIL(a)
+| EVAL a = CEIL(a)
 ```
+
+This example rounds the value `1.8` up to the nearest integer, resulting in `2`.
 
 ## Limitations
 
-- the CEIL function does not perform any operation for `long` (including unsigned) and `integer` types. For `double` type, it picks the closest `double` value to the integer, similar to the Math.ceil function in other programming languages.
+- This function is a no-op for `long` (including unsigned) and `integer` types. For `double`, it selects the closest `double` value to the integer, similar to `Math.ceil`.

@@ -8,43 +8,25 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { AggFunctionsMapping, UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
-import { buildExpressionFunction, Range } from '@kbn/expressions-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type {
+  FullRangeTypeLens,
+  LENS_RANGE_MODES_TYPES,
+  RangeIndexPatternColumn,
+  RangeType,
+  RangeTypeLens,
+  IndexPattern,
+  IndexPatternField,
+} from '@kbn/lens-common';
 import { RangeEditor } from './range_editor';
-import { OperationDefinition } from '..';
-import { FieldBasedIndexPatternColumn } from '../column_types';
+import type { OperationDefinition } from '..';
 import { updateColumnParam } from '../../layer_helpers';
-import { supportedFormats } from '../../../../../../common/expressions/format_column/supported_formats';
+import { supportedFormats } from '../../../../../../common/expressions/defs/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
-import { IndexPattern, IndexPatternField } from '../../../../../types';
 import { getInvalidFieldMessage, isValidNumber } from '../helpers';
-
-type RangeType = Omit<Range, 'type'>;
-// Try to cover all possible serialized states for ranges
-export type RangeTypeLens = (RangeType | { from: Range['from'] | null; to: Range['to'] | null }) & {
-  label: string;
-};
-
-// This is a subset of RangeTypeLens which has both from and to defined
-type FullRangeTypeLens = Extract<RangeTypeLens, NonNullable<RangeType>>;
-
-export type MODES_TYPES = (typeof MODES)[keyof typeof MODES];
-
-export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'range';
-  params: {
-    type: MODES_TYPES;
-    maxBars: typeof AUTO_BARS | number;
-    ranges: RangeTypeLens[];
-    format?: { id: string; params?: { decimals: number } };
-    includeEmptyRows?: boolean;
-    parentFormat?: {
-      id: string;
-      params?: { id?: string; template?: string; replaceInfinity?: boolean };
-    };
-  };
-}
 
 export type RangeColumnParams = RangeIndexPatternColumn['params'];
 export type UpdateParamsFnType = <K extends keyof RangeColumnParams>(
@@ -82,6 +64,10 @@ export const rangeOperation: OperationDefinition<
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
+  scale: (column) => {
+    const type = column.params?.type ?? MODES.Histogram;
+    return type === MODES.Histogram ? 'interval' : 'ordinal';
+  },
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer, columnId, indexPattern),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
@@ -110,7 +96,6 @@ export const rangeOperation: OperationDefinition<
       operationType: 'range',
       sourceField: field.name,
       isBucketed: true,
-      scale: type === MODES.Histogram ? 'interval' : 'ordinal', // ordinal for Range
       params: {
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,
         type: columnParams?.type ?? MODES.Histogram,
@@ -137,6 +122,9 @@ export const rangeOperation: OperationDefinition<
       label: field.name,
       sourceField: field.name,
     };
+  },
+  toESQL: (column, columnId, _indexPattern, layer, uiSettings) => {
+    return undefined;
   },
   toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;
@@ -225,7 +213,7 @@ export const rangeOperation: OperationDefinition<
     };
 
     // Useful to change more params at once
-    const onChangeMode = (newMode: MODES_TYPES) => {
+    const onChangeMode = (newMode: LENS_RANGE_MODES_TYPES) => {
       const scale = newMode === MODES.Range ? 'ordinal' : 'interval';
       const dataType = newMode === MODES.Range ? 'string' : 'number';
       const parentFormat =

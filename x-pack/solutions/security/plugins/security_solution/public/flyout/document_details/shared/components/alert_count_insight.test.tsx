@@ -13,15 +13,13 @@ import { useAlertsByStatus } from '../../../../overview/components/detection_res
 import type { ParsedAlertsData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useEuiTheme } from '@elastic/eui';
 import {
-  INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
   INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID,
 } from './test_ids';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../../common/components/user_privileges');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -65,10 +63,17 @@ const mockAlertData: ParsedAlertsData = {
   },
 };
 
+const openDetailsPanel = jest.fn();
+
 const renderAlertCountInsight = () => {
   return render(
     <TestProviders>
-      <AlertCountInsight name={name} fieldName={fieldName} data-test-subj={testId} />
+      <AlertCountInsight
+        name={name}
+        fieldName={fieldName}
+        data-test-subj={testId}
+        openDetailsPanel={openDetailsPanel}
+      />
     </TestProviders>
   );
 };
@@ -76,7 +81,6 @@ const renderAlertCountInsight = () => {
 describe('AlertCountInsight', () => {
   beforeEach(() => {
     (useSignalIndex as jest.Mock).mockReturnValue({ signalIndexName: '' });
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
   });
 
   it('renders', () => {
@@ -90,26 +94,17 @@ describe('AlertCountInsight', () => {
     expect(getByTestId(testId)).toBeInTheDocument();
     expect(getByTestId(`${testId}-distribution-bar`)).toBeInTheDocument();
     expect(getByTestId(`${testId}-count`)).toHaveTextContent('8');
-    expect(
-      getByTestId(INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)
-    ).toBeInTheDocument();
     expect(queryByTestId(INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('renders the count as text instead of button', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+  it('open entity details panel when clicking on the count', () => {
     (useAlertsByStatus as jest.Mock).mockReturnValue({
       isLoading: false,
       items: mockAlertData,
     });
-
-    const { getByTestId, queryByTestId } = renderAlertCountInsight();
-
-    expect(getByTestId(`${testId}-count`)).toHaveTextContent('8');
-    expect(getByTestId(INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID)).toBeInTheDocument();
-    expect(
-      queryByTestId(INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)
-    ).not.toBeInTheDocument();
+    const { getByTestId } = renderAlertCountInsight();
+    getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
+    expect(openDetailsPanel).toHaveBeenCalled();
   });
 
   it('renders loading spinner if data is being fetched', () => {
@@ -131,9 +126,9 @@ describe('AlertCountInsight', () => {
         closed: {
           total: 6,
           severities: [
-            { key: 'high', value: 1, label: 'High' },
             { key: 'low', value: 1, label: 'Low' },
             { key: 'medium', value: 2, label: 'Medium' },
+            { key: 'high', value: 1, label: 'High' },
             { key: 'critical', value: 2, label: 'Critical' },
           ],
         },
@@ -151,10 +146,10 @@ describe('getFormattedAlertStats', () => {
   it('should return alert stats', () => {
     const alertStats = getFormattedAlertStats(mockAlertData, euiTheme);
     expect(alertStats).toEqual([
-      { key: 'High', count: 2, color: '#ff7e62' },
-      { key: 'Low', count: 2, color: '#54b399' },
-      { key: 'Medium', count: 2, color: '#f1d86f' },
-      { key: 'Critical', count: 2, color: '#bd271e' },
+      { key: 'Low', count: 2, color: '#54B399' },
+      { key: 'Medium', count: 2, color: '#D6BF57' },
+      { key: 'High', count: 2, color: '#DA8B45' },
+      { key: 'Critical', count: 2, color: '#E7664C' },
     ]);
   });
 
@@ -164,8 +159,8 @@ describe('getFormattedAlertStats', () => {
         closed: {
           total: 2,
           severities: [
-            { key: 'high', value: 1, label: 'High' },
             { key: 'low', value: 1, label: 'Low' },
+            { key: 'high', value: 1, label: 'High' },
           ],
         },
       },

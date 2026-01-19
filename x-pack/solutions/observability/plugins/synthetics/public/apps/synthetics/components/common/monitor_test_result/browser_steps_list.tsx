@@ -6,35 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, {
-  CSSProperties,
-  ReactElement,
-  PropsWithChildren,
-  useCallback,
-  useEffect,
-  useState,
-  useMemo,
-} from 'react';
+import type { CSSProperties, ReactElement, PropsWithChildren } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import type { Criteria, EuiBasicTableColumn, EuiTextProps, Pagination } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiTextProps,
   EuiTitle,
   useEuiTheme,
-  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 import { StepTabs } from '../../test_run_details/step_tabs';
 import { ResultDetails } from './result_details';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
+import type { ScreenshotImageSize } from '../screenshot/screenshot_size';
 import {
-  ScreenshotImageSize,
   THUMBNAIL_SCREENSHOT_SIZE,
   THUMBNAIL_SCREENSHOT_SIZE_MOBILE,
 } from '../screenshot/screenshot_size';
@@ -77,6 +68,8 @@ function mapStepIds(steps: JourneyStep[]) {
   return steps.map(({ _id }) => _id).toString();
 }
 
+const MAX_STEPS_TO_SHOW = 5;
+
 export const BrowserStepsList = ({
   steps,
   error,
@@ -88,8 +81,34 @@ export const BrowserStepsList = ({
   showExpand = true,
   testNowMode = false,
 }: Props) => {
-  const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
-  const failedStep = stepEnds.find((step) => step.synthetics.step?.status === 'failed');
+  const [pageIndex, setPageIndex] = useState(0);
+
+  const allStepEnds: JourneyStep[] = steps.filter(isStepEnd);
+  const failedStep = allStepEnds.find((step) => step.synthetics.step?.status === 'failed');
+
+  const shouldPaginate = allStepEnds.length > MAX_STEPS_TO_SHOW;
+
+  const stepEnds = shouldPaginate
+    ? allStepEnds.slice(
+        pageIndex * MAX_STEPS_TO_SHOW,
+        Math.min(pageIndex * MAX_STEPS_TO_SHOW + MAX_STEPS_TO_SHOW, allStepEnds.length)
+      )
+    : allStepEnds;
+
+  const pagination: Pagination | undefined = shouldPaginate
+    ? {
+        pageIndex,
+        pageSize: MAX_STEPS_TO_SHOW,
+        totalItemCount: allStepEnds.length,
+        showPerPageOptions: false,
+      }
+    : undefined;
+
+  const onTableChange = ({ page }: Criteria<JourneyStep>) => {
+    if (page) {
+      setPageIndex(page.index);
+    }
+  };
   /**
    * This component is used in cases where the steps list is not pre-fetched at render time. In that case, we handle the auto-expand
    * in the `useEffect` call below, which will update the expanded map after the data loads. At times, the component is also rendered
@@ -105,7 +124,6 @@ export const BrowserStepsList = ({
   const { euiTheme } = useEuiTheme();
   const [expandedMap, setExpandedMap] = useState<Record<string, ReactElement>>(defaultExpanded);
   const [stepIds, setStepIds] = useState<string>(mapStepIds(stepEnds));
-  const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   useEffect(() => {
     /**
@@ -284,35 +302,34 @@ export const BrowserStepsList = ({
   ];
 
   return (
-    <>
-      <EuiBasicTable
-        css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
-        cellProps={(row) => {
-          if (expandedMap[row._id]) {
-            return {
-              style: { verticalAlign: 'top' },
-            };
-          }
-        }}
-        compressed={compressed}
-        loading={loading}
-        columns={columns}
-        error={error?.message}
-        items={stepEnds}
-        noItemsMessage={
-          loading
-            ? i18n.translate('xpack.synthetics.monitor.step.loading', {
-                defaultMessage: 'Loading steps...',
-              })
-            : i18n.translate('xpack.synthetics.monitor.step.noDataFound', {
-                defaultMessage: 'No data found',
-              })
+    <EuiBasicTable
+      cellProps={(row) => {
+        if (expandedMap[row._id]) {
+          return {
+            style: { verticalAlign: 'top' },
+          };
         }
-        tableLayout="auto"
-        itemId="_id"
-        itemIdToExpandedRowMap={testNowMode || showExpand ? expandedMap : undefined}
-      />
-    </>
+      }}
+      compressed={compressed}
+      loading={loading}
+      columns={columns}
+      error={error?.message}
+      items={stepEnds}
+      noItemsMessage={
+        loading
+          ? i18n.translate('xpack.synthetics.monitor.step.loading', {
+              defaultMessage: 'Loading steps...',
+            })
+          : i18n.translate('xpack.synthetics.monitor.step.noDataFound', {
+              defaultMessage: 'No data found',
+            })
+      }
+      tableLayout="auto"
+      itemId="_id"
+      itemIdToExpandedRowMap={testNowMode || showExpand ? expandedMap : undefined}
+      onChange={onTableChange}
+      pagination={pagination}
+    />
   );
 };
 

@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { SloRulesBadge as Component, Props } from './slo_rules_badge';
-import { BurnRateRuleParams } from '../../../../typings';
+import type { Props } from './slo_rules_badge';
+import { SloRulesBadge as Component } from './slo_rules_badge';
+import type { BurnRateRuleParams } from '../../../../typings';
 
 export default {
   component: Component,
@@ -20,16 +21,23 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => (
+const Template: StoryFn<typeof Component> = (props: Props) => (
   <EuiFlexGroup gutterSize="s">
     <Component {...props} />
   </EuiFlexGroup>
 );
 
-export const WithNoRule = Template.bind({});
-WithNoRule.args = { rules: [] };
+export const WithNoRule = {
+  render: Template,
+  args: { rules: [] },
+};
 
-export const WithLoadingRule = Template.bind({});
-WithLoadingRule.args = { rules: undefined };
-export const WithRule = Template.bind({});
-WithRule.args = { rules: [{ name: 'rulename' }] as Array<Rule<BurnRateRuleParams>> };
+export const WithLoadingRule = {
+  render: Template,
+  args: { rules: undefined },
+};
+
+export const WithRule = {
+  render: Template,
+  args: { rules: [{ name: 'rulename' }] as Array<Rule<BurnRateRuleParams>> },
+};

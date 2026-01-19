@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringPolicy, FilteringRuleRule } from '..';
+import type { FilteringPolicy, FilteringRuleRule } from '..';
 
 const filteringRuleStringMap: Record<FilteringRuleRule, string> = {
   contains: i18n.translate('searchConnectors.content.filteringRules.rules.contains', {

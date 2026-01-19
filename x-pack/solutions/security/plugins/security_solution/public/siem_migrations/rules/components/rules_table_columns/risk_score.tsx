@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { type RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { COLUMN_EMPTY_VALUE, type TableColumn } from './constants';
@@ -16,7 +16,7 @@ export const createRiskScoreColumn = (): TableColumn => {
   return {
     field: 'elastic_rule.risk_score',
     name: i18n.COLUMN_RISK_SCORE,
-    render: (riskScore, rule: RuleMigration) => (
+    render: (riskScore, rule: RuleMigrationRule) => (
       <EuiText data-test-subj="riskScore" size="s">
         {rule.status === SiemMigrationStatus.FAILED ? COLUMN_EMPTY_VALUE : riskScore}
       </EuiText>

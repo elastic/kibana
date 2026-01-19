@@ -5,72 +5,53 @@
  * 2.0.
  */
 
-import {
-  CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
-  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-} from '@kbn/aiops-change-point-detection/constants';
-import type { Reference } from '@kbn/content-management-utils';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
   fetch$,
-  initializeTimeRange,
+  initializeTimeRangeManager,
   initializeTitleManager,
   useBatchedPublishingSubjects,
+  apiPublishesFilters,
+  titleComparators,
+  timeRangeComparators,
 } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 
 import fastIsEqual from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, distinctUntilChanged, map, skipWhile } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
 import { getChangePointDetectionComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
-import { initializeChangePointControls } from './initialize_change_point_controls';
-import type {
-  ChangePointEmbeddableApi,
-  ChangePointEmbeddableRuntimeState,
-  ChangePointEmbeddableState,
-} from './types';
+import {
+  changePointComparators,
+  initializeChangePointControls,
+} from './initialize_change_point_controls';
+import type { ChangePointEmbeddableApi } from './types';
+import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
 
 export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
 export const getChangePointChartEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: ReactEmbeddableFactory<
-    ChangePointEmbeddableState,
-    ChangePointEmbeddableRuntimeState,
-    ChangePointEmbeddableApi
-  > = {
+  const factory: EmbeddableFactory<ChangePointEmbeddableState, ChangePointEmbeddableApi> = {
     type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-    deserializeState: (state) => {
-      const serializedState = cloneDeep(state.rawState);
-      // inject the reference
-      const dataViewIdRef = state.references?.find(
-        (ref) => ref.name === CHANGE_POINT_CHART_DATA_VIEW_REF_NAME
-      );
-      // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
-      if (dataViewIdRef && serializedState && !serializedState.dataViewId) {
-        serializedState.dataViewId = dataViewIdRef?.id;
-      }
-      return serializedState;
-    },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const timeRangeManager = initializeTimeRange(state);
-      const titleManager = initializeTitleManager(state);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
-      const {
-        changePointControlsApi,
-        changePointControlsComparators,
-        serializeChangePointChartState,
-      } = initializeChangePointControls(state);
+      const state = initialState;
+
+      const changePointManager = initializeChangePointControls(state);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -79,66 +60,82 @@ export const getChangePointChartEmbeddableFactory = (
         await pluginStart.data.dataViews.get(state.dataViewId),
       ]);
 
-      const api = buildApi(
-        {
-          ...timeRangeManager.api,
-          ...titleManager.api,
-          ...changePointControlsApi,
-          getTypeDisplayName: () =>
-            i18n.translate('xpack.aiops.changePointDetection.typeDisplayName', {
-              defaultMessage: 'change point charts',
-            }),
-          isEditingEnabled: () => true,
-          onEdit: async () => {
-            try {
-              const { resolveEmbeddableChangePointUserInput } = await import(
-                './resolve_change_point_config_input'
-              );
+      const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-              const result = await resolveEmbeddableChangePointUserInput(
-                coreStart,
-                pluginStart,
-                parentApi,
-                uuid,
-                serializeChangePointChartState()
-              );
+      function serializeState() {
+        return {
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...changePointManager.getLatestState(),
+        };
+      }
 
-              changePointControlsApi.updateUserInput(result);
-            } catch (e) {
-              return Promise.reject();
-            }
-          },
-          dataLoading$,
-          blockingError$,
-          dataViews$,
-          serializeState: () => {
-            const dataViewId = changePointControlsApi.dataViewId.getValue();
-            const references: Reference[] = dataViewId
-              ? [
-                  {
-                    type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                    name: CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
-                    id: dataViewId,
-                  },
-                ]
-              : [];
-            return {
-              rawState: {
-                timeRange: undefined,
-                ...titleManager.serialize(),
-                ...timeRangeManager.serialize(),
-                ...serializeChangePointChartState(),
-              },
-              references,
-            };
-          },
+      const unsavedChangesApi = initializeUnsavedChanges<ChangePointEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState,
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          timeRangeManager.anyStateChange$,
+          changePointManager.anyStateChange$
+        ),
+        getComparators: () => {
+          return {
+            ...titleComparators,
+            ...timeRangeComparators,
+            ...changePointComparators,
+          };
         },
-        {
-          ...timeRangeManager.comparators,
-          ...titleManager.comparators,
-          ...changePointControlsComparators,
-        }
-      );
+        onReset: (lastSaved) => {
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) changePointManager.reinitializeState(lastSaved);
+        },
+      });
+
+      const api = finalizeApi({
+        ...timeRangeManager.api,
+        ...titleManager.api,
+        ...changePointManager.api,
+        ...unsavedChangesApi,
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.aiops.changePointDetection.typeDisplayName', {
+            defaultMessage: 'change point charts',
+          }),
+        isEditingEnabled: () => true,
+        onEdit: async () => {
+          openLazyFlyout({
+            core: coreStart,
+            parentApi,
+            flyoutProps: {
+              'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+              'aria-labelledby': 'changePointConfig',
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              const { EmbeddableChangePointUserInput } = await import(
+                './change_point_config_input'
+              );
+              return (
+                <EmbeddableChangePointUserInput
+                  coreStart={coreStart}
+                  pluginStart={pluginStart}
+                  onConfirm={(result) => {
+                    changePointManager.api.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  onCancel={closeFlyout}
+                  input={changePointManager.getLatestState()}
+                />
+              );
+            },
+          });
+        },
+        dataLoading$,
+        blockingError$,
+        dataViews$,
+        serializeState,
+      });
 
       const ChangePointDetectionComponent = getChangePointDetectionComponent(
         coreStart,
@@ -194,6 +191,7 @@ export const getChangePointChartEmbeddableFactory = (
 
           return (
             <ChangePointDetectionComponent
+              filtersApi={filtersApi}
               viewType={viewType}
               timeRange={timeRange}
               fn={fn}

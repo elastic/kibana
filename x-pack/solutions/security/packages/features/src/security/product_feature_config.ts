@@ -7,19 +7,9 @@
 
 import { ProductFeatureSecurityKey, SecuritySubFeatureId } from '../product_features_keys';
 import { APP_ID } from '../constants';
-import type { DefaultSecurityProductFeaturesConfig } from './types';
+import type { SecurityProductFeaturesConfig } from './types';
 
-/**
- * App features privileges configuration for the Security Solution Kibana Feature app.
- * These are the configs that are shared between both offering types (ess and serverless).
- * They can be extended on each offering plugin to register privileges using different way on each offering type.
- *
- * Privileges can be added in different ways:
- * - `privileges`: the privileges that will be added directly into the main Security feature.
- * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
- * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
- */
-export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeaturesConfig = {
+export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig = {
   [ProductFeatureSecurityKey.advancedInsights]: {
     privileges: {
       all: {
@@ -32,6 +22,19 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
     },
   },
+  [ProductFeatureSecurityKey.detections]: {
+    privileges: {
+      all: {
+        ui: ['detections'],
+        api: ['cloud-security-posture-all', 'cloud-security-posture-read', 'bulkGetUserProfiles'],
+      },
+      read: {
+        ui: ['detections'],
+        api: ['cloud-security-posture-read', 'bulkGetUserProfiles'],
+      },
+    },
+  },
+
   [ProductFeatureSecurityKey.investigationGuide]: {
     privileges: {
       all: {
@@ -41,6 +44,21 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
         ui: ['investigation-guide'],
       },
     },
+  },
+  [ProductFeatureSecurityKey.configurations]: {
+    privileges: {
+      all: {
+        ui: ['configurations'],
+        api: [],
+      },
+      read: {
+        ui: [],
+        api: [],
+      },
+    },
+  },
+  [ProductFeatureSecurityKey.aiValueReport]: {
+    subFeatureIds: [SecuritySubFeatureId.socManagement],
   },
   [ProductFeatureSecurityKey.investigationGuideInteractions]: {
     privileges: {
@@ -66,25 +84,28 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     },
   },
 
+  [ProductFeatureSecurityKey.endpointHostIsolation]: {
+    subFeatureIds: [SecuritySubFeatureId.hostIsolation],
+  },
+
   [ProductFeatureSecurityKey.endpointHostManagement]: {
     subFeatureIds: [SecuritySubFeatureId.endpointList],
+  },
+
+  [ProductFeatureSecurityKey.endpointTrustedDevices]: {
+    subFeatureIds: [SecuritySubFeatureId.trustedDevices],
   },
 
   [ProductFeatureSecurityKey.endpointPolicyManagement]: {
     subFeatureIds: [SecuritySubFeatureId.policyManagement],
   },
 
+  [ProductFeatureSecurityKey.endpointScriptsManagement]: {
+    subFeatureIds: [SecuritySubFeatureId.scriptsManagement],
+  },
+
   // Adds no additional kibana feature controls
   [ProductFeatureSecurityKey.endpointPolicyProtections]: {},
-
-  [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-    subFeatureIds: [
-      SecuritySubFeatureId.hostIsolationExceptionsBasic,
-      SecuritySubFeatureId.trustedApplications,
-      SecuritySubFeatureId.blocklist,
-      SecuritySubFeatureId.eventFilters,
-    ],
-  },
 
   // Endpoint Complete Tier:
   // Allows access to create/update HIEs
@@ -124,16 +145,18 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
   [ProductFeatureSecurityKey.securityWorkflowInsights]: {
     subFeatureIds: [SecuritySubFeatureId.workflowInsights],
   },
-  // Product features without RBAC
-  // Endpoint/Osquery PLIs
-  [ProductFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
-  [ProductFeatureSecurityKey.endpointProtectionUpdates]: {},
-  [ProductFeatureSecurityKey.endpointAgentTamperProtection]: {},
-  [ProductFeatureSecurityKey.endpointCustomNotification]: {},
-  [ProductFeatureSecurityKey.externalRuleActions]: {},
-  [ProductFeatureSecurityKey.cloudSecurityPosture]: {},
 
-  // Security PLIs
-  [ProductFeatureSecurityKey.automaticImport]: {},
-  [ProductFeatureSecurityKey.prebuiltRuleCustomization]: {},
+  [ProductFeatureSecurityKey.endpointArtifactManagement]: {
+    subFeatureIds: [
+      SecuritySubFeatureId.hostIsolationExceptionsBasic,
+      SecuritySubFeatureId.trustedApplications,
+      SecuritySubFeatureId.blocklist,
+      SecuritySubFeatureId.eventFilters,
+      SecuritySubFeatureId.globalArtifactManagement,
+    ],
+  },
+
+  [ProductFeatureSecurityKey.endpointExceptions]: {
+    subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
+  },
 };

@@ -10,7 +10,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { debounce } from 'lodash';
 import { fieldNameWildcardMatcher, type FieldTypeKnown } from '@kbn/field-utils';
 import type { FieldListItem } from '@kbn/unified-field-list';
@@ -19,14 +19,10 @@ import {
   type FieldTypeFilterProps,
 } from '@kbn/unified-field-list/src/components/field_list_filters/field_type_filter';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { FieldRow } from './field_row';
+import type { FieldRow } from './field_row';
 
 export const LOCAL_STORAGE_KEY_SEARCH_TERM = 'discover:searchText';
 export const LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES = 'unifiedDocViewer:selectedFieldTypes';
-
-const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchPlaceHolder', {
-  defaultMessage: 'Search field names or values',
-});
 
 export enum TermMatch {
   name = 'name',
@@ -67,8 +63,12 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
   return (
     <EuiFieldSearch
       data-test-subj="unifiedDocViewerFieldsSearchInput"
-      aria-label={searchPlaceholder}
-      placeholder={searchPlaceholder}
+      aria-label={i18n.translate('unifiedDocViewer.docView.table.searchAriaLabel', {
+        defaultMessage: 'Field name or value',
+      })}
+      placeholder={i18n.translate('unifiedDocViewer.docView.table.searchPlaceHolder', {
+        defaultMessage: 'Search field names or values',
+      })}
       fullWidth
       compressed
       value={searchTerm}
@@ -120,8 +120,14 @@ export interface UseTableFiltersReturn extends TableFiltersCommonProps {
   onFindSearchTermMatch: (row: FieldRow, term: string) => TermMatch | null;
 }
 
-export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
-  const [searchTerm, setSearchTerm] = useState(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM) || '');
+export const useTableFilters = ({
+  storage,
+  storageKey,
+}: {
+  storage: Storage;
+  storageKey: string;
+}): UseTableFiltersReturn => {
+  const [searchTerm, setSearchTerm] = useState(storage.get(storageKey) || '');
   const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>(
     getStoredFieldTypes(storage)
   );

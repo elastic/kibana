@@ -10,11 +10,18 @@
 export * from './types';
 export * from './profiles';
 export { getMergedAccessor } from './composable_profile';
-export { ProfilesManager } from './profiles_manager';
+export {
+  ProfilesManager,
+  ScopedProfilesManager,
+  ContextualProfileLevel,
+  type GetProfilesOptions,
+} from './profiles_manager';
+export { type ProfileProviderSharedServices } from './profile_providers';
 export {
   useProfileAccessor,
   useRootProfile,
   useAdditionalCellActions,
   useDefaultAdHocDataViews,
   BaseAppWrapper,
+  type RootProfileState,
 } from './hooks';

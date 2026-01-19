@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "timestamp": 1756914281687,
+    "date": "2025-09-03T15:44:41.687Z",
+    "kibanaCommitHash": "20b1ec4d471768b45fab2c61f781bbc5ce776452",
+    "buildUrl": "https://buildkite.com/elastic/kibana-on-merge/builds/76489",
+    "pullRequestUrl": "https://github.com/elastic/kibana/pulls/233325"
+  },
+  "typeDefinitions": {
+    "task": {
+      "name": "task",
+      "migrationVersions": [
+        "7.4.0",
+        "7.6.0",
+        "8.0.0",
+        "8.2.0",
+        "8.5.0",
+        "8.8.0"
+      ],
+      "hash": "689edead32ea09558ceb54f64fd9aa4d324d94d0",
+      "modelVersions": [
+        {
+          "version": "1",
+          "changeTypes": [
+            "mappings_deprecation"
+          ],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": true
+          }
+        },
+        {
+          "version": "2",
+          "changeTypes": [
+            "mappings_addition"
+          ],
+          "hasTransformation": false,
+          "newMappings": [
+            "partition.type"
+          ],
+          "schemas": {
+            "forwardCompatibility": true
+          }
+        },
+        {
+          "version": "3",
+          "changeTypes": [
+            "mappings_addition"
+          ],
+          "hasTransformation": false,
+          "newMappings": [
+            "priority.type"
+          ],
+          "schemas": {
+            "forwardCompatibility": true
+          }
+        },
+        {
+          "version": "4",
+          "changeTypes": [
+            "mappings_addition"
+          ],
+          "hasTransformation": false,
+          "newMappings": [
+            "userScope.properties.apiKeyId.type"
+          ],
+          "schemas": {
+            "forwardCompatibility": true
+          }
+        },
+        {
+          "version": "5",
+          "changeTypes": [],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": true
+          }
+        },
+        {
+          "version": "6",
+          "changeTypes": [],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": true
+          }
+        },
+        {
+          "version": "8",
+          "changeTypes": [
+            "mappings_addition"
+          ],
+          "hasTransformation": false,
+          "newMappings": [
+            "userScope.properties.someNewProperty.type"
+          ],
+          "schemas": {
+            "forwardCompatibility": true
+          }
+        }
+      ],
+      "schemaVersions": [],
+      "mappings": {
+        "dynamic": false,
+        "properties.someNewProperty.type": "keyword",
+        "properties.taskType.type": "keyword",
+        "properties.scheduledAt.type": "date",
+        "properties.runAt.type": "date",
+        "properties.retryAt.type": "date",
+        "properties.enabled.type": "boolean",
+        "properties.schedule.properties.interval.type": "keyword",
+        "properties.attempts.type": "integer",
+        "properties.status.type": "keyword",
+        "properties.scope.type": "keyword",
+        "properties.ownerId.type": "keyword",
+        "properties.partition.type": "integer",
+        "properties.priority.type": "integer",
+        "properties.userScope.properties.apiKeyId.type": "keyword"
+      }
+    }
+  }
+}

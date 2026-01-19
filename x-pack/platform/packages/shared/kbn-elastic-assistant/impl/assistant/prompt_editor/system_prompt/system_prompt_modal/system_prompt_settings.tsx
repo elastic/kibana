@@ -10,25 +10,23 @@ import { EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import * as i18n from './translations';
 import { SystemPromptEditor } from './system_prompt_editor';
-import { SystemPromptSettingsProps } from './types';
+import type { SystemPromptSettingsProps } from './types';
 
 /**
  * Settings for adding/removing system prompts. Configure name, prompt and default conversations.
  */
 export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.memo(
   ({
-    connectors,
-    conversationSettings,
-    onSelectedSystemPromptChange,
+    conversations,
+    onConversationSelectionChange,
+    onNewConversationDefaultChange,
+    onPromptContentChange,
+    onSystemPromptDelete,
+    onSystemPromptSelect,
+    resetSettings,
     selectedSystemPrompt,
-    setUpdatedSystemPromptSettings,
-    setConversationSettings,
     systemPromptSettings,
-    conversationsSettingsBulkActions,
-    setConversationsSettingsBulkActions,
-    promptsBulkActions,
-    defaultConnector,
-    setPromptsBulkActions,
+    setPaginationObserver,
   }) => {
     return (
       <>
@@ -40,18 +38,16 @@ export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.m
         <EuiHorizontalRule margin={'s'} />
 
         <SystemPromptEditor
-          connectors={connectors}
-          conversationSettings={conversationSettings}
-          onSelectedSystemPromptChange={onSelectedSystemPromptChange}
+          conversations={conversations}
+          onConversationSelectionChange={onConversationSelectionChange}
+          onNewConversationDefaultChange={onNewConversationDefaultChange}
+          onPromptContentChange={onPromptContentChange}
+          onSystemPromptDelete={onSystemPromptDelete}
+          onSystemPromptSelect={onSystemPromptSelect}
+          resetSettings={resetSettings}
           selectedSystemPrompt={selectedSystemPrompt}
-          setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
-          setConversationSettings={setConversationSettings}
+          setPaginationObserver={setPaginationObserver}
           systemPromptSettings={systemPromptSettings}
-          conversationsSettingsBulkActions={conversationsSettingsBulkActions}
-          setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-          defaultConnector={defaultConnector}
-          setPromptsBulkActions={setPromptsBulkActions}
-          promptsBulkActions={promptsBulkActions}
         />
       </>
     );

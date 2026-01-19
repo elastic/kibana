@@ -8,7 +8,7 @@
  */
 
 import { orderBy } from 'lodash';
-import { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ISavedObjectsRepository,
   SavedObjectsFindOptions,

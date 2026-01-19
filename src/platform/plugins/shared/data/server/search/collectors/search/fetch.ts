@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
-import { CollectedUsage, ReportedUsage } from './register';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type { CollectedUsage, ReportedUsage } from './register';
 
 interface SearchTelemetry {
   'search-telemetry': CollectedUsage;
@@ -20,9 +20,7 @@ export function fetchProvider(getIndexForType: (type: string) => Promise<string>
     const esResponse = await esClient.search<SearchTelemetry>(
       {
         index: searchIndex,
-        body: {
-          query: { term: { type: { value: 'search-telemetry' } } },
-        },
+        query: { term: { type: { value: 'search-telemetry' } } },
       },
       { ignore: [404] }
     );

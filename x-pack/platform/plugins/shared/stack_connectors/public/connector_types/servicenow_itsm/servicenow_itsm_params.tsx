@@ -18,15 +18,18 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { Choice, Fields } from '../lib/servicenow/types';
-import { ServiceNowITSMActionParams, EventAction } from './types';
+import type { Choice, Fields } from '../lib/servicenow/types';
+import type { ServiceNowITSMActionParams } from './types';
+import { EventAction } from './types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
+import { OptionalFieldLabel } from '../../common/optional_field_label';
 import {
   ACTION_GROUP_RECOVERED,
   choicesToEuiOptions,
@@ -34,7 +37,7 @@ import {
 } from '../lib/servicenow/helpers';
 
 import * as i18n from '../lib/servicenow/translations';
-import { AdditionalFields } from '../lib/servicenow/additional_fields';
+import { AdditionalFields } from '../../common/components/additional_fields';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -295,7 +298,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         />
       ) : (
         <>
-          <EuiFormRow fullWidth label={i18n.URGENCY_LABEL}>
+          <EuiFormRow fullWidth label={i18n.URGENCY_LABEL} labelAppend={OptionalFieldLabel}>
             <EuiSelect
               fullWidth
               data-test-subj="urgencySelect"
@@ -310,7 +313,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
           <EuiSpacer size="m" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow fullWidth label={i18n.SEVERITY_LABEL}>
+              <EuiFormRow fullWidth label={i18n.SEVERITY_LABEL} labelAppend={OptionalFieldLabel}>
                 <EuiSelect
                   fullWidth
                   data-test-subj="severitySelect"
@@ -324,7 +327,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow fullWidth label={i18n.IMPACT_LABEL}>
+              <EuiFormRow fullWidth label={i18n.IMPACT_LABEL} labelAppend={OptionalFieldLabel}>
                 <EuiSelect
                   fullWidth
                   data-test-subj="impactSelect"
@@ -341,7 +344,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
           <EuiSpacer size="m" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow fullWidth label={i18n.CATEGORY_LABEL}>
+              <EuiFormRow fullWidth label={i18n.CATEGORY_LABEL} labelAppend={OptionalFieldLabel}>
                 <EuiSelect
                   fullWidth
                   data-test-subj="categorySelect"
@@ -365,7 +368,11 @@ const ServiceNowParamsFields: React.FunctionComponent<
             </EuiFlexItem>
             <EuiFlexItem>
               {subcategoryOptions?.length > 0 ? (
-                <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL}>
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.SUBCATEGORY_LABEL}
+                  labelAppend={OptionalFieldLabel}
+                >
                   <EuiSelect
                     fullWidth
                     data-test-subj="subcategorySelect"
@@ -399,11 +406,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
                   <EuiFormRow
                     fullWidth
                     label={i18n.CORRELATION_DISPLAY}
-                    labelAppend={
-                      <EuiText size="xs" color="subdued">
-                        {i18n.OPTIONAL_LABEL}
-                      </EuiText>
-                    }
+                    labelAppend={OptionalFieldLabel}
                   >
                     <TextFieldWithMessageVariables
                       index={index}
@@ -429,11 +432,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
                   incident.short_description !== undefined
                 }
                 label={i18n.SHORT_DESCRIPTION_LABEL}
-                labelAppend={
-                  <EuiText size="xs" color="subdued">
-                    {i18n.REQUIRED_LABEL}
-                  </EuiText>
-                }
               >
                 <TextFieldWithMessageVariables
                   index={index}
@@ -454,6 +452,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
             paramsProperty={'description'}
             inputTargetValue={incident.description ?? undefined}
             label={i18n.DESCRIPTION_LABEL}
+            isOptionalField
           />
           <TextAreaWithMessageVariables
             index={index}
@@ -462,6 +461,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
             paramsProperty={'comments'}
             inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
             label={i18n.COMMENTS_LABEL}
+            isOptionalField
           />
           {!isDeprecatedActionConnector && (
             <AdditionalFields
@@ -469,6 +469,8 @@ const ServiceNowParamsFields: React.FunctionComponent<
               messageVariables={messageVariables}
               errors={errors['subActionParams.incident.additional_fields'] as string[]}
               onChange={additionalFieldsOnChange}
+              isOptionalField
+              helpText={i18n.ADDITIONAL_FIELDS_HELP_SERVICENOW_TEXT}
             />
           )}
         </>

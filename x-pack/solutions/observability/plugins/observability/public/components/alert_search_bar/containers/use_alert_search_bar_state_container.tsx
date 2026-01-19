@@ -10,24 +10,26 @@ import { pipe } from 'fp-ts/pipeable';
 import * as t from 'io-ts';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
+import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
+import type { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   createKbnUrlStateStorage,
   syncState,
-  IKbnUrlStateStorage,
   useContainerSelector,
 } from '@kbn/kibana-utils-plugin/public';
+import { setStatusOnControlConfigs } from '../../../utils/alert_controls/set_status_on_control_configs';
 import { datemathStringRT } from '../../../utils/datemath';
 import { ALERT_STATUS_ALL } from '../../../../common/constants';
 import { useTimefilterService } from '../../../hooks/use_timefilter_service';
 
-import {
-  useContainer,
-  DEFAULT_STATE,
-  AlertSearchBarStateContainer,
-  AlertSearchBarContainerState,
-} from './state_container';
+import type { AlertSearchBarStateContainer, AlertSearchBarContainerState } from './state_container';
+import { useContainer, DEFAULT_STATE } from './state_container';
 
 export const alertSearchBarState = t.partial({
   rangeFrom: datemathStringRT,
@@ -37,7 +39,9 @@ export const alertSearchBarState = t.partial({
     t.literal(ALERT_STATUS_ACTIVE),
     t.literal(ALERT_STATUS_RECOVERED),
     t.literal(ALERT_STATUS_ALL),
+    t.literal(ALERT_STATUS_UNTRACKED),
   ]),
+  groupings: t.array(t.string),
 });
 
 export function useAlertSearchBarStateContainer(
@@ -50,12 +54,18 @@ export function useAlertSearchBarStateContainer(
 
   useUrlStateSyncEffect(stateContainer, urlStorageKey, replace, defaultState);
 
-  const { setRangeFrom, setRangeTo, setKuery, setStatus, setFilters, setSavedQueryId } =
-    stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId } = useContainerSelector(
-    stateContainer,
-    (state) => state
-  );
+  const {
+    setRangeFrom,
+    setRangeTo,
+    setKuery,
+    setStatus,
+    setFilters,
+    setSavedQueryId,
+    setControlConfigs,
+    setGroupings,
+  } = stateContainer.transitions;
+  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId, controlConfigs, groupings } =
+    useContainerSelector(stateContainer, (state) => state);
 
   useEffect(() => {
     if (!savedQuery) {
@@ -94,12 +104,16 @@ export function useAlertSearchBarStateContainer(
     onRangeToChange: setRangeTo,
     onStatusChange: setStatus,
     onFiltersChange: setFilters,
+    onControlConfigsChange: setControlConfigs,
+    onGroupingsChange: setGroupings,
+    controlConfigs,
     filters,
     rangeFrom,
     rangeTo,
     status,
     savedQuery,
     setSavedQuery,
+    groupings,
   };
 }
 
@@ -160,8 +174,7 @@ function setupUrlStateSync(
     },
     stateStorage: {
       ...urlStateStorage,
-      set: <AlertSearchBarStateContainer,>(key: string, state: AlertSearchBarStateContainer) =>
-        urlStateStorage.set(key, state, { replace }),
+      set: (key, state) => urlStateStorage.set(key, state, { replace }),
     },
   });
 }
@@ -176,7 +189,9 @@ function initializeUrlAndStateContainer(
   const urlState = alertSearchBarState.decode(
     urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey)
   );
-  const validUrlState = isRight(urlState) ? pipe(urlState).right : {};
+  const validUrlState: Partial<AlertSearchBarContainerState> = isRight(urlState)
+    ? pipe(urlState).right
+    : {};
   const timeFilterTime = timefilterService.getTime();
   const timeFilterState = timefilterService.isTimeTouched()
     ? {
@@ -184,6 +199,16 @@ function initializeUrlAndStateContainer(
         rangeTo: timeFilterTime.to,
       }
     : {};
+
+  // This part is for backward compatibility. Previously, we saved status in the status query
+  // parameter. Now, we save it in the controlConfigs.
+  if (validUrlState.status) {
+    validUrlState.controlConfigs = setStatusOnControlConfigs(
+      validUrlState.status,
+      validUrlState.controlConfigs ?? DEFAULT_CONTROLS
+    );
+    validUrlState.status = undefined;
+  }
 
   const currentState = {
     ...defaultState,

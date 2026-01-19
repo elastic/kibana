@@ -17,6 +17,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public/plugin';
@@ -24,6 +25,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ConfigSchema } from '../server/config';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
@@ -33,6 +35,7 @@ export interface PluginsDependencies {
   data: DataPublicPluginStart;
   dataViewEditor?: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dataViews: DataViewsPublicPluginStart;
   management: ManagementSetup;
   home: HomePublicPluginSetup;
@@ -44,6 +47,7 @@ export interface PluginsDependencies {
   fieldFormats: FieldFormatsStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export class TransformUiPlugin {

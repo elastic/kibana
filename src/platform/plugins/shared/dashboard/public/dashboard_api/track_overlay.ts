@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { BehaviorSubject } from 'rxjs';
 
 export function initializeTrackOverlay(setFocusedPanelId: (id: string | undefined) => void) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 
@@ -39,6 +39,7 @@ describe('TaskRunnerTimer', () => {
         rule_type_run_duration_ms: 0,
         total_run_duration_ms: 0,
         trigger_actions_duration_ms: 0,
+        update_alerts_duration_ms: 0,
       });
     });
 
@@ -57,6 +58,7 @@ describe('TaskRunnerTimer', () => {
         rule_type_run_duration_ms: 0,
         total_run_duration_ms: 0,
         trigger_actions_duration_ms: 0,
+        update_alerts_duration_ms: 0,
       });
     });
   });

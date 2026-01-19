@@ -8,10 +8,12 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import React, { useEffect } from 'react';
 import queryString from 'query-string';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 import type { LocationDescriptor, History } from 'history';
@@ -22,7 +24,7 @@ import { getTagList, localStorageMock } from './mocks';
 import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
 import type { Services } from './services';
-import { CustomSortingOptions } from './components/table_sort_select';
+import type { CustomSortingOptions } from './components/table_sort_select';
 
 const mockUseEffect = useEffect;
 
@@ -59,7 +61,6 @@ describe('TableListView', () => {
   const requiredProps: TableListViewTableProps = {
     entityName: 'test',
     entityNamePlural: 'tests',
-    listingLimit: 500,
     initialFilter: '',
     initialPageSize: 20,
     findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
@@ -393,7 +394,7 @@ describe('TableListView', () => {
 
       // Changing the "Rows per page" also sends the "sort" column information and thus updates the sorting.
       // We test that the "sort by" column has not changed before and after changing the number of rows
-      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated');
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recent-Old');
 
       // Open the "Rows per page" drop down
       find('tablePaginationPopoverButton').simulate('click');
@@ -402,7 +403,7 @@ describe('TableListView', () => {
       ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
       expect(tableCellsValues.length).toBe(10);
 
-      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated'); // Still the same
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recent-Old'); // Still the same
     });
 
     test('should navigate to page 2', async () => {
@@ -559,10 +560,10 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(4);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
-        'Recently updated. Checked option. ',
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A ',
+        'Recent-Old. Checked option. ',
+        'Old-Recent ',
       ]);
     });
 
@@ -592,10 +593,10 @@ describe('TableListView', () => {
       component.update();
       const filterOptions = find('sortSelect').find('li');
 
-      // Check that the second option is 'Name Z-A'
-      expect(filterOptions.at(1).text()).toBe('Name Z-A ');
+      // Check that the second option is 'Z-A'
+      expect(filterOptions.at(1).text()).toBe('Z-A ');
 
-      // Click 'Name Z-A'
+      // Click 'Z-A'
       act(() => {
         filterOptions.at(1).simulate('click');
       });
@@ -664,10 +665,10 @@ describe('TableListView', () => {
       component.update();
       let filterOptions = find('sortSelect').find('li');
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
-        'Recently updated. Checked option. ', // checked
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A ',
+        'Recent-Old. Checked option. ', // checked
+        'Old-Recent ',
       ]);
 
       const nameColumnHeaderButton = getTableColumnSortButton(testBed!, 'Name');
@@ -704,10 +705,10 @@ describe('TableListView', () => {
       filterOptions = find('sortSelect').find('li');
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A. Checked option. ', // now this option is checked
-        'Recently updated ',
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A. Checked option. ', // now this option is checked
+        'Recent-Old ',
+        'Old-Recent ',
       ]);
     });
   });
@@ -864,12 +865,12 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(6);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
+        'A-Z ',
+        'Z-A ',
         'Type A-Z ',
         'Type Z-A ',
-        'Recently updated. Checked option. ',
-        'Least recently updated ',
+        'Recent-Old. Checked option. ',
+        'Old-Recent ',
       ]);
 
       const typeColumnHeaderButton = getCustomTableColumnSortButton(testBed!, 'Type');
@@ -909,12 +910,12 @@ describe('TableListView', () => {
       filterOptions = find('sortSelect').find('li');
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Name A-Z ',
-        'Name Z-A ',
+        'A-Z ',
+        'Z-A ',
         'Type A-Z ',
         'Type Z-A. Checked option. ',
-        'Recently updated ',
-        'Least recently updated ',
+        'Recent-Old ',
+        'Old-Recent ',
       ]);
     });
   });
@@ -996,10 +997,10 @@ describe('TableListView', () => {
       expect(filterOptions.length).toBe(5);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'Recently viewed. Checked option.Additional information ',
-        'Name A-Z ',
-        'Name Z-A ',
-        'Recently updated ',
-        'Least recently updated ',
+        'A-Z ',
+        'Z-A ',
+        'Recent-Old ',
+        'Old-Recent ',
       ]);
     });
   });
@@ -1771,10 +1772,10 @@ describe('TableListView', () => {
       openSortSelect();
       const filterOptions = find('sortSelect').find('li');
 
-      // Check that the second option is 'Name Z-A'
-      expect(filterOptions.at(1).text()).toBe('Name Z-A ');
+      // Check that the second option is 'Z-A'
+      expect(filterOptions.at(1).text()).toBe('Z-A ');
 
-      // Click 'Name Z-A'
+      // Click 'Z-A'
       act(() => {
         filterOptions.at(1).simulate('click');
       });
@@ -1896,7 +1897,6 @@ describe('TableList', () => {
     entityName: 'test',
     entityNamePlural: 'tests',
     initialPageSize: 20,
-    listingLimit: 500,
     findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
     onFetchSuccess: jest.fn(),
     tableCaption: 'test title',

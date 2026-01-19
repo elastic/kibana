@@ -8,13 +8,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
-import { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -22,7 +21,10 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-rule-form';
-import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
 import { Sidebar } from './components/sidebar';
@@ -37,6 +39,7 @@ import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_san
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
+import { TaskWithApiKeySandbox } from './components/task_with_api_key_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
@@ -54,6 +57,9 @@ export interface TriggersActionsUiExampleComponentParams {
   dataViews: DataViewsPublicPluginStart;
   dataViewsEditor: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 const TriggersActionsUiExampleApp = ({
@@ -68,6 +74,8 @@ const TriggersActionsUiExampleApp = ({
   charts,
   dataViews,
   unifiedSearch,
+  fieldFormats,
+  licensing,
   ...startServices
 }: TriggersActionsUiExampleComponentParams) => {
   return (
@@ -169,7 +177,17 @@ const TriggersActionsUiExampleApp = ({
             path="/alerts_table"
             render={() => (
               <Page title="Alerts Table">
-                <AlertsTableSandbox triggersActionsUi={triggersActionsUi} />
+                <AlertsTableSandbox
+                  services={{
+                    data,
+                    http,
+                    notifications,
+                    fieldFormats,
+                    application,
+                    licensing,
+                    settings,
+                  }}
+                />
               </Page>
             )}
           />
@@ -230,6 +248,15 @@ const TriggersActionsUiExampleApp = ({
               </Page>
             )}
           />
+          <Route
+            exact
+            path="/task_manager_with_api_key"
+            render={() => (
+              <Page title="Task Manager with API Key">
+                <TaskWithApiKeySandbox http={http} />
+              </Page>
+            )}
+          />
         </Routes>
       </EuiPage>
     </Router>
@@ -247,7 +274,7 @@ export const renderApp = (
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...core}>
+    core.rendering.addContext(
       <KibanaContextProvider
         services={{
           ...core,
@@ -266,12 +293,15 @@ export const renderApp = (
               dataViews={deps.dataViews}
               dataViewsEditor={deps.dataViewsEditor}
               unifiedSearch={deps.unifiedSearch}
+              fieldFormats={deps.fieldFormats}
+              licensing={deps.licensing}
+              fieldsMetadata={deps.fieldsMetadata}
               {...core}
             />
           </IntlProvider>
         </QueryClientProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

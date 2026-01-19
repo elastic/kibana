@@ -5,63 +5,27 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
-import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
+import {
+  getConvertEsqlSchemaCisToEcs,
+  type GetConvertEsqlSchemaCisToEcsParams,
+} from '../../../../../../../common/task/agent/helpers/convert_esql_schema_cim_to_ecs';
 import type { GraphNode } from '../../types';
-import { SIEM_RULE_MIGRATION_CIM_ECS_MAP } from './cim_ecs_map';
-import { ESQL_TRANSLATE_ECS_MAPPING_PROMPT } from './prompts';
-import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 
-interface GetEcsMappingNodeParams {
-  inferenceClient: InferenceClient;
-  connectorId: string;
-  logger: Logger;
-}
-
-export const getEcsMappingNode = ({
-  inferenceClient,
-  connectorId,
-  logger,
-}: GetEcsMappingNodeParams): GraphNode => {
-  const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
+export const getEcsMappingNode = (params: GetConvertEsqlSchemaCisToEcsParams): GraphNode => {
+  const convertEsqlSchemaCimToEcs = getConvertEsqlSchemaCisToEcs(params);
   return async (state) => {
-    const elasticRule = {
-      title: state.elastic_rule.title,
-      description: state.elastic_rule.description,
-      query: state.elastic_rule.query,
-    };
-
-    const prompt = await ESQL_TRANSLATE_ECS_MAPPING_PROMPT.format({
-      field_mapping: SIEM_RULE_MIGRATION_CIM_ECS_MAP,
-      splunk_query: state.inline_query,
-      elastic_rule: JSON.stringify(elasticRule, null, 2),
+    const { query, comments } = await convertEsqlSchemaCimToEcs({
+      title: state.elastic_rule.title ?? '',
+      description: state.elastic_rule.description ?? '',
+      query: state.elastic_rule.query ?? '',
+      originalQuery: state.inline_query,
     });
 
-    const response = await esqlKnowledgeBaseCaller(prompt);
-
-    const updatedQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
-    const ecsSummary = response.match(/## Field Mapping Summary[\s\S]*$/)?.[0] ?? '';
-
-    const translationResult = getTranslationResult(updatedQuery);
-
+    // Set includes_ecs_mapping to indicate that this node has been executed to ensure it only runs once
     return {
-      response,
-      comments: [generateAssistantComment(cleanMarkdown(ecsSummary))],
-      translation_finalized: true,
-      translation_result: translationResult,
-      elastic_rule: {
-        ...state.elastic_rule,
-        query: updatedQuery,
-      },
+      includes_ecs_mapping: true,
+      comments,
+      ...(query && { elastic_rule: { ...state.elastic_rule, query } }),
     };
   };
-};
-
-const getTranslationResult = (esqlQuery: string): RuleTranslationResult => {
-  if (esqlQuery.match(/\[(macro|lookup):[\s\S]*\]/)) {
-    return RuleTranslationResult.PARTIAL;
-  }
-  return RuleTranslationResult.FULL;
 };

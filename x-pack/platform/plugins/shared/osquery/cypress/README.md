@@ -20,13 +20,11 @@ A headless browser is a browser simulation program that does not have a user int
 
 #### FTR (CI)
 
-This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/osquery_cypress`
+This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/solutions/security/test/osquery_cypress`
 
 ### Test Execution: Examples
 
-#### FTR + Headless (Chrome)
-
-Since this is how tests are run on CI, this will likely be the configuration you want to reproduce failures locally, etc.
+Initialization:
 
 ```shell
 # bootstrap kibana from the project root
@@ -34,25 +32,24 @@ yarn kbn bootstrap
 
 # build the plugins/assets that cypress will execute against
 node scripts/build_kibana_platform_plugins
-
-# launch the cypress test runner
-cd x-pack/platform/plugins/shared/osquery
-yarn cypress:run-as-ci
 ```
-#### FTR + Interactive
 
-This is the preferred mode for developing new tests.
-
+You can either run all the tests:
 ```shell
-# bootstrap kibana from the project root
-yarn kbn bootstrap
+# ess
+yarn --cwd x-pack/platform/plugins/shared/osquery cypress:run
 
-# build the plugins/assets that cypress will execute against
-node scripts/build_kibana_platform_plugins
+# serverless
+yarn --cwd x-pack/platform/plugins/shared/osquery cypress:serverless:run
+```
 
-# launch the cypress test runner
-cd x-pack/platform/plugins/shared/osquery
-yarn cypress:open-as-ci
+Or open the Cypress test runner to run tests in an interactive way.
+```shell
+# ess
+yarn --cwd x-pack/platform/plugins/shared/osquery cypress:open
+
+# serverless
+yarn --cwd x-pack/platform/plugins/shared/osquery cypress:serverless:open
 ```
 
 Note that you can select the browser you want to use on the top right side of the interactive runner.
@@ -101,13 +98,13 @@ We use es_archiver to manage the data that our Cypress tests need.
 3. When you are sure that you have all the data you need run the following command from: `x-pack/platform/plugins/shared/osquery`
 
 ```sh
-node ../../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../solutions/security/test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example:
 
 ```sh
-node ../../../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
+node ../../../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../solutions/security/test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command will create the folder if it does not exist.

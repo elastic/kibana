@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -35,7 +35,6 @@ export const setupMockEsCompositeQuery = <K, C, I>(
 ): ElasticsearchClientMock => {
   const esMock = elasticsearchServiceMock.createElasticsearchClient();
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   criteria.forEach(({ after_key, bucketCriteria }) => {
     const mockResponse = {
       aggregations: {

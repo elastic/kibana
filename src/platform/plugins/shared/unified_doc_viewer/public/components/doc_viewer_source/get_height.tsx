@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { MIN_HEIGHT } from './source';
 
 // Displayed margin of the tab content to the window bottom

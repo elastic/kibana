@@ -8,23 +8,65 @@
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDetails } from './rule_details';
-import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
-import { EuiBadge, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
+import type {
+  Rule,
+  ActionType,
+  RuleTypeModel,
+  GetDescriptionFieldsFn,
+  RuleType,
+} from '../../../../types';
+import { EuiBadge, EuiButtonEmpty, EuiPageHeader, type EuiPageHeaderProps } from '@elastic/eui';
+import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
-  ActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
   ALERTING_FEATURE_ID,
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+      staleTime: 0,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    },
+  },
+});
 
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
+
+jest.mock('../../../lib/rule_api/rule_summary', () => ({
+  loadRuleSummary: jest.fn().mockReturnValue({
+    alerts: {},
+  }),
+}));
+
+jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
+  loadExecutionLogAggregations: jest.fn().mockReturnValue([]),
+}));
+
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: jest.fn(),
+}));
+
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
@@ -56,7 +98,9 @@ jest.mock('../../../lib/capabilities', () => ({
   hasSaveRulesCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
   hasManageApiKeysCapability: jest.fn(() => true),
+  hasShowActionsCapability: jest.fn(() => false),
 }));
+
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
@@ -89,16 +133,101 @@ const ruleType: RuleType = {
   authorizedConsumers,
   enabledInLicense: true,
   category: 'my-category',
+  isExportable: true,
+  isInternallyManaged: false,
 };
 
 describe('rule_details', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('Lifecycle alerts', () => {
+    const renderComponent = ({ autoRecoverAlerts }: { autoRecoverAlerts?: boolean }) => {
+      const rule = mockRule();
+      const requestRefresh = jest.fn();
+      return render(
+        <QueryClientProvider client={queryClient}>
+          <IntlProvider locale="en">
+            <RuleDetails
+              rule={rule}
+              ruleType={{ ...ruleType, autoRecoverAlerts }}
+              actionTypes={[]}
+              {...mockRuleApis}
+              requestRefresh={requestRefresh}
+            />
+          </IntlProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
+      renderComponent({ autoRecoverAlerts: true });
+
+      await userEvent.click(screen.getByTestId('ruleActionsButton'));
+      await waitForEuiPopoverOpen();
+      await userEvent.click(screen.getByTestId('disableButton'));
+
+      await waitFor(async () => {
+        expect(screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
+      });
+
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(async () => {
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+          expect.objectContaining({ untrack: false })
+        );
+      });
+    });
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
+      renderComponent({ autoRecoverAlerts: undefined });
+
+      await userEvent.click(screen.getByTestId('ruleActionsButton'));
+      await waitForEuiPopoverOpen();
+      await userEvent.click(screen.getByTestId('disableButton'));
+
+      await waitFor(async () => {
+        expect(screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
+      });
+
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(async () => {
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+          expect.objectContaining({ untrack: false })
+        );
+      });
+    });
+
+    it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
+      renderComponent({ autoRecoverAlerts: false });
+
+      await userEvent.click(screen.getByTestId('ruleActionsButton'));
+      await waitForEuiPopoverOpen();
+      await userEvent.click(screen.getByTestId('disableButton'));
+
+      await waitFor(async () => {
+        expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+          expect.objectContaining({ untrack: false })
+        );
+      });
+    });
+  });
+
   describe('page', () => {
     it('renders the rule name as a title', () => {
       const rule = mockRule();
       expect(
         shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-        ).find('EuiPageHeader')
+        ).find(EuiPageHeader)
       ).toBeTruthy();
     });
 
@@ -114,7 +243,9 @@ describe('rule_details', () => {
     it('renders the API key owner badge when user can manage API keys', () => {
       const rule = mockRule({ apiKeyOwner: 'elastic' });
       const wrapper = mountWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+        </QueryClientProvider>
       );
       expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe('elastic');
     });
@@ -122,7 +253,9 @@ describe('rule_details', () => {
     it('renders the user-managed icon when apiKeyCreatedByUser is true', async () => {
       const rule = mockRule({ apiKeyOwner: 'elastic', apiKeyCreatedByUser: true });
       const wrapper = mountWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+        </QueryClientProvider>
       );
       expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe(
         'elastic Info'
@@ -140,6 +273,33 @@ describe('rule_details', () => {
           .find(<EuiBadge>{rule.apiKeyOwner}</EuiBadge>)
           .exists()
       ).toBeFalsy();
+    });
+
+    it('does not render actions button if the user has only read permissions', async () => {
+      const rule = mockRule();
+      const mockedRuleType: RuleType = {
+        id: '.noop',
+        name: 'No Op',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup,
+        actionVariables: { context: [], state: [], params: [] },
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        producer: ALERTING_FEATURE_ID,
+        authorizedConsumers: {
+          ALERTING_FEATURE_ID: { read: true, all: false },
+        },
+        enabledInLicense: true,
+        category: 'my-category',
+        isExportable: true,
+        isInternallyManaged: false,
+      };
+
+      const wrapper = shallowWithIntl(
+        <RuleDetails rule={rule} ruleType={mockedRuleType} actionTypes={[]} {...mockRuleApis} />
+      );
+
+      expect(wrapper.find('[data-test-subj="ruleActionsButton"]').exists()).toBeFalsy();
     });
 
     it('renders the rule error banner with error message, when rule has a license error', () => {
@@ -206,6 +366,27 @@ describe('rule_details', () => {
               />
             </EuiLink>
           </EuiText>
+          <EuiLiveAnnouncer>
+            Cannot run rule, 
+            <EuiText
+              size="xs"
+            >
+              test
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiLink
+              color="primary"
+              href="/app/management/stack/license_management"
+              target="_blank"
+            >
+              <MemoizedFormattedMessage
+                defaultMessage="Manage license"
+                id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+              />
+            </EuiLink>
+          </EuiLiveAnnouncer>
         </EuiPanel>
       `);
     });
@@ -237,7 +418,9 @@ describe('rule_details', () => {
         },
       });
       const wrapper = mountWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -262,25 +445,23 @@ describe('rule_details', () => {
         });
 
         const actionTypes: ActionType[] = [
-          {
+          createMockConnectorType({
             id: '.server-log',
             name: 'Server log',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-          },
+          }),
         ];
 
         const wrapper = mountWithIntl(
-          <RuleDetails
-            rule={rule}
-            ruleType={ruleType}
-            actionTypes={actionTypes}
-            {...mockRuleApis}
-          />
+          <QueryClientProvider client={queryClient}>
+            <RuleDetails
+              rule={rule}
+              ruleType={ruleType}
+              actionTypes={actionTypes}
+              {...mockRuleApis}
+            />
+          </QueryClientProvider>
         );
 
         expect(
@@ -306,35 +487,29 @@ describe('rule_details', () => {
           ],
         });
         const actionTypes: ActionType[] = [
-          {
+          createMockConnectorType({
             id: '.server-log',
             name: 'Server log',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-          },
-          {
+          }),
+          createMockConnectorType({
             id: '.email',
             name: 'Send email',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-          },
+          }),
         ];
 
         const details = mountWithIntl(
-          <RuleDetails
-            rule={rule}
-            ruleType={ruleType}
-            actionTypes={actionTypes}
-            {...mockRuleApis}
-          />
+          <QueryClientProvider client={queryClient}>
+            <RuleDetails
+              rule={rule}
+              ruleType={ruleType}
+              actionTypes={actionTypes}
+              {...mockRuleApis}
+            />
+          </QueryClientProvider>
         );
 
         expect(
@@ -361,12 +536,13 @@ describe('rule_details', () => {
         const pageHeaderProps = shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
         )
-          .find('EuiPageHeader')
+          .find(EuiPageHeader)
           .props() as EuiPageHeaderProps;
         const rightSideItems = pageHeaderProps.rightSideItems;
         expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
           <React.Fragment>
             <EuiButtonEmpty
+              aria-label="Edit"
               data-test-subj="openEditRuleFlyoutButton"
               disabled={false}
               iconType="pencil"
@@ -386,16 +562,12 @@ describe('rule_details', () => {
 
   describe('edit button', () => {
     const actionTypes: ActionType[] = [
-      {
+      createMockConnectorType({
         id: '.server-log',
         name: 'Server log',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-      },
+      }),
     ];
     ruleTypeRegistry.has.mockReturnValue(true);
     const ruleTypeR: RuleTypeModel = {
@@ -428,12 +600,13 @@ describe('rule_details', () => {
       const pageHeaderProps = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
-        .find('EuiPageHeader')
+        .find(EuiPageHeader)
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
         <React.Fragment>
           <EuiButtonEmpty
+            aria-label="Edit"
             data-test-subj="openEditRuleFlyoutButton"
             disabled={false}
             iconType="pencil"
@@ -491,12 +664,13 @@ describe('rule_details', () => {
       const pageHeaderProps = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
-        .find('EuiPageHeader')
+        .find(EuiPageHeader)
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
         <React.Fragment>
           <EuiButtonEmpty
+            aria-label="Edit"
             data-test-subj="openEditRuleFlyoutButton"
             disabled={false}
             iconType="pencil"
@@ -524,6 +698,8 @@ describe('rule_details', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
+        source: 'stack',
       },
     ];
     ruleTypeRegistry.has.mockReturnValue(true);
@@ -584,7 +760,14 @@ describe('rule_details', () => {
         ],
       });
       const wrapper = mountWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={actionTypes}
+            {...mockRuleApis}
+          />
+        </QueryClientProvider>
       );
       await act(async () => {
         await nextTick();
@@ -626,7 +809,14 @@ describe('rule_details', () => {
         ],
       });
       const wrapper = mountWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={actionTypes}
+            {...mockRuleApis}
+          />
+        </QueryClientProvider>
       );
       await act(async () => {
         await nextTick();
@@ -670,7 +860,14 @@ describe('rule_details', () => {
       const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
       hasExecuteActionsCapability.mockReturnValue(false);
       const wrapper = mountWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={actionTypes}
+            {...mockRuleApis}
+          />
+        </QueryClientProvider>
       );
       await act(async () => {
         await nextTick();
@@ -692,13 +889,15 @@ describe('rule_details', () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
       const wrapper = mountWithIntl(
-        <RuleDetails
-          rule={rule}
-          ruleType={ruleType}
-          actionTypes={[]}
-          {...mockRuleApis}
-          requestRefresh={requestRefresh}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={[]}
+            {...mockRuleApis}
+            requestRefresh={requestRefresh}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -719,13 +918,15 @@ describe('rule_details', () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
       const wrapper = mountWithIntl(
-        <RuleDetails
-          rule={rule}
-          ruleType={ruleType}
-          actionTypes={[]}
-          {...mockRuleApis}
-          requestRefresh={requestRefresh}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={[]}
+            {...mockRuleApis}
+            requestRefresh={requestRefresh}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -763,13 +964,15 @@ describe('rule_details', () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
       const wrapper = mountWithIntl(
-        <RuleDetails
-          rule={rule}
-          ruleType={ruleType}
-          actionTypes={[]}
-          {...mockRuleApis}
-          requestRefresh={requestRefresh}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={[]}
+            {...mockRuleApis}
+            requestRefresh={requestRefresh}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -802,13 +1005,15 @@ describe('rule_details', () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
       const wrapper = mountWithIntl(
-        <RuleDetails
-          rule={rule}
-          ruleType={ruleType}
-          actionTypes={[]}
-          {...mockRuleApis}
-          requestRefresh={requestRefresh}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={[]}
+            {...mockRuleApis}
+            requestRefresh={requestRefresh}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -839,13 +1044,15 @@ describe('rule_details', () => {
       const rule = { ...mockRule(), enabled: false };
       const requestRefresh = jest.fn();
       const wrapper = mountWithIntl(
-        <RuleDetails
-          rule={rule}
-          ruleType={ruleType}
-          actionTypes={[]}
-          {...mockRuleApis}
-          requestRefresh={requestRefresh}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={[]}
+            {...mockRuleApis}
+            requestRefresh={requestRefresh}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -862,6 +1069,107 @@ describe('rule_details', () => {
 
       expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
       expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
+    });
+
+    it('should not show untrack alerts modal if rule type does not track alerts life cycle', async () => {
+      const rule = mockRule();
+      const requestRefresh = jest.fn();
+      const wrapper = mountWithIntl(
+        <QueryClientProvider client={queryClient}>
+          <RuleDetails
+            rule={rule}
+            ruleType={{ ...ruleType, autoRecoverAlerts: false }}
+            actionTypes={[]}
+            {...mockRuleApis}
+            requestRefresh={requestRefresh}
+          />
+        </QueryClientProvider>
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
+      actionsButton.simulate('click');
+
+      const disableButton = wrapper.find('[data-test-subj="disableButton"]').last();
+      expect(disableButton.exists()).toBeTruthy();
+
+      disableButton.simulate('click');
+
+      const modal = wrapper.find('[data-test-subj="untrackAlertsModal"]');
+      expect(modal.exists()).not.toBeTruthy();
+
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
+        ids: [rule.id],
+        untrack: false,
+      });
+    });
+  });
+
+  describe('when the rule type includes the getDescriptionFields function in the registry definition', () => {
+    const getDescriptionFields: GetDescriptionFieldsFn = ({ rule }) => {
+      return [
+        {
+          title: 'my title',
+          description: <div>Generated Test Description Field - {rule.ruleTypeId}</div>,
+        },
+      ];
+    };
+
+    const ruleTypeWithDescriptionFields = {
+      ...ruleType,
+      id: '.noop-with-description-fields',
+      name: 'No Op with description fields',
+      getDescriptionFields,
+    };
+
+    const ruleTypeWithDescriptionFieldsModel: RuleTypeModel = {
+      id: '.noop-with-description-fields',
+      iconClass: 'test',
+      description: 'Rule when testing',
+      documentationUrl: 'https://localhost.local/docs',
+      validate: () => {
+        return { errors: {} };
+      },
+      ruleParamsExpression: jest.fn(),
+      requiresAppContext: false,
+      getDescriptionFields,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      ruleTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.get.mockReturnValue(ruleTypeWithDescriptionFieldsModel);
+      useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+    });
+
+    it('should render the description fields', async () => {
+      const rule = mockRule({
+        ruleTypeId: '.noop-with-description-fields',
+      });
+      const requestRefresh = jest.fn();
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <IntlProvider locale="en">
+            <RuleDetails
+              rule={rule}
+              ruleType={ruleTypeWithDescriptionFields}
+              actionTypes={[]}
+              {...mockRuleApis}
+              requestRefresh={requestRefresh}
+            />
+          </IntlProvider>
+        </QueryClientProvider>
+      );
+
+      expect(
+        await screen.findByText('Generated Test Description Field - .noop-with-description-fields')
+      ).toBeInTheDocument();
     });
   });
 

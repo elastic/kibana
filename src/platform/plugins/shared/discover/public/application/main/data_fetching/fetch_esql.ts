@@ -10,16 +10,18 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
+import type { Query, AggregateQuery, Filter, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../types';
-import type { ProfilesManager } from '../../../context_awareness';
+import type { ScopedProfilesManager } from '../../../context_awareness';
 
 interface EsqlErrorResponse {
   error: {
@@ -38,7 +40,10 @@ export function fetchEsql({
   inspectorAdapters,
   data,
   expressions,
-  profilesManager,
+  scopedProfilesManager,
+  esqlVariables,
+  searchSessionId,
+  projectRouting,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -49,7 +54,10 @@ export function fetchEsql({
   inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
-  profilesManager: ProfilesManager;
+  scopedProfilesManager: ScopedProfilesManager;
+  esqlVariables?: ESQLControlVariable[];
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
 }): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
@@ -64,8 +72,16 @@ export function fetchEsql({
       if (ast) {
         const contract = expressions.execute(ast, null, {
           inspectorAdapters,
+          searchContext: {
+            timeRange,
+            esqlVariables,
+            projectRouting,
+          },
+          searchSessionId,
         });
-        abortSignal?.addEventListener('abort', contract.cancel);
+        abortSignal?.addEventListener('abort', (e) => {
+          contract.cancel((e.target as AbortSignal)?.reason);
+        });
         const execution = contract.getData();
         let finalData: DataTableRecord[] = [];
         let esqlQueryColumns: Datatable['columns'] | undefined;
@@ -87,7 +103,7 @@ export function fetchEsql({
                 flattened: row,
               };
 
-              return profilesManager.resolveDocumentProfile({ record });
+              return scopedProfilesManager.resolveDocumentProfile({ record });
             });
           }
         });
@@ -95,8 +111,17 @@ export function fetchEsql({
           if (error) {
             throw new Error(error);
           } else {
+            const adapter = inspectorAdapters.requests;
+            const interceptedWarnings: SearchResponseWarning[] = [];
+            if (adapter) {
+              data.search.showWarnings(adapter, (warning) => {
+                interceptedWarnings.push(warning);
+                return true; // suppress the default behaviour
+              });
+            }
             return {
               records: finalData || [],
+              interceptedWarnings,
               esqlQueryColumns,
               esqlHeaderWarning,
             };
@@ -105,6 +130,7 @@ export function fetchEsql({
       }
       return {
         records: [],
+        interceptedWarnings: [],
         esqlQueryColumns: [],
         esqlHeaderWarning: undefined,
       };

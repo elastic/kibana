@@ -8,11 +8,11 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import {
-  createIndexPatternService,
+import type {
   IndexPatternServiceProps,
   IndexPatternServiceAPI,
 } from '../data_views_service/service';
+import { createIndexPatternService } from '../data_views_service/service';
 
 export function createIndexPatternServiceMock({
   core = coreMock.createStart(),

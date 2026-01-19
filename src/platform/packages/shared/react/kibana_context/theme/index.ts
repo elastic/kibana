@@ -9,6 +9,7 @@
 
 export { KibanaThemeProvider, type KibanaThemeProviderProps } from './theme_provider';
 export { wrapWithTheme } from './with_theme';
+export { useKibanaIsDarkMode } from './hooks';
 
 // Re-exporting from @kbn/react-kibana-context-common for convenience to consumers.
 export { defaultTheme, type KibanaTheme } from '@kbn/react-kibana-context-common';

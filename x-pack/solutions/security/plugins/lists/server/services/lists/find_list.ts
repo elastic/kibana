@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Filter,
   FoundListSchema,
@@ -16,7 +16,7 @@ import type {
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SearchEsListSchema } from '../../schemas/elastic_response';
+import type { SearchEsListSchema } from '../../schemas/elastic_response';
 import {
   encodeCursor,
   getQueryFilter,
@@ -68,11 +68,9 @@ export const findList = async ({
   });
 
   const totalCount = await esClient.count({
-    body: {
-      query,
-    },
     ignore_unavailable: true,
     index: listIndex,
+    query,
   });
 
   if (scroll.validSearchAfterFound) {
@@ -80,15 +78,13 @@ export const findList = async ({
     // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
     // to explicitly define the type <T>.
     const response = await esClient.search<SearchEsListSchema>({
-      body: {
-        query,
-        search_after: scroll.searchAfter,
-        sort: getSortWithTieBreaker({ sortField, sortOrder }),
-      },
       ignore_unavailable: true,
       index: listIndex,
+      query,
+      search_after: scroll.searchAfter,
       seq_no_primary_term: true,
       size: perPage,
+      sort: getSortWithTieBreaker({ sortField, sortOrder }),
     });
     return {
       cursor: encodeCursor({

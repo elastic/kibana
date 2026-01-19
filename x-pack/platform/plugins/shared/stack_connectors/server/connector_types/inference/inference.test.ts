@@ -12,8 +12,8 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Readable, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
-
+import type { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
+import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 
@@ -70,6 +70,7 @@ describe('InferenceConnector', () => {
 
       const response = await connector.performApiUnifiedCompletion({
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        telemetryMetadata: { pluginId: 'security_ai_assistant' },
       });
       expect(mockEsClient.transport.request).toBeCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
@@ -84,9 +85,15 @@ describe('InferenceConnector', () => {
             n: undefined,
           },
           method: 'POST',
-          path: '_inference/chat_completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true }
+        {
+          asStream: true,
+          meta: true,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'security_ai_assistant',
+          },
+        }
       );
       expect(response.choices[0].message.content).toEqual(' you');
     });
@@ -101,6 +108,24 @@ describe('InferenceConnector', () => {
         })
       ).rejects.toThrow('API Error');
     });
+
+    it('marks 429 errors as user errors', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([
+          `{\"error\":{\"code\":\"insufficient_quota\",\"message\":\"Received a rate limit status code for request from inference entity id [openai-chat_completion-1p3u6iyzmes] status [429]. Error message: [You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.]\",\"type\":\"insufficient_quota\"}}`,
+        ]),
+        statusCode: 400,
+      });
+
+      try {
+        await connector.performApiUnifiedCompletion({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        });
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
   });
 
   describe('performApiRerank', () => {
@@ -109,12 +134,12 @@ describe('InferenceConnector', () => {
       rerank: [
         {
           index: 2,
-          score: 0.011597361,
+          relevance_score: 0.011597361,
           text: 'leia',
         },
         {
           index: 0,
-          score: 0.006338922,
+          relevance_score: 0.006338922,
           text: 'luke',
         },
       ],
@@ -158,7 +183,9 @@ describe('InferenceConnector', () => {
         },
         { asStream: false }
       );
-      expect(response).toEqual(mockResponseRerank.rerank);
+      expect(response).toEqual(
+        mockResponseRerank.rerank.map(({ relevance_score: score, ...rest }) => ({ ...rest, score }))
+      );
     });
   });
 
@@ -288,9 +315,12 @@ describe('InferenceConnector', () => {
             n: undefined,
           },
           method: 'POST',
-          path: '_inference/chat_completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true }
+        {
+          asStream: true,
+          meta: true,
+        }
       );
     });
 
@@ -310,9 +340,13 @@ describe('InferenceConnector', () => {
         {
           body: { messages: [{ content: 'Hello world', role: 'user' }], n: undefined },
           method: 'POST',
-          path: '_inference/chat_completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true, signal }
+        {
+          asStream: true,
+          meta: true,
+          signal,
+        }
       );
     });
 
@@ -325,6 +359,24 @@ describe('InferenceConnector', () => {
           body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
         })
       ).rejects.toThrow('API Error');
+    });
+
+    it('marks 429 errors as user errors', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([
+          `{\"error\":{\"code\":\"insufficient_quota\",\"message\":\"Received a rate limit status code for request from inference entity id [openai-chat_completion-1p3u6iyzmes] status [429]. Error message: [You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.]\",\"type\":\"insufficient_quota\"}}`,
+        ]),
+        statusCode: 400,
+      });
+
+      try {
+        await connector.performApiUnifiedCompletionStream({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        });
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
 
     it('responds with a readable stream', async () => {

@@ -10,7 +10,7 @@ import type { ApplicationStart } from '@kbn/core/public';
 import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { Observable } from 'rxjs';
-import { EventReporter } from '../telemetry';
+import type { EventReporter } from '../telemetry';
 
 /* @internal */
 export interface SearchBarProps {

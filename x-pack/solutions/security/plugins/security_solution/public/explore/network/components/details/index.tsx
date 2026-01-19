@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import React from 'react';
-
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { PageScope } from '../../../../data_view_manager/constants';
 import type { DescriptionList } from '../../../../../common/utility_types';
-import { useDarkMode } from '../../../../common/lib/kibana';
 import type {
   FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
 } from '../../../../../common/search_strategy';
 import type { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-
 import {
   autonomousSystemRenderer,
   hostIdRenderer,
@@ -24,7 +23,7 @@ import {
   locationRenderer,
   reputationRenderer,
   whoisRenderer,
-} from '../../../../timelines/components/field_renderers/field_renderers';
+} from '../field_renderers/field_renderers';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -47,15 +46,16 @@ export interface IpOverviewProps {
   flowTarget: FlowTargetSourceDest;
   id: string;
   ip: string;
-  isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
   isLoadingAnomaliesData: boolean;
   loading: boolean;
   narrowDateRange: NarrowDateRange;
+  scopeId: PageScope;
   startDate: string;
   type: networkModel.NetworkType;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
+  isFlyoutOpen?: boolean;
 }
 
 export const IpOverview = React.memo<IpOverviewProps>(
@@ -64,7 +64,6 @@ export const IpOverview = React.memo<IpOverviewProps>(
     id,
     ip,
     data,
-    isDraggable = false,
     isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     loading,
     flowTarget,
@@ -73,12 +72,14 @@ export const IpOverview = React.memo<IpOverviewProps>(
     isLoadingAnomaliesData,
     anomaliesData,
     narrowDateRange,
+    scopeId,
     indexPatterns,
     jobNameById,
+    isFlyoutOpen = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const darkMode = useDarkMode();
+    const darkMode = useKibanaIsDarkMode();
     const typeData = data[flowTarget];
     const column: DescriptionList[] = [
       {
@@ -86,14 +87,13 @@ export const IpOverview = React.memo<IpOverviewProps>(
         description: locationRenderer(
           [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
           data,
-          contextID,
-          isDraggable
+          scopeId
         ),
       },
       {
         title: i18n.AUTONOMOUS_SYSTEM,
         description: typeData
-          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, contextID, isDraggable)
+          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, scopeId)
           : getEmptyTagValue(),
       },
     ];
@@ -148,14 +148,25 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.HOST_ID,
           description:
             typeData && data.host
-              ? hostIdRenderer({ host: data.host, isDraggable, ipFilter: ip, contextID })
+              ? hostIdRenderer({
+                  host: data.host,
+                  ipFilter: ip,
+                  contextID,
+                  scopeId,
+                  isFlyoutOpen,
+                })
               : getEmptyTagValue(),
         },
         {
           title: i18n.HOST_NAME,
           description:
             typeData && data.host
-              ? hostNameRenderer(data.host, ip, contextID, isDraggable)
+              ? hostNameRenderer({
+                  scopeId,
+                  host: data.host,
+                  ipFilter: ip,
+                  isFlyoutOpen,
+                })
               : getEmptyTagValue(),
         },
       ],

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiBadge, EuiHealth } from '@elastic/eui';
 
@@ -49,5 +50,6 @@ export const Tag: FunctionComponent<Props> = ({
 Tag.propTypes = {
   name: PropTypes.string.isRequired,
   color: PropTypes.string,
+  // @ts-expect-error upgrade typescript v5.9.3
   type: PropTypes.string,
 };

@@ -45,6 +45,7 @@ export const snapshotListSchema = schema.object({
       schema.literal('snapshot'),
       schema.literal('repository'),
       schema.literal('policyName'),
+      schema.literal('state'),
     ])
   ),
   searchValue: schema.maybe(schema.string()),
@@ -65,30 +66,12 @@ export const policySchema = schema.object({
 // Only validate required settings, everything else is optional
 const fsRepositorySettings = schema.object({ location: schema.string() }, { unknowns: 'allow' });
 
-const fsRepositorySchema = schema.object({
-  name: schema.string({ maxLength: 1000 }),
-  type: schema.string(),
-  settings: fsRepositorySettings,
-});
-
 const readOnlyRepositorySettings = schema.object({
   url: schema.string(),
 });
 
-const readOnlyRepository = schema.object({
-  name: schema.string({ maxLength: 1000 }),
-  type: schema.string(),
-  settings: readOnlyRepositorySettings,
-});
-
 // Only validate required settings, everything else is optional
 const s3RepositorySettings = schema.object({ bucket: schema.string() }, { unknowns: 'allow' });
-
-const s3Repository = schema.object({
-  name: schema.string({ maxLength: 1000 }),
-  type: schema.string(),
-  settings: s3RepositorySettings,
-});
 
 // Only validate required settings, everything else is optional
 const hdsRepositorySettings = schema.object(
@@ -99,30 +82,27 @@ const hdsRepositorySettings = schema.object(
   { unknowns: 'allow' }
 );
 
-const hdsfRepository = schema.object({
-  name: schema.string({ maxLength: 1000 }),
-  type: schema.string(),
-  settings: hdsRepositorySettings,
-});
-
 const azureRepositorySettings = schema.object({}, { unknowns: 'allow' });
-
-const azureRepository = schema.object({
-  name: schema.string({ maxLength: 1000 }),
-  type: schema.string(),
-  settings: azureRepositorySettings,
-});
 
 // Only validate required settings, everything else is optional
 const gcsRepositorySettings = schema.object({ bucket: schema.string() }, { unknowns: 'allow' });
 
-const gcsRepository = schema.object({
-  name: schema.string({ maxLength: 1000 }),
-  type: schema.string(),
-  settings: gcsRepositorySettings,
-});
+const sourceRepositorySettings = schema.oneOf([
+  fsRepositorySettings,
+  readOnlyRepositorySettings,
+  s3RepositorySettings,
+  hdsRepositorySettings,
+  azureRepositorySettings,
+  gcsRepositorySettings,
+  schema.object(
+    {
+      delegateType: schema.string(),
+    },
+    { unknowns: 'allow' }
+  ),
+]);
 
-const sourceRepository = schema.object({
+export const repositorySchema = schema.object({
   name: schema.string({ maxLength: 1000 }),
   type: schema.string(),
   settings: schema.oneOf([
@@ -132,24 +112,9 @@ const sourceRepository = schema.object({
     hdsRepositorySettings,
     azureRepositorySettings,
     gcsRepositorySettings,
-    schema.object(
-      {
-        delegateType: schema.string(),
-      },
-      { unknowns: 'allow' }
-    ),
+    sourceRepositorySettings,
   ]),
 });
-
-export const repositorySchema = schema.oneOf([
-  fsRepositorySchema,
-  readOnlyRepository,
-  sourceRepository,
-  s3Repository,
-  hdsfRepository,
-  azureRepository,
-  gcsRepository,
-]);
 
 export const restoreSettingsSchema = schema.object({
   indices: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),

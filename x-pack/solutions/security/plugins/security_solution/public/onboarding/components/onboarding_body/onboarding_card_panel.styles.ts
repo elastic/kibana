@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { COLOR_MODES_STANDARD, useEuiTheme } from '@elastic/eui';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 export const HEIGHT_ANIMATION_DURATION = 250;
 
 export const useCardPanelStyles = () => {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const successBackgroundColor = euiTheme.colors.backgroundLightSuccess;
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
+  const successBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
   const darkModeStyles = useDarkPanelStyles(isDarkMode);
 
   return css`
@@ -24,14 +25,18 @@ export const useCardPanelStyles = () => {
     .onboardingCardIcon {
       padding: ${euiTheme.size.m};
       border-radius: 50%;
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      background-color: ${isDarkMode
+        ? euiTheme.colors.lightShade
+        : euiTheme.colors.backgroundBaseSubdued};
+      display: flex;
+      align-items: center;
     }
     .onboardingCardHeaderTitle {
       font-weight: ${euiTheme.font.weight.semiBold};
     }
     .onboardingCardHeaderCompleteBadge {
-      background-color: ${successBackgroundColor};
-      color: ${euiTheme.colors.textSuccess};
+      background-color: ${isDarkMode ? euiTheme.colors.success : successBackgroundColor};
+      color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textSuccess};
     }
     .onboardingCardContentWrapper {
       display: grid;

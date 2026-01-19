@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 import { ReadListIndexResponse } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
@@ -20,7 +21,7 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
       path: LIST_INDEX,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [LISTS_API_READ],
         },
       },
     })

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useRef, memo, ReactPortal } from 'react';
+import type { ReactPortal } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
 import deepEqual from 'react-fast-compare';
 import usePrevious from 'react-use/lib/usePrevious';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { ExpressionAstExpression, ExpressionValue } from '@kbn/expressions-plugin/common';
+import type { ExpressionAstExpression, ExpressionValue } from '@kbn/expressions-plugin/common';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
-import { UpdatePropsRef } from '../../../types/arguments';
+import type { UpdatePropsRef } from '../../../types/arguments';
 
 export interface ArgTemplateFormProps {
   template?: (

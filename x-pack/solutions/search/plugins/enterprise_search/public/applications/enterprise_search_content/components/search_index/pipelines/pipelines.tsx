@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -20,7 +21,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -32,6 +33,7 @@ import { docLinks } from '../../../../shared/doc_links';
 import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
 import { getContentExtractionDisabled, isApiIndex, isConnectorIndex } from '../../../utils/indices';
 
+import { SearchIndexTabId } from '../constants';
 import { IndexNameLogic } from '../index_name_logic';
 
 import { InferenceErrors } from './inference_errors';
@@ -53,6 +55,7 @@ export const SearchIndexPipelines: React.FC = () => {
     isDeleteModalOpen,
     pipelineName,
     defaultPipelineValues,
+    showPipelineSettings,
   } = useValues(PipelinesLogic);
   const {
     closeAddMlInferencePipelineModal,
@@ -65,9 +68,34 @@ export const SearchIndexPipelines: React.FC = () => {
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const apiIndex = isApiIndex(index);
   const extractionDisabled = getContentExtractionDisabled(index);
+  const [isRevertPipeline, setRevertPipeline] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
-    if (index) {
+    if (!isDeleteModalOpen) {
+      if (isRevertPipeline) {
+        const pipelinesButton = document.querySelector<HTMLDivElement>(
+          `[id="${SearchIndexTabId.PIPELINES}"]`
+        );
+        if (pipelinesButton) {
+          pipelinesButton.focus();
+        }
+        setRevertPipeline(false);
+      } else if (buttonRef.current) {
+        buttonRef.current.focus();
+      }
+    }
+  }, [isDeleteModalOpen]);
+
+  const onDeletePipeline = useCallback(() => {
+    revertPipeline({ indexName });
+    setRevertPipeline(true);
+  }, [indexName, revertPipeline]);
+
+  useEffect(() => {
+    if (index && !showPipelineSettings) {
       fetchDefaultPipeline(undefined);
       setPipelineState(
         isConnectorIndex(index)
@@ -75,7 +103,7 @@ export const SearchIndexPipelines: React.FC = () => {
           : defaultPipelineValues
       );
     }
-  }, [index]);
+  }, [index, showPipelineSettings]);
 
   if (!index) {
     return <></>;
@@ -108,6 +136,7 @@ export const SearchIndexPipelines: React.FC = () => {
       {showMissingPipelineCallout && (
         <>
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="error"
             title={i18n.translate(
@@ -193,7 +222,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     </EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ManageCustomPipelineActions />
+                    <ManageCustomPipelineActions buttonRef={buttonRef} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
@@ -272,15 +301,17 @@ export const SearchIndexPipelines: React.FC = () => {
       )}
       {isDeleteModalOpen && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate(
             'xpack.enterpriseSearch.content.index.pipelines.deleteModal.title',
             {
               defaultMessage: 'Delete custom pipeline',
             }
           )}
+          titleProps={{ id: modalTitleId }}
           isLoading={revertStatus === Status.LOADING}
           onCancel={closeDeleteModal}
-          onConfirm={() => revertPipeline({ indexName })}
+          onConfirm={onDeletePipeline}
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(
             'xpack.enterpriseSearch.content.index.pipelines.deleteModal.confirmButton',

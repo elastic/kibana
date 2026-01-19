@@ -1,0 +1,3685 @@
+{
+  "id": "@kbn/file-upload-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.AbortError",
+        "type": "Class",
+        "tags": [],
+        "label": "AbortError",
+        "description": [
+          "\nError thrown when a file upload is aborted."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.AbortError",
+            "text": "AbortError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/abort_error/abort_error.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.AbortError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/abort_error/abort_error.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.AbortError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/abort_error/abort_error.ts",
+                "lineNumber": 12,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FileReaderBase",
+        "type": "Class",
+        "tags": [],
+        "label": "FileReaderBase",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/file_reader_base.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileReaderBase._docArray",
+            "type": "Array",
+            "tags": [],
+            "label": "_docArray",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/file_reader_base.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileReaderBase._createDocs",
+            "type": "Function",
+            "tags": [],
+            "label": "_createDocs",
+            "description": [],
+            "signature": [
+              "(t: string, isLastPart: boolean) => ",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.CreateDocsResponse",
+                "text": "CreateDocsResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/file_reader_base.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileReaderBase._createDocs.$1",
+                "type": "string",
+                "tags": [],
+                "label": "t",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/file_reader_base.ts",
+                "lineNumber": 31,
+                "columnNumber": 34,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileReaderBase._createDocs.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isLastPart",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/file_reader_base.ts",
+                "lineNumber": 31,
+                "columnNumber": 45,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileReaderBase.read",
+            "type": "Function",
+            "tags": [],
+            "label": "read",
+            "description": [],
+            "signature": [
+              "(data: ArrayBuffer) => ",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/file_reader_base.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileReaderBase.read.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "ArrayBuffer"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/file_reader_base.ts",
+                "lineNumber": 33,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FileUploadTelemetryService",
+        "type": "Class",
+        "tags": [],
+        "label": "FileUploadTelemetryService",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadTelemetryService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "analytics",
+                "description": [],
+                "signature": [
+                  "AnalyticsServiceStart"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "lineNumber": 60,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "lineNumber": 60,
+                "columnNumber": 57,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadTelemetryService.trackAnalyzeFile",
+            "type": "Function",
+            "tags": [],
+            "label": "trackAnalyzeFile",
+            "description": [],
+            "signature": [
+              "(fileUploadEvent: FileAnalysisEvent) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.trackAnalyzeFile.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fileUploadEvent",
+                "description": [],
+                "signature": [
+                  "FileAnalysisEvent"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "lineNumber": 71,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadTelemetryService.trackUploadFile",
+            "type": "Function",
+            "tags": [],
+            "label": "trackUploadFile",
+            "description": [],
+            "signature": [
+              "(fileUploadEvent: FileUploadEvent) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.trackUploadFile.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fileUploadEvent",
+                "description": [],
+                "signature": [
+                  "FileUploadEvent"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "lineNumber": 78,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadTelemetryService.trackUploadSession",
+            "type": "Function",
+            "tags": [],
+            "label": "trackUploadSession",
+            "description": [],
+            "signature": [
+              "(uploadSessionEvent: UploadSessionEvent) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.trackUploadSession.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "uploadSessionEvent",
+                "description": [],
+                "signature": [
+                  "UploadSessionEvent"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "lineNumber": 85,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.MessageReader",
+        "type": "Class",
+        "tags": [],
+        "label": "MessageReader",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.MessageReader",
+            "text": "MessageReader"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.FileReaderBase",
+            "text": "FileReaderBase"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/message_reader.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.MessageReader.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/message_reader.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.MessageReader.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/file-upload-common",
+                    "scope": "common",
+                    "docId": "kibKbnFileUploadCommonPluginApi",
+                    "section": "def-common.ImportFactoryOptions",
+                    "text": "ImportFactoryOptions"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/message_reader.ts",
+                "lineNumber": 16,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.MessageReader._createDocs",
+            "type": "Function",
+            "tags": [],
+            "label": "_createDocs",
+            "description": [],
+            "signature": [
+              "(text: string, isLastPart: boolean, lineLimit?: number | undefined) => ",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.CreateDocsResponse",
+                "text": "CreateDocsResponse"
+              },
+              "<",
+              "ImportDocMessage",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/message_reader.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.MessageReader._createDocs.$1",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/message_reader.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.MessageReader._createDocs.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isLastPart",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/message_reader.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.MessageReader._createDocs.$3",
+                "type": "number",
+                "tags": [],
+                "label": "lineLimit",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/message_reader.ts",
+                "lineNumber": 36,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.NdjsonReader",
+        "type": "Class",
+        "tags": [],
+        "label": "NdjsonReader",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.NdjsonReader",
+            "text": "NdjsonReader"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.FileReaderBase",
+            "text": "FileReaderBase"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/ndjson_reader.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.NdjsonReader._createDocs",
+            "type": "Function",
+            "tags": [],
+            "label": "_createDocs",
+            "description": [],
+            "signature": [
+              "(json: string, isLastPart: boolean) => ",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.CreateDocsResponse",
+                "text": "CreateDocsResponse"
+              },
+              "<string>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/ndjson_reader.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.NdjsonReader._createDocs.$1",
+                "type": "string",
+                "tags": [],
+                "label": "json",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/ndjson_reader.ts",
+                "lineNumber": 12,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.NdjsonReader._createDocs.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isLastPart",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/ndjson_reader.ts",
+                "lineNumber": 12,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.TikaReader",
+        "type": "Class",
+        "tags": [],
+        "label": "TikaReader",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.TikaReader",
+            "text": "TikaReader"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.FileReaderBase",
+            "text": "FileReaderBase"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/tika_reader.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.TikaReader.read",
+            "type": "Function",
+            "tags": [],
+            "label": "read",
+            "description": [],
+            "signature": [
+              "(data: ArrayBuffer) => ",
+              "ImportDocTika",
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/tika_reader.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.TikaReader.read.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "ArrayBuffer"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/tika_reader.ts",
+                "lineNumber": 12,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.TikaReader._createDocs",
+            "type": "Function",
+            "tags": [],
+            "label": "_createDocs",
+            "description": [],
+            "signature": [
+              "(base64String: string) => ",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.CreateDocsResponse",
+                "text": "CreateDocsResponse"
+              },
+              "<",
+              "ImportDocTika",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/tika_reader.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.TikaReader._createDocs.$1",
+                "type": "string",
+                "tags": [],
+                "label": "base64String",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/file_reader/tika_reader.ts",
+                "lineNumber": 24,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.getFieldsFromGrokPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldsFromGrokPattern",
+        "description": [],
+        "signature": [
+          "(grokPattern: string) => { name: string; type: string; }[]"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/grok_pattern_utils/grok_pattern.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.getFieldsFromGrokPattern.$1",
+            "type": "string",
+            "tags": [],
+            "label": "grokPattern",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/grok_pattern_utils/grok_pattern.ts",
+            "lineNumber": 37,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.isAbortError",
+        "type": "Function",
+        "tags": [],
+        "label": "isAbortError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/abort_error/abort_error.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.isAbortError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/abort_error/abort_error.ts",
+            "lineNumber": 19,
+            "columnNumber": 30,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.registerFileUploadAnalyticsEvents",
+        "type": "Function",
+        "tags": [],
+        "label": "registerFileUploadAnalyticsEvents",
+        "description": [
+          "\nRegisters the file upload analytics events."
+        ],
+        "signature": [
+          "(analytics: ",
+          "AnalyticsServiceSetup",
+          ") => void"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.registerFileUploadAnalyticsEvents.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "AnalyticsServiceSetup"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+            "lineNumber": 22,
+            "columnNumber": 51,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.replaceFieldInGrokPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "replaceFieldInGrokPattern",
+        "description": [],
+        "signature": [
+          "(grokPattern: string, fieldName: string, index: number) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/grok_pattern_utils/grok_pattern.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.replaceFieldInGrokPattern.$1",
+            "type": "string",
+            "tags": [],
+            "label": "grokPattern",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/grok_pattern_utils/grok_pattern.ts",
+            "lineNumber": 51,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.replaceFieldInGrokPattern.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/grok_pattern_utils/grok_pattern.ts",
+            "lineNumber": 51,
+            "columnNumber": 64,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.replaceFieldInGrokPattern.$3",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/grok_pattern_utils/grok_pattern.ts",
+            "lineNumber": 51,
+            "columnNumber": 83,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.updatePipelineTimezone",
+        "type": "Function",
+        "tags": [],
+        "label": "updatePipelineTimezone",
+        "description": [],
+        "signature": [
+          "(ingestPipeline: ",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.IngestPipeline",
+            "text": "IngestPipeline"
+          },
+          " | ",
+          "IngestPipelineConfig",
+          ") => void"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/utils.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.updatePipelineTimezone.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ingestPipeline",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              },
+              " | ",
+              "IngestPipelineConfig"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/utils.ts",
+            "lineNumber": 19,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.AnalysisResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnalysisResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.AnalysisResult.results",
+            "type": "Object",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.FindFileStructureResponse",
+                "text": "FindFileStructureResponse"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.AnalysisResult.overrides",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.FormattedOverrides",
+                "text": "FormattedOverrides"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.AnalysisResult.preview",
+            "type": "Object",
+            "tags": [],
+            "label": "preview",
+            "description": [],
+            "signature": [
+              "IngestSimulateResponse",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.ConfigSchema",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConfigSchema",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/app.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ConfigSchema.resultLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "resultLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.ResultLinks",
+                "text": "ResultLinks"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/app.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.CreateDocsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateDocsResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.CreateDocsResponse",
+            "text": "CreateDocsResponse"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 212,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.CreateDocsResponse.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 213,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.CreateDocsResponse.remainder",
+            "type": "number",
+            "tags": [],
+            "label": "remainder",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 214,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.CreateDocsResponse.docs",
+            "type": "Array",
+            "tags": [],
+            "label": "docs",
+            "description": [],
+            "signature": [
+              "T[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 215,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.CreateDocsResponse.error",
+            "type": "Any",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 216,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FileUploadResults",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileUploadResults",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.pipelineId",
+            "type": "string",
+            "tags": [],
+            "label": "pipelineId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              "{ id: string; title: string; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.inferenceId",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.files",
+            "type": "Array",
+            "tags": [],
+            "label": "files",
+            "description": [],
+            "signature": [
+              "{ fileName: string; docCount: number; fileFormat: string; documentType: string; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.timeFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FindFileStructureErrorResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindFileStructureErrorResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureErrorResponse.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "{ statusCode: number; error: string; message: string; attributes?: ErrorAttribute | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureErrorResponse.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FindFileStructureResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindFileStructureResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.charset",
+            "type": "string",
+            "tags": [],
+            "label": "charset",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.has_header_row",
+            "type": "boolean",
+            "tags": [],
+            "label": "has_header_row",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.has_byte_order_marker",
+            "type": "boolean",
+            "tags": [],
+            "label": "has_byte_order_marker",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.format",
+            "type": "string",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.document_type",
+            "type": "string",
+            "tags": [],
+            "label": "document_type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.field_stats",
+            "type": "Object",
+            "tags": [],
+            "label": "field_stats",
+            "description": [],
+            "signature": [
+              "{ [fieldName: string]: { count: number; cardinality: number; top_hits: { count: number; value: any; }[]; mean_value?: number | undefined; median_value?: number | undefined; max_value?: number | undefined; min_value?: number | undefined; earliest?: string | undefined; latest?: string | undefined; }; }"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.sample_start",
+            "type": "string",
+            "tags": [],
+            "label": "sample_start",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.num_messages_analyzed",
+            "type": "number",
+            "tags": [],
+            "label": "num_messages_analyzed",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "{ properties: { [fieldName: string]: { type: ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".STRING | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".TEXT | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".MATCH_ONLY_TEXT | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".KEYWORD | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".VERSION | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".BOOLEAN | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".OBJECT | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".DATE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".DATE_NANOS | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".DATE_RANGE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".GEO_POINT | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".GEO_SHAPE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".FLOAT | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".HALF_FLOAT | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".SCALED_FLOAT | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".DOUBLE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".INTEGER | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".LONG | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".SHORT | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".UNSIGNED_LONG | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".AGGREGATE_METRIC_DOUBLE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".FLOAT_RANGE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".DOUBLE_RANGE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".INTEGER_RANGE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".LONG_RANGE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".NESTED | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".BYTE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".IP | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".IP_RANGE | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".ATTACHMENT | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".TOKEN_COUNT | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".MURMUR3 | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".HISTOGRAM | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".EXPONENTIAL_HISTOGRAM | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".TDIGEST; format?: string | undefined; }; }; }"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.ingest_pipeline",
+            "type": "Object",
+            "tags": [],
+            "label": "ingest_pipeline",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.quote",
+            "type": "string",
+            "tags": [],
+            "label": "quote",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.delimiter",
+            "type": "string",
+            "tags": [],
+            "label": "delimiter",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.need_client_timezone",
+            "type": "boolean",
+            "tags": [],
+            "label": "need_client_timezone",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.num_lines_analyzed",
+            "type": "number",
+            "tags": [],
+            "label": "num_lines_analyzed",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.column_names",
+            "type": "Array",
+            "tags": [],
+            "label": "column_names",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.explanation",
+            "type": "Array",
+            "tags": [],
+            "label": "explanation",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.grok_pattern",
+            "type": "string",
+            "tags": [],
+            "label": "grok_pattern",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.multiline_start_pattern",
+            "type": "string",
+            "tags": [],
+            "label": "multiline_start_pattern",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.exclude_lines_pattern",
+            "type": "string",
+            "tags": [],
+            "label": "exclude_lines_pattern",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.java_timestamp_formats",
+            "type": "Array",
+            "tags": [],
+            "label": "java_timestamp_formats",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.joda_timestamp_formats",
+            "type": "Array",
+            "tags": [],
+            "label": "joda_timestamp_formats",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.timestamp_field",
+            "type": "string",
+            "tags": [],
+            "label": "timestamp_field",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.should_trim_fields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "should_trim_fields",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FindFileStructureResponse.ecs_compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "ecs_compatibility",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.GetAdditionalLinksParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetAdditionalLinksParams",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 233,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.GetAdditionalLinksParams.dataViewId",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 234,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.GetAdditionalLinksParams.dataViewTitle",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.GetAdditionalLinksParams.globalState",
+            "type": "Any",
+            "tags": [],
+            "label": "globalState",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.HasImportPermission",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasImportPermission",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 127,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.HasImportPermission.hasImportPermission",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasImportPermission",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.ImportConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ImportConfig",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 199,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportConfig.settings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "IndicesIndexSettingsKeys",
+              " & { [property: string]: any; }"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportConfig.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "MappingTypeMapping"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 201,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportConfig.pipeline",
+            "type": "Object",
+            "tags": [],
+            "label": "pipeline",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.ImportFactoryOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ImportFactoryOptions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 219,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportFactoryOptions.excludeLinesPattern",
+            "type": "string",
+            "tags": [],
+            "label": "excludeLinesPattern",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportFactoryOptions.multilineStartPattern",
+            "type": "string",
+            "tags": [],
+            "label": "multilineStartPattern",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 221,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.ImportFailure",
+        "type": "Interface",
+        "tags": [],
+        "label": "ImportFailure",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 155,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportFailure.item",
+            "type": "number",
+            "tags": [],
+            "label": "item",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportFailure.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportFailure.caused_by",
+            "type": "Object",
+            "tags": [],
+            "label": "caused_by",
+            "description": [],
+            "signature": [
+              "{ type: string; reason: string; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportFailure.doc",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "string | object | ",
+              "ImportDocMessage",
+              " | ",
+              "ImportDocTika"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.ImportResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ImportResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 143,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResponse.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResponse.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResponse.pipelineId",
+            "type": "string",
+            "tags": [],
+            "label": "pipelineId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResponse.docCount",
+            "type": "number",
+            "tags": [],
+            "label": "docCount",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResponse.failures",
+            "type": "Array",
+            "tags": [],
+            "label": "failures",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.ImportFailure",
+                "text": "ImportFailure"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResponse.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "{ error: ",
+              "ErrorCause",
+              "; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResponse.ingestError",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ingestError",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.ImportResults",
+        "type": "Interface",
+        "tags": [],
+        "label": "ImportResults",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 205,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResults.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 206,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResults.failures",
+            "type": "Array",
+            "tags": [],
+            "label": "failures",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.ImportFailure",
+                "text": "ImportFailure"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResults.docCount",
+            "type": "number",
+            "tags": [],
+            "label": "docCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ImportResults.error",
+            "type": "Any",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 209,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.IngestPipeline",
+        "type": "Interface",
+        "tags": [],
+        "label": "IngestPipeline",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 180,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.IngestPipeline.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 181,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.IngestPipeline.processors",
+            "type": "Array",
+            "tags": [],
+            "label": "processors",
+            "description": [],
+            "signature": [
+              "any[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.IngestPipeline.isManaged",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isManaged",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 183,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.IngestPipeline.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.IngestPipelineWrapper",
+        "type": "Interface",
+        "tags": [],
+        "label": "IngestPipelineWrapper",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 175,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.IngestPipelineWrapper.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 176,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.IngestPipelineWrapper.pipeline",
+            "type": "Object",
+            "tags": [],
+            "label": "pipeline",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 177,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.InitializeImportResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "InitializeImportResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 133,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.InitializeImportResponse.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.InitializeImportResponse.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.InitializeImportResponse.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.InitializeImportResponse.pipelineIds",
+            "type": "Array",
+            "tags": [],
+            "label": "pipelineIds",
+            "description": [],
+            "signature": [
+              "(string | undefined)[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.InitializeImportResponse.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "{ error: ",
+              "ErrorCause",
+              "; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.InputOverrides",
+        "type": "Interface",
+        "tags": [],
+        "label": "InputOverrides",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.InputOverrides.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: string | undefined",
+            "description": [],
+            "signature": [
+              "[key: string]:  string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.OpenFileUploadLiteContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "OpenFileUploadLiteContext",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.onUploadComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "onUploadComplete",
+            "description": [],
+            "signature": [
+              "((results: ",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.FileUploadResults",
+                "text": "FileUploadResults"
+              },
+              " | null) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.OpenFileUploadLiteContext.onUploadComplete.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "results",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/file-upload-common",
+                    "scope": "common",
+                    "docId": "kibKbnFileUploadCommonPluginApi",
+                    "section": "def-common.FileUploadResults",
+                    "text": "FileUploadResults"
+                  },
+                  " | null"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.indexSettings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "indexSettings",
+            "description": [],
+            "signature": [
+              "IndicesIndexSettings",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.autoAddInference",
+            "type": "string",
+            "tags": [],
+            "label": "autoAddInference",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.autoCreateDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoCreateDataView",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.existingIndex",
+            "type": "string",
+            "tags": [],
+            "label": "existingIndex",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.initialIndexName",
+            "type": "string",
+            "tags": [],
+            "label": "initialIndexName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.flyoutContent",
+            "type": "Object",
+            "tags": [],
+            "label": "flyoutContent",
+            "description": [],
+            "signature": [
+              "FlyoutContent",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.location",
+            "type": "string",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.PreviewTikaResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "PreviewTikaResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 187,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.PreviewTikaResponse.date",
+            "type": "string",
+            "tags": [],
+            "label": "date",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.PreviewTikaResponse.content_type",
+            "type": "string",
+            "tags": [],
+            "label": "content_type",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 189,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.PreviewTikaResponse.author",
+            "type": "string",
+            "tags": [],
+            "label": "author",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.PreviewTikaResponse.format",
+            "type": "string",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 191,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.PreviewTikaResponse.modified",
+            "type": "string",
+            "tags": [],
+            "label": "modified",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.PreviewTikaResponse.language",
+            "type": "string",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 193,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.PreviewTikaResponse.creator_tool",
+            "type": "string",
+            "tags": [],
+            "label": "creator_tool",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 194,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.PreviewTikaResponse.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 195,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.PreviewTikaResponse.content_length",
+            "type": "number",
+            "tags": [],
+            "label": "content_length",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.ResultLink",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResultLink",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 243,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ResultLink.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 244,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ResultLink.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"index\" | \"file\""
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 245,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ResultLink.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 246,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ResultLink.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 247,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ResultLink.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 248,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ResultLink.getUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getUrl",
+            "description": [],
+            "signature": [
+              "(params?: any) => Promise<string>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 249,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.ResultLink.getUrl.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+                "lineNumber": 249,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ResultLink.canDisplay",
+            "type": "Function",
+            "tags": [],
+            "label": "canDisplay",
+            "description": [],
+            "signature": [
+              "(params?: any) => Promise<boolean>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 250,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.ResultLink.canDisplay.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+                "lineNumber": 250,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ResultLink.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 251,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.ResultLinks",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResultLinks",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/app.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.ResultLinks.fileBeat",
+            "type": "Object",
+            "tags": [],
+            "label": "fileBeat",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/app.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.TestGrokPatternResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "TestGrokPatternResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 224,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.TestGrokPatternResponse.matches",
+            "type": "Array",
+            "tags": [],
+            "label": "matches",
+            "description": [],
+            "signature": [
+              "{ matched: boolean; fields: Record<string, { match: string; offset: number; length: number; }[]>; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "lineNumber": 225,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FILE_SIZE_DISPLAY_FORMAT",
+        "type": "string",
+        "tags": [],
+        "label": "FILE_SIZE_DISPLAY_FORMAT",
+        "description": [],
+        "signature": [
+          "\"0,0.[0] b\""
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FormattedOverrides",
+        "type": "Type",
+        "tags": [],
+        "label": "FormattedOverrides",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.InputOverrides",
+            "text": "InputOverrides"
+          },
+          " & { column_names?: string | string[] | undefined; has_header_row?: string | boolean | undefined; should_trim_fields?: string | boolean | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.GetAdditionalLinks",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAdditionalLinks",
+        "description": [],
+        "signature": [
+          "((params: ",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.GetAdditionalLinksParams",
+            "text": "GetAdditionalLinksParams"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.ResultLink",
+            "text": "ResultLink"
+          },
+          "[] | undefined>)[]"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 239,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.ImportDoc",
+        "type": "Type",
+        "tags": [],
+        "label": "ImportDoc",
+        "description": [],
+        "signature": [
+          "string | object | ",
+          "ImportDocMessage",
+          " | ",
+          "ImportDocTika"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 173,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.INDEX_META_DATA_CREATED_BY",
+        "type": "string",
+        "tags": [],
+        "label": "INDEX_META_DATA_CREATED_BY",
+        "description": [],
+        "signature": [
+          "\"file-data-visualizer\""
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.InputData",
+        "type": "Type",
+        "tags": [],
+        "label": "InputData",
+        "description": [],
+        "signature": [
+          "any[]"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.MB",
+        "type": "number",
+        "tags": [],
+        "label": "MB",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.NO_TIME_FORMAT",
+        "type": "string",
+        "tags": [],
+        "label": "NO_TIME_FORMAT",
+        "description": [],
+        "signature": [
+          "\"null\""
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.OPEN_FILE_UPLOAD_LITE_ACTION",
+        "type": "string",
+        "tags": [],
+        "label": "OPEN_FILE_UPLOAD_LITE_ACTION",
+        "description": [],
+        "signature": [
+          "\"openFileUploadLiteTrigger\""
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.OPEN_FILE_UPLOAD_LITE_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "OPEN_FILE_UPLOAD_LITE_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"OPEN_FILE_UPLOAD_LITE_TRIGGER\""
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.TIKA_PREVIEW_CHARS",
+        "type": "number",
+        "tags": [],
+        "label": "TIKA_PREVIEW_CHARS",
+        "description": [],
+        "signature": [
+          "100000"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FILE_FORMATS",
+        "type": "Object",
+        "tags": [],
+        "label": "FILE_FORMATS",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_FORMATS.DELIMITED",
+            "type": "string",
+            "tags": [],
+            "label": "DELIMITED",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_FORMATS.NDJSON",
+            "type": "string",
+            "tags": [],
+            "label": "NDJSON",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_FORMATS.SEMI_STRUCTURED_TEXT",
+            "type": "string",
+            "tags": [],
+            "label": "SEMI_STRUCTURED_TEXT",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_FORMATS.TIKA",
+            "type": "string",
+            "tags": [],
+            "label": "TIKA",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FILE_UPLOAD_EVENT",
+        "type": "Object",
+        "tags": [],
+        "label": "FILE_UPLOAD_EVENT",
+        "description": [
+          "\nEvent types."
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_UPLOAD_EVENT.FILE_ANALYSIS",
+            "type": "string",
+            "tags": [],
+            "label": "FILE_ANALYSIS",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_UPLOAD_EVENT.FILE_UPLOAD",
+            "type": "string",
+            "tags": [],
+            "label": "FILE_UPLOAD",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_UPLOAD_EVENT.UPLOAD_SESSION",
+            "type": "string",
+            "tags": [],
+            "label": "UPLOAD_SESSION",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

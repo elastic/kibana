@@ -31,9 +31,10 @@ export const SelectedVSAvailableCallout = ({
         selectedColumns.length > 0 &&
         selectedColumns.length < esqlQueryColumns.length && (
           <EuiCallOut
+            announceOnMount
             color="primary"
             data-test-subj="dscSelectedColumnsCallout"
-            iconType="iInCircle"
+            iconType="info"
             title={i18n.translate('discover.esqlMode.selectedColumnsCallout', {
               defaultMessage:
                 'Displaying {selectedColumnsNumber} of {esqlQueryColumnsNumber} fields. Add more from the Available fields list.',

@@ -25,9 +25,8 @@
  * @packageDocumentation
  */
 
+import 'reflect-metadata/lite';
 import './index.scss';
-
-import 'reflect-metadata';
 
 export type { DocLinksStart } from '@kbn/core-doc-links-browser';
 export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
@@ -35,7 +34,7 @@ export type { I18nStart } from '@kbn/core-i18n-browser';
 export type {
   FatalErrorsSetup,
   FatalErrorsStart,
-  FatalErrorInfo,
+  FatalError,
 } from '@kbn/core-fatal-errors-browser';
 export type {
   EvaluationContext,
@@ -48,7 +47,6 @@ export type {
   PublicUiSettingsParams,
 } from '@kbn/core-ui-settings-browser';
 export type { Capabilities } from '@kbn/core-capabilities-common';
-export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 export type {
   ChromeBadge,
@@ -169,23 +167,7 @@ export type {
 } from '@kbn/core-application-browser';
 export { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 
-export type {
-  SavedObjectsClientContract,
-  SimpleSavedObject,
-  SavedObjectsCreateOptions,
-  SavedObjectsDeleteOptions,
-  SavedObjectsBatchResponse,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
-  SavedObjectsUpdateOptions,
-  ResolvedSimpleSavedObject,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsFindResponse,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsBulkResolveResponse,
-  SavedObjectsBulkCreateObject,
-} from '@kbn/core-saved-objects-api-browser';
+export type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObject,
   SavedObjectTypeIdTuple,
@@ -201,6 +183,7 @@ export type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnexpectedAccessControlMetadataError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
@@ -280,6 +263,8 @@ export type {
   ToastOptions,
   ErrorToastOptions,
 } from '@kbn/core-notifications-browser';
+
+export type { PricingServiceStart } from '@kbn/core-pricing-browser';
 
 export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 

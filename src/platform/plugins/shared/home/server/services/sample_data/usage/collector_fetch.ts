@@ -10,7 +10,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 
 interface SearchHit {
   _id: string;
@@ -40,10 +40,8 @@ export function fetchProvider(getIndexForType: (type: string) => Promise<string>
     const response = await esClient.search<ESResponse>(
       {
         index,
-        body: {
-          query: { term: { type: { value: 'sample-data-telemetry' } } },
-          _source: { includes: ['sample-data-telemetry', 'type', 'updated_at'] },
-        },
+        query: { term: { type: { value: 'sample-data-telemetry' } } },
+        _source: { includes: ['sample-data-telemetry', 'type', 'updated_at'] },
         filter_path: 'hits.hits._id,hits.hits._source',
       },
       {

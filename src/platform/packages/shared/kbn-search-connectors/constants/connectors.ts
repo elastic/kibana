@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ConnectorClientSideDefinition,
   ConnectorServerSideDefinition,
 } from '../types/connector_definition';
@@ -51,6 +51,12 @@ export const getConnectorsDict = (): Record<string, ConnectorClientSideDefinitio
   },
   github: {
     docsUrl: docLinks.connectorsGithub,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    platinumOnly: true,
+  },
+  gitlab: {
+    docsUrl: docLinks.connectorsGitlab,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     platinumOnly: true,
@@ -322,6 +328,21 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'github',
   },
   {
+    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
+    description: i18n.translate('searchConnectors.content.nativeConnectors.gitlab.description', {
+      defaultMessage: 'Search over your projects and repos on GitLab.',
+    }),
+    iconPath: 'gitlab.svg',
+    isBeta: false,
+    isNative: true,
+    isTechPreview: true,
+    keywords: ['gitlab', 'cloud', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.gitlab.name', {
+      defaultMessage: 'GitLab',
+    }),
+    serviceType: 'gitlab',
+  },
+  {
     categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
     description: i18n.translate(
       'searchConnectors.content.nativeConnectors.googleCloud.description',
@@ -558,24 +579,6 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'Gmail',
     }),
     serviceType: 'gmail',
-  },
-  {
-    categories: ['search', 'elastic_stack', 'connector', 'connector_client'],
-    description: i18n.translate(
-      'searchConnectors.content.nativeConnectors.openTextDocumentum.description',
-      {
-        defaultMessage: 'Search over your content on OpenText Documentum.',
-      }
-    ),
-    iconPath: 'connector.svg',
-    isBeta: false,
-    isNative: false,
-    isTechPreview: true,
-    keywords: ['opentext', 'documentum', 'connector'],
-    name: i18n.translate('searchConnectors.content.nativeConnectors.openTextDocumentum.name', {
-      defaultMessage: 'OpenText Documentum',
-    }),
-    serviceType: 'opentext_documentum',
   },
   {
     categories: ['search', 'elastic_stack', 'custom', 'datastore', 'connector', 'connector_client'],

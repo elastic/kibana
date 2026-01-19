@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Filter,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
-import { Scroll } from '../lists/types';
+import type { Scroll } from '../lists/types';
 
 import { getQueryFilter } from './get_query_filter';
 import { getSortWithTieBreaker } from './get_sort_with_tie_breaker';
 import { getSourceWithTieBreaker } from './get_source_with_tie_breaker';
-import { TieBreaker, getSearchAfterWithTieBreaker } from './get_search_after_with_tie_breaker';
+import type { TieBreaker } from './get_search_after_with_tie_breaker';
+import { getSearchAfterWithTieBreaker } from './get_search_after_with_tie_breaker';
 
 interface GetSearchAfterOptions {
   esClient: ElasticsearchClient;
@@ -47,16 +48,14 @@ export const getSearchAfterScroll = async <T>({
   let newSearchAfter = searchAfter;
   for (let i = 0; i < hops; ++i) {
     const response = await esClient.search<TieBreaker<T>>({
-      body: {
-        _source: getSourceWithTieBreaker({ sortField }),
-        query,
-        runtime_mappings: runtimeMappings,
-        search_after: newSearchAfter,
-        sort: getSortWithTieBreaker({ sortField, sortOrder }),
-      },
+      _source: getSourceWithTieBreaker({ sortField }),
       ignore_unavailable: true,
       index,
+      query,
+      runtime_mappings: runtimeMappings,
+      search_after: newSearchAfter,
       size: hopSize,
+      sort: getSortWithTieBreaker({ sortField, sortOrder }),
     });
     if (response.hits.hits.length > 0) {
       newSearchAfter = getSearchAfterWithTieBreaker({ response, sortField });

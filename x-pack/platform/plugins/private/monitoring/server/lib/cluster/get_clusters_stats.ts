@@ -8,9 +8,8 @@
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
 import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
-import { getClustersState } from './get_clusters_state';
-import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
@@ -22,12 +21,7 @@ import { Globals } from '../../static_globals';
  * @return {Promise} A promise containing an array of clusters.
  */
 export function getClustersStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
-  return (
-    fetchClusterStats(req, clusterUuid, ccs)
-      .then((response) => handleClusterStats(response))
-      // augment older documents (e.g., from 2.x - 5.4) with their cluster_state
-      .then((clusters) => getClustersState(req, clusters))
-  );
+  return fetchClusterStats(req, clusterUuid, ccs).then((response) => handleClusterStats(response));
 }
 
 /**
@@ -82,21 +76,19 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid?: string, ccs?: strin
       'hits.hits._source.elasticsearch.cluster.stats.state',
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
     ],
-    body: {
-      query: createQuery({
-        type: dataset,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        metric,
-        clusterUuid,
-      }),
-      collapse: {
-        field: 'cluster_uuid',
-      },
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type: dataset,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      metric,
+      clusterUuid,
+    }),
+    collapse: {
+      field: 'cluster_uuid',
     },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

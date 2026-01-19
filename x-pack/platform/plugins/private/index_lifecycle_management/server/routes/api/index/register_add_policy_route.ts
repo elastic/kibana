@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function addLifecyclePolicy(
@@ -17,14 +17,14 @@ async function addLifecyclePolicy(
   policyName: string,
   alias: string
 ) {
-  const body = {
+  const settings = {
     lifecycle: {
       name: policyName,
       rollover_alias: alias,
     },
   };
 
-  return client.indices.putSettings({ index: indexName, body });
+  return client.indices.putSettings({ index: indexName, settings });
 }
 
 const bodySchema = schema.object({

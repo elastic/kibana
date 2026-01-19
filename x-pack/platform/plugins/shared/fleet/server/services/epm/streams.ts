@@ -15,15 +15,34 @@ export function bufferToStream(buffer: Buffer): PassThrough {
 
 export function streamToString(stream: NodeJS.ReadableStream | Buffer): Promise<string> {
   if (stream instanceof Buffer) return Promise.resolve(stream.toString());
+
   return new Promise((resolve, reject) => {
     const body: string[] = [];
+    // @ts-expect-error upgrade typescript v5.9.3
     stream.on('data', (chunk: string) => body.push(chunk));
+    // @ts-expect-error upgrade typescript v5.9.3
     stream.on('end', () => resolve(body.join('')));
+    // @ts-expect-error upgrade typescript v5.9.3
     stream.on('error', reject);
   });
 }
 
-export function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
+export function streamToBuffer(stream: NodeJS.ReadableStream, size?: number): Promise<Buffer> {
+  if (size) {
+    return new Promise((resolve, reject) => {
+      const data = Buffer.alloc(size);
+      let pos = 0;
+
+      stream.on('data', (chunk: Buffer) => {
+        pos += chunk.copy(data, pos);
+      });
+      stream.on('end', () => {
+        resolve(data);
+      });
+      stream.on('error', reject);
+    });
+  }
+
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));

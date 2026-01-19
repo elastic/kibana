@@ -5,12 +5,7 @@ exports[`FieldFormatEditor should render normally 1`] = `
   <Suspense
     fallback={
       <div
-        css={
-          Object {
-            "marginTop": 8,
-            "minHeight": 430,
-          }
-        }
+        css="unknown styles"
       >
         <EuiDelayRender
           delay={500}
@@ -38,12 +33,7 @@ exports[`FieldFormatEditor should render nothing if there is no editor for the f
   <Suspense
     fallback={
       <div
-        css={
-          Object {
-            "marginTop": 8,
-            "minHeight": 430,
-          }
-        }
+        css="unknown styles"
       >
         <EuiDelayRender
           delay={500}

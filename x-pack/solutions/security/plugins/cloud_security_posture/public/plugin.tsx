@@ -9,8 +9,19 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import type {
+  CspClientPluginStartDeps,
+  FindingMisconfigurationFlyoutFooterProps,
+  FindingsMisconfigurationFlyoutContentProps,
+  FindingsMisconfigurationFlyoutHeaderProps,
+  FindingsVulnerabilityFlyoutContentProps,
+  FindingsVulnerabilityFlyoutFooterProps,
+  FindingsVulnerabilityFlyoutHeaderProps,
+  FindingsMisconfigurationPanelExpandableFlyoutProps,
+  FindingsVulnerabilityPanelExpandableFlyoutProps,
+} from '@kbn/cloud-security-posture';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { NoDataCardKibanaProvider } from '@kbn/shared-ux-card-no-data';
 import { CspLoadingState } from './components/csp_loading_state';
 import type { CspRouterProps } from './application/csp_router';
 import type { CspClientPluginSetup, CspClientPluginStart, CspClientPluginSetupDeps } from './types';
@@ -29,6 +40,44 @@ const LazyCspPolicyTemplateForm = lazy(
 
 const LazyCspCustomAssets = lazy(
   () => import('./components/fleet_extensions/custom_assets_extension')
+);
+
+// Misconfiguration Flyout Components
+export const LazyCspFindingsMisconfigurationFlyout = lazy(
+  () => import('./pages/configurations/findings_flyout/findings_flyout')
+);
+export const LazyCspFindingsMisconfigurationFlyoutHeader = lazy(
+  () => import('./pages/configurations/findings_flyout/findings_right/header')
+);
+export const LazyCspFindingsMisconfigurationFlyoutBody = lazy(
+  () => import('./pages/configurations/findings_flyout/findings_right/content')
+);
+export const LazyCspFindingsMisconfigurationFlyoutFooter = lazy(
+  () => import('./pages/configurations/findings_flyout/findings_right/footer')
+);
+
+// Vulnerability Flyout Components
+export const LazyCspFindingsVulnerabilityFlyout = lazy(
+  () =>
+    import('./pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_flyout')
+);
+export const LazyCspFindingsVulnerabilityFlyoutHeader = lazy(
+  () =>
+    import(
+      './pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/header'
+    )
+);
+export const LazyCspFindingsVulnerabilityFlyoutBody = lazy(
+  () =>
+    import(
+      './pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/content'
+    )
+);
+export const LazyCspFindingsVulnerabilityFlyoutFooter = lazy(
+  () =>
+    import(
+      './pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/footer'
+    )
 );
 
 const CspRouterLazy = lazy(() => import('./application/csp_router'));
@@ -89,18 +138,72 @@ export class CspPlugin
     // Keep as constant to prevent remounts https://github.com/elastic/kibana/issues/146773
     const App = (props: CspRouterProps) => (
       <KibanaContextProvider services={{ ...core, ...plugins, storage }}>
-        <RedirectAppLinks coreStart={core}>
-          <div style={{ width: '100%', height: '100%' }}>
-            <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
-              <CspRouter {...props} />
-            </SetupContext.Provider>
-          </div>
-        </RedirectAppLinks>
+        <NoDataCardKibanaProvider coreStart={core}>
+          <RedirectAppLinks coreStart={core}>
+            <div css={{ width: '100%', height: '100%' }}>
+              <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
+                <CspRouter {...props} />
+              </SetupContext.Provider>
+            </div>
+          </RedirectAppLinks>
+        </NoDataCardKibanaProvider>
       </KibanaContextProvider>
     );
 
     return {
       getCloudSecurityPostureRouter: () => App,
+      getCloudSecurityPostureMisconfigurationFlyout: () => {
+        return {
+          Component: (props: FindingsMisconfigurationPanelExpandableFlyoutProps['params']) => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyout {...props}>
+                {props.children}
+              </LazyCspFindingsMisconfigurationFlyout>
+            </Suspense>
+          ),
+          Header: (props: FindingsMisconfigurationFlyoutHeaderProps) => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyoutHeader {...props} />
+            </Suspense>
+          ),
+          Body: (props: FindingsMisconfigurationFlyoutContentProps) => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyoutBody {...props} />
+            </Suspense>
+          ),
+          Footer: (props: FindingMisconfigurationFlyoutFooterProps) => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyoutFooter {...props} />
+            </Suspense>
+          ),
+        };
+      },
+      getCloudSecurityPostureVulnerabilityFlyout: () => {
+        return {
+          Component: (props: FindingsVulnerabilityPanelExpandableFlyoutProps['params']) => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyout {...props}>
+                {props.children}
+              </LazyCspFindingsVulnerabilityFlyout>
+            </Suspense>
+          ),
+          Header: (props: FindingsVulnerabilityFlyoutHeaderProps) => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyoutHeader {...props} />
+            </Suspense>
+          ),
+          Body: (props: FindingsVulnerabilityFlyoutContentProps) => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyoutBody {...props} />
+            </Suspense>
+          ),
+          Footer: (props: FindingsVulnerabilityFlyoutFooterProps) => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyoutFooter {...props} />
+            </Suspense>
+          ),
+        };
+      },
     };
   }
 

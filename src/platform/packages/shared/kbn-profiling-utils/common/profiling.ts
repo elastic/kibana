@@ -22,6 +22,8 @@ export type FileID = string;
 
 /**
  * Frame type
+ * These frame types need to match with the constants defined in
+ * https://github.com/open-telemetry/opentelemetry-ebpf-profiler/blob/main/libpf/frametype.go
  */
 export enum FrameType {
   Unsymbolized = 0,
@@ -35,6 +37,7 @@ export enum FrameType {
   JavaScript,
   PHPJIT,
   DotNET,
+  Go,
   ErrorFlag = 0x80,
   Error = 0xff,
 
@@ -42,6 +45,7 @@ export enum FrameType {
   Root = 0x100,
   ProcessName = 0x101,
   ThreadName = 0x102,
+  ExecutableName = 0x103,
 }
 
 const frameTypeDescriptions = {
@@ -56,11 +60,13 @@ const frameTypeDescriptions = {
   [FrameType.JavaScript]: 'JavaScript',
   [FrameType.PHPJIT]: 'PHP JIT',
   [FrameType.DotNET]: '.NET',
+  [FrameType.Go]: 'Go',
   [FrameType.ErrorFlag]: 'ErrorFlag',
   [FrameType.Error]: 'Error',
   [FrameType.Root]: 'Root',
-  [FrameType.ProcessName]: 'Process', // Due to OTEL semconv issues, "process name" is currently more correct than "executable name"
+  [FrameType.ProcessName]: 'Process',
   [FrameType.ThreadName]: 'Thread',
+  [FrameType.ExecutableName]: 'Executable',
 };
 
 export function isErrorFrame(ft: FrameType): boolean {
@@ -297,7 +303,7 @@ export function getCalleeFunction(frame: StackFrameMetadata): string {
  * Frame symbol status
  */
 export enum FrameSymbolStatus {
-  PARTIALLY_SYMBOLYZED = 'PARTIALLY_SYMBOLYZED',
+  PARTIALLY_SYMBOLIZED = 'PARTIALLY_SYMBOLIZED',
   NOT_SYMBOLIZED = 'NOT_SYMBOLIZED',
   SYMBOLIZED = 'SYMBOLIZED',
 }
@@ -321,7 +327,7 @@ export function getFrameSymbolStatus(param: FrameSymbolStatusParams) {
   const { sourceFilename, sourceLine, exeFileName } = param;
   if (sourceFilename === '' && sourceLine === 0) {
     if (exeFileName) {
-      return FrameSymbolStatus.PARTIALLY_SYMBOLYZED;
+      return FrameSymbolStatus.PARTIALLY_SYMBOLIZED;
     }
 
     return FrameSymbolStatus.NOT_SYMBOLIZED;
@@ -369,9 +375,12 @@ export function getCalleeSource(frame: StackFrameMetadata): string {
       // If we don't have the executable filename, display <unsymbolized>
       return '<unsymbolized>';
     }
-    case FrameSymbolStatus.PARTIALLY_SYMBOLYZED: {
+    case FrameSymbolStatus.PARTIALLY_SYMBOLIZED: {
       // If no source line or filename available, display the executable offset
-      return frame.ExeFileName + '+0x' + frame.AddressOrLine.toString(16);
+      return (
+        frame.ExeFileName +
+        (frame.AddressOrLine === 0 ? '' : '+0x' + frame.AddressOrLine.toString(16))
+      );
     }
     case FrameSymbolStatus.SYMBOLIZED: {
       return frame.SourceFilename + (frame.SourceLine !== 0 ? `#${frame.SourceLine}` : '');

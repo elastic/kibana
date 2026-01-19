@@ -6,7 +6,7 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   CheckMetadataTransformsTask,
   TYPE,
@@ -107,7 +107,7 @@ describe('check metadata transforms task', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
       return taskRunner.run();
     };
 

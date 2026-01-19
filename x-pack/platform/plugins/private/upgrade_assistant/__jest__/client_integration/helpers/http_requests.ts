@@ -7,8 +7,9 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
+import { REINDEX_SERVICE_BASE_PATH } from '@kbn/reindex-service-plugin/server';
 import { API_BASE_PATH } from '../../../common/constants';
-import {
+import type {
   CloudBackupStatus,
   ESUpgradeStatus,
   DeprecationLoggingStatus,
@@ -33,6 +34,16 @@ const registerHttpRequestMockHelpers = (
     if (shouldDelayResponse()) {
       return new Promise((resolve) => {
         setTimeout(() => resolve(responsePromise), 1000);
+      });
+    }
+
+    const isReindexStatusRequest = method === 'GET' && path.startsWith(REINDEX_SERVICE_BASE_PATH);
+
+    // Reindex status is fetched on mount by IndexStatusProvider. Resolve it on a macrotask tick so
+    // RTL has a chance to start awaiting a UI boundary, preventing React act() warnings.
+    if (isReindexStatusRequest) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(responsePromise), 0);
       });
     }
 
@@ -111,13 +122,13 @@ const registerHttpRequestMockHelpers = (
     indexName: string,
     response?: Record<string, any>,
     error?: ResponseError
-  ) => mockResponse('GET', `${API_BASE_PATH}/reindex/${indexName}`, response, error);
+  ) => mockResponse('GET', `${REINDEX_SERVICE_BASE_PATH}/${indexName}`, response, error);
 
   const setStartReindexingResponse = (
     indexName: string,
     response?: object,
     error?: ResponseError
-  ) => mockResponse('POST', `${API_BASE_PATH}/reindex/${indexName}`, response, error);
+  ) => mockResponse('POST', REINDEX_SERVICE_BASE_PATH, response, error);
 
   const setDeleteMlSnapshotResponse = (
     jobId: string,
@@ -150,6 +161,28 @@ const registerHttpRequestMockHelpers = (
     mockResponse('POST', `${API_BASE_PATH}/cluster_settings`, response, error);
   };
 
+  const setDataStreamMigrationStatusResponse = (
+    dataStreamName: string,
+    response?: object,
+    error?: ResponseError
+  ) =>
+    mockResponse('GET', `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}`, response, error);
+
+  const setDataStreamMetadataResponse = (
+    dataStreamName: string,
+    response?: object,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}/metadata`,
+      response,
+      error
+    );
+
+  const setUpdateIndexResponse = (indexName: string, response?: object, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/update_index/${indexName}`, response, error);
+
   return {
     setLoadCloudBackupStatusResponse,
     setLoadEsDeprecationsResponse,
@@ -170,6 +203,9 @@ const registerHttpRequestMockHelpers = (
     setLoadRemoteClustersResponse,
     setLoadNodeDiskSpaceResponse,
     setClusterSettingsResponse,
+    setDataStreamMigrationStatusResponse,
+    setDataStreamMetadataResponse,
+    setUpdateIndexResponse,
   };
 };
 

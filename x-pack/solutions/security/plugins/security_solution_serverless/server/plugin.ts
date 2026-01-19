@@ -14,7 +14,8 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { getProductProductFeatures } from '../common/pli/pli_features';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
 import { createConfig } from './config';
@@ -26,8 +27,9 @@ import type {
 } from './types';
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
 import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
-import { registerProductFeatures, getSecurityProductTier } from './product_features';
+import { registerProductFeatures, getSecurityAiSocProductTier } from './product_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
+import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/metering';
 import {
   endpointMeteringService,
   setEndpointPackagePolicyServerlessBillingFlags,
@@ -35,6 +37,7 @@ import {
 import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task';
 import { telemetryEvents } from './telemetry/event_based_telemetry';
 import { UsageReportingService } from './common/services/usage_reporting_service';
+import { ai4SocMeteringService } from './ai4soc/services';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -49,6 +52,7 @@ export class SecuritySolutionServerlessPlugin
   private config: ServerlessSecurityConfig;
   private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;
   private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
+  private ai4SocUsageReportingTask: SecurityUsageReportingTask | undefined;
   private nlpCleanupTask: NLPCleanupTask | undefined;
   private readonly logger: Logger;
   private readonly usageReportingService: UsageReportingService;
@@ -67,19 +71,30 @@ export class SecuritySolutionServerlessPlugin
     this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
   }
 
-  public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+  public setup(
+    coreSetup: CoreSetup<SecuritySolutionServerlessPluginStartDeps>,
+    pluginsSetup: SecuritySolutionServerlessPluginSetupDeps
+  ) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
 
     // Register product features
-    const enabledProductFeatures = getProductProductFeatures(this.config.productTypes);
+    const enabledProductFeatures = getEnabledProductFeatures(this.config.productTypes);
 
-    registerProductFeatures(pluginsSetup, enabledProductFeatures, this.config);
+    registerProductFeatures(pluginsSetup, enabledProductFeatures);
 
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
+    const projectSettings = [...SECURITY_PROJECT_SETTINGS];
+
+    // This setting is only registered in complete and ease tiers. Adding it to the project settings list while in the essentials tier causes an error.
+    // This is a temporary UI setting to enable workflows, it's planned to be removed on 9.4.0 release.
+    if (this.config.productTypes.some((productType) => productType.product_tier !== 'essentials')) {
+      projectSettings.push(WORKFLOWS_UI_SETTING_ID);
+    }
+
     // Setup project uiSettings whitelisting
-    pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
+    pluginsSetup.serverless.setupProjectSettings(projectSettings);
 
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
@@ -108,10 +123,27 @@ export class SecuritySolutionServerlessPlugin
       usageReportingService: this.usageReportingService,
     });
 
+    this.ai4SocUsageReportingTask = new SecurityUsageReportingTask({
+      core: coreSetup,
+      logFactory: this.initializerContext.logger,
+      config: this.config,
+      taskType: AI4SOC_METERING_TASK.TYPE,
+      taskTitle: AI4SOC_METERING_TASK.TITLE,
+      version: AI4SOC_METERING_TASK.VERSION,
+      meteringCallback: ai4SocMeteringService.getUsageRecords,
+      taskManager: pluginsSetup.taskManager,
+      cloudSetup: pluginsSetup.cloud,
+      usageReportingService: this.usageReportingService,
+      backfillConfig: {
+        enabled: true,
+        maxRecords: AI4SOC_METERING_TASK.MAX_BACKFILL_RECORDS,
+      },
+    });
+
     this.nlpCleanupTask = new NLPCleanupTask({
       core: coreSetup,
       logFactory: this.initializerContext.logger,
-      productTier: getSecurityProductTier(this.config, this.logger),
+      productTier: getSecurityAiSocProductTier(this.config, this.logger),
       taskManager: pluginsSetup.taskManager,
     });
 
@@ -135,6 +167,15 @@ export class SecuritySolutionServerlessPlugin
         interval: this.config.usageReportingTaskInterval,
       })
       .catch(() => {});
+
+    if (ai4SocMeteringService.shouldMeter(this.config)) {
+      this.ai4SocUsageReportingTask
+        ?.start({
+          taskManager: pluginsSetup.taskManager,
+          interval: this.config.ai4SocUsageReportingTaskInterval,
+        })
+        .catch(() => {});
+    }
 
     this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager }).catch(() => {});
 

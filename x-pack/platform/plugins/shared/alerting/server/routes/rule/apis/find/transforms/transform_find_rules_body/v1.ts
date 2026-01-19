@@ -9,7 +9,7 @@ import type {
   FindRulesInternalRequestBodyV1,
   FindRulesRequestQueryV1,
 } from '../../../../../../../common/routes/rule/apis/find';
-import { FindRulesOptions } from '../../../../../../application/rule/methods/find';
+import type { FindRulesOptions } from '../../../../../../application/rule/methods/find';
 
 export const transformFindRulesBody = (params: FindRulesRequestQueryV1): FindRulesOptions => {
   const {
@@ -28,7 +28,7 @@ export const transformFindRulesBody = (params: FindRulesRequestQueryV1): FindRul
   return {
     ...(page ? { page } : {}),
     ...(search ? { search } : {}),
-    ...(fields ? { fields } : {}),
+    ...(fields ? { fields: Array.isArray(fields) ? fields : [fields] } : {}),
     ...(filter ? { filter } : {}),
     ...(defaultSearchOperator ? { defaultSearchOperator } : {}),
     ...(perPage ? { perPage } : {}),

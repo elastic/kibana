@@ -24,7 +24,7 @@ export const EventLogStat = ({
           <b>{title}</b>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIconTip content={tooltip} position="top" />
+          <EuiIconTip content={tooltip} position="top" aria-label={title} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

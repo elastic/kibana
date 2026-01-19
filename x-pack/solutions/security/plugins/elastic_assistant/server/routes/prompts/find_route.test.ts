@@ -23,7 +23,7 @@ describe('Find user prompts route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     const mockUser1 = {
-      username: 'my_username',
+      username: 'elastic',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
@@ -33,15 +33,15 @@ describe('Find user prompts route', () => {
     clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getFindPromptsResultWithSingleHit())
     );
-    context.elasticAssistant.getCurrentUser.mockReturnValue({
-      username: 'my_username',
+    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
+      username: 'elastic',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
       },
     } as AuthenticatedUser);
     logger = loggingSystemMock.createLogger();
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
     findPromptsRoute(server.router, logger);
   });
 

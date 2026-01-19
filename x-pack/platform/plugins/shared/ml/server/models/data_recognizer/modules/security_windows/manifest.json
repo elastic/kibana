@@ -89,6 +89,10 @@
     {
       "id": "v3_windows_anomalous_script",
       "file": "v3_windows_anomalous_script.json"
+    },
+    {
+      "id": "v3_windows_rare_script",
+      "file": "v3_windows_rare_script.json"
     }
   ],
   "datafeeds": [
@@ -151,6 +155,11 @@
       "id": "datafeed-v3_windows_anomalous_script",
       "file": "datafeed_v3_windows_anomalous_script.json",
       "job_id": "v3_windows_anomalous_script"
+    },
+    {
+      "id": "datafeed-v3_windows_rare_script",
+      "file": "datafeed_v3_windows_rare_script.json",
+      "job_id": "v3_windows_rare_script"
     }
   ],
   "tags": [

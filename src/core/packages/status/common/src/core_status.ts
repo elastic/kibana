@@ -9,6 +9,15 @@
 
 import type { ServiceStatus } from './service_status';
 
+interface CoreStatusBase {
+  elasticsearch: ServiceStatus;
+  savedObjects: ServiceStatus;
+}
+
+interface CoreStatusWithHttp extends CoreStatusBase {
+  http: ServiceStatus;
+}
+
 /**
  * Status of core services.
  *
@@ -18,7 +27,4 @@ import type { ServiceStatus } from './service_status';
  *
  * @public
  */
-export interface CoreStatus {
-  elasticsearch: ServiceStatus;
-  savedObjects: ServiceStatus;
-}
+export type CoreStatus = CoreStatusBase | CoreStatusWithHttp;

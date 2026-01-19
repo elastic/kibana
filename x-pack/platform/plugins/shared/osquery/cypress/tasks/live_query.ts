@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '@kbn/cypress-test-helper/src/services/alerting_services';
 import { disableNewFeaturesTours } from './navigation';
 import { getAdvancedButton } from '../screens/integrations';
-import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
+import {
+  LIVE_QUERY_EDITOR,
+  OSQUERY_FLYOUT_BODY_EDITOR,
+  RESULTS_TABLE,
+} from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
 
 export const DEFAULT_QUERY = 'select * from processes;';
@@ -58,13 +62,13 @@ export const verifyQueryTimeout = (timeout: string) => {
 
 // sometimes the results get stuck in the tests, this is a workaround
 export const checkResults = () => {
-  cy.getBySel('osqueryResultsTable', { timeout: 120000 }).then(($table) => {
+  cy.getBySel(RESULTS_TABLE, { timeout: 240000 }).then(($table) => {
     if ($table.find('div .euiDataGridRow').length > 0) {
-      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+      cy.getBySel('dataGridRowCell', { timeout: 240000 }).should('have.lengthOf.above', 0);
     } else {
-      cy.getBySel('osquery-status-tab').click();
-      cy.getBySel('osquery-results-tab').click();
-      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+      cy.getBySel('osquery-status-tab').click({ multiple: true });
+      cy.getBySel('osquery-results-tab').click({ multiple: true });
+      cy.getBySel('dataGridRowCell', { timeout: 240000 }).should('have.lengthOf.above', 0);
     }
   });
 };
@@ -117,13 +121,19 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
     });
 };
 
-export const loadRuleAlerts = (ruleName: string) => {
+export const navigateToRule = (ruleName: string) => {
   cy.login(ServerlessRoleName.SOC_MANAGER, false);
   cy.visit('/app/security/rules', {
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
   });
   clickRuleName(ruleName);
   waitForAlertsToPopulate();
+};
+
+export const loadRuleAlerts = (ruleName: string) => {
+  navigateToRule(ruleName);
+  cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+  cy.getBySel('ruleSwitch').click();
 };
 
 export const addToCase = (caseId: string) => {
@@ -162,7 +172,7 @@ export const checkActionItemsInResults = ({
   cy.contains('View in Discover').should(discover ? 'exist' : 'not.exist');
   cy.contains('View in Lens').should(lens ? 'exist' : 'not.exist');
   cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
-  cy.contains('Add to timeline investigation').should(timeline ? 'exist' : 'not.exist');
+  cy.contains('Add to Timeline investigation').should(timeline ? 'exist' : 'not.exist');
 };
 
 export const takeOsqueryActionWithParams = () => {

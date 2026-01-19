@@ -20,22 +20,19 @@ import { CasesDeepLinkId } from '../../common/navigation';
 export const CommonUseField = getUseField({ component: Field });
 
 export const CreateCase = React.memo<CreateCaseFormProps>(
-  ({ afterCaseCreated, onCancel, onSuccess, timelineIntegration, withSteps }) => {
+  ({ afterCaseCreated, onCancel, onSuccess, timelineIntegration, withSteps, observables }) => {
     useCasesBreadcrumbs(CasesDeepLinkId.casesCreate);
 
     return (
       <EuiPageSection restrictWidth={true}>
-        <HeaderPage
-          showBackButton={true}
-          data-test-subj="case-create-title"
-          title={i18n.CREATE_CASE_TITLE}
-        />
+        <HeaderPage data-test-subj="case-create-title" title={i18n.CREATE_CASE_TITLE} />
         <CreateCaseForm
           afterCaseCreated={afterCaseCreated}
           onCancel={onCancel}
           onSuccess={onSuccess}
           timelineIntegration={timelineIntegration}
           withSteps={withSteps}
+          observables={observables}
         />
       </EuiPageSection>
     );

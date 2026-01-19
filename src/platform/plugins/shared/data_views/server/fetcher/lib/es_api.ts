@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  ExpandWildcard,
-  MappingRuntimeFields,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { QueryDslQueryContainer } from '../../../common/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ExpandWildcard, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 
 /**

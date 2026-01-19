@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Command } from '@kbn/dev-cli-runner';
+import type { Command } from '@kbn/dev-cli-runner';
 
-import { Render } from './lib/render';
+import type { Render } from './lib/render';
 
 export interface ContextExtensions {
   render: Render;

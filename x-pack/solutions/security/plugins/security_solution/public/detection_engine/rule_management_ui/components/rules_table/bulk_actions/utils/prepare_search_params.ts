@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type { QueryOrIds } from '../../../../../rule_management/logic';
 import type { DryRunResult } from '../types';
@@ -14,7 +15,12 @@ import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/de
 
 type PrepareSearchFilterProps =
   | { selectedRuleIds: string[]; dryRunResult?: DryRunResult }
-  | { filterOptions: FilterOptions; dryRunResult?: DryRunResult };
+  | {
+      filterOptions: FilterOptions;
+      gapRange?: { start: string; end: string };
+      gapFillStatuses?: GapFillStatus[];
+      dryRunResult?: DryRunResult;
+    };
 
 /**
  * helper methods to prepare search params for bulk actions based on results of previous dry run
@@ -40,6 +46,7 @@ export const prepareSearchParams = ({
   dryRunResult?.ruleErrors.forEach(({ errorCode }) => {
     switch (errorCode) {
       case BulkActionsDryRunErrCodeEnum.IMMUTABLE:
+      case BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE:
         modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };
         break;
       case BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_INDEX_PATTERN:
@@ -55,10 +62,24 @@ export const prepareSearchParams = ({
           excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'esql'],
         };
         break;
+      case BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION:
+        modifiedFilterOptions = {
+          ...modifiedFilterOptions,
+          excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'threshold'],
+        };
+        break;
+      case BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD:
+        modifiedFilterOptions = {
+          ...modifiedFilterOptions,
+          includeRuleTypes: [...(modifiedFilterOptions.includeRuleTypes ?? []), 'threshold'],
+        };
+        break;
     }
   });
 
   return {
     query: convertRulesFilterToKQL(modifiedFilterOptions),
+    ...(props.gapRange ? { gapRange: props.gapRange } : {}),
+    ...(props.gapFillStatuses?.length ? { gapFillStatuses: props.gapFillStatuses } : {}),
   };
 };

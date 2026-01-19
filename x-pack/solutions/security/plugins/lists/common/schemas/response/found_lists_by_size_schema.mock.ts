@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FoundListsBySizeSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { FoundListsBySizeSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getListResponseMock } from './list_schema.mock';
 

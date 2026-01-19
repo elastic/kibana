@@ -21,7 +21,12 @@ const { readPackageManifest } = require('./parse_package_manifest');
 const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : path);
 
 /**
- * Representation of a Bazel Package in the Kibana repository
+ * @type {import('@kbn/projects-solutions-groups').KibanaSolution[]}
+ */
+const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'workplaceai'];
+
+/**
+ * Representation of a Package in the Kibana repository
  * @class
  */
 class Package {
@@ -48,7 +53,7 @@ class Package {
   }
 
   /**
-   * @private
+   * @internal
    */
   constructor(
     /**
@@ -121,14 +126,14 @@ class Package {
 
     /**
      * the group to which this package belongs
-     * @type {import('@kbn/repo-info/types').ModuleGroup}
+     * @type {import('@kbn/projects-solutions-groups').ModuleGroup}
      * @readonly
      */
 
     this.group = group;
     /**
      * the visibility of this package, i.e. whether it can be accessed by everybody or only modules in the same group
-     * @type {import('@kbn/repo-info/types').ModuleVisibility}
+     * @type {import('@kbn/projects-solutions-groups').ModuleVisibility}
      * @readonly
      */
     this.visibility = visibility;
@@ -159,7 +164,7 @@ class Package {
   /**
    * Returns the group to which this package belongs
    * @readonly
-   * @returns {import('@kbn/repo-info/types').ModuleGroup}
+   * @returns {import('@kbn/projects-solutions-groups').ModuleGroup}
    */
   getGroup() {
     return this.group;
@@ -168,7 +173,7 @@ class Package {
   /**
    * Returns the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
    * @readonly
-   * @returns {import('@kbn/repo-info/types').ModuleVisibility}
+   * @returns {import('@kbn/projects-solutions-groups').ModuleVisibility}
    */
   getVisibility() {
     return this.visibility;
@@ -191,8 +196,12 @@ class Package {
     const dir = this.normalizedRepoRelativeDir;
     const oss = !dir.startsWith('x-pack/');
     const example = dir.startsWith('examples/') || dir.startsWith('x-pack/examples/');
-    const testPlugin = dir.startsWith('test/') || dir.startsWith('x-pack/test/');
-
+    const testPlugin =
+      dir.startsWith('src/platform/test/') ||
+      dir.startsWith('x-pack/platform/test/') ||
+      dir.startsWith('x-pack/solutions/search/test/') ||
+      dir.startsWith('x-pack/solutions/observability/test/') ||
+      dir.startsWith('x-pack/solutions/security/test/');
     return {
       oss,
       example,
@@ -203,17 +212,19 @@ class Package {
   determineGroupAndVisibility() {
     const dir = this.normalizedRepoRelativeDir;
 
-    /** @type {import('@kbn/repo-info/types').ModuleGroup} */
+    /** @type {import('@kbn/projects-solutions-groups').ModuleGroup} */
     let group = 'common';
-    /** @type {import('@kbn/repo-info/types').ModuleVisibility} */
+    /** @type {import('@kbn/projects-solutions-groups').ModuleVisibility} */
     let visibility = 'shared';
 
+    // the following checks will only work in dev mode, as production builds create NPM packages under 'node_modules/@kbn-...'
     if (dir.startsWith('src/platform/') || dir.startsWith('x-pack/platform/')) {
       group = 'platform';
       visibility =
         /src\/platform\/[^\/]+\/shared/.test(dir) || /x-pack\/platform\/[^\/]+\/shared/.test(dir)
           ? 'shared'
           : 'private';
+      // BOOKMARK - List of Kibana solutions
     } else if (dir.startsWith('x-pack/solutions/search/')) {
       group = 'search';
       visibility = 'private';
@@ -223,20 +234,28 @@ class Package {
     } else if (dir.startsWith('x-pack/solutions/observability/')) {
       group = 'observability';
       visibility = 'private';
+    } else if (dir.startsWith('x-pack/solutions/workplaceai/')) {
+      group = 'workplaceai';
+      visibility = 'private';
     } else {
+      // this conditional branch is the only one that applies in production
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
-      visibility = ['search', 'security', 'observability'].includes(group)
-        ? 'private'
-        : this.manifest.visibility ?? 'shared';
+      // KIBANA_SOLUTIONS - List of Kibana solutions
+      const isSolution = Boolean(KIBANA_SOLUTIONS.find((solution) => solution === group));
+      if (!isSolution && !['platform', 'common'].includes(group)) {
+        throw new Error(
+          `Detected unknown group: ${group}, this module's definition of KIBANA_SOLUTIONS is probably outdated.`
+        );
+      }
+      visibility = isSolution ? 'private' : this.manifest.visibility ?? 'shared';
     }
 
     return { group, visibility };
   }
 
   /**
-   * Custom inspect handler so that logging variables in scripts/generate doesn't
-   * print all the BUILD.bazel files
+   * Custom inspect handler
    */
   [inspect.custom]() {
     return `${this.isPlugin() ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;

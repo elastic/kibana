@@ -10,8 +10,7 @@ import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/pu
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { CasesActionContextProps, Services } from './types';
 import { ADD_TO_EXISTING_CASE_DISPLAYNAME } from './translations';
-
-export const ACTION_ID = 'embeddable_addToExistingCase';
+import { ADD_TO_EXISTING_CASE_ACTION_ID } from './constants';
 
 export const createAddToExistingCaseLensAction = (
   casesActionContextProps: CasesActionContextProps,
@@ -24,7 +23,7 @@ export const createAddToExistingCaseLensAction = (
   });
 
   return createAction<EmbeddableApiContext>({
-    id: ACTION_ID,
+    id: ADD_TO_EXISTING_CASE_ACTION_ID,
     type: 'actionButton',
     order: 10,
     grouping: [{ id: 'cases', order: 6 }],

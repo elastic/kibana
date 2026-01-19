@@ -7,15 +7,18 @@
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { CoreStart } from '@kbn/core/server';
+import type { CoreStart } from '@kbn/core/server';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
-import axios, { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
 import times from 'lodash/times';
-import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
+import type { HeartbeatConfig } from '../../common/runtime_types';
+import { LocationStatus } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
 import * as apiKeys from './get_api_key';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 jest.mock('axios', () => jest.fn());
 
@@ -145,6 +148,8 @@ describe('SyntheticsService', () => {
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
+    service.getMaintenanceWindows = jest.fn();
+
     return { service, locations };
   };
 
@@ -223,7 +228,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.addConfigs({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -250,7 +255,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushConfigs(ALL_SPACES_ID);
 
       expect(axios).not.toHaveBeenCalled();
 
@@ -273,9 +278,9 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushConfigs(ALL_SPACES_ID);
 
-      expect(serverMock.logger.error).toBeCalledWith(
+      expect(serverMock.logger.debug).toBeCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
     });
@@ -289,7 +294,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.editConfig({ monitor: payload } as any);
+      await service.editConfig({ monitor: payload } as any, true, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -306,7 +311,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.editConfig({ monitor: payload } as any);
+      await service.editConfig({ monitor: payload } as any, true, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -323,7 +328,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.addConfigs({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -346,7 +351,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushConfigs(ALL_SPACES_ID);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -396,7 +401,7 @@ describe('SyntheticsService', () => {
 
         (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-        await expect(service.pushConfigs()).rejects.toThrow(errorMessage);
+        await expect(service.pushConfigs(ALL_SPACES_ID)).rejects.toThrow(errorMessage);
       }
     );
   });
@@ -450,6 +455,7 @@ describe('SyntheticsService', () => {
         },
       });
     });
+
     it('returns the space limited params', async () => {
       const { service } = getMockedService();
       jest.spyOn(service, 'getSyntheticsParams').mockRestore();
@@ -468,6 +474,44 @@ describe('SyntheticsService', () => {
       expect(params).toEqual({
         default: {
           username: 'elastic',
+        },
+      });
+    });
+
+    it('returns the params from mixed spaces', async () => {
+      const { service } = getMockedService();
+      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        params: [
+          {
+            attributes: { key: 'username', value: 'elastic' },
+            namespaces: ['default'],
+          },
+          {
+            attributes: { key: 'username-shared', value: 'elastic' },
+            namespaces: ['*'],
+          },
+          {
+            attributes: { key: 'username-test-space', value: 'elastic' },
+            namespaces: ['test'],
+          },
+        ],
+      });
+
+      const params = await service.getSyntheticsParams({ spaceId: 'default' });
+
+      expect(params).toEqual({
+        '*': {
+          'username-shared': 'elastic',
+        },
+        default: {
+          username: 'elastic',
+          'username-shared': 'elastic',
+        },
+        test: {
+          'username-shared': 'elastic',
+          'username-test-space': 'elastic',
         },
       });
     });
@@ -493,6 +537,8 @@ describe('SyntheticsService', () => {
     service.locations = locations;
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
+
+    service.getMaintenanceWindows = jest.fn();
 
     it('paginates the results', async () => {
       serverMock.config = mockConfig;
@@ -521,13 +567,137 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushConfigs(ALL_SPACES_ID);
 
       expect(syncSpy).toHaveBeenCalledTimes(72);
       expect(axios).toHaveBeenCalledTimes(72);
       expect(logger.debug).toHaveBeenCalledTimes(112);
       expect(logger.info).toHaveBeenCalledTimes(0);
       expect(logger.error).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('start method - manifestUrl logging', () => {
+    const taskManagerStart = taskManagerMock.createStart();
+    const expectedLogMessage =
+      'Synthetics sync task is not being scheduled because manifestUrl is not configured.';
+
+    const createServerMock = (
+      cloudConfig?:
+        | {
+            isServerlessEnabled?: boolean;
+            isCloudEnabled?: boolean;
+            deploymentId?: string;
+          }
+        | undefined,
+      manifestUrl?: string
+    ): SyntheticsServerSetup => {
+      return {
+        ...serverMock,
+        config: {
+          service: {
+            username: 'dev',
+            password: '12345',
+            ...(manifestUrl && { manifestUrl }),
+          },
+          enabled: true,
+        },
+        cloud: cloudConfig as any,
+      } as SyntheticsServerSetup;
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      logger.error.mockClear();
+      logger.debug.mockClear();
+    });
+
+    it('logs ERROR for Serverless environment when manifestUrl is missing', () => {
+      const serverMockWithoutManifest = createServerMock({
+        isServerlessEnabled: true,
+        isCloudEnabled: true,
+        deploymentId: undefined,
+      });
+
+      const service = new SyntheticsService(serverMockWithoutManifest);
+      service.start(taskManagerStart);
+
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(expectedLogMessage);
+      expect(logger.debug).not.toHaveBeenCalled();
+    });
+
+    it('logs ERROR for ECH (stateful) environment when manifestUrl is missing', () => {
+      const serverMockWithoutManifest = createServerMock({
+        isServerlessEnabled: false,
+        isCloudEnabled: true,
+        deploymentId: 'test-deployment-id',
+      });
+
+      const service = new SyntheticsService(serverMockWithoutManifest);
+      service.start(taskManagerStart);
+
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(expectedLogMessage);
+      expect(logger.debug).not.toHaveBeenCalled();
+    });
+
+    it('logs DEBUG for ECE environment when manifestUrl is missing', () => {
+      const serverMockWithoutManifest = createServerMock({
+        isServerlessEnabled: false,
+        isCloudEnabled: true,
+        deploymentId: undefined,
+      });
+
+      const service = new SyntheticsService(serverMockWithoutManifest);
+      service.start(taskManagerStart);
+
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(expectedLogMessage);
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs DEBUG for self-managed environment when manifestUrl is missing', () => {
+      const serverMockWithoutManifest = createServerMock(undefined);
+
+      const service = new SyntheticsService(serverMockWithoutManifest);
+      service.start(taskManagerStart);
+
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(expectedLogMessage);
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs DEBUG for self-managed environment (isCloudEnabled=false) when manifestUrl is missing', () => {
+      const serverMockWithoutManifest = createServerMock({
+        isServerlessEnabled: false,
+        isCloudEnabled: false,
+        deploymentId: undefined,
+      });
+
+      const service = new SyntheticsService(serverMockWithoutManifest);
+      service.start(taskManagerStart);
+
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(expectedLogMessage);
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('does not log when manifestUrl is present', () => {
+      const serverMockWithManifest = createServerMock(
+        {
+          isServerlessEnabled: true,
+          isCloudEnabled: true,
+          deploymentId: 'test-deployment-id',
+        },
+        'http://localhost:8080/api/manifest'
+      );
+
+      const service = new SyntheticsService(serverMockWithManifest);
+      service.start(taskManagerStart);
+
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.debug).not.toHaveBeenCalled();
     });
   });
 });

@@ -8,10 +8,10 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from './translations';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 interface UpgradePrebuiltRulesTableButtonsProps {
   selectedRules: RuleUpgradeState[];
@@ -21,18 +21,11 @@ export const UpgradePrebuiltRulesTableButtons = ({
   selectedRules,
 }: UpgradePrebuiltRulesTableButtonsProps) => {
   const {
-    state: {
-      ruleUpgradeStates,
-      hasRulesToUpgrade,
-      loadingRules,
-      isRefetching,
-      isUpgradingSecurityPackages,
-    },
+    state: { hasRulesToUpgrade, loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { upgradeRules, upgradeAllRules },
   } = useUpgradePrebuiltRulesTableContext();
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
-  const canUserEditRules = canUserCRUD && !isUserDataLoading;
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
 
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayUpgradeSelectedRulesButton = numberOfSelectedRules > 0;
@@ -42,15 +35,13 @@ export const UpgradePrebuiltRulesTableButtons = ({
 
   const doAllSelectedRulesHaveConflicts =
     isRulesCustomizationEnabled &&
-    selectedRules.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
-  const doAllRulesHaveConflicts =
-    isRulesCustomizationEnabled &&
-    ruleUpgradeStates.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
+    selectedRules.every(
+      ({ hasNonSolvableUnresolvedConflicts }) => hasNonSolvableUnresolvedConflicts
+    );
 
   const { selectedRulesButtonTooltip, allRulesButtonTooltip } = useBulkUpdateButtonsTooltipContent({
-    canUserEditRules,
+    canUserEditRules: canEditRules,
     doAllSelectedRulesHaveConflicts,
-    doAllRulesHaveConflicts,
     isPrebuiltRulesCustomizationEnabled: isRulesCustomizationEnabled,
   });
 
@@ -66,7 +57,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
           <EuiToolTip content={selectedRulesButtonTooltip}>
             <EuiButton
               onClick={upgradeSelectedRules}
-              disabled={!canUserEditRules || isRequestInProgress || doAllSelectedRulesHaveConflicts}
+              disabled={!canEditRules || isRequestInProgress || doAllSelectedRulesHaveConflicts}
               data-test-subj="upgradeSelectedRulesButton"
             >
               <>
@@ -83,12 +74,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
             fill
             iconType="plusInCircle"
             onClick={upgradeAllRules}
-            disabled={
-              !canUserEditRules ||
-              !hasRulesToUpgrade ||
-              isRequestInProgress ||
-              doAllRulesHaveConflicts
-            }
+            disabled={!canEditRules || !hasRulesToUpgrade || isRequestInProgress}
             data-test-subj="upgradeAllRulesButton"
           >
             {i18n.UPDATE_ALL}
@@ -103,12 +89,10 @@ export const UpgradePrebuiltRulesTableButtons = ({
 const useBulkUpdateButtonsTooltipContent = ({
   canUserEditRules,
   doAllSelectedRulesHaveConflicts,
-  doAllRulesHaveConflicts,
   isPrebuiltRulesCustomizationEnabled,
 }: {
   canUserEditRules: boolean | null;
   doAllSelectedRulesHaveConflicts: boolean;
-  doAllRulesHaveConflicts: boolean;
   isPrebuiltRulesCustomizationEnabled: boolean;
 }) => {
   if (!canUserEditRules) {
@@ -122,13 +106,6 @@ const useBulkUpdateButtonsTooltipContent = ({
     return {
       selectedRulesButtonTooltip: undefined,
       allRulesButtonTooltip: undefined,
-    };
-  }
-
-  if (doAllRulesHaveConflicts) {
-    return {
-      selectedRulesButtonTooltip: i18n.BULK_UPDATE_SELECTED_RULES_BUTTON_TOOLTIP_CONFLICTS,
-      allRulesButtonTooltip: i18n.BULK_UPDATE_ALL_RULES_BUTTON_TOOLTIP_CONFLICTS,
     };
   }
 

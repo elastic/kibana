@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/server';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { PluginStartContract } from '../plugin';
+import type { CoreSetup, CoreStart } from '@kbn/core/server';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { PluginStartContract } from '../plugin';
 
 const getUiSettings = (coreStart: CoreStart, context: ExecutionContext) => {
   const kibanaRequest = context.getKibanaRequest?.();

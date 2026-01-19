@@ -10,6 +10,7 @@ import type { CasesFeaturesAllRequired } from '../ui/types';
 export * from './owners';
 export * from './files';
 export * from './application';
+export * from './observables';
 export { LENS_ATTACHMENT_TYPE } from './visualizations';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
@@ -25,6 +26,7 @@ export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions' as const;
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
+export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -93,6 +95,12 @@ export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
+export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
+  `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
+// TODO: below is an alias to INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL that should be removed in the next serverless development cycle
+export const INTERNAL_CASE_GET_CASES_BY_ALERTS_URL =
+  `${CASES_INTERNAL_URL}/case/alerts/_find_containing_all` as const;
+export const INTERNAL_BULK_CREATE_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables/_bulk_create`;
 
 /**
  * Action routes
@@ -128,6 +136,8 @@ export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_RULE_NAME_LENGTH = 100 as const;
+export const MAX_SUFFIX_LENGTH = 60 as const;
 export const MAX_CATEGORY_LENGTH = 50 as const;
 export const MAX_DESCRIPTION_LENGTH = 30000 as const;
 export const MAX_COMMENT_LENGTH = 30000 as const;
@@ -159,6 +169,8 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
   alerts: { sync: true, enabled: true, isExperimental: false },
   metrics: [],
+  observables: { enabled: true, autoExtract: false },
+  events: { enabled: false },
 });
 
 /**
@@ -166,6 +178,9 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
  */
 
 export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
+export const ANALYTICS_BACKFILL_TASK_TYPE = 'cai:cases_analytics_index_backfill';
+export const ANALYTICS_SCHEDULER_TASK_TYPE = 'cai:cases_analytics_index_scheduler';
+export const ANALYTICS_SYNCHRONIZATION_TASK_TYPE = 'cai:cases_analytics_index_synchronization';
 
 /**
  * Telemetry
@@ -185,6 +200,7 @@ export const CASES_SETTINGS_CAPABILITY = 'cases_settings' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
 export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
+export const ASSIGN_CASE_CAPABILITY = 'cases_assign' as const;
 
 /**
  * Cases API Tags
@@ -241,7 +257,7 @@ export const NONE_CONNECTOR_ID: string = 'none';
 export const CASES_CONNECTOR_ID = '.cases';
 export const CASES_CONNECTOR_TITLE = 'Cases';
 
-export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w]$';
+export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w,h,m]$';
 
 /**
  * This field is used for authorization of the entities within the cases plugin. Each entity within Cases will have the owner field
@@ -279,56 +295,15 @@ export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 
 export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
 
-export const OBSERVABLE_TYPE_EMAIL = {
-  label: 'Email',
-  key: 'observable-type-email',
-} as const;
-
-export const OBSERVABLE_TYPE_DOMAIN = {
-  label: 'Domain',
-  key: 'observable-type-domain',
-} as const;
-
-export const OBSERVABLE_TYPE_IPV4 = {
-  label: 'IPv4',
-  key: 'observable-type-ipv4',
-} as const;
-
-export const OBSERVABLE_TYPE_IPV6 = {
-  label: 'IPv6',
-  key: 'observable-type-ipv6',
-} as const;
-
-export const OBSERVABLE_TYPE_URL = {
-  label: 'URL',
-  key: 'observable-type-url',
-} as const;
-
 /**
- * Exporting an array of built-in observable types for use in the application
+ * EBT events
  */
-export const OBSERVABLE_TYPES_BUILTIN = [
-  OBSERVABLE_TYPE_IPV4,
-  OBSERVABLE_TYPE_IPV6,
-  OBSERVABLE_TYPE_URL,
-  {
-    label: 'Hostname',
-    key: 'observable-type-hostname',
-  },
-  {
-    label: 'File hash',
-    key: 'observable-type-file-hash',
-  },
-  {
-    label: 'File path',
-    key: 'observable-type-file-path',
-  },
-  {
-    ...OBSERVABLE_TYPE_EMAIL,
-  },
-  {
-    ...OBSERVABLE_TYPE_DOMAIN,
-  },
-];
+export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view' as const;
 
-export const OBSERVABLE_TYPES_BUILTIN_KEYS = OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key);
+export const CASE_ATTACH_EVENTS_EVENT_TYPE = 'case_attach_events' as const;
+
+export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
+  'case_view_attachments_tab_clicked' as const;
+
+export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
+  'case_view_attachments_sub_tab_clicked' as const;

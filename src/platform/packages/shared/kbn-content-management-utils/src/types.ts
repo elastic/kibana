@@ -33,7 +33,7 @@ import type {
   SortOrder,
   AggregationsAggregationContainer,
   SortResults,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   MutatingOperationRefreshSetting,
@@ -75,6 +75,10 @@ export interface SavedObjectCreateOptions {
    * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   initialNamespaces?: string[];
+  /**
+   * Whether the object is managed by the application.
+   */
+  managed?: boolean;
 }
 
 /** Saved Object search options - Pick and Omit to customize */

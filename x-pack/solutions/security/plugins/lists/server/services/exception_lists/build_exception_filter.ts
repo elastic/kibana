@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import agent from 'elastic-apm-node';
 import { chunk } from 'lodash/fp';
-import {
+import type {
   CreateExceptionListItemSchema,
   Entry,
   EntryExists,
@@ -18,6 +19,8 @@ import {
   ExceptionListItemSchema,
   OsTypeArray,
   Type,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   entriesExists,
   entriesList,
   entriesMatch,
@@ -26,7 +29,7 @@ import {
   entriesNested,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Filter } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { partition } from 'lodash';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 import {
@@ -34,6 +37,11 @@ import {
   MAXIMUM_SMALL_VALUE_LIST_SIZE,
 } from '@kbn/securitysolution-list-constants';
 
+import {
+  SECURITY_NUM_LARGE_LIST_EXCEPTIONS,
+  SECURITY_NUM_REGULAR_EXCEPTIONS,
+  SECURITY_NUM_SMALL_LIST_EXCEPTIONS,
+} from '../../apm_field_names';
 import type { ListClient } from '../..';
 
 type ExceptionEntry = Entry | EntryNested;
@@ -320,6 +328,11 @@ export const buildExceptionFilter = async <
   unprocessedExceptions.push(...unprocessableValueListExceptions);
 
   if (exceptionsWithoutValueLists.length === 0 && exceptionsWithValueLists.length === 0) {
+    agent.setCustomContext({
+      [SECURITY_NUM_LARGE_LIST_EXCEPTIONS]: unprocessedExceptions.length,
+      [SECURITY_NUM_REGULAR_EXCEPTIONS]: 0,
+      [SECURITY_NUM_SMALL_LIST_EXCEPTIONS]: 0,
+    });
     return { filter: undefined, unprocessedExceptions };
   }
   const { orClauses, unprocessableExceptionItems } = await createOrClauses<T>({
@@ -327,6 +340,14 @@ export const buildExceptionFilter = async <
     exceptionsWithValueLists,
     exceptionsWithoutValueLists,
     listClient,
+  });
+
+  agent.setCustomContext({
+    [SECURITY_NUM_LARGE_LIST_EXCEPTIONS]:
+      unprocessableValueListExceptions.length + unprocessableExceptionItems.length,
+    [SECURITY_NUM_REGULAR_EXCEPTIONS]: exceptionsWithoutValueLists.length,
+    [SECURITY_NUM_SMALL_LIST_EXCEPTIONS]:
+      exceptionsWithValueLists.length - unprocessableExceptionItems.length,
   });
 
   const exceptionFilter: Filter = {

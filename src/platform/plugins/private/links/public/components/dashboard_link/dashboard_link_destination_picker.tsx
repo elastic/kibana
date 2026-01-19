@@ -13,16 +13,11 @@ import useMount from 'react-use/lib/useMount';
 import useUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  EuiBadge,
-  EuiComboBox,
-  EuiFlexItem,
-  EuiHighlight,
-  EuiFlexGroup,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiBadge, EuiComboBox, EuiFlexItem, EuiHighlight, EuiFlexGroup } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-import { DashboardItem } from '../../types';
+import type { DashboardItem } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { fetchDashboard, fetchDashboards } from './dashboard_link_tools';
 
@@ -47,7 +42,7 @@ export const DashboardLinkDestinationPicker = ({
     return {
       key: dashboard.id,
       value: dashboard,
-      label: dashboard.attributes.title,
+      label: dashboard.title,
       className: 'linksDashboardItem',
     };
   }, []);
@@ -100,7 +95,7 @@ export const DashboardLinkDestinationPicker = ({
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" className={contentClassName}>
           {dashboardId === parentDashboardId && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} className={'linksDashboardItem--current'}>
               <EuiBadge>{DashboardLinkStrings.getCurrentDashboardLabel()}</EuiBadge>
             </EuiFlexItem>
           )}
@@ -143,6 +138,25 @@ export const DashboardLinkDestinationPicker = ({
         }
       }}
       data-test-subj="links--linkEditor--dashboardLink--comboBox"
+      inputPopoverProps={{ panelProps: { css: styles } }}
     />
   );
 };
+
+const styles = css({
+  '.linksDashboardItem': {
+    '.linksDashboardItem--current': {
+      cursor: 'pointer !important',
+    },
+    // in order to ensure that the "Current" badge doesn't recieve an underline on hover, we have to set the
+    // text-decoration to `none` for the entire list item and manually set the underline **only** on the text
+    '&:hover': {
+      textDecoration: 'none !important',
+    },
+    '.linksPanelEditorLinkText': {
+      '&:hover': {
+        textDecoration: 'underline !important',
+      },
+    },
+  },
+});

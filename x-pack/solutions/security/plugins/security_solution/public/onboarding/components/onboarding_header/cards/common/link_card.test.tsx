@@ -9,9 +9,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { LinkCard } from './link_card';
 import { OnboardingHeaderCardId, TELEMETRY_HEADER_CARD } from '../../constants';
-import { trackOnboardingLinkClick } from '../../../lib/telemetry';
+import { mockReportLinkClick } from '../../../__mocks__/mocks';
 
 jest.mock('../../../lib/telemetry');
+jest.mock('../../../onboarding_context');
 
 describe('DataIngestionHubHeaderCardComponent', () => {
   beforeEach(() => {
@@ -46,7 +47,7 @@ describe('DataIngestionHubHeaderCardComponent', () => {
     );
 
     getByTestId('headerCardLink').click();
-    expect(trackOnboardingLinkClick).toHaveBeenCalledWith(
+    expect(mockReportLinkClick).toHaveBeenCalledWith(
       `${TELEMETRY_HEADER_CARD}_${OnboardingHeaderCardId.demo}`
     );
   });

@@ -8,4 +8,4 @@
 export * from './src/components/api_key_flyout_wrapper';
 export * from './src/components/api_key_form';
 export * from './src/hooks/use_search_api_key';
-export * from './src/providers/search_api_key_provider';
+export * from './src/constants';

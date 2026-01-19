@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
 import moment from 'moment';
 import path from 'path';
 import fs from 'fs';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
@@ -195,7 +195,7 @@ async function run() {
 
   const apiIntegrationDir = path.join(
     REPO_ROOT,
-    'x-pack/test/apm_api_integration/common',
+    'x-pack/solutions/observability/test/apm_api_integration/common',
     esArchiverDir
   );
   const e2eDir = path.join(__dirname, '../../ftr_e2e/cypress', esArchiverDir);

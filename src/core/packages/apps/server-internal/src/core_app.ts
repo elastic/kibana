@@ -8,7 +8,7 @@
  */
 
 import { stringify } from 'querystring';
-import { Env, IConfigService } from '@kbn/config';
+import type { Env, IConfigService } from '@kbn/config';
 import { schema, ValidationError } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
@@ -58,6 +58,7 @@ interface CommonRoutesParams {
     req: KibanaRequest,
     res: HttpResourcesServiceToolkit & KibanaResponseFactory
   ) => Promise<IKibanaResponse>;
+  skipBundleRegistration: boolean;
 }
 
 const DYNAMIC_CONFIG_OVERRIDES_SO_TYPE = 'dynamic-config-overrides';
@@ -81,12 +82,17 @@ export class CoreAppsService {
       .pipe(map((rawCfg) => new CoreAppConfig(rawCfg)));
   }
 
-  preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
+  async preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
     this.logger.debug('Prebooting core app.');
 
     // We register app-serving routes only if there are `preboot` plugins that may need them.
     if (uiPlugins.public.size > 0) {
-      this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
+      const config = await firstValueFrom(this.config$);
+      this.registerPrebootDefaultRoutes(
+        corePreboot,
+        uiPlugins,
+        config.skipBundleRoutesIfCdnEnabled && corePreboot.http.staticAssets.isUsingCdn()
+      );
       this.registerStaticDirs(corePreboot, uiPlugins);
     }
   }
@@ -94,7 +100,11 @@ export class CoreAppsService {
   async setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     this.logger.debug('Setting up core app.');
     const config = await firstValueFrom(this.config$);
-    this.registerDefaultRoutes(coreSetup, uiPlugins);
+    this.registerDefaultRoutes(
+      coreSetup,
+      uiPlugins,
+      config.skipBundleRoutesIfCdnEnabled && coreSetup.http.staticAssets.isUsingCdn()
+    );
     this.registerStaticDirs(coreSetup, uiPlugins);
     this.maybeRegisterDynamicConfigurationFeature({
       config,
@@ -111,7 +121,11 @@ export class CoreAppsService {
     this.stop$.next();
   }
 
-  private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
+  private registerPrebootDefaultRoutes(
+    corePreboot: InternalCorePreboot,
+    uiPlugins: UiPlugins,
+    skipBundleRegistration: boolean
+  ) {
     corePreboot.http.registerRoutes('', (router) => {
       this.registerCommonDefaultRoutes({
         basePath: corePreboot.http.basePath,
@@ -133,17 +147,32 @@ export class CoreAppsService {
                 bypassErrorFormat: true,
               })
             : res.renderCoreApp(),
+        skipBundleRegistration,
       });
     });
   }
 
-  private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
+  private registerDefaultRoutes(
+    coreSetup: InternalCoreSetup,
+    uiPlugins: UiPlugins,
+    skipBundleRegistration: boolean
+  ) {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get(
-      { path: '/', validate: false, options: { access: 'public' } },
+      {
+        path: '/',
+        validate: false,
+        options: { access: 'public' },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is only used for serving the default route.',
+          },
+        },
+      },
       async (context, req, res) => {
         const { uiSettings } = await context.core;
         let defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request: req });
@@ -168,6 +197,7 @@ export class CoreAppsService {
       router,
       uiPlugins,
       onResourceNotFound: async (req, res) => res.notFound(),
+      skipBundleRegistration,
     });
 
     resources.register(
@@ -175,7 +205,17 @@ export class CoreAppsService {
         path: '/app/{id}/{any*}',
         validate: false,
         options: {
-          authRequired: true,
+          excludeFromRateLimiter: true,
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'The route is opted out of the authorization since it is a wrapper around core app view',
+          },
+          authc: {
+            enabled: true,
+          },
         },
       },
       async (context, request, response) => {
@@ -188,8 +228,19 @@ export class CoreAppsService {
       {
         path: '/status',
         validate: false,
-        options: {
-          authRequired: !anonymousStatusPage,
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'The route is opted out of the authorization since it is a wrapper around core app view',
+          },
+          authc: anonymousStatusPage
+            ? {
+                enabled: false,
+                reason:
+                  'The route is opted out of the authentication since it since it is a wrapper around core app anonymous view',
+              }
+            : { enabled: true },
         },
       },
       async (context, request, response) => {
@@ -269,7 +320,7 @@ export class CoreAppsService {
    * Registers the HTTP API that allows updating in-memory the settings that opted-in to be dynamically updatable.
    * @param router {@link IRouter}
    * @param savedObjectClient$ An observable of a {@link SavedObjectsClientContract | savedObjects client} that will be used to update the document
-   * @private
+   * @internal
    */
   private registerInternalCoreSettingsRoute(
     router: IRouter,
@@ -279,8 +330,10 @@ export class CoreAppsService {
       .put({
         path: '/internal/core/_settings',
         access: 'internal',
-        options: {
-          tags: ['access:updateDynamicConfig'],
+        security: {
+          authz: {
+            requiredPrivileges: ['updateDynamicConfig'],
+          },
         },
       })
       .addVersion(
@@ -325,6 +378,7 @@ export class CoreAppsService {
     uiPlugins,
     onResourceNotFound,
     httpResources,
+    skipBundleRegistration,
   }: CommonRoutesParams) {
     // catch-all route
     httpResources.register(
@@ -335,6 +389,12 @@ export class CoreAppsService {
             path: schema.maybe(schema.string()),
           }),
           query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'The route is opted out of the authorization since it is a catch-all route',
+          },
         },
       },
       async (context, req, res) => {
@@ -364,21 +424,45 @@ export class CoreAppsService {
       }
     );
 
-    router.get({ path: '/core', validate: false }, async (context, req, res) =>
-      res.ok({ body: { version: '0.0.1' } })
+    router.get(
+      {
+        path: '/core',
+        validate: false,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'The route is opted out of the authorization since it returns static response',
+          },
+        },
+      },
+      async (context, req, res) => res.ok({ body: { version: '0.0.1' } })
     );
 
-    registerBundleRoutes({
-      router,
-      uiPlugins,
-      staticAssets,
-      packageInfo: this.env.packageInfo,
-    });
+    if (!skipBundleRegistration) {
+      registerBundleRoutes({
+        router,
+        uiPlugins,
+        staticAssets,
+        packageInfo: this.env.packageInfo,
+      });
+    }
   }
 
-  // After the package is built and bootstrap extracts files to bazel-bin,
+  // After the package is built and bootstrap extracts files to target/build,
   // assets are exposed at the root of the package and in the package's node_modules dir
   private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot, uiPlugins: UiPlugins) {
+    // Expose @elastic/charts' pre-compiled CSS themes
+    // Referenced in `getThemeStylesheetPaths` in src/core/packages/rendering/server-internal/src/render_utils.ts
+    core.http.registerStaticDir(
+      // We're only interested in exposing 'theme_dark.css' and 'theme_light.css',
+      // but this route cannot be limited to a file (not even a pattern like `{file}.css`).
+      // We don't think that it's too risky because @elastic/charts is a public code.
+      // Still, it's limited to the root dir (missing * in the pattern) for extra security.
+      core.http.staticAssets.prependServerPath(`/ui/charts/{file}`),
+      fromRoot(`node_modules/@elastic/charts/dist/`)
+    );
+    // });
+
     /**
      * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
      * Eventually we only want to serve from the sha scoped path

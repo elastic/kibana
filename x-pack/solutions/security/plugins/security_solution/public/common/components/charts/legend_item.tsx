@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { EMPTY_VALUE_LABEL } from './translation';
 import { hasValueToDisplay } from '../../utils/validators';

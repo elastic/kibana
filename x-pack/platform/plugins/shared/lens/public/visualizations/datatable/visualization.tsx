@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { Ast } from '@kbn/interpreter';
+
+import type { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core/public';
+import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
-  PaletteRegistry,
   CUSTOM_PALETTE,
-  PaletteOutput,
-  CustomPaletteParams,
+  DEFAULT_COLOR_MAPPING_CONFIG,
   applyPaletteParams,
   getOverridePaletteStops,
 } from '@kbn/coloring';
@@ -22,56 +22,50 @@ import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import useObservable from 'react-use/lib/useObservable';
 import { getSortingCriteria } from '@kbn/sort-predicates';
-import { getKbnPalettes } from '@kbn/palettes';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
+import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
-  SuggestionRequest,
-  Visualization,
-  VisualizationSuggestion,
   DatasourceLayers,
+  FormBasedPersistedState,
   Suggestion,
-} from '../../types';
-import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
-import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
-import type { FormatFactory, LayerType } from '../../../common/types';
-import { RowHeightMode } from '../../../common/types';
-import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
+  SuggestionRequest,
+  VisualizationSuggestion,
+  DatatableVisualizationState,
+  Visualization,
+} from '@kbn/lens-common';
+import {
+  DEFAULT_HEADER_ROW_HEIGHT,
+  DEFAULT_ROW_HEIGHT_LINES,
+  DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  LENS_ROW_HEIGHT_MODE,
+  LENS_DATAGRID_DENSITY,
+} from '@kbn/lens-common';
+import type { FormatFactory } from '../../../common/types';
+import { getDefaultSummaryLabel } from '../../../common/expressions/impl/datatable/summary';
 import {
   type ColumnState,
-  type SortingState,
-  type PagingState,
   type CollapseExpressionFunction,
   type DatatableColumnFn,
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
-import { DataTableToolbar } from './components/toolbar';
-import {
-  DEFAULT_HEADER_ROW_HEIGHT,
-  DEFAULT_HEADER_ROW_HEIGHT_LINES,
-  DEFAULT_ROW_HEIGHT,
-} from './components/constants';
 import {
   defaultPaletteParams,
   findMinMaxByColumnId,
   getPaletteDisplayColors,
-  shouldColorByTerms,
+  getAccessorType,
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
-import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
-import { getSimpleColumnType } from './components/table_actions';
-export interface DatatableVisualizationState {
-  columns: ColumnState[];
-  layerId: string;
-  layerType: LayerType;
-  sorting?: SortingState;
-  rowHeight?: RowHeightMode;
-  headerRowHeight?: RowHeightMode;
-  rowHeightLines?: number;
-  headerRowHeightLines?: number;
-  paging?: PagingState;
-}
+import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
+import { convertToRuntimeState } from './runtime_state';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import {
+  DatatableAppearanceSettings,
+  getSimpleColumnType,
+  TableDimensionDataExtraEditor,
+  TableDimensionEditor,
+  TableDimensionEditorAdditionalSection,
+} from './components';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
@@ -126,14 +120,19 @@ export const getDatatableVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
 
-  initialize(addNewLayer, state) {
-    return (
-      state || {
-        columns: [],
-        layerId: addNewLayer(),
-        layerType: LayerTypes.DATA,
-      }
-    );
+  initialize(addNewLayer, state, mainPalette, datasourceStates) {
+    if (state) return convertToRuntimeState(state, datasourceStates);
+
+    return {
+      columns: [],
+      layerId: addNewLayer(),
+      layerType: LayerTypes.DATA,
+      showRowNumbers: true,
+    };
+  },
+
+  convertToRuntimeState(state, datasourceStates) {
+    return convertToRuntimeState(state, datasourceStates);
   },
 
   onDatasourceUpdate(state, frame) {
@@ -147,12 +146,25 @@ export const getDatatableVisualization = ({
 
     const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
     const columns = state.columns.map((column) => {
-      if (column.palette) {
-        const accessor = column.columnId;
+      const newColumn = { ...column };
+      const accessor = newColumn.columnId;
+      const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+
+      if (newColumn.palette && (isNumeric || isBucketable)) {
+        const showColorByTerms = isBucketable;
+
+        if (!showColorByTerms && newColumn.colorMapping) {
+          // switched from terms to values
+          delete newColumn.colorMapping;
+        }
+
+        if (showColorByTerms && !newColumn.colorMapping) {
+          // switched from values to terms
+          newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+        }
+
         const currentData = frame?.activeData?.[state.layerId];
-        const { dataType, isBucketed } = datasource?.getOperationForColumnId(column.columnId) ?? {};
-        const showColorByTerms = shouldColorByTerms(dataType, isBucketed);
-        const palette = paletteMap.get(column.palette?.name ?? '');
+        const palette = paletteMap.get(newColumn.palette?.name ?? '');
         const columnsToCheck = hasTransposedColumn
           ? currentData?.columns
               .filter(({ id }) => getOriginalId(id) === accessor)
@@ -163,10 +175,10 @@ export const getDatatableVisualization = ({
         if (palette && !showColorByTerms && !palette?.canDynamicColoring && dataBounds) {
           const newPalette: PaletteOutput<CustomPaletteParams> = {
             type: 'palette',
-            name: showColorByTerms ? 'default' : defaultPaletteParams.name,
+            name: defaultPaletteParams.name,
           };
           return {
-            ...column,
+            ...newColumn,
             palette: {
               ...newPalette,
               params: {
@@ -177,7 +189,7 @@ export const getDatatableVisualization = ({
         }
       }
 
-      return column;
+      return newColumn;
     });
 
     return {
@@ -251,7 +263,9 @@ export const getDatatableVisualization = ({
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
         score: forceSuggestion ? 1 : (Math.min(table.columns.length, 10) / 10) * 0.4 * changeFactor,
         state: {
-          ...(state || {}),
+          ...(state || {
+            showRowNumbers: true,
+          }),
           layerId: table.layerId,
           layerType: LayerTypes.DATA,
           columns: table.columns.map((col, columnIndex) => ({
@@ -486,18 +500,16 @@ export const getDatatableVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
-      darkMode: false,
-      name: 'amsterdam',
-    });
-    const palettes = getKbnPalettes(theme);
+    const isDarkMode = useKibanaIsDarkMode();
+    const palettes = useKbnPalettes();
 
     return (
       <TableDimensionEditor
         {...props}
-        isDarkMode={theme.darkMode}
+        isDarkMode={isDarkMode}
         palettes={palettes}
         paletteService={paletteService}
+        formatFactory={formatFactory}
       />
     );
   },
@@ -583,22 +595,26 @@ export const getDatatableVisualization = ({
       columns: columns
         .filter((c) => !c.collapseFn)
         .map((column) => {
+          const { isNumeric, isCategory: isBucketable } = getAccessorType(
+            datasource,
+            column.columnId
+          );
           const stops = getOverridePaletteStops(paletteService, column.palette);
           const paletteParams = {
             ...column.palette?.params,
             // rewrite colors and stops as two distinct arguments
             colors: stops?.map(({ color }) => color),
             stops:
-              column.palette?.params?.name === RowHeightMode.custom
+              column.palette?.params?.name === LENS_ROW_HEIGHT_MODE.custom
                 ? stops?.map(({ stop }) => stop)
                 : [],
             reverse: false, // managed at UI level
           };
-          const { dataType, isBucketed, sortingHint, inMetricDimension } =
+          const { sortingHint, inMetricDimension } =
             datasource?.getOperationForColumnId(column.columnId) ?? {};
           const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
-          const canColor = dataType !== 'date';
-          const colorByTerms = shouldColorByTerms(dataType, isBucketed);
+          const canColor = isNumeric || isBucketable;
+          const colorByTerms = isBucketable;
           let isTransposable =
             !isTextBasedLanguage &&
             !datasource!.getOperationForColumnId(column.columnId)?.isBucketed;
@@ -637,15 +653,13 @@ export const getDatatableVisualization = ({
         }),
       sortingColumnId: state.sorting?.columnId || '',
       sortingDirection: state.sorting?.direction || 'none',
-      fitRowToContent: state.rowHeight === RowHeightMode.auto,
+      fitRowToContent: state.rowHeight === LENS_ROW_HEIGHT_MODE.auto,
       headerRowHeight: state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT,
-      rowHeightLines:
-        !state.rowHeight || state.rowHeight === DEFAULT_ROW_HEIGHT ? 1 : state.rowHeightLines ?? 2,
-      headerRowHeightLines:
-        state.headerRowHeight === RowHeightMode.single
-          ? 1
-          : state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
+      rowHeightLines: state.rowHeightLines ?? DEFAULT_ROW_HEIGHT_LINES,
+      headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
+      density: state.density ?? LENS_DATAGRID_DENSITY.NORMAL,
+      showRowNumbers: state.showRowNumbers,
     }).toAst();
 
     return {
@@ -686,8 +700,8 @@ export const getDatatableVisualization = ({
     }, []);
   },
 
-  ToolbarComponent(props) {
-    return <DataTableToolbar {...props} />;
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: DatatableAppearanceSettings }} />;
   },
 
   onEditAction(state, event) {

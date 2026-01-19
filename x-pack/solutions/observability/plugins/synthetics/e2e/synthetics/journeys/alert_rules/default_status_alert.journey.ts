@@ -7,7 +7,7 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
 import { getReasonMessage } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
@@ -28,11 +28,11 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   let configId2: string;
 
   before(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   after(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   step('setup monitor', async () => {
@@ -56,17 +56,28 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await syntheticsApp.navigateToOverview(true, 15);
   });
 
-  step('should create default status alert', async () => {
+  step('should wait for and edit default status alert', async () => {
+    // Wait for the default alert to be created asynchronously after monitor creation
     await page.getByTestId('syntheticsAlertsRulesButton').click();
+
+    await retry.tryForTime(30 * 1000, async () => {
+      await page.waitForSelector(byTestId('manageStatusRuleName'), { timeout: 5 * 1000 });
+    });
+
     await page.getByTestId('manageStatusRuleName').click();
+
+    await retry.tryForTime(30 * 1000, async () => {
+      await page.waitForSelector(byTestId('editDefaultStatusRule'), { timeout: 5 * 1000 });
+    });
+
     await page.isDisabled(byTestId('editDefaultStatusRule'));
     await page.getByTestId('editDefaultStatusRule').click();
 
     await page.waitForSelector('text=Monitor status rule');
-    await page.getByTestId('intervalInputUnit').selectOption('second');
-    await page.getByTestId('intervalInput').fill('20');
-    await page.click(byTestId('saveEditedRuleButton'));
-    await page.waitForSelector("text=Updated 'Synthetics status internal rule'");
+    await page.getByTestId('ruleScheduleUnitInput').selectOption('second');
+    await page.getByTestId('ruleScheduleNumberInput').fill('20');
+    await page.click(byTestId('ruleFlyoutFooterSaveButton'));
+    await page.waitForSelector('text=Updated "Synthetics status internal rule"');
   });
 
   step('Monitor is as up in overview page', async () => {
@@ -111,7 +122,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name: 'Test Monitor',
       location: 'North America - US Central',
-      status: 'down',
+      reason: 'down',
       checks: {
         downWithinXChecks: 1,
         down: 1,
@@ -120,11 +131,12 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
+      await page.waitForTimeout(5000);
 
       const alerts = await page.waitForSelector(`text=1 Alert`, { timeout: 5 * 1000 });
       expect(await alerts.isVisible()).toBe(true);
 
-      const text = await page.textContent(`${byTestId('dataGridRowCell')} .euiLink`);
+      const text = await page.getByTestId('o11yGetRenderCellValueLink').textContent();
 
       expect(text).toBe(reasonMessage);
     });
@@ -175,7 +187,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name,
       location: 'North America - US Central',
-      status: 'down',
+      reason: 'down',
       checks: {
         downWithinXChecks: 1,
         down: 1,
@@ -195,7 +207,13 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
   step('Deleting the monitor recovers the alert', async () => {
     await services.deleteTestMonitorByQuery('"Test Monitor 2"');
-    await page.click(byTestId('alert-status-filter-recovered-button'));
+    const recoveredFilter = 'kibana.alert.status : "recovered" ';
+    await page.getByTestId('queryInput').fill(recoveredFilter);
+    await page.click(byTestId('querySubmitButton'));
+    await page.getByTestId('optionsList-control-0').hover();
+    await page.click(
+      '[data-test-subj="hover-actions-0"] [data-test-subj="embeddablePanelAction-clearControl"]'
+    );
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
 
@@ -203,7 +221,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       expect(await alertsCount.isVisible()).toBe(true);
     });
 
-    await page.click(byTestId('alert-status-filter-active-button'));
+    await page.getByTestId('queryInput').fill('kibana.alert.status : "active" ');
+    await page.click(byTestId('querySubmitButton'));
     await syntheticsApp.waitForLoadingToFinish();
     await page.waitForTimeout(10 * 1000);
 

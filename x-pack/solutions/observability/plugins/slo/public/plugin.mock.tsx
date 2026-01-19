@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
 const triggersActionsUiStartMock = {
   createStart() {
@@ -58,7 +58,6 @@ const dataViews = {
 export const sloPublicPluginsStartMock = {
   createStart() {
     return {
-      cases: mockCasesContract(),
       charts: chartPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
       dataViewEditor: dataViewEditor.createStart(),
@@ -67,6 +66,7 @@ export const sloPublicPluginsStartMock = {
       share: sharePluginMock.createStartContract(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
     };
   },
 };

@@ -9,12 +9,14 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
-import { AlertStatus, ALERT_STATUS_RECOVERED, ALERT_STATUS_UNTRACKED } from '@kbn/rule-data-utils';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_RECOVERED, ALERT_STATUS_UNTRACKED } from '@kbn/rule-data-utils';
 
 export interface AlertLifecycleStatusBadgeProps {
   alertStatus: AlertStatus;
-  flapping?: boolean | string;
+  flapping?: boolean;
 }
 
 const ACTIVE_LABEL = i18n.translate(
@@ -83,19 +85,9 @@ const getBadgeProps = (alertStatus: AlertStatus, flapping: boolean | undefined):
   };
 };
 
-const castFlapping = (flapping: boolean | string | undefined) => {
-  if (typeof flapping === 'string') {
-    return flapping === 'true';
-  }
-  return flapping;
-};
-
 export const AlertLifecycleStatusBadge = memo((props: AlertLifecycleStatusBadgeProps) => {
   const { alertStatus, flapping } = props;
-
-  const castedFlapping = castFlapping(flapping);
-
-  const { label, color, iconProps, isDisabled } = getBadgeProps(alertStatus, castedFlapping);
+  const { label, color, iconProps, isDisabled } = getBadgeProps(alertStatus, flapping ?? false);
 
   return (
     <EuiBadge

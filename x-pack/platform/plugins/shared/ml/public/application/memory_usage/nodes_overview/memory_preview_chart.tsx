@@ -19,7 +19,7 @@ import {
   LineAnnotation,
   AnnotationDomainType,
   Tooltip,
-  LEGACY_LIGHT_THEME,
+  LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -37,7 +37,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
   const {
     services: { charts: chartsService },
   } = useMlKibana();
-
+  const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
   const groups = useMemo(
     () => ({
       jvm: {
@@ -123,8 +123,8 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         }
       />
       <Settings
-        theme={{ chartMargins: LEGACY_LIGHT_THEME.chartMargins }}
-        baseTheme={chartsService.theme.useChartsBaseTheme()}
+        theme={{ chartMargins: LIGHT_THEME.chartMargins }}
+        baseTheme={chartBaseTheme}
         rotation={90}
         locale={i18n.getLocale()}
       />

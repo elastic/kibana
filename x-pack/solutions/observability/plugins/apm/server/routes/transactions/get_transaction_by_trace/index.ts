@@ -7,7 +7,7 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
@@ -68,33 +68,34 @@ export async function getRootTransactionByTraceId({
     apm: {
       events: [ProcessorEvent.transaction as const],
     },
-    body: {
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      query: {
-        bool: {
-          should: [
-            {
-              constant_score: {
-                filter: {
-                  bool: {
-                    must_not: { exists: { field: PARENT_ID } },
-                  },
+    track_total_hits: false,
+    size: 1,
+    terminate_after: 1,
+    query: {
+      bool: {
+        should: [
+          {
+            constant_score: {
+              filter: {
+                bool: {
+                  must_not: { exists: { field: PARENT_ID } },
                 },
               },
             },
-          ],
-          filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
-        },
+          },
+        ],
+        filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
       },
-      fields: requiredFields,
     },
+    fields: requiredFields,
   };
 
   const resp = await apmEventClient.search('get_root_transaction_by_trace_id', params);
 
-  const event = unflattenKnownApmEventFields(maybe(resp.hits.hits[0])?.fields, requiredFields);
+  const fields = maybe(resp.hits.hits[0])?.fields;
+
+  const event =
+    fields && accessKnownApmEventFields(fields).requireFields(requiredFields).unflatten();
 
   return {
     transaction: event,

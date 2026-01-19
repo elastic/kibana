@@ -16,9 +16,11 @@ import type { ColumnRenderer } from './column_renderer';
 import { EVENT_SUMMARY_FIELD_NAME } from './constants';
 import { getRowRenderer } from './get_row_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
+
 const EventRenderedFlexItem = styled(EuiFlexItem)`
   div:first-child {
     padding-left: 0px;
+
     div {
       margin: 0px;
     }
@@ -42,10 +44,9 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
   }: {
     columnName: string;
     ecsData?: Ecs;
-    eventId: string;
+    eventId?: string;
     field: ColumnHeaderOptions;
     isDetails?: boolean;
-    isDraggable?: boolean;
     linkValues?: string[] | null | undefined;
     rowRenderers?: RowRenderer[];
     scopeId: string;
@@ -68,7 +69,6 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
         eventId,
         field,
         isDetails,
-        isDraggable: false,
         linkValues,
         scopeId,
         truncate,
@@ -94,7 +94,6 @@ const SummaryCell: React.FC<{
       rowRenderer &&
       rowRenderer.renderRow({
         data: ecsData,
-        isDraggable: false,
         scopeId,
       })
     );
@@ -104,7 +103,7 @@ const SummaryCell: React.FC<{
     <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
       {rowRenderer && rowRender ? (
         <EventRenderedFlexItem className="eui-xScroll">
-          <div className="eui-displayInlineBlock" style={{ width: 'fit-content' }}>
+          <div className="eui-displayInlineBlock" css={{ width: 'fit-content' }}>
             {rowRender}
           </div>
         </EventRenderedFlexItem>

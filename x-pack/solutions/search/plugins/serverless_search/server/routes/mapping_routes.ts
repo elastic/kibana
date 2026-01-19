@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDependencies } from '../plugin';
+import type { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';
 
 export const registerMappingRoutes = ({ logger, router }: RouteDependencies) => {
@@ -17,6 +17,12 @@ export const registerMappingRoutes = ({ logger, router }: RouteDependencies) => 
         params: schema.object({
           index_name: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {

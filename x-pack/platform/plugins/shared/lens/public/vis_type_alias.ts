@@ -15,9 +15,9 @@ import {
   LENS_ICON,
   STAGE_ID,
 } from '../common/constants';
-import { getLensClient } from './persistence/lens_client';
+import { getLensBasicClient } from './persistence/basic_lens_client';
 
-export const getLensAliasConfig = (): VisTypeAlias => ({
+export const lensVisTypeAlias: VisTypeAlias = {
   alias: {
     path: getBasePath(),
     app: APP_ID,
@@ -39,10 +39,10 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
       docTypes: [LENS_EMBEDDABLE_TYPE],
       searchFields: ['title^3'],
       clientOptions: { update: { overwrite: true } },
-      client: getLensClient,
+      client: getLensBasicClient,
       toListItem(savedObject) {
         const { id, type, updatedAt, attributes, managed } = savedObject;
-        const { title, description } = attributes as { title: string; description?: string };
+        const { title, description } = attributes;
         return {
           id,
           title,
@@ -59,4 +59,4 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
       },
     },
   },
-});
+};

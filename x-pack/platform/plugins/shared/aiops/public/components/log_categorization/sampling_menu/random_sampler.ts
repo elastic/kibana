@@ -6,7 +6,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-random-sampler-utils';
+import { RANDOM_SAMPLER_OPTION, createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { i18n } from '@kbn/i18n';
 import type { RandomSamplerStorage } from './use_random_sampler_storage';
 
@@ -17,16 +18,6 @@ export const RANDOM_SAMPLER_PROBABILITIES = [
 export const MIN_SAMPLER_PROBABILITY = 0.00001;
 export const RANDOM_SAMPLER_STEP = MIN_SAMPLER_PROBABILITY * 100;
 export const DEFAULT_PROBABILITY = 0.001;
-
-export const RANDOM_SAMPLER_OPTION = {
-  ON_AUTOMATIC: 'on_automatic',
-  ON_MANUAL: 'on_manual',
-  OFF: 'off',
-} as const;
-
-export type RandomSamplerOption =
-  (typeof RANDOM_SAMPLER_OPTION)[keyof typeof RANDOM_SAMPLER_OPTION];
-export type RandomSamplerProbability = number | null;
 
 export const RANDOM_SAMPLER_SELECT_OPTIONS: Array<{
   value: RandomSamplerOption;

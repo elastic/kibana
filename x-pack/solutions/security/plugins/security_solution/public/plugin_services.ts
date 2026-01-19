@@ -9,6 +9,7 @@ import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn
 import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Logger } from '@kbn/logging';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import type { ExperimentalFeatures } from '../common/experimental_features';
@@ -55,7 +56,8 @@ export class PluginServices {
     private readonly config: SecuritySolutionUiConfigType,
     private readonly experimentalFeatures: ExperimentalFeatures,
     private readonly contract: PluginContract,
-    private readonly packageInfo: PackageInfo
+    private readonly packageInfo: PackageInfo,
+    private logger: Logger
   ) {
     this.configSettings = parseConfigSettings(this.config.offeringSettings ?? {}).settings;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
@@ -137,11 +139,17 @@ export class PluginServices {
       startPlugins.data
     );
 
+    const telemetry = this.telemetry.start();
+    const siemMigrations = await createSiemMigrationsService(coreStart, startPlugins, telemetry);
+
     return {
       ...coreStart,
       ...plugins,
       ...this.contract.getStartServices(),
       apm,
+      config: this.config,
+      inference: startPlugins.inference,
+      logger: this.logger,
       configSettings: this.configSettings,
       savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
       storage: this.storage,
@@ -149,12 +157,12 @@ export class PluginServices {
       security: startPlugins.security,
       securityLayout: { getPluginWrapper: () => SecuritySolutionTemplateWrapper },
       contentManagement: startPlugins.contentManagement,
-      telemetry: this.telemetry.start(),
+      telemetry,
       customDataService,
       timelineDataService,
       topValuesPopover: new TopValuesPopoverService(),
       productDocBase: startPlugins.productDocBase,
-      siemMigrations: await createSiemMigrationsService(coreStart, startPlugins),
+      siemMigrations,
       ...(params && {
         onAppLeave: params.onAppLeave,
         setHeaderActionMenu: params.setHeaderActionMenu,

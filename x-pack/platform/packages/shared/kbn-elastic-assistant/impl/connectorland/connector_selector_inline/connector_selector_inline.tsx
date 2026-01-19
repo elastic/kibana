@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
-import { AIConnector, ConnectorSelector } from '../connector_selector';
-import { Conversation } from '../../..';
+import type { ApiConfig, AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import type { AIConnector } from '../connector_selector';
+import { ConnectorSelector } from '../connector_selector';
+import type { Conversation } from '../../..';
 import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
 import { getGenAiConfig } from '../helpers';
@@ -19,12 +20,19 @@ import { getGenAiConfig } from '../helpers';
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 interface Props {
+  fullWidth?: boolean;
   isDisabled?: boolean;
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
   onConnectorIdSelected?: (connectorId: string) => void;
-  onConnectorSelected?: (conversation: Conversation) => void;
+  onConnectorSelected?: (conversation: Conversation, apiConfig?: ApiConfig) => void;
   stats?: AttackDiscoveryStats | null;
+
+  /**
+   * Allows parent components to control whether the default connector should be
+   * automatically selected or the explicit user selection action required.
+   */
+  explicitConnectorSelection?: boolean;
 }
 
 const inputContainerClassName = css`
@@ -43,6 +51,20 @@ const inputContainerClassName = css`
   }
 `;
 
+const fullWidthContainerClassName = css`
+  .euiSuperSelect {
+    max-inline-size: 100% !important;
+  }
+
+  .euiSuperSelectControl {
+    max-inline-size: 100%;
+  }
+
+  .euiFormControlLayout {
+    max-inline-size: 100%;
+  }
+`;
+
 const inputDisplayClassName = css`
   margin-right: 8px;
   overflow: hidden;
@@ -54,14 +76,15 @@ const inputDisplayClassName = css`
  */
 export const ConnectorSelectorInline: React.FC<Props> = React.memo(
   ({
+    fullWidth = false,
     isDisabled = false,
     selectedConnectorId,
     selectedConversation,
     onConnectorIdSelected,
     onConnectorSelected,
     stats = null,
+    explicitConnectorSelection,
   }) => {
-    const { euiTheme } = useEuiTheme();
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { assistantAvailability } = useAssistantContext();
     const { setApiConfig } = useConversation();
@@ -81,20 +104,30 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         setIsOpen(false);
 
         if (selectedConversation != null) {
-          const conversation = await setApiConfig({
-            conversation: selectedConversation,
-            apiConfig: {
+          if (selectedConversation.id === '' && onConnectorSelected != null) {
+            onConnectorSelected(selectedConversation, {
               ...selectedConversation.apiConfig,
-              actionTypeId: connector.actionTypeId,
               connectorId,
-              // With the inline component, prefer config args to handle 'new connector' case
+              actionTypeId: connector.actionTypeId,
               provider: apiProvider,
               model,
-            },
-          });
+            });
+          } else {
+            const conversation = await setApiConfig({
+              conversation: selectedConversation,
+              apiConfig: {
+                ...selectedConversation.apiConfig,
+                actionTypeId: connector.actionTypeId,
+                connectorId,
+                // With the inline component, prefer config args to handle 'new connector' case
+                provider: apiProvider,
+                model,
+              },
+            });
 
-          if (conversation && onConnectorSelected != null) {
-            onConnectorSelected(conversation);
+            if (conversation && onConnectorSelected != null) {
+              onConnectorSelected(conversation);
+            }
           }
         }
 
@@ -108,7 +141,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     return (
       <EuiFlexGroup
         alignItems="center"
-        className={inputContainerClassName}
+        className={fullWidth ? fullWidthContainerClassName : inputContainerClassName}
         direction="row"
         gutterSize="xs"
         justifyContent={'flexStart'}
@@ -116,13 +149,10 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
       >
         <EuiFlexItem>
           <ConnectorSelector
-            displayFancy={(displayText) => (
-              <EuiText
-                className={inputDisplayClassName}
-                size="s"
-                color={euiTheme.colors.textPrimary}
-              >
-                {displayText}
+            fullWidth={fullWidth}
+            displayFancy={(label) => (
+              <EuiText className={inputDisplayClassName} size="s">
+                {label}
               </EuiText>
             )}
             isOpen={isOpen}
@@ -131,6 +161,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             setIsOpen={setIsOpen}
             onConnectorSelectionChange={onChange}
             stats={stats}
+            explicitConnectorSelection={explicitConnectorSelection}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

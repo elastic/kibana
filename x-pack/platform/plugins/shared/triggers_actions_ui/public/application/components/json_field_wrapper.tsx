@@ -6,12 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  FieldHook,
-  getFieldValidityAndErrorMessage,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback } from 'react';
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import { styles } from './json_field_wrapper.styles';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
 

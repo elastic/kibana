@@ -16,7 +16,7 @@ import {
   mockGetSearchDsl,
 } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
 import {
@@ -28,9 +28,12 @@ import {
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 import {
   CUSTOM_INDEX_TYPE,
@@ -49,6 +52,7 @@ import {
   createUnsupportedTypeErrorPayload,
   createConflictErrorPayload,
   mockTimestampFieldsWithCreated,
+  ACCESS_CONTROL_TYPE,
 } from '../../test_helpers/repository.test.common';
 
 describe('#create', () => {
@@ -57,8 +61,10 @@ describe('#create', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
+
   const documentMigrator = createDocumentMigrator(registry);
 
   const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
@@ -80,6 +86,7 @@ describe('#create', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -97,6 +104,9 @@ describe('#create', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -382,7 +392,8 @@ describe('#create', () => {
       });
 
       it(`prepends namespace to the id and adds namespace to the body when providing namespace for single-namespace type`, async () => {
-        await createSuccess(type, attributes, { id, namespace });
+        const res = await createSuccess(type, attributes, { id, namespace });
+        expect(res.namespaces).toEqual([namespace]);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${namespace}:${type}:${id}`,
@@ -393,7 +404,8 @@ describe('#create', () => {
       });
 
       it(`doesn't prepend namespace to the id or add namespace to the body when providing no namespace for single-namespace type`, async () => {
-        await createSuccess(type, attributes, { id });
+        const res = await createSuccess(type, attributes, { id });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
@@ -404,7 +416,8 @@ describe('#create', () => {
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        await createSuccess(type, attributes, { id, namespace: 'default' });
+        const res = await createSuccess(type, attributes, { id, namespace: 'default' });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
@@ -823,6 +836,117 @@ describe('#create', () => {
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '1.1.1',
           managed: true,
+        });
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeCreate', async () => {
+        await createSuccess(type, attributes, { overwrite: true });
+
+        expect(securityExtension.authorizeCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            object: expect.objectContaining({
+              name: 'Logstash',
+              type: 'index-pattern',
+            }),
+          })
+        );
+      });
+    });
+
+    describe('access control', () => {
+      it('should not allow creating an object with access control when the type does not support access control', async () => {
+        await expect(
+          repository.create(MULTI_NAMESPACE_TYPE, attributes, {
+            id,
+            namespace,
+            accessControl: {
+              accessMode: 'write_restricted',
+            },
+          })
+        ).rejects.toThrowError(
+          createBadRequestErrorPayload(
+            `Cannot create a saved object of type multiNamespaceType with an access mode because the type does not support access control`
+          )
+        );
+        expect(client.create).not.toHaveBeenCalled();
+      });
+
+      it('allows creation of an object with access control when the type supports it', async () => {
+        securityExtension.getCurrentUser.mockReturnValue(
+          mockAuthenticatedUser({ profile_uid: 'u_test_user_version' })
+        );
+        const accessControl = {
+          accessMode: 'write_restricted' as const,
+        };
+
+        const result = await repository.create(ACCESS_CONTROL_TYPE, attributes, {
+          id,
+          namespace,
+          references,
+          accessControl,
+        });
+        expect(result).toEqual({
+          type: ACCESS_CONTROL_TYPE,
+          id,
+          ...mockTimestampFieldsWithCreated,
+          version: mockVersion,
+          attributes,
+          references,
+          namespaces: [namespace ?? 'default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
+          managed: false,
+          updated_by: 'u_test_user_version',
+          created_by: 'u_test_user_version',
+          accessControl: {
+            accessMode: 'write_restricted',
+            owner: 'u_test_user_version',
+          },
+        });
+      });
+
+      it('throws when trying to create an object with access control and there is no active user profile', async () => {
+        securityExtension.getCurrentUser.mockReturnValueOnce(null);
+        await expect(
+          repository.create(ACCESS_CONTROL_TYPE, attributes, {
+            id,
+            namespace,
+            references,
+            accessControl: {
+              accessMode: 'write_restricted',
+            },
+          })
+        ).rejects.toThrowError(
+          createBadRequestErrorPayload(
+            `Cannot create a saved object of type accessControlType with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
+          )
+        );
+        expect(client.create).not.toHaveBeenCalled();
+      });
+
+      // Regression test
+      it('allows creation when the type supports access control and no user is present if access mode is not provided', async () => {
+        securityExtension.getCurrentUser.mockReturnValueOnce(null);
+
+        const result = await repository.create(ACCESS_CONTROL_TYPE, attributes, {
+          id,
+          namespace,
+          references,
+        });
+
+        expect(result).toEqual({
+          type: ACCESS_CONTROL_TYPE,
+          id,
+          ...mockTimestampFieldsWithCreated,
+          version: mockVersion,
+          attributes,
+          references,
+          namespaces: [namespace ?? 'default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
+          managed: false,
         });
       });
     });

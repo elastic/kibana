@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { isPlainObject } from 'lodash';
-import {
+import type {
   Datatable,
   DatatableColumn,
   DatatableRow,

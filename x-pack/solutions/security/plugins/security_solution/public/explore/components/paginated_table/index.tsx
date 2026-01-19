@@ -22,6 +22,7 @@ import {
   EuiPagination,
   EuiPopover,
 } from '@elastic/eui';
+import { i18n as i18nCore } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import type { FC, ComponentType } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
@@ -342,13 +343,17 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                       pageCount={pageCount}
                       activePage={myActivePage}
                       onPageClick={goToPage}
+                      aria-label={i18nCore.translate(
+                        'xpack.securitySolution.paginatedTable.pagination.ariaLabel',
+                        {
+                          defaultMessage: 'Table pagination',
+                        }
+                      )}
                     />
                   )}
                 </PaginationWrapper>
               </FooterAction>
-              {(isInspect || myLoading) && (
-                <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />
-              )}
+              {(isInspect || myLoading) && <Loader overlay size="xl" />}
             </>
           ))}
       </Panel>

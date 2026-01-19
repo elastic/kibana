@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
+import type { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
 
 export const shouldOverrideRefreshInterval = (
   uiSettings: MonitoringStartServices['uiSettings'],

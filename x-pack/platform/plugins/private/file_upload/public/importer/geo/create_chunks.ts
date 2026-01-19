@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Feature, Point } from 'geojson';
+import type { Feature, Point } from 'geojson';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-import type { ImportDoc } from '../../../common/types';
+import type { ImportDoc } from '@kbn/file-upload-common';
 
 export function createChunks(
   features: Feature[],

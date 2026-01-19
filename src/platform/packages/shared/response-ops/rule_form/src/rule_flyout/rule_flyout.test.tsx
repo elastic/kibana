@@ -15,7 +15,8 @@ import {
   RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
   RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT,
 } from '../translations';
-import { RuleFormData } from '../types';
+import type { RuleFormData } from '../types';
+import { RuleFormStepId } from '../constants';
 
 jest.mock('../rule_definition', () => ({
   RuleDefinition: () => <div />,
@@ -118,6 +119,44 @@ describe('ruleFlyout', () => {
     expect(await screen.findByTestId('ruleFlyoutFooterNextStepButton')).toBeInTheDocument();
   });
 
+  test('omitting `initialStep` causes default behavior with step 1 selected', () => {
+    const { getByText } = render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
+
+    expect(getByText('Current step is 1'));
+    expect(getByText('Step 2 is incomplete'));
+    expect(getByText('Step 3 is incomplete'));
+  });
+
+  test('setting `initialStep` to `RuleFormStepId.DEFINITION` will make step 1 the current step', () => {
+    const { getByText } = render(
+      <RuleFlyout onCancel={onCancel} onSave={onSave} initialEditStep={RuleFormStepId.DEFINITION} />
+    );
+
+    expect(getByText('Current step is 1'));
+    expect(getByText('Step 2 is incomplete'));
+    expect(getByText('Step 3 is incomplete'));
+  });
+
+  test('setting `initialStep` to `RuleFormStepId.ACTION` will make step 1 the current step', () => {
+    const { getByText } = render(
+      <RuleFlyout onCancel={onCancel} onSave={onSave} initialEditStep={RuleFormStepId.ACTIONS} />
+    );
+
+    expect(getByText('Step 1 is complete'));
+    expect(getByText('Current step is 2'));
+    expect(getByText('Step 3 is incomplete'));
+  });
+
+  test('setting `initialStep` to `RuleFormStepId.DETAILS` will make step 1 the current step', () => {
+    const { getByText } = render(
+      <RuleFlyout onCancel={onCancel} onSave={onSave} initialEditStep={RuleFormStepId.DETAILS} />
+    );
+
+    expect(getByText('Step 1 is complete'));
+    expect(getByText('Step 2 is incomplete'));
+    expect(getByText('Current step is 3'));
+  });
+
   test('should call onSave when save button is pressed', async () => {
     render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
 
@@ -127,6 +166,9 @@ describe('ruleFlyout', () => {
     expect(await screen.findByTestId('ruleFlyoutFooterSaveButton')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterSaveButton'));
+
+    expect(await screen.findByTestId('confirmCreateRuleModal')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(onSave).toHaveBeenCalledWith({
       ...formDataMock,
@@ -139,5 +181,34 @@ describe('ruleFlyout', () => {
 
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterCancelButton'));
     expect(onCancel).toHaveBeenCalled();
+  });
+
+  test('should display discard changes modal only if changes are made in the form', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          navigateToUrl,
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      touched: true,
+      formData: formDataMock,
+      connectors: [],
+      connectorTypes: [],
+      aadTemplateFields: [],
+    });
+
+    render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
+
+    fireEvent.click(screen.getByTestId('ruleFlyoutFooterCancelButton'));
+    expect(screen.getByTestId('confirmRuleCloseModal')).toBeInTheDocument();
   });
 });

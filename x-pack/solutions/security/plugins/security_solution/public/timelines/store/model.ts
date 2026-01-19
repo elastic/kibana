@@ -7,22 +7,22 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { SessionViewConfig } from '../../../common/types';
 import type { EqlOptions, TimelineNonEcsData } from '../../../common/search_strategy/timeline';
 import type {
-  TimelineTabs,
-  ScrollToTopEvent,
-  SortColumnTimeline,
   ColumnHeaderOptions,
   DataProvider,
+  ScrollToTopEvent,
   SerializedFilterQuery,
+  SortColumnTimeline,
   TimelineEventsType,
+  KueryFilterQuery,
+  TimelineTabs,
 } from '../../../common/types/timeline';
 import type {
+  PinnedEvent,
   RowRendererId,
   TimelineStatus,
   TimelineType,
-  PinnedEvent,
 } from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 
@@ -70,7 +70,6 @@ export interface TimelineModel {
   resolveTimelineConfig?: ResolveTimelineConfig;
   showSaveModal?: boolean;
   savedQueryId?: string | null;
-  sessionViewConfig: SessionViewConfig | null;
   /** When true, show the timeline flyover */
   show: boolean;
   /** status: active | draft */
@@ -182,7 +181,6 @@ export type SubsetTimelineModel = Readonly<
     | 'dateRange'
     | 'selectAll'
     | 'selectedEventIds'
-    | 'sessionViewConfig'
     | 'show'
     | 'sort'
     | 'isSaving'
@@ -203,4 +201,5 @@ export interface TimelineUrl {
   isOpen: boolean;
   graphEventId?: string;
   savedSearchId?: string;
+  query?: KueryFilterQuery;
 }

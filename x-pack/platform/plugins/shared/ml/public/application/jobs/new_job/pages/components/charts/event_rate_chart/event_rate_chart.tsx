@@ -15,10 +15,10 @@ import {
   Settings,
   TooltipType,
   Tooltip,
-  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useMlKibana } from '../../../../../../contexts/kibana';
 import { Axes } from '../common/axes';
 import type { LineChartPoint } from '../../../../common/chart_loader';
 import type { Anomaly } from '../../../../common/results_loader';
@@ -55,6 +55,16 @@ export const EventRateChart: FC<Props> = ({
   overlayRanges,
   onBrushEnd,
 }) => {
+  const {
+    services: {
+      charts: {
+        theme: { useChartsBaseTheme },
+      },
+    },
+  } = useMlKibana();
+
+  const baseTheme = useChartsBaseTheme();
+
   const { EVENT_RATE_COLOR_WITH_ANOMALIES, EVENT_RATE_COLOR } = useChartColors();
   const barColor = fadeChart ? EVENT_RATE_COLOR_WITH_ANOMALIES : EVENT_RATE_COLOR;
 
@@ -79,8 +89,7 @@ export const EventRateChart: FC<Props> = ({
           <Settings
             onBrushEnd={onBrushEnd}
             theme={theme}
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={LEGACY_LIGHT_THEME}
+            baseTheme={baseTheme}
             locale={i18n.getLocale()}
           />
 
@@ -99,6 +108,7 @@ export const EventRateChart: FC<Props> = ({
           <Anomalies anomalyData={anomalyData} />
           <HistogramBarSeries
             id="event_rate"
+            // Defaults to multi layer time axis as of Elastic Charts v70
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor={'time'}

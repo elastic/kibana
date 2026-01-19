@@ -11,14 +11,14 @@ import { TestProviders } from '../../../common/mock';
 import type { UserPanelProps } from '.';
 import { UserPanel } from '.';
 import type {
-  FlyoutPanelProps,
-  ExpandableFlyoutState,
   ExpandableFlyoutApi,
+  ExpandableFlyoutState,
+  FlyoutPanelHistory,
 } from '@kbn/expandable-flyout';
 import {
   useExpandableFlyoutApi,
-  useExpandableFlyoutState,
   useExpandableFlyoutHistory,
+  useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 import { mockManagedUserData, mockObservedUser } from './mocks';
 import { mockRiskScoreState } from '../../shared/mocks';
@@ -27,7 +27,7 @@ const mockProps: UserPanelProps = {
   userName: 'test',
   contextID: 'test-user-panel',
   scopeId: 'test-scope-id',
-  isDraggable: false,
+  isPreviewMode: false,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
@@ -48,16 +48,13 @@ jest.mock('./hooks/use_observed_user', () => ({
   useObservedUser: () => mockedUseObservedUser(),
 }));
 
-const mockedUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => mockedUseIsExperimentalFeatureEnabled(),
-}));
-
 const flyoutContextValue = {
   closeLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-const flyoutHistory = [{ id: 'id1', params: {} }] as unknown as FlyoutPanelProps[];
+const flyoutHistory: FlyoutPanelHistory[] = [
+  { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
+];
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
   useExpandableFlyoutHistory: jest.fn(),
@@ -89,33 +86,6 @@ describe('UserPanel', () => {
   it('renders loading state when observed user is loading', () => {
     mockedUseObservedUser.mockReturnValue({
       ...mockObservedUser,
-      isLoading: true,
-    });
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <UserPanel {...mockProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
-  });
-
-  it('does not render managed user when experimental flag is disabled', () => {
-    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-
-    const { queryByTestId } = render(
-      <TestProviders>
-        <UserPanel {...mockProps} />
-      </TestProviders>
-    );
-
-    expect(queryByTestId('managedUser-accordion-button')).not.toBeInTheDocument();
-  });
-
-  it('renders loading state when managed user is loading', () => {
-    mockedUseManagedUser.mockReturnValue({
-      ...mockManagedUserData,
       isLoading: true,
     });
 

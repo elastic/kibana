@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useMemo } from 'react';
 import type { Capabilities } from '@kbn/core/types';
-import { SECURITY_FEATURE_ID } from '../../../../common/constants';
+import { RULES_UI_EDIT, RULES_UI_READ } from '@kbn/security-solution-features/constants';
+import { SECURITY_FEATURE_ID, RULES_FEATURE_ID } from '../../../../common/constants';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { getEndpointPrivilegesInitialState, useEndpointPrivileges } from './endpoint';
@@ -19,18 +20,20 @@ export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
   detectionEnginePrivileges: ReturnType<typeof useFetchDetectionEnginePrivileges>;
   endpointPrivileges: EndpointPrivileges;
-  kibanaSecuritySolutionsPrivileges: { crud: boolean; read: boolean };
+  siemPrivileges: { crud: boolean; read: boolean };
   timelinePrivileges: { crud: boolean; read: boolean };
   notesPrivileges: { crud: boolean; read: boolean };
+  rulesPrivileges: { read: boolean; edit: boolean };
 }
 
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   listPrivileges: { loading: false, error: undefined, result: undefined },
   detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
   endpointPrivileges: getEndpointPrivilegesInitialState(),
-  kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
+  siemPrivileges: { crud: false, read: false },
   timelinePrivileges: { crud: false, read: false },
   notesPrivileges: { crud: false, read: false },
+  rulesPrivileges: { read: false, edit: false },
 });
 export const UserPrivilegesContext = createContext<UserPrivilegesState>(
   initialUserPrivilegesState()
@@ -47,64 +50,64 @@ export const UserPrivilegesProvider = ({
 }: UserPrivilegesProviderProps) => {
   const crud: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].crud === true;
   const read: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].show === true;
-  const [kibanaSecuritySolutionsPrivileges, setKibanaSecuritySolutionsPrivileges] = useState({
-    crud,
-    read,
-  });
 
-  const listPrivileges = useFetchListPrivileges(read);
-  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges(read);
+  const rulesCapabilities = kibanaCapabilities[RULES_FEATURE_ID];
+  const readRules = rulesCapabilities?.[RULES_UI_READ] === true;
+  const editRules = rulesCapabilities?.[RULES_UI_EDIT] === true;
+
+  const shouldFetchListPrivileges = read || readRules;
+
+  const listPrivileges = useFetchListPrivileges(shouldFetchListPrivileges);
+  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges();
   const endpointPrivileges = useEndpointPrivileges();
 
-  const [timelinePrivileges, setTimelinePrivileges] = useState(
-    extractTimelineCapabilities(kibanaCapabilities)
+  const siemPrivileges = useMemo(
+    () => ({
+      crud,
+      read,
+    }),
+    [crud, read]
   );
-  const [notesPrivileges, setNotesPrivileges] = useState(
-    extractNotesCapabilities(kibanaCapabilities)
+
+  const timelinePrivileges = useMemo(
+    () => extractTimelineCapabilities(kibanaCapabilities),
+    [kibanaCapabilities]
   );
 
-  useEffect(() => {
-    setNotesPrivileges((currPrivileges) => {
-      const { read: notesRead, crud: notesCrud } = extractNotesCapabilities(kibanaCapabilities);
-      if (currPrivileges.read !== notesRead || currPrivileges.crud !== notesCrud) {
-        return { read: notesRead, crud: notesCrud };
-      }
-      return currPrivileges;
-    });
-  }, [kibanaCapabilities]);
+  const notesPrivileges = useMemo(
+    () => extractNotesCapabilities(kibanaCapabilities),
+    [kibanaCapabilities]
+  );
 
-  useEffect(() => {
-    setTimelinePrivileges((currPrivileges) => {
-      const { read: timelineRead, crud: timelineCrud } =
-        extractTimelineCapabilities(kibanaCapabilities);
-      if (currPrivileges.read !== timelineRead || currPrivileges.crud !== timelineCrud) {
-        return { read: timelineRead, crud: timelineCrud };
-      }
-      return currPrivileges;
-    });
-  }, [kibanaCapabilities]);
+  const rulesPrivileges = useMemo(() => {
+    return {
+      read: readRules,
+      edit: editRules,
+    };
+  }, [readRules, editRules]);
 
-  useEffect(() => {
-    setKibanaSecuritySolutionsPrivileges((currPrivileges) => {
-      if (currPrivileges.read !== read || currPrivileges.crud !== crud) {
-        return { read, crud };
-      }
-      return currPrivileges;
-    });
-  }, [crud, read]);
+  const contextValue = useMemo(
+    () => ({
+      listPrivileges,
+      detectionEnginePrivileges,
+      endpointPrivileges,
+      siemPrivileges,
+      timelinePrivileges,
+      notesPrivileges,
+      rulesPrivileges,
+    }),
+    [
+      listPrivileges,
+      detectionEnginePrivileges,
+      endpointPrivileges,
+      siemPrivileges,
+      timelinePrivileges,
+      notesPrivileges,
+      rulesPrivileges,
+    ]
+  );
 
   return (
-    <UserPrivilegesContext.Provider
-      value={{
-        listPrivileges,
-        detectionEnginePrivileges,
-        endpointPrivileges,
-        kibanaSecuritySolutionsPrivileges,
-        timelinePrivileges,
-        notesPrivileges,
-      }}
-    >
-      {children}
-    </UserPrivilegesContext.Provider>
+    <UserPrivilegesContext.Provider value={contextValue}>{children}</UserPrivilegesContext.Provider>
   );
 };

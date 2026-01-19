@@ -15,7 +15,7 @@ export class IntegrationRetriever {
     return this.clients.data.integrations.populate();
   }
 
-  public async getIntegrations(semanticString: string): Promise<RuleMigrationIntegration[]> {
-    return this.clients.data.integrations.retrieveIntegrations(semanticString);
+  public async search(semanticString: string): Promise<RuleMigrationIntegration[]> {
+    return this.clients.data.integrations.semanticSearch(semanticString);
   }
 }

@@ -9,7 +9,7 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import { BASE_TRIGGERS_ACTIONS_UI_API_PATH } from '../../../constants';
-import { UiConfig } from '.';
+import type { UiConfig } from '.';
 
 export const fetchUiConfig = async ({ http }: { http: HttpStart }): Promise<UiConfig> => {
   return http.get<UiConfig>(`${BASE_TRIGGERS_ACTIONS_UI_API_PATH}/_config`);

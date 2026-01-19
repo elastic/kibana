@@ -19,7 +19,12 @@ import type {
   OutputPreset,
   AgentlessPolicy,
 } from '../../common/types';
-import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
+import type {
+  AgentStatus,
+  AgentType,
+  AgentUpgrade,
+  FleetServerAgentComponent,
+} from '../../common/types/models';
 
 import type {
   PackagePolicy,
@@ -27,7 +32,7 @@ import type {
   PackagePolicyPackage,
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
-import type { PolicySecretReference } from '../../common/types/models/secret';
+import type { SecretReference } from '../../common/types/models/secret';
 import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
 import type {
   KafkaPartitionType,
@@ -35,6 +40,11 @@ import type {
   KafkaTopicWhenType,
   SimpleSOAssetType,
 } from '../../common/types';
+import type {
+  CloudProvider,
+  CloudConnectorVars,
+  AccountType,
+} from '../../common/types/models/cloud_connector';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -92,6 +102,9 @@ export interface AgentSOAttributes {
   tags?: string[];
   components?: FleetServerAgentComponent[];
   packages?: string[];
+  namespaces?: string[];
+  last_known_status?: AgentStatus;
+  upgrade?: AgentUpgrade;
 }
 
 export interface FleetProxySOAttributes {
@@ -111,6 +124,14 @@ export interface FleetServerHostSOAttributes {
   is_preconfigured: boolean;
   is_internal?: boolean;
   proxy_id?: string | null;
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+      es_key?: { id: string };
+      agent_key?: { id: string };
+    };
+  };
+  ssl?: string | null;
 }
 
 export interface PackagePolicySOAttributes {
@@ -129,7 +150,7 @@ export interface PackagePolicySOAttributes {
   updated_by: string;
   description?: string;
   is_managed?: boolean;
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   package?: PackagePolicyPackage;
   vars?: PackagePolicyConfigRecord;
   elasticsearch?: {
@@ -140,9 +161,10 @@ export interface PackagePolicySOAttributes {
   agents?: number;
   overrides?: any | null;
   bump_agent_policy_revision?: boolean;
+  latest_revision?: boolean;
 }
 
-interface OutputSoBaseAttributes {
+export interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
   name: string;
@@ -158,6 +180,12 @@ interface OutputSoBaseAttributes {
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
   preset?: OutputPreset;
+  write_to_logs_streams?: boolean | null;
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+    };
+  };
 }
 
 interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
@@ -167,19 +195,21 @@ interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
 
 export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
   type: OutputType['RemoteElasticsearch'];
-  service_token?: string;
+  service_token?: string | null;
   secrets?: {
     service_token?: { id: string };
-  };
-}
-
-interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
-  type: OutputType['Logstash'];
-  secrets?: {
     ssl?: {
       key?: { id: string };
     };
   };
+  sync_integrations?: boolean;
+  kibana_url?: string;
+  kibana_api_key?: string | null;
+  sync_uninstalled_integrations?: boolean;
+}
+
+interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Logstash'];
 }
 
 export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
@@ -242,12 +272,20 @@ export interface SettingsSOAttributes {
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
+  action_secret_storage_requirements_met?: boolean;
+  ssl_secret_storage_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {
     enabled: boolean;
     is_preconfigured: boolean;
   };
+  ilm_migration_status?: {
+    logs?: 'success' | null;
+    metrics?: 'success' | null;
+    synthetics?: 'success' | null;
+  };
+  integration_knowledge_enabled?: boolean;
 }
 
 export interface SpaceSettingsSOAttributes {
@@ -261,5 +299,21 @@ export interface DownloadSourceSOAttributes {
   is_default: boolean;
   source_id?: string;
   proxy_id?: string | null;
+  ssl?: string | null; // encrypted ssl field
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+    };
+  };
 }
 export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];
+
+export interface CloudConnectorSOAttributes {
+  name: string;
+  namespace?: string;
+  cloudProvider: CloudProvider;
+  accountType?: AccountType;
+  vars: CloudConnectorVars;
+  created_at: string;
+  updated_at: string;
+}

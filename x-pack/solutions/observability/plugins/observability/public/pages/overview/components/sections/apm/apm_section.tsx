@@ -5,23 +5,15 @@
  * 2.0.
  */
 
-import {
-  Axis,
-  BarSeries,
-  niceTimeFormatter,
-  Position,
-  ScaleType,
-  Settings,
-  XYBrushEvent,
-} from '@elastic/charts';
+import type { XYBrushEvent } from '@elastic/charts';
+import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { useContext } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { ThemeContext } from 'styled-components';
 import { useChartThemes, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import { SectionContainer } from '../section_container';
@@ -54,7 +46,7 @@ function formatTpmStat(value?: number) {
 }
 
 export function APMSection({ bucketSize }: Props) {
-  const theme = useContext(ThemeContext);
+  const { euiTheme } = useEuiTheme();
   const chartThemes = useChartThemes();
   const history = useHistory();
   const { forceUpdate, hasDataMap } = useHasData();
@@ -92,12 +84,10 @@ export function APMSection({ bucketSize }: Props) {
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const transactionsColor = theme.eui.euiColorVis1;
-
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.apm.title', {
-        defaultMessage: 'Services',
+        defaultMessage: 'Service inventory',
       })}
       appLink={{
         href: appLink,
@@ -112,7 +102,7 @@ export function APMSection({ bucketSize }: Props) {
           <StyledStat
             title={numeral(stats?.services.value).format('0a')}
             description={i18n.translate('xpack.observability.overview.apm.services', {
-              defaultMessage: 'Services',
+              defaultMessage: 'Service inventory',
             })}
             isLoading={isLoading}
             data-test-subj="apmServiceStat"
@@ -132,17 +122,12 @@ export function APMSection({ bucketSize }: Props) {
                   {i18n.translate('xpack.observability.overview.apm.throughput', {
                     defaultMessage: 'Throughput',
                   })}{' '}
-                  <EuiIcon
-                    size="s"
-                    color="subdued"
-                    type="questionInCircle"
-                    className="eui-alignCenter"
-                  />
+                  <EuiIcon size="s" color="subdued" type="question" className="eui-alignCenter" />
                 </>
               </EuiToolTip>
             }
             isLoading={isLoading}
-            color={transactionsColor}
+            // color={transactionsColor}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -164,7 +149,7 @@ export function APMSection({ bucketSize }: Props) {
               yScaleType={ScaleType.Linear}
               xAccessor={'x'}
               yAccessors={['y']}
-              color={transactionsColor}
+              color={euiTheme.colors.vis.euiColorVis0}
             />
             <Axis
               id="y-axis"

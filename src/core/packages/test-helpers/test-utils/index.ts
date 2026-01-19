@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { setupServer } from './src/setup_server';
+export { setupServer, type SetupServerReturn } from './src/setup_server';
 export { createExportableType } from './src/create_exportable_type';
 export { createHiddenTypeVariants } from './src/create_hidden_type_variants';

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import type { LogstashPluginRouter } from '../../types';
 
@@ -27,6 +27,12 @@ export function registerPipelinesListRoute(router: LogstashPluginRouter) {
   router.get(
     {
       path: '/api/logstash/pipelines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get all managed Logstash pipelines`,

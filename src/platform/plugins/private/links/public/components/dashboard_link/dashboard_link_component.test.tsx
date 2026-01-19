@@ -14,12 +14,14 @@ import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import type { DashboardLinkProps } from './dashboard_link_component';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { getMockLinksParentApi } from '../../mocks';
-import { ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { EuiThemeProvider } from '@elastic/eui';
 
 function createMockLinksParent({
   initialQuery,
@@ -52,6 +54,37 @@ describe('Dashboard link component', () => {
     description: 'Dashboard 1 description',
   };
 
+  const renderComponent = (overrides?: Partial<DashboardLinkProps>) => {
+    const parentApi = createMockLinksParent({});
+    const { rerender, ...rtlRest } = render(
+      <EuiThemeProvider>
+        <DashboardLinkComponent
+          link={resolvedLink}
+          layout={LINKS_VERTICAL_LAYOUT}
+          parentApi={parentApi}
+          {...overrides}
+        />
+      </EuiThemeProvider>
+    );
+
+    return {
+      ...rtlRest,
+      rerender: (newOverrides: Partial<DashboardLinkProps>) => {
+        return rerender(
+          <EuiThemeProvider>
+            <DashboardLinkComponent
+              link={resolvedLink}
+              layout={LINKS_VERTICAL_LAYOUT}
+              parentApi={parentApi}
+              {...overrides}
+              {...newOverrides}
+            />
+          </EuiThemeProvider>
+        );
+      },
+    };
+  };
+
   beforeEach(async () => {
     window.open = jest.fn();
   });
@@ -62,13 +95,7 @@ describe('Dashboard link component', () => {
 
   test('by default uses navigate to open in same tab', async () => {
     const parentApi = createMockLinksParent({});
-    render(
-      <DashboardLinkComponent
-        link={resolvedLink}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    renderComponent({ parentApi });
 
     // renders dashboard title
     const link = screen.getByTestId('dashboardLink--foo');
@@ -83,7 +110,7 @@ describe('Dashboard link component', () => {
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
       filters: [],
-      timeRange: {
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },
@@ -92,14 +119,7 @@ describe('Dashboard link component', () => {
   });
 
   test('modified click does not trigger event.preventDefault', async () => {
-    const parentApi = createMockLinksParent({});
-    render(
-      <DashboardLinkComponent
-        link={resolvedLink}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    renderComponent();
     const link = screen.getByTestId('dashboardLink--foo');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
     const preventDefault = jest.spyOn(clickEvent, 'preventDefault');
@@ -109,16 +129,14 @@ describe('Dashboard link component', () => {
 
   test('openInNewTab uses window.open, not navigateToApp, and renders external icon', async () => {
     const parentApi = createMockLinksParent({});
-    render(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
+      },
+      parentApi,
+    });
+
     const link = screen.getByTestId('dashboardLink--foo');
     expect(link).toBeInTheDocument();
     // external link icon is rendered
@@ -149,19 +167,17 @@ describe('Dashboard link component', () => {
       to: 'now',
     });
 
-    render(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          options: DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        options: DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+      },
+      parentApi,
+    });
+
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
-      timeRange: { from: 'now-7d', to: 'now' },
+      time_range: { from: 'now-7d', to: 'now' },
       filters: initialFilters,
       query: initialQuery,
     });
@@ -185,19 +201,17 @@ describe('Dashboard link component', () => {
       to: 'now',
     });
 
-    render(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          options: {
-            ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-            useCurrentDateRange: false,
-          },
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        options: {
+          ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+          useCurrentDateRange: false,
+        },
+      },
+      parentApi,
+    });
+
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
       filters: initialFilters,
@@ -223,40 +237,33 @@ describe('Dashboard link component', () => {
       to: 'now',
     });
 
-    render(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          options: {
-            ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-            useCurrentFilters: false,
-          },
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        options: {
+          ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+          useCurrentFilters: false,
+        },
+      },
+      parentApi,
+    });
+
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
-      timeRange: { from: 'now-7d', to: 'now' },
+      time_range: { from: 'now-7d', to: 'now' },
       filters: [],
     });
   });
 
   test('shows an error when fetchDashboard fails', async () => {
-    const parentApi = createMockLinksParent({});
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        title: 'Error fetching dashboard',
+        error: new Error('not found'),
+      },
+    });
 
-    render(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          title: 'Error fetching dashboard',
-          error: new Error('not found'),
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
     const link = await screen.findByTestId('dashboardLink--foo--error');
     expect(link).toHaveTextContent(DashboardLinkStrings.getDashboardErrorLabel());
   });
@@ -266,17 +273,14 @@ describe('Dashboard link component', () => {
     parentApi.savedObjectId$ = new BehaviorSubject<string | undefined>('123');
     parentApi.title$ = new BehaviorSubject<string | undefined>('current dashboard');
 
-    render(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          destination: '123',
-          id: 'bar',
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        destination: '123',
+        id: 'bar',
+      },
+      parentApi,
+    });
 
     const link = screen.getByTestId('dashboardLink--bar');
     expect(link).toHaveTextContent('current dashboard');
@@ -286,19 +290,13 @@ describe('Dashboard link component', () => {
   });
 
   test('shows dashboard title and description in tooltip', async () => {
-    const parentApi = createMockLinksParent({});
-
-    render(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          title: 'another dashboard',
-          description: 'something awesome',
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        title: 'another dashboard',
+        description: 'something awesome',
+      },
+    });
 
     const link = screen.getByTestId('dashboardLink--foo');
     await userEvent.hover(link);
@@ -315,48 +313,38 @@ describe('Dashboard link component', () => {
       savedObjectId$: new BehaviorSubject<string | undefined>('123'),
     };
 
-    const { rerender } = render(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          destination: '123',
-          id: 'bar',
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    const { rerender } = renderComponent({
+      link: {
+        ...resolvedLink,
+        destination: '123',
+        id: 'bar',
+      },
+      parentApi,
+    });
+
     expect(await screen.findByTestId('dashboardLink--bar')).toHaveTextContent('old title');
 
     parentApi.title$.next('new title');
-    rerender(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          destination: '123',
-          id: 'bar',
-          label: undefined,
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    rerender({
+      link: {
+        ...resolvedLink,
+        destination: '123',
+        id: 'bar',
+        label: undefined,
+      },
+    });
     expect(await screen.findByTestId('dashboardLink--bar')).toHaveTextContent('new title');
   });
 
   test('can override link label', async () => {
     const label = 'my custom label';
-    const parentApi = createMockLinksParent({});
-    render(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          label,
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        label,
+      },
+    });
+
     const link = screen.getByTestId('dashboardLink--foo');
     expect(link).toHaveTextContent(label);
     await userEvent.hover(link);
@@ -369,18 +357,15 @@ describe('Dashboard link component', () => {
     const parentApi = createMockLinksParent({});
     parentApi.savedObjectId$ = new BehaviorSubject<string | undefined>('123');
 
-    render(
-      <DashboardLinkComponent
-        link={{
-          ...resolvedLink,
-          destination: '123',
-          id: 'bar',
-          label: customLabel,
-        }}
-        layout={LINKS_VERTICAL_LAYOUT}
-        parentApi={parentApi}
-      />
-    );
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        destination: '123',
+        id: 'bar',
+        label: customLabel,
+      },
+      parentApi,
+    });
 
     const link = screen.getByTestId('dashboardLink--bar');
     expect(link).toHaveTextContent(customLabel);

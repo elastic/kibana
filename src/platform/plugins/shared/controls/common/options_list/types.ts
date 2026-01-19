@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
+import type {
+  OptionsListControlState,
+  OptionsListDSLControlState,
+  OptionsListESQLControlState,
+  OptionsListSelection,
+} from '@kbn/controls-schemas';
+import type { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-
-import { OptionsListSelection } from './options_list_selections';
-import { OptionsListSortingType } from './suggestions_sorting';
-import { DefaultDataControlState } from '../types';
-import { OptionsListSearchTechnique } from './suggestions_searching';
 
 /**
  * ----------------------------------------------------------------
@@ -21,25 +22,13 @@ import { OptionsListSearchTechnique } from './suggestions_searching';
  * ----------------------------------------------------------------
  */
 
-export interface OptionsListDisplaySettings {
-  placeholder?: string;
-  hideActionBar?: boolean;
-  hideExclude?: boolean;
-  hideExists?: boolean;
-  hideSort?: boolean;
-}
-
-export interface OptionsListControlState
-  extends DefaultDataControlState,
-    OptionsListDisplaySettings {
-  searchTechnique?: OptionsListSearchTechnique;
-  sort?: OptionsListSortingType;
-  selectedOptions?: OptionsListSelection[];
-  existsSelected?: boolean;
-  runPastTimeout?: boolean;
-  singleSelect?: boolean;
-  exclude?: boolean;
-}
+export const isOptionsListESQLControlState = (
+  state: OptionsListControlState | undefined
+): state is OptionsListESQLControlState =>
+  typeof state !== 'undefined' &&
+  Object.hasOwn(state, 'esqlQuery') &&
+  Object.hasOwn(state, 'controlType') &&
+  !Object.hasOwn(state, 'fieldName');
 
 /**
  * ----------------------------------------------------------------
@@ -92,7 +81,7 @@ export type OptionsListRequest = Omit<
  */
 export interface OptionsListRequestBody
   extends Pick<
-    OptionsListControlState,
+    OptionsListDSLControlState,
     'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
   > {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
@@ -103,4 +92,5 @@ export interface OptionsListRequestBody
   searchString?: string;
   fieldSpec?: FieldSpec;
   size: number;
+  isReload?: boolean;
 }

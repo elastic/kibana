@@ -11,14 +11,16 @@ import supertest from 'supertest';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { IRouter, RouteRegistrar } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createConfigService, createHttpService } from '@kbn/core-http-server-mocks';
-import { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { createConfigService } from '@kbn/core-http-server-mocks';
+import type { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { schema } from '@kbn/config-schema';
-import { IConfigServiceMock } from '@kbn/config-mocks';
-import { Logger } from '@kbn/logging';
+import type { IConfigServiceMock } from '@kbn/config-mocks';
+import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
+import { createInternalHttpService } from '../utilities';
 
 const actualVersion = kibanaPackageJson.version;
 const versionHeader = 'kbn-version';
@@ -63,8 +65,11 @@ describe('core lifecycle handlers', () => {
   beforeEach(async () => {
     const configService = createConfigService(testConfig);
     logger = loggerMock.create();
-    server = createHttpService({ configService, logger });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService({ configService, logger });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
     innerServer = serverSetup.server;
@@ -78,9 +83,12 @@ describe('core lifecycle handlers', () => {
     const testRoute = '/version_check/test/route';
 
     beforeEach(async () => {
-      router.get({ path: testRoute, validate: false }, (context, req, res) => {
-        return res.ok({ body: 'ok' });
-      });
+      router.get(
+        { path: testRoute, validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({ body: 'ok' });
+        }
+      );
       await server.start();
     });
 
@@ -123,12 +131,22 @@ describe('core lifecycle handlers', () => {
     };
 
     beforeEach(async () => {
-      router.get({ path: testRoute, validate: false }, (context, req, res) => {
-        return res.ok({ body: 'ok' });
-      });
-      router.get({ path: testErrorRoute, validate: false }, (context, req, res) => {
-        return res.badRequest({ body: 'bad request' });
-      });
+      router.get(
+        { path: testRoute, validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({ body: 'ok' });
+        }
+      );
+      router.get(
+        {
+          path: testErrorRoute,
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+        },
+        (context, req, res) => {
+          return res.badRequest({ body: 'bad request' });
+        }
+      );
       await server.start();
     });
 
@@ -155,25 +173,37 @@ describe('core lifecycle handlers', () => {
     };
 
     beforeEach(async () => {
-      router.get({ path: testPath, validate: false }, (context, req, res) => {
-        return res.ok({ body: 'ok' });
-      });
+      router.get(
+        { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({ body: 'ok' });
+        }
+      );
 
       destructiveMethods.forEach((method) => {
         ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
-          { path: testPath, validate: false },
+          { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
         );
         ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
-          { path: allowlistedTestPath, validate: false },
+          {
+            path: allowlistedTestPath,
+            validate: false,
+            security: { authz: { enabled: false, reason: '' } },
+          },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
         );
         ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
-          { path: xsrfDisabledTestPath, validate: false, options: { xsrfRequired: false } },
+          {
+            path: xsrfDisabledTestPath,
+            validate: false,
+            security: { authz: { enabled: false, reason: '' } },
+            options: { xsrfRequired: false },
+          },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
@@ -245,14 +275,18 @@ describe('core lifecycle handlers', () => {
           restrictInternalApis: true,
         },
       });
-      server = createHttpService({ configService });
-      await server.preboot({ context: contextServiceMock.createPrebootContract() });
+      server = createInternalHttpService({ configService });
+      await server.preboot({
+        context: contextServiceMock.createPrebootContract(),
+        docLinks: docLinksServiceMock.createSetupContract(),
+      });
       const serverSetup = await server.setup(setupDeps);
       router = serverSetup.createRouter('/');
       innerServer = serverSetup.server;
       router.get(
         {
           path: testInternalRoute,
+          security: { authz: { enabled: false, reason: '' } },
           validate: { query: schema.object({ myValue: schema.string() }) },
           options: { access: 'internal' },
         },
@@ -263,6 +297,7 @@ describe('core lifecycle handlers', () => {
       router.get(
         {
           path: testPublicRoute,
+          security: { authz: { enabled: false, reason: '' } },
           validate: { query: schema.object({ myValue: schema.string() }) },
           options: { access: 'public' },
         },
@@ -321,9 +356,12 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
   beforeEach(async () => {
     logger = loggerMock.create();
     const configService = createConfigService({ server: { restrictInternalApis: true } });
-    server = createHttpService({ configService, logger });
+    server = createInternalHttpService({ configService, logger });
 
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
     innerServer = serverSetup.server;
@@ -338,13 +376,23 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
     const testPublicRoute = '/restrict_internal_routes/test/route_public';
     beforeEach(async () => {
       router.get(
-        { path: testInternalRoute, validate: false, options: { access: 'internal' } },
+        {
+          path: testInternalRoute,
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+          options: { access: 'internal' },
+        },
         (context, req, res) => {
           return res.ok({ body: 'ok()' });
         }
       );
       router.get(
-        { path: testPublicRoute, validate: false, options: { access: 'public' } },
+        {
+          path: testPublicRoute,
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+          options: { access: 'public' },
+        },
         (context, req, res) => {
           return res.ok({ body: 'ok()' });
         }
@@ -390,16 +438,25 @@ describe('core lifecycle handlers with no strict client version check', () => {
         },
       },
     });
-    server = createHttpService({ configService, logger, buildNum: 1234 });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService({ configService, logger, buildNum: 1234 });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
-    router.get({ path: testRouteGood, validate: false }, (context, req, res) => {
-      return res.ok({ body: 'ok' });
-    });
-    router.get({ path: testRouteBad, validate: false }, (context, req, res) => {
-      return res.custom({ body: 'nok', statusCode: 500 });
-    });
+    router.get(
+      { path: testRouteGood, validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => {
+        return res.ok({ body: 'ok' });
+      }
+    );
+    router.get(
+      { path: testRouteBad, validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => {
+        return res.custom({ body: 'nok', statusCode: 500 });
+      }
+    );
     innerServer = serverSetup.server;
     await server.start();
   });

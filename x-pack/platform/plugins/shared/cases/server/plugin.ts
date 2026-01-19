@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import type {
-  IContextProvider,
-  KibanaRequest,
-  Logger,
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
+import {
+  type IContextProvider,
+  type KibanaRequest,
+  type Logger,
+  type PluginInitializerContext,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  SavedObjectsClient,
 } from '@kbn/core/server';
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { APP_ID } from '../common/constants';
+import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
 
 import type { CasesClient } from './client';
 import type {
@@ -47,6 +48,11 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import type { ServerlessProjectType } from '../common/constants/types';
+
+import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
+import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
+import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 
 export class CasePlugin
   implements
@@ -66,6 +72,8 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private incrementalIdTaskManager?: IncrementalIdTaskManager;
+  private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -75,9 +83,13 @@ export class CasePlugin
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup(core: CoreSetup, plugins: CasesServerSetupDependencies): CasesServerSetup {
+  public setup(
+    core: CoreSetup<CasesServerStartDependencies>,
+    plugins: CasesServerSetupDependencies
+  ): CasesServerSetup {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
@@ -90,6 +102,12 @@ export class CasePlugin
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
+    registerCasesAnalyticsIndexesTasks({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      core,
+      analyticsConfig: this.caseConfig.analytics,
+    });
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -100,6 +118,7 @@ export class CasePlugin
       const casesFeatures = getCasesKibanaFeatures();
       plugins.features.registerKibanaFeature(casesFeatures.v1);
       plugins.features.registerKibanaFeature(casesFeatures.v2);
+      plugins.features.registerKibanaFeature(casesFeatures.v3);
     }
 
     registerSavedObjects({
@@ -116,25 +135,34 @@ export class CasePlugin
       })
     );
 
-    if (plugins.taskManager && plugins.usageCollection) {
-      createCasesTelemetry({
-        core,
-        taskManager: plugins.taskManager,
-        usageCollection: plugins.usageCollection,
-        logger: this.logger,
-        kibanaVersion: this.kibanaVersion,
-      });
+    if (plugins.taskManager) {
+      if (plugins.usageCollection) {
+        createCasesTelemetry({
+          core,
+          taskManager: plugins.taskManager,
+          usageCollection: plugins.usageCollection,
+          logger: this.logger,
+          kibanaVersion: this.kibanaVersion,
+        });
+      }
+
+      if (this.caseConfig.incrementalId.enabled) {
+        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
+          plugins.taskManager,
+          this.caseConfig.incrementalId,
+          this.logger,
+          plugins.usageCollection
+        );
+      }
     }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
-    const isServerless = plugins.cloud?.isServerlessEnabled;
-
     registerRoutes({
       router,
       routes: [
-        ...getExternalRoutes({ isServerless, docLinks: core.docLinks }),
+        ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
         ...getInternalRoutes(this.userProfileService),
       ],
       logger: this.logger,
@@ -158,16 +186,18 @@ export class CasePlugin
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
-    const isServerlessSecurity =
-      plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'security';
+    const serverlessProjectType = this.isServerless
+      ? (plugins.cloud?.serverless.projectType as ServerlessProjectType)
+      : undefined;
 
     registerConnectorTypes({
       actions: plugins.actions,
       alerting: plugins.alerting,
       core,
+      logger: this.logger,
       getCasesClient,
       getSpaceId,
-      isServerlessSecurity,
+      serverlessProjectType,
     });
 
     return {
@@ -179,6 +209,7 @@ export class CasePlugin
           this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
         },
       },
+      config: this.caseConfig,
     };
   }
 
@@ -187,6 +218,27 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
+
+      if (this.caseConfig.incrementalId.enabled) {
+        void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
+      }
+      if (this.caseConfig.analytics.index?.enabled) {
+        const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+          CASE_SAVED_OBJECT,
+        ]);
+        const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
+        scheduleCAISchedulerTask({
+          taskManager: plugins.taskManager,
+          logger: this.logger,
+        }).catch(() => {}); // it shouldn't reject, but just in case
+        createCasesAnalyticsIndexes({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+          isServerless: this.isServerless,
+          taskManager: plugins.taskManager,
+          savedObjectsClient: internalSavedObjectsClient,
+        }).catch(() => {}); // it shouldn't reject, but just in case
+      }
     }
 
     this.userProfileService.initialize({
@@ -227,6 +279,7 @@ export class CasePlugin
       getExternalReferenceAttachmentTypeRegistry: () =>
         this.externalReferenceAttachmentTypeRegistry,
       getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
+      config: this.caseConfig,
     };
   }
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { getCapabilitiesForRollupIndices } from '@kbn/data-views-plugin/server';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Returns a list of all rollup index names
@@ -14,7 +15,7 @@ import { RouteDependencies } from '../../../types';
 export const registerGetRoute = ({
   router,
   license,
-  lib: { handleEsError, getCapabilitiesForRollupIndices },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.get(
     {

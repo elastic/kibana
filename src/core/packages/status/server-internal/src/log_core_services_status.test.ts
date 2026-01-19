@@ -11,11 +11,11 @@ import { Subject } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { type CoreStatus, ServiceStatusLevels, ServiceStatus } from '@kbn/core-status-common';
+import type { ServiceStatus } from '@kbn/core-status-common';
+import { type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { logCoreStatusChanges } from './log_core_services_status';
 
-const delay = async (millis: number = 10) =>
-  await new Promise((resolve) => setTimeout(resolve, millis));
+const jestDelay = async (millis: number = 10) => await jest.advanceTimersByTimeAsync(millis);
 
 describe('logCoreStatusChanges', () => {
   const serviceUnavailable: ServiceStatus = {
@@ -33,6 +33,7 @@ describe('logCoreStatusChanges', () => {
   let l: Logger; // using short name for clarity
 
   beforeEach(() => {
+    jest.useFakeTimers();
     core$ = new Subject<CoreStatus>();
     stop$ = new Subject<void>();
     loggerFactory = loggingSystemMock.create();
@@ -40,6 +41,8 @@ describe('logCoreStatusChanges', () => {
   });
 
   afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
     stop$.next();
     stop$.complete();
     loggingSystemMock.clear(loggerFactory);
@@ -56,7 +59,7 @@ describe('logCoreStatusChanges', () => {
     core$.next({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable });
     core$.next({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable });
 
-    await delay();
+    await jestDelay();
 
     expect(l.get).toBeCalledTimes(3);
     expect(l.get).nthCalledWith(1, 'elasticsearch');
@@ -82,7 +85,7 @@ describe('logCoreStatusChanges', () => {
     core$.next({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable });
     core$.next({ elasticsearch: serviceAvailable, savedObjects: serviceAvailable });
 
-    await delay();
+    await jestDelay();
 
     expect(l.get).toBeCalledTimes(2);
     expect(l.get).nthCalledWith(1, 'elasticsearch');
@@ -130,7 +133,7 @@ describe('logCoreStatusChanges', () => {
     core$.next({ savedObjects: serviceAvailable, elasticsearch: serviceAvailable });
 
     // give the 'bufferTime' operator enough time to emit and log
-    await delay(20);
+    await jestDelay(1_000);
 
     expect(l.get).toBeCalledWith('elasticsearch');
     expect(l.get).toBeCalledWith('savedObjects');
@@ -221,7 +224,7 @@ describe('logCoreStatusChanges', () => {
     });
 
     // give the 'bufferTime' operator enough time to emit and log
-    await delay(20);
+    await jestDelay(1_000);
 
     // emit a last message (some time after)
     core$.next({

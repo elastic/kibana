@@ -8,8 +8,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 
 export const HELLO_LOCATOR = 'HELLO_LOCATOR';
 

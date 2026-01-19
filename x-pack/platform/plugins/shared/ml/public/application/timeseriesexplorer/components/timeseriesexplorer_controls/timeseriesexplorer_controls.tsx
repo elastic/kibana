@@ -26,7 +26,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import type { MlJobState } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlJobState } from '@elastic/elasticsearch/lib/api/types';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../../../cases/constants';
 import type { CombinedJobWithStats } from '../../../../../server/shared';
 import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
@@ -178,7 +178,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
   }
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
       const config = getDefaultEmbeddablePanelConfig(selectedJobId);
 
@@ -193,14 +193,14 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
       };
 
       const state = {
-        input: embeddableInput,
+        serializedState: embeddableInput,
         type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },

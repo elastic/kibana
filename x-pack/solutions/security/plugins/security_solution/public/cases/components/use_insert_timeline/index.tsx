@@ -11,12 +11,12 @@ import { isEmpty } from 'lodash/fp';
 
 import { getTimelineUrl, useFormatUrl } from '../../../common/components/link_to';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { timelineSelectors, timelineActions } from '../../../timelines/store';
+import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { SecurityPageName } from '../../../app/types';
 import { setInsertTimeline } from '../../../timelines/store/actions';
 
 export interface UseInsertTimelineReturn {
-  handleOnTimelineChange: (title: string, id: string | null, graphEventId?: string) => void;
+  handleOnTimelineChange: (title: string, id: string | null) => void;
 }
 
 export const useInsertTimeline = (
@@ -29,8 +29,8 @@ export const useInsertTimeline = (
   const insertTimeline = useShallowEqualSelector(timelineSelectors.selectInsertTimeline);
 
   const handleOnTimelineChange = useCallback(
-    (title: string, id: string | null, graphEventId?: string) => {
-      const url = formatUrl(getTimelineUrl(id ?? '', graphEventId), {
+    (title: string, id: string | null) => {
+      const url = formatUrl(getTimelineUrl(id ?? ''), {
         absolute: true,
         skipSearch: true,
       });
@@ -49,11 +49,7 @@ export const useInsertTimeline = (
   useEffect(() => {
     if (insertTimeline != null && value != null) {
       dispatch(timelineActions.showTimeline({ id: insertTimeline.timelineId, show: false }));
-      handleOnTimelineChange(
-        insertTimeline.timelineTitle,
-        insertTimeline.timelineSavedObjectId,
-        insertTimeline.graphEventId
-      );
+      handleOnTimelineChange(insertTimeline.timelineTitle, insertTimeline.timelineSavedObjectId);
       dispatch(setInsertTimeline(null));
     }
   }, [insertTimeline, dispatch, handleOnTimelineChange, value]);

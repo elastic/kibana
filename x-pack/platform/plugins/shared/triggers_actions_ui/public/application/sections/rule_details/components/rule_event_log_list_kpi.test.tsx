@@ -13,7 +13,7 @@ import { loadGlobalExecutionKPIAggregations } from '../../../lib/rule_api/load_g
 import { RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib';
-import { IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
 
 const addDangerMock = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => ({

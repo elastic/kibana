@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stubFieldSpecMap, stubLogstashFieldSpecMap } from './field.stub';
+import { DataViewType } from './types';
+import {
+  stubFieldSpecMap,
+  stubFieldSpecWithDateNanosMap,
+  stubLogstashFieldSpecMap,
+} from './field.stub';
 import { createStubDataView } from './data_views/data_view.stub';
 export {
   createStubDataView,
@@ -20,6 +25,25 @@ export const stubDataView = createStubDataView({
     fields: stubFieldSpecMap,
     title: 'logstash-*',
     timeFieldName: '@timestamp',
+  },
+});
+
+export const stubDataViewWithDateNanos = createStubDataView({
+  spec: {
+    id: 'logstash-*',
+    fields: stubFieldSpecWithDateNanosMap,
+    title: 'logstash-*',
+    timeFieldName: '@timestamp',
+  },
+});
+
+export const stubRollupDataView = createStubDataView({
+  spec: {
+    id: 'logstash-*',
+    fields: stubFieldSpecMap,
+    title: 'logstash-*',
+    timeFieldName: '@timestamp',
+    type: DataViewType.ROLLUP,
   },
 });
 

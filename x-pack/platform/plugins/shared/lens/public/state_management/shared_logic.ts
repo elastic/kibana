@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { DataViewSpec, DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Query, Filter } from '@kbn/es-query';
-import { FilterManager } from '@kbn/data-plugin/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type {
+  VisualizationState,
+  DatasourceStates,
+  DatasourceMap,
+  VisualizationMap,
+  Datasource,
+  LensDocument,
+} from '@kbn/lens-common';
 import { DOC_TYPE, INDEX_PATTERN_TYPE } from '../../common/constants';
-import { VisualizationState, DatasourceStates } from '.';
-import { LensDocument } from '../persistence';
-import { DatasourceMap, VisualizationMap, Datasource } from '../types';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(
@@ -32,7 +40,7 @@ export function mergeToNewDoc(
     visualizationMap: VisualizationMap;
     extractFilterReferences: FilterManager['extract'];
   }
-) {
+): LensDocument | undefined {
   const activeVisualization =
     visualization.state && visualization.activeId ? visualizationMap[visualization.activeId] : null;
   const activeDatasource =
@@ -53,14 +61,13 @@ export function mergeToNewDoc(
   );
 
   const persistibleDatasourceStates: Record<string, unknown> = {};
-  const references: SavedObjectReference[] = [];
-  const internalReferences: SavedObjectReference[] = [];
+  const references: Reference[] = [];
+  const internalReferences: Reference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    const { state: persistableState, savedObjectReferences } = datasource.getPersistableState(
-      datasourceStates[id].state
-    );
+    const { state: persistableState, references: persistableReferences } =
+      datasource.getPersistableState(datasourceStates[id].state);
     persistibleDatasourceStates[id] = persistableState;
-    savedObjectReferences.forEach((r) => {
+    persistableReferences.forEach((r) => {
       if (r.type === INDEX_PATTERN_TYPE && adHocDataViews[r.id]) {
         internalReferences.push(r);
       } else {
@@ -71,10 +78,14 @@ export function mergeToNewDoc(
 
   let persistibleVisualizationState = visualization.state;
   if (activeVisualization.getPersistableState) {
-    const { state: persistableState, savedObjectReferences } =
-      activeVisualization.getPersistableState(visualization.state);
+    const { state: persistableState, references: persistableReferences } =
+      activeVisualization.getPersistableState(
+        visualization.state,
+        activeDatasource,
+        datasourceStates[activeDatasource.id]
+      );
     persistibleVisualizationState = persistableState;
-    savedObjectReferences.forEach((r) => {
+    persistableReferences.forEach((r) => {
       if (r.type === INDEX_PATTERN_TYPE && adHocDataViews[r.id]) {
         internalReferences.push(r);
       } else {
@@ -120,5 +131,20 @@ export function mergeToNewDoc(
       internalReferences,
       adHocDataViews: persistableAdHocDataViews,
     },
-  };
+    version: LENS_ITEM_LATEST_VERSION,
+  } satisfies LensDocument;
+}
+
+export function getActiveDataFromDatatable(
+  defaultLayerId: string,
+  tables: Record<string, Datatable> = {}
+) {
+  return Object.entries(tables).reduce<Record<string, Datatable>>(
+    (acc, [key, value], _index, { length }) => {
+      const id = length === 1 ? defaultLayerId : key;
+      acc[id] = value as Datatable;
+      return acc;
+    },
+    {}
+  );
 }

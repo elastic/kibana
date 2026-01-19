@@ -11,13 +11,15 @@ import React, { memo, useEffect } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
 
-import { APP_ID } from '../../common/constants';
+import { ALERT_DETAILS_REDIRECT_PATH, APP_ID } from '../../common/constants';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
 import { useKibana } from '../common/lib/kibana';
 import type { AppAction } from '../common/store/actions';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { NotFoundPage } from './404';
 import { HomePage } from './home';
+import { AlertDetailsRedirect } from '../detections/pages/alerts/alert_details_redirect';
+import { CASES_FEATURES } from '../cases';
 
 interface RouterProps {
   children: React.ReactNode;
@@ -45,8 +47,16 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
       <Router history={history}>
         <RouteCapture>
           <Routes>
+            <Route
+              path={`${ALERT_DETAILS_REDIRECT_PATH}/:alertId`}
+              component={AlertDetailsRedirect}
+            />
             <Route path="/">
-              <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
+              <CasesContext
+                owner={[APP_ID]}
+                permissions={userCasesPermissions}
+                features={CASES_FEATURES}
+              >
                 <HomePage>{children}</HomePage>
               </CasesContext>
             </Route>

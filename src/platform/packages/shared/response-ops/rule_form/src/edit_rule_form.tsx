@@ -8,12 +8,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { RuleFormData, RuleFormPlugins } from './types';
+import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useUpdateRule } from './common/hooks';
 import { RulePage } from './rule_page';
+import { RuleFlyout } from './rule_flyout';
 import { RuleFormHealthCheckError } from './rule_form_errors/rule_form_health_check_error';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
 import {
@@ -25,6 +27,7 @@ import {
 } from './rule_form_errors';
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
 import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
+import type { RuleFormStepId } from './constants';
 import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 
 export interface EditRuleFormProps {
@@ -32,8 +35,13 @@ export interface EditRuleFormProps {
   plugins: RuleFormPlugins;
   showMustacheAutocompleteSwitch?: boolean;
   connectorFeatureId?: string;
+  isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
+  onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
+  initialMetadata?: RuleTypeMetaData;
+  initialEditStep?: RuleFormStepId;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
@@ -44,8 +52,13 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     connectorFeatureId = 'alerting',
     onCancel,
     onSubmit,
+    isFlyout,
+    onChangeMetaData,
+    initialMetadata,
+    initialEditStep,
   } = props;
-  const { http, notifications, docLinks, ruleTypeRegistry, application, ...deps } = plugins;
+  const { http, notifications, docLinks, ruleTypeRegistry, application, fieldsMetadata, ...deps } =
+    plugins;
   const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useUpdateRule({
@@ -80,7 +93,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     fetchedFormData,
     connectors,
     connectorTypes,
-    aadTemplateFields,
+    alertFields,
     flappingSettings,
   } = useLoadDependencies({
     http,
@@ -89,6 +102,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     ruleTypeRegistry,
     id,
     connectorFeatureId,
+    fieldsMetadata,
   });
 
   const onSave = useCallback(
@@ -103,6 +117,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           actions: newFormData.actions,
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
+          artifacts: newFormData.artifacts,
         },
       });
     },
@@ -120,6 +135,18 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
 
     return hasAllPrivilege && (canExecuteActions || (!canExecuteActions && !actions.length));
   }, [ruleType, fetchedFormData, application]);
+
+  const computedInitialMetadata = useMemo(() => {
+    // Injecting isEdit only for esquery rules to enable this feature: https://github.com/elastic/kibana/issues/226839
+    // to minimize possible changes to other ruletypes
+    if (ruleType?.id === '.es-query') {
+      return {
+        ...initialMetadata,
+        isEdit: true,
+      };
+    }
+    return initialMetadata;
+  }, [ruleType, initialMetadata]);
 
   if (isInitialLoading) {
     return (
@@ -179,40 +206,49 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     return action;
   });
 
+  const RuleFormUIComponent = isFlyout ? RuleFlyout : RulePage;
+
   return (
-    <div data-test-subj="editRuleForm">
-      <RuleFormStateProvider
-        initialRuleFormState={{
-          connectors,
-          connectorTypes,
-          aadTemplateFields,
-          formData: {
-            ...getDefaultFormData({
-              ruleTypeId: fetchedFormData.ruleTypeId,
-              name: fetchedFormData.name,
-              consumer: fetchedFormData.consumer,
-              actions: fetchedFormData.actions,
-            }),
-            ...fetchedFormData,
-            actions: actionsWithFrequency,
-          },
-          id,
-          plugins,
-          minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
-          selectedRuleType: ruleType,
-          selectedRuleTypeModel: ruleTypeModel,
-          availableRuleTypes: getAvailableRuleTypes({
+    <RuleFormStateProvider
+      initialRuleFormState={{
+        connectors,
+        connectorTypes,
+        alertFields,
+        formData: {
+          ...getDefaultFormData({
+            ruleTypeId: fetchedFormData.ruleTypeId,
+            name: fetchedFormData.name,
             consumer: fetchedFormData.consumer,
-            ruleTypes,
-            ruleTypeRegistry,
-          }).map(({ ruleType: rt }) => rt),
-          flappingSettings,
-          validConsumers: DEFAULT_VALID_CONSUMERS,
-          showMustacheAutocompleteSwitch,
-        }}
-      >
-        <RulePage isEdit={true} isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
-      </RuleFormStateProvider>
-    </div>
+            actions: fetchedFormData.actions,
+          }),
+          ...fetchedFormData,
+          actions: actionsWithFrequency,
+        },
+        id,
+        metadata: computedInitialMetadata,
+        plugins,
+        minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+        selectedRuleType: ruleType,
+        selectedRuleTypeModel: ruleTypeModel,
+        availableRuleTypes: getAvailableRuleTypes({
+          consumer: fetchedFormData.consumer,
+          ruleTypes,
+          ruleTypeRegistry,
+        }).map(({ ruleType: rt }) => rt),
+        flappingSettings,
+        validConsumers: DEFAULT_VALID_CONSUMERS,
+        showMustacheAutocompleteSwitch,
+      }}
+    >
+      <RuleFormUIComponent
+        isEdit
+        isSaving={isSaving}
+        onSave={onSave}
+        onCancel={onCancel}
+        onChangeMetaData={onChangeMetaData}
+        initialEditStep={initialEditStep}
+        focusTrapProps={props.focusTrapProps}
+      />
+    </RuleFormStateProvider>
   );
 };

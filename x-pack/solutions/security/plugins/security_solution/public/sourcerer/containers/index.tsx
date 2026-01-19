@@ -8,18 +8,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { PageScope } from '../../data_view_manager/constants';
 import { sourcererSelectors } from '../store';
-import type { SelectedDataView, SourcererDataView, RunTimeMappings } from '../store/model';
-import { SourcererScopeName } from '../store/model';
+import type { RunTimeMappings, SelectedDataView, SourcererDataView } from '../store/model';
 import { checkIfIndicesExist } from '../store/helpers';
 import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
 import { useFetchIndex } from '../../common/containers/source';
 import type { State } from '../../common/store/types';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
-export const useSourcererDataView = (
-  scopeId: SourcererScopeName = SourcererScopeName.default
-): SelectedDataView => {
+export const useSourcererDataView = (scopeId: PageScope = PageScope.default): SelectedDataView => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
@@ -64,13 +65,24 @@ export const useSourcererDataView = (
   );
 
   useEffect(() => {
+    if (newDataViewPickerEnabled) {
+      return;
+    }
+
     if (selectedDataView == null || missingPatterns.length > 0) {
       // old way of fetching indices, legacy timeline
       setLegacyPatterns(selectedPatterns);
-    } else {
+    } else if (legacyPatterns.length > 0) {
+      // Only create a new array reference if legacyPatterns is not empty
       setLegacyPatterns([]);
     }
-  }, [missingPatterns, selectedDataView, selectedPatterns]);
+  }, [
+    legacyPatterns.length,
+    newDataViewPickerEnabled,
+    missingPatterns,
+    selectedDataView,
+    selectedPatterns,
+  ]);
 
   const sourcererDataView = useMemo(() => {
     const _dv =

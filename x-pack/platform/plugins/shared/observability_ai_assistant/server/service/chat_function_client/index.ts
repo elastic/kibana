@@ -4,43 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable max-classes-per-file*/
 
-import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
-import dedent from 'dedent';
+import Ajv, { type ValidateFunction } from 'ajv';
 import { compact, keyBy } from 'lodash';
-import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
-import type {
-  AdHocInstruction,
-  Message,
-  ObservabilityAIAssistantScreenContextRequest,
-} from '../../../common/types';
+import type { Logger } from '@kbn/logging';
+import { createToolValidationError } from '@kbn/inference-plugin/common/chat_complete/errors';
+import { type FunctionResponse } from '../../../common/functions/types';
+import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
 import type {
   FunctionCallChatFunction,
   FunctionHandler,
   FunctionHandlerRegistry,
   InstructionOrCallback,
-  RegisterAdHocInstruction,
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
-
-export class FunctionArgsValidationError extends Error {
-  constructor(public readonly errors: ErrorObject[]) {
-    super('Function arguments are invalid');
-  }
-}
+import { registerGetDataOnScreenFunction } from '../../functions/get_data_on_screen';
 
 const ajv = new Ajv({
   strict: false,
 });
 
-export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
-
 export class ChatFunctionClient {
   private readonly instructions: InstructionOrCallback[] = [];
-  private readonly adhocInstructions: AdHocInstruction[] = [];
 
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
@@ -48,46 +35,9 @@ export class ChatFunctionClient {
   private readonly actions: Required<ObservabilityAIAssistantScreenContextRequest>['actions'];
 
   constructor(private readonly screenContexts: ObservabilityAIAssistantScreenContextRequest[]) {
-    const allData = compact(screenContexts.flatMap((context) => context.data));
-
     this.actions = compact(screenContexts.flatMap((context) => context.actions));
 
-    if (allData.length) {
-      this.registerFunction(
-        {
-          name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
-          description: `Retrieve the structured data of content currently visible on the user's screen. Use this tool to understand what the user is viewing at this moment to provide more accurate and context-aware responses to their questions.`,
-          visibility: FunctionVisibility.AssistantOnly,
-          parameters: {
-            type: 'object',
-            properties: {
-              data: {
-                type: 'array',
-                description:
-                  'The pieces of data you want to look at it. You can request one, or multiple',
-                items: {
-                  type: 'string',
-                  enum: allData.map((data) => data.name),
-                },
-              },
-            },
-            required: ['data' as const],
-          },
-        },
-        async ({ arguments: { data: dataNames } }) => {
-          return {
-            content: allData.filter((data) => dataNames.includes(data.name)),
-          };
-        }
-      );
-
-      this.registerAdhocInstruction({
-        text: `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will retrieve specific content from the user's screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(
-          allData.map((data) => `${data.name}: ${data.description}`).join('\n')
-        )}`,
-        instruction_type: 'application_instruction',
-      });
-    }
+    registerGetDataOnScreenFunction(this, screenContexts);
 
     this.actions.forEach((action) => {
       if (action.parameters) {
@@ -107,10 +57,6 @@ export class ChatFunctionClient {
     this.instructions.push(instruction);
   };
 
-  registerAdhocInstruction: RegisterAdHocInstruction = (instruction: AdHocInstruction) => {
-    this.adhocInstructions.push(instruction);
-  };
-
   validate(name: string, parameters: unknown) {
     const validator = this.validators.get(name)!;
     if (!validator) {
@@ -119,16 +65,17 @@ export class ChatFunctionClient {
 
     const result = validator(parameters);
     if (!result) {
-      throw new FunctionArgsValidationError(validator.errors!);
+      throw createToolValidationError(`Tool call arguments for ${name} were invalid`, {
+        name,
+        errorsText: validator.errors?.map((error) => error.message).join(', '),
+        arguments: JSON.stringify(parameters),
+        toolCalls: [],
+      });
     }
   }
 
   getInstructions(): InstructionOrCallback[] {
     return this.instructions;
-  }
-
-  getAdhocInstructions(): AdHocInstruction[] {
-    return this.adhocInstructions;
   }
 
   hasAction(name: string) {
@@ -166,16 +113,18 @@ export class ChatFunctionClient {
     args,
     messages,
     signal,
+    logger,
     connectorId,
-    useSimulatedFunctionCalling,
+    simulateFunctionCalling,
   }: {
     chat: FunctionCallChatFunction;
     name: string;
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
+    logger: Logger;
     connectorId: string;
-    useSimulatedFunctionCalling: boolean;
+    simulateFunctionCalling: boolean;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -187,16 +136,26 @@ export class ChatFunctionClient {
 
     this.validate(name, parsedArguments);
 
-    return await fn.handler.respond(
-      {
-        arguments: parsedArguments,
-        messages,
-        screenContexts: this.screenContexts,
-        chat,
-        connectorId,
-        useSimulatedFunctionCalling,
-      },
-      signal
+    logger.debug(
+      () => `Executing function ${name} with arguments: ${JSON.stringify(parsedArguments)}`
     );
+
+    try {
+      return await fn.handler.respond(
+        {
+          arguments: parsedArguments,
+          messages,
+          screenContexts: this.screenContexts,
+          chat,
+          connectorId,
+          simulateFunctionCalling,
+        },
+        signal
+      );
+    } catch (e) {
+      logger.error(`Error executing function "${name}": ${e.message}`);
+      logger.error(e);
+      throw e;
+    }
   }
 }

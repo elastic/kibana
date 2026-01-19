@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ChatActionClickHandler, ChatActionClickType } from '../chat/types';
+import type { ChatActionClickHandler } from '../chat/types';
+import { ChatActionClickType } from '../chat/types';
 
 const getCodeBlockClassName = (theme: UseEuiTheme) => css`
   background-color: ${theme.euiTheme.colors.lightestShade};
@@ -61,10 +62,12 @@ export function CodeBlock({ children }: { children: React.ReactNode }) {
 
 export function EsqlCodeBlock({
   value,
+  lang,
   actionsDisabled,
   onActionClick,
 }: {
   value: string;
+  lang: string;
   actionsDisabled: boolean;
   onActionClick: ChatActionClickHandler;
 }) {
@@ -72,7 +75,7 @@ export function EsqlCodeBlock({
     <CodeBlockWrapper>
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiCodeBlock isCopyable fontSize="m">
+          <EuiCodeBlock language={lang} isCopyable fontSize="m">
             {value}
           </EuiCodeBlock>
         </EuiFlexItem>

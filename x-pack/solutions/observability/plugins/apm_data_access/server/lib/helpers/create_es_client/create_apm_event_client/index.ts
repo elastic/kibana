@@ -9,28 +9,27 @@ import type {
   EqlSearchRequest,
   FieldCapsRequest,
   FieldCapsResponse,
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   MsearchMultisearchHeader,
   TermsEnumRequest,
   TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { InferSearchResponseOf } from '@kbn/es-types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { compact, omit } from 'lodash';
 import type { ValuesType } from 'utility-types';
 import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/es_schemas_ui';
-import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
-import type { DataTier } from '@kbn/observability-shared-plugin/common';
+import { type InspectResponse, type DataTier } from '@kbn/observability-shared-plugin/common';
+import { unwrapEsResponse } from '@kbn/observability-utils-server/es/unwrap_es_response';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { withApmSpan } from '../../../../utils';
 import type { ApmDataSource } from '../../../../../common/data_source';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_with_debug';
+import { callAsyncWithDebug } from '../call_async_with_debug';
 import type { ProcessorEventOfDocumentType } from '../document_type';
-import type { APMIndices } from '../../../..';
 import { getRequestBase, processorEventsToIndex } from './get_request_base';
 import { getDataTierFilterCombined } from '../../tier_filter';
 
@@ -38,17 +37,13 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
     includeLegacyData?: boolean;
   } & ({ events: ProcessorEvent[] } | { sources: ApmDataSource[] });
-  body: {
-    size: number;
-    track_total_hits: boolean | number;
-  };
+  size: number;
+  track_total_hits: boolean | number;
 };
 
 export type APMLogEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
-  body: {
-    size: number;
-    track_total_hits: boolean | number;
-  };
+  size: number;
+  track_total_hits: boolean | number;
 };
 
 type APMEventWrapper<T> = Omit<T, 'index'> & {
@@ -129,14 +124,6 @@ export class APMEventClient {
     operationName: string;
   }): Promise<T['body']> {
     return callAsyncWithDebug({
-      getDebugMessage: () => ({
-        body: getDebugBody({
-          params,
-          requestType,
-          operationName,
-        }),
-        title: getDebugTitle(this.request),
-      }),
       isCalledWithInternalUser: false,
       debug: this.debug,
       request: this.request,
@@ -161,11 +148,13 @@ export class APMEventClient {
 
   async search<TParams extends APMEventESSearchRequest>(
     operationName: string,
-    params: TParams
+    params: TParams,
+    options?: { skipProcessorEventFilter?: boolean }
   ): Promise<TypedSearchResponse<TParams>> {
     const { index, filters } = getRequestBase({
       apm: params.apm,
       indices: this.indices,
+      skipProcessorEventFilter: options?.skipProcessorEventFilter,
     });
 
     if (this.excludedDataTiers.length > 0) {
@@ -175,15 +164,13 @@ export class APMEventClient {
     const searchParams = {
       ...omit(params, 'apm', 'body'),
       index,
-      body: {
-        ...params.body,
-        query: {
-          bool: {
-            filter: filters,
-            must: compact([params.body.query]),
-          },
+      query: {
+        bool: {
+          filter: filters,
+          must: compact([params.query]),
         },
       },
+      body: params.body,
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',
@@ -214,13 +201,11 @@ export class APMEventClient {
     const searchParams = {
       ...omit(params, 'body'),
       index,
-      body: {
-        ...params.body,
-        query: {
-          bool: {
-            filter,
-            must: compact([params.body.query]),
-          },
+      body: params.body,
+      query: {
+        bool: {
+          filter,
+          must: compact([params.query]),
         },
       },
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
@@ -255,7 +240,7 @@ export class APMEventClient {
           filters.push(...excludeTiersQuery(this.excludedDataTiers));
         }
 
-        const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
+        const searchParams: [MsearchMultisearchHeader, SearchSearchRequestBody] = [
           {
             index,
             preference: 'any',
@@ -265,10 +250,10 @@ export class APMEventClient {
           },
           {
             ...omit(params, 'apm', 'body'),
-            ...params.body,
+            body: params.body,
             query: {
               bool: {
-                filter: compact([params.body.query, ...filters]),
+                filter: compact([params.query, ...filters]),
               },
             },
           },

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRouter } from '@kbn/core/server';
-import {
-  deleteParamsSchemaV1,
-  DeleteBackfillRequestParamsV1,
-} from '../../../../../common/routes/backfill/apis/delete';
-import { ILicenseState } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { DeleteBackfillRequestParamsV1 } from '../../../../../common/routes/backfill/apis/delete';
+import { deleteParamsSchemaV1 } from '../../../../../common/routes/backfill/apis/delete';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const deleteBackfillRoute = (

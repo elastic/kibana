@@ -10,7 +10,7 @@
 import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import {
   PRODUCT_RESPONSE_HEADER,
   USER_AGENT_HEADER,
@@ -37,6 +37,7 @@ describe('ES Client - custom user-agent', () => {
 
   afterAll(async () => {
     try {
+      // @ts-expect-error upgrade typescript v5.9.3
       await kibanaServer?.shutdown();
     } catch (e) {
       // trap

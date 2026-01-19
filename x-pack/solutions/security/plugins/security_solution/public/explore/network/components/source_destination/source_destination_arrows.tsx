@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { ArrowBody, ArrowHead } from '../arrows';
 import {
@@ -17,7 +17,7 @@ import {
   getPercent,
   hasOneValue,
 } from '../arrows/helpers';
-import { DefaultDraggable } from '../../../../common/components/draggables';
+import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 
 import * as i18n from './translations';
@@ -56,11 +56,11 @@ Data.displayName = 'Data';
 const SourceArrow = React.memo<{
   contextId: string;
   eventId: string;
-  isDraggable?: boolean;
   sourceBytes: string | undefined;
   sourceBytesPercent: number | undefined;
   sourcePackets: string | undefined;
-}>(({ contextId, eventId, isDraggable, sourceBytes, sourceBytesPercent, sourcePackets }) => {
+  scopeId: string;
+}>(({ contextId, eventId, sourceBytes, sourceBytesPercent, sourcePackets, scopeId }) => {
   const sourceArrowHeight =
     sourceBytesPercent != null
       ? getArrowHeightFromPercent(sourceBytesPercent)
@@ -74,10 +74,9 @@ const SourceArrow = React.memo<{
 
       {sourceBytes != null && !isNaN(Number(sourceBytes)) ? (
         <EuiFlexItem grow={false}>
-          <DefaultDraggable
+          <CellActionsRenderer
+            scopeId={scopeId}
             field={SOURCE_BYTES_FIELD_NAME}
-            id={`source-arrow-default-draggable-${contextId}-${eventId}-${SOURCE_BYTES_FIELD_NAME}-${sourceBytes}`}
-            isDraggable={isDraggable}
             value={sourceBytes}
           >
             <Data size="xs">
@@ -88,7 +87,7 @@ const SourceArrow = React.memo<{
                 <PreferenceFormattedBytes value={sourceBytes} />
               </span>
             </Data>
-          </DefaultDraggable>
+          </CellActionsRenderer>
         </EuiFlexItem>
       ) : null}
 
@@ -98,16 +97,15 @@ const SourceArrow = React.memo<{
 
       {sourcePackets != null && !isNaN(Number(sourcePackets)) ? (
         <EuiFlexItem grow={false}>
-          <DefaultDraggable
+          <CellActionsRenderer
+            scopeId={scopeId}
             field={SOURCE_PACKETS_FIELD_NAME}
-            id={`source-arrow-default-draggable-${contextId}-${eventId}-${SOURCE_PACKETS_FIELD_NAME}-${sourcePackets}`}
-            isDraggable={isDraggable}
             value={sourcePackets}
           >
             <Data size="xs">
               <span>{`${sourcePackets} ${i18n.PACKETS}`}</span>
             </Data>
-          </DefaultDraggable>
+          </CellActionsRenderer>
         </EuiFlexItem>
       ) : null}
 
@@ -134,7 +132,7 @@ const DestinationArrow = React.memo<{
   destinationBytesPercent: number | undefined;
   destinationPackets: string | undefined;
   eventId: string;
-  isDraggable?: boolean;
+  scopeId: string;
 }>(
   ({
     contextId,
@@ -142,7 +140,7 @@ const DestinationArrow = React.memo<{
     destinationBytesPercent,
     destinationPackets,
     eventId,
-    isDraggable,
+    scopeId,
   }) => {
     const destinationArrowHeight =
       destinationBytesPercent != null
@@ -161,10 +159,9 @@ const DestinationArrow = React.memo<{
 
         {destinationBytes != null && !isNaN(Number(destinationBytes)) ? (
           <EuiFlexItem grow={false}>
-            <DefaultDraggable
+            <CellActionsRenderer
+              scopeId={scopeId}
               field={DESTINATION_BYTES_FIELD_NAME}
-              id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_BYTES_FIELD_NAME}-${destinationBytes}`}
-              isDraggable={isDraggable}
               value={destinationBytes}
             >
               <Data size="xs">
@@ -175,7 +172,7 @@ const DestinationArrow = React.memo<{
                   <PreferenceFormattedBytes value={destinationBytes} />
                 </span>
               </Data>
-            </DefaultDraggable>
+            </CellActionsRenderer>
           </EuiFlexItem>
         ) : null}
 
@@ -185,16 +182,15 @@ const DestinationArrow = React.memo<{
 
         {destinationPackets != null && !isNaN(Number(destinationPackets)) ? (
           <EuiFlexItem grow={false}>
-            <DefaultDraggable
+            <CellActionsRenderer
+              scopeId={scopeId}
               field={DESTINATION_PACKETS_FIELD_NAME}
-              id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_PACKETS_FIELD_NAME}-${destinationPackets}`}
-              isDraggable={isDraggable}
               value={destinationPackets}
             >
               <Data size="xs">
                 <span>{`${numeral(destinationPackets).format('0,0')} ${i18n.PACKETS}`}</span>
               </Data>
-            </DefaultDraggable>
+            </CellActionsRenderer>
           </EuiFlexItem>
         ) : null}
 
@@ -217,18 +213,18 @@ export const SourceDestinationArrows = React.memo<{
   destinationBytes?: string[] | null;
   destinationPackets?: string[] | null;
   eventId: string;
-  isDraggable?: boolean;
   sourceBytes?: string[] | null;
   sourcePackets?: string[] | null;
+  scopeId?: string;
 }>(
   ({
     contextId,
     destinationBytes,
     destinationPackets,
     eventId,
-    isDraggable,
     sourceBytes,
     sourcePackets,
+    scopeId = '',
   }) => {
     const maybeSourceBytes =
       sourceBytes != null && hasOneValue(sourceBytes) ? sourceBytes[0] : undefined;
@@ -265,9 +261,9 @@ export const SourceDestinationArrows = React.memo<{
         {maybeSourceBytes != null ? (
           <EuiFlexItem grow={false}>
             <SourceArrow
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
-              isDraggable={isDraggable}
               sourceBytes={maybeSourceBytes}
               sourcePackets={maybeSourcePackets}
               sourceBytesPercent={maybeSourceBytesPercent}
@@ -277,12 +273,12 @@ export const SourceDestinationArrows = React.memo<{
         {maybeDestinationBytes != null ? (
           <EuiFlexItem grow={false}>
             <DestinationArrow
+              scopeId={scopeId}
               contextId={contextId}
               destinationBytes={maybeDestinationBytes}
               destinationPackets={maybeDestinationPackets}
               destinationBytesPercent={maybeDestinationBytesPercent}
               eventId={eventId}
-              isDraggable={isDraggable}
             />
           </EuiFlexItem>
         ) : null}

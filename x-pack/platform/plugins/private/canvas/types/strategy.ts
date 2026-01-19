@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TransportResult } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IKibanaSearchRequest } from '@kbn/search-types';
-import { ExpressionValueFilter } from '.';
+import type { ExpressionValueFilter } from '.';
 export interface EssqlSearchStrategyRequest extends IKibanaSearchRequest {
   count: number;
   query: string;

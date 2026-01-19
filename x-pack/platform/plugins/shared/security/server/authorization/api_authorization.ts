@@ -7,6 +7,8 @@
 
 import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type {
+  AllRequiredCondition,
+  AnyRequiredCondition,
   AuthzDisabled,
   AuthzEnabled,
   HttpServiceSetup,
@@ -16,6 +18,7 @@ import type {
   PrivilegeSet,
   RouteAuthz,
 } from '@kbn/core/server';
+import { unwindNestedSecurityPrivileges } from '@kbn/core-security-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   AuthorizationServiceSetup,
@@ -56,178 +59,171 @@ export function initAPIAuthorization(
       return toolkit.next();
     }
 
-    const security = request.route.options.security;
+    const security = request.route.options.security!;
 
-    if (security) {
-      if (isAuthzDisabled(security.authz)) {
-        return toolkit.next();
-      }
+    if (isAuthzDisabled(security.authz)) {
+      return toolkit.next();
+    }
 
-      const authz = security.authz as AuthzEnabled;
-      const normalizeRequiredPrivileges = async (
-        privileges: AuthzEnabled['requiredPrivileges']
-      ) => {
-        const hasOperatorPrivileges = privileges.some(
-          (privilege) =>
-            privilege === ReservedPrivilegesSet.operator ||
-            (typeof privilege === 'object' &&
-              privilege.allRequired?.includes(ReservedPrivilegesSet.operator))
-        );
-
-        // nothing to normalize
-        if (!hasOperatorPrivileges) {
-          return privileges;
-        }
-
-        const securityConfig = await getSecurityConfig();
-
-        // nothing to normalize
-        if (securityConfig.operator_privileges.enabled) {
-          return privileges;
-        }
-
-        return privileges.reduce<AuthzEnabled['requiredPrivileges']>((acc, privilege) => {
-          if (typeof privilege === 'object') {
-            const operatorPrivilegeIndex =
-              privilege.allRequired?.findIndex((p) => p === ReservedPrivilegesSet.operator) ?? -1;
-
-            acc.push(
-              operatorPrivilegeIndex !== -1
-                ? {
-                    ...privilege,
-                    // @ts-ignore wrong types for `toSpliced`
-                    allRequired: privilege.allRequired?.toSpliced(operatorPrivilegeIndex, 1),
-                  }
-                : privilege
-            );
-          } else if (privilege !== ReservedPrivilegesSet.operator) {
-            acc.push(privilege);
-          }
-
-          return acc;
-        }, []);
-      };
-
-      // We need to normalize privileges to drop unintended privilege checks.
-      // Operator privileges check should be only performed if the `operator_privileges` are enabled in config.
-      const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
-
-      const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
-        (acc, privilegeEntry) => {
-          const privileges =
-            typeof privilegeEntry === 'object'
-              ? [...(privilegeEntry.allRequired ?? []), ...(privilegeEntry.anyRequired ?? [])]
-              : [privilegeEntry];
-
-          for (const privilege of privileges) {
-            if (isReservedPrivilegeSet(privilege)) {
-              acc.requestedReservedPrivileges.push(privilege);
-            } else {
-              acc.requestedPrivileges.push(privilege);
-            }
-          }
-
-          return acc;
-        },
-        {
-          requestedPrivileges: [] as string[],
-          requestedReservedPrivileges: [] as string[],
-        }
+    const authz = security.authz as AuthzEnabled;
+    const normalizeRequiredPrivileges = async (privileges: AuthzEnabled['requiredPrivileges']) => {
+      const hasOperatorPrivileges = privileges.some(
+        (privilege) =>
+          privilege === ReservedPrivilegesSet.operator ||
+          (typeof privilege === 'object' &&
+            privilege.allRequired?.includes(ReservedPrivilegesSet.operator))
       );
 
-      const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
-      const privilegeToApiOperation = (privilege: string) =>
-        privilege.replace(API_OPERATION_PREFIX, '');
-
-      const kibanaPrivileges: Record<string, boolean> = {};
-
-      if (requestedPrivileges.length > 0) {
-        const checkPrivilegesResponse = await checkPrivileges({
-          kibana: requestedPrivileges.map((permission) => actions.api.get(permission)),
-        });
-
-        for (const kbPrivilege of checkPrivilegesResponse.privileges.kibana) {
-          kibanaPrivileges[privilegeToApiOperation(kbPrivilege.privilege)] = kbPrivilege.authorized;
-        }
+      // nothing to normalize
+      if (!hasOperatorPrivileges) {
+        return privileges;
       }
 
-      for (const reservedPrivilege of requestedReservedPrivileges) {
-        if (reservedPrivilege === ReservedPrivilegesSet.superuser) {
-          const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(
-            request
-          ).globally(SUPERUSER_PRIVILEGES);
-          kibanaPrivileges[ReservedPrivilegesSet.superuser] =
-            checkSuperuserPrivilegesResponse.hasAllRequested;
-        }
+      const securityConfig = await getSecurityConfig();
 
-        if (reservedPrivilege === ReservedPrivilegesSet.operator) {
-          const currentUser = getCurrentUser(request);
-
-          kibanaPrivileges[ReservedPrivilegesSet.operator] = currentUser?.operator ?? false;
-        }
+      // nothing to normalize
+      if (securityConfig.operator_privileges.enabled) {
+        return privileges;
       }
 
-      const hasRequestedPrivilege = (kbPrivilege: Privilege | PrivilegeSet) => {
-        if (typeof kbPrivilege === 'object') {
-          const allRequired = kbPrivilege.allRequired ?? [];
-          const anyRequired = kbPrivilege.anyRequired ?? [];
+      return privileges.reduce<AuthzEnabled['requiredPrivileges']>((acc, privilege) => {
+        if (typeof privilege === 'object') {
+          const operatorPrivilegeIndex =
+            privilege.allRequired?.findIndex((p) => p === ReservedPrivilegesSet.operator) ?? -1;
 
-          return (
-            allRequired.every((privilege: string) => kibanaPrivileges[privilege]) &&
-            (!anyRequired.length ||
-              anyRequired.some((privilege: string) => kibanaPrivileges[privilege]))
+          acc.push(
+            operatorPrivilegeIndex !== -1
+              ? {
+                  ...privilege,
+                  // @ts-ignore wrong types for `toSpliced`
+                  allRequired: privilege.allRequired?.toSpliced(operatorPrivilegeIndex, 1),
+                }
+              : privilege
           );
+        } else if (privilege !== ReservedPrivilegesSet.operator) {
+          acc.push(privilege);
         }
 
-        return kibanaPrivileges[kbPrivilege];
-      };
+        return acc;
+      }, []);
+    };
 
-      for (const privilege of requiredPrivileges) {
-        if (!hasRequestedPrivilege(privilege)) {
-          const missingPrivileges = Object.keys(kibanaPrivileges).filter(
-            (key) => !kibanaPrivileges[key]
-          );
-          const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${
-            request.url.pathname
-          }${
-            request.url.search
-          }] is unauthorized for user, this action is granted by the Kibana privileges [${missingPrivileges}]`;
+    // We need to normalize privileges to drop unintended privilege checks.
+    // Operator privileges check should be only performed if the `operator_privileges` are enabled in config.
+    const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
 
-          logger.warn(forbiddenMessage);
+    const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
+      (acc, privilegeEntry) => {
+        const privileges =
+          typeof privilegeEntry === 'object'
+            ? [
+                ...unwindNestedSecurityPrivileges<AllRequiredCondition>(
+                  privilegeEntry.allRequired ?? []
+                ),
+                ...unwindNestedSecurityPrivileges<AnyRequiredCondition>(
+                  privilegeEntry.anyRequired ?? []
+                ),
+              ]
+            : [privilegeEntry];
 
-          return response.forbidden({
-            body: {
-              message: forbiddenMessage,
-            },
-          });
+        for (const privilege of privileges) {
+          if (isReservedPrivilegeSet(privilege)) {
+            acc.requestedReservedPrivileges.push(privilege);
+          } else {
+            acc.requestedPrivileges.push(privilege);
+          }
         }
+
+        return acc;
+      },
+      {
+        requestedPrivileges: [] as string[],
+        requestedReservedPrivileges: [] as string[],
       }
-
-      return toolkit.authzResultNext(kibanaPrivileges);
-    }
-
-    const tags = request.route.options.tags;
-    const tagPrefix = 'access:';
-    const actionTags = tags.filter((tag) => tag.startsWith(tagPrefix));
-
-    // if there are no tags starting with "access:", just continue
-    if (actionTags.length === 0) {
-      return toolkit.next();
-    }
-
-    const apiActions = actionTags.map((tag) => actions.api.get(tag.substring(tagPrefix.length)));
-    const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
-    const checkPrivilegesResponse = await checkPrivileges({ kibana: apiActions });
-
-    // we've actually authorized the request
-    if (checkPrivilegesResponse.hasAllRequested) {
-      logger.debug(`User authorized for "${request.url.pathname}${request.url.search}"`);
-      return toolkit.next();
-    }
-
-    logger.warn(
-      `User not authorized for "${request.url.pathname}${request.url.search}": responding with 403`
     );
-    return response.forbidden();
+
+    const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
+    const privilegeToApiOperation = (privilege: string) =>
+      privilege.replace(API_OPERATION_PREFIX, '');
+
+    const kibanaPrivileges: Record<string, boolean> = {};
+
+    if (requestedPrivileges.length > 0) {
+      const checkPrivilegesResponse = await checkPrivileges({
+        kibana: requestedPrivileges.map((permission) => actions.api.get(permission)),
+      });
+
+      for (const kbPrivilege of checkPrivilegesResponse.privileges.kibana) {
+        kibanaPrivileges[privilegeToApiOperation(kbPrivilege.privilege)] = kbPrivilege.authorized;
+      }
+    }
+
+    for (const reservedPrivilege of requestedReservedPrivileges) {
+      if (reservedPrivilege === ReservedPrivilegesSet.superuser) {
+        const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(request).globally(
+          SUPERUSER_PRIVILEGES
+        );
+        kibanaPrivileges[ReservedPrivilegesSet.superuser] =
+          checkSuperuserPrivilegesResponse.hasAllRequested;
+      }
+
+      if (reservedPrivilege === ReservedPrivilegesSet.operator) {
+        const currentUser = getCurrentUser(request);
+
+        kibanaPrivileges[ReservedPrivilegesSet.operator] = currentUser?.operator ?? false;
+      }
+    }
+
+    const hasRequestedPrivilege = (kbPrivilege: Privilege | PrivilegeSet) => {
+      if (typeof kbPrivilege === 'object') {
+        const allRequired = kbPrivilege.allRequired ?? [];
+        const anyRequired = kbPrivilege.anyRequired ?? [];
+
+        return (
+          allRequired.every((privilege) =>
+            typeof privilege === 'string'
+              ? kibanaPrivileges[privilege]
+              : // checking composite privileges
+                privilege.anyOf.some(
+                  (anyPrivilegeEntry: Privilege) => kibanaPrivileges[anyPrivilegeEntry]
+                )
+          ) &&
+          (!anyRequired.length ||
+            anyRequired.some((privilege) =>
+              typeof privilege === 'string'
+                ? kibanaPrivileges[privilege]
+                : // checking composite privileges
+                  privilege.allOf.every(
+                    (allPrivilegeEntry: Privilege) => kibanaPrivileges[allPrivilegeEntry]
+                  )
+            ))
+        );
+      }
+
+      return kibanaPrivileges[kbPrivilege];
+    };
+
+    for (const privilege of requiredPrivileges) {
+      if (!hasRequestedPrivilege(privilege)) {
+        const missingPrivileges = Object.keys(kibanaPrivileges).filter(
+          (key) => !kibanaPrivileges[key]
+        );
+        const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${
+          request.url.pathname
+        }${
+          request.url.search
+        }] is unauthorized for user, this action is granted by the Kibana privileges [${missingPrivileges}]`;
+
+        logger.warn(forbiddenMessage);
+
+        return response.forbidden({
+          body: {
+            message: forbiddenMessage,
+          },
+        });
+      }
+    }
+
+    return toolkit.authzResultNext(kibanaPrivileges);
   });
 }

@@ -1,0 +1,379 @@
+{
+  "id": "@kbn/metrics",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/metrics",
+        "id": "def-server.PrometheusExporter",
+        "type": "Class",
+        "tags": [
+          "privateRemarks"
+        ],
+        "label": "PrometheusExporter",
+        "description": [
+          "\nPrometheus exporter for OpenTelemetry with a custom extension to collect the metrics whenever\nthe Prometheus HTTP endpoint is called.\n\nThe Prometheus HTTP endpoint is registered in the plugin monitoringCollection."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/metrics",
+            "scope": "server",
+            "docId": "kibKbnMetricsPluginApi",
+            "section": "def-server.PrometheusExporter",
+            "text": "PrometheusExporter"
+          },
+          " extends ",
+          "MetricReader"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.PrometheusExporter.instance",
+            "type": "Object",
+            "tags": [
+              "private"
+            ],
+            "label": "#instance",
+            "description": [
+              "\nThe singleton PrometheusExporter instance."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/metrics",
+                "scope": "server",
+                "docId": "kibKbnMetricsPluginApi",
+                "section": "def-server.PrometheusExporter",
+                "text": "PrometheusExporter"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.PrometheusExporter.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGets the singleton PrometheusExporter instance."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/metrics",
+                "scope": "server",
+                "docId": "kibKbnMetricsPluginApi",
+                "section": "def-server.PrometheusExporter",
+                "text": "PrometheusExporter"
+              }
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.PrometheusExporter.destroy",
+            "type": "Function",
+            "tags": [
+              "privateRemarks"
+            ],
+            "label": "destroy",
+            "description": [
+              "\nDestroys the singleton PrometheusExporter instance."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.PrometheusExporter.selectAggregationTemporality",
+            "type": "Function",
+            "tags": [],
+            "label": "selectAggregationTemporality",
+            "description": [
+              "\nForces the AggregationTemporality to be CUMULATIVE (as required by the Prometheus format)."
+            ],
+            "signature": [
+              "() => ",
+              "AggregationTemporality"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.PrometheusExporter.onForceFlush",
+            "type": "Function",
+            "tags": [
+              "protected"
+            ],
+            "label": "onForceFlush",
+            "description": [
+              "\nImplementation of the MetricReader interface onForceFlush (noop)."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.PrometheusExporter.onShutdown",
+            "type": "Function",
+            "tags": [
+              "protected"
+            ],
+            "label": "onShutdown",
+            "description": [
+              "\nImplementation of the MetricReader interface onShutdown (noop)."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.PrometheusExporter.exportMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "exportMetrics",
+            "description": [
+              "\nResponds to incoming message with current state of all metrics."
+            ],
+            "signature": [
+              "(res: ",
+              "KibanaResponseFactory",
+              ") => Promise<",
+              "IKibanaResponse",
+              "<any>>"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/metrics",
+                "id": "def-server.PrometheusExporter.exportMetrics.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "res",
+                "description": [
+                  "{@link KibanaResponseFactory }"
+                ],
+                "signature": [
+                  "KibanaResponseFactory"
+                ],
+                "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+                "lineNumber": 89,
+                "columnNumber": 30,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/metrics",
+        "id": "def-server.initMetrics",
+        "type": "Function",
+        "tags": [],
+        "label": "initMetrics",
+        "description": [
+          "\nInitialize the OpenTelemetry meter provider"
+        ],
+        "signature": [
+          "(initMetricsOptions: ",
+          {
+            "pluginId": "@kbn/metrics",
+            "scope": "server",
+            "docId": "kibKbnMetricsPluginApi",
+            "section": "def-server.InitMetricsOptions",
+            "text": "InitMetricsOptions"
+          },
+          ") => void"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.initMetrics.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "initMetricsOptions",
+            "description": [
+              "{@link InitMetricsOptions }"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/metrics",
+                "scope": "server",
+                "docId": "kibKbnMetricsPluginApi",
+                "section": "def-server.InitMetricsOptions",
+                "text": "InitMetricsOptions"
+              }
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "lineNumber": 43,
+            "columnNumber": 29,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/metrics",
+        "id": "def-server.InitMetricsOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "InitMetricsOptions",
+        "description": [
+          "\nOptions to the initMetrics method"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.InitMetricsOptions.resource",
+            "type": "Object",
+            "tags": [],
+            "label": "resource",
+            "description": [
+              "\nThe OpenTelemetry resource information"
+            ],
+            "signature": [
+              "Resource"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.InitMetricsOptions.metricsConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "metricsConfig",
+            "description": [
+              "\nThe OpenTelemetry metrics configuration"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/metrics-config",
+                "scope": "common",
+                "docId": "kibKbnMetricsConfigPluginApi",
+                "section": "def-common.MetricsConfig",
+                "text": "MetricsConfig"
+              }
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-server.InitMetricsOptions.monitoringCollectionConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "monitoringCollectionConfig",
+            "description": [
+              "\nThe config of the Monitoring Collection plugin"
+            ],
+            "signature": [
+              "{ readonly enabled: boolean; readonly opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

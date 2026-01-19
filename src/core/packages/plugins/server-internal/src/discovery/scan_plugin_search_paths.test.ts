@@ -12,7 +12,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { toArray } from 'rxjs';
 import { resolve } from 'path';
 import { scanPluginSearchPaths } from './scan_plugin_search_paths';
-import { PluginDiscoveryError } from './plugin_discovery_error';
+import type { PluginDiscoveryError } from './plugin_discovery_error';
 import { firstValueFrom } from 'rxjs';
 
 const KIBANA_ROOT = process.cwd();

@@ -1,0 +1,30 @@
+# summary: 
+description: An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.
+value: >
+  {
+    "_index": "observability-annotations",
+    "_id": "Lc9I93EBh6DbmkeV7nFX",
+    "_version": 1,
+    "_seq_no": 12,
+    "_primary_term": 1,
+    "found": true,
+    "_source": {
+      "message": "Deployment 1.2",
+      "@timestamp": "2020-05-08T10:31:30.452Z",
+      "service": {
+        "version": "1.2",
+        "name": "opbeans-java"
+      },
+      "tags": [
+        "apm",
+        "elastic.co",
+        "customer"
+      ],
+      "annotation": {
+        "type": "deployment"
+      },
+      "event": {
+        "created": "2020-05-09T02:34:43.937Z"
+      }
+    }
+  }

@@ -35,6 +35,7 @@ import { ConfigValidator } from './config_validator';
 import { type CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts';
+import { AnomalyKqlFilter } from './anomaly_kql_filter';
 
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams> & {
@@ -58,25 +59,31 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
   const [newJobUrl, setNewJobUrl] = useState<string | undefined>(undefined);
 
+  const [savedFilterForNonBucketTypes, setSavedFilterForNonBucketTypes] = useState<string | null>(
+    null
+  );
+
   useEffect(() => {
     let mounted = true;
 
     if (!mlCapabilities.canCreateJob) return;
 
     getStartServices().then((startServices) => {
-      const locator = startServices[2].locator;
-      if (!locator) return;
-      locator.getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB }).then((url) => {
-        if (mounted) {
-          setNewJobUrl(url);
-        }
-      });
+      const { managementLocator } = startServices[2];
+      if (!managementLocator) return;
+      managementLocator
+        .getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB }, 'anomaly_detection')
+        .then(({ url }) => {
+          if (mounted) {
+            setNewJobUrl(url);
+          }
+        });
     });
 
     return () => {
       mounted = false;
     };
-  }, [getStartServices, mlCapabilities]);
+  }, [mlCapabilities, getStartServices]);
 
   const mlHttpService = useMemo(() => new HttpService(http!), [http]);
   const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);
@@ -133,6 +140,25 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobsAndGroupIds]
+  );
+
+  useEffect(
+    function handleFilterPreservationAcrossResultTypes() {
+      const isBucketType = ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET;
+
+      if (isBucketType) {
+        if (ruleParams.kqlQueryString) {
+          setSavedFilterForNonBucketTypes(ruleParams.kqlQueryString);
+          setRuleParams('kqlQueryString', null);
+        }
+      } else {
+        if (savedFilterForNonBucketTypes && !ruleParams.kqlQueryString) {
+          setRuleParams('kqlQueryString', savedFilterForNonBucketTypes);
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ruleParams.resultType]
   );
 
   useMount(function setDefaults() {
@@ -194,8 +220,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         createJobUrl={newJobUrl}
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('jobSelection'), [])}
+        onChange={onAlertParamChange('jobSelection')}
         errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
         shouldUseDropdownJobCreate
       />
@@ -209,19 +234,23 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <ResultTypeSelector
         value={ruleParams.resultType}
         availableOption={availableResultTypes}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('resultType'), [])}
+        onChange={onAlertParamChange('resultType')}
       />
-      <SeverityControl
-        value={ruleParams.severity}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('severity'), [])}
+      <EuiSpacer size="m" />
+      <SeverityControl value={ruleParams.severity} onChange={onAlertParamChange('severity')} />
+      <AnomalyKqlFilter
+        value={ruleParams.kqlQueryString}
+        onChange={onAlertParamChange('kqlQueryString')}
+        jobConfigs={jobConfigs}
+        resultType={ruleParams.resultType}
+        jobId={ruleParams.jobSelection?.jobIds?.[0]}
+        errors={Array.isArray(errors.kqlQueryString) ? errors.kqlQueryString : []}
+        disabled={ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET}
       />
       <EuiSpacer size="m" />
       <InterimResultsControl
         value={ruleParams.includeInterim}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('includeInterim'), [])}
+        onChange={onAlertParamChange('includeInterim')}
       />
       <EuiSpacer size="m" />
       <AdvancedSettings

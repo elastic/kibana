@@ -15,12 +15,14 @@ import type {
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import type { LensEmbeddableStateWithType } from '@kbn/lens-plugin/server/embeddable/types';
 import type {
   ActionsAttachmentPayload,
   AlertAttachmentPayload,
   Attachment,
   AttachmentAttributes,
   Case,
+  EventAttachmentPayload,
   User,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
@@ -89,6 +91,8 @@ export const transformNewCase = ({
   category: newCase.category ?? null,
   customFields: newCase.customFields ?? [],
   observables: [],
+  total_observables: 0,
+  incremental_id: undefined,
 });
 
 export const transformCases = ({
@@ -122,17 +126,20 @@ export const flattenCaseSavedObject = ({
   comments = [],
   totalComment = comments.length,
   totalAlerts = 0,
+  totalEvents = 0,
 }: {
   savedObject: CaseSavedObjectTransformed;
   comments?: Array<SavedObject<AttachmentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
+  totalEvents?: number;
 }): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
   totalAlerts,
+  totalEvents,
   ...savedObject.attributes,
 });
 
@@ -162,10 +169,17 @@ export const flattenCommentSavedObject = (
 });
 
 export const getIDsAndIndicesAsArrays = (
-  comment: AlertAttachmentPayload
+  comment: AlertAttachmentPayload | EventAttachmentPayload
 ): { ids: string[]; indices: string[] } => {
+  if (comment.type === AttachmentType.alert) {
+    return {
+      ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
+      indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    };
+  }
+
   return {
-    ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
+    ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
     indices: Array.isArray(comment.index) ? comment.index : [comment.index],
   };
 };
@@ -214,7 +228,6 @@ type NewCommentArgs = AttachmentRequest & {
 export const transformNewComment = ({
   createdDate,
   email,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   username,
   profile_uid: profileUid,
@@ -256,6 +269,15 @@ export const isCommentRequestTypeAlert = (
   context: AttachmentRequest
 ): context is AlertAttachmentPayload => {
   return context.type === AttachmentType.alert;
+};
+
+/**
+ * A type narrowing function for event comments.
+ */
+export const isCommentRequestTypeEvent = (
+  context: AttachmentRequest
+): context is EventAttachmentPayload => {
+  return context.type === AttachmentType.event;
 };
 
 /**
@@ -349,6 +371,23 @@ export const countAlertsForID = ({
 };
 
 /**
+ * Counts total events in a single case.
+ */
+export const countEventsForID = ({
+  comments,
+}: {
+  comments: SavedObjectsFindResponse<AttachmentAttributes>;
+}): number | undefined => {
+  return comments.saved_objects.reduce((sum, current) => {
+    if (current.attributes.type === AttachmentType.event) {
+      return sum + [current.attributes.eventId].flat().length;
+    }
+
+    return sum;
+  }, 0);
+};
+
+/**
  * Returns a connector that indicates that no connector was set.
  *
  * @returns the 'none' connector
@@ -364,15 +403,16 @@ export const extractLensReferencesFromCommentString = (
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   comment: string
 ): SavedObjectReference[] => {
-  const extract = lensEmbeddableFactory()?.extract;
+  const extract = lensEmbeddableFactory().extract;
 
   if (extract) {
     const parsedComment = parseCommentString(comment);
     const lensVisualizations = getLensVisualizations(parsedComment.children);
-    const flattenRefs = flatMap(
-      lensVisualizations,
-      (lensObject) => extract(lensObject)?.references ?? []
-    );
+    const flattenRefs = flatMap(lensVisualizations, (vis) => {
+      // TODO: Improve these types
+      const lensVis = vis as unknown as LensEmbeddableStateWithType;
+      return extract(lensVis).references;
+    });
 
     const uniqRefs = uniqWith(
       flattenRefs,

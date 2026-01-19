@@ -8,20 +8,20 @@ slug: /kibana-dev-docs/api/metricsDataAccess
 title: "metricsDataAccess"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the metricsDataAccess plugin
-date: 2025-01-29
+date: 2026-01-19
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'metricsDataAccess']
 ---
 import metricsDataAccessObj from './metrics_data_access.devdocs.json';
 
 Exposes utilities for accessing metrics data
 
-Contact [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) for questions regarding this plugin.
+Contact [@elastic/obs-presentation-team](https://github.com/orgs/elastic/teams/obs-presentation-team) for questions regarding this plugin.
 
 **Code health stats**
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 135 | 6 | 135 | 5 |
+| 152 | 6 | 152 | 7 |
 
 ## Client
 
@@ -42,8 +42,14 @@ Contact [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/te
 ### Setup
 <DocDefinitionList data={[metricsDataAccessObj.server.setup]}/>
 
+### Start
+<DocDefinitionList data={[metricsDataAccessObj.server.start]}/>
+
 ### Objects
 <DocDefinitionList data={metricsDataAccessObj.server.objects}/>
+
+### Functions
+<DocDefinitionList data={metricsDataAccessObj.server.functions}/>
 
 ### Classes
 <DocDefinitionList data={metricsDataAccessObj.server.classes}/>
@@ -64,6 +70,9 @@ Contact [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/te
 
 ### Interfaces
 <DocDefinitionList data={metricsDataAccessObj.common.interfaces}/>
+
+### Enums
+<DocDefinitionList data={metricsDataAccessObj.common.enums}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={metricsDataAccessObj.common.misc}/>

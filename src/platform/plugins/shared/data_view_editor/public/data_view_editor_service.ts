@@ -7,29 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Observable, Subscription } from 'rxjs';
 import {
   BehaviorSubject,
   Subject,
   first,
   firstValueFrom,
   from,
-  Observable,
-  Subscription,
   map,
   distinctUntilChanged,
 } from 'rxjs';
 
-import {
+import type {
   DataViewsServicePublic,
   MatchedItem,
-  INDEX_PATTERN_TYPE,
   DataViewField,
 } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 
-import { RollupIndicesCapsResponse, MatchedIndicesSet, TimestampOption } from './types';
+import type {
+  RollupIndicesCapsResponse,
+  RollupIndiciesCapability,
+  MatchedIndicesSet,
+  TimestampOption,
+} from './types';
 import { getMatchedIndices, ensureMinimumTime, extractTimeFields, removeSpaces } from './lib';
-import { GetFieldsOptions } from './shared_imports';
+import type { GetFieldsOptions } from './shared_imports';
 
 export const matchedIndiciesDefault = {
   allIndices: [],
@@ -70,6 +74,7 @@ interface DataViewEditorState {
   loadingTimestampFields: boolean;
   timestampFieldOptions: TimestampOption[];
   rollupIndexName?: string | null;
+  rollupCaps?: RollupIndiciesCapability;
 }
 
 const defaultDataViewEditorState: DataViewEditorState = {
@@ -119,6 +124,7 @@ export class DataViewEditorService {
     this.loadingTimestampFields$ = stateSelector((state) => state.loadingTimestampFields);
     this.timestampFieldOptions$ = stateSelector((state) => state.timestampFieldOptions);
     this.rollupIndex$ = stateSelector((state) => state.rollupIndexName);
+    this.rollupCaps$ = stateSelector((state) => state.rollupCaps);
 
     // when list of matched indices is updated always update timestamp fields
     this.loadTimestampFieldsSub = this.matchedIndices$.subscribe(() => this.loadTimestampFields());
@@ -162,6 +168,8 @@ export class DataViewEditorService {
 
   // current matched rollup index
   rollupIndex$: Observable<string | undefined | null>;
+  // current matched rollup capabilities
+  rollupCaps$: Observable<RollupIndiciesCapability | undefined>;
   // alernates between value and undefined so validation can treat new value as thought its a promise
   private rollupIndexForProvider$ = new Subject<string | undefined | null>();
 
@@ -244,11 +252,27 @@ export class DataViewEditorService {
     // verify we're looking at the current result
     if (currentLoadingMatchedIndicesIdx === this.currentLoadingMatchedIndices) {
       if (type === INDEX_PATTERN_TYPE.ROLLUP) {
-        const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
+        const rollupIndices = exactMatched.filter(
+          (index) =>
+            isRollupIndex(index.name) ||
+            // if its an alias
+            (index.item.indices?.length === 1 && isRollupIndex(index.item.indices[0])) ||
+            // if its an index referenced by an alias
+            (index.item.aliases?.length === 1 && isRollupIndex(index.item.aliases[0]))
+        );
+
         newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : null;
-        this.updateState({ rollupIndexName: newRollupIndexName });
+        const newRollupCaps = await this.rollupCapsResponse.then((response) => {
+          return (
+            response[newRollupIndexName || ''] ||
+            // if its an alias
+            response[rollupIndices[0]?.item.indices?.[0] || '']
+          );
+        });
+
+        this.updateState({ rollupIndexName: newRollupIndexName, rollupCaps: newRollupCaps });
       } else {
-        this.updateState({ rollupIndexName: null });
+        this.updateState({ rollupIndexName: null, rollupCaps: undefined });
       }
 
       this.updateState({ matchedIndices });

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MonitoringConfig } from '../config';
+import type { MonitoringConfig } from '../config';
 import { decorateDebugServer } from '../debug_logger';
-import { MonitoringCore, RouteDependencies } from '../types';
+import type { MonitoringCore, RouteDependencies } from '../types';
 import {
   registerV1AlertRoutes,
   registerV1ApmRoutes,

@@ -8,7 +8,7 @@
  */
 
 import { normalizeSettings } from './normalize_settings';
-import { UiSettingsType } from '@kbn/core-ui-settings-common';
+import type { UiSettingsType } from '@kbn/core-ui-settings-common';
 
 describe('normalizeSettings', () => {
   describe('adds a missing type if there is a value', () => {

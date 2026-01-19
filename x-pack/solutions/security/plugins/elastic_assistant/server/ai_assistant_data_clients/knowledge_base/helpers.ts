@@ -8,15 +8,16 @@
 import { z } from '@kbn/zod';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import {
-  contentReferenceBlock,
-  ContentReferencesStore,
-  esqlQueryReference,
-  IndexEntry,
-} from '@kbn/elastic-assistant-common';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  QueryDslQueryContainer,
+  SearchHit,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { ContentReferencesStore, IndexEntry } from '@kbn/elastic-assistant-common';
+import { contentReferenceBlock, esqlQueryReference } from '@kbn/elastic-assistant-common';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isString } from 'lodash';
 
 export const isModelAlreadyExistsError = (error: Error) => {
   return (
@@ -148,7 +149,7 @@ export const getStructuredToolForIndexEntry = ({
 }: {
   indexEntry: IndexEntry;
   esClient: ElasticsearchClient;
-  contentReferencesStore: ContentReferencesStore | false;
+  contentReferencesStore: ContentReferencesStore;
   logger: Logger;
 }): DynamicStructuredTool => {
   const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
@@ -182,21 +183,20 @@ export const getStructuredToolForIndexEntry = ({
       // Generate filters for inputSchema fields
       const filter =
         indexEntry.inputSchema?.reduce(
-          // @ts-expect-error Possible to override types with dynamic input schema?
+          // @ts-expect-error upgrade typescript v5.9.3
           (prev, i) => [...prev, { term: { [`${i.fieldName}`]: input?.[i.fieldName] } }],
           [] as Array<{ term: { [key: string]: string } }>
         ) ?? [];
 
       const params: SearchRequest = {
         index: indexEntry.index,
-        size: 10,
+        size: 100,
         query: {
           bool: {
             must: [
               {
-                semantic: {
-                  field: indexEntry.field,
-                  query: input.query,
+                match: {
+                  [indexEntry.field]: input.query,
                 },
               },
             ],
@@ -206,8 +206,8 @@ export const getStructuredToolForIndexEntry = ({
         highlight: {
           fields: {
             [indexEntry.field]: {
-              type: 'semantic',
               number_of_fragments: 2,
+              order: 'score',
             },
           },
         },
@@ -217,13 +217,7 @@ export const getStructuredToolForIndexEntry = ({
         const result = await esClient.search(params);
 
         const kbDocs = result.hits.hits.map((hit) => {
-          const esqlQuery = `FROM ${hit._index} ${
-            hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''
-          }`;
-
-          const reference =
-            contentReferencesStore &&
-            contentReferencesStore.add((p) => esqlQueryReference(p.id, esqlQuery, hit._index));
+          const reference = contentReferencesStore.add((p) => createReference(p.id, hit));
 
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
             return indexEntry.outputFields.reduce(
@@ -231,13 +225,13 @@ export const getStructuredToolForIndexEntry = ({
                 // @ts-expect-error
                 return { ...prev, [field]: hit._source[field] };
               },
-              reference ? { citation: contentReferenceBlock(reference) } : {}
+              { citation: contentReferenceBlock(reference) }
             );
           }
 
           return {
             text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
-            ...(reference ? { citation: contentReferenceBlock(reference) } : {}),
+            citation: contentReferenceBlock(reference),
           };
         });
 
@@ -245,9 +239,9 @@ export const getStructuredToolForIndexEntry = ({
         logger.debug(() => `Similarity Search Results:\n ${JSON.stringify(result)}`);
         logger.debug(() => `Similarity Text Extract Results:\n ${JSON.stringify(kbDocs)}`);
 
-        return `###\nBelow are all relevant documents in JSON format:\n${JSON.stringify(
-          kbDocs
-        )}###`;
+        const prunedResult = JSON.stringify(kbDocs).substring(0, 20000);
+
+        return `###\nBelow are all relevant documents in JSON format:\n${prunedResult}###`;
       } catch (e) {
         logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);
         return `I'm sorry, but I was unable to find any information in the knowledge base. Perhaps this error would be useful to deliver to the user. Be sure to print it below your response and in a codeblock so it is rendered nicely: ${e.message}`;
@@ -256,4 +250,24 @@ export const getStructuredToolForIndexEntry = ({
     tags: ['knowledge-base'],
     // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
   }) as unknown as DynamicStructuredTool;
+};
+
+const createReference = (id: string, hit: SearchHit<unknown>) => {
+  const hitIndex = hit._index;
+  const hitId = hit._id;
+  const esqlQuery = `FROM ${hitIndex} ${hitId ? `METADATA _id\n | WHERE _id == "${hitId}"` : ''}`;
+
+  let timerange;
+  const source = hit._source as Record<string, unknown>;
+
+  if ('@timestamp' in source && isString(source['@timestamp']) && hitId) {
+    timerange = { from: source['@timestamp'], to: source['@timestamp'] };
+  }
+
+  return esqlQueryReference({
+    id,
+    query: esqlQuery,
+    label: `Index: ${hit._index}`,
+    timerange,
+  });
 };

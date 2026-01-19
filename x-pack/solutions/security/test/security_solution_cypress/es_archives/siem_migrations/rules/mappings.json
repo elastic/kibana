@@ -1,0 +1,126 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".kibana-siem-rule-migrations-rules-default",
+    "aliases": {},
+    "mappings": {
+      "dynamic": "false",
+      "_meta": {
+        "namespace": "default",
+        "kibana": {
+          "version": "9.1.0"
+        }
+      },
+      "properties": {
+        "@timestamp": {
+          "type": "date",
+          "ignore_malformed": false
+        },
+        "comments": {
+          "properties": {
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "type": "keyword"
+            },
+            "message": {
+              "type": "keyword"
+            }
+          }
+        },
+        "created_by": {
+          "type": "keyword"
+        },
+        "elastic_rule": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "integration_ids": {
+              "type": "keyword"
+            },
+            "prebuilt_rule_id": {
+              "type": "keyword"
+            },
+            "query": {
+              "type": "text"
+            },
+            "query_language": {
+              "type": "keyword"
+            },
+            "risk_score": {
+              "type": "short"
+            },
+            "severity": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "migration_id": {
+          "type": "keyword"
+        },
+        "original_rule": {
+          "properties": {
+            "annotations": {
+              "properties": {
+                "mitre_attack": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "description": {
+              "type": "text"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "query": {
+              "type": "text"
+            },
+            "query_language": {
+              "type": "keyword"
+            },
+            "severity": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "vendor": {
+              "type": "keyword"
+            }
+          }
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "translation_result": {
+          "type": "keyword"
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "updated_by": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

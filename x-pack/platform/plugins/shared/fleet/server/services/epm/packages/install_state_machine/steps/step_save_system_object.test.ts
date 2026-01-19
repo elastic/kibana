@@ -66,7 +66,6 @@ describe('updateLatestExecutedState', () => {
       esClient,
       logger,
       packageInstallContext: {
-        assetsMap: new Map(),
         archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
@@ -97,16 +96,18 @@ describe('updateLatestExecutedState', () => {
           install_version: '1.0.0',
           latest_install_failed_attempts: [],
           package_assets: undefined,
+          rolled_back: false,
           version: '1.0.0',
         },
       ],
     ]);
     expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'update',
+      name: 'test-integration',
       id: 'test-integration',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
-    expect(mockedPackagePolicyService.upgrade).not.toBeCalled();
+    expect(mockedPackagePolicyService.bulkUpgrade).not.toBeCalled();
   });
 
   it('Should call packagePolicy upgrade if keep_policies_up_to_date = true', async () => {
@@ -133,7 +134,6 @@ describe('updateLatestExecutedState', () => {
       esClient,
       logger,
       packageInstallContext: {
-        assetsMap: new Map(),
         archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
@@ -164,6 +164,7 @@ describe('updateLatestExecutedState', () => {
           install_version: '1.0.0',
           latest_install_failed_attempts: [],
           package_assets: undefined,
+          rolled_back: false,
           version: '1.0.0',
         },
       ],
@@ -171,12 +172,80 @@ describe('updateLatestExecutedState', () => {
     expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'update',
       id: 'test-integration',
+      name: 'test-integration',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
-    expect(packagePolicyService.upgrade).toHaveBeenCalledWith(
+    expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
       expect.any(Object),
       expect.any(Object),
       ['packagePolicy1', 'packagePolicy2']
     );
+  });
+
+  it('Should save the SO with rolled_back:true if update version is less than current version', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-integration',
+      attributes: {
+        title: 'title',
+        name: 'test-integration',
+        version: '1.0.1',
+        install_source: 'registry',
+        install_status: 'installed',
+        package_assets: [],
+      },
+    } as any);
+
+    await stepSaveSystemObject({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger,
+      packageInstallContext: {
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        paths: [],
+        packageInfo: {
+          title: 'title',
+          name: 'test-integration',
+          version: '1.0.0',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
+        },
+      },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      installedPkg: {
+        attributes: {
+          name: 'test-integration',
+          version: '1.0.1',
+          install_source: 'registry',
+          install_status: 'installed',
+          package_assets: [],
+        },
+        id: 'test-integration',
+      } as any,
+    });
+
+    expect(soClient.update.mock.calls).toEqual([
+      [
+        'epm-packages',
+        'test-integration',
+        {
+          install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+          install_status: 'installed',
+          install_version: '1.0.0',
+          latest_install_failed_attempts: [],
+          package_assets: undefined,
+          rolled_back: true,
+          version: '1.0.0',
+        },
+      ],
+    ]);
   });
 });

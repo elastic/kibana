@@ -26,12 +26,14 @@ export interface RuleType<
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
     | 'category'
+    | 'isExportable'
+    | 'autoRecoverAlerts'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
-  hasFieldsForAAD?: boolean;
   hasAlertsMappings?: boolean;
+  isInternallyManaged: boolean;
 }
 
 export type RuleTypeIndex = Map<string, RuleType>;

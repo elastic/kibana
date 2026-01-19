@@ -6,27 +6,32 @@
  */
 
 import { text as streamToString } from 'node:stream/consumers';
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { Stream } from 'openai/streaming';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
-import { AxiosError } from 'axios';
-import {
+import type { AxiosError } from 'axios';
+import type {
   InferenceInferenceRequest,
   InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { filter, from, identity, map, mergeMap, Observable, tap } from 'rxjs';
-import OpenAI from 'openai';
-import { ChatCompletionChunk } from 'openai/resources';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { isUserError } from '@kbn/task-manager-plugin/server/task_running';
+import { trace } from '@opentelemetry/api';
+import type { Observable } from 'rxjs';
+import { filter, from, identity, map, mergeMap, tap } from 'rxjs';
+import type OpenAI from 'openai';
+import type { ChatCompletionChunk } from 'openai/resources';
 import {
+  SUB_ACTION,
   ChatCompleteParamsSchema,
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
   TextEmbeddingParamsSchema,
   UnifiedChatCompleteParamsSchema,
-} from '../../../common/inference/schema';
-import {
+} from '@kbn/connector-schemas/inference';
+import type {
   Config,
   Secrets,
   RerankParams,
@@ -41,10 +46,13 @@ import {
   DashboardActionResponse,
   ChatCompleteParams,
   ChatCompleteResponse,
-} from '../../../common/inference/types';
-import { SUB_ACTION } from '../../../common/inference/constants';
+} from '@kbn/connector-schemas/inference';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { chunksIntoMessage, eventSourceStreamIntoObservable } from './helpers';
+import {
+  chunksIntoMessage,
+  eventSourceStreamIntoObservable,
+  detectandThrowUserError,
+} from './helpers';
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
@@ -116,7 +124,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * responsible for making a esClient inference method to perform chat completion task endpoint and returning the service response data
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */
@@ -179,26 +187,39 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * responsible for making a esClient inference method to perform chat completion task endpoint and returning the service response data
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */
   public async performApiUnifiedCompletionStream(params: UnifiedChatCompleteParams) {
+    const parentSpan = trace.getActiveSpan();
+    const body = { ...params.body, n: undefined }; // exclude n param for now, constant is used on the inference API side
+    if (parentSpan?.isRecording()) {
+      parentSpan.setAttribute('inference.raw_request', JSON.stringify(body));
+    }
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
-        path: `_inference/chat_completion/${this.inferenceId}/_unified`,
-        body: { ...params.body, n: undefined }, // exclude n param for now, constant is used on the inference API side
+        path: `_inference/chat_completion/${this.inferenceId}/_stream`,
+        body,
       },
       {
         asStream: true,
         meta: true,
         signal: params.signal,
+        ...(params.telemetryMetadata?.pluginId
+          ? {
+              headers: {
+                'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
+              },
+            }
+          : {}),
       }
     );
     // errors should be thrown as it will not be a stream response
     if (response.statusCode >= 400) {
       const error = await streamToString(response.body as unknown as Readable);
+      detectandThrowUserError(error);
       throw new Error(error);
     }
 
@@ -234,6 +255,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       return { consumerStream: teed[0], tokenCountStream: teed[1] };
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
+      if (isUserError(e)) {
+        // Bubble up user errors as-is
+        throw e;
+      }
       const errorMessage = this.getResponseErrorMessage(e);
       throw new Error(errorMessage);
     }
@@ -260,7 +285,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.rerank!;
+    return response.rerank!.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }));
   }
 
   /**
@@ -313,7 +338,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    */
   private async performInferenceApi(
     params: InferenceInferenceRequest,
-    asStream: boolean = false,
+    asStream = false,
     signal?: AbortSignal
   ): Promise<InferenceInferenceResponse> {
     try {

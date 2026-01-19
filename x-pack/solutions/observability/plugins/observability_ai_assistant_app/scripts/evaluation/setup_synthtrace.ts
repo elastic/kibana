@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   ApmSynthtraceEsClient,
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-} from '@kbn/apm-synthtrace';
-import { ToolingLog } from '@kbn/tooling-log';
-import { isPromise } from 'util/types';
-import { Logger } from '@kbn/apm-synthtrace/src/lib/utils/create_logger';
-import { Client } from '@elastic/elasticsearch';
+} from '@kbn/synthtrace';
+import { SynthtraceClientsManager } from '@kbn/synthtrace';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { extendToolingLog } from '@kbn/synthtrace';
+import type { Client } from '@elastic/elasticsearch';
 
 export interface SynthtraceEsClients {
   apmSynthtraceEsClient: ApmSynthtraceEsClient;
@@ -31,60 +30,31 @@ export async function setupSynthtrace({
   client: Client;
   target: string;
 }): Promise<SynthtraceEsClients> {
-  const logger: Logger = {
-    debug: (...args) => log.debug(...args),
-    info: (...args) => log.info(...args),
-    error: (...args) => log.error(args.map((arg) => arg.toString()).join(' ')),
-    perf: (name, cb) => {
-      const now = performance.now();
+  const logger = extendToolingLog(log);
 
-      const result = cb();
+  const clientManager = new SynthtraceClientsManager({
+    client,
+    logger,
+    refreshAfterIndex: true,
+  });
 
-      function measure() {
-        const after = performance.now();
-        log.debug(`[${name}] took ${after - now} ms`);
-      }
-
-      if (isPromise(result)) {
-        result.finally(measure);
-      } else {
-        measure();
-      }
-
-      return result;
+  const { apmEsClient, infraEsClient, logsEsClient } = clientManager.getClients({
+    clients: ['apmEsClient', 'infraEsClient', 'logsEsClient'],
+    kibana: {
+      target,
     },
-  };
-  const kibanaClient = new ApmSynthtraceKibanaClient({
-    target,
-    logger,
   });
 
-  const latestVersion = await kibanaClient.fetchLatestApmPackageVersion();
-
-  await kibanaClient.installApmPackage(latestVersion);
-
-  const apmSynthtraceEsClient = new ApmSynthtraceEsClient({
-    logger,
-    client,
-    version: latestVersion,
-    refreshAfterIndex: true,
-  });
-
-  const logsSynthtraceEsClient = new LogsSynthtraceEsClient({
-    client,
-    logger,
-    refreshAfterIndex: true,
-  });
-
-  const infraSynthtraceEsClient = new InfraSynthtraceEsClient({
-    client,
-    logger,
-    refreshAfterIndex: true,
+  await clientManager.initFleetPackageForClient({
+    clients: {
+      apmEsClient,
+    },
+    skipInstallation: false,
   });
 
   return {
-    apmSynthtraceEsClient,
-    logsSynthtraceEsClient,
-    infraSynthtraceEsClient,
+    apmSynthtraceEsClient: apmEsClient,
+    logsSynthtraceEsClient: logsEsClient,
+    infraSynthtraceEsClient: infraEsClient,
   };
 }

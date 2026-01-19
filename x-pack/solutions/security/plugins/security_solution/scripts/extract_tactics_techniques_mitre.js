@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 
 const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -19,7 +19,7 @@ const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
 // Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
 // This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.
 // This version is basically a tag on https://github.com/mitre/cti/tags, or can be a branch name like `master`.
-const MITRE_CONTENT_VERSION = 'ATT&CK-v15.1'; // last updated when preparing for 8.15.0 release
+const MITRE_CONTENT_VERSION = 'ATT&CK-v18.1'; // last updated when preparing for 9.3 release
 const MITRE_CONTENT_URL = `https://raw.githubusercontent.com/mitre/cti/${MITRE_CONTENT_VERSION}/enterprise-attack/enterprise-attack.json`;
 
 /**
@@ -80,12 +80,28 @@ const getSubtechniquesOptions = (subtechniques) =>
 }`.replace(/(\r\n|\n|\r)/gm, ' ')
   );
 
+const normalizeThreatReference = (reference) => {
+  try {
+    const parsed = new URL(reference);
+
+    if (!parsed.pathname.endsWith('/')) {
+      // Adds a trailing backslash in urls if it doesn't exist to account for
+      // any inconsistencies between our script generated data and prebuilt rules packages
+      parsed.pathname = `${parsed.pathname}/`;
+    }
+
+    return parsed.toString();
+  } catch {
+    return reference;
+  }
+};
+
 const getIdReference = (references) => {
   const ref = references.find((r) => r.source_name === 'mitre-attack');
   if (ref != null) {
     return {
       id: ref.external_id,
-      reference: ref.url,
+      reference: normalizeThreatReference(ref.url),
     };
   } else {
     return { id: '', reference: '' };
@@ -183,8 +199,19 @@ const extractSubtechniques = (mitreData) => {
 const buildMockThreatData = (tacticsData, techniques, subtechniques) => {
   const numberOfThreatsToGenerate = 4;
   const mockThreatData = [];
+  const generatedTechniqueIds = new Set();
   for (let i = 0; i < numberOfThreatsToGenerate; i++) {
-    const subtechnique = subtechniques[i * 50]; // Increase our interval to broaden the subtechnique types we're pulling data from a bit
+    let subtechnique;
+    let count = i * 50;
+    /**
+     * Since we're building from the subtechnique level -> up, we make sure there are no
+     * dupilicate techniques in the generated MITRE test data. This can cause flakiness in
+     * the tests as we don't expect the data to duplicated in the table
+     */
+    while (subtechnique == null || generatedTechniqueIds.has(subtechnique.techniqueId)) {
+      subtechnique = subtechniques[count++];
+    }
+    generatedTechniqueIds.add(subtechnique.techniqueId);
     const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
     const tactic = tacticsData.find((tactic) => tactic.shortName === technique.tactics[0]);
 

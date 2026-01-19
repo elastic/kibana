@@ -9,43 +9,38 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiLink,
   EuiSpacer,
-  EuiText,
-  useEuiTheme,
+  EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import React, { useMemo } from 'react';
 
-import { AssistantBeacon } from '@kbn/ai-assistant-icon';
-import { AnimatedCounter } from './animated_counter';
 import { Generate } from '../generate';
+import type { SettingsOverrideOptions } from '../../history/types';
 import * as i18n from './translations';
 
 interface Props {
   aiConnectorsCount: number | null; // null when connectors are not configured
-  alertsCount: number;
   attackDiscoveriesCount: number;
   isDisabled?: boolean;
   isLoading: boolean;
-  onGenerate: () => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
 }
 
 const EmptyPromptComponent: React.FC<Props> = ({
   aiConnectorsCount,
-  alertsCount,
   attackDiscoveriesCount,
   isLoading,
   isDisabled = false,
   onGenerate,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const title = useMemo(
+  const historyTitle = useMemo(
     () => (
       <EuiFlexGroup
         alignItems="center"
-        data-test-subj="emptyPromptTitleContainer"
+        data-test-subj="bodyContainer"
         direction="column"
         gutterSize="none"
       >
@@ -55,57 +50,45 @@ const EmptyPromptComponent: React.FC<Props> = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
-            <EuiFlexItem
-              css={css`
-                margin-right: ${euiTheme.size.xs};
-              `}
-              data-test-subj="upTo"
-              grow={false}
-            >
-              <span>{i18n.UP_TO}</span>
-            </EuiFlexItem>
-
-            <EuiFlexItem data-test-subj="emptyPromptAnimatedCounter" grow={false}>
-              <AnimatedCounter count={alertsCount} />
-            </EuiFlexItem>
-
-            <EuiFlexItem data-test-subj="emptyPromptAlertsWillBeAnalyzed" grow={false}>
-              <span>{i18n.ALERTS_WILL_BE_ANALYZED(alertsCount)}</span>
-            </EuiFlexItem>
-
-            <EuiFlexItem
-              css={css`
-                margin-left: ${euiTheme.size.xs};
-              `}
-              grow={false}
-            >
-              <EuiIconTip
-                content={i18n.RESPONSES_FROM_AI_SYSTEMS}
-                data-test-subj="responsesFromAiSystemsTooltip"
-                position="right"
-                type="iInCircle"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle data-test-subj="historyTitle" size="m">
+            <h1>{i18n.NO_RESULTS_MATCH_YOUR_SEARCH}</h1>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [alertsCount, euiTheme.size.xs]
+    []
   );
 
-  const body = useMemo(
+  const historyBody = useMemo(
     () => (
       <EuiFlexGroup
         alignItems="center"
-        data-test-subj="bodyContainer"
+        data-test-subj="historyBody"
         direction="column"
         gutterSize="none"
+        responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" data-test-subj="startGeneratingDiscoveriesLabel">
-            {i18n.START_GENERATING_DISCOVERIES}
-          </EuiText>
+        <EuiFlexItem
+          css={css`
+            display: inline-flex;
+            text-align: left;
+          `}
+          grow={false}
+        >
+          <span>{i18n.HERE_ARE_SOME_THINGS_TO_TRY}</span>
+
+          <ul
+            css={css`
+              text-align: left;
+            `}
+          >
+            <li>
+              <span>{i18n.EXPAND_THE_TIME_RANGE}</span>
+            </li>
+            <li>
+              <span>{i18n.GENERATE_NEW_ATTACK_DISCOVERIES}</span>
+            </li>
+          </ul>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -128,7 +111,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
       gutterSize="none"
     >
       <EuiFlexItem data-test-subj="emptyPromptContainer" grow={false}>
-        <EuiEmptyPrompt actions={actions} body={body} title={title} />
+        <EuiEmptyPrompt actions={actions} body={historyBody} title={historyTitle} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { capitalize } from 'lodash';
 
 interface Props {
@@ -24,9 +24,12 @@ export const ManageLicenseModal: React.FC<Props> = ({
   onConfirm,
   onCancel,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const licenseRequired = capitalize(licenseType);
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={i18n.translate('xpack.triggersActionsUI.sections.manageLicense.manageLicenseTitle', {
         defaultMessage: '{licenseRequired} license required',
         values: { licenseRequired },

@@ -5,32 +5,37 @@
  * 2.0.
  */
 
-import { intersectionBy } from 'lodash';
-import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
+import {
+  isPerRowAggregation,
+  parseAggregationResults,
+} from '@kbn/triggers-actions-ui-plugin/common';
+import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { Filter, Query } from '@kbn/es-query';
-import { EsqlTable, toEsQueryHits } from '../../../../common';
-import { OnlyEsqlQueryRuleParams } from '../types';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import { hasStartEndParams } from '@kbn/esql-utils';
+import type { EsqlTable } from '../../../../common';
+import { getEsqlQueryHits } from '../../../../common';
+import type { OnlyEsqlQueryRuleParams, EsQuerySourceFields } from '../types';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
   alertLimit: number | undefined;
   params: OnlyEsqlQueryRuleParams;
   spacePrefix: string;
-  publicBaseUrl: string;
   services: {
     logger: Logger;
     scopedClusterClient: IScopedClusterClient;
     share: SharePluginStart;
+    ruleResultService?: PublicRuleResultService;
   };
   dateStart: string;
   dateEnd: string;
+  sourceFields: EsQuerySourceFields;
 }
 
 export async function fetchEsqlQuery({
@@ -39,11 +44,12 @@ export async function fetchEsqlQuery({
   params,
   services,
   spacePrefix,
-  publicBaseUrl,
   dateStart,
   dateEnd,
+  sourceFields,
 }: FetchEsqlQueryOpts) {
-  const { logger, scopedClusterClient } = services;
+  const { logger, scopedClusterClient, share, ruleResultService } = services;
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
   const esClient = scopedClusterClient.asCurrentUser;
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
@@ -63,23 +69,35 @@ export async function fetchEsqlQuery({
     throw e;
   }
 
-  const hits = toEsQueryHits(response);
-  const sourceFields = getSourceFields(response);
+  const isGroupAgg = isPerRowAggregation(params.groupBy);
+  const { results, duplicateAlertIds } = await getEsqlQueryHits(
+    response,
+    params.esqlQuery.esql,
+    isGroupAgg
+  );
 
-  const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
+  if (ruleResultService && duplicateAlertIds && duplicateAlertIds.size > 0) {
+    const warning = `The query returned multiple rows with the same alert ID. There are duplicate results for alert IDs: ${Array.from(
+      duplicateAlertIds
+    ).join('; ')}`;
+    ruleResultService.addLastRunWarning(warning);
+    ruleResultService.setLastRunOutcomeMessage(warning);
+  }
+
+  const isPartial = response.is_partial ?? false;
+
+  if (ruleResultService && isPartial) {
+    const warning = getPartialResultsWarning(response);
+    ruleResultService.addLastRunWarning(warning);
+    ruleResultService.setLastRunOutcomeMessage(warning);
+  }
+
+  const link = generateLink(params, discoverLocator, dateStart, dateEnd, spacePrefix);
 
   return {
     link,
-    numMatches: Number(response.values.length),
     parsedResults: parseAggregationResults({
-      isCountAgg: true,
-      isGroupAgg: false,
-      esResult: {
-        took: 0,
-        timed_out: false,
-        _shards: { failed: 0, successful: 0, total: 0 },
-        hits,
-      },
+      ...results,
       resultLimit: alertLimit,
       sourceFieldsParams: sourceFields,
       generateSourceFieldsFromHits: true,
@@ -113,48 +131,49 @@ export const getEsqlQuery = (
         filter: rangeFilter,
       },
     },
+    ...(hasStartEndParams(params.esqlQuery.esql)
+      ? { params: [{ _tstart: dateStart }, { _tend: dateEnd }] }
+      : {}),
   };
   return query;
 };
 
-export const getSourceFields = (results: EsqlTable) => {
-  const resultFields = results.columns.map((c) => ({
-    label: c.name,
-    searchPath: c.name,
-  }));
-  const alertFields = Object.keys(alertFieldMap);
-  const ecsFields = Object.keys(ecsFieldMap)
-    // exclude the alert fields that we don't want to override
-    .filter((key) => !alertFields.includes(key))
-    .map((key) => ({ label: key, searchPath: key }));
-
-  return intersectionBy(resultFields, ecsFields, 'label');
-};
-
-export async function generateLink(
-  esqlQuery: Query,
+export function generateLink(
+  params: OnlyEsqlQueryRuleParams,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
-  dataViews: DataViewsContract,
-  dataViewToUpdate: DataView,
   dateStart: string,
   dateEnd: string,
-  spacePrefix: string,
-  filterToExcludeHitsFromPreviousRun: Filter | null
+  spacePrefix: string
 ) {
   const redirectUrlParams: DiscoverAppLocatorParams = {
-    filters: filterToExcludeHitsFromPreviousRun ? [filterToExcludeHitsFromPreviousRun] : [],
     timeRange: { from: dateStart, to: dateEnd },
+    query: params.esqlQuery,
     isAlertResults: true,
-    query: {
-      language: 'esql',
-      query: esqlQuery,
-    },
   };
 
   // use `lzCompress` flag for making the link readable during debugging/testing
   // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
-  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
-  const [start, end] = redirectUrl.split('/app');
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { spaceId: spacePrefix });
 
-  return start + spacePrefix + '/app' + end;
+  return redirectUrl;
+}
+
+function getPartialResultsWarning(response: EsqlTable) {
+  const clusters = response?._clusters?.details ?? {};
+  const shardFailures: EsqlEsqlShardFailure[] = [];
+  for (const cluster of Object.keys(clusters)) {
+    const failures = clusters[cluster]?.failures ?? [];
+
+    if (failures.length > 0) {
+      shardFailures.push(...failures);
+    }
+  }
+
+  return i18n.translate('xpack.stackAlerts.esQuery.partialResultsWarning', {
+    defaultMessage:
+      shardFailures.length > 0
+        ? 'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues. Failures: {failures}'
+        : 'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.',
+    values: { failures: JSON.stringify(shardFailures) },
+  });
 }
