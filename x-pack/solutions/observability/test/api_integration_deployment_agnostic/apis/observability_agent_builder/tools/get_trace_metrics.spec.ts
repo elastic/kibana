@@ -219,6 +219,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Configured at 30% failure rate: 3 failures / 10 total = 0.3
         expect(notificationService!.failureRate).to.be(0.3);
       });
+
+      it('returns values sorted by latency descending by default', () => {
+        for (let i = 1; i < resultData.items.length; i++) {
+          expect(resultData.items[i - 1].latency).to.be.greaterThan(resultData.items[i].latency);
+        }
+      });
     });
 
     describe('when fetching trace metrics with filters', () => {
