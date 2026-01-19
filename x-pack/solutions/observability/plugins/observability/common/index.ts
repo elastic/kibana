@@ -42,6 +42,7 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
+  apmUseLegacyTraceWaterfall,
   enableDiagnosticMode,
 } from './ui_settings_keys';
 

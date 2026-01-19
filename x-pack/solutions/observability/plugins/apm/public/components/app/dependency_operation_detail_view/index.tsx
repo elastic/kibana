@@ -19,6 +19,7 @@ import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
 import { ResettingHeightRetainer } from '../../shared/height_retainer/resetting_height_container';
 import { push, replace } from '../../shared/links/url_helpers';
 import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
+import { useUnifiedWaterfallFetcher } from '../transaction_details/use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 import type { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 import { DependencyOperationDistributionChart } from './dependency_operation_distribution_chart';
@@ -101,6 +102,17 @@ export function DependencyOperationDetailView() {
     start,
     end,
   });
+
+  const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
+    start,
+    end,
+    traceId: selectedSample?.traceId,
+    entryTransactionId: selectedSample?.transactionId,
+  });
+
+  const serviceName = waterfallFetch.useLegacy
+    ? waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service.name
+    : unifiedWaterfallFetchResult.entryTransaction?.service.name;
 
   const queryRef = useRef(query);
 
@@ -187,12 +199,14 @@ export function DependencyOperationDetailView() {
               traceSamplesFetchStatus={spanFetch.status}
               onSampleClick={onSampleClick}
               onTabClick={onTabClick}
-              serviceName={waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service.name}
+              serviceName={serviceName}
               waterfallItemId={waterfallItemId}
               detailTab={detailTab}
               selectedSample={selectedSample || null}
               showCriticalPath={showCriticalPath}
               onShowCriticalPathChange={onShowCriticalPathChange}
+              useLegacy={waterfallFetch.useLegacy}
+              unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
             />
           </ResettingHeightRetainer>
         </EuiPanel>

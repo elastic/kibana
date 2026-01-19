@@ -16,6 +16,7 @@ import { AT_TIMESTAMP } from '@kbn/apm-types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
+import { useUnifiedWaterfallFetcher } from '../use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -54,15 +55,22 @@ export function TransactionDistribution({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const history = useHistory();
+  const { serviceName } = useApmServiceContext();
+  const { waterfallItemId, detailTab } = urlParams;
+
   const waterfallFetchResult = useWaterfallFetcher({
     traceId,
     transactionId,
     start,
     end,
   });
-  const { waterfallItemId, detailTab } = urlParams;
 
-  const { serviceName } = useApmServiceContext();
+  const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
+    start,
+    end,
+    traceId,
+    entryTransactionId: transactionId,
+  });
 
   const markerCurrentEvent =
     waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
@@ -204,6 +212,8 @@ export function TransactionDistribution({
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
           onLogsTableConfigChange={onLogsTableConfigChange}
+          useLegacy={waterfallFetchResult.useLegacy}
+          unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
         />
       </div>
     </ResettingHeightRetainer>

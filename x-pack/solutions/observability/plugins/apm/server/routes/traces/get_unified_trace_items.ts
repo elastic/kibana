@@ -250,6 +250,7 @@ export async function getUnifiedTraceItems({
         event[SPAN_COMPOSITE_SUM],
         event[SPAN_COMPOSITE_COMPRESSION_STRATEGY]
       ),
+      docType: event[PROCESSOR_EVENT] === ProcessorEvent.transaction ? 'transaction' : 'span',
     } satisfies TraceItem;
   });
 

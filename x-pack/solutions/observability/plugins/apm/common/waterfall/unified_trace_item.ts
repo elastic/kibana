@@ -17,6 +17,8 @@ export interface TraceItemComposite {
   compressionStrategy: CompressionStrategy;
 }
 
+export type TraceItemDocType = 'span' | 'transaction';
+
 export interface TraceItem {
   id: string;
   timestampUs: number;
@@ -40,4 +42,5 @@ export interface TraceItem {
   icon?: string;
   coldstart?: boolean;
   composite?: TraceItemComposite;
+  docType: TraceItemDocType;
 }

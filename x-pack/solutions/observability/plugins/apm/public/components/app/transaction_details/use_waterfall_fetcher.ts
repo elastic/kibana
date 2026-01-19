@@ -6,6 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import { apmUseLegacyTraceWaterfall } from '@kbn/observability-plugin/common';
+import { useKibana } from '../../../context/kibana_context/use_kibana';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { getWaterfall } from './waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
@@ -35,11 +37,19 @@ export function useWaterfallFetcher({
   end: string;
 }) {
   const {
+    services: { uiSettings },
+  } = useKibana();
+  const useLegacy = uiSettings.get<boolean>(apmUseLegacyTraceWaterfall);
+
+  const {
     data = INITIAL_DATA,
     status,
     error,
   } = useFetcher(
     (callApmApi) => {
+      if (!useLegacy) {
+        return;
+      }
       if (traceId && start && end && transactionId) {
         return callApmApi('GET /internal/apm/traces/{traceId}', {
           params: {
@@ -53,10 +63,10 @@ export function useWaterfallFetcher({
         });
       }
     },
-    [traceId, start, end, transactionId]
+    [traceId, start, end, transactionId, useLegacy]
   );
 
-  const waterfall = useMemo(() => getWaterfall(traceId ? data : INITIAL_DATA), [data, traceId]);
+  const waterfall = useMemo(() => getWaterfall(data), [data]);
 
-  return { waterfall, status, error };
+  return { waterfall, status, error, useLegacy };
 }

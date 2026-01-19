@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
-import { TraceWaterfall } from '../../../../shared/trace_waterfall';
+import { Waterfall } from './waterfall';
+import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning';
 import { WaterfallFlyout } from './waterfall/waterfall_flyout';
-import type { IWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';
-import { convertToTraceItems } from './convert_to_trace_items';
+import type { IWaterfall, IWaterfallItem } from './waterfall/waterfall_helpers/waterfall_helpers';
+import { WaterfallLegends } from '../../../../shared/trace_waterfall/waterfall_legends';
 
 interface Props {
   waterfallItemId?: string;
   serviceName?: string;
   waterfall: IWaterfall;
   showCriticalPath: boolean;
-  onShowCriticalPathChange: (value: boolean) => void;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }
 
 const toggleFlyout = ({
   history,
-  waterfallItemId,
+  item,
   flyoutDetailTab,
 }: {
   history: History;
-  waterfallItemId?: string;
+  item?: IWaterfallItem;
   flyoutDetailTab?: string;
 }) => {
   history.replace({
@@ -37,7 +39,7 @@ const toggleFlyout = ({
     search: fromQuery({
       ...toQuery(location.search),
       flyoutDetailTab,
-      waterfallItemId,
+      waterfallItemId: item?.id,
     }),
   });
 };
@@ -51,34 +53,46 @@ export function WaterfallContainer({
 }: Props) {
   const history = useHistory();
 
-  const traceItems = useMemo(() => (waterfall ? convertToTraceItems(waterfall) : []), [waterfall]);
-  const errors = useMemo(
-    () => (waterfall ? waterfall.errorItems.map((item) => item.doc) : []),
-    [waterfall]
-  );
-  const agentMarks = waterfall?.entryTransaction?.transaction.marks?.agent;
-
   if (!waterfall) {
     return null;
   }
-
-  const handleNodeClick = (id: string) => {
-    toggleFlyout({ history, waterfallItemId: id, flyoutDetailTab: 'metadata' });
-  };
+  const { legends, colorBy, orphanTraceItemsCount } = waterfall;
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <TraceWaterfall
-          traceItems={traceItems}
-          errors={errors}
-          onClick={handleNodeClick}
-          serviceName={serviceName}
-          showLegend
-          showCriticalPathControl
-          agentMarks={agentMarks}
+        <EuiSwitch
+          id="showCriticalPath"
+          label={i18n.translate('xpack.apm.waterfall.showCriticalPath', {
+            defaultMessage: 'Show critical path',
+          })}
+          checked={showCriticalPath}
+          onChange={(event) => {
+            onShowCriticalPathChange(event.target.checked);
+          }}
+        />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
+          </EuiFlexItem>
+          {orphanTraceItemsCount > 0 ? (
+            <EuiFlexItem grow={false}>
+              <OrphanTraceItemsWarning orphanTraceItemsCount={orphanTraceItemsCount} />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <Waterfall
           showCriticalPath={showCriticalPath}
-          onShowCriticalPathChange={onShowCriticalPathChange}
+          waterfallItemId={waterfallItemId}
+          waterfall={waterfall}
+          onNodeClick={(item: IWaterfallItem, flyoutDetailTab: string) =>
+            toggleFlyout({ history, item, flyoutDetailTab })
+          }
         />
       </EuiFlexItem>
 

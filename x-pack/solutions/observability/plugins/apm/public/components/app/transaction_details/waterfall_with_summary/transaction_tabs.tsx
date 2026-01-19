@@ -14,7 +14,9 @@ import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { WaterfallContainer } from './waterfall_container';
+import { UnifiedWaterfallContainer } from './waterfall_container/unified_waterfall_container';
 import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { type UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 
 export enum TransactionTab {
   timeline = 'timeline',
@@ -34,6 +36,8 @@ interface Props {
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
   logsTableConfig?: SavedSearchTableConfig;
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
+  useLegacy: boolean;
+  unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
 }
 
 export function TransactionTabs({
@@ -48,6 +52,8 @@ export function TransactionTabs({
   onShowCriticalPathChange,
   logsTableConfig,
   onLogsTableConfigChange,
+  useLegacy,
+  unifiedWaterfallFetchResult,
 }: Props) {
   const tabs: Record<TransactionTab, { label: string; component: React.ReactNode }> = useMemo(
     () => ({
@@ -62,6 +68,8 @@ export function TransactionTabs({
             waterfall={waterfall}
             showCriticalPath={showCriticalPath}
             onShowCriticalPathChange={onShowCriticalPathChange}
+            useLegacy={useLegacy}
+            unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
           />
         ),
       },
@@ -97,6 +105,8 @@ export function TransactionTabs({
       serviceName,
       showCriticalPath,
       transaction,
+      unifiedWaterfallFetchResult,
+      useLegacy,
       waterfall,
       waterfallItemId,
     ]
@@ -140,18 +150,36 @@ function TimelineTabContent({
   serviceName,
   showCriticalPath,
   onShowCriticalPathChange,
+  useLegacy,
+  unifiedWaterfallFetchResult,
 }: {
   waterfallItemId?: string;
   serviceName?: string;
   waterfall: IWaterfall;
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
+  useLegacy: boolean;
+  unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
 }) {
+  if (useLegacy) {
+    return (
+      <WaterfallContainer
+        waterfallItemId={waterfallItemId}
+        serviceName={serviceName}
+        waterfall={waterfall}
+        showCriticalPath={showCriticalPath}
+        onShowCriticalPathChange={onShowCriticalPathChange}
+      />
+    );
+  }
+
   return (
-    <WaterfallContainer
+    <UnifiedWaterfallContainer
+      traceItems={unifiedWaterfallFetchResult.traceItems}
+      errors={unifiedWaterfallFetchResult.errors}
+      agentMarks={unifiedWaterfallFetchResult.agentMarks}
       waterfallItemId={waterfallItemId}
       serviceName={serviceName}
-      waterfall={waterfall}
       showCriticalPath={showCriticalPath}
       onShowCriticalPathChange={onShowCriticalPathChange}
     />

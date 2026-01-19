@@ -35,6 +35,7 @@ const root: TraceItem = {
   serviceName: 'svcA',
   errors: [],
   spanLinksCount: { incoming: 0, outgoing: 0 },
+  docType: 'transaction',
 };
 const child1: TraceItem = {
   id: '2',
@@ -46,6 +47,7 @@ const child1: TraceItem = {
   serviceName: 'svcB',
   errors: [],
   spanLinksCount: { incoming: 0, outgoing: 0 },
+  docType: 'span',
 };
 const child2: TraceItem = {
   id: '3',
@@ -57,6 +59,7 @@ const child2: TraceItem = {
   serviceName: 'svcC',
   errors: [],
   spanLinksCount: { incoming: 0, outgoing: 0 },
+  docType: 'span',
 };
 const grandchild: TraceItem = {
   id: '4',
@@ -68,6 +71,7 @@ const grandchild: TraceItem = {
   serviceName: 'svcD',
   errors: [],
   spanLinksCount: { incoming: 0, outgoing: 0 },
+  docType: 'span',
 };
 
 describe('getFlattenedTraceWaterfall', () => {

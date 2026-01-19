@@ -48,6 +48,7 @@ export interface Props {
   showCriticalPath?: boolean;
   defaultShowCriticalPath?: boolean;
   onShowCriticalPathChange?: (value: boolean) => void;
+  children?: React.ReactNode;
 }
 
 export function TraceWaterfall({
@@ -68,6 +69,7 @@ export function TraceWaterfall({
   showCriticalPath,
   defaultShowCriticalPath,
   onShowCriticalPathChange,
+  children,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -92,6 +94,7 @@ export function TraceWaterfall({
       <TraceWarning>
         <TraceWaterfallComponent />
       </TraceWarning>
+      {children}
     </TraceWaterfallContextProvider>
   );
 }

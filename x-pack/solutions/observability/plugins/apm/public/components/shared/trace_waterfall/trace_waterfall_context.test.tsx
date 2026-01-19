@@ -291,6 +291,7 @@ describe('TraceWaterfallContextProvider - controlled/uncontrolled showCriticalPa
     agentName: 'nodejs',
     errors: [],
     spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'transaction',
   };
 
   const createWrapper =

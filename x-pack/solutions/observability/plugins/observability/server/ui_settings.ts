@@ -30,6 +30,7 @@ import {
   profilingCostPervCPUPerHour,
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
+  apmUseLegacyTraceWaterfall,
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
   enableDiagnosticMode,
@@ -396,6 +397,20 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       defaultMessage: 'Enable Universal Profiling on Transaction view',
     }),
     value: true,
+    schema: schema.boolean(),
+    requiresPageReload: true,
+    solutionViews: ['classic', 'oblt'],
+  },
+  [apmUseLegacyTraceWaterfall]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmUseLegacyTraceWaterfall', {
+      defaultMessage: 'Use legacy trace waterfall',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.apmUseLegacyTraceWaterfallDescription', {
+      defaultMessage:
+        'Enable to use the legacy trace waterfall implementation instead of the new unified waterfall.',
+    }),
     schema: schema.boolean(),
     requiresPageReload: true,
     solutionViews: ['classic', 'oblt'],

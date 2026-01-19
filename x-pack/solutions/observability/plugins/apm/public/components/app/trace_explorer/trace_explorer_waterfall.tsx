@@ -14,6 +14,7 @@ import { useTraceExplorerSamples } from '../../../hooks/use_trace_explorer_sampl
 import { ResettingHeightRetainer } from '../../shared/height_retainer/resetting_height_container';
 import { push, replace } from '../../shared/links/url_helpers';
 import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
+import { useUnifiedWaterfallFetcher } from '../transaction_details/use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 import type { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 
@@ -55,6 +56,17 @@ export function TraceExplorerWaterfall() {
     start,
     end,
   });
+
+  const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
+    start,
+    end,
+    traceId,
+    entryTransactionId: transactionId,
+  });
+
+  const serviceName = waterfallFetchResult.useLegacy
+    ? waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name
+    : unifiedWaterfallFetchResult.entryTransaction?.service.name;
 
   useEffect(() => {
     if (waterfallFetchResult.status === FETCH_STATUS.SUCCESS) {
@@ -122,9 +134,11 @@ export function TraceExplorerWaterfall() {
         onTabClick={onTabClick}
         detailTab={detailTab}
         waterfallItemId={waterfallItemId}
-        serviceName={waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name}
+        serviceName={serviceName}
         showCriticalPath={showCriticalPath}
         onShowCriticalPathChange={onShowCriticalPathChange}
+        useLegacy={waterfallFetchResult.useLegacy}
+        unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
       />
     </ResettingHeightRetainer>
   );
