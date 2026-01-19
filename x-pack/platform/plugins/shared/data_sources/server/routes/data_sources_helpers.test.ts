@@ -205,7 +205,7 @@ describe('createConnectorAndRelatedResources', () => {
     );
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'my-test-connector.test_type.workflow',
+        id: 'test_type.my-test-connector.workflow',
         type: 'workflow',
         description: 'Workflow tool for test_type data source',
         tags: ['data-source', 'test_type'],
