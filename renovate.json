@@ -3661,7 +3661,8 @@
       "groupName": "CodeQL",
       "matchPackageNames": [
         "github/codeql-action/analyze",
-        "github/codeql-action/init"
+        "github/codeql-action/init",
+        "advanced-security/dismiss-alerts"
       ],
       "matchManagers": [
         "github-actions"
