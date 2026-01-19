@@ -20,20 +20,6 @@ const searchSLODefinitionsParamsSchema = t.type({
   ]),
 });
 
-// const searchSLODefinitionsParamsSchema = t.intersection([
-//   t.type({
-//     path: t.type({ id: t.string }),
-//   }),
-//   t.partial({
-//     query: t.partial({
-//       search: t.string,
-//       size: toNumberRt,
-//       searchAfter: t.string,
-//       remoteName: t.string,
-//     }),
-//   }),
-// ]);
-
 type SearchSLODefinitionsParams = t.TypeOf<typeof searchSLODefinitionsParamsSchema.props.query>;
 
 interface SearchSLODefinitionItem {
