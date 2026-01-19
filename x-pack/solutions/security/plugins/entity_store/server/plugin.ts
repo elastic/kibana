@@ -38,7 +38,7 @@ export class EntityStorePlugin implements Plugin {
         createRequestHandlerContext({ context, coreSetup: core, logger: this.logger })
     );
 
-    registerTasks(plugins.taskManager, this.logger);
+    registerTasks(plugins.taskManager, this.logger, core);
     this.logger.debug('Registering routes');
     registerRoutes(router);
 

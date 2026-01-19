@@ -22,7 +22,6 @@ export class AssetManager {
     await scheduleExtractEntityTasks({
       taskManager: this.taskManager,
       entityTypes,
-      assetManager: this,
       logger: this.logger,
       frequency: logExtractionFrequency,
     });
