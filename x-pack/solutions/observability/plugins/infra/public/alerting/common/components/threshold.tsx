@@ -35,10 +35,6 @@ const NO_DATA_VALUE = i18n.translate('xpack.infra.alerting.noDataValue', {
   defaultMessage: 'No Data',
 });
 
-const THRESHOLD_NO_DATA_TITLE = i18n.translate('xpack.infra.alerting.thresholdNoDataTitle', {
-  defaultMessage: 'Alert when',
-});
-
 export const Threshold = ({
   chartProps: { theme, baseTheme },
   comparator,
@@ -71,7 +67,7 @@ export const Threshold = ({
             [
               {
                 title,
-                extra: value ? (
+                extra: (
                   <>
                     {i18n.translate('xpack.infra.alerting.thresholdExtraTitle', {
                       values: {
@@ -90,8 +86,6 @@ export const Threshold = ({
                         defaultMessage: `Warn when {comparator} {threshold}`,
                       })}
                   </>
-                ) : (
-                  <>{THRESHOLD_NO_DATA_TITLE}</>
                 ),
                 color,
                 value: value ?? NO_DATA_VALUE,
