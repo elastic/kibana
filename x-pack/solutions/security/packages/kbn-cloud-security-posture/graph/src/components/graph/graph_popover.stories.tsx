@@ -11,6 +11,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { EntityNodeViewModel, LabelNodeViewModel, NodeProps } from '..';
 import { Graph } from '..';
+import { isLabelNode } from '../utils';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { GraphPopover } from './graph_popover';
 import type { ExpandButtonClickCallback } from '../types';
@@ -72,7 +73,7 @@ const useExpandButtonPopover = () => {
     closePopover();
   }, [closePopover]);
 
-  const isLabelNode = selectedNode.current?.data?.shape === 'label';
+  const isLabel = selectedNode.current?.data && isLabelNode(selectedNode.current.data);
 
   // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
@@ -84,7 +85,7 @@ const useExpandButtonPopover = () => {
       closePopover={closePopoverHandler}
     >
       <EuiListGroup color="primary" gutterSize="none" bordered={false} flush={true}>
-        {isLabelNode ? (
+        {isLabel ? (
           <>
             <ExpandPopoverListItem
               iconType="visTagCloud"

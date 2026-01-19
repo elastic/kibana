@@ -33,6 +33,7 @@ import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
+import { isConnectorShape } from '../utils';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
@@ -343,8 +344,6 @@ const processGraph = (
 
     return node;
   });
-
-  const isConnectorShape = (shape: string) => shape === 'label' || shape === 'relationship';
 
   const initialEdges: Array<Edge<EdgeViewModel>> = edgesModel
     .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])

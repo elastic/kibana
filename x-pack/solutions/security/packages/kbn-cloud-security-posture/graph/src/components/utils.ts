@@ -39,13 +39,19 @@ export const isRelationshipNode = (node: NodeViewModel): node is RelationshipNod
   node.shape === 'relationship';
 
 /**
+ * Returns true if the shape is a connector shape (label or relationship).
+ * Connector shapes act as connectors between entity nodes.
+ */
+export const isConnectorShape = (shape?: string): boolean =>
+  shape === 'label' || shape === 'relationship';
+
+/**
  * Returns true for nodes that act as connectors between entity nodes (label or relationship nodes).
  * These nodes share similar layout and sizing behavior.
  */
 export const isConnectorNode = (
   node: NodeViewModel
-): node is LabelNodeViewModel | RelationshipNodeViewModel =>
-  node.shape === 'label' || node.shape === 'relationship';
+): node is LabelNodeViewModel | RelationshipNodeViewModel => isConnectorShape(node.shape);
 
 export const isStackNode = (node: NodeViewModel): node is GroupNodeViewModel =>
   node.shape === 'group';
@@ -225,8 +231,6 @@ export const buildGraphFromViewModels = (
 
     return node;
   });
-
-  const isConnectorShape = (shape: string) => shape === 'label' || shape === 'relationship';
 
   const edges: Array<Edge<EdgeViewModel>> = edgesModel
     .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])

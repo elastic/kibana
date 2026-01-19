@@ -13,6 +13,7 @@ import { getMarkerEnd } from './markers';
 import { useEdgeColor } from './styles';
 import { STACK_NODE_HORIZONTAL_PADDING } from '../constants';
 import { GRAPH_EDGE_ID } from '../test_ids';
+import { isConnectorShape } from '../utils';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -21,8 +22,6 @@ const dashedStyle = {
 };
 
 const NODES_WITHOUT_MARKER = ['label', 'group', 'relationship'];
-
-const isConnectorShape = (shape?: string) => shape === 'label' || shape === 'relationship';
 
 export const DefaultEdge = memo(
   ({
