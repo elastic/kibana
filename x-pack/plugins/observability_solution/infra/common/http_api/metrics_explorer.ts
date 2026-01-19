@@ -19,7 +19,6 @@ export const METRIC_EXPLORER_AGGREGATIONS = [
   'p95',
   'p99',
   'custom',
-  'last_value',
 ] as const;
 
 export const OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS = ['custom', 'rate', 'p95', 'p99'];
