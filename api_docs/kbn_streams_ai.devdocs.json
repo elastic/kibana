@@ -2467,7 +2467,7 @@
         "label": "identifyFeatures",
         "description": [],
         "signature": [
-          "({\n  stream,\n  prompt,\n  inferenceClient,\n  logger,\n  start,\n  end,\n  esClient,\n  signal,\n}: ",
+          "({\n  stream,\n  systemPrompt,\n  inferenceClient,\n  logger,\n  start,\n  end,\n  esClient,\n  signal,\n}: ",
           {
             "pluginId": "@kbn/streams-ai",
             "scope": "server",
@@ -2504,7 +2504,7 @@
             "id": "def-server.identifyFeatures.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  stream,\n  prompt,\n  inferenceClient,\n  logger,\n  start,\n  end,\n  esClient,\n  signal,\n}",
+            "label": "{\n  stream,\n  systemPrompt,\n  inferenceClient,\n  logger,\n  start,\n  end,\n  esClient,\n  signal,\n}",
             "description": [],
             "signature": [
               {
@@ -6249,10 +6249,10 @@
           },
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.prompt",
+            "id": "def-server.IdentifyFeaturesOptions.systemPrompt",
             "type": "string",
             "tags": [],
-            "label": "prompt",
+            "label": "systemPrompt",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
             "lineNumber": 22,

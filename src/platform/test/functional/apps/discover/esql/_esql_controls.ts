@@ -47,7 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    describe('when adding an ES|QL panel with controls in dashboards and exploring it in discover', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/248030
+    describe.skip('when adding an ES|QL panel with controls in dashboards and exploring it in discover', () => {
       it('should retain the controls and their state', async () => {
         // Go to dashboard app
         await dashboard.navigateToApp();
