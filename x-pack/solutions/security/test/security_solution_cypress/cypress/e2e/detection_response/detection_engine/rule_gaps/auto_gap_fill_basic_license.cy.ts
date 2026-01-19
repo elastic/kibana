@@ -23,16 +23,6 @@ describe(
   'Rule gaps auto fill status - Basic license',
   {
     tags: ['@ess'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          '--xpack.alerting.gapAutoFillScheduler.enabled=true',
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'gapAutoFillSchedulerEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     beforeEach(() => {
