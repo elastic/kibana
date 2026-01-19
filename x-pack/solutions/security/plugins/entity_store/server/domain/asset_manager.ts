@@ -24,9 +24,9 @@ export class AssetManager {
     private taskManager: TaskManagerStartContract
   ) {}
 
-  public async init(type: EntityType) {
+  public async init(type: EntityType, logExtractionFrequency?: string) {
     await this.install(type); // TODO: async
-    await this.start(type);
+    await this.start(type, logExtractionFrequency);
   }
 
   public async start(type: EntityType, logExtractionFrequency?: string) {
@@ -38,6 +38,7 @@ export class AssetManager {
       { interval: logExtractionFrequency }
     );
 
+    // TODO: if this fails, set status to failed
     await scheduleExtractEntityTask({
       logger: this.logger,
       taskManager: this.taskManager,

@@ -28,18 +28,14 @@ export const getEntityDefinitionComponentTemplate = (definition: EntityDefinitio
   template: { settings: { hidden: true }, mappings: getIndexMappings(definition) },
 });
 
-const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => {
-  const identityFieldMappings: MappingProperties = Object.fromEntries(
-    definition.identityFields.map((c) => [c.field, c.mapping])
-  );
-
-  const entityFieldsMapping: MappingProperties = Object.fromEntries(
-    definition.fields
-      .filter(({ mapping }) => mapping)
-      .map(({ source, destination, mapping }) => [destination || source, mapping])
-  );
-
-  return {
-    properties: { ...BASE_ENTITY_INDEX_MAPPING, ...identityFieldMappings, ...entityFieldsMapping },
-  };
-};
+const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
+  properties: {
+    ...BASE_ENTITY_INDEX_MAPPING,
+    ...Object.fromEntries(definition.identityFields.map((c) => [c.field, c.mapping])),
+    ...Object.fromEntries(
+      definition.fields
+        .filter(({ mapping }) => mapping)
+        .map(({ source, destination, mapping }) => [destination || source, mapping])
+    ),
+  },
+});

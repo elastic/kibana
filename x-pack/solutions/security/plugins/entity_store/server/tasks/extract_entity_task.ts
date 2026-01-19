@@ -134,12 +134,7 @@ export async function stopExtractEntityTask({
   taskManager: TaskManagerStartContract;
   logger: Logger;
   type: EntityType;
-}): Promise<string[]> {
-  const taskIds = [getTaskId(type)];
-
-  const { statuses } = await taskManager.bulkRemove(taskIds);
-  const stoppedTasksIds = statuses.filter((status) => status.success).map((status) => status.id);
-  logger.debug(`Successfully stopped ${stoppedTasksIds.length} task(s)`);
-
-  return stoppedTasksIds;
+}): Promise<void> {
+  await taskManager.removeIfExists(getTaskId(type));
+  logger.debug(`removed task: ${getTaskId(type)}`);
 }

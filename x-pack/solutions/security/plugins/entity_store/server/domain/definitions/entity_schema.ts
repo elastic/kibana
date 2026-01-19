@@ -6,11 +6,14 @@
  */
 
 import { z } from '@kbn/zod';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.Values);
+
+const mappingSchema = z.custom<MappingProperty>().optional();
 
 const retentionOperationSchema = z.discriminatedUnion('operation', [
   z.object({ operation: z.literal('collect_values'), maxLength: z.number() }),
@@ -20,7 +23,7 @@ const retentionOperationSchema = z.discriminatedUnion('operation', [
 
 const retentionFieldSchema = z.object({
   allowAPIUpdate: z.optional(z.boolean()),
-  mapping: z.any(),
+  mapping: mappingSchema,
   source: z.string(),
   destination: z.optional(z.string()),
   retention: retentionOperationSchema,
@@ -28,7 +31,7 @@ const retentionFieldSchema = z.object({
 
 const identityFieldSchema = z.object({
   field: z.string(),
-  mapping: z.any(), // !!
+  mapping: mappingSchema,
 });
 
 export const entitySchema = z.object({
