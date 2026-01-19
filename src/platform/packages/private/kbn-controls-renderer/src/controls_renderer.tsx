@@ -32,7 +32,8 @@ import { EuiFlexGroup } from '@elastic/eui';
 
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
-import type { ControlsRendererParentApi, ControlsLayout, PublishesFocusedPanelId } from './types';
+import type { ControlsRendererParentApi, ControlsLayout } from './types';
+import { apiPublishesFocusedPanelId } from './utils';
 
 export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererParentApi }) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
@@ -70,10 +71,8 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
   }, [parentApi]);
 
   useEffect(() => {
-    const publishesFocusedPanelId = (api: unknown): api is PublishesFocusedPanelId => {
-      return Boolean((api as PublishesFocusedPanelId).focusedPanelId$);
-    };
-    if (publishesFocusedPanelId(parentApi)) {
+    const publishesFocusedPanelId = apiPublishesFocusedPanelId(parentApi);
+    if (publishesFocusedPanelId) {
       const focusSub = parentApi.focusedPanelId$
         .pipe(distinctUntilChanged())
         .subscribe((focusId) => {
