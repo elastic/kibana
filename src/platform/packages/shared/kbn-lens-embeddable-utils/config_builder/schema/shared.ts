@@ -47,7 +47,7 @@ export const sharedPanelInfoSchema = {
       },
     })
   ),
-  filters: schema.maybe(schema.arrayOf(unifiedSearchFilterSchema)),
+  filters: schema.maybe(schema.arrayOf(unifiedSearchFilterSchema, { maxSize: 100 })),
 };
 
 export const dslOnlyPanelInfoSchema = {

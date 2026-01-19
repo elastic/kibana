@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -33,7 +33,7 @@ interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   onSave: (query: StreamQueryKql) => void;
-  features: Omit<Feature, 'description'>[];
+  features: Omit<System, 'description'>[];
   dataViews: DataView[];
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;

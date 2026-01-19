@@ -20,6 +20,7 @@ import type {
   DatasourceDimensionTriggerProps,
   DatasourceDimensionEditorProps,
 } from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { DimensionEditor } from './dimension_editor';
 import { getOperationSupportMatrix } from './operation_support';
 
@@ -37,6 +38,7 @@ export type FormBasedDimensionEditorProps =
     data: DataPublicPluginStart;
     fieldFormats: FieldFormatsStart;
     unifiedSearch: UnifiedSearchPublicPluginStart;
+    kql: KqlPluginStart;
     dataViews: DataViewsPublicPluginStart;
     uniqueLabel: string;
     dateRange: DateRange;

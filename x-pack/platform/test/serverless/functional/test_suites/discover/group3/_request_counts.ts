@@ -214,7 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should send 2 requests (chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
         await testSubjects.click('discoverNewButton');
         await expectSearches(type, 2, async () => {
-          await discover.chooseBreakdownField('extension.raw');
+          await discover.chooseBreakdownField('geo.src');
         });
       });
 
