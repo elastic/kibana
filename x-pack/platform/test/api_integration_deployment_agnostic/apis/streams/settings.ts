@@ -411,39 +411,36 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await deleteStream(apiClient, 'logs.validation_test');
         });
 
-        it('rejects disallowed settings on new stream creation via API', async function () {
-          if (!isServerless) {
-            this.skip();
-            return;
-          }
-
-          const response = await apiClient
-            .fetch('PUT /api/streams/{name} 2023-10-31', {
-              params: {
-                path: { name: 'logs.creation_validation_test' },
-                body: {
-                  ...emptyAssets,
-                  stream: {
-                    description: '',
-                    ingest: {
-                      settings: {
-                        'index.number_of_replicas': { value: 2 },
+        if (isServerless) {
+          it('rejects disallowed settings on new stream creation via API', async () => {
+            const response = await apiClient
+              .fetch('PUT /api/streams/{name} 2023-10-31', {
+                params: {
+                  path: { name: 'logs.creation_validation_test' },
+                  body: {
+                    ...emptyAssets,
+                    stream: {
+                      description: '',
+                      ingest: {
+                        settings: {
+                          'index.number_of_replicas': { value: 2 },
+                        },
+                        processing: { steps: [] },
+                        lifecycle: { inherit: {} },
+                        wired: { fields: {}, routing: [] },
+                        failure_store: { inherit: {} },
                       },
-                      processing: { steps: [] },
-                      lifecycle: { inherit: {} },
-                      wired: { fields: {}, routing: [] },
-                      failure_store: { inherit: {} },
                     },
                   },
                 },
-              },
-            })
-            .expect(400);
+              })
+              .expect(400);
 
-          expect(response.body).to.have.property('statusCode', 400);
-          const body = response.body as unknown as { message?: string };
-          expect(body.message ?? '').to.contain('not allowed in serverless');
-        });
+            expect(response.body).to.have.property('statusCode', 400);
+            const body = response.body as unknown as { message?: string };
+            expect(body.message ?? '').to.contain('not allowed in serverless');
+          });
+        }
 
         it('accepts valid settings on new stream creation via API', async () => {
           const response = await putStream(apiClient, 'logs.creation_valid_test', {
