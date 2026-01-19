@@ -231,21 +231,99 @@ export const PrivMonUtils = (
   };
 
   const waitForSyncTaskRun = async (): Promise<void> => {
+    // Same task id is updated by Task Manager; we snapshot initial fields and
+    // wait for any execution signal to advance (startedAt/attempts/runAt).
     const initialTime = new Date();
+    const initialTask = await kibanaServer.savedObjects.get({
+      type: 'task',
+      id: TASK_ID,
+    });
+    const initialStartedAt = initialTask.attributes.startedAt
+      ? new Date(initialTask.attributes.startedAt)
+      : undefined;
+    const initialRunAt = initialTask.attributes.runAt
+      ? new Date(initialTask.attributes.runAt)
+      : undefined;
+    const initialAttempts = initialTask.attributes.attempts ?? 0;
 
-    // Just wait for task to be scheduled - rely on side effects (user count, markers) to verify completion
+    // Wait for evidence the task actually started (not just rescheduled).
     await waitFor(
       async () => {
         const task = await kibanaServer.savedObjects.get({
           type: 'task',
           id: TASK_ID,
         });
-        const runAtTime = task.attributes.runAt;
+        const startedAt = task.attributes.startedAt
+          ? new Date(task.attributes.startedAt)
+          : undefined;
+        const runAt = task.attributes.runAt ? new Date(task.attributes.runAt) : undefined;
+        const attempts = task.attributes.attempts ?? 0;
 
-        return !!runAtTime && new Date(runAtTime) > initialTime;
+        const startedAtAdvanced =
+          !!startedAt && (!initialStartedAt || startedAt > initialStartedAt);
+        const attemptsAdvanced = attempts > initialAttempts;
+        const runAtAdvanced =
+          !!runAt && (!initialRunAt || runAt > initialRunAt) && runAt > initialTime;
+
+        return startedAtAdvanced || attemptsAdvanced || runAtAdvanced;
       },
       'waitForSyncTaskRun',
       log
+    );
+  };
+
+  const waitForPrivMonEngineStatus = async (
+    expectedStatus: 'started' | 'error' | 'disabled' | 'not_installed' = 'started',
+    timeout = 60000
+  ): Promise<void> => {
+    await retry.waitForWithTimeout(
+      `privmon engine status to be ${expectedStatus}`,
+      timeout,
+      async () => {
+        const res = await entityAnalyticsApi.privMonHealth();
+        if (res.status !== 200) {
+          log.info(
+            `PrivMon health check returned status ${res.status}: ${JSON.stringify(res.body)}`
+          );
+          return false;
+        }
+        if (res.body.status !== expectedStatus) {
+          log.info(`PrivMon engine status is ${res.body.status} (expected ${expectedStatus})`);
+        }
+        log.info(`PrivMon engine status is ${res.body.status} (expected ${expectedStatus})`);
+        return res.body.status === expectedStatus;
+      }
+    );
+  };
+
+  const waitForIndexSourceEnabled = async (
+    indexPattern: string,
+    timeout = 60000
+  ): Promise<void> => {
+    await retry.waitForWithTimeout(
+      `index entity source to be enabled for ${indexPattern}`,
+      timeout,
+      async () => {
+        const res = await entityAnalyticsApi.listEntitySources({ query: {} });
+        const sources = res.body.sources ?? [];
+        const indexSource = sources.find(
+          (source: any) => source.type === 'index' && source.indexPattern === indexPattern
+        );
+        if (!indexSource?.enabled) {
+          log.info(
+            `Index entity source not enabled yet for ${indexPattern}: ${JSON.stringify(
+              sources
+                .filter((source: any) => source.type === 'index')
+                .map((source: any) => ({
+                  name: source.name,
+                  indexPattern: source.indexPattern,
+                  enabled: source.enabled,
+                }))
+            )}`
+          );
+        }
+        return Boolean(indexSource?.enabled);
+      }
     );
   };
 
@@ -717,6 +795,8 @@ export const PrivMonUtils = (
     scheduleMonitoringEngineNow,
     setPrivmonTaskStatus,
     waitForSyncTaskRun,
+    waitForIndexSourceEnabled,
+    waitForPrivMonEngineStatus,
     scheduleEngineAndWaitForUserCount,
     scheduleEngineAndWaitForUserCountWithoutDuplicates,
     getIntegrationMonitoringSource,

@@ -36,6 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should merge sources when the same user is added through different methods (API, CSV, index)`, async () => {
       await privMonUtils.initPrivMonEngine();
+      await privMonUtils.waitForPrivMonEngineStatus('started');
 
       // Step 1: Add user via API
       await entityAnalyticsApi.createPrivMonUser({
@@ -55,7 +56,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(csvUploadResponse.status).toBe(200);
       expect(csvUploadResponse.body.stats.successful).toBeGreaterThanOrEqual(1);
-
       users = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
         .body as ListPrivMonUsersResponse;
       user = privMonUtils.findUser(users, user1.name);
@@ -66,10 +66,15 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Step 3: Add same user via index sync - should merge all three sources
       await indexSyncUtils.createEntitySourceForIndex();
+      await privMonUtils.waitForIndexSourceEnabled(index1);
       // Can't use scheduleEngineAndWaitForUserCount(1) because count is already 1 from API/CSV sources.
       // It would return immediately before the index sync merges the 'index' source into user labels.
       // Instead, manually trigger the sync and wait for the actual source merge to complete.
-      await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true }); // Trigger sync task
+      await privMonUtils.waitForPrivMonEngineStatus('started');
+      const scheduleResponse = await privMonUtils.scheduleMonitoringEngineNow({
+        expectStatusCode: 200,
+      }); // Trigger sync task
+      expect(scheduleResponse.status).toBe(200);
       await privMonUtils.waitForSyncTaskRun(); // Wait for task to be scheduled in Task Manager
       // Wait for 'index' source to be merged (user count should stay at 1, sources should be ['api', 'csv', 'index'])
       // Timeout: 120s to fail fast
