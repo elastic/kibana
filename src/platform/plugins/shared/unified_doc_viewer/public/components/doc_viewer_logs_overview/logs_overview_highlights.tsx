@@ -66,7 +66,6 @@ const fieldNames: Array<keyof LogDocumentOverview> = [
   // Service & Infrastructure
   fieldConstants.SERVICE_NAME_FIELD,
   fieldConstants.HOST_NAME_FIELD,
-  fieldConstants.TRACE_ID_FIELD,
   fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD,
   fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD,
   // Cloud

@@ -10,9 +10,13 @@
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiDelayRender } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { TRACE_ID_FIELD } from '@kbn/discover-utils';
+import type { Target } from '../../../../content_framework/section/section_actions';
+import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
@@ -24,6 +28,11 @@ interface Props {
   serviceName?: string;
   dataView: DocViewRenderProps['dataView'];
 }
+
+const openInDiscoverButtonLabel = i18n.translate(
+  'unifiedDocViewer.observability.traces.trace.openInDiscover.button',
+  { defaultMessage: 'Open in Discover' }
+);
 
 export const fullScreenButtonLabel = i18n.translate(
   'unifiedDocViewer.observability.traces.trace.fullScreen.button',
@@ -40,8 +49,18 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
 
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
   const { data } = getUnifiedDocViewerServices();
+  const { indexes } = useDataSourcesContext();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
+
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
+    indexPattern: indexes.apm.traces,
+  });
+
+  const openInDiscoverLink = useMemo(() => {
+    return generateDiscoverLink({ [TRACE_ID_FIELD]: traceId });
+  }, [generateDiscoverLink, traceId]);
+
   const getParentApi = useCallback(
     () => ({
       getSerializedStateForChild: () => ({
@@ -76,6 +95,18 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
         title={sectionTitle}
         description={sectionTip}
         actions={[
+          ...(openInDiscoverLink
+            ? [
+                {
+                  icon: 'discoverApp',
+                  label: openInDiscoverButtonLabel,
+                  ariaLabel: openInDiscoverButtonLabel,
+                  href: openInDiscoverLink,
+                  target: '_blank' as Target,
+                  dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
+                },
+              ]
+            : []),
           {
             icon: 'fullScreen',
             onClick: () => setShowFullScreenWaterfall(true),
