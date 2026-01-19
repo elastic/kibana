@@ -35,15 +35,15 @@ export function generateLogsDataForHostsOrContainers({
   ];
 
   return range
-    .interval('30s')
+    .interval('10s')
     .rate(1)
-    .generator((timestamp) =>
+    .generator((timestamp, indx) =>
       (hostNames ?? containerIds).flatMap((name) => {
-        const index = Math.floor(Math.random() * LOG_LEVELS.length);
+        const logIndex = indx % LOG_LEVELS.length;
         const logConfig = log
           .create()
-          .message(LOG_LEVELS[index].message)
-          .logLevel(LOG_LEVELS[index].level);
+          .message(LOG_LEVELS[logIndex].message)
+          .logLevel(LOG_LEVELS[logIndex].level);
 
         if (containerIds) {
           logConfig.containerId(name);
@@ -55,12 +55,12 @@ export function generateLogsDataForHostsOrContainers({
           .defaults({
             'trace.id': generateShortId(),
             'agent.name': 'synth-agent',
-            'orchestrator.cluster.name': CLUSTER[index].clusterName,
-            'orchestrator.cluster.id': CLUSTER[index].clusterId,
+            'orchestrator.cluster.name': CLUSTER[logIndex].clusterName,
+            'orchestrator.cluster.id': CLUSTER[logIndex].clusterId,
             'orchestrator.resource.id': generateShortId(),
-            'cloud.provider': CLOUD_PROVIDERS[index],
-            'cloud.region': CLOUD_REGION[index],
-            'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
+            'cloud.provider': CLOUD_PROVIDERS[logIndex],
+            'cloud.region': CLOUD_REGION[logIndex],
+            'cloud.availability_zone': `${CLOUD_REGION[logIndex]}a`,
             'cloud.project.id': generateShortId(),
             'cloud.instance.id': generateShortId(),
             'log.file.path': `/logs/${generateShortId()}/error.txt`,
