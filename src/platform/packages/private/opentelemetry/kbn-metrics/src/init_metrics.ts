@@ -10,6 +10,7 @@
 import { castArray } from 'lodash';
 import { Metadata } from '@grpc/grpc-js';
 import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
+import { OTLPMetricExporter as OTLPMetricExporterProto } from '@opentelemetry/exporter-metrics-otlp-proto';
 import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
 import type { resources } from '@elastic/opentelemetry-node/sdk';
 import { api, metrics } from '@elastic/opentelemetry-node/sdk';
@@ -108,6 +109,13 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
         }
         case 'http':
           exporter = new OTLPMetricExporterHttp({
+            ...commonConfig,
+            headers: variant.value.headers,
+            url: variant.value.url,
+          });
+          break;
+        case 'proto':
+          exporter = new OTLPMetricExporterProto({
             ...commonConfig,
             headers: variant.value.headers,
             url: variant.value.url,

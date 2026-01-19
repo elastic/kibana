@@ -40,6 +40,15 @@ export type MetricsExporterConfig =
         /** HTTP headers to send to the OTLP HTTP endpoint. Typically, the `Authorization` header is one of them */
         headers?: Record<string, string>;
       };
+    }
+  | {
+      /** Protobuf OTLP Exporter */
+      proto: MetricsExporterCommonConfig & {
+        /** The URL of the OTLP HTTP endpoint */
+        url: string;
+        /** HTTP headers to send to the OTLP HTTP endpoint. Typically, the `Authorization` header is one of them */
+        headers?: Record<string, string>;
+      };
     };
 
 /**
