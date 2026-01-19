@@ -126,14 +126,6 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
           },
         ],
       },
-      {
-        id: 'cloudLinkUserAndRoles',
-        cloudLink: 'userAndRoles',
-      },
-      {
-        id: 'cloudLinkBilling',
-        cloudLink: 'billingAndSub',
-      },
     ],
   };
 };
