@@ -112,8 +112,12 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   validLicenseTypes,
   currentLicenseType,
 }) => {
-  const { hasConfigurePermission, hasActionsSavePrivilege, telemetryService } =
-    useCloudConnectedAppContext();
+  const {
+    hasConfigurePermission,
+    hasActionsSavePrivilege,
+    hasAnyDefaultLLMConnectors,
+    telemetryService,
+  } = useCloudConnectedAppContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLicensePopoverOpen, setIsLicensePopoverOpen] = useState(false);
 
@@ -488,20 +492,23 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>
       </EuiFlexGroup>
 
-      {serviceKey === 'eis' && !hasActionsSavePrivilege && (
+      {serviceKey === 'eis' && !hasActionsSavePrivilege && !hasAnyDefaultLLMConnectors && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
-            title={i18n.translate('xpack.cloudConnect.connectedServices.service.missingPrivileges', {
-              defaultMessage: 'Missing privileges',
-            })}
+            title={i18n.translate(
+              'xpack.cloudConnect.connectedServices.service.missingPrivileges',
+              {
+                defaultMessage: 'Missing privileges',
+              }
+            )}
             color="warning"
             iconType="warning"
           >
             <p>
               <FormattedMessage
                 id="xpack.cloudConnect.connectedServices.service.missingPrivilegesDescription"
-                defaultMessage="Full LLM functionality requires the save {privilege} Kibana privilege. Without it, some features will be unavailable."
+                defaultMessage="Full LLM functionality requires the save {privilege} Kibana privilege. Without it, some features will be unavailable. Please contact your administrator."
                 values={{
                   privilege: <strong>Actions and Connectors</strong>,
                 }}
@@ -510,6 +517,32 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           </EuiCallOut>
         </>
       )}
+
+      {serviceKey === 'eis' &&
+        enabled &&
+        hasActionsSavePrivilege &&
+        !hasAnyDefaultLLMConnectors && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.cloudConnect.connectedServices.service.missingLLMConnectors',
+                {
+                  defaultMessage: 'Missing LLM connectors',
+                }
+              )}
+              color="warning"
+              iconType="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.cloudConnect.connectedServices.service.missingLLMConnectorsDescription"
+                  defaultMessage="You have a degraded experience because you don't have any configured LLM models. Please reconnect the EIS service to install them."
+                />
+              </p>
+            </EuiCallOut>
+          </>
+        )}
     </EuiPanel>
   );
 };

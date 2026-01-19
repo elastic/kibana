@@ -6,7 +6,10 @@
  */
 
 import type { Logger, KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  PluginStartContract as ActionsPluginStart,
+  ActionsClient,
+} from '@kbn/actions-plugin/server';
 import defaultLLMConnectors from './default_llm_connectors.json';
 
 interface StartDeps {
@@ -14,12 +17,27 @@ interface StartDeps {
 }
 
 /**
- *
+ * Checks if any default LLM connectors exist.
+ */
+export async function hasAnyDefaultLLMConnectors(actionsClient: ActionsClient): Promise<boolean> {
+  const existingConnectors = await actionsClient.getAll();
+
+  for (const connector of existingConnectors) {
+    if (
+      connector.actionTypeId === '.inference' &&
+      connector?.config?.taskType === 'chat_completion'
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * This function is called when EIS (Elastic Inference Service) is being enabled. It checks
  * if the user has the `actions.save` Kibana privilege, and if so, compares the existing
  * connectors against the default LLM connectors defined in `default_llm_connectors.json`.
  * Any missing connectors are created automatically.
- *
  */
 export async function updateDefaultLLMActions(
   getStartServices: StartServicesAccessor<StartDeps>,
@@ -37,20 +55,17 @@ export async function updateDefaultLLMActions(
     return;
   }
 
-  logger.info('Will update default llm actions..');
-
   const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
-  // Get all existing connectors
+
+  // If any default LLM connector already exists, we assume they have all been created
+  if (await hasAnyDefaultLLMConnectors(actionsClient)) {
+    logger.info('Default LLM connectors already exist, skipping creation');
+    return;
+  }
+
+  // Get all existing connectors to check by ID
   const existingConnectors = await actionsClient.getAll();
   const existingConnectorIds = new Set(existingConnectors.map((c) => c.id));
-
-  // If one one of the default LLM connectors already exists, we assume they have all been created
-  for (const connector of existingConnectors) {
-    if (connector.actionTypeId === '.inference' && connector?.config?.taskType === 'chat_completion') {
-      logger.debug(`Default LLM connector "${connector.name}" already exists, skipping`);
-      return;
-    }
-  }
 
   // Create any missing default LLM connectors
   for (const connector of defaultLLMConnectors) {

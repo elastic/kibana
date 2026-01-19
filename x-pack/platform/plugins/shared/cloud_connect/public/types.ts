@@ -25,6 +25,7 @@ export interface CloudConnectConfig {
 
 export interface CloudConnectApiConfig {
   hasEncryptedSOEnabled: boolean;
+  hasAnyDefaultLLMConnectors?: boolean;
   license?: {
     type: string;
     uid: string;
