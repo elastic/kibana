@@ -30,7 +30,6 @@ describe('AlertActionsClient', () => {
   let storageService: jest.Mocked<StorageServiceContract>;
   let security: SecurityPluginStart;
   let client: AlertActionsClient;
-  let executeQueryCallCount: number;
 
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
