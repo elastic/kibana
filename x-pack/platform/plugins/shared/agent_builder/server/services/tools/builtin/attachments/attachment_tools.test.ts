@@ -19,7 +19,7 @@ describe('attachment tools', () => {
       id: type,
       validate: (input: unknown) => ({ valid: true, data: input }),
       format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-    }) as any;
+    } as any);
 
   beforeEach(() => {
     attachmentManager = createAttachmentStateManager([], { getTypeDefinition });
@@ -106,7 +106,11 @@ describe('attachment tools', () => {
     });
 
     it('reads a specific version', async () => {
-      const attachment = await attachmentManager.add({ type: 'text', data: 'v1', description: 'Test' });
+      const attachment = await attachmentManager.add({
+        type: 'text',
+        data: 'v1',
+        description: 'Test',
+      });
       await attachmentManager.update(attachment.id, { data: 'v2' });
 
       const tool = getTool('platform.core.attachment_read');
@@ -133,7 +137,11 @@ describe('attachment tools', () => {
 
   describe('attachment_update', () => {
     it('updates an attachment', async () => {
-      const attachment = await attachmentManager.add({ type: 'text', data: 'v1', description: 'Test' });
+      const attachment = await attachmentManager.add({
+        type: 'text',
+        data: 'v1',
+        description: 'Test',
+      });
       const tool = getTool('platform.core.attachment_update');
       const result = (await tool.handler(
         { attachment_id: attachment.id, data: 'v2' },
@@ -146,7 +154,11 @@ describe('attachment tools', () => {
     });
 
     it('returns error for deleted attachment', async () => {
-      const attachment = await attachmentManager.add({ type: 'text', data: 'v1', description: 'Test' });
+      const attachment = await attachmentManager.add({
+        type: 'text',
+        data: 'v1',
+        description: 'Test',
+      });
       attachmentManager.delete(attachment.id);
 
       const tool = getTool('platform.core.attachment_update');
@@ -162,7 +174,11 @@ describe('attachment tools', () => {
   describe('attachment_list', () => {
     it('lists active attachments', async () => {
       await attachmentManager.add({ type: 'text', data: 'a1', description: 'Attachment 1' });
-      await attachmentManager.add({ type: 'json', data: { key: 'value' }, description: 'Attachment 2' });
+      await attachmentManager.add({
+        type: 'json',
+        data: { key: 'value' },
+        description: 'Attachment 2',
+      });
 
       const tool = getTool('platform.core.attachment_list');
       const result = (await tool.handler({}, {} as any)) as ToolHandlerStandardReturn;
@@ -172,7 +188,11 @@ describe('attachment tools', () => {
     });
 
     it('includes deleted when requested', async () => {
-      const a1 = await attachmentManager.add({ type: 'text', data: 'a1', description: 'Attachment 1' });
+      const a1 = await attachmentManager.add({
+        type: 'text',
+        data: 'a1',
+        description: 'Attachment 1',
+      });
       await attachmentManager.add({ type: 'text', data: 'a2', description: 'Attachment 2' });
       attachmentManager.delete(a1.id);
 
