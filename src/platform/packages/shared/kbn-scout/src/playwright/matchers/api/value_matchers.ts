@@ -17,35 +17,9 @@ export function createValueMatchers(actual: unknown): ValueMatchers {
   // eslint-disable-next-line playwright/valid-expect
   const base = baseExpect(actual);
   return {
-    // toBe: (expected) => base.toBe(expected),
-    // toEqual: (expected) => base.toEqual(expected),
-    // toStrictEqual: (expected) => base.toStrictEqual(expected),
-    // toContain: (expected) => base.toContain(expected),
     toBeDefined: () => base.toBeDefined(),
-    // toBeUndefined: () => base.toBeUndefined(),
-    // toHaveLength: (expected) => base.toHaveLength(expected),
-    // toBeGreaterThan: (expected) => base.toBeGreaterThan(expected),
-    // toBeGreaterThanOrEqual: (expected) => base.toBeGreaterThanOrEqual(expected),
-    // toBeLessThan: (expected) => base.toBeLessThan(expected),
-    // toBeLessThanOrEqual: (expected) => base.toBeLessThanOrEqual(expected),
-    // toHaveProperty: (keyPath, value?) =>
-    //   value !== undefined ? base.toHaveProperty(keyPath, value) : base.toHaveProperty(keyPath),
     not: {
-      // toBe: (expected) => base.not.toBe(expected),
-      // toEqual: (expected) => base.not.toEqual(expected),
-      // toStrictEqual: (expected) => base.not.toStrictEqual(expected),
-      // toContain: (expected) => base.not.toContain(expected),
       toBeDefined: () => base.not.toBeDefined(),
-      // toBeUndefined: () => base.not.toBeUndefined(),
-      // toHaveLength: (expected) => base.not.toHaveLength(expected),
-      // toBeGreaterThan: (expected) => base.not.toBeGreaterThan(expected),
-      // toBeGreaterThanOrEqual: (expected) => base.not.toBeGreaterThanOrEqual(expected),
-      // toBeLessThan: (expected) => base.not.toBeLessThan(expected),
-      // toBeLessThanOrEqual: (expected) => base.not.toBeLessThanOrEqual(expected),
-      // toHaveProperty: (keyPath, value?) =>
-      //   value !== undefined
-      //     ? base.not.toHaveProperty(keyPath, value)
-      //     : base.not.toHaveProperty(keyPath),
     },
   };
 }
