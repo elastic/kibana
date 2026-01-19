@@ -55,7 +55,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
               });
 
               try {
-                const [{ systems }, stream] = await Promise.all([
+                const [{ systems: currentSystems }, stream] = await Promise.all([
                   systemClient.getSystems(name),
                   streamsClient.getStream(name),
                 ]);
@@ -71,14 +71,14 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                 const { descriptionPromptOverride, systemsPromptOverride } =
                   await promptsConfigService.getPrompt();
 
-                const results = await identifySystemsWithDescription({
+                const { systems, tokensUsed } = await identifySystemsWithDescription({
                   start,
                   end,
                   esClient,
                   inferenceClient: boundInferenceClient,
                   logger: taskContext.logger.get('system_identification'),
                   stream,
-                  systems,
+                  systems: currentSystems,
                   signal: runContext.abortController.signal,
                   descriptionPrompt: descriptionPromptOverride,
                   systemsPrompt: systemsPromptOverride,
@@ -86,18 +86,17 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                 });
 
                 taskContext.telemetry.trackSystemsIdentified({
-                  count: results.systems.length,
+                  count: systems.length,
                   stream_name: stream.name,
                   stream_type: getStreamTypeFromDefinition(stream),
-                  input_tokens_used: results.tokensUsed.prompt,
-                  output_tokens_used: results.tokensUsed.completion,
+                  input_tokens_used: tokensUsed.prompt,
+                  output_tokens_used: tokensUsed.completion,
                 });
 
-                await taskClient.complete<SystemIdentificationTaskParams, IdentifySystemsResult>(
-                  _task,
-                  { connectorId, start, end },
-                  results
-                );
+                await taskClient.complete<
+                  SystemIdentificationTaskParams,
+                  Pick<IdentifySystemsResult, 'systems'>
+                >(_task, { connectorId, start, end }, { systems });
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
