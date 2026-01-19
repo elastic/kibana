@@ -27,6 +27,7 @@ export function isMetricColumnNoESQL(
   if (col.isMetric) return true;
 
   // If the column is bucketed, it is a row column (not a metric)
+  return !col.isTransposed && !layerColumn.isBucketed;
   if (col.isTransposed || layerColumn.isBucketed) {
     return false;
   }
