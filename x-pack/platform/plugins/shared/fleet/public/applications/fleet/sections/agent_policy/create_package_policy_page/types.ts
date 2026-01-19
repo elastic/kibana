@@ -48,7 +48,6 @@ export type CreatePackagePolicyParams = React.FunctionComponent<{
   integration?: string;
   pkgLabel?: string;
   defaultPolicyData?: Partial<PackagePolicy>;
-  defaultAgentPolicies?: AgentPolicy[];
   addIntegrationFlyoutProps?: {
     selectIntegrationStep: EuiStepProps;
     onSubmitCompleted: () => void;

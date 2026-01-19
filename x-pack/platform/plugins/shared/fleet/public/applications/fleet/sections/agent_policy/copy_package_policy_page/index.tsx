@@ -8,7 +8,6 @@
 import React, { useMemo, memo } from 'react';
 import { useRouteMatch, useLocation } from 'react-router-dom';
 
-import { useBulkGetAgentPoliciesQuery } from '../../../hooks';
 import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 import { Loading } from '../../../components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
@@ -18,7 +17,7 @@ import { CreatePackagePolicySinglePage } from '../create_package_policy_page/sin
 export const CopyPackagePolicyPage = memo(() => {
   const {
     params: { packagePolicyId },
-  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
+  } = useRouteMatch<{ packagePolicyId: string }>();
 
   const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
 
@@ -31,16 +30,12 @@ export const CopyPackagePolicyPage = memo(() => {
     }
   }, [packagePolicy.data?.item]);
 
-  const agentPolicies = useBulkGetAgentPoliciesQuery(packagePolicyData?.policy_ids || [], {
-    enabled: !!packagePolicyData?.policy_ids,
-  });
-
   // Parse the 'from' query parameter to determine navigation after save
   const { search } = useLocation();
   const qs = new URLSearchParams(search);
   const fromQs = qs.get('from') as EditPackagePolicyFrom | null;
 
-  if (packagePolicy.isLoading || agentPolicies.isLoading || !agentPolicies.data) {
+  if (packagePolicy.isLoading) {
     return <Loading />;
   }
 
@@ -50,7 +45,6 @@ export const CopyPackagePolicyPage = memo(() => {
       pkgName={packagePolicy.data!.item!.package!.name}
       pkgVersion={packagePolicy.data!.item!.package!.version}
       defaultPolicyData={packagePolicyData}
-      defaultAgentPolicies={agentPolicies.data?.items || []}
       prerelease={true}
     />
   );

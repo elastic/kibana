@@ -46,7 +46,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   packageInfo?: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
-  defaultPolicyData?: PackagePolicy;
+  defaultPolicyData?: Partial<PackagePolicy>;
   'data-test-subj'?: string;
   tabs?: Array<{
     title: string;
@@ -177,7 +177,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
                 id="xpack.fleet.copyPackagePolicy.pageTitle"
                 defaultMessage="Create integration from {packagePolicyName}"
                 values={{
-                  packagePolicyName: defaultPolicyData?.name.replace(/^copy-/, '') || '',
+                  packagePolicyName: defaultPolicyData?.name?.replace(/^copy-/, '') || '',
                 }}
               />
             </h1>
@@ -201,9 +201,11 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       integrationInfo?.name,
       integrationInfo?.title,
       packageInfo,
+      defaultPolicyData?.name,
       isAdd,
       isEdit,
       isUpgrade,
+      isCopy,
     ]);
 
     const pageDescription = useMemo(() => {
