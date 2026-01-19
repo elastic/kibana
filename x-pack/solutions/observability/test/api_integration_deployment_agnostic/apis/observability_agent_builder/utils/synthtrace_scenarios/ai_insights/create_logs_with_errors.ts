@@ -101,14 +101,12 @@ export const createLogsWithErrors = async ({
   const es = getService('es');
   const searchResponse = await es.search({
     index: 'logs-*',
-    body: {
-      query: {
-        bool: {
-          must: [{ term: { 'service.name': SERVICE_NAME } }, { term: { 'trace.id': traceId } }],
-        },
+    query: {
+      bool: {
+        must: [{ term: { 'service.name': SERVICE_NAME } }, { term: { 'trace.id': traceId } }],
       },
-      sort: [{ '@timestamp': { order: 'asc' } }],
     },
+    size: 10,
   });
 
   const hits = searchResponse.hits.hits as Array<{ _id: string; _source: any }>;
