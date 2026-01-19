@@ -15,7 +15,7 @@ import type {
 } from '@kbn/scout';
 import type { StreamsTestApiService } from '../services/streams_api_service';
 import { getStreamsTestApiService } from '../services/streams_api_service';
-import { STREAMS_USERS } from './constants';
+import { getStreamsUsers } from './constants';
 
 export interface StreamsSamlAuthFixture extends SamlAuth {
   asStreamsAdmin: () => Promise<RoleSessionCredentials>;
@@ -37,12 +37,14 @@ export const streamsApiTest = apiTest.extend<{
   samlAuth: StreamsSamlAuthFixture;
   apiServices: StreamsApiServicesFixture;
 }>({
-  requestAuth: async ({ requestAuth }, use) => {
+  requestAuth: async ({ requestAuth, config }, use) => {
+    const streamsUsers = getStreamsUsers(config);
+
     const loginAsStreamsAdmin = async () =>
-      requestAuth.getApiKeyForCustomRole(STREAMS_USERS.streamsAdmin);
+      requestAuth.getApiKeyForCustomRole(streamsUsers.streamsAdmin);
 
     const loginAsStreamsReadOnly = async () =>
-      requestAuth.getApiKeyForCustomRole(STREAMS_USERS.streamsReadOnly);
+      requestAuth.getApiKeyForCustomRole(streamsUsers.streamsReadOnly);
 
     const extendedRequestAuth: StreamsRequestAuthFixture = {
       ...requestAuth,
@@ -52,13 +54,15 @@ export const streamsApiTest = apiTest.extend<{
     await use(extendedRequestAuth);
   },
 
-  samlAuth: async ({ samlAuth }, use) => {
-    const asStreamsAdmin = async () => samlAuth.asInteractiveUser(STREAMS_USERS.streamsAdmin);
+  samlAuth: async ({ samlAuth, config }, use) => {
+    const streamsUsers = getStreamsUsers(config);
 
-    const asStreamsReadOnly = async () => samlAuth.asInteractiveUser(STREAMS_USERS.streamsReadOnly);
+    const asStreamsAdmin = async () => samlAuth.asInteractiveUser(streamsUsers.streamsAdmin);
+
+    const asStreamsReadOnly = async () => samlAuth.asInteractiveUser(streamsUsers.streamsReadOnly);
 
     const asStreamsUnauthorized = async () =>
-      samlAuth.asInteractiveUser(STREAMS_USERS.streamsUnauthorized);
+      samlAuth.asInteractiveUser(streamsUsers.streamsUnauthorized);
 
     const extendedSamlAuth: StreamsSamlAuthFixture = {
       ...samlAuth,
@@ -77,5 +81,5 @@ export const streamsApiTest = apiTest.extend<{
   },
 });
 
-export { STREAMS_USERS } from './constants';
+export { getStreamsUsers } from './constants';
 export { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from './constants';

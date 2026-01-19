@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout';
+import type { KibanaRole, ScoutTestConfig } from '@kbn/scout';
 
 // Headers for internal APIs (version 1)
 export const COMMON_API_HEADERS = {
@@ -21,61 +21,74 @@ export const PUBLIC_API_HEADERS = {
   'elastic-api-version': '2023-10-31',
 } as const;
 
-export const STREAMS_USERS: Record<string, KibanaRole> = {
-  streamsAdmin: {
-    kibana: [
-      {
-        base: ['all'],
-        feature: {},
-        spaces: ['*'],
-      },
-    ],
-    elasticsearch: {
-      cluster: [
-        'manage_index_templates',
-        'monitor',
-        'manage_pipeline',
-        'manage_ilm',
-        'manage_data_stream_global_retention',
-      ],
-      indices: [
-        { names: ['logs*'], privileges: ['all'] },
-        { names: ['.ds-logs*'], privileges: ['all'] },
-        { names: ['.streams*'], privileges: ['all'] },
-        { names: ['.kibana_streams*'], privileges: ['all'] },
-      ],
-    },
-  },
+/**
+ * Returns streams user roles with privileges appropriate for the deployment type.
+ * Some cluster privileges (manage_ilm, manage_data_stream_global_retention) are not
+ * supported in serverless mode.
+ */
+export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaRole> {
+  const isServerless = config.serverless;
 
-  streamsReadOnly: {
-    kibana: [
-      {
-        base: ['read'],
-        feature: {},
-        spaces: ['*'],
-      },
-    ],
-    elasticsearch: {
-      cluster: ['monitor'],
-      indices: [
-        { names: ['logs*'], privileges: ['read', 'view_index_metadata'] },
-        { names: ['.ds-logs*'], privileges: ['read', 'view_index_metadata'] },
-        { names: ['.kibana_streams*'], privileges: ['read', 'view_index_metadata'] },
-      ],
-    },
-  },
+  // Cluster privileges that are only available in stateful deployments
+  const statefulOnlyClusterPrivileges = isServerless
+    ? []
+    : ['manage_ilm', 'manage_data_stream_global_retention'];
 
-  streamsUnauthorized: {
-    kibana: [
-      {
-        base: [],
-        feature: {},
-        spaces: ['*'],
+  return {
+    streamsAdmin: {
+      kibana: [
+        {
+          base: ['all'],
+          feature: {},
+          spaces: ['*'],
+        },
+      ],
+      elasticsearch: {
+        cluster: [
+          'manage_index_templates',
+          'monitor',
+          'manage_pipeline',
+          ...statefulOnlyClusterPrivileges,
+        ],
+        indices: [
+          { names: ['logs*'], privileges: ['all'] },
+          { names: ['.ds-logs*'], privileges: ['all'] },
+          { names: ['.streams*'], privileges: ['all'] },
+          { names: ['.kibana_streams*'], privileges: ['all'] },
+        ],
       },
-    ],
-    elasticsearch: {
-      cluster: [],
-      indices: [],
     },
-  },
-};
+
+    streamsReadOnly: {
+      kibana: [
+        {
+          base: ['read'],
+          feature: {},
+          spaces: ['*'],
+        },
+      ],
+      elasticsearch: {
+        cluster: ['monitor'],
+        indices: [
+          { names: ['logs*'], privileges: ['read', 'view_index_metadata'] },
+          { names: ['.ds-logs*'], privileges: ['read', 'view_index_metadata'] },
+          { names: ['.kibana_streams*'], privileges: ['read', 'view_index_metadata'] },
+        ],
+      },
+    },
+
+    streamsUnauthorized: {
+      kibana: [
+        {
+          base: [],
+          feature: {},
+          spaces: ['*'],
+        },
+      ],
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+      },
+    },
+  };
+}
