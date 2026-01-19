@@ -156,8 +156,3 @@ function normalizeGroupBy(rawGroupBy: unknown): string[] {
   if (typeof rawGroupBy === 'string') return rawGroupBy === ALL_VALUE ? [] : [rawGroupBy];
   return [];
 }
-
-// TODO consider using a fnction instead of a class
-// export async function searchSLODefinitions(params: SearchSLODefinitionsParams) {
-//   // Placeholder implementation
-// }
