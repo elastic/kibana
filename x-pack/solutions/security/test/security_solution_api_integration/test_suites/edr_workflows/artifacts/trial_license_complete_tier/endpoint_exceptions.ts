@@ -44,9 +44,10 @@ export default function ({ getService }: FtrProviderContext) {
     .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
     ?.includes('endpointExceptionsMovedUnderManagement');
 
+  // Failing: See https://github.com/elastic/kibana/issues/246207
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
-  describe('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Endpoint Exceptions', function () {
+  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Endpoint Exceptions', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     let t1AnalystSupertest: TestAgent;
