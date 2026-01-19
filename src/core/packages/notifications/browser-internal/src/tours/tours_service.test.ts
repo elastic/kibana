@@ -28,6 +28,8 @@ describe('ToursService', () => {
       globalSetting | namespaceSetting | expectedResult | description
       ${false}      | ${false}         | ${true}        | ${'both settings are false'}
       ${false}      | ${true}          | ${false}       | ${'namespace setting is true'}
+      ${true}       | ${false}         | ${false}       | ${'global setting is true'}
+      ${true}       | ${true}          | ${false}       | ${'both settings are true'}
       ${undefined}  | ${undefined}     | ${true}        | ${'both settings are undefined'}
     `(
       'returns $expectedResult when $description',
@@ -44,17 +46,5 @@ describe('ToursService', () => {
         expect(mockSettings.client.get).toHaveBeenCalledWith('hideAnnouncements', false);
       }
     );
-
-    it('returns false and short-circuits when global setting is true', () => {
-      const service = new ToursService();
-      const mockSettings = settingsServiceMock.createStartContract();
-      mockSettings.globalClient.get.mockReturnValue(true);
-
-      const toursStart = service.start({ settings: mockSettings });
-
-      expect(toursStart.areEnabled()).toBe(false);
-      expect(mockSettings.globalClient.get).toHaveBeenCalledWith('hideAnnouncements', false);
-      expect(mockSettings.client.get).not.toHaveBeenCalled();
-    });
   });
 });

@@ -22,10 +22,15 @@ export class ToursService {
 
     return {
       areEnabled: () => {
-        return (
-          !this.settings?.globalClient.get<boolean>('hideAnnouncements', false) &&
-          !this.settings?.client.get<boolean>('hideAnnouncements', false)
+        const isEnabledGlobally = !this.settings?.globalClient.get<boolean>(
+          'hideAnnouncements',
+          false
         );
+        const isEnabledInNamespace = !this.settings?.client.get<boolean>(
+          'hideAnnouncements',
+          false
+        );
+        return isEnabledGlobally && isEnabledInNamespace;
       },
     };
   }
