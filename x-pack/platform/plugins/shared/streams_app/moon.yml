@@ -107,6 +107,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/timerange'
   - '@kbn/inference-common'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
