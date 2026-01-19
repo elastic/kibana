@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EndpointScriptsGenerator } from '../../../common/endpoint/data_generators/endpoint_scripts_generator';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../common/endpoint/constants';
-import type { EndpointScriptListApiResponse } from '../../../common/endpoint/types';
+import type {
+  EndpointScriptListApiResponse,
+  EndpointScriptApiResponse,
+} from '../../../common/endpoint/types';
 import {
   httpHandlerMockFactory,
   type ResponseProvidersInterface,
@@ -15,6 +19,7 @@ import {
 
 export type ScriptsLibraryHttpMocksInterface = ResponseProvidersInterface<{
   getScriptsList: () => EndpointScriptListApiResponse;
+  getScriptById: (options: HttpFetchOptionsWithPath) => EndpointScriptApiResponse;
 }>;
 
 export const scriptsLibraryHttpMocks = httpHandlerMockFactory<ScriptsLibraryHttpMocksInterface>([
@@ -34,6 +39,16 @@ export const scriptsLibraryHttpMocks = httpHandlerMockFactory<ScriptsLibraryHttp
         sortDirection: 'asc',
         total: items.length,
       };
+    },
+  },
+  {
+    id: 'getScriptById',
+    method: 'get',
+    path: `${SCRIPTS_LIBRARY_ROUTE}/{id}`,
+    handler: ({ path }): EndpointScriptApiResponse => {
+      const response = new EndpointScriptsGenerator('seed').generate();
+      response.id = path.substring(path.lastIndexOf('/') + 1) || response.id;
+      return { data: response };
     },
   },
 ]);
