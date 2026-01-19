@@ -21,6 +21,7 @@ export const FailureStoreDataSourceCard = ({ dataSourceRef }: LatestSamplesDataS
       dataSourceRef={dataSourceRef}
       title={DATA_SOURCES_I18N.failureStore.defaultName}
       subtitle={DATA_SOURCES_I18N.failureStore.subtitle}
+      isForCompleteSimulation
     >
       <EuiSpacer size="m" />
     </DataSourceCard>
