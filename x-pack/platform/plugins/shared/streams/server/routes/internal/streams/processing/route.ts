@@ -31,6 +31,8 @@ import {
   processingDissectSuggestionsSchema,
 } from './dissect_suggestions_handler';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import type { FailureStoreSamplesResponse } from './failure_store_samples_handler';
+import { getFailureStoreSamples } from './failure_store_samples_handler';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
@@ -217,9 +219,58 @@ export const processingDateSuggestionsRoute = createServerRoute({
   },
 });
 
+const failureStoreSamplesParamsSchema = z.object({
+  path: z.object({ name: z.string() }),
+  query: z
+    .object({
+      size: z.coerce.number().optional(),
+      start: z.coerce.number().optional(),
+      end: z.coerce.number().optional(),
+    })
+    .optional(),
+});
+
+export const failureStoreSamplesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/processing/_failure_store_samples',
+  options: {
+    access: 'internal',
+    summary: 'Get failure store samples with parent processors applied',
+    description:
+      'Fetches documents from the failure store and applies all configured processors from parent streams',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: failureStoreSamplesParamsSchema,
+  handler: async ({ params, request, getScopedClients }): Promise<FailureStoreSamplesResponse> => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({
+      request,
+    });
+
+    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    if (!read) {
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
+    }
+
+    const { read_failure_store: readFailureStore } = await streamsClient.getPrivileges(
+      params.path.name
+    );
+    if (!readFailureStore) {
+      throw new SecurityError(
+        `Cannot read failure store for stream ${params.path.name}, insufficient privileges`
+      );
+    }
+
+    return getFailureStoreSamples({ params, scopedClusterClient, streamsClient });
+  },
+});
+
 export const internalProcessingRoutes = {
   ...simulateProcessorRoute,
   ...processingGrokSuggestionRoute,
   ...processingDissectSuggestionRoute,
   ...processingDateSuggestionsRoute,
+  ...failureStoreSamplesRoute,
 };

@@ -12,6 +12,7 @@ import { DATA_SOURCES_I18N } from './translations';
 import {
   createDefaultCustomSamplesDataSource,
   defaultKqlSamplesDataSource,
+  createFailureStoreDataSource,
 } from '../state_management/stream_enrichment_state_machine/utils';
 import {
   useStreamEnrichmentEvents,
@@ -58,6 +59,15 @@ export const AddDataSourcesContextMenu = () => {
                 'data-test-subj': 'streamsAppProcessingAddCustomDataSource',
                 onClick: () => {
                   addDataSource(createDefaultCustomSamplesDataSource(streamName));
+                  closeMenu();
+                },
+              },
+              {
+                name: DATA_SOURCES_I18N.contextMenu.addFailureStore,
+                icon: 'visText',
+                'data-test-subj': 'streamsAppProcessingAddCustomDataSource',
+                onClick: () => {
+                  addDataSource(createFailureStoreDataSource(streamName));
                   closeMenu();
                 },
               },

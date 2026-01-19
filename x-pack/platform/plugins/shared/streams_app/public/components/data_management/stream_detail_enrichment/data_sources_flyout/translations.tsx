@@ -48,6 +48,10 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.addDataSource.menu.addCustomSamples',
       { defaultMessage: 'Add custom docs samples' }
     ),
+    addFailureStore: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.addDataSource.menu.addFailureStore',
+      { defaultMessage: 'Add documents from failure store' }
+    ),
   },
   dataSourceCard: {
     enabled: i18n.translate(
@@ -162,6 +166,24 @@ export const DATA_SOURCES_I18N = {
           ),
         }}
       />
+    ),
+  },
+  failureStore: {
+    defaultName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.failureStore.defaultName',
+      { defaultMessage: 'Failure store' }
+    ),
+    placeholderName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.failureStore.placeholderName',
+      { defaultMessage: 'Failure store' }
+    ),
+    subtitle: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.failureStore.subtitle',
+      { defaultMessage: 'Use documents from the failure store.' }
+    ),
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.failureStore.label',
+      { defaultMessage: 'Failed documents' }
     ),
   },
   nameField: {

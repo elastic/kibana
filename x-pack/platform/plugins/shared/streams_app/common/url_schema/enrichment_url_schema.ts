@@ -33,6 +33,10 @@ export interface LatestSamplesDataSource extends BaseDataSource {
   type: 'latest-samples';
 }
 
+export interface FailureStoreDataSource extends BaseDataSource {
+  type: 'failure-store';
+}
+
 const latestSamplesDataSourceSchema = baseDataSourceSchema.extend({
   type: z.literal('latest-samples'),
 }) satisfies z.Schema<LatestSamplesDataSource>;
@@ -91,7 +95,8 @@ export const customSamplesDataSourceSchema = baseDataSourceSchema.extend({
 export type EnrichmentDataSource =
   | LatestSamplesDataSource
   | KqlSamplesDataSource
-  | CustomSamplesDataSource;
+  | CustomSamplesDataSource
+  | FailureStoreDataSource;
 
 /**
  * Schema for validating enrichment data sources
