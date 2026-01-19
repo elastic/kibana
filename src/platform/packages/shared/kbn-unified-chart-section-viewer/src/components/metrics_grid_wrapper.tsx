@@ -12,7 +12,7 @@ import { EuiFocusTrap } from '@elastic/eui';
 import { cx } from '@emotion/css';
 import { css } from '@emotion/react';
 import { ChartSectionTemplate, type ChartSectionTemplateProps } from '@kbn/unified-histogram';
-import { useMetricsGridFullScreen } from '../hooks';
+import { useMetricsGridFullScreen } from './observability/metrics_experience/hooks';
 import {
   METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
   METRICS_GRID_FULL_SCREEN_CLASS,
