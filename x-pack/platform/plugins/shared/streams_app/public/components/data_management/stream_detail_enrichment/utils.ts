@@ -277,7 +277,7 @@ const defaultConcatProcessorFormState = (): ConcatFormState => ({
   from: [],
   to: '',
   ignore_failure: true,
-  ignore_empty_value: true,
+  ignore_missing: true,
   where: ALWAYS_CONDITION,
 });
 
@@ -619,14 +619,14 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'concat') {
-      const { from, to, ignore_failure, ignore_empty_value } = formState;
+      const { from, to, ignore_failure, ignore_missing } = formState;
       return {
         processorDefinition: {
           action: 'concat',
           from,
           to,
           ignore_failure,
-          ignore_empty_value,
+          ignore_missing,
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as ConcatProcessor,
