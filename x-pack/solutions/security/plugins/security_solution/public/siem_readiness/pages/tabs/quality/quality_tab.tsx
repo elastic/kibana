@@ -109,12 +109,9 @@ export const QualityTab: React.FC = () => {
     () => [
       {
         field: 'indexName',
-        name: i18n.translate(
-          'xpack.securitySolution.siemReadiness.quality.table.column.dataSource',
-          {
-            defaultMessage: 'Data source',
-          }
-        ),
+        name: i18n.translate('xpack.securitySolution.siemReadiness.quality.table.column.indices', {
+          defaultMessage: 'Indices',
+        }),
         sortable: true,
         truncateText: true,
         width: '40%',
@@ -126,7 +123,10 @@ export const QualityTab: React.FC = () => {
             defaultMessage: 'Incompatible fields',
           }
         ),
-        sortable: true,
+        sortable: (item: IndexInfo) => {
+          const result = indexResultsMap.get(item.indexName);
+          return result?.incompatibleFieldCount ?? 0;
+        },
         width: '15%',
         align: 'right',
         render: (item: IndexInfo) => {
@@ -142,6 +142,10 @@ export const QualityTab: React.FC = () => {
             defaultMessage: 'Last checked',
           }
         ),
+        sortable: (item: IndexInfo) => {
+          const result = indexResultsMap.get(item.indexName);
+          return result?.checkedAt ?? 0;
+        },
         width: '15%',
         render: (item: IndexInfo) => {
           const result = indexResultsMap.get(item.indexName);
@@ -160,6 +164,12 @@ export const QualityTab: React.FC = () => {
         name: i18n.translate('xpack.securitySolution.siemReadiness.quality.table.column.status', {
           defaultMessage: 'Status',
         }),
+        sortable: (item: IndexInfo) => {
+          const result = indexResultsMap.get(item.indexName);
+          const incompatibleCount = result?.incompatibleFieldCount ?? 0;
+          // Return 1 for incompatible, 0 for healthy (so incompatible sorts first)
+          return incompatibleCount > 0 ? 1 : 0;
+        },
         width: '15%',
         render: (item: IndexInfo) => {
           const result = indexResultsMap.get(item.indexName);
@@ -219,9 +229,8 @@ export const QualityTab: React.FC = () => {
       return sum + (result?.incompatibleFieldCount ?? 0);
     }, 0);
 
-    const affectedIntegrations = new Set(
-      category.indices.map((index) => index.indexName.split('-')[0])
-    ).size;
+    const affectedIndices = new Set(category.indices.map((index) => index.indexName.split('-')[0]))
+      .size;
 
     const hasIncompatibleFields = incompatibleFields > 0;
     const status: keyof typeof STATUS_BADGE_CONFIG = hasIncompatibleFields
@@ -231,7 +240,7 @@ export const QualityTab: React.FC = () => {
     return {
       totalDataSources,
       incompatibleFields,
-      affectedIntegrations,
+      affectedIndices,
       status,
     };
   };
@@ -283,7 +292,7 @@ export const QualityTab: React.FC = () => {
         >
           <p>
             {i18n.translate('xpack.securitySolution.siemReadiness.quality.noData.description', {
-              defaultMessage: 'No category data found. Please check your data sources.',
+              defaultMessage: 'No category data found. Please check your indices.',
             })}
           </p>
         </EuiCallOut>
@@ -302,7 +311,7 @@ export const QualityTab: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
                 {i18n.translate('xpack.securitySolution.siemReadiness.quality.showing', {
-                  defaultMessage: 'Showing {indices} of {totalIndices} data sources',
+                  defaultMessage: 'Showing {indices} of {totalIndices} indices',
                   values: {
                     indices: totalIndicesCount,
                     totalIndices: mainCategories.reduce((sum, cat) => sum + cat.indices.length, 0),
@@ -317,8 +326,8 @@ export const QualityTab: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.securitySolution.siemReadiness.quality.groups', {
-                  defaultMessage: '{count} groups',
+                {i18n.translate('xpack.securitySolution.siemReadiness.quality.categories', {
+                  defaultMessage: '{count} categories',
                   values: { count: totalGroupsCount },
                 })}
               </EuiText>
@@ -333,7 +342,7 @@ export const QualityTab: React.FC = () => {
                 placeholder={i18n.translate(
                   'xpack.securitySolution.siemReadiness.quality.searchPlaceholder',
                   {
-                    defaultMessage: 'Search data sources...',
+                    defaultMessage: 'Search indices...',
                   }
                 )}
                 value={searchQuery}
@@ -347,6 +356,9 @@ export const QualityTab: React.FC = () => {
                 <EuiFilterButton
                   hasActiveFilters={statusFilter === 'all'}
                   onClick={() => setStatusFilter('all')}
+                  isSelected={statusFilter === 'all'}
+                  isToggle
+                  withNext
                 >
                   {i18n.translate('xpack.securitySolution.siemReadiness.quality.filter.all', {
                     defaultMessage: 'All',
@@ -355,7 +367,9 @@ export const QualityTab: React.FC = () => {
                 <EuiFilterButton
                   hasActiveFilters={statusFilter === 'incompatible'}
                   onClick={() => setStatusFilter('incompatible')}
-                  color="danger"
+                  isSelected={statusFilter === 'incompatible'}
+                  isToggle
+                  withNext
                 >
                   {i18n.translate(
                     'xpack.securitySolution.siemReadiness.quality.filter.incompatible',
@@ -367,7 +381,8 @@ export const QualityTab: React.FC = () => {
                 <EuiFilterButton
                   hasActiveFilters={statusFilter === 'healthy'}
                   onClick={() => setStatusFilter('healthy')}
-                  color="success"
+                  isSelected={statusFilter === 'healthy'}
+                  isToggle
                 >
                   {i18n.translate('xpack.securitySolution.siemReadiness.quality.filter.healthy', {
                     defaultMessage: 'Healthy',
@@ -439,16 +454,16 @@ export const QualityTab: React.FC = () => {
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
                         {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.quality.affectedIntegrations.label',
+                          'xpack.securitySolution.siemReadiness.quality.affectedIndices.label',
                           {
-                            defaultMessage: 'Affected integrations:',
+                            defaultMessage: 'Affected indices:',
                           }
                         )}
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiBadge color="hollow">
-                        {`${stats.affectedIntegrations}/${stats.totalDataSources}`}
+                        {`${stats.affectedIndices}/${stats.totalDataSources}`}
                       </EuiBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -476,7 +491,7 @@ export const QualityTab: React.FC = () => {
                     tableCaption={i18n.translate(
                       'xpack.securitySolution.siemReadiness.quality.table.caption',
                       {
-                        defaultMessage: 'Data sources for {category} category',
+                        defaultMessage: 'Indices for {category} category',
                         values: { category: category.category },
                       }
                     )}
