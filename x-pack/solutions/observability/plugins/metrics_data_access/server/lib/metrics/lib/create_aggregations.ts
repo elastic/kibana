@@ -66,12 +66,14 @@ export const createCompositeAggregations = (options: MetricsAPIRequest) => {
     throw Boom.badRequest('groupBy must be informed.');
   }
 
-  const isDerivativeMetrics = Object.values(options.metrics).some((metric) =>
-    Object.values(metric.aggregations).some(isDerivativeAgg)
-  );
+  const derivativeMetrics = Object.values(options.metrics)
+    .filter((metric) => Object.values(metric.aggregations).some(isDerivativeAgg))
+    .map((metric) => metric.id);
 
-  if (!options.includeTimeseries && isDerivativeMetrics) {
-    throw Boom.badRequest('derivative aggregations are not supported without time series');
+  if (!options.includeTimeseries && derivativeMetrics.length > 0) {
+    throw Boom.badRequest(
+      `The following metrics require time series: ${derivativeMetrics.join(', ')}`
+    );
   }
 
   const after = getAfterKey(options);
