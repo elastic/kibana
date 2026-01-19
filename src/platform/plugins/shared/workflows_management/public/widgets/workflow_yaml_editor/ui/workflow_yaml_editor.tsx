@@ -75,6 +75,10 @@ import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
+import {
+  monkeyPatchSuggestWidget,
+  resetSuggestWidgetPatch,
+} from '../lib/monkey_patch_suggest_widget';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
@@ -346,6 +350,8 @@ export const WorkflowYAMLEditor = ({
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
 
+        monkeyPatchSuggestWidget(editor);
+
         // Create unified providers with template expression support
         const providerConfig = {
           getYamlDocument: () => yamlDocumentRef.current || null,
@@ -369,6 +375,7 @@ export const WorkflowYAMLEditor = ({
 
   const handleEditorWillUnmount = useCallback(() => {
     unregisterKeyboardCommands();
+    resetSuggestWidgetPatch();
   }, [unregisterKeyboardCommands]);
 
   // Clean up the monaco model and editor on unmount
@@ -479,7 +486,7 @@ export const WorkflowYAMLEditor = ({
   }, [isExecutionYaml]);
 
   useEffect(() => {
-    // Monkey patching
+    // Monkey patching 'setModelMarkers'
     // 1. to set the initial markers https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
     // 2. to intercept and format markers validation messages – this prevents Monaco from ever seeing the problematic numeric enum messages
     const setModelMarkers = monaco.editor.setModelMarkers;
