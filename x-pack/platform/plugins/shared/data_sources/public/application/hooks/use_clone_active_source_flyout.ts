@@ -6,16 +6,11 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { useQuery } from '@kbn/react-query';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from './use_kibana';
 import type { ActiveSource } from '../../types/connector';
-import type { StackConnectorApiResponse } from '../../types/stack_connector';
-import { transformStackConnectorResponse } from '../../types/stack_connector';
-import { queryKeys } from '../query_keys';
 import { useCloneActiveSource } from './use_clone_active_source';
 import { useAddConnectorFlyout } from './use_add_connector_flyout';
+import { useStackConnector } from './use_stack_connector';
 
 export interface UseCloneActiveSourceFlyoutOptions {
   sourceToClone: ActiveSource | null;
@@ -31,13 +26,6 @@ export const useCloneActiveSourceFlyout = ({
   sourceToClone,
   onConnectorCreated,
 }: UseCloneActiveSourceFlyoutOptions) => {
-  const {
-    services: {
-      http,
-      notifications: { toasts },
-    },
-  } = useKibana();
-
   const { getCloneName } = useCloneActiveSource();
   const [shouldOpenFlyout, setShouldOpenFlyout] = useState(false);
 
@@ -47,32 +35,10 @@ export const useCloneActiveSourceFlyout = ({
       ? sourceToClone.stackConnectors[0]
       : null;
 
-  const { data: stackConnector, isLoading: isLoadingConnector } = useQuery(
-    queryKeys.stackConnectors.byId(stackConnectorId ?? ''),
-    async () => {
-      if (!stackConnectorId) {
-        throw new Error('No stack connector ID provided');
-      }
-
-      const connectorResponse = await http.get<StackConnectorApiResponse>(
-        `/api/actions/connector/${stackConnectorId}`
-      );
-
-      // Transform snake_case response to camelCase
-      return transformStackConnectorResponse(connectorResponse);
-    },
-    {
-      enabled: shouldOpenFlyout && !!stackConnectorId, // Only fetch when triggered and we have an ID
-      onError: (error: Error) => {
-        toasts.addError(error, {
-          title: i18n.translate('xpack.dataSources.hooks.useCloneActiveSourceFlyout.loadError', {
-            defaultMessage: 'Failed to load connector details',
-          }),
-        });
-        setShouldOpenFlyout(false); // Reset on error
-      },
-    }
-  );
+  const { stackConnector, isLoading: isLoadingConnector } = useStackConnector({
+    stackConnectorId,
+    enabled: shouldOpenFlyout,
+  });
 
   // Generate suggested clone name
   const clonedName = sourceToClone ? getCloneName(sourceToClone) : undefined;
