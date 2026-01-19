@@ -18,6 +18,13 @@ import { RELATED_ENTITY } from '../../../common/constants';
 import type { FilterActionType } from '../../graph_investigation/filter_actions';
 
 /**
+ * Separator item for visual grouping in the popover.
+ */
+interface SeparatorItem {
+  type: 'separator';
+}
+
+/**
  * Entity expand popover item with label included.
  * Contains all the data needed to render a menu item.
  * onClick handler is NOT included - the caller must bind it.
@@ -48,6 +55,12 @@ export interface EntityExpandPopoverItem {
   /** Tooltip text when disabled */
   disabledTooltip?: string;
 }
+
+/**
+ * Union type for all possible items returned by getEntityExpandItems,
+ * including separators for visual grouping.
+ */
+export type EntityExpandPopoverItemOrSeparator = EntityExpandPopoverItem | SeparatorItem;
 
 /**
  * Input for entity expand item generation.
@@ -136,71 +149,18 @@ export const createEntityExpandInput = (
   };
 };
 
-const DISABLED_TOOLTIP = i18n.translate(
-  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
-  { defaultMessage: 'Details not available' }
-);
-
 /**
- * Resolves the i18n label for an entity expand item.
- */
-const resolveLabel = (
-  type: EntityExpandPopoverItem['type'],
-  currentAction?: 'show' | 'hide'
-): string => {
-  switch (type) {
-    case 'show-actions-by-entity':
-      return currentAction === 'show'
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showThisEntitysActions',
-            { defaultMessage: "Show this entity's actions" }
-          )
-        : i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideThisEntitysActions',
-            { defaultMessage: "Hide this entity's actions" }
-          );
-    case 'show-actions-on-entity':
-      return currentAction === 'show'
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
-            { defaultMessage: 'Show actions done to this entity' }
-          )
-        : i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsDoneToThisEntity',
-            { defaultMessage: 'Hide actions done to this entity' }
-          );
-    case 'show-related-events':
-      return currentAction === 'show'
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
-            { defaultMessage: 'Show related events' }
-          )
-        : i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideRelatedEntities',
-            { defaultMessage: 'Hide related events' }
-          );
-    case 'show-entity-details':
-      return i18n.translate(
-        'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-        { defaultMessage: 'Show entity details' }
-      );
-    default:
-      return '';
-  }
-};
-
-/**
- * Generates entity expand popover items with labels included.
+ * Generates entity expand popover items with labels and separators included.
  * Returns complete items ready for rendering - caller only needs to bind onClick handlers.
  *
  * @param input - Entity expand input containing node data
  * @param isFilterActive - Function to check if a filter is currently active
- * @returns Array of items with labels
+ * @returns Array of items with labels and separators
  */
 export const getEntityExpandItems = (
   input: EntityExpandInput,
   isFilterActive: (field: string, value: string) => boolean
-): EntityExpandPopoverItem[] => {
+): EntityExpandPopoverItemOrSeparator[] => {
   const { id, docMode, actorField, targetField, entityDetailsDisabled } = input;
 
   // Entity details item (shared between single-entity and grouped-entities)
@@ -208,9 +168,17 @@ export const getEntityExpandItems = (
     type: 'show-entity-details',
     iconType: 'expand',
     testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-    label: resolveLabel('show-entity-details'),
+    label: i18n.translate(
+      'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+      { defaultMessage: 'Show entity details' }
+    ),
     disabled: entityDetailsDisabled,
-    disabledTooltip: entityDetailsDisabled ? DISABLED_TOOLTIP : undefined,
+    disabledTooltip: entityDetailsDisabled
+      ? i18n.translate(
+          'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
+          { defaultMessage: 'Details not available' }
+        )
+      : undefined,
   };
 
   // For 'grouped-entities', only show entity details
@@ -218,47 +186,68 @@ export const getEntityExpandItems = (
     return [entityDetailsItem];
   }
 
-  // For 'single-entity', show filter actions + entity details
+  // For 'single-entity', show filter actions + separator + entity details
   if (docMode === 'single-entity') {
     const actionsByEntityActive = isFilterActive(actorField, id);
     const actionsOnEntityActive = isFilterActive(targetField, id);
     const relatedEventsActive = isFilterActive(RELATED_ENTITY, id);
-
-    const actionsByAction: 'show' | 'hide' = actionsByEntityActive ? 'hide' : 'show';
-    const actionsOnAction: 'show' | 'hide' = actionsOnEntityActive ? 'hide' : 'show';
-    const relatedAction: 'show' | 'hide' = relatedEventsActive ? 'hide' : 'show';
 
     return [
       {
         type: 'show-actions-by-entity',
         iconType: 'sortRight',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
-        label: resolveLabel('show-actions-by-entity', actionsByAction),
+        label: actionsByEntityActive
+          ? i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideThisEntitysActions',
+              { defaultMessage: "Hide this entity's actions" }
+            )
+          : i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showThisEntitysActions',
+              { defaultMessage: "Show this entity's actions" }
+            ),
         field: actorField,
         value: id,
-        currentAction: actionsByAction,
+        currentAction: actionsByEntityActive ? 'hide' : 'show',
         filterActionType: 'TOGGLE_ACTIONS_BY_ENTITY',
       },
       {
         type: 'show-actions-on-entity',
         iconType: 'sortLeft',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
-        label: resolveLabel('show-actions-on-entity', actionsOnAction),
+        label: actionsOnEntityActive
+          ? i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsDoneToThisEntity',
+              { defaultMessage: 'Hide actions done to this entity' }
+            )
+          : i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
+              { defaultMessage: 'Show actions done to this entity' }
+            ),
         field: targetField,
         value: id,
-        currentAction: actionsOnAction,
+        currentAction: actionsOnEntityActive ? 'hide' : 'show',
         filterActionType: 'TOGGLE_ACTIONS_ON_ENTITY',
       },
       {
         type: 'show-related-events',
         iconType: 'analyzeEvent',
         testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
-        label: resolveLabel('show-related-events', relatedAction),
+        label: relatedEventsActive
+          ? i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideRelatedEntities',
+              { defaultMessage: 'Hide related events' }
+            )
+          : i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
+              { defaultMessage: 'Show related events' }
+            ),
         field: RELATED_ENTITY,
         value: id,
-        currentAction: relatedAction,
+        currentAction: relatedEventsActive ? 'hide' : 'show',
         filterActionType: 'TOGGLE_RELATED_EVENTS',
       },
+      { type: 'separator' },
       entityDetailsItem,
     ];
   }

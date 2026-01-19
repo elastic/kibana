@@ -53,41 +53,37 @@ export const useLabelNodeExpandPopover = (
       }
 
       // Convert items to popover list items with click handlers
-      const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
+      // Separators are passed through as-is, action items get onClick handlers
+      return popoverItems.map(
+        (popoverItem): ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps => {
+          if (popoverItem.type === 'separator') {
+            return popoverItem;
+          }
 
-      popoverItems.forEach((popoverItem, index) => {
-        // Add separator before event details item
-        if (popoverItem.type === 'show-event-details' && index > 0) {
-          items.push({ type: 'separator' });
-        }
+          return {
+            type: 'item',
+            iconType: popoverItem.iconType,
+            testSubject: popoverItem.testSubject,
+            label: popoverItem.label,
+            onClick: () => {
+              if (popoverItem.type === 'show-event-details') {
+                onShowEventDetailsClick?.(node);
+              } else if (popoverItem.field && popoverItem.value && popoverItem.currentAction) {
+                // Handle filter toggle actions
+                const action = popoverItem.currentAction;
+                const field = popoverItem.field;
+                const value = popoverItem.value;
 
-        const item: ItemExpandPopoverListItemProps = {
-          type: 'item',
-          iconType: popoverItem.iconType,
-          testSubject: popoverItem.testSubject,
-          label: popoverItem.label,
-          onClick: () => {
-            if (popoverItem.type === 'show-event-details') {
-              onShowEventDetailsClick?.(node);
-            } else if (popoverItem.field && popoverItem.value && popoverItem.currentAction) {
-              // Handle filter toggle actions
-              const action = popoverItem.currentAction;
-              const field = popoverItem.field;
-              const value = popoverItem.value;
-
-              if (action === 'show') {
-                setSearchFilters((prev) => addFilter(dataViewId, prev, field, value));
-              } else {
-                setSearchFilters((prev) => removeFilter(prev, field, value));
+                if (action === 'show') {
+                  setSearchFilters((prev) => addFilter(dataViewId, prev, field, value));
+                } else {
+                  setSearchFilters((prev) => removeFilter(prev, field, value));
+                }
               }
-            }
-          },
-        };
-
-        items.push(item);
-      });
-
-      return items;
+            },
+          };
+        }
+      );
     },
     [onShowEventDetailsClick, searchFilters, dataViewId, setSearchFilters]
   );

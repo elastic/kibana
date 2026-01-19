@@ -60,50 +60,46 @@ export const useEntityNodeExpandPopover = (
       }
 
       // Convert items to popover list items with click handlers
-      const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
+      // Separators are passed through as-is, action items get onClick handlers
+      return popoverItems.map(
+        (popoverItem): ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps => {
+          if (popoverItem.type === 'separator') {
+            return popoverItem;
+          }
 
-      popoverItems.forEach((popoverItem) => {
-        // Add separator before entity details item in single-entity mode
-        if (popoverItem.type === 'show-entity-details' && input.docMode === 'single-entity') {
-          items.push({ type: 'separator' });
+          return {
+            type: 'item',
+            iconType: popoverItem.iconType,
+            testSubject: popoverItem.testSubject,
+            label: popoverItem.label,
+            disabled: popoverItem.disabled,
+            onClick: () => {
+              if (popoverItem.type === 'show-entity-details') {
+                onShowEntityDetailsClick?.(node);
+              } else if (popoverItem.field && popoverItem.value && popoverItem.currentAction) {
+                // Handle filter toggle actions
+                const action = popoverItem.currentAction;
+                const field = popoverItem.field;
+                const value = popoverItem.value;
+
+                if (action === 'show') {
+                  setSearchFilters((prev) => addFilter(dataViewId, prev, field, value));
+                } else {
+                  setSearchFilters((prev) => removeFilter(prev, field, value));
+                }
+              }
+            },
+            showToolTip: popoverItem.disabled,
+            toolTipText: popoverItem.disabled ? DISABLED_TOOLTIP : undefined,
+            toolTipProps: popoverItem.disabled
+              ? {
+                  position: 'bottom',
+                  'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+                }
+              : undefined,
+          };
         }
-
-        const item: ItemExpandPopoverListItemProps = {
-          type: 'item',
-          iconType: popoverItem.iconType,
-          testSubject: popoverItem.testSubject,
-          label: popoverItem.label,
-          disabled: popoverItem.disabled,
-          onClick: () => {
-            if (popoverItem.type === 'show-entity-details') {
-              onShowEntityDetailsClick?.(node);
-            } else if (popoverItem.field && popoverItem.value && popoverItem.currentAction) {
-              // Handle filter toggle actions
-              const action = popoverItem.currentAction;
-              const field = popoverItem.field;
-              const value = popoverItem.value;
-
-              if (action === 'show') {
-                setSearchFilters((prev) => addFilter(dataViewId, prev, field, value));
-              } else {
-                setSearchFilters((prev) => removeFilter(prev, field, value));
-              }
-            }
-          },
-          showToolTip: popoverItem.disabled,
-          toolTipText: popoverItem.disabled ? DISABLED_TOOLTIP : undefined,
-          toolTipProps: popoverItem.disabled
-            ? {
-                position: 'bottom',
-                'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
-              }
-            : undefined,
-        };
-
-        items.push(item);
-      });
-
-      return items;
+      );
     },
     [onShowEntityDetailsClick, searchFilters, dataViewId, setSearchFilters]
   );

@@ -71,45 +71,42 @@ export const EventActionsButton = ({ item }: EventActionsButtonProps) => {
   );
 
   // Convert items to popover list items
+  // Separators are passed through as-is, action items get onClick handlers
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> =
     useMemo(() => {
-      const result: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> =
-        [];
+      return popoverItems.map(
+        (popoverItem): ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps => {
+          if (popoverItem.type === 'separator') {
+            return popoverItem;
+          }
 
-      popoverItems.forEach((popoverItem, index) => {
-        // Add separator before event details item
-        if (popoverItem.type === 'show-event-details' && index > 0) {
-          result.push({ type: 'separator' });
+          return {
+            type: 'item' as const,
+            iconType: popoverItem.iconType,
+            testSubject: popoverItem.testSubject,
+            label: popoverItem.label,
+            onClick: () => {
+              if (popoverItem.type === 'show-event-details') {
+                emitGroupedItemClick(item);
+              } else if (
+                popoverItem.field &&
+                popoverItem.value &&
+                popoverItem.currentAction &&
+                popoverItem.filterActionType
+              ) {
+                // Emit filter action via pub-sub
+                emitFilterAction({
+                  type: popoverItem.filterActionType,
+                  field: popoverItem.field,
+                  value: popoverItem.value,
+                  action: popoverItem.currentAction,
+                });
+              }
+              actions.closePopover();
+            },
+          };
         }
-
-        result.push({
-          type: 'item' as const,
-          iconType: popoverItem.iconType,
-          testSubject: popoverItem.testSubject,
-          label: popoverItem.label,
-          onClick: () => {
-            if (popoverItem.type === 'show-event-details') {
-              emitGroupedItemClick(item);
-            } else if (
-              popoverItem.field &&
-              popoverItem.value &&
-              popoverItem.currentAction &&
-              popoverItem.filterActionType
-            ) {
-              // Emit filter action via pub-sub
-              emitFilterAction({
-                type: popoverItem.filterActionType,
-                field: popoverItem.field,
-                value: popoverItem.value,
-                action: popoverItem.currentAction,
-              });
-            }
-            actions.closePopover();
-          },
-        });
-      });
-
-      return result;
+      );
     }, [popoverItems, item, actions]);
 
   return (

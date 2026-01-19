@@ -10,7 +10,10 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useGraphPopoverState } from '../../../../popovers/primitives/use_graph_popover_state';
 import { ListGraphPopover } from '../../../../popovers/primitives/list_graph_popover';
-import type { ItemExpandPopoverListItemProps } from '../../../../popovers/primitives/list_graph_popover';
+import type {
+  ItemExpandPopoverListItemProps,
+  SeparatorExpandPopoverListItemProps,
+} from '../../../../popovers/primitives/list_graph_popover';
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
@@ -71,34 +74,44 @@ export const EntityActionsButton = ({ item }: EntityActionsButtonProps) => {
   );
 
   // Convert items to popover list items
-  const items: ItemExpandPopoverListItemProps[] = useMemo(() => {
-    return popoverItems.map((popoverItem) => ({
-      type: 'item' as const,
-      iconType: popoverItem.iconType,
-      testSubject: popoverItem.testSubject,
-      label: popoverItem.label,
-      disabled: popoverItem.disabled,
-      onClick: () => {
-        if (popoverItem.type === 'show-entity-details') {
-          emitGroupedItemClick(item);
-        } else if (
-          popoverItem.field &&
-          popoverItem.value &&
-          popoverItem.currentAction &&
-          popoverItem.filterActionType
-        ) {
-          // Emit filter action via pub-sub
-          emitFilterAction({
-            type: popoverItem.filterActionType,
-            field: popoverItem.field,
-            value: popoverItem.value,
-            action: popoverItem.currentAction,
-          });
+  // Separators are passed through as-is, action items get onClick handlers
+  const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> =
+    useMemo(() => {
+      return popoverItems.map(
+        (popoverItem): ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps => {
+          if (popoverItem.type === 'separator') {
+            return popoverItem;
+          }
+
+          return {
+            type: 'item' as const,
+            iconType: popoverItem.iconType,
+            testSubject: popoverItem.testSubject,
+            label: popoverItem.label,
+            disabled: popoverItem.disabled,
+            onClick: () => {
+              if (popoverItem.type === 'show-entity-details') {
+                emitGroupedItemClick(item);
+              } else if (
+                popoverItem.field &&
+                popoverItem.value &&
+                popoverItem.currentAction &&
+                popoverItem.filterActionType
+              ) {
+                // Emit filter action via pub-sub
+                emitFilterAction({
+                  type: popoverItem.filterActionType,
+                  field: popoverItem.field,
+                  value: popoverItem.value,
+                  action: popoverItem.currentAction,
+                });
+              }
+              actions.closePopover();
+            },
+          };
         }
-        actions.closePopover();
-      },
-    }));
-  }, [popoverItems, item, actions]);
+      );
+    }, [popoverItems, item, actions]);
 
   return (
     <>
