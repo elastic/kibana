@@ -10,7 +10,6 @@
 import React from 'react';
 import {
   EuiPanel,
-  EuiTitle,
   EuiSpacer,
   EuiButton,
   EuiFlexGroup,
@@ -18,9 +17,11 @@ import {
   EuiBadge,
   EuiText,
   EuiFormRow,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
+import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar';
 
 export const counterAppId = 'sidebarExampleCounter';
 
@@ -34,8 +35,13 @@ export type CounterSidebarParams = z.infer<ReturnType<typeof getCounterParamsSch
 /**
  * Counter app that receives params and setParams as props.
  * Params are persisted to localStorage automatically.
+ * Demonstrates header actions with a reset button in the header.
  */
-export function CounterApp({ params, setParams }: SidebarComponentProps<CounterSidebarParams>) {
+export function CounterApp({
+  params,
+  setParams,
+  onClose,
+}: SidebarComponentProps<CounterSidebarParams>) {
   const { counter } = params;
 
   const increment = () => setParams({ counter: counter + 1 });
@@ -44,53 +50,57 @@ export function CounterApp({ params, setParams }: SidebarComponentProps<CounterS
   const reset = () => setParams({ counter: 0 });
 
   return (
-    <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
-      <EuiTitle size="s">
-        <h2>Counter Example (Params-based)</h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-
-      <EuiText size="s" color="subdued">
-        <p>Counter value is passed as params and persisted to localStorage.</p>
-      </EuiText>
-
-      <EuiSpacer size="l" />
-
-      <EuiFormRow label="Counter">
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={decrement}>
-              -
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="primary">{counter}</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={increment}>
-              +
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => incrementBy(5)}>
-              +5
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={reset}>
-              Reset
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-
-      <EuiSpacer size="l" />
-
-      <EuiPanel color="subdued" paddingSize="s">
-        <EuiText size="xs">
-          <pre>{JSON.stringify(params, null, 2)}</pre>
+    <>
+      <SidebarHeader
+        title="Counter Example"
+        onClose={onClose}
+        actions={
+          <EuiButtonIcon
+            iconType="refresh"
+            aria-label="Reset counter"
+            onClick={reset}
+            title="Reset counter"
+          />
+        }
+      />
+      <SidebarBody>
+        <EuiText size="s" color="subdued">
+          <p>Counter value is passed as params and persisted to localStorage.</p>
         </EuiText>
-      </EuiPanel>
-    </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <EuiFormRow label="Counter">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" onClick={decrement}>
+                -
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="primary">{counter}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" onClick={increment}>
+                +
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" onClick={() => incrementBy(5)}>
+                +5
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+
+        <EuiSpacer size="l" />
+
+        <EuiPanel color="subdued" paddingSize="s">
+          <EuiText size="xs">
+            <pre>{JSON.stringify(params, null, 2)}</pre>
+          </EuiText>
+        </EuiPanel>
+      </SidebarBody>
+    </>
   );
 }

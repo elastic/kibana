@@ -25,7 +25,7 @@ export {
 } from '@kbn/core-chrome-sidebar-types';
 
 export { SidebarService } from './src/services';
-export { Sidebar } from './src/components';
-export type { SidebarProps } from './src/components';
+export { Sidebar, SidebarHeader, SidebarBody } from './src/components';
+export type { SidebarProps, SidebarHeaderProps, SidebarBodyProps } from './src/components';
 export { useSidebar, useSidebarWidth, useSidebarApp } from './src/hooks';
 export type { UseSidebarApi, UseSidebarAppApi } from './src/hooks';

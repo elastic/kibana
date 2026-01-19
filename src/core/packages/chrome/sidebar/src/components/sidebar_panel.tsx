@@ -10,18 +10,9 @@
 import type { FC, ReactNode } from 'react';
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
 import { useLayoutConfig } from '@kbn/core-chrome-layout-components';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiTitle,
-  euiOverflowScroll,
-  euiShadow,
-} from '@elastic/eui';
+import { EuiPanel, euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelResizeHandle } from './panel_resize_handle';
 
@@ -47,35 +38,15 @@ const panelContainerStyles = (isProjectStyle: boolean) => (theme: UseEuiTheme) =
     `}
   `;
 
-const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
-  height: ${euiTheme.size.xl};
-  padding: ${euiTheme.size.s};
-  padding-left: ${euiTheme.size.m};
-  box-sizing: content-box;
-  border-bottom: ${euiTheme.border.thin};
-
-  flex-grow: 0;
-  align-items: center;
-`;
-
-const scrollableContentStyles = (theme: UseEuiTheme) => {
-  const { euiTheme } = theme;
-
-  return css`
-    ${euiOverflowScroll(theme, { direction: 'y' })};
-    padding: ${euiTheme.size.m};
-    flex-grow: 1;
-  `;
-};
-
 export interface SidebarPanelProps {
   children: ReactNode;
-  title: string;
-  onClose: () => void;
 }
 
-export const SidebarPanel: FC<SidebarPanelProps> = ({ children, title, onClose }) => {
-  // TODO: Replace with context from Chrome when available
+/**
+ * Minimal container for sidebar app content.
+ * Apps are responsible for rendering their own header using SidebarHeader component.
+ */
+export const SidebarPanel: FC<SidebarPanelProps> = ({ children }) => {
   const { chromeStyle } = useLayoutConfig();
   return (
     <div css={sidebarWrapperStyles}>
@@ -87,30 +58,7 @@ export const SidebarPanel: FC<SidebarPanelProps> = ({ children, title, onClose }
         hasShadow={false}
         borderRadius={'none'}
       >
-        <EuiFlexGroup css={headerStyles}>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h3>{title}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem>
-                <EuiButtonIcon
-                  iconType="cross"
-                  onClick={onClose}
-                  aria-label={i18n.translate('core.ui.chrome.sidebar.closeSidebarAriaLabel', {
-                    defaultMessage: 'Close Sidebar',
-                  })}
-                  color="text"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiPanel css={scrollableContentStyles} hasShadow={false} paddingSize={'none'}>
-          {children}
-        </EuiPanel>
+        {children}
       </EuiPanel>
     </div>
   );

@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiTitle, EuiSpacer, EuiButtonGroup, EuiText, EuiFormRow } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiButtonGroup, EuiText, EuiFormRow, EuiTitle } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
+import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar';
 
 export const tabSelectionAppId = 'sidebarExampleTabs';
 
@@ -22,12 +23,13 @@ export const getTabSelectionParamsSchema = () =>
 export type TabSelectionSidebarParams = z.infer<ReturnType<typeof getTabSelectionParamsSchema>>;
 
 /**
- * Tab selection app that receives params and setParams as props.
- * Params are persisted to localStorage automatically.
+ * Tab selection app that demonstrates custom header content.
+ * Uses children prop of SidebarHeader for a dynamic title based on the selected tab.
  */
 export function TabSelectionApp({
   params,
   setParams,
+  onClose,
 }: SidebarComponentProps<TabSelectionSidebarParams>) {
   const { selectedTab } = params;
 
@@ -37,38 +39,42 @@ export function TabSelectionApp({
     { id: 'about', label: 'About' },
   ];
 
+  const currentTab = tabs.find((t) => t.id === selectedTab) ?? tabs[0];
+
   return (
-    <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
-      <EuiTitle size="s">
-        <h2>Tab Selection Example</h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-
-      <EuiText size="s" color="subdued">
-        <p>Simple tab selection with params persistence.</p>
-      </EuiText>
-
-      <EuiSpacer size="l" />
-
-      <EuiFormRow label="Tab Selection">
-        <EuiButtonGroup
-          legend="Select a tab"
-          options={tabs.map((tab) => ({
-            id: tab.id,
-            label: tab.label,
-          }))}
-          idSelected={selectedTab}
-          onChange={(id) => setParams({ selectedTab: id })}
-        />
-      </EuiFormRow>
-
-      <EuiSpacer size="l" />
-
-      <EuiPanel color="subdued" paddingSize="s">
-        <EuiText size="xs">
-          <pre>{JSON.stringify(params, null, 2)}</pre>
+    <>
+      <SidebarHeader onClose={onClose}>
+        <EuiTitle size="xs">
+          <h3>Tabs: {currentTab.label}</h3>
+        </EuiTitle>
+      </SidebarHeader>
+      <SidebarBody>
+        <EuiText size="s" color="subdued">
+          <p>Demonstrates dynamic header title based on the selected tab.</p>
         </EuiText>
-      </EuiPanel>
-    </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <EuiFormRow label="Tab Selection">
+          <EuiButtonGroup
+            legend="Select a tab"
+            options={tabs.map((tab) => ({
+              id: tab.id,
+              label: tab.label,
+            }))}
+            idSelected={selectedTab}
+            onChange={(id) => setParams({ selectedTab: id })}
+          />
+        </EuiFormRow>
+
+        <EuiSpacer size="l" />
+
+        <EuiPanel color="subdued" paddingSize="s">
+          <EuiText size="xs">
+            <pre>{JSON.stringify(params, null, 2)}</pre>
+          </EuiText>
+        </EuiPanel>
+      </SidebarBody>
+    </>
   );
 }

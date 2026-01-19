@@ -36,11 +36,12 @@ export function Sidebar(props: SidebarProps) {
   }
 
   return (
-    <SidebarPanel title={currentApp.title} onClose={close}>
+    <SidebarPanel>
       <SidebarAppRenderer
         key={currentAppId}
         appId={currentAppId}
         loadComponent={currentApp.loadComponent}
+        onClose={close}
       />
     </SidebarPanel>
   );

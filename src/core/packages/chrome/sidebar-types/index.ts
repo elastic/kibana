@@ -50,6 +50,8 @@ export interface SidebarComponentProps<TParams> {
   params: TParams;
   /** Update params (merges with existing params, persists to localStorage) */
   setParams: (params: Partial<TParams>) => void;
+  /** Close the sidebar panel */
+  onClose: () => void;
 }
 
 export type SidebarComponentType<TParams> = ComponentType<SidebarComponentProps<TParams>>;
@@ -59,7 +61,8 @@ export type SidebarComponentType<TParams> = ComponentType<SidebarComponentProps<
  */
 export interface SidebarAppContent<TParams = unknown> {
   /**
-   * Title displayed at the top of the sidebar panel
+   * Title for the sidebar app, used for button tooltip and accessibility.
+   * Apps can render their own header using the SidebarHeader component.
    */
   title: string;
   /**

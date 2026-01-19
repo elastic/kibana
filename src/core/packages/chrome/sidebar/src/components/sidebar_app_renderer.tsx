@@ -16,9 +16,10 @@ import type { SidebarAppId, SidebarComponentType } from '@kbn/core-chrome-sideba
 interface SidebarAppRendererProps {
   appId: SidebarAppId;
   loadComponent: () => Promise<SidebarComponentType<any>>;
+  onClose: () => void;
 }
 
-export function SidebarAppRenderer({ appId, loadComponent }: SidebarAppRendererProps) {
+export function SidebarAppRenderer({ appId, loadComponent, onClose }: SidebarAppRendererProps) {
   const sidebarService = useSidebarService();
 
   const LazyComponent = useMemo(
@@ -35,7 +36,7 @@ export function SidebarAppRenderer({ appId, loadComponent }: SidebarAppRendererP
 
   return (
     <Suspense fallback={<Fallback />}>
-      <LazyComponent params={params} setParams={setParams} />
+      <LazyComponent params={params} setParams={setParams} onClose={onClose} />
     </Suspense>
   );
 }
