@@ -15,16 +15,35 @@ export interface ToHaveDataOptions {
 }
 
 /**
+ * Recursively wraps arrays with `arrayContaining` and objects with `objectContaining`
+ * to enable partial matching at any depth.
+ */
+function toPartialMatch(expected: unknown): unknown {
+  if (Array.isArray(expected)) {
+    return baseExpect.arrayContaining(expected.map(toPartialMatch));
+  }
+  if (expected !== null && typeof expected === 'object') {
+    const transformed: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(expected)) {
+      transformed[key] = toPartialMatch(value);
+    }
+    return baseExpect.objectContaining(transformed);
+  }
+  return expected;
+}
+
+/**
  * Asserts that the response data matches the expected value.
  *
  * @param expected - The expected value. If omitted, checks that data is not null/undefined.
  * @param options.exactMatch - If true, performs exact matching for objects/arrays.
  *
  * @example
- * expect(response).toHaveData(); // checks data is not null/undefined
- * expect(response).toHaveData({ id: 1 }); // partial match (default)
- * expect(response).toHaveData({ id: 1 }, { exactMatch: true }); // exact match
- * expect(response).toHaveData('success'); // exact match for primitives
+ * expect(response).toHaveData();                                   // checks data is not null/undefined
+ * expect(response).toHaveData({ id: 1 });                          // partial match (default)
+ * expect(response).toHaveData({ id: 1 }, { exactMatch: true });    // exact match
+ * expect(response).toHaveData('success');                          // exact match for primitives
+ * expect(response).toHaveData({ items: [{ name: 'foo' }] });       // at least one item with name 'foo'
  */
 export function toHaveData<T extends { data: unknown }>(
   obj: T,
@@ -53,7 +72,8 @@ export function toHaveData<T extends { data: unknown }>(
     // eslint-disable-next-line playwright/valid-expect
     const assertion = isNegated ? baseExpect(actual).not : baseExpect(actual);
     if (isObject && !exactMatch) {
-      assertion.toMatchObject(expected as Record<string, unknown>);
+      const transformedExpected = toPartialMatch(expected);
+      assertion.toEqual(transformedExpected);
     } else {
       assertion.toEqual(expected);
     }

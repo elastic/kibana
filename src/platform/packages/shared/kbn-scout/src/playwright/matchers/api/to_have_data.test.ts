@@ -11,124 +11,122 @@ import { expect as apiExpect } from '.';
 import { createApiResponse } from './utils';
 
 describe('toHaveData', () => {
-  describe('data existence check (no arguments)', () => {
-    it('should pass when data has a value', () => {
-      const response = createApiResponse({ data: { id: 1 } });
-      expect(() => apiExpect(response).toHaveData()).not.toThrow();
+  describe('existence check (no arguments)', () => {
+    it('passes when data exists (including falsy values like 0, false, "")', () => {
+      expect(() => apiExpect(createApiResponse({ data: { id: 1 } })).toHaveData()).not.toThrow();
+      expect(() => apiExpect(createApiResponse({ data: 0 })).toHaveData()).not.toThrow();
+      expect(() => apiExpect(createApiResponse({ data: false })).toHaveData()).not.toThrow();
+      expect(() => apiExpect(createApiResponse({ data: '' })).toHaveData()).not.toThrow();
     });
 
-    it('should pass when data is false (falsy but defined)', () => {
-      const response = createApiResponse({ data: false });
-      expect(() => apiExpect(response).toHaveData()).not.toThrow();
+    it('fails when data is null or undefined', () => {
+      expect(() => apiExpect(createApiResponse({ data: null })).toHaveData()).toThrow();
+      expect(() => apiExpect(createApiResponse({ data: undefined })).toHaveData()).toThrow();
     });
 
-    it('should pass when data is 0 (falsy but defined)', () => {
-      const response = createApiResponse({ data: 0 });
-      expect(() => apiExpect(response).toHaveData()).not.toThrow();
-    });
-
-    it('should pass when data is empty string (falsy but defined)', () => {
-      const response = createApiResponse({ data: '' });
-      expect(() => apiExpect(response).toHaveData()).not.toThrow();
-    });
-
-    it('should fail when data is null', () => {
-      const response = createApiResponse({ data: null });
-      expect(() => apiExpect(response).toHaveData()).toThrow();
-    });
-
-    it('should fail when data is undefined', () => {
-      const response = createApiResponse({ data: undefined });
-      expect(() => apiExpect(response).toHaveData()).toThrow();
-    });
-
-    it('should support negation', () => {
-      const response = createApiResponse({ data: null });
-      expect(() => apiExpect(response).not.toHaveData()).not.toThrow();
+    it('supports negation', () => {
+      expect(() => apiExpect(createApiResponse({ data: null })).not.toHaveData()).not.toThrow();
     });
   });
 
-  describe('object matching (partial by default)', () => {
-    it('should pass when data contains expected properties', () => {
-      const response = createApiResponse({ data: { id: 1, name: 'test', extra: 'field' } });
+  describe('primitive matching', () => {
+    it('matches primitives exactly', () => {
+      expect(() =>
+        apiExpect(createApiResponse({ data: 'success' })).toHaveData('success')
+      ).not.toThrow();
+      expect(() => apiExpect(createApiResponse({ data: 42 })).toHaveData(42)).not.toThrow();
+      expect(() => apiExpect(createApiResponse({ data: 'a' })).toHaveData('b')).toThrow();
+    });
+  });
+
+  describe('partial object matching (default)', () => {
+    it('passes when data contains expected properties', () => {
+      const response = createApiResponse({ data: { id: 1, name: 'test', extra: 'ignored' } });
       expect(() => apiExpect(response).toHaveData({ id: 1, name: 'test' })).not.toThrow();
     });
 
-    it('should fail when data is missing expected properties', () => {
+    it('fails when expected properties are missing', () => {
       const response = createApiResponse({ data: { id: 1 } });
       expect(() => apiExpect(response).toHaveData({ id: 1, name: 'test' })).toThrow();
     });
 
-    it('should fail when property values do not match', () => {
-      const response = createApiResponse({ data: { id: 1, name: 'other' } });
-      expect(() => apiExpect(response).toHaveData({ id: 1, name: 'test' })).toThrow();
-    });
-
-    it('should support negation for objects', () => {
-      const response = createApiResponse({ data: { id: 1, name: 'test' } });
+    it('supports negation', () => {
+      const response = createApiResponse({ data: { id: 1 } });
       expect(() => apiExpect(response).not.toHaveData({ id: 2 })).not.toThrow();
     });
   });
 
-  describe('object matching with exactMatch option', () => {
-    it('should fail when data has extra properties with exactMatch', () => {
-      const response = createApiResponse({ data: { id: 1, name: 'test', extra: 'field' } });
-      expect(() =>
-        apiExpect(response).toHaveData({ id: 1, name: 'test' }, { exactMatch: true })
-      ).toThrow();
+  describe('exact matching with { exactMatch: true }', () => {
+    it('fails when data has extra properties', () => {
+      const response = createApiResponse({ data: { id: 1, extra: 'field' } });
+      expect(() => apiExpect(response).toHaveData({ id: 1 }, { exactMatch: true })).toThrow();
     });
 
-    it('should pass when data matches exactly with exactMatch', () => {
-      const response = createApiResponse({ data: { id: 1, name: 'test' } });
-      expect(() =>
-        apiExpect(response).toHaveData({ id: 1, name: 'test' }, { exactMatch: true })
-      ).not.toThrow();
-    });
-  });
-
-  describe('primitive matching (exact)', () => {
-    it('should pass when string data matches exactly', () => {
-      const response = createApiResponse({ data: 'success' });
-      expect(() => apiExpect(response).toHaveData('success')).not.toThrow();
+    it('passes only when data matches exactly', () => {
+      const response = createApiResponse({ data: { id: 1 } });
+      expect(() => apiExpect(response).toHaveData({ id: 1 }, { exactMatch: true })).not.toThrow();
     });
 
-    it('should fail when string data does not match', () => {
-      const response = createApiResponse({ data: 'failure' });
-      expect(() => apiExpect(response).toHaveData('success')).toThrow();
-    });
-
-    it('should pass when number data matches exactly', () => {
-      const response = createApiResponse({ data: 42 });
-      expect(() => apiExpect(response).toHaveData(42)).not.toThrow();
-    });
-
-    it('should support negation for primitives', () => {
-      const response = createApiResponse({ data: 'success' });
-      expect(() => apiExpect(response).not.toHaveData('failure')).not.toThrow();
-    });
-  });
-
-  describe('array matching', () => {
-    it('should pass when array elements partially match', () => {
-      const response = createApiResponse({
-        data: [
-          { id: 1, extra: 'a' },
-          { id: 2, extra: 'b' },
-        ],
-      });
-      expect(() => apiExpect(response).toHaveData([{ id: 1 }, { id: 2 }])).not.toThrow();
-    });
-
-    it('should fail when array lengths differ', () => {
+    it('requires exact array length and order', () => {
       const response = createApiResponse({ data: [{ id: 1 }, { id: 2 }, { id: 3 }] });
-      expect(() => apiExpect(response).toHaveData([{ id: 1 }, { id: 2 }])).toThrow();
-    });
-
-    it('should pass with exactMatch when arrays match exactly', () => {
-      const response = createApiResponse({ data: [{ id: 1 }, { id: 2 }] });
       expect(() =>
         apiExpect(response).toHaveData([{ id: 1 }, { id: 2 }], { exactMatch: true })
+      ).toThrow();
+    });
+  });
+
+  describe('partial array matching (default)', () => {
+    it('allows extra items and ignores order', () => {
+      const response = createApiResponse({ data: [{ id: 3 }, { id: 1 }, { id: 2 }] });
+      expect(() => apiExpect(response).toHaveData([{ id: 1 }])).not.toThrow();
+    });
+
+    it('allows extra properties on array items', () => {
+      const response = createApiResponse({ data: [{ id: 1, extra: 'a' }] });
+      expect(() => apiExpect(response).toHaveData([{ id: 1 }])).not.toThrow();
+    });
+
+    it('fails when expected item is not found', () => {
+      const response = createApiResponse({ data: [{ id: 1 }, { id: 2 }] });
+      expect(() => apiExpect(response).toHaveData([{ id: 999 }])).toThrow();
+    });
+  });
+
+  describe('deep nesting with parallel branches', () => {
+    const complexData = {
+      meta: { version: '1.0', extra: 'ignored' },
+      results: {
+        total: 100,
+        items: [
+          { id: 'a', children: [{ childId: 'a1' }, { childId: 'a2' }] },
+          { id: 'b', children: [{ childId: 'b1' }] },
+        ],
+      },
+    };
+
+    it('matches multiple branches and nested arrays simultaneously', () => {
+      const response = createApiResponse({ data: complexData });
+      // This tests: partial object matching, partial array matching, deep nesting,
+      // and matching two different items in the same array (parallel branches)
+      expect(() =>
+        apiExpect(response).toHaveData({
+          meta: { version: '1.0' },
+          results: {
+            total: 100,
+            items: [{ id: 'a', children: [{ childId: 'a2' }] }, { children: [{ childId: 'b1' }] }],
+          },
+        })
       ).not.toThrow();
+    });
+
+    it('fails when any branch does not match', () => {
+      const response = createApiResponse({ data: complexData });
+      expect(() =>
+        apiExpect(response).toHaveData({
+          meta: { version: '1.0' },
+          results: { items: [{ id: 'nonexistent' }] },
+        })
+      ).toThrow();
     });
   });
 });
