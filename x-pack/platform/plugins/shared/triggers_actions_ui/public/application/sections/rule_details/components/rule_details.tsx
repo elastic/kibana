@@ -37,7 +37,7 @@ import {
   hasExecuteActionsCapability,
   hasManageApiKeysCapability,
 } from '../../../lib/capabilities';
-import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { getRulesBreadcrumbWithHref } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import type {
   Rule,
@@ -123,16 +123,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
-
-    const breadcrumbHref = isAppRegistered('rules')
-      ? getUrlForApp('rules', { path: '/' })
-      : getUrlForApp('management', { path: 'insightsAndAlerting/triggersActions/rules' });
-
-    const rulesBreadcrumbWithAppPath = {
-      ...rulesBreadcrumb,
-      href: breadcrumbHref,
-    };
+    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(isAppRegistered, getUrlForApp);
     setBreadcrumbs([rulesBreadcrumbWithAppPath, { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
