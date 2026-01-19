@@ -23,13 +23,13 @@ import type {
 import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
-import type { SidebarServiceSetup, SidebarServiceStart } from './sidebar';
+import type { SidebarStart, SidebarSetup } from './sidebar';
 
 export interface ChromeSetup {
   /**
-   * {@link SidebarServiceSetup}
+   * {@link SidebarSetup}
    */
-  sidebar: SidebarServiceSetup;
+  sidebar: SidebarSetup;
 }
 
 /**
@@ -276,9 +276,9 @@ export interface ChromeStart {
   };
 
   /**
-   * {@link SidebarServiceStart}
+   * {@link SidebarStart}
    */
-  sidebar: SidebarServiceStart;
+  sidebar: SidebarStart;
 
   /**
    * Get the id of the currently active project navigation or `null` otherwise.

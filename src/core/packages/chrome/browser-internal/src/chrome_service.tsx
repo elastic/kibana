@@ -37,6 +37,7 @@ import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import type {
   AppDeepLinkId,
   ChromeBadge,
@@ -616,7 +617,7 @@ export class ChromeService {
 
       wrapInChromeProvider: (children: ReactNode) => {
         // TODO: we can have more chrome context values here in the future
-        return this.sidebar.wrapInProvider(children);
+        return <SidebarServiceProvider value={{ sidebar }}>{children}</SidebarServiceProvider>;
       },
 
       // chrome APIs

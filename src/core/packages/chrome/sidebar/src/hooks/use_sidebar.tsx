@@ -9,8 +9,8 @@
 
 import { useCallback, useMemo } from 'react';
 import { useObservable } from '@kbn/use-observable';
-import type { SidebarAppId } from '../sidebar_app_id';
-import { useSidebarService } from '../providers';
+import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
+import type { SidebarAppId } from '@kbn/core-chrome-sidebar-types';
 
 /**
  * Hook based API for interacting with the sidebar state
@@ -28,8 +28,7 @@ export interface UseSidebarApi {
  * React hook for accessing the sidebar state and actions
  */
 export function useSidebar(): UseSidebarApi {
-  const sidebarService = useSidebarService();
-  const sidebar = sidebarService.state;
+  const sidebar = useSidebarService();
 
   const isOpen = useObservable(sidebar.isOpen$(), sidebar.isOpen());
   const currentAppId = useObservable(sidebar.getCurrentAppId$(), sidebar.getCurrentAppId());
@@ -42,8 +41,8 @@ export function useSidebar(): UseSidebarApi {
   const setWidth = useCallback((newWidth: number) => sidebar.setWidth(newWidth), [sidebar]);
   const setParams = useCallback(
     <TParams = {},>(appId: SidebarAppId, params: Partial<TParams>) =>
-      sidebarService.appState.setParams(appId, params),
-    [sidebarService]
+      sidebar.setParams(appId, params),
+    [sidebar]
   );
 
   return useMemo(
@@ -63,7 +62,7 @@ export function useSidebar(): UseSidebarApi {
  * React hook for accessing the sidebar width
  */
 export function useSidebarWidth(): number {
-  const sidebar = useSidebarService().state;
+  const sidebar = useSidebarService();
   return useObservable(sidebar.getWidth$(), sidebar.getWidth());
 }
 
@@ -80,15 +79,15 @@ export interface UseSidebarAppApi<TParams = {}> {
  * @param appId
  */
 export function useSidebarApp<TParams = {}>(appId: SidebarAppId): UseSidebarAppApi<TParams> {
-  const sidebarService = useSidebarService();
+  const sidebar = useSidebarService();
 
   const open = useCallback(
-    (params?: Partial<TParams>) => sidebarService.state.open<TParams>(appId, params),
-    [sidebarService, appId]
+    (params?: Partial<TParams>) => sidebar.open<TParams>(appId, params),
+    [sidebar, appId]
   );
   const setParams = useCallback(
-    (params: Partial<TParams>) => sidebarService.appState.setParams<TParams>(appId, params),
-    [sidebarService, appId]
+    (params: Partial<TParams>) => sidebar.setParams<TParams>(appId, params),
+    [sidebar, appId]
   );
 
   return useMemo(() => ({ open, setParams }), [open, setParams]);

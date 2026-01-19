@@ -5277,6 +5277,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-sidebar-context@link:src/core/packages/chrome/sidebar-context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-types@link:src/core/packages/chrome/sidebar-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-sidebar@link:src/core/packages/chrome/sidebar":
   version "0.0.0"
   uid ""
@@ -7914,10 +7922,6 @@
   uid ""
 
 "@kbn/random-sampling@link:x-pack/platform/packages/private/kbn-random-sampling":
-  version "0.0.0"
-  uid ""
-
-"@kbn/react-context-registry@link:src/platform/packages/shared/react/context_registry":
   version "0.0.0"
   uid ""
 

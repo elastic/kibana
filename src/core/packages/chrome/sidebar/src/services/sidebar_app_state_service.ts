@@ -10,23 +10,10 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { z } from '@kbn/zod/v4';
-import type { SidebarAppId } from '../sidebar_app_id';
-import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
+import type { SidebarAppId } from '@kbn/core-chrome-sidebar-types';
+import type { SidebarRegistryService } from './sidebar_registry_service';
 
 const isDev = process.env.NODE_ENV !== 'production';
-/**
- * API for managing sidebar app params
- */
-export interface SidebarAppStateServiceApi {
-  /** Get observable stream of app params */
-  getParams$<T>(appId: SidebarAppId): Observable<T>;
-
-  /** Get current app params synchronously */
-  getParams<T>(appId: SidebarAppId): T;
-
-  /** Update app params (merges with existing params) */
-  setParams<T>(appId: SidebarAppId, params: Partial<T>): void;
-}
 
 /**
  * Service for managing params passed to sidebar app components
@@ -34,12 +21,12 @@ export interface SidebarAppStateServiceApi {
  * Params are persisted to localStorage and restored on page reload.
  * Components receive params as React props and can manage their own internal state.
  */
-export class SidebarAppStateService implements SidebarAppStateServiceApi {
+export class SidebarAppStateService {
   private readonly appParams = new Map<string, BehaviorSubject<any>>();
   // Base path is needed to separate storage keys between different Kibana spaces. Base path === space path.
   private basePath!: string;
 
-  constructor(private readonly registry: SidebarRegistryServiceApi) {}
+  constructor(private readonly registry: SidebarRegistryService) {}
 
   start(basePath: string): void {
     this.basePath = basePath;

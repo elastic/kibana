@@ -6,25 +6,5 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-export {
-  SidebarService,
-  type SidebarServiceStart,
-  type SidebarServiceSetup,
-} from './sidebar_service';
-
-export type {
-  SidebarApp,
-  SidebarAppButton,
-  SidebarAppContent,
-  SidebarComponentProps,
-  SidebarComponentType,
-} from './sidebar_registry_service';
-export type { SidebarAppId } from '../sidebar_app_id';
-
-export { SidebarRegistryService, type SidebarRegistryServiceApi } from './sidebar_registry_service';
-export { SidebarStateService, type SidebarStateServiceApi } from './sidebar_state_service';
-export {
-  SidebarAppStateService,
-  type SidebarAppStateServiceApi,
-} from './sidebar_app_state_service';
+export { SidebarService } from './sidebar_service';
+export type { SidebarStart, SidebarSetup } from './sidebar_service';

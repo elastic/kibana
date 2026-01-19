@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
-  "id": "@kbn/react-context-registry",
+  "id": "@kbn/core-chrome-sidebar-context",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
-  "visibility": "shared"
+  "visibility": "private"
 }

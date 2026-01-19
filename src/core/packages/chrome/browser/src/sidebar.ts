@@ -11,6 +11,6 @@ export type {
   SidebarApp,
   SidebarAppButton,
   SidebarAppContent,
-  SidebarServiceStart,
-  SidebarServiceSetup,
+  SidebarSetup,
+  SidebarStart,
 } from '@kbn/core-chrome-sidebar';

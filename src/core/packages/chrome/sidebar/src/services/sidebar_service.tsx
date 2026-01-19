@@ -7,27 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { SidebarRegistryService, type SidebarRegistryServiceApi } from './sidebar_registry_service';
-import { SidebarStateService, type SidebarStateServiceApi } from './sidebar_state_service';
-import {
-  SidebarAppStateService,
-  type SidebarAppStateServiceApi,
-} from './sidebar_app_state_service';
-import { SidebarServiceProvider } from '../providers';
+import type { SidebarSetup, SidebarStart } from '@kbn/core-chrome-sidebar-types';
+import { SidebarRegistryService } from './sidebar_registry_service';
+import { SidebarStateService } from './sidebar_state_service';
+import { SidebarAppStateService } from './sidebar_app_state_service';
 
-export interface SidebarServiceSetup {
-  registerApp: SidebarRegistryServiceApi['registerApp'];
-}
-
-export interface SidebarServiceStart extends SidebarStateServiceApi {
-  /** Update params for a sidebar app */
-  setParams: SidebarAppStateServiceApi['setParams'];
-  /** Set the availability status of a sidebar app */
-  setAvailable: SidebarRegistryServiceApi['setAvailable'];
-  /** Observable of apps that are currently available */
-  getAvailableApps$: SidebarRegistryServiceApi['getAvailableApps$'];
-}
+export type { SidebarSetup, SidebarStart } from '@kbn/core-chrome-sidebar-types';
 
 /**
  * Composite service for sidebar functionality
@@ -36,12 +21,11 @@ export interface SidebarServiceStart extends SidebarStateServiceApi {
  * - SidebarRegistryService: Manages app registration
  * - SidebarStateService: Manages UI state (open/close, width)
  * - SidebarAppStateService: Manages params passed to sidebar app components
- * - wrapInProvider method to wrap application in Sidebar context
  */
 export class SidebarService {
-  readonly registry: SidebarRegistryServiceApi;
+  readonly registry: SidebarRegistryService;
   readonly appState: SidebarAppStateService;
-  readonly state: SidebarStateServiceApi;
+  readonly state: SidebarStateService;
 
   constructor() {
     this.registry = new SidebarRegistryService();
@@ -49,13 +33,13 @@ export class SidebarService {
     this.state = new SidebarStateService(this.registry, this.appState);
   }
 
-  setup(): SidebarServiceSetup {
+  setup(): SidebarSetup {
     return {
       registerApp: this.registry.registerApp.bind(this.registry),
     };
   }
 
-  start(basePath: string): SidebarServiceStart {
+  start(basePath: string): SidebarStart {
     // initialize services on start to make sure all apps are registered
     this.appState.start(basePath);
     (this.state as SidebarStateService).start(basePath);
@@ -71,14 +55,14 @@ export class SidebarService {
       getCurrentAppId$: this.state.getCurrentAppId$.bind(this.state),
       getCurrentAppId: this.state.getCurrentAppId.bind(this.state),
       // SidebarAppStateServiceApi
+      getParams$: this.appState.getParams$.bind(this.appState),
+      getParams: this.appState.getParams.bind(this.appState),
       setParams: this.appState.setParams.bind(this.appState),
       // SidebarRegistryServiceApi
       setAvailable: this.registry.setAvailable.bind(this.registry),
       getAvailableApps$: this.registry.getAvailableApps$.bind(this.registry),
+      hasApp: this.registry.hasApp.bind(this.registry),
+      getApp: this.registry.getApp.bind(this.registry),
     };
-  }
-
-  wrapInProvider(children: React.ReactNode) {
-    return <SidebarServiceProvider value={{ sidebar: this }}>{children}</SidebarServiceProvider>;
   }
 }

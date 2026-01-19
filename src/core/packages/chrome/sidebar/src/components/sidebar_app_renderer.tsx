@@ -10,9 +10,8 @@
 import React, { lazy, Suspense, useMemo, useCallback } from 'react';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { useObservable } from '@kbn/use-observable';
-import type { SidebarAppId } from '../sidebar_app_id';
-import type { SidebarComponentType } from '../services';
-import { useSidebarAppStateService } from '../providers';
+import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
+import type { SidebarAppId, SidebarComponentType } from '@kbn/core-chrome-sidebar-types';
 
 interface SidebarAppRendererProps {
   appId: SidebarAppId;
@@ -20,18 +19,18 @@ interface SidebarAppRendererProps {
 }
 
 export function SidebarAppRenderer({ appId, loadComponent }: SidebarAppRendererProps) {
-  const appStateService = useSidebarAppStateService();
+  const sidebarService = useSidebarService();
 
   const LazyComponent = useMemo(
     () => lazy(() => loadComponent().then((c) => ({ default: c }))),
     [loadComponent]
   );
 
-  const params = useObservable(appStateService.getParams$(appId), appStateService.getParams(appId));
+  const params = useObservable(sidebarService.getParams$(appId), sidebarService.getParams(appId));
 
   const setParams = useCallback(
-    (newParams: Record<string, unknown>) => appStateService.setParams(appId, newParams),
-    [appStateService, appId]
+    (newParams: Record<string, unknown>) => sidebarService.setParams(appId, newParams),
+    [sidebarService, appId]
   );
 
   return (

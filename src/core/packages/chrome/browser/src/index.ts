@@ -58,6 +58,6 @@ export type {
   SidebarApp,
   SidebarAppButton,
   SidebarAppContent,
-  SidebarServiceSetup,
-  SidebarServiceStart,
+  SidebarSetup,
+  SidebarStart,
 } from './sidebar';

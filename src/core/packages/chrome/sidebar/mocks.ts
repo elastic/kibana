@@ -8,17 +8,17 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { SidebarServiceSetup, SidebarServiceStart } from '.';
+import type { SidebarStart, SidebarSetup } from '@kbn/core-chrome-sidebar-types';
 
 const DEFAULT_WIDTH = 400;
 
-const createSetupContractMock = (): jest.Mocked<SidebarServiceSetup> => {
+const createSetupContractMock = (): jest.Mocked<SidebarSetup> => {
   return {
     registerApp: jest.fn(),
   };
 };
 
-const createStartContractMock = (): jest.Mocked<SidebarServiceStart> => {
+const createStartContractMock = (): jest.Mocked<SidebarStart> => {
   return {
     // State
     isOpen$: jest.fn().mockReturnValue(new BehaviorSubject<boolean>(false)),
@@ -31,10 +31,14 @@ const createStartContractMock = (): jest.Mocked<SidebarServiceStart> => {
     getCurrentAppId$: jest.fn().mockReturnValue(new BehaviorSubject<string | null>(null)),
     getCurrentAppId: jest.fn().mockReturnValue(null),
     // App state
+    getParams$: jest.fn().mockReturnValue(new BehaviorSubject<unknown>({})),
+    getParams: jest.fn().mockReturnValue({}),
     setParams: jest.fn(),
     // Registry
     setAvailable: jest.fn(),
     getAvailableApps$: jest.fn().mockReturnValue(new BehaviorSubject<string[]>([])),
+    hasApp: jest.fn().mockReturnValue(false),
+    getApp: jest.fn(),
   };
 };
 

@@ -11,24 +11,10 @@
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, filter, map, take } from 'rxjs';
 import { memoize } from 'decko';
-import type { SidebarAppId } from '../sidebar_app_id';
-import { isValidSidebarAppId } from '../sidebar_app_id';
-import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
+import type { SidebarAppId } from '@kbn/core-chrome-sidebar-types';
+import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar-types';
+import type { SidebarRegistryService } from './sidebar_registry_service';
 import type { SidebarAppStateService } from './sidebar_app_state_service';
-
-export interface SidebarStateServiceApi {
-  isOpen$: () => Observable<boolean>;
-  isOpen: () => boolean;
-  open: <TParams = {}>(appId: SidebarAppId, params?: Partial<TParams>) => void;
-  close: () => void;
-
-  getWidth$: () => Observable<number>;
-  getWidth: () => number;
-  setWidth: (width: number) => void;
-
-  getCurrentAppId$: () => Observable<SidebarAppId | null>;
-  getCurrentAppId: () => SidebarAppId | null;
-}
 
 const DEFAULT_WIDTH = 400;
 const MIN_WIDTH = 200;
@@ -38,14 +24,14 @@ function getMaxWidth(): number {
   return Math.floor(window.innerWidth * MAX_WIDTH_PERCENT);
 }
 
-export class SidebarStateService implements SidebarStateServiceApi {
+export class SidebarStateService {
   private readonly currentAppId$ = new BehaviorSubject<SidebarAppId | null>(null);
   private readonly width$ = new BehaviorSubject<number>(DEFAULT_WIDTH);
   private pendingRestoreSubscription?: Subscription;
   private storage!: StorageHelper;
 
   constructor(
-    private readonly registry: SidebarRegistryServiceApi,
+    private readonly registry: SidebarRegistryService,
     private readonly appStateService: SidebarAppStateService
   ) {}
 

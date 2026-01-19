@@ -8,121 +8,12 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subject, map, startWith } from 'rxjs';
+import { map, startWith, Subject } from 'rxjs';
 import { memoize } from 'decko';
-import type { ComponentType } from 'react';
-import type { z } from '@kbn/zod/v4';
-import type { SidebarAppId } from '../sidebar_app_id';
-import { isValidSidebarAppId } from '../sidebar_app_id';
+import type { SidebarApp, SidebarAppId } from '@kbn/core-chrome-sidebar-types';
+import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar-types';
 
-/**
- * Props passed to sidebar app components
- */
-export interface SidebarComponentProps<TParams> {
-  /** Current params for the sidebar app */
-  params: TParams;
-  /** Update params (merges with existing params, persists to localStorage) */
-  setParams: (params: Partial<TParams>) => void;
-}
-
-export type SidebarComponentType<TParams> = ComponentType<SidebarComponentProps<TParams>>;
-
-/**
- * Content configuration for a sidebar app panel
- */
-export interface SidebarAppContent<TParams = unknown> {
-  /**
-   * Title displayed at the top of the sidebar panel
-   */
-  title: string;
-  /**
-   * Asynchronously loads the main component for the sidebar app
-   */
-  loadComponent: () => Promise<SidebarComponentType<TParams>>;
-  /**
-   * Function that returns a Zod schema defining the params structure and default values.
-   *
-   * Initial params are created by calling `getParamsSchema().parse({})`.
-   * Use `.default()` on schema fields to provide initial values.
-   *
-   * Lazy evaluation ensures schemas are only built when needed.
-   *
-   * Params are persisted to localStorage and restored on page reload.
-   *
-   * @example
-   * ```typescript
-   * import { z } from '@kbn/zod/v4';
-   *
-   * const getMyParamsSchema = () => z.object({
-   *   userName: z.string().default(''),
-   *   count: z.number().int().nonnegative().default(0),
-   * });
-   *
-   * type MyParams = z.infer<ReturnType<typeof getMyParamsSchema>>;
-   *
-   * registerApp({
-   *   getParamsSchema: getMyParamsSchema,
-   *   // ...
-   * });
-   * ```
-   */
-  getParamsSchema: () => z.ZodType<TParams>;
-}
-
-/**
- * Button configuration for a sidebar app
- */
-export interface SidebarAppButton {
-  /**
-   * Type of icon to display on the sidebar button (e.g., 'search', 'settings', etc.)
-   */
-  iconType: string;
-  /**
-   * Optional title for the sidebar button (used for accessibility and tooltips), defaults to app title if not provided
-   */
-  buttonTitle?: string;
-}
-
-/**
- * Complete app definition for sidebar registration
- */
-export interface SidebarApp<TParams = unknown>
-  extends SidebarAppButton,
-    SidebarAppContent<TParams> {
-  /**
-   * Unique identifier for the sidebar app
-   */
-  appId: SidebarAppId;
-  /**
-   * Whether the app is available. Defaults to true.
-   * Unavailable apps will have their buttons hidden from the sidebar.
-   * Use `setAvailable()` to update availability after registration (e.g., after permission checks).
-   */
-  available?: boolean;
-}
-
-export interface SidebarRegistryServiceApi {
-  /** Observable of all registered apps */
-  getApps$: () => Observable<SidebarApp[]>;
-  /** Get all registered apps */
-  getApps: () => SidebarApp[];
-  /** Register a new sidebar app */
-  registerApp<TParams = {}>(app: SidebarApp<TParams>): void;
-  /** Get a specific app by ID */
-  getApp(appId: SidebarAppId): SidebarApp;
-  /** Check if an app is registered */
-  hasApp: (appId: SidebarAppId) => boolean;
-  /** Set the availability status of an app */
-  setAvailable: (appId: SidebarAppId, available: boolean) => void;
-  /** Get reactive availability status for an app */
-  getAvailable$: (appId: SidebarAppId) => Observable<boolean>;
-  /** Get current availability status for an app */
-  isAvailable: (appId: SidebarAppId) => boolean;
-  /** Observable of apps ids that are currently available */
-  getAvailableApps$: () => Observable<string[]>;
-}
-
-export class SidebarRegistryService implements SidebarRegistryServiceApi {
+export class SidebarRegistryService {
   private readonly registeredApps = new Map<string, SidebarApp>();
   private readonly changed$ = new Subject<void>();
 

@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode, useContext } from 'react';
-import { getOrCreateContext } from '@kbn/react-context-registry';
-import type { SidebarService } from '../services';
+import React, { type ReactNode, useContext, createContext } from 'react';
+import type { SidebarStart } from '@kbn/core-chrome-sidebar-types';
 
 interface SidebarContextValue {
-  sidebar: SidebarService;
+  sidebar: SidebarStart;
 }
 
-const SidebarContext = getOrCreateContext<SidebarContextValue | null>(
-  '@kbn/core-chrome-sidebar/SidebarContext',
-  null
-);
+const SidebarContext = createContext<SidebarContextValue | null>(null);
 
 export interface SidebarProviderProps {
   children: ReactNode;
@@ -40,20 +36,6 @@ function useSidebarContext(): SidebarContextValue {
 /**
  * @internal
  */
-export function useSidebarService(): SidebarService {
+export function useSidebarService(): SidebarStart {
   return useSidebarContext().sidebar;
-}
-
-/**
- * @internal
- */
-export function useSidebarStateService(): SidebarService['state'] {
-  return useSidebarService().state;
-}
-
-/**
- * @internal
- */
-export function useSidebarAppStateService(): SidebarService['appState'] {
-  return useSidebarService().appState;
 }

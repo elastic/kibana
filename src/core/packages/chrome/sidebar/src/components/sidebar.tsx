@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
+import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
 import { SidebarPanel } from './sidebar_panel';
 import { SidebarAppRenderer } from './sidebar_app_renderer';
 import { useSidebar } from '../hooks';
-import { useSidebarService } from '../providers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SidebarProps {}
@@ -24,11 +24,11 @@ export function Sidebar(props: SidebarProps) {
     return null;
   }
 
-  if (!currentAppId || !sidebarService.registry.hasApp(currentAppId)) {
+  if (!currentAppId || !sidebarService.hasApp(currentAppId)) {
     return null;
   }
 
-  const currentApp = sidebarService.registry.getApp(currentAppId);
+  const currentApp = sidebarService.getApp(currentAppId);
 
   if (!currentApp.available) {
     // most likely we're trying to render an app that hasn't become available yet after initial restoration
