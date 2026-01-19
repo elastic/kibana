@@ -41,6 +41,10 @@ const latestSamplesDataSourceSchema = baseDataSourceSchema.extend({
   type: z.literal('latest-samples'),
 }) satisfies z.Schema<LatestSamplesDataSource>;
 
+const failureStoreDataSourceSchema = baseDataSourceSchema.extend({
+  type: z.literal('failure-store'),
+}) satisfies z.Schema<FailureStoreDataSource>;
+
 /**
  * KQL samples data source that retrieves data based on KQL query
  */
@@ -105,6 +109,7 @@ const enrichmentDataSourceSchema = z.union([
   latestSamplesDataSourceSchema,
   kqlSamplesDataSourceSchema,
   customSamplesDataSourceSchema,
+  failureStoreDataSourceSchema,
 ]) satisfies z.Schema<EnrichmentDataSource>;
 
 /**
