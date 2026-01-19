@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -214,12 +215,30 @@ export default function (providerContext: FtrProviderContext) {
           .send({ agentPolicyId: agentPolicyWithPPId })
           .expect(200);
       });
-      it('should create version specific policies with common agent versions and package level agent version condition', async () => {
+      it('should create version specific policies with common agent versions and template level agent version condition', async () => {
         const { body } = await supertest
           .get(`/api/fleet/agent_policies/${agentPolicyWithPPId}`)
           .expect(200);
         expect(body.item.has_agent_version_conditions).to.eql(true);
 
+        // check inputs for versions saved in package policy SO
+        const res: any = await es.transport.request({
+          method: 'GET',
+          path: `/${INGEST_SAVED_OBJECT_INDEX}/_doc/fleet-package-policies:${packagePolicyId}`,
+        });
+        const inputsForVersions = res._source?.['fleet-package-policies']?.inputs_for_versions;
+        expect(Object.keys(inputsForVersions).length).to.eql(3);
+        for (const ver of Object.keys(inputsForVersions)) {
+          if (ver >= '9.3') {
+            expect(inputsForVersions[ver][0].streams[0].compiled_stream.program).to.not.be(
+              undefined
+            );
+          } else {
+            expect(inputsForVersions[ver][0].streams[0].compiled_stream.program).to.be(undefined);
+          }
+        }
+
+        // check version specific policies created
         const policies = await es.search({
           index: '.fleet-policies',
           _source: ['data.inputs', 'policy_id'],
