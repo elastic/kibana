@@ -47,8 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/248030
-    describe.skip('when adding an ES|QL panel with controls in dashboards and exploring it in discover', () => {
+    describe('when adding an ES|QL panel with controls in dashboards and exploring it in discover', () => {
       it('should retain the controls and their state', async () => {
         // Go to dashboard app
         await dashboard.navigateToApp();
@@ -62,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esql.waitESQLEditorLoaded('ESQLEditor');
         await esql.setEsqlEditorQuery('FROM logstash-* | STATS BY geo.dest');
 
-        await testSubjects.click('ESQLEditor-run-query-button');
+        await find.clickByButtonText('Run query');
         expect(await testSubjects.exists('esqlValuesPreview')).to.be(true);
         await testSubjects.click('saveEsqlControlsFlyoutButton');
 
@@ -70,8 +69,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Add a new ES|QL panel
         await dashboardAddPanel.clickAddEsqlPanel();
+        await esql.waitESQLEditorLoaded('ESQLEditor');
         await esql.setEsqlEditorQuery('FROM logstash-* | WHERE geo.dest == ?variable');
         await find.clickByButtonText('Run query');
+        await find.byButtonText('Refresh');
         await find.clickByButtonText('Apply and close');
 
         // Wait for the control to be added
