@@ -27,7 +27,6 @@ import {
 } from './types';
 import { transformEntityTypeToIconAndShape } from './utils';
 
-
 interface LabelEdges {
   source: string;
   target: string;
