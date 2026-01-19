@@ -9,7 +9,7 @@ import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { load } from 'js-yaml';
-import { isEqual, omit } from 'lodash';
+import { isEqual, omit, pick } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
@@ -422,20 +422,26 @@ export function useOnSubmit({
         );
 
         if (defaultPolicyData) {
-          basePackagePolicy.name = defaultPolicyData.name || basePackagePolicy.name;
-          basePackagePolicy.description =
-            defaultPolicyData.description || basePackagePolicy.description;
-          basePackagePolicy.namespace = defaultPolicyData.namespace || basePackagePolicy.namespace;
-          if (defaultPolicyData.inputs) {
-            basePackagePolicy.inputs = defaultPolicyData.inputs;
-          }
-          if (defaultPolicyData.vars) {
-            basePackagePolicy.vars = defaultPolicyData.vars;
-          }
-
-          if (defaultPolicyData.policy_ids) {
-            basePackagePolicy.policy_ids = defaultPolicyData.policy_ids;
-          }
+          Object.assign(
+            basePackagePolicy,
+            pick(
+              defaultPolicyData,
+              'name',
+              'description',
+              'namespace',
+              'policy_ids',
+              'output_id',
+              'cloud_connector_id',
+              'cloud_connector_name',
+              'inputs',
+              'vars',
+              'elasticsearch',
+              'overrides',
+              'supports_agentless',
+              'supports_cloud_connector',
+              'additional_datastreams_permissions'
+            )
+          );
         }
 
         // Set the package policy with the fetched package
