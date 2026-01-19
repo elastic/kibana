@@ -79,4 +79,78 @@ apiTest.describe('Streamlang to ES|QL - Concat Processor', { tag: ['@ess', '@svl
       expect(esqlResult.documents[1]).toHaveProperty('full_email', null);
     }
   );
+
+  apiTest(
+    'should concatenate fields and literals with ignore_missing',
+    async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-concat-with-ignore-missing';
+
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'concat',
+            from: [
+              { type: 'field', value: 'first_name' },
+              { type: 'literal', value: '.' },
+              { type: 'field', value: 'last_name' },
+              { type: 'literal', value: '@' },
+              { type: 'field', value: 'email_domain' },
+            ],
+            ignore_missing: true,
+            to: 'full_email',
+          } as ConcatProcessor,
+        ],
+      };
+
+      const { query } = transpile(streamlangDSL);
+
+      const docs = [
+        { first_name: 'john', last_name: 'doe', email_domain: 'example.com' },
+        { first_name: 'jane', last_name: 'smith' },
+      ];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
+
+      expect(esqlResult.documents).toHaveLength(2);
+      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
+      expect(esqlResult.documents[1]).toHaveProperty('full_email', 'jane.smith@');
+    }
+  );
+
+  apiTest(
+    'should not concatenate fields if ignore_missing is false and some fields are missing',
+    async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-concat-with-ignore-missing-false';
+
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'concat',
+            from: [
+              { type: 'field', value: 'first_name' },
+              { type: 'literal', value: '.' },
+              { type: 'field', value: 'last_name' },
+              { type: 'literal', value: '@' },
+              { type: 'field', value: 'email_domain' },
+            ],
+            ignore_missing: false,
+            to: 'full_email',
+          } as ConcatProcessor,
+        ],
+      };
+
+      const { query } = transpile(streamlangDSL);
+
+      const docs = [
+        { first_name: 'john', last_name: 'doe', email_domain: 'example.com' },
+        { first_name: 'jane', last_name: 'smith' },
+      ];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
+
+      expect(esqlResult.documents).toHaveLength(2);
+      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
+      expect(esqlResult.documents[1]).toHaveProperty('full_email', null);
+    }
+  );
 });

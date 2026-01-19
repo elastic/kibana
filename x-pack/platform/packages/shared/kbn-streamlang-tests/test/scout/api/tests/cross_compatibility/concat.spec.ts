@@ -108,4 +108,105 @@ apiTest.describe('Cross-compatibility - Concat Processor', { tag: ['@ess', '@svl
       expect(esqlResult.documents[1]).toHaveProperty('full_email', null);
     }
   );
+
+  apiTest(
+    'should concatenate fields and literals with ignore_missing in both ingest pipeline and ES|QL',
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'concat',
+            from: [
+              { type: 'field', value: 'first_name' },
+              { type: 'literal', value: '.' },
+              { type: 'field', value: 'last_name' },
+              { type: 'literal', value: '@' },
+              { type: 'field', value: 'email_domain' },
+            ],
+            to: 'full_email',
+            ignore_missing: true,
+          } as ConcatProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [
+        {
+          first_name: 'john',
+          last_name: 'doe',
+          email_domain: 'example.com',
+        },
+        {
+          first_name: 'jane',
+          last_name: 'smith',
+        },
+      ];
+
+      await testBed.ingest('ingest-e2e-test-concat-basic', docs, processors);
+      const ingestResult = await testBed.getDocs('ingest-e2e-test-concat-basic');
+
+      await testBed.ingest('esql-e2e-test-concat-basic', docs);
+      const esqlResult = await esql.queryOnIndex('esql-e2e-test-concat-basic', query);
+
+      expect(ingestResult).toHaveLength(2);
+      expect(ingestResult[0]).toHaveProperty('full_email', 'john.doe@example.com');
+      expect(ingestResult[1]).toHaveProperty('full_email', 'jane.smith@');
+
+      expect(esqlResult.documents).toHaveLength(2);
+      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
+      expect(esqlResult.documents[1]).toHaveProperty('full_email', 'jane.smith@');
+    }
+  );
+
+  apiTest(
+    'should not concatenate fields and literals with ignore_missing false and some fields missing in both ingest pipeline and ES|QL',
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'concat',
+            from: [
+              { type: 'field', value: 'first_name' },
+              { type: 'literal', value: '.' },
+              { type: 'field', value: 'last_name' },
+              { type: 'literal', value: '@' },
+              { type: 'field', value: 'email_domain' },
+            ],
+            to: 'full_email',
+          } as ConcatProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [
+        {
+          first_name: 'john',
+          last_name: 'doe',
+          email_domain: 'example.com',
+        },
+        {
+          first_name: 'jane',
+          last_name: 'smith',
+        },
+      ];
+
+      await testBed.ingest('ingest-e2e-test-concat-basic', docs, processors);
+      const ingestResult = await testBed.getDocs('ingest-e2e-test-concat-basic');
+
+      await testBed.ingest('esql-e2e-test-concat-basic', docs);
+      const esqlResult = await esql.queryOnIndex('esql-e2e-test-concat-basic', query);
+
+      expect(ingestResult).toHaveLength(2);
+      expect(ingestResult[0]).toHaveProperty('full_email', 'john.doe@example.com');
+      expect(ingestResult[1]).not.toHaveProperty('full_email');
+
+      expect(esqlResult.documents).toHaveLength(2);
+      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
+      expect(esqlResult.documents[1]).toHaveProperty('full_email', null);
+    }
+  );
 });
