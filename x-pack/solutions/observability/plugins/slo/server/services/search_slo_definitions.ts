@@ -39,29 +39,57 @@ export class SearchSLODefinitions {
       const response = await this.esClient.search<{ slo?: any; remote?: any }>({
         index: indices,
         size: 0,
+        runtime_mappings: {
+          remoteName: {
+            type: 'keyword',
+            script: {
+              source: `
+                String idx = doc['_index'].value;
+                int colonPos = idx.indexOf(':');
+                if (colonPos > 0) {
+                  emit(idx.substring(0, colonPos));
+                } else {
+                  emit('local');
+                }
+              `,
+            },
+          },
+        },
         query: {
           bool: {
             filter: [
               { term: { spaceId: this.spaceId } },
-              ...(search ? [{ query_string: { query: search } }] : []),
+              {
+                simple_query_string: {
+                  query: search ?? '',
+                  fields: ['slo.name^3', 'slo.description^2', 'slo.tags'],
+                  default_operator: 'AND',
+                  analyze_wildcard: true,
+                },
+              },
             ],
           },
         },
         aggs: {
-          slo_composite: {
+          slo_definitions: {
             composite: {
               size,
-              sources: [
-                { slo_id: { terms: { field: 'slo.id' } } },
-                { slo_revision: { terms: { field: 'slo.revision' } } },
-              ],
+              sources: [{ slo_id: { terms: { field: 'slo.id' } } }],
               ...(afterObj ? { after: afterObj } : {}),
             },
             aggs: {
-              top_slo: {
+              slo_details: {
                 top_hits: {
-                  _source: { includes: ['slo.*', 'kibanaUrl'] },
+                  _source: { includes: ['slo.id', 'slo.name', 'slo.groupBy', 'kibanaUrl'] },
                   size: 1,
+                  sort: [
+                    {
+                      'slo.revision': {
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                  fields: ['remoteName'],
                 },
               },
             },
@@ -70,12 +98,12 @@ export class SearchSLODefinitions {
       });
 
       const buckets =
-        response.aggregations && (response.aggregations as any).slo_composite
-          ? (response.aggregations as any).slo_composite.buckets
+        response.aggregations && (response.aggregations as any).slo_definitions
+          ? (response.aggregations as any).slo_definitions.buckets
           : [];
 
       const results = buckets.map((bucket: any) => {
-        const hit = bucket.top_slo.hits.hits[0];
+        const hit = bucket.slo_details.hits.hits[0];
         const sloSrc = hit?._source?.slo ?? {};
         const kibanaUrl = hit?._source?.kibanaUrl;
         const indexName = hit?._index;
@@ -106,8 +134,8 @@ export class SearchSLODefinitions {
       });
 
       const afterKey =
-        response.aggregations && (response.aggregations as any).slo_composite
-          ? (response.aggregations as any).slo_composite.after_key
+        response.aggregations && (response.aggregations as any).slo_definitions
+          ? (response.aggregations as any).slo_definitions.after_key
           : undefined;
 
       return {
