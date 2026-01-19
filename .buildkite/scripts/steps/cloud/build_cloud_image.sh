@@ -9,7 +9,7 @@ source .buildkite/scripts/common/util.sh
 export KBN_NP_PLUGINS_BUILT=true
 
 # VERSION for downloading the artifact (must match what build_kibana.sh created)
-VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
+VERSION="$(jq -r '.version' package.json)"
 
 # Custom docker tag without SNAPSHOT (to enable APM in Cloud)
 DOCKER_TAG="$(jq -r '.version' package.json)-$GIT_COMMIT"
