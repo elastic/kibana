@@ -8,6 +8,7 @@
 export * from './asset_criticality/constants';
 export * from './risk_engine/constants';
 export * from './risk_score/constants';
+export * from './risk_impact/constants';
 export * from './migrations/constants';
 export * from './privileged_user_monitoring/constants';
 export * from './entity_store/constants';

@@ -17,6 +17,7 @@ import {
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
   ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+  ENTITY_ANALYTICS_RISK_IMPACT_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
@@ -26,6 +27,7 @@ import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
 import { EntityThreatHuntingPage } from './pages/entity_threat_hunting_page';
+import { EntityRiskImpactPage } from './pages/entity_risk_impact_page';
 
 const EntityAnalyticsManagementWrapper = () => (
   <PluginTemplateWrapper>
@@ -173,6 +175,27 @@ const EntityThreatHuntingContainer: React.FC = React.memo(() => {
 
 EntityThreatHuntingContainer.displayName = 'EntityThreatHuntingContainer';
 
+const EntityRiskImpactWrapper = () => (
+  <PluginTemplateWrapper>
+    <EntityRiskImpactPage />
+  </PluginTemplateWrapper>
+);
+
+const EntityRiskImpactContainer: React.FC = React.memo(() => {
+  return (
+    <Routes>
+      <Route
+        path={ENTITY_ANALYTICS_RISK_IMPACT_PATH}
+        exact
+        component={EntityRiskImpactWrapper}
+      />
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityRiskImpactContainer.displayName = 'EntityRiskImpactContainer';
+
 export const routes = [
   {
     path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -218,6 +241,13 @@ export const routes = [
     component: withSecurityRoutePageWrapper(
       EntityThreatHuntingContainer,
       SecurityPageName.entityAnalyticsThreatHunting
+    ),
+  },
+  {
+    path: ENTITY_ANALYTICS_RISK_IMPACT_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityRiskImpactContainer,
+      SecurityPageName.entityAnalytics
     ),
   },
 ];
