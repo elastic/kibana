@@ -13,8 +13,6 @@ import { ESQLEditorTelemetryService } from './telemetry_service';
 
 const mockMetricEvent = jest.fn();
 
-// Mirrors the ebt-tools mock used in
-// src/platform/plugins/shared/dashboard/public/dashboard_api/performance/query_performance_tracking.test.ts
 jest.mock('@kbn/ebt-tools', () => ({
   ...jest.requireActual('@kbn/ebt-tools'),
   reportPerformanceMetricEvent: (_: AnalyticsServiceStart, args: PerformanceMetricEvent) => {
@@ -57,7 +55,6 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
       queryLength: 44,
       queryLines: 2,
       sessionId: 'session-1',
-      interactionId: 7,
       isInitialLoad: true,
     });
 
@@ -71,7 +68,6 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
         value2: 2,
         meta: expect.objectContaining({
           session_id: 'session-1',
-          interaction_id: 7,
           is_initial_load: true,
         }),
       })
@@ -89,7 +85,6 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
       queryLength: 90,
       queryLines: 1,
       sessionId: 'session-1',
-      interactionId: 5,
       isInitialLoad: false,
     });
 
@@ -103,7 +98,6 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
         value2: 1,
         meta: expect.objectContaining({
           session_id: 'session-1',
-          interaction_id: 5,
           is_initial_load: false,
         }),
       })
@@ -121,7 +115,6 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
       queryLength: 12,
       queryLines: 1,
       sessionId: 'session-1',
-      interactionId: 3,
       isInitialLoad: false,
     });
 
@@ -135,7 +128,6 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
         value2: 1,
         meta: expect.objectContaining({
           session_id: 'session-1',
-          interaction_id: 3,
           is_initial_load: false,
         }),
       })

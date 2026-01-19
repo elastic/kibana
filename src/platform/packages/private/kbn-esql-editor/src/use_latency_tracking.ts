@@ -98,6 +98,7 @@ export const useInputLatencyTracking = ({
 interface SuggestionsLatencyTrackingDeps {
   telemetryService: ESQLEditorTelemetryService;
   sessionIdRef: MutableRefObject<string>;
+  // Internal counter for deterministic sampling; not emitted in telemetry payloads.
   interactionIdRef: MutableRefObject<number>;
 }
 
@@ -136,7 +137,6 @@ export const useSuggestionsLatencyTracking = ({
         duration,
         queryLength,
         queryLines,
-        interactionId,
         isInitialLoad,
         sessionId: sessionIdRef.current,
       });
@@ -153,6 +153,7 @@ export const useSuggestionsLatencyTracking = ({
 interface ValidationLatencyTrackingDeps {
   telemetryService: ESQLEditorTelemetryService;
   sessionIdRef: MutableRefObject<string>;
+  // Internal counter for deterministic sampling; not emitted in telemetry payloads.
   interactionIdRef: MutableRefObject<number>;
 }
 
@@ -259,7 +260,6 @@ const endLatencyTracking = (tracking: BaseTracking) => {
     duration: performance.now() - tracking.startTime,
     queryLength: tracking.queryLength,
     queryLines: tracking.queryLines,
-    interactionId: tracking.interactionId,
     isInitialLoad: !tracking.hasFirstSample,
   };
 

@@ -44,10 +44,9 @@ export enum TelemetryControlCancelledReason {
 }
 
 export interface TelemetryLatencyProps {
-  duration: number;
-  queryLength: number;
-  queryLines: number;
-  sessionId: string;
-  interactionId?: number;
-  isInitialLoad?: boolean;
+  duration: number; // Latency in milliseconds.
+  queryLength: number; // Query length in characters.
+  queryLines: number; // Query length in lines.
+  sessionId: string; // Editor mount session id.
+  isInitialLoad?: boolean; // True for the first sampled event of each metric.
 }

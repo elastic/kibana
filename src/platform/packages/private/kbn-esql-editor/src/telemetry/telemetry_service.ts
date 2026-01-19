@@ -66,7 +66,6 @@ export class ESQLEditorTelemetryService {
       value2: payload.queryLines,
       meta: {
         ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
-        ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
         ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
       },
     };
