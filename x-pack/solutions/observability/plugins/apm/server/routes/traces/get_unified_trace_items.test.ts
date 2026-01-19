@@ -175,6 +175,7 @@ describe('getUnifiedTraceItems', () => {
               incoming: 0,
               outgoing: 0,
             },
+            docType: 'transaction',
           },
         ],
         agentMarks: {},
@@ -231,6 +232,7 @@ describe('getUnifiedTraceItems', () => {
               incoming: 0,
               outgoing: 0,
             },
+            docType: 'transaction',
           },
         ],
         agentMarks: {
@@ -278,6 +280,7 @@ describe('getUnifiedTraceItems', () => {
               incoming: 0,
               outgoing: 0,
             },
+            docType: 'span',
           },
         ],
         agentMarks: {},
@@ -683,6 +686,78 @@ describe('getUnifiedTraceItems', () => {
         agentName: undefined,
         sync: undefined,
       });
+    });
+
+    it('should return docType as transaction when processor.event is transaction', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              _source: {},
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['tx-1'],
+                [SPAN_NAME]: ['Test Transaction'],
+                [SPAN_DURATION]: [1000],
+                [PROCESSOR_EVENT]: [ProcessorEvent.transaction],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].docType).toBe('transaction');
+    });
+
+    it('should return docType as span when processor.event is span', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+                [PROCESSOR_EVENT]: [ProcessorEvent.span],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].docType).toBe('span');
+    });
+
+    it('should default docType to span when processor.event is not present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].docType).toBe('span');
     });
 
     it('should include coldstart field when present and true', async () => {

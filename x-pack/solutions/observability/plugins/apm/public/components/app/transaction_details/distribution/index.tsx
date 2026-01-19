@@ -55,8 +55,6 @@ export function TransactionDistribution({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const history = useHistory();
-  const { serviceName } = useApmServiceContext();
-  const { waterfallItemId, detailTab } = urlParams;
 
   const waterfallFetchResult = useWaterfallFetcher({
     traceId,
@@ -64,6 +62,9 @@ export function TransactionDistribution({
     start,
     end,
   });
+  const { waterfallItemId, detailTab } = urlParams;
+
+  const { serviceName } = useApmServiceContext();
 
   const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
     start,

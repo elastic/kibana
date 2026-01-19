@@ -6,8 +6,18 @@
  */
 
 import type { Error, Transaction } from '@kbn/apm-types';
+import { apmUseLegacyTraceWaterfall } from '@kbn/observability-plugin/common';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import { useKibana } from '../../../context/kibana_context/use_kibana';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useFetcher, type FETCH_STATUS } from '../../../hooks/use_fetcher';
+
+const INITIAL_DATA: APIReturnType<'GET /internal/apm/unified_traces/{traceId}'> = {
+  traceItems: [],
+  errors: [],
+  agentMarks: {},
+  entryTransaction: undefined,
+};
 
 export interface UnifiedWaterfallFetcherResult {
   traceItems: TraceItem[];
@@ -30,8 +40,19 @@ export function useUnifiedWaterfallFetcher({
   entryTransactionId?: string;
   serviceName?: string;
 }) {
-  const { data, status } = useFetcher(
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const useLegacy = uiSettings.get<boolean>(apmUseLegacyTraceWaterfall);
+
+  const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
+      // When using legacy, skip the API call.
+      // The legacy waterfall uses useWaterfallFetcher instead.
+      // This will be removed when we remove the legacy waterfall.
+      if (useLegacy) {
+        return;
+      }
       if (traceId && start && end) {
         return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
           params: {
@@ -41,14 +62,14 @@ export function useUnifiedWaterfallFetcher({
         });
       }
     },
-    [traceId, start, end, entryTransactionId, serviceName]
+    [traceId, start, end, entryTransactionId, serviceName, useLegacy]
   );
 
   return {
-    traceItems: data?.traceItems ?? [],
-    errors: (data?.errors ?? []) as Error[],
-    agentMarks: data?.agentMarks ?? {},
-    entryTransaction: data?.entryTransaction,
+    traceItems: data.traceItems,
+    errors: data.errors,
+    agentMarks: data.agentMarks,
+    entryTransaction: data.entryTransaction,
     status,
   };
 }

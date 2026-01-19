@@ -47,6 +47,9 @@ export function useWaterfallFetcher({
     error,
   } = useFetcher(
     (callApmApi) => {
+      // When not using legacy, skip the API call.
+      // The unified waterfall uses useUnifiedWaterfallFetcher instead.
+      // This will be removed when we remove the legacy waterfall.
       if (!useLegacy) {
         return;
       }
@@ -66,7 +69,7 @@ export function useWaterfallFetcher({
     [traceId, start, end, transactionId, useLegacy]
   );
 
-  const waterfall = useMemo(() => getWaterfall(data), [data]);
+  const waterfall = useMemo(() => getWaterfall(traceId ? data : INITIAL_DATA), [data, traceId]);
 
   return { waterfall, status, error, useLegacy };
 }
