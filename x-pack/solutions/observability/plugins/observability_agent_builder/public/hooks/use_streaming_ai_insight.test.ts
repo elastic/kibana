@@ -72,5 +72,4 @@ describe('useStreamingAiInsight', () => {
     });
     unmount();
   });
-
 });
