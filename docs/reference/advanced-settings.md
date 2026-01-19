@@ -650,7 +650,7 @@ Change the settings that apply to all of {{product.kibana}}.
 
 ### General [kibana-general-global-settings]
 
-$$$hideAnnouncements$$$`hideAnnouncements` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
+$$$hideAnnouncements-global$$$`hideAnnouncements` {applies_to}`stack: ga 9.4+` {applies_to}`serverless: unavailable`
 :   Stops showing messages and tours that highlight new features. `false` by default.
 
 
