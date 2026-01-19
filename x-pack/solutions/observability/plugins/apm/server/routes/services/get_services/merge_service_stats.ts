@@ -35,14 +35,18 @@ export function mergeServiceStats({
 }): MergedServiceStat[] {
   const allServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
-  // make sure to exclude health statuses from services
-  // that are not found in APM data
+  // Make sure to exclude health statuses and alerts from services
+  // that are not found in APM data (e.g., wildcard "*" services from SLO alerts)
   const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );
 
+  const matchedAlertCounts = alertCounts.filter(({ serviceName }) =>
+    allServiceNames.includes(serviceName)
+  );
+
   return joinByKey(
-    asMutableArray([...serviceStats, ...matchedHealthStatuses, ...alertCounts] as const),
+    asMutableArray([...serviceStats, ...matchedHealthStatuses, ...matchedAlertCounts] as const),
     'serviceName',
     function merge(a, b) {
       const aEnvs = 'environments' in a ? a.environments : [];
