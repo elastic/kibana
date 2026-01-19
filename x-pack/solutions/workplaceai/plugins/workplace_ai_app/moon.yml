@@ -32,10 +32,9 @@ dependsOn:
   - '@kbn/actions-plugin'
   - '@kbn/features-plugin'
   - '@kbn/logging'
-  - '@kbn/data-sources-registry-plugin'
+  - '@kbn/data-catalog-plugin'
   - '@kbn/react-query'
   - '@kbn/deeplinks-agent-builder'
-  - '@kbn/deeplinks-data-connectors'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-workflows'
   - '@kbn/agent-builder-common'
@@ -47,6 +46,7 @@ dependsOn:
   - '@kbn/elastic-assistant'
   - '@kbn/ai-assistant-connector-selector-action'
   - '@kbn/core-application-browser'
+  - '@kbn/deeplinks-data-sources'
 tags:
   - plugin
   - prod
