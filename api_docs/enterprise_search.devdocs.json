@@ -17,6 +17,8 @@
           "{}"
         ],
         "path": "x-pack/solutions/search/plugins/enterprise_search/public/plugin.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -34,6 +36,8 @@
         "void"
       ],
       "path": "x-pack/solutions/search/plugins/enterprise_search/public/plugin.ts",
+      "lineNumber": 63,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -57,6 +61,8 @@
           "{ readonly enabled: boolean; readonly hasConnectors: boolean; readonly hasDefaultIngestPipeline: boolean; readonly hasDocumentLevelSecurityEnabled: boolean; readonly hasIncrementalSyncEnabled: boolean; readonly hasNativeConnectors: boolean; readonly hasWebCrawler: boolean; }"
         ],
         "path": "x-pack/solutions/search/plugins/enterprise_search/server/config.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -137,6 +143,8 @@
           "<boolean>; }>"
         ],
         "path": "x-pack/solutions/search/plugins/enterprise_search/server/config.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
