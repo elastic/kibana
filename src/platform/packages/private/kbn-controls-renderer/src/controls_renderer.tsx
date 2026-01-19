@@ -45,7 +45,7 @@ export const ControlsRenderer = ({
   const setControlPanelRef = useCallback((id: string, ref: HTMLElement | null) => {
     controlPanelRefs.current = { ...controlPanelRefs.current, [id]: ref };
   }, []);
-  console.log({ controlState });
+
   const controlsInOrder: Array<ControlsLayout['controls'][string] & { id: string }> =
     useMemo(() => {
       return Object.entries(controlState.controls)
@@ -86,7 +86,7 @@ export const ControlsRenderer = ({
   if (controlsInOrder.length === 0) {
     return null;
   }
-  console.log({ controlsInOrder });
+
   return (
     <DndContext
       onDragStart={({ active }) => {
