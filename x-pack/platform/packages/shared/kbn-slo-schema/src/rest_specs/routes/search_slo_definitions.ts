@@ -36,15 +36,17 @@ const searchSLODefinitionsParamsSchema = t.type({
 
 type SearchSLODefinitionsParams = t.TypeOf<typeof searchSLODefinitionsParamsSchema.props.query>;
 
+interface SearchSLODefinitionItem {
+  id: string;
+  name: string;
+  groupBy: string[];
+  remote?: { remoteName: string; kibanaUrl: string };
+}
+
 interface SearchSLODefinitionResponse {
-  results: Array<{
-    id: string;
-    name: string;
-    groupBy: string[];
-    remote?: { remoteName: string; kibanaUrl: string };
-  }>;
+  results: SearchSLODefinitionItem[];
   searchAfter?: string;
 }
 
 export { searchSLODefinitionsParamsSchema };
-export type { SearchSLODefinitionsParams, SearchSLODefinitionResponse };
+export type { SearchSLODefinitionsParams, SearchSLODefinitionResponse, SearchSLODefinitionItem };

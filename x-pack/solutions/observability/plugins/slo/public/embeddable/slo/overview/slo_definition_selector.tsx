@@ -10,11 +10,11 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import type { SearchSLODefinitionResponse } from '@kbn/slo-schema';
+import type { SearchSLODefinitionItem } from '@kbn/slo-schema';
 import { useFetchSloDefinitionsWithRemote } from '../../../hooks/use_fetch_slo_definitions_with_remote';
 
 interface Props {
-  onSelected: (slo: SearchSLODefinitionResponse | undefined) => void;
+  onSelected: (slo: SearchSLODefinitionItem | undefined) => void;
   hasError?: boolean;
   remoteName?: string;
 }

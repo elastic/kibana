@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import type { SLODefinitionResponse, SLODefinitionResponseWithRemote } from '@kbn/slo-schema';
+import type { SearchSLODefinitionItem } from '@kbn/slo-schema';
 import { SloDefinitionSelector } from './slo_definition_selector';
 import { SloInstanceSelector } from './slo_instance_selector';
 
@@ -57,7 +57,7 @@ interface GroupConfigurationProps {
 
 function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
   const [selectedSloDefinition, setSelectedSloDefinition] = useState<
-    SLODefinitionResponse | undefined
+    SearchSLODefinitionItem | undefined
   >();
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>(ALL_VALUE);
   const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
@@ -68,13 +68,8 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
       return false;
     }
     const groupBy = selectedSloDefinition.groupBy;
-    if (groupBy === ALL_VALUE) {
-      return false;
-    }
-    if (Array.isArray(groupBy)) {
-      return groupBy.length > 0 && !groupBy.includes(ALL_VALUE);
-    }
-    return groupBy !== ALL_VALUE;
+    // groupBy is always string[] in SearchSLODefinitionResponse
+    return groupBy.length > 0 && !groupBy.includes(ALL_VALUE);
   }, [selectedSloDefinition]);
 
   const onConfirmClick = () => {
@@ -87,10 +82,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
     const finalShowAllGroupByInstances =
       selectedInstanceId === ALL_VALUE ? true : showAllGroupByInstances;
 
-    const remoteName: string | undefined =
-      'remote' in selectedSloDefinition
-        ? (selectedSloDefinition as SLODefinitionResponseWithRemote).remote?.remoteName
-        : undefined;
+    const remoteName: string | undefined = selectedSloDefinition?.remote?.remoteName;
 
     onCreate({
       showAllGroupByInstances: finalShowAllGroupByInstances,
@@ -123,7 +115,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
               {hasGroupBy && selectedSloDefinition && (
                 <EuiFlexItem data-test-subj="singleSloInstanceSelector" grow>
                   <SloInstanceSelector
-                    remoteName={selectedSloDefinition?.remote?.remoteName}
+                    remoteName={selectedSloDefinition.remote?.remoteName}
                     sloId={selectedSloDefinition.id}
                     onSelected={(instanceId) => {
                       setSelectedInstanceId(instanceId);
