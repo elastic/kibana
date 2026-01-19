@@ -32,8 +32,5 @@ export class LogsTab extends AssetDetailsTab {
 
   public async filterTable(searchTerm: string) {
     await this.searchBar.pressSequentially(searchTerm);
-    await this.page.waitForResponse(
-      (resp) => resp.url().includes('/internal/search/ese') && resp.status() === 200
-    );
   }
 }

@@ -11,16 +11,14 @@ import {
   DATE_WITH_HOSTS_DATA,
   HOST1_NAME,
   LOG_LEVELS,
-  HOSTS_METADATA_FIELDS,
   EXTENDED_TIMEOUT,
+  HOSTS_METADATA_FIELD,
 } from '../../fixtures/constants';
 import type { MetricsTabQuickAccessItem } from '../../fixtures/page_objects/asset_details/metrics_tab';
 
 test.use({
   timezoneId: 'GMT',
 });
-
-const METADATA_FIELD = HOSTS_METADATA_FIELDS[1];
 
 test.describe(
   'Infrastructure Inventory - Host Asset Details Flyout',
@@ -196,23 +194,23 @@ test.describe(
       });
 
       await test.step('pin a metadata field row', async () => {
-        await assetDetailsPage.metadataTab.pinField(METADATA_FIELD);
-        const pinButtons = assetDetailsPage.metadataTab.getPinButtonsForField(METADATA_FIELD);
+        await assetDetailsPage.metadataTab.pinField(HOSTS_METADATA_FIELD);
+        const pinButtons = assetDetailsPage.metadataTab.getPinButtonsForField(HOSTS_METADATA_FIELD);
         await expect(pinButtons.pin).toBeHidden();
         await expect(pinButtons.unpin).toBeVisible();
       });
 
       await test.step('unpin a metadata field row', async () => {
-        await assetDetailsPage.metadataTab.unpinField(METADATA_FIELD);
-        const pinButtons = assetDetailsPage.metadataTab.getPinButtonsForField(METADATA_FIELD);
+        await assetDetailsPage.metadataTab.unpinField(HOSTS_METADATA_FIELD);
+        const pinButtons = assetDetailsPage.metadataTab.getPinButtonsForField(HOSTS_METADATA_FIELD);
         await expect(pinButtons.pin).toBeVisible();
         await expect(pinButtons.unpin).toBeHidden();
       });
 
       await test.step('filter fields via search bar', async () => {
-        await assetDetailsPage.metadataTab.filterField(METADATA_FIELD);
+        await assetDetailsPage.metadataTab.filterField(HOSTS_METADATA_FIELD);
         await expect(assetDetailsPage.metadataTab.tableRows).toHaveCount(1);
-        const row = assetDetailsPage.metadataTab.getRowForField(METADATA_FIELD);
+        const row = assetDetailsPage.metadataTab.getRowForField(HOSTS_METADATA_FIELD);
         await expect(row).toBeVisible();
       });
     });
@@ -337,7 +335,13 @@ test.describe(
       });
 
       await test.step('filter logs via search bar and open the query in discover', async () => {
+        const totalDocumentsText =
+          await assetDetailsPage.logsTag.tableTotalDocumentsLabel.textContent();
+
         await assetDetailsPage.logsTag.filterTable(`"${LOG_LEVELS[0].message}"`);
+        await expect(assetDetailsPage.logsTag.tableTotalDocumentsLabel).not.toHaveText(
+          totalDocumentsText!
+        );
 
         const discoverQuery = `(host.name: ${HOST1_NAME}) and ("${LOG_LEVELS[0].message}")`;
 

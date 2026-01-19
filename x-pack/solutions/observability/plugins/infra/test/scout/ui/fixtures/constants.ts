@@ -16,7 +16,7 @@ export const HOST4_NAME = 'host-4';
 export const HOST5_NAME = 'host-5';
 export const HOST6_NAME = 'host-6';
 
-export const HOSTS_METADATA_FIELDS = ['host.name', 'agent.name.text'];
+export const HOSTS_METADATA_FIELD = 'host.name';
 
 export const LOG_LEVELS = [
   { message: 'A simple log', level: 'info' },
@@ -92,16 +92,7 @@ export const CONTAINER_NAMES = Array.from(
   (_, i) => `container-cont-${i}`
 );
 
-export const CONTAINER_METADATA_FIELDS = [
-  'host.name',
-  'container.runtime',
-  'container.name',
-  'container.image.name',
-  'container.id',
-  'cloud.image.id',
-  'cloud.instance.id',
-  'cloud.provider',
-];
+export const CONTAINER_METADATA_FIELD = 'container.id';
 
 export const DATE_WITH_POD_DATA_FROM = '2023-04-01T18:20:00.000Z';
 export const DATE_WITH_POD_DATA_TO = '2023-04-01T18:21:00.000Z';

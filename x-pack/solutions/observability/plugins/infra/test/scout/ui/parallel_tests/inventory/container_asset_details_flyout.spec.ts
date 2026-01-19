@@ -10,7 +10,7 @@ import { test } from '../../fixtures';
 import {
   CONTAINER_COUNT,
   CONTAINER_IDS,
-  CONTAINER_METADATA_FIELDS,
+  CONTAINER_METADATA_FIELD,
   CONTAINER_NAMES,
   DATE_WITH_DOCKER_DATA,
   EXTENDED_TIMEOUT,
@@ -21,8 +21,6 @@ import type { MetricsTabQuickAccessItem } from '../../fixtures/page_objects/asse
 test.use({
   timezoneId: 'GMT',
 });
-
-const METADATA_FIELD = CONTAINER_METADATA_FIELDS[1];
 
 const CONTAINER_NAME = CONTAINER_NAMES[CONTAINER_COUNT - 1];
 const CONTAINER_ID = CONTAINER_IDS[CONTAINER_COUNT - 1];
@@ -180,23 +178,25 @@ test.describe(
       });
 
       await test.step('pin a metadata field row', async () => {
-        await assetDetailsPage.metadataTab.pinField(METADATA_FIELD);
-        const pinButtons = assetDetailsPage.metadataTab.getPinButtonsForField(METADATA_FIELD);
+        await assetDetailsPage.metadataTab.pinField(CONTAINER_METADATA_FIELD);
+        const pinButtons =
+          assetDetailsPage.metadataTab.getPinButtonsForField(CONTAINER_METADATA_FIELD);
         await expect(pinButtons.pin).toBeHidden();
         await expect(pinButtons.unpin).toBeVisible();
       });
 
       await test.step('unpin a metadata field row', async () => {
-        await assetDetailsPage.metadataTab.unpinField(METADATA_FIELD);
-        const pinButtons = assetDetailsPage.metadataTab.getPinButtonsForField(METADATA_FIELD);
+        await assetDetailsPage.metadataTab.unpinField(CONTAINER_METADATA_FIELD);
+        const pinButtons =
+          assetDetailsPage.metadataTab.getPinButtonsForField(CONTAINER_METADATA_FIELD);
         await expect(pinButtons.pin).toBeVisible();
         await expect(pinButtons.unpin).toBeHidden();
       });
 
       await test.step('filter fields via search bar', async () => {
-        await assetDetailsPage.metadataTab.filterField(METADATA_FIELD);
+        await assetDetailsPage.metadataTab.filterField(CONTAINER_METADATA_FIELD);
         await expect(assetDetailsPage.metadataTab.tableRows).toHaveCount(1);
-        const row = assetDetailsPage.metadataTab.getRowForField(METADATA_FIELD);
+        const row = assetDetailsPage.metadataTab.getRowForField(CONTAINER_METADATA_FIELD);
         await expect(row).toBeVisible();
       });
     });
@@ -324,7 +324,13 @@ test.describe(
       });
 
       await test.step('filter logs via search bar and open the query in discover', async () => {
+        const totalDocumentsText =
+          await assetDetailsPage.logsTag.tableTotalDocumentsLabel.textContent();
+
         await assetDetailsPage.logsTag.filterTable(`"${LOG_LEVELS[0].message}"`);
+        await expect(assetDetailsPage.logsTag.tableTotalDocumentsLabel).not.toHaveText(
+          totalDocumentsText!
+        );
 
         const discoverQuery = `(container.id: ${CONTAINER_ID}) and ("${LOG_LEVELS[0].message}")`;
 
