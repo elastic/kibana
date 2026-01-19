@@ -48,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
     ?.includes('endpointExceptionsMovedUnderManagement');
 
+  // @skipInServerless: due to the fact that the serverless builtin roles are not yet updated with new privilege
   //                    and tests below are currently creating a new role/user
   describe('@ess @serverless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
