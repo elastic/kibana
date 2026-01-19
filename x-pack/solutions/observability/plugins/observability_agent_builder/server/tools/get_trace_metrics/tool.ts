@@ -38,12 +38,12 @@ const getTraceMetricsSchema = z.object({
     ),
   latencyType: z
     .enum(['avg', 'p95', 'p99'])
-    .describe('Aggregation type for latency change points analysis. default is avg.')
-    .optional(),
+    .describe('Aggregation type for latency change points analysis.')
+    .default('avg'),
   sortBy: z
     .enum(['latency', 'throughput', 'failureRate'])
-    .describe('Metric to sort the results by. Default is latency.')
-    .optional(),
+    .describe('Metric to sort the results by.')
+    .default('latency'),
 });
 
 export function createGetTraceMetricsTool({
