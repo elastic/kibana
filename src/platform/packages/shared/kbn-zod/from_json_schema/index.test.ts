@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, fromJSONSchema } from '../v4';
+import { z } from '../v4';
+import { fromJSONSchema } from '.';
 import type { ZodType, ZodDiscriminatedUnion } from 'zod/v4';
 
 const getMeta = (schema: ZodType) => {

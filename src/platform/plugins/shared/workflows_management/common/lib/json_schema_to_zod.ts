@@ -8,7 +8,8 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { fromJSONSchema, z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
 /**
  * Recursively converts a JSON Schema to a Zod schema

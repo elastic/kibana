@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { z } from 'zod/v4';
-
-export * from 'zod/v4';
+// Re-export fromJSONSchema from the actual implementation
+// This separate entry point ensures webpack only bundles the polyfill when explicitly imported
+export { fromJSONSchema } from '../from_json_schema';
+export type { JsonSchema } from '../from_json_schema';
