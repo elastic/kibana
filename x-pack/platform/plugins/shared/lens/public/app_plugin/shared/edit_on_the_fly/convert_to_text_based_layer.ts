@@ -14,6 +14,7 @@ import type {
   TextBasedPrivateState,
   TypedLensSerializedState,
   DatasourceStates,
+  ValueFormatConfig,
 } from '@kbn/lens-common';
 
 import type { ConvertibleLayer, EsqlConversionData } from './convert_to_esql_modal';
@@ -82,23 +83,34 @@ function buildTextBasedState(
 
     // Build new text-based columns from esAggsIdMap
     // Keep original column IDs so visualizations can still reference them
+    // sourceColumn from esAggsIdMap already has properly computed label (via getDefaultLabel) and format
     const newColumns: TextBasedLayerColumn[] = Object.entries(conversionResult.esAggsIdMap).map(
       ([esqlFieldName, originalColumns]) => {
         const sourceColumn = originalColumns[0];
-        // Get the original column from the layer to access dataType and label
-        const originalLayerColumn = layer.columns[sourceColumn.id];
         // Map Lens DataType to DatatableColumnType
-        const dataType = originalLayerColumn?.dataType ?? 'string';
+        const dataType = sourceColumn.dataType ?? 'string';
         const metaType = dataType === 'document' ? 'string' : dataType;
 
-        return {
+        const column: TextBasedLayerColumn = {
           columnId: sourceColumn.id,
           fieldName: esqlFieldName,
-          label: originalLayerColumn?.label ?? esqlFieldName,
+          label: sourceColumn.label ?? esqlFieldName,
           meta: {
             type: metaType as TextBasedLayerColumn['meta'] extends { type: infer T } ? T : never,
           },
         };
+
+        // Only include customLabel if it's explicitly set to true
+        if (sourceColumn.customLabel) {
+          column.customLabel = sourceColumn.customLabel;
+        }
+
+        // Only include params if format has a valid id
+        if (sourceColumn.format?.id !== undefined) {
+          column.params = { format: sourceColumn.format as ValueFormatConfig };
+        }
+
+        return column;
       }
     );
 

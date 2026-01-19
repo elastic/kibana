@@ -121,6 +121,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
               label: 'Count of records',
               operationType: 'count',
               sourceField: '___records___',
+              dataType: 'number',
               interval: undefined as never,
             },
           ],
@@ -130,6 +131,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
               label: '@timestamp',
               operationType: 'date_histogram',
               sourceField: '@timestamp',
+              dataType: 'date',
               interval: 1800000, // 30 minutes in ms
             },
           ],
@@ -391,6 +393,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
                 label: 'Count of records',
                 operationType: 'count',
                 sourceField: '___records___',
+                dataType: 'number',
                 interval: undefined as never,
               },
             ],
@@ -400,6 +403,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
                 label: '@timestamp',
                 operationType: 'date_histogram',
                 sourceField: '@timestamp',
+                dataType: 'date',
                 interval: 3600000, // 1 hour in ms
               },
             ],
@@ -493,5 +497,253 @@ describe('convertFormBasedToTextBasedLayer', () => {
     const textBasedState = result?.state.datasourceStates.textBased;
     const columns = textBasedState?.layers[layerId]?.columns;
     expect(columns?.map((c) => c.columnId)).toEqual(['col2', 'col1']);
+  });
+
+  it('preserves custom labels from esAggsIdMap', () => {
+    const framePublicAPI = createMockFramePublicAPI({
+      dataViews: {
+        indexPatterns: { 'test-index-pattern': mockIndexPattern },
+        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
+      },
+      dateRange: {
+        fromDate: '2024-01-01T00:00:00.000Z',
+        toDate: '2024-01-02T00:00:00.000Z',
+      },
+    });
+
+    const layersWithCustomLabels: ConvertibleLayer[] = [
+      {
+        id: layerId,
+        icon: 'layers',
+        name: '',
+        type: 'data',
+        query: 'FROM test-index | STATS my_count = COUNT(*)',
+        isConvertibleToEsql: true,
+        conversionData: {
+          esAggsIdMap: {
+            my_count: [
+              {
+                id: 'col2',
+                label: 'My Custom Label',
+                customLabel: true,
+                operationType: 'count',
+                sourceField: '___records___',
+                dataType: 'number',
+                interval: undefined as never,
+              },
+            ],
+          },
+          partialRows: false,
+        },
+      },
+    ];
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: layersWithCustomLabels,
+      attributes: mockAttributes,
+      visualizationState: mockVisualizationState,
+      datasourceStates: mockDatasourceStates,
+      framePublicAPI,
+    });
+
+    const textBasedState = result?.state.datasourceStates.textBased;
+    const columns = textBasedState?.layers[layerId]?.columns;
+
+    expect(columns).toEqual([
+      {
+        columnId: 'col2',
+        fieldName: 'my_count',
+        label: 'My Custom Label',
+        customLabel: true,
+        meta: { type: 'number' },
+      },
+    ]);
+  });
+
+  it('preserves format configuration from esAggsIdMap', () => {
+    const framePublicAPI = createMockFramePublicAPI({
+      dataViews: {
+        indexPatterns: { 'test-index-pattern': mockIndexPattern },
+        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
+      },
+      dateRange: {
+        fromDate: '2024-01-01T00:00:00.000Z',
+        toDate: '2024-01-02T00:00:00.000Z',
+      },
+    });
+
+    const layersWithFormat: ConvertibleLayer[] = [
+      {
+        id: layerId,
+        icon: 'layers',
+        name: '',
+        type: 'data',
+        query: 'FROM test-index | STATS total_bytes = SUM(bytes)',
+        isConvertibleToEsql: true,
+        conversionData: {
+          esAggsIdMap: {
+            total_bytes: [
+              {
+                id: 'col2',
+                label: 'Total Bytes',
+                operationType: 'sum',
+                sourceField: 'bytes',
+                dataType: 'number',
+                format: { id: 'bytes', params: { decimals: 2 } },
+                interval: undefined as never,
+              },
+            ],
+          },
+          partialRows: false,
+        },
+      },
+    ];
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: layersWithFormat,
+      attributes: mockAttributes,
+      visualizationState: mockVisualizationState,
+      datasourceStates: mockDatasourceStates,
+      framePublicAPI,
+    });
+
+    const textBasedState = result?.state.datasourceStates.textBased;
+    const columns = textBasedState?.layers[layerId]?.columns;
+
+    expect(columns).toEqual([
+      {
+        columnId: 'col2',
+        fieldName: 'total_bytes',
+        label: 'Total Bytes',
+        params: { format: { id: 'bytes', params: { decimals: 2 } } },
+        meta: { type: 'number' },
+      },
+    ]);
+  });
+
+  it('preserves both custom label and format together', () => {
+    const framePublicAPI = createMockFramePublicAPI({
+      dataViews: {
+        indexPatterns: { 'test-index-pattern': mockIndexPattern },
+        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
+      },
+      dateRange: {
+        fromDate: '2024-01-01T00:00:00.000Z',
+        toDate: '2024-01-02T00:00:00.000Z',
+      },
+    });
+
+    const layersWithLabelAndFormat: ConvertibleLayer[] = [
+      {
+        id: layerId,
+        icon: 'layers',
+        name: '',
+        type: 'data',
+        query: 'FROM test-index | STATS total_bytes = SUM(bytes)',
+        isConvertibleToEsql: true,
+        conversionData: {
+          esAggsIdMap: {
+            total_bytes: [
+              {
+                id: 'col2',
+                label: 'Network Traffic (GB)',
+                customLabel: true,
+                operationType: 'sum',
+                sourceField: 'bytes',
+                dataType: 'number',
+                format: { id: 'bytes', params: { decimals: 1 } },
+                interval: undefined as never,
+              },
+            ],
+          },
+          partialRows: false,
+        },
+      },
+    ];
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: layersWithLabelAndFormat,
+      attributes: mockAttributes,
+      visualizationState: mockVisualizationState,
+      datasourceStates: mockDatasourceStates,
+      framePublicAPI,
+    });
+
+    const textBasedState = result?.state.datasourceStates.textBased;
+    const columns = textBasedState?.layers[layerId]?.columns;
+
+    expect(columns).toEqual([
+      {
+        columnId: 'col2',
+        fieldName: 'total_bytes',
+        label: 'Network Traffic (GB)',
+        customLabel: true,
+        params: { format: { id: 'bytes', params: { decimals: 1 } } },
+        meta: { type: 'number' },
+      },
+    ]);
+  });
+
+  it('does not include params when format is not defined', () => {
+    const framePublicAPI = createMockFramePublicAPI({
+      dataViews: {
+        indexPatterns: { 'test-index-pattern': mockIndexPattern },
+        indexPatternRefs: [{ id: 'test-index-pattern', title: 'test-index', name: 'test-index' }],
+      },
+      dateRange: {
+        fromDate: '2024-01-01T00:00:00.000Z',
+        toDate: '2024-01-02T00:00:00.000Z',
+      },
+    });
+
+    const layersWithoutFormat: ConvertibleLayer[] = [
+      {
+        id: layerId,
+        icon: 'layers',
+        name: '',
+        type: 'data',
+        query: 'FROM test-index | STATS my_count = COUNT(*)',
+        isConvertibleToEsql: true,
+        conversionData: {
+          esAggsIdMap: {
+            my_count: [
+              {
+                id: 'col2',
+                label: 'Count',
+                operationType: 'count',
+                sourceField: '___records___',
+                dataType: 'number',
+                // No format defined
+                interval: undefined as never,
+              },
+            ],
+          },
+          partialRows: false,
+        },
+      },
+    ];
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: layersWithoutFormat,
+      attributes: mockAttributes,
+      visualizationState: mockVisualizationState,
+      datasourceStates: mockDatasourceStates,
+      framePublicAPI,
+    });
+
+    const textBasedState = result?.state.datasourceStates.textBased;
+    const columns = textBasedState?.layers[layerId]?.columns;
+
+    // params should not be present when format is undefined
+    expect(columns).toEqual([
+      {
+        columnId: 'col2',
+        fieldName: 'my_count',
+        label: 'Count',
+        meta: { type: 'number' },
+      },
+    ]);
+    expect(columns?.[0]).not.toHaveProperty('params');
+    expect(columns?.[0]).not.toHaveProperty('customLabel');
   });
 });
