@@ -16,9 +16,9 @@ export function registerSampleData(home: HomeServerPluginSetup, logger: Logger) 
   });
   const { addAppLinksToSampleDataset } = home.sampleData;
   const sampleDataSetsId = ['ecommerce', 'flights', 'logs', 'logstsdb'];
-  sampleDataSetsId.forEach((item) => {
+  sampleDataSetsId.forEach((dataSetId) => {
     try {
-      addAppLinksToSampleDataset(item, [
+      addAppLinksToSampleDataset(dataSetId, [
         {
           sampleObject: null,
           getPath: () => AGENTBUILDER_PATH,
@@ -27,7 +27,7 @@ export function registerSampleData(home: HomeServerPluginSetup, logger: Logger) 
         },
       ]);
     } catch (error) {
-      logger.warn(`Agent builder failed to register sample data links for ${item}`);
+      logger.warn(`Agent builder failed to register sample data links for ${dataSetId}`);
     }
   });
 }
