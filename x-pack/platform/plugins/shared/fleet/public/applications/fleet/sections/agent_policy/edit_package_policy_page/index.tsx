@@ -47,6 +47,8 @@ import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
+import type { VarGroupSelection } from '../create_package_policy_page/components/steps/components';
+import { computeDefaultVarGroupSelections } from '../create_package_policy_page/components/steps/components';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
@@ -146,6 +148,14 @@ export const EditPackagePolicyForm = memo<{
         : false,
     [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
   );
+
+  // Derive var_group_selections from policy for edit mode
+  const varGroupSelections = useMemo((): VarGroupSelection => {
+    if (packagePolicy.var_group_selections) {
+      return packagePolicy.var_group_selections;
+    }
+    return computeDefaultVarGroupSelections(packageInfo?.var_groups, hasAgentlessAgentPolicy);
+  }, [packagePolicy.var_group_selections, packageInfo?.var_groups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -436,6 +446,7 @@ export const EditPackagePolicyForm = memo<{
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
+              isAgentlessSelected={hasAgentlessAgentPolicy}
             />
           )}
 
@@ -448,6 +459,8 @@ export const EditPackagePolicyForm = memo<{
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
+              isAgentlessSelected={hasAgentlessAgentPolicy}
+              varGroupSelections={varGroupSelections}
             />
           )}
 
@@ -476,15 +489,17 @@ export const EditPackagePolicyForm = memo<{
     [
       agentPolicies,
       packageInfo,
+      selectedTab,
       packagePolicy,
       updatePackagePolicy,
       validationResults,
       formState,
-      originalPackagePolicy,
+      hasAgentlessAgentPolicy,
       extensionView,
-      handleExtensionViewOnChange,
-      selectedTab,
+      varGroupSelections,
+      originalPackagePolicy,
       tabsViews,
+      handleExtensionViewOnChange,
     ]
   );
 

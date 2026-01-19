@@ -429,6 +429,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         package: pkg ?? packagePolicy.package,
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
+        var_group_selections: restOfBody.var_group_selections ?? packagePolicy.var_group_selections,
         supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
         supports_cloud_connector:
           restOfBody.supports_cloud_connector ?? packagePolicy.supports_cloud_connector,

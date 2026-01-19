@@ -300,6 +300,7 @@ describe('When calling package policy', () => {
           type: 'text',
         },
       },
+      var_group_selections: { auth_method: 'api_key' },
     };
 
     beforeEach(() => {
@@ -396,6 +397,19 @@ describe('When calling package policy', () => {
       await routeHandler(context, request, response);
       expect(response.ok).toHaveBeenCalledWith({
         body: { item: { ...existingPolicy, namespace: 'namespace' } },
+      });
+    });
+
+    it('should update var_group_selections when provided', async () => {
+      const newData = {
+        var_group_selections: { auth_method: 'oauth' },
+      };
+      const request = getUpdateKibanaRequest(newData as any);
+
+      await routeHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: { ...existingPolicy, ...newData } },
       });
     });
 
