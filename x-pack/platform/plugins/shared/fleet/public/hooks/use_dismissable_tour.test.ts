@@ -42,7 +42,7 @@ describe('useDismissableTour', () => {
   });
 
   it('should not display the tour if tours are disabled', () => {
-    jest.mocked(startServices.notifications.tours.areEnabled).mockReturnValue(false);
+    jest.mocked(startServices.notifications.tours.isEnabled).mockReturnValue(false);
     const res = renderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
 
     expect(res.result.current.isHidden).toBe(true);

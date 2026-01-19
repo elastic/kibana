@@ -76,12 +76,12 @@ export const RuleFeatureTour: FC = () => {
     storage.set(TOUR_STORAGE_KEY, { isTourActive, currentTourStep });
   }, [tourState, storage]);
 
-  const areToursEnabled = notifications.tours.areEnabled();
+  const isTourEnabled = notifications.tours.isEnabled();
   const isTourAnchorMounted = useIsElementMounted(CREATE_NEW_RULE_TOUR_ANCHOR);
   const canEditRules = useUserPrivileges().rulesPrivileges.edit;
   // Display the tour only if the user has permissions to create/edit rules,
   // otherwise they could not follow the tour steps
-  const shouldShowRuleUpgradeTour = areToursEnabled && isTourAnchorMounted && canEditRules;
+  const shouldShowRuleUpgradeTour = isTourEnabled && isTourAnchorMounted && canEditRules;
 
   const enhancedSteps = useMemo(
     () =>

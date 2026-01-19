@@ -19,11 +19,11 @@ describe('ToursService', () => {
       const toursStart = service.start({ settings: mockSettings });
 
       expect(toursStart).toBeDefined();
-      expect(toursStart.areEnabled).toBeDefined();
+      expect(toursStart.isEnabled).toBeDefined();
     });
   });
 
-  describe('areEnabled()', () => {
+  describe('isEnabled()', () => {
     it.each`
       globalSetting | namespaceSetting | expectedResult | description
       ${false}      | ${false}         | ${true}        | ${'both settings are false'}
@@ -41,7 +41,7 @@ describe('ToursService', () => {
 
         const toursStart = service.start({ settings: mockSettings });
 
-        expect(toursStart.areEnabled()).toBe(expectedResult);
+        expect(toursStart.isEnabled()).toBe(expectedResult);
         expect(mockSettings.globalClient.get).toHaveBeenCalledWith('hideAnnouncements', false);
         expect(mockSettings.client.get).toHaveBeenCalledWith('hideAnnouncements', false);
       }

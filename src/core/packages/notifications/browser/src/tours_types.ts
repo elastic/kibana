@@ -15,5 +15,5 @@ export interface ToursStart {
   /**
    * Returns whether guided tours are allowed to be shown.
    */
-  areEnabled(): boolean;
+  isEnabled(): boolean;
 }

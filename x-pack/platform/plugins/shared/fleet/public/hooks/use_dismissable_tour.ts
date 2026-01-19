@@ -23,7 +23,7 @@ export function useDismissableTour(tourKey: TourKey, enabled: boolean = true) {
   const { activeTour, setActiveTour } = useTourManager();
 
   const defaultValue =
-    !notifications.tours.areEnabled() ||
+    !notifications.tours.isEnabled() ||
     (storage.get(TOUR_STORAGE_KEYS[tourKey]) as TourConfig | undefined)?.active === false;
 
   const [isHidden, setIsHidden] = React.useState(defaultValue);

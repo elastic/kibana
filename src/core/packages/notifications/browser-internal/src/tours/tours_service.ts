@@ -21,7 +21,7 @@ export class ToursService {
     this.settings = settings;
 
     return {
-      areEnabled: () => {
+      isEnabled: () => {
         const isEnabledGlobally = !this.settings?.globalClient.get<boolean>(
           'hideAnnouncements',
           false

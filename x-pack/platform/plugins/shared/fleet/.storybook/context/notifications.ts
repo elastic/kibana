@@ -31,7 +31,7 @@ const notifications: NotificationsStart = {
     isEnabled: () => true,
   },
   tours: {
-    areEnabled: () => true,
+    isEnabled: () => true,
   },
 };
 

@@ -11,7 +11,7 @@ import type { ToursStart } from '@kbn/core-notifications-browser';
 
 const createStartContract = (): jest.Mocked<ToursStart> => {
   return {
-    areEnabled: jest.fn().mockReturnValue(true),
+    isEnabled: jest.fn().mockReturnValue(true),
   };
 };
 

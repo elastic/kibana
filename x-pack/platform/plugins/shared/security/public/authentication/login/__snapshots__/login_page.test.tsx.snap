@@ -200,7 +200,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
         "remove": [MockFunction],
       },
       "tours": Object {
-        "areEnabled": [MockFunction],
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -245,7 +245,7 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
         "remove": [MockFunction],
       },
       "tours": Object {
-        "areEnabled": [MockFunction],
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -291,7 +291,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
         "remove": [MockFunction],
       },
       "tours": Object {
-        "areEnabled": [MockFunction],
+        "isEnabled": [MockFunction],
       },
     }
   }
