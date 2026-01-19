@@ -29,19 +29,20 @@ const RestorableStateDocViewBase: React.FC<{
           By wrapping your custom <code>DocViewer</code> with <code>withRestorableState</code> and
           using <code>useRestorableState</code>, you can easily add restorable state to your
           component. State is coupled to the specific tab and will be restored when navigating away
-          and back to the tab as long as you don&apos;t close the flyout or change the document.
+          and back to the tab as long as you don&apos;t close the flyout or change the displayed
+          document.
         </EuiCallOut>
       </EuiFlexItem>
       <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem grow={false}>
-          <div>Count: {clickCount}</div>
+          <div data-test-subj="example-restorable-state-doc-view-count">Count: {clickCount}</div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             color="text"
             size="s"
             onClick={onIncrement}
-            data-test-subj="exampleRestorableStateDocViewIncrement"
+            data-test-subj="example-restorable-state-doc-view-increment-button"
           >
             Increment
           </EuiButton>
