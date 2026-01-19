@@ -21,7 +21,10 @@ const useFetchSloInstancesMock = useFetchSloInstances as jest.MockedFunction<
 
 const createHookResponse = (instances: string[] = []) => ({
   data: {
-    results: instances.map((instanceId) => ({ instanceId })),
+    results: instances.map((instanceId) => ({
+      instanceId,
+      groupings: {},
+    })),
   },
   isLoading: false,
   isInitialLoading: false,
