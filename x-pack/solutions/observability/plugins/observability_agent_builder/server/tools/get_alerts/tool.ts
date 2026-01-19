@@ -65,7 +65,7 @@ const getAlertsSchema = z.object({
   includeRecovered: z
     .boolean()
     .default(false)
-    .describe('Set to true to include recovered/closed alerts alongside active ones.'),
+    .describe('Whether to include recovered/closed alerts alongside active ones.'),
   fields: z
     .array(z.string())
     .optional()
