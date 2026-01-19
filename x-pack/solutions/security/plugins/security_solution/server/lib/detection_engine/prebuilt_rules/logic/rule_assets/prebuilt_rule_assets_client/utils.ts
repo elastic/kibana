@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
+import { chunk } from 'lodash';
 import type { ESFilter } from '@kbn/es-types';
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -72,4 +74,55 @@ export function getPrebuiltRuleAssetsSearchNamespace(
 
 export function getPrebuiltRuleAssetSoId(ruleId: string, version: number): string {
   return `${PREBUILT_RULE_ASSETS_SO_TYPE}:${ruleId}_${version}`;
+}
+
+/**
+ * Creates an array of KQL filter strings for a collection of items.
+ * Uses chunking to ensure that the number of filter clauses does not exceed the ES "too_many_clauses" limit.
+ * See: https://github.com/elastic/kibana/pull/223240
+ *
+ * @param {object} options
+ * @param {T[]} options.items - Array of items to create filters for.
+ * @param {(item: T) => string} options.mapperFn - A function that maps an item to a filter string.
+ * @param {number} options.clausesPerItem - Number of Elasticsearch clauses generated per item. Determined empirically by converting a KQL filter into a Query DSL query.
+ * More complex filters will result in more clauses. Info about clauses in docs: https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl#query-dsl
+ * @returns {string[]} An array of filter strings
+ */
+export function createChunkedFilters<T>({
+  items,
+  mapperFn,
+  clausesPerItem,
+}: {
+  items: T[];
+  mapperFn: (item: T) => string;
+  clausesPerItem: number;
+}): string[] {
+  return chunk(items, ES_MAX_CLAUSE_COUNT / clausesPerItem).map((singleChunk) =>
+    singleChunk.map(mapperFn).join(' OR ')
+  );
+}
+
+export const RULE_ASSET_ATTRIBUTES = `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes`;
+const ES_MAX_CLAUSE_COUNT = 1024;
+const ES_MAX_CONCURRENT_REQUESTS = 2;
+
+/**
+ * Fetches objects using a provided function.
+ * If filters are provided fetches concurrently in chunks.
+ *
+ * @param {(filter?: string) => Promise<T[]>} chunkFetchFn - Function that fetches a chunk.
+ * @param {string[]} [filters] - An optional array of filter strings. If provided, `chunkFetchFn` will be called for each filter concurrently.
+ * @returns {Promise<T[]>} A promise that resolves to an array of fetched objects.
+ */
+export function chunkedFetch<T>(
+  chunkFetchFn: (filter?: string) => Promise<T[]>,
+  filters?: string[]
+): Promise<T[]> {
+  if (filters?.length) {
+    return pMap(filters, chunkFetchFn, {
+      concurrency: ES_MAX_CONCURRENT_REQUESTS,
+    }).then((results) => results.flat());
+  }
+
+  return chunkFetchFn();
 }
