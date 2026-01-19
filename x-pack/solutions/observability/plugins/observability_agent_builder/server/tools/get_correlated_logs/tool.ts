@@ -44,7 +44,7 @@ const getCorrelatedLogsSchema = z.object({
     .boolean()
     .default(true)
     .describe(
-      'When true, only sequences containing on error logs (ERROR, WARN, FATAL, HTTP 5xx) are returned. Set to false to return any sequence. You can use `kqlFilter` to apply another filter (e.g., slow requests).'
+      'When true, only sequences containing error logs (ERROR, WARN, FATAL, HTTP 5xx) are returned. Set to false to return any sequence. You can use `kqlFilter` to apply another filter (e.g., slow requests).'
     ),
   correlationFields: z
     .array(z.string())
