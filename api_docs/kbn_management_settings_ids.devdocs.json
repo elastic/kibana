@@ -398,13 +398,13 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.DATA_CONNECTORS_ENABLED_SETTING_ID",
+        "id": "def-common.DATA_SOURCES_ENABLED_SETTING_ID",
         "type": "string",
         "tags": [],
-        "label": "DATA_CONNECTORS_ENABLED_SETTING_ID",
+        "label": "DATA_SOURCES_ENABLED_SETTING_ID",
         "description": [],
         "signature": [
-          "\"dataConnectors:enabled\""
+          "\"dataSources:enabled\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "lineNumber": 78,
