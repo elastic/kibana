@@ -395,7 +395,7 @@ export const QualityTab: React.FC = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <div style={{ border: '1px solid #D3DAE6', padding: '16px', borderRadius: '4px' }}>
+      <div style={{ border: '1px solid #D3DAE6', padding: '16px 0', borderRadius: '4px' }}>
         {filteredCategories.map((category, index) => {
           const stats = getCategoryStats(category);
           const statusConfig = STATUS_BADGE_CONFIG[stats.status];
@@ -403,15 +403,12 @@ export const QualityTab: React.FC = () => {
           return (
             <React.Fragment key={category.category}>
               <EuiAccordion
+                style={{ padding: '0 16px' }}
                 id={`accordion-${category.category}`}
                 buttonContent={
-                  <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="m">
-                        <strong>{category.category}</strong>
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiText size="m">
+                    <strong>{category.category}</strong>
+                  </EuiText>
                 }
                 extraAction={
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -498,7 +495,7 @@ export const QualityTab: React.FC = () => {
                     tableLayout="auto"
                   />
                 </div>
-              </EuiAccordion>{' '}
+              </EuiAccordion>
               {index < mainCategories.length - 1 && <EuiHorizontalRule margin="m" />}
             </React.Fragment>
           );
