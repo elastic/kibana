@@ -40,7 +40,7 @@ export function validateOption(
       continue;
     }
     if (isColumn(arg)) {
-      messages.push(...validateColumnForCommand(arg, command.name, context));
+      messages.push(...validateColumnForCommand(arg, command.name, context, ast));
     } else if (isFunctionExpression(arg)) {
       messages.push(
         ...validateFunction({
