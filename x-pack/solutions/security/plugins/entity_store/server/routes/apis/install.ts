@@ -11,7 +11,7 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { EntityType, ALL_ENTITY_TYPES } from '../../domain/definitions/registry';
+import { EntityType, ALL_ENTITY_TYPES } from '../../domain/definitions/entity_schema';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
@@ -46,7 +46,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
         const { entityTypes, logExtractionFrequency } = req.body;
         logger.debug('Install api called');
 
-        await assetManager.install(entityTypes, logExtractionFrequency);
+        await Promise.all(entityTypes.map((type) => assetManager.init(type)));
 
         return res.ok({
           body: {

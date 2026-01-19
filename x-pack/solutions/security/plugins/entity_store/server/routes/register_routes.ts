@@ -7,7 +7,7 @@
 
 import { registerInstall, registerStop } from './apis';
 import type { EntityStorePluginRouter } from '../types';
-import { registerUninstall } from './uninstall';
+import { registerUninstall } from './apis/uninstall';
 
 export function registerRoutes(router: EntityStorePluginRouter) {
   registerInstall(router);

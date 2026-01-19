@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { EntityType } from './registry';
+
+export type EntityType = z.infer<typeof EntityType>;
+export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
+
+export const ALL_ENTITY_TYPES = Object.values(EntityType.Values);
 
 const retentionOperationSchema = z.discriminatedUnion('operation', [
   z.object({ operation: z.literal('collect_values'), maxLength: z.number() }),
@@ -14,37 +18,30 @@ const retentionOperationSchema = z.discriminatedUnion('operation', [
   z.object({ operation: z.literal('prefer_oldest_value') }),
 ]);
 
-const fieldSchema = z
-  .object({
-    allowAPIUpdate: z.optional(z.boolean()),
-    mapping: z.any(),
-    source: z.string(),
-    destination: z.optional(z.string()),
-    retention: retentionOperationSchema,
-  })
-  .refine((v) => ({
-    ...v,
-    destination: v.destination ?? v.source,
-  }));
+const retentionFieldSchema = z.object({
+  allowAPIUpdate: z.optional(z.boolean()),
+  mapping: z.any(),
+  source: z.string(),
+  destination: z.optional(z.string()),
+  retention: retentionOperationSchema,
+});
 
 const identityFieldSchema = z.object({
   field: z.string(),
   mapping: z.any(), // !!
 });
 
-export const baseEntitySchema = z.object({
+export const entitySchema = z.object({
   id: z.string(),
   name: z.string(),
   type: z.string(),
   filter: z.string().optional(),
-  fields: z.array(fieldSchema),
+  fields: z.array(retentionFieldSchema),
   identityFields: z.array(identityFieldSchema),
   indexPatterns: z.array(z.string()),
 });
 
-export const managedEntitySchema = baseEntitySchema.extend({ type: EntityType });
-
-export type EntityDefinition = z.infer<typeof baseEntitySchema>; // any entity definition
-export type EntityDescription = Omit<EntityDefinition, 'id'>; // entity definition without id
-export type ManagedEntity = z.infer<typeof managedEntitySchema>; // entity definition with id and a known type
-export type FieldDescription = z.infer<typeof fieldSchema>;
+export type EntityRetentionField = z.infer<typeof retentionFieldSchema>; // entity field for retention operations
+export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
+export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
+export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient as EsClient } from '@kbn/core/server';
 import type {
   IndicesPutIndexTemplateRequest,
   IndexName,
@@ -13,29 +13,22 @@ import type {
   ClusterPutComponentTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
-type WithClient<T = {}> = { esClient: ElasticsearchClient } & T;
-type WithIndex = WithClient<{ index: IndexName }>;
-type WithName = WithClient<{ name: Names }>;
+export const createIndex = (esClient: EsClient, index: IndexName) =>
+  esClient.indices.create({ index });
 
-export const createIndex = ({ esClient, index }: WithIndex) => esClient.indices.create({ index });
-
-export const deleteIndex = ({ esClient, index }: WithIndex) =>
+export const deleteIndex = (esClient: EsClient, index: IndexName) =>
   esClient.indices.delete({ index }, { ignore: [404] });
 
-export const putComponentTemplate = ({
-  esClient,
-  request,
-}: WithClient<{ request: ClusterPutComponentTemplateRequest }>) =>
-  esClient.cluster.putComponentTemplate(request);
+export const putComponentTemplate = (
+  esClient: EsClient,
+  request: ClusterPutComponentTemplateRequest
+) => esClient.cluster.putComponentTemplate(request);
 
-export const deleteComponentTemplate = ({ esClient, name }: WithName) =>
+export const deleteComponentTemplate = (esClient: EsClient, name: Names) =>
   esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
 
-export const createIndexTemplate = ({
-  esClient,
-  template,
-}: WithClient<{ template: IndicesPutIndexTemplateRequest }>) =>
+export const putIndexTemplate = (esClient: EsClient, template: IndicesPutIndexTemplateRequest) =>
   esClient.indices.putIndexTemplate(template);
 
-export const deleteIndexTemplate = ({ esClient, name }: WithName) =>
+export const deleteIndexTemplate = (esClient: EsClient, name: Names) =>
   esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });

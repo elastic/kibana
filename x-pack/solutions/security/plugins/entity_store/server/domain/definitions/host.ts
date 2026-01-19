@@ -6,7 +6,7 @@
  */
 
 import { collectValues as collect } from './field_retention_operations';
-import type { EntityDescription } from './entity_schema';
+import type { EntityDefinitionWithoutId } from './entity_schema';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 
 // export const HOST_DEFINITION_VERSION = '1.0.0';
@@ -14,7 +14,7 @@ export const HOST_IDENTITY_FIELD = 'host.name';
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/host.ts
 
-export const hostEntityDescription: EntityDescription = {
+export const hostEntityDescription: EntityDefinitionWithoutId = {
   type: 'host',
   name: `Security 'host' Entity Store Definition`,
   // version: HOST_DEFINITION_VERSION,

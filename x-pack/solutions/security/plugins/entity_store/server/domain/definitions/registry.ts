@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import assert from 'node:assert';
 import { hostEntityDescription } from './host';
-import { managedEntitySchema, type EntityDescription, type ManagedEntity } from './entity_schema';
-import { buildEntityDefinitionId } from '../assets/indices/entities_latest';
+import type { EntityType } from './entity_schema';
+import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
+import { getEntityDefinitionId } from '../assets/latest_index';
 
 const entitiesDescriptionRegistry = {
   host: hostEntityDescription,
@@ -16,25 +17,21 @@ const entitiesDescriptionRegistry = {
   user: hostEntityDescription,
   service: hostEntityDescription,
   generic: hostEntityDescription,
-} as const satisfies Record<EntityType, EntityDescription>;
+} as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
 
 interface EntityDefinitionParams {
   type: EntityType;
 }
 
-export function getEntityDefinition({ type }: EntityDefinitionParams): ManagedEntity {
+export function getEntityDefinition({ type }: EntityDefinitionParams): ManagedEntityDefinition {
   // TODO: get index patterns from data view in runtime
 
   const description = entitiesDescriptionRegistry[type];
+  assert(description, `No entity description found for type: ${type}`);
 
-  return managedEntitySchema.parse({
+  return {
     ...description,
-    id: buildEntityDefinitionId(type, 'default'), // TODO: get namespace
+    id: getEntityDefinitionId(type, 'default'), // TODO: get namespace
     type,
-  });
+  };
 }
-
-export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
-
-export const ALL_ENTITY_TYPES = Object.values(EntityType.Values);

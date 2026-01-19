@@ -11,24 +11,21 @@ import {
   ENTITY_LATEST,
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
-  ENTITY_ENTITY_COMPONENT_TEMPLATE_V2,
-  ENTITY_EVENT_COMPONENT_TEMPLATE_V2,
   ECS_MAPPINGS_COMPONENT_TEMPLATE,
-  ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V2,
   getEntityIndexPattern,
   getEntitiesAliasPattern,
 } from '../constants';
-import { getComponentTemplateName } from '../assets_manager';
+import { getComponentTemplateName } from './component_templates';
 
 // Mostly copied from x-pack/platform/plugins/shared/entity_manager/server/lib/entities/templates/entities_latest_template.ts
 
-export const generateLatestIndexTemplateId = (definition: EntityDefinition) =>
+export const getLatestIndexTemplateId = (definition: EntityDefinition) =>
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_LATEST}_${definition.id}_index_template` as const;
 
-export const generateEntitiesLatestIndexTemplateConfig = (
+export const getLatestEntityIndexTemplateConfig = (
   definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
-  name: generateLatestIndexTemplateId(definition),
+  name: getLatestIndexTemplateId(definition),
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
@@ -36,13 +33,7 @@ export const generateEntitiesLatestIndexTemplateConfig = (
     managed: true,
     managed_by: 'security_context_core_analysis',
   },
-  composed_of: [
-    ECS_MAPPINGS_COMPONENT_TEMPLATE,
-    ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V2,
-    ENTITY_ENTITY_COMPONENT_TEMPLATE_V2,
-    ENTITY_EVENT_COMPONENT_TEMPLATE_V2,
-    getComponentTemplateName(definition.id),
-  ],
+  composed_of: [ECS_MAPPINGS_COMPONENT_TEMPLATE, getComponentTemplateName(definition.id)],
   index_patterns: [
     getEntityIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V2,

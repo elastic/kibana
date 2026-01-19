@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FieldDescription } from './entity_schema';
+import type { EntityRetentionField } from './entity_schema';
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/field_utils.ts
 
-type Operation = Omit<FieldDescription, 'retention'>;
+type Operation = Omit<EntityRetentionField, 'retention'>;
 
 export const collectValues = ({
   destination,
@@ -17,7 +17,7 @@ export const collectValues = ({
   fieldHistoryLength = 10,
   mapping = { type: 'keyword' },
   allowAPIUpdate = false,
-}: Operation & { fieldHistoryLength?: number }): FieldDescription => ({
+}: Operation & { fieldHistoryLength?: number }): EntityRetentionField => ({
   destination: destination ?? source,
   source,
   retention: { operation: 'collect_values', maxLength: fieldHistoryLength },
@@ -30,7 +30,7 @@ export const newestValue = ({
   mapping = { type: 'keyword' },
   source,
   allowAPIUpdate = false,
-}: Operation): FieldDescription => ({
+}: Operation): EntityRetentionField => ({
   destination: destination ?? source,
   source,
   retention: { operation: 'prefer_newest_value' },
@@ -42,7 +42,7 @@ export const oldestValue = ({
   source,
   destination,
   mapping = { type: 'keyword' },
-}: Operation): FieldDescription => ({
+}: Operation): EntityRetentionField => ({
   destination: destination ?? source,
   source,
   retention: { operation: 'prefer_oldest_value' },

@@ -11,14 +11,7 @@ export const ENTITY_BASE_PREFIX = 'entities';
 
 export const ENTITY_SCHEMA_VERSION_V2 = 'v2';
 
-export const ENTITY_ENTITY_COMPONENT_TEMPLATE_V2 = `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_entity`;
-
-export const ENTITY_EVENT_COMPONENT_TEMPLATE_V2 = `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_event`;
-
 export const ECS_MAPPINGS_COMPONENT_TEMPLATE = 'ecs@mappings';
-
-export const ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V2 =
-  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_LATEST}_base` as const;
 
 type SchemaVersion = `v${number}`;
 type Dataset = typeof ENTITY_LATEST;
