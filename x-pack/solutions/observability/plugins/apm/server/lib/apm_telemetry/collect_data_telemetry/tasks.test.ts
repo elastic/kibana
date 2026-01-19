@@ -1035,4 +1035,146 @@ describe('data telemetry collection tasks', () => {
       ).toMatchSnapshot();
     });
   });
+
+  describe('otel_agents', () => {
+    const task = tasks.find((t) => t.name === 'otel_agents');
+
+    it('returns OTel agent metrics', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: {
+          total: { value: 1000 },
+        },
+        aggregations: {
+          agents: {
+            buckets: [
+              {
+                key: 'opentelemetry/nodejs',
+                doc_count: 500,
+                services: { value: 3 },
+              },
+              {
+                key: 'opentelemetry/python',
+                doc_count: 300,
+                services: { value: 2 },
+              },
+            ],
+          },
+        },
+      });
+
+      const indicesStats = jest.fn().mockResolvedValueOnce({
+        _all: {
+          total: {
+            docs: { count: 5000 },
+            store: { size_in_bytes: 10000000 },
+          },
+        },
+      });
+
+      expect(
+        await task?.executor({
+          indices,
+          telemetryClient: { search, indicesStats },
+        } as any)
+      ).toEqual({
+        otel_services_per_agent: {
+          'opentelemetry/nodejs': 3,
+          'opentelemetry/python': 2,
+        },
+        otel_docs_per_agent: {
+          'opentelemetry/nodejs': 500,
+          'opentelemetry/python': 300,
+        },
+        otel_size_per_agent: {
+          'opentelemetry/nodejs': 1000000,
+          'opentelemetry/python': 600000,
+        },
+        otel_total_size_bytes: 10000000,
+        otel_total_docs: 5000,
+        otel_1d_docs: 1000,
+        otel_1d_size_bytes: 2000000,
+      });
+    });
+
+    it('returns empty results when no OTel data', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: { total: { value: 0 } },
+        aggregations: { agents: { buckets: [] } },
+      });
+
+      const indicesStats = jest.fn().mockResolvedValueOnce({
+        _all: {
+          total: {
+            docs: { count: 0 },
+            store: { size_in_bytes: 0 },
+          },
+        },
+      });
+
+      expect(
+        await task?.executor({
+          indices,
+          telemetryClient: { search, indicesStats },
+        } as any)
+      ).toEqual({
+        otel_services_per_agent: {},
+        otel_docs_per_agent: {},
+        otel_size_per_agent: {},
+        otel_total_size_bytes: 0,
+        otel_total_docs: 0,
+        otel_1d_docs: 0,
+        otel_1d_size_bytes: 0,
+      });
+    });
+
+    it('filters out unknown and empty agent names', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: {
+          total: { value: 100 },
+        },
+        aggregations: {
+          agents: {
+            buckets: [
+              {
+                key: 'opentelemetry/go',
+                doc_count: 50,
+                services: { value: 1 },
+              },
+              {
+                key: 'unknown',
+                doc_count: 30,
+                services: { value: 1 },
+              },
+              {
+                key: '',
+                doc_count: 20,
+                services: { value: 1 },
+              },
+            ],
+          },
+        },
+      });
+
+      const indicesStats = jest.fn().mockResolvedValueOnce({
+        _all: {
+          total: {
+            docs: { count: 100 },
+            store: { size_in_bytes: 10000 },
+          },
+        },
+      });
+
+      const result = await task?.executor({
+        indices,
+        telemetryClient: { search, indicesStats },
+      } as any);
+
+      expect(result?.otel_services_per_agent).toEqual({
+        'opentelemetry/go': 1,
+      });
+      expect(result?.otel_docs_per_agent).toEqual({
+        'opentelemetry/go': 50,
+      });
+    });
+  });
 });
