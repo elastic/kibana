@@ -12,6 +12,7 @@ export type PublicApiServiceSetupMock = jest.Mocked<PublicApiServiceSetup>;
 const createServiceMock = (): PublicApiServiceSetupMock => ({
   getAllEnrichPolicies: jest.fn(),
   getIndexTemplates: jest.fn(),
+  simulateIndexTemplate: jest.fn(),
 });
 
 export const publicApiServiceMock = {

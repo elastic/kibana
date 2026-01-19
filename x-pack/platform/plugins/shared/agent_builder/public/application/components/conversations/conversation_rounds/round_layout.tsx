@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -59,12 +59,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     !isResuming;
 
   const handleConfirm = useCallback(() => {
-    resumeRound({ confirm: true });
-  }, [resumeRound]);
+    resumeRound({ promptId: pendingPrompt!.id, confirm: true });
+  }, [resumeRound, pendingPrompt]);
 
   const handleCancel = useCallback(() => {
-    resumeRound({ confirm: false });
-  }, [resumeRound]);
+    resumeRound({ promptId: pendingPrompt!.id, confirm: false });
+  }, [resumeRound, pendingPrompt]);
 
   // Track if this round has ever been in a loading state during this session
   useEffect(() => {
@@ -146,6 +146,9 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           </EuiFlexItem>
         </EuiFlexItem>
       )}
+
+      {/* Add spacing after the final round so that text is not cut off by the scroll mask */}
+      {isCurrentRound && <EuiSpacer size="l" />}
     </EuiFlexGroup>
   );
 };

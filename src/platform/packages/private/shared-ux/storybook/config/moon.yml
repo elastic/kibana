@@ -19,6 +19,8 @@ project:
     sourceRoot: src/platform/packages/private/shared-ux/storybook/config
 dependsOn:
   - '@kbn/storybook'
+  - '@kbn/unified-tabs'
+  - '@kbn/core-chrome-app-menu-components'
 tags:
   - shared-common
   - package
@@ -28,5 +30,6 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.tsx'
     - '!target/**/*'
 tasks: {}
