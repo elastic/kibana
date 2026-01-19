@@ -300,15 +300,6 @@ export const registerClustersRoute = ({
             });
           }
 
-          // Update default LLM actions if needed
-          try {
-            if (eisRequest?.enabled) {
-              await updateDefaultLLMActions(getStartServices, request, logger);
-            }
-          } catch (llmActionsError) {
-            logger.warn('Failed to update default LLM actions', { error: llmActionsError });
-          }
-
           // Update elastic inference ccm settings
           try {
             if (eisRequest?.enabled) {
@@ -354,7 +345,19 @@ export const registerClustersRoute = ({
               },
             });
           }
+
+          // Update default LLM actions if needed, this always needs to happen
+          // after updating the service.
+          try {
+            if (eisRequest?.enabled) {
+              await updateDefaultLLMActions(getStartServices, request, logger);
+            }
+          } catch (llmActionsError) {
+            logger.warn('Failed to update default LLM actions', { error: llmActionsError });
+          }
         }
+
+
 
         return response.ok({ body: { success: true } });
       } catch (error) {

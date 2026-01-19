@@ -40,10 +40,17 @@ export async function updateDefaultLLMActions(
   logger.info('Will update default llm actions..');
 
   const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
-
   // Get all existing connectors
   const existingConnectors = await actionsClient.getAll();
   const existingConnectorIds = new Set(existingConnectors.map((c) => c.id));
+
+  // If one one of the default LLM connectors already exists, we assume they have all been created
+  for (const connector of existingConnectors) {
+    if (connector.actionTypeId === '.inference' && connector?.config?.taskType === 'chat_completion') {
+      logger.debug(`Default LLM connector "${connector.name}" already exists, skipping`);
+      return;
+    }
+  }
 
   // Create any missing default LLM connectors
   for (const connector of defaultLLMConnectors) {
