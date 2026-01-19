@@ -7,15 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import {
-  EuiPanel,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiBadge,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useStreamFeatures } from './stream_features/hooks/use_stream_features';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
@@ -37,38 +29,13 @@ export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamCon
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
       <EuiPanel hasShadow={false} color="subdued">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <EuiText size="s">
-              <h3>
-                {i18n.translate('xpack.streams.streamDetailView.configurationTitle', {
-                  defaultMessage: 'Feature identification',
-                })}
-              </h3>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={i18n.translate(
-                'xpack.streams.streamFeatureConfiguration.backgroundTaskTooltipLabel',
-                {
-                  defaultMessage:
-                    'Feature identification runs as a background task. You can start it and come back later to review the results.',
-                }
-              )}
-            >
-              <EuiBadge tabIndex={0} iconType="backgroundTask">
-                {i18n.translate(
-                  'xpack.streams.streamFeatureConfiguration.backgroundTaskBadgeLabel',
-                  {
-                    defaultMessage: 'Background task',
-                  }
-                )}
-              </EuiBadge>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText size="s">
+          <h3>
+            {i18n.translate('xpack.streams.streamDetailView.configurationTitle', {
+              defaultMessage: 'Feature identification',
+            })}
+          </h3>
+        </EuiText>
       </EuiPanel>
 
       <EuiPanel hasShadow={false} hasBorder={false}>
