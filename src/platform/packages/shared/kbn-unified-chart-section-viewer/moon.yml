@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-chart-section-viewer'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-exploration-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/unified-chart-section-viewer'
   description: Moon project for @kbn/unified-chart-section-viewer
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-exploration-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-unified-chart-section-viewer
 dependsOn:

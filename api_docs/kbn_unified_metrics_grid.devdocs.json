@@ -14,6 +14,8 @@
           "React.ForwardRefExoticComponent<Omit<any, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/trace_metrics_grid/lazy_trace_metrics_grid.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -27,6 +29,8 @@
             "description": [],
             "signature": ["P"],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -56,6 +60,8 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>, \"ref\"> & { ref?: ((instance: null) => void) | React.RefObject<never> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/lazy_unified_metrics_experience_grid.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -69,6 +75,8 @@
             "description": [],
             "signature": ["P"],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -88,6 +96,8 @@
         "description": [],
         "signature": ["\"apm\" | \"otel\""],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/trace_metrics_grid/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -101,6 +111,8 @@
         "description": [],
         "signature": ["MetricsExperienceRestorableState", " | ", "TracesRestorableState"],
         "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/restorable_state.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
