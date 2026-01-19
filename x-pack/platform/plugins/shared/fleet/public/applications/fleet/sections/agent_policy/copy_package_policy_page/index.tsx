@@ -79,7 +79,7 @@ export const CopyPackagePolicyPage = memo(() => {
       pkgName={packagePolicy.data!.item!.package!.name}
       pkgVersion={packagePolicy.data!.item!.package!.version}
       defaultPolicyData={packagePolicyData}
-      noBreadcrumbs={true}
+      noBreadcrumb={true}
       prerelease={true}
     />
   );
