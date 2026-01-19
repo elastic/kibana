@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { StepContext, WorkflowInput } from '@kbn/workflows';
+import type { JsonModelSchemaType, LegacyWorkflowInput, StepContext } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
 import {
   extractSchemaPropertyPaths,
@@ -28,8 +28,9 @@ export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflo
   /**
    * Workflow inputs definition with their default values.
    * Used to pre-populate input fields in the test step modal.
+   * Can be either legacy array format (LegacyWorkflowInput[]) or JSON Schema format.
    */
-  inputsDefinition?: WorkflowInput[];
+  inputsDefinition?: LegacyWorkflowInput[] | JsonModelSchemaType;
 }
 
 const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
@@ -68,18 +69,34 @@ function readPropertyRecursive(
 /**
  * Build inputs object from workflow input definitions with their default values.
  * This allows the test step modal to pre-populate input fields with defined defaults.
+ * Supports both legacy array format and new JSON Schema format.
  */
 function buildInputsFromDefinition(
-  inputsDefinition: WorkflowInput[] | undefined
+  inputsDefinition: LegacyWorkflowInput[] | JsonModelSchemaType | undefined
 ): Record<string, unknown> | undefined {
-  if (!inputsDefinition || inputsDefinition.length === 0) {
+  if (!inputsDefinition) {
     return undefined;
   }
 
   const inputs: Record<string, unknown> = {};
-  for (const input of inputsDefinition) {
-    if (input.default !== undefined) {
-      inputs[input.name] = input.default;
+
+  // Handle legacy array format
+  if (Array.isArray(inputsDefinition)) {
+    if (inputsDefinition.length === 0) {
+      return undefined;
+    }
+    for (const input of inputsDefinition) {
+      if (input.default !== undefined) {
+        inputs[input.name] = input.default;
+      }
+    }
+  }
+  // Handle JSON Schema format
+  else if (typeof inputsDefinition === 'object' && inputsDefinition.properties) {
+    for (const [propertyName, propertySchema] of Object.entries(inputsDefinition.properties)) {
+      if (propertySchema.default !== undefined) {
+        inputs[propertyName] = propertySchema.default;
+      }
     }
   }
 

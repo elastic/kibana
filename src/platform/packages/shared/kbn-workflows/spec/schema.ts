@@ -450,6 +450,7 @@ export const WorkflowInputSchema = z.union([
   WorkflowInputChoiceSchema,
   WorkflowInputArraySchema,
 ]);
+export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
 // JSON Schema model structure
 // This represents a JSON Schema object with properties, required, additionalProperties, and definitions.
@@ -500,6 +501,7 @@ export const JsonModelSchema = z
     },
     { message: 'required fields must exist in properties' }
   );
+export type JsonModelSchemaType = z.infer<typeof JsonModelSchema>;
 
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
