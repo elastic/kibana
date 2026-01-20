@@ -10,7 +10,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
   ActionsClient,
 } from '@kbn/actions-plugin/server';
-import defaultLLMConnectors from './default_llm_connectors.json';
+import { defaultLLMConnectors } from './default_llm_connectors';
 
 interface StartDeps {
   actions: ActionsPluginStart;
