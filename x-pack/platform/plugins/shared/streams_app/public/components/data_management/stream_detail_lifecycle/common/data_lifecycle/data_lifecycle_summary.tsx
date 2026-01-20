@@ -7,44 +7,47 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiFlexItemProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiSkeletonRectangle, EuiSpacer, EuiText } from '@elastic/eui';
+import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+import { DataLifecycleTimeline } from './data_lifecycle_timeline';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSkeletonRectangle,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { capitalize } from 'lodash';
-import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
+  buildDslSegments,
+  buildPhaseTimelineSegments,
+  getGridTemplateColumns,
+  getPhaseColumnSpans,
+  buildDownsamplingSegments,
+} from './data_lifecycle_segments';
+import { LifecycleBar } from './lifecycle_bar';
+import { DownsamplingBar } from './downsampling_bar';
+import { type LifecyclePhase } from './lifecycle_types';
 
-export interface LifecyclePhase {
-  color?: string;
-  label?: string;
-  size?: string;
-  grow: EuiFlexItemProps['grow'];
-  isDelete?: boolean;
-  timelineValue?: string;
-}
+// Re-export for backwards compatibility
+export { type LifecyclePhase, buildLifecyclePhases } from './lifecycle_types';
 
 interface DataLifecycleSummaryProps {
   phases: LifecyclePhase[];
   loading?: boolean;
+  onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
+  downsampleSteps?: DownsampleStep[];
 }
 
-export const DataLifecycleSummary = ({ phases, loading = false }: DataLifecycleSummaryProps) => {
+export const DataLifecycleSummary = ({
+  phases,
+  loading = false,
+  onPhaseClick,
+  downsampleSteps,
+}: DataLifecycleSummaryProps) => {
   const isRetentionInfinite = !phases.some((p) => p.isDelete);
-
-  const phasesWithPosition = phases.map((phase, index) => ({
-    ...phase,
-    isFirst: index === 0,
-    isLast: isRetentionInfinite ? index === phases.length - 1 : phase.isDelete,
-    hasNextPhase: index < phases.length - 1,
-  }));
-
   const showSkeleton = loading && phases.length === 0;
+
+  const hasDslDownsampling = Boolean(downsampleSteps?.length);
+  const dslSegments =
+    hasDslDownsampling && downsampleSteps ? buildDslSegments(phases, downsampleSteps) : null;
+  const timelineSegments = dslSegments?.timelineSegments ?? buildPhaseTimelineSegments(phases);
+  const downsamplingSegments = buildDownsamplingSegments(phases, dslSegments);
+
+  const gridTemplateColumns = getGridTemplateColumns(timelineSegments);
+  const phaseColumnSpans = getPhaseColumnSpans(phases, timelineSegments);
 
   return (
     <EuiPanel hasShadow={false} hasBorder grow>
@@ -74,183 +77,35 @@ export const DataLifecycleSummary = ({ phases, loading = false }: DataLifecycleS
               data-test-subj="dataLifecycleSummary-skeleton"
             />
           ) : (
-            <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
-              {phasesWithPosition.map((phase, index) => (
-                <EuiFlexItem key={index} grow={phase.grow}>
-                  <LifecyclePhaseBar
-                    color={phase.color}
-                    label={phase.label}
-                    size={phase.size}
-                    isDelete={phase.isDelete}
-                    isFirst={phase.isFirst}
-                    isLast={phase.isLast}
-                    timelineValue={phase.timelineValue}
-                    hasNextPhase={phase.hasNextPhase}
-                  />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            <>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.streams.dataLifecycleSummary.panelLabel', {
+                  defaultMessage: 'Data phases',
+                })}
+              </EuiText>
+              <EuiSpacer size="xs" />
+              <LifecycleBar
+                phases={phases}
+                gridTemplateColumns={gridTemplateColumns}
+                phaseColumnSpans={phaseColumnSpans}
+                onPhaseClick={onPhaseClick}
+              />
+              <EuiSpacer size="xs" />
+              <DownsamplingBar
+                segments={downsamplingSegments}
+                gridTemplateColumns={gridTemplateColumns}
+              />
+              <EuiSpacer size="xs" />
+              <DataLifecycleTimeline
+                phases={phases}
+                isRetentionInfinite={isRetentionInfinite}
+                timelineSegments={timelineSegments}
+                gridTemplateColumns={gridTemplateColumns}
+              />
+            </>
           )}
         </EuiPanel>
       </EuiFlexGroup>
     </EuiPanel>
   );
 };
-
-const LifecyclePhaseBar = ({
-  color,
-  label,
-  size,
-  isDelete = false,
-  isFirst = false,
-  isLast = false,
-  timelineValue,
-  hasNextPhase = false,
-}: {
-  color?: string;
-  label?: string;
-  size?: string;
-  isDelete?: boolean;
-  isFirst?: boolean;
-  isLast?: boolean;
-  timelineValue?: string;
-  hasNextPhase?: boolean;
-}) => {
-  const { euiTheme } = useEuiTheme();
-
-  const phaseColor = isDelete ? euiTheme.colors.borderBasePlain : color;
-
-  const getBorderRadius = () => {
-    if (isDelete) {
-      return hasNextPhase ? '0px' : '0px 4px 4px 0px';
-    }
-    if (isFirst && isLast) {
-      return '4px';
-    }
-    if (isFirst) {
-      return '4px 0px 0px 4px';
-    }
-    if (isLast || !hasNextPhase) {
-      return '0px 4px 4px 0px';
-    }
-    return '0px';
-  };
-
-  return (
-    <>
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiPanel
-          paddingSize="s"
-          hasBorder={false}
-          hasShadow={false}
-          css={{
-            backgroundColor: phaseColor,
-            margin: '0',
-            borderRadius: getBorderRadius(),
-            borderRight:
-              !isDelete && hasNextPhase
-                ? `1px solid ${euiTheme.colors.backgroundBasePlain}`
-                : undefined,
-            minHeight: '50px',
-            ...(isDelete && {
-              minWidth: '50px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }),
-          }}
-          grow={false}
-        >
-          {isDelete ? (
-            <EuiIcon size="m" type="trash" data-test-subj="dataLifecycle-delete-icon" />
-          ) : (
-            <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-              <EuiText
-                size="xs"
-                color={euiTheme.colors.plainDark}
-                data-test-subj={`lifecyclePhase-${label}-name`}
-              >
-                <b>{capitalize(label)}</b>
-              </EuiText>
-              {size && (
-                <EuiText
-                  size="xs"
-                  color={euiTheme.colors.plainDark}
-                  data-test-subj={`lifecyclePhase-${label}-size`}
-                >
-                  {size}
-                </EuiText>
-              )}
-            </EuiFlexGroup>
-          )}
-        </EuiPanel>
-        <EuiPanel
-          paddingSize="s"
-          borderRadius="none"
-          hasBorder={false}
-          hasShadow={false}
-          grow={false}
-          css={{
-            paddingBottom: '5px',
-            ...(!isDelete && {
-              borderRight: `1px solid ${euiTheme.colors.darkShade}`,
-            }),
-          }}
-        />
-      </EuiFlexGroup>
-
-      {!isDelete && (
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiPanel
-            paddingSize="xs"
-            css={{
-              marginRight: timelineValue ? '-40px' : '-10px',
-              width: timelineValue ? '80px' : '20px',
-            }}
-            grow={false}
-            hasBorder={false}
-            hasShadow={false}
-          >
-            <EuiText textAlign="center" size="xs" color="subdued">
-              {timelineValue ? getTimeSizeAndUnitLabel(timelineValue) : '∞'}
-            </EuiText>
-          </EuiPanel>
-        </EuiFlexGroup>
-      )}
-    </>
-  );
-};
-
-const DELETE_PHASE: LifecyclePhase = {
-  grow: false,
-  isDelete: true,
-};
-
-export function buildLifecyclePhases({
-  label,
-  color,
-  size,
-  retentionPeriod,
-}: {
-  label: string;
-  color: string;
-  size?: string;
-  retentionPeriod?: string;
-}): LifecyclePhase[] {
-  const phases: LifecyclePhase[] = [
-    {
-      color,
-      label,
-      size,
-      grow: true,
-      timelineValue: retentionPeriod,
-    },
-  ];
-
-  // Only add delete phase if retention is not infinite
-  if (retentionPeriod !== undefined) {
-    phases.push(DELETE_PHASE);
-  }
-
-  return phases;
-}

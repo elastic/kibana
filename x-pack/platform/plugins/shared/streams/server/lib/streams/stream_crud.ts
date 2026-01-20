@@ -25,6 +25,7 @@ import type {
   ClassicIngestStreamEffectiveLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
+import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
@@ -45,7 +46,17 @@ export function getDataStreamLifecycle(
 
   if (dataStream.next_generation_managed_by === 'Data stream lifecycle') {
     const retention = dataStream.lifecycle?.data_retention;
-    return { dsl: { data_retention: retention ? String(retention) : undefined } };
+    const downsampling = dataStream.lifecycle?.downsampling as DownsampleStep[] | undefined;
+
+    return {
+      dsl: {
+        data_retention: retention ? String(retention) : undefined,
+        downsample: downsampling?.map((step) => ({
+          after: step.after,
+          fixed_interval: step.fixed_interval,
+        })),
+      },
+    };
   }
 
   if (dataStream.next_generation_managed_by === 'Unmanaged') {

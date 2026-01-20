@@ -17,6 +17,7 @@ export const useIlmPhasesColorAndDescription = () => {
       ilmPhases: {
         hot: {
           color: euiTheme.colors.severity.risk,
+          hoverColor: euiTheme.colors.backgroundFilledRisk,
           description: i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
             defaultMessage:
               'Use for data that is searched frequently and actively updated, optimized for indexing and search performance.',
@@ -24,6 +25,7 @@ export const useIlmPhasesColorAndDescription = () => {
         },
         warm: {
           color: euiTheme.colors.severity.warning,
+          hoverColor: euiTheme.colors.backgroundFilledWarning,
           description: i18n.translate('xpack.streams.streamDetailLifecycle.warmPhaseDescription', {
             defaultMessage:
               'Use for data that is searched occasionally but rarely updated, optimized for search over indexing.',
@@ -31,6 +33,7 @@ export const useIlmPhasesColorAndDescription = () => {
         },
         cold: {
           color: euiTheme.colors.severity.neutral,
+          hoverColor: euiTheme.colors.backgroundFilledNeutral,
           description: i18n.translate('xpack.streams.streamDetailLifecycle.coldPhaseDescription', {
             defaultMessage:
               'Use for infrequently searched, read-only data where cost savings are prioritized over performance.',
@@ -38,6 +41,7 @@ export const useIlmPhasesColorAndDescription = () => {
         },
         frozen: {
           color: euiTheme.colors.vis.euiColorVis3,
+          hoverColor: euiTheme.colors.vis.euiColorVis2,
           description: i18n.translate(
             'xpack.streams.streamDetailLifecycle.frozenPhaseDescription',
             {
@@ -48,6 +52,7 @@ export const useIlmPhasesColorAndDescription = () => {
         },
         delete: {
           color: euiTheme.colors.borderBasePlain,
+          hoverColor: euiTheme.colors.backgroundBaseFormsPrepend,
           description: i18n.translate(
             'xpack.streams.streamDetailLifecycle.deletePhaseDescription',
             {

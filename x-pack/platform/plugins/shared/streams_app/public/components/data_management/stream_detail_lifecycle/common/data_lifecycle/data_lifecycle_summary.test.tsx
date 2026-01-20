@@ -7,11 +7,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import {
-  DataLifecycleSummary,
-  buildLifecyclePhases,
-  type LifecyclePhase,
-} from './data_lifecycle_summary';
+import { DataLifecycleSummary } from './data_lifecycle_summary';
+import { type LifecyclePhase } from './lifecycle_types';
 
 describe('DataLifecycleSummary', () => {
   describe('Loading State', () => {
@@ -43,6 +40,7 @@ describe('DataLifecycleSummary', () => {
           size: '1.0 MB',
           grow: 5,
           timelineValue: '30d',
+          min_age: '0d',
         },
         {
           color: '#FFA500',
@@ -50,20 +48,41 @@ describe('DataLifecycleSummary', () => {
           size: '500.0 KB',
           grow: 3,
           timelineValue: '60d',
+          min_age: '30d',
         },
         {
           grow: false,
           isDelete: true,
+          min_age: '60d',
         },
       ];
 
       render(<DataLifecycleSummary phases={phases} />);
 
+      expect(screen.getByText('0d')).toBeInTheDocument();
       expect(screen.getByTestId('lifecyclePhase-hot-name')).toBeInTheDocument();
       expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument();
       expect(screen.getByTestId('lifecyclePhase-hot-size')).toHaveTextContent('1.0 MB');
       expect(screen.getByTestId('lifecyclePhase-warm-size')).toHaveTextContent('500.0 KB');
       expect(screen.getByTestId('dataLifecycle-delete-icon')).toBeInTheDocument();
+    });
+
+    it('should render start timeline with the same unit as the first timeline value', () => {
+      const phases: LifecyclePhase[] = [
+        {
+          color: '#FF0000',
+          label: 'hot',
+          size: '1.0 MB',
+          grow: 5,
+          timelineValue: '1s',
+          min_age: '0s',
+        },
+        { grow: false, isDelete: true, min_age: '1s' },
+      ];
+
+      render(<DataLifecycleSummary phases={phases} />);
+
+      expect(screen.getByText('0s')).toBeInTheDocument();
     });
 
     it('should render single phase with delete icon', () => {
@@ -74,8 +93,9 @@ describe('DataLifecycleSummary', () => {
           size: '2.0 GB',
           grow: true,
           timelineValue: '30d',
+          min_age: '0d',
         },
-        { grow: false, isDelete: true },
+        { grow: false, isDelete: true, min_age: '30d' },
       ];
 
       render(<DataLifecycleSummary phases={phases} />);
@@ -118,57 +138,96 @@ describe('DataLifecycleSummary', () => {
       expect(screen.getByText('∞')).toBeInTheDocument();
     });
   });
-});
 
-describe('buildLifecyclePhases', () => {
-  it('should build phases with delete phase when retentionPeriod is provided', () => {
-    const phases = buildLifecyclePhases({
-      label: 'Test phase',
-      color: '#FF0000',
-      size: '1.0 GB',
-      retentionPeriod: '30d',
+  describe('ILM Downsampling', () => {
+    it('should render downsampling bar when phase has downsample', () => {
+      const phases: LifecyclePhase[] = [
+        {
+          color: '#FF0000',
+          label: 'hot',
+          size: '1.0 MB',
+          grow: 5,
+          timelineValue: '30d',
+          downsample: {
+            after: '0d',
+            fixed_interval: '1h',
+          },
+        },
+      ];
+
+      render(<DataLifecycleSummary phases={phases} />);
+
+      expect(screen.getByTestId('downsamplingPhase-1h-label')).toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingPhase-1h-interval')).toHaveTextContent('1h');
     });
 
-    expect(phases).toHaveLength(2);
-    expect(phases[0]).toEqual({
-      color: '#FF0000',
-      label: 'Test phase',
-      size: '1.0 GB',
-      grow: true,
-      timelineValue: '30d',
-    });
-    expect(phases[1]).toEqual({
-      grow: false,
-      isDelete: true,
+    it('should render downsampling bar with empty space for delete phase', () => {
+      const phases: LifecyclePhase[] = [
+        {
+          color: '#FF0000',
+          label: 'hot',
+          size: '1.0 MB',
+          grow: 5,
+          timelineValue: '30d',
+          downsample: {
+            after: '0d',
+            fixed_interval: '1h',
+          },
+        },
+        {
+          grow: false,
+          isDelete: true,
+        },
+      ];
+
+      render(<DataLifecycleSummary phases={phases} />);
+
+      expect(screen.getByTestId('downsamplingPhase-1h-label')).toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingPhase-1h-interval')).toHaveTextContent('1h');
+      expect(screen.queryByTestId('downsamplingPhase-delete-label')).not.toBeInTheDocument();
     });
   });
 
-  it('should build phases without delete phase when retentionPeriod is undefined (infinite)', () => {
-    const phases = buildLifecyclePhases({
-      label: 'Test phase',
-      color: '#00FF00',
-      size: '2.0 GB',
-      retentionPeriod: undefined,
+  describe('DSL Downsampling', () => {
+    it('should render multiple downsampling steps in a single bar for DSL', () => {
+      const phases: LifecyclePhase[] = [
+        {
+          color: '#FF0000',
+          label: 'hot',
+          size: '1.0 MB',
+          grow: true,
+        },
+      ];
+
+      const downsampleSteps = [
+        { fixed_interval: '1d', after: '20d' },
+        { fixed_interval: '5d', after: '40d' },
+      ];
+
+      render(<DataLifecycleSummary phases={phases} downsampleSteps={downsampleSteps} />);
+
+      expect(screen.getByTestId('downsamplingPhase-1d-label')).toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingPhase-1d-interval')).toHaveTextContent('1d');
+      expect(screen.getByTestId('downsamplingPhase-5d-label')).toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingPhase-5d-interval')).toHaveTextContent('5d');
+      expect(screen.getByText('20d')).toBeInTheDocument();
+      expect(screen.getByText('40d')).toBeInTheDocument();
     });
 
-    expect(phases).toHaveLength(1);
-    expect(phases[0]).toEqual({
-      color: '#00FF00',
-      label: 'Test phase',
-      size: '2.0 GB',
-      grow: true,
-      timelineValue: undefined,
-    });
-  });
+    it('should not render downsampling bar when no downsample steps', () => {
+      const phases: LifecyclePhase[] = [
+        {
+          color: '#FF0000',
+          label: 'hot',
+          size: '1.0 MB',
+          grow: 5,
+          timelineValue: '30d',
+        },
+      ];
 
-  it('should build phases without size when size is not provided', () => {
-    const phases = buildLifecyclePhases({
-      label: 'Test phase',
-      color: '#FF0000',
-      retentionPeriod: '7d',
-    });
+      render(<DataLifecycleSummary phases={phases} />);
 
-    expect(phases).toHaveLength(2);
-    expect(phases[0].size).toBeUndefined();
+      expect(screen.queryByTestId('downsamplingPhase-1d-label')).not.toBeInTheDocument();
+    });
   });
 });

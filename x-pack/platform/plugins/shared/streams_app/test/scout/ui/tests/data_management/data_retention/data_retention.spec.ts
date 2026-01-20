@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
@@ -119,6 +120,38 @@ test.describe(
       await setCustomRetention(page, '7', 'd');
       await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '7 days');
+    });
+
+    test('should open DSL lifecycle phase popup and display phase details', async ({
+      page,
+      config,
+    }) => {
+      // Set a custom retention to have a DSL lifecycle with a delete phase
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+      await setCustomRetention(page, '30', 'd');
+      await saveRetentionChanges(page);
+
+      // DSL phase label differs: 'Hot' in stateful, 'Successful ingest' in serverless
+      // Click on the phase button using test ID
+      await page
+        .getByTestId(`lifecyclePhase-${config.serverless ? 'Successful ingest' : 'Hot'}-button`)
+        .click();
+
+      // Verify the popover opens and shows the expected content
+      await expect(
+        page.getByTestId(
+          `lifecyclePhase-${config.serverless ? 'Successful ingest' : 'Hot'}-popoverTitle`
+        )
+      ).toBeVisible();
+      await expect(
+        page.getByTestId(
+          `lifecyclePhase-${config.serverless ? 'Successful ingest' : 'Hot'}-popoverContent`
+        )
+      ).toBeVisible();
+
+      // Close the popover by pressing Escape
+      await page.keyboard.press('Escape');
     });
   }
 );

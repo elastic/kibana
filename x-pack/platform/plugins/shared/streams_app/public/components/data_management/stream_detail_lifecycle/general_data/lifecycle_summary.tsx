@@ -40,7 +40,6 @@ export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) =
   const { ilmPhases } = useIlmPhasesColorAndDescription();
 
   const isIlm = isIlmLifecycle(definition.effective_lifecycle);
-  const isDsl = isDslLifecycle(definition.effective_lifecycle);
 
   const { value: ilmStatsValue, loading: ilmLoading } = useStreamsAppFetch(
     ({ signal }) => {
@@ -61,19 +60,48 @@ export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) =
       if (!phasesWithGrow) {
         return [];
       }
-      return phasesWithGrow.map((phase, index) => ({
-        color: ilmPhases[phase.name].color,
-        label: phase.name,
-        size: 'size_in_bytes' in phase ? formatBytes(phase.size_in_bytes) : undefined,
-        grow: phase.grow,
-        isDelete: phase.name === 'delete',
-        timelineValue: phasesWithGrow[index + 1]?.min_age,
-      }));
+
+      // Calculate total docs and distribute based on size ratio
+      const totalDocs = stats?.totalDocs || 0;
+      const totalSize = phasesWithGrow.reduce(
+        (sum, phase) => sum + ('size_in_bytes' in phase ? phase.size_in_bytes : 0),
+        0
+      );
+
+      return phasesWithGrow.map((phase, index) => {
+        // Estimate doc count based on size ratio
+        const phaseSize = 'size_in_bytes' in phase ? phase.size_in_bytes : 0;
+        const estimatedDocs =
+          totalSize > 0 && totalDocs > 0
+            ? Math.round((phaseSize / totalSize) * totalDocs)
+            : undefined;
+
+        // Get readonly and searchable_snapshot from the server-side phase data
+        const hasReadonlyAction = 'readonly' in phase && phase.readonly === true;
+        const searchableSnapshotAction =
+          'searchable_snapshot' in phase ? phase.searchable_snapshot : undefined;
+
+        return {
+          color: ilmPhases[phase.name].color,
+          label: phase.name,
+          size: 'size_in_bytes' in phase ? formatBytes(phase.size_in_bytes) : undefined,
+          grow: phase.grow,
+          isDelete: phase.name === 'delete',
+          timelineValue: phasesWithGrow[index + 1]?.min_age,
+          colorHover: ilmPhases[phase.name].hoverColor,
+          description: ilmPhases[phase.name].description,
+          sizeInBytes: 'size_in_bytes' in phase ? phase.size_in_bytes : undefined,
+          docsCount: estimatedDocs,
+          min_age: phase.min_age,
+          isReadOnly: hasReadonlyAction,
+          downsample: 'downsample' in phase ? phase.downsample : undefined,
+          searchableSnapshot: searchableSnapshotAction,
+        };
+      });
     }
 
-    if (isDsl) {
-      const lifecycle = definition.effective_lifecycle;
-      const retentionPeriod = isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined;
+    if (isDslLifecycle(definition.effective_lifecycle)) {
+      const retentionPeriod = definition.effective_lifecycle.dsl.data_retention;
       const storageSize = stats?.sizeBytes ? formatBytes(stats.sizeBytes) : undefined;
 
       return buildLifecyclePhases({
@@ -87,11 +115,34 @@ export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) =
         color: isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color,
         size: storageSize,
         retentionPeriod,
+        colorHover: isServerless
+          ? euiTheme.colors.backgroundFilledSuccess
+          : ilmPhases.hot.hoverColor,
+        description: isServerless ? '' : ilmPhases.hot.description,
+        sizeInBytes: stats?.sizeBytes,
+        docsCount: stats?.totalDocs,
+        deletePhaseDescription: ilmPhases.delete.description,
+        deletePhaseColor: ilmPhases.delete.color,
+        deletePhaseColorHover: ilmPhases.delete.hoverColor,
       });
     }
 
     return [];
   };
 
-  return <DataLifecycleSummary phases={getPhases()} loading={isIlm && ilmLoading} />;
+  const getDslDownsampleSteps = () => {
+    if (isDslLifecycle(definition.effective_lifecycle)) {
+      return definition.effective_lifecycle.dsl.downsample;
+    }
+    // Ilm downsampling is defined by the phases so returning undefined
+    return undefined;
+  };
+
+  return (
+    <DataLifecycleSummary
+      phases={getPhases()}
+      loading={isIlm && ilmLoading}
+      downsampleSteps={getDslDownsampleSteps()}
+    />
+  );
 };
