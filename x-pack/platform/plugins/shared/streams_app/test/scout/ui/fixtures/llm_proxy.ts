@@ -33,6 +33,47 @@ function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatCompletionChun
   };
 }
 
+export function createOpenAIResponse(msg: LLMMessage): OpenAI.ChatCompletion {
+  let content = '';
+  let toolCalls: OpenAI.ChatCompletion['choices'][0]['message']['tool_calls'] = [];
+
+  if (typeof msg === 'string') {
+    content = msg;
+  } else if (Array.isArray(msg)) {
+    content = msg.join('');
+  } else if (msg && typeof msg === 'object') {
+    toolCalls =
+      msg.tool_calls?.map((toolCall) => ({
+        id: toolCall.toolCallId ?? uuidv4(),
+        function: {
+          name: toolCall.function.name,
+          arguments: toolCall.function.arguments,
+        },
+        type: 'function',
+      })) ?? [];
+  }
+
+  return {
+    id: uuidv4(),
+    created: new Date().getTime(),
+    model: 'gpt-4o',
+    object: 'chat.completion',
+    choices: [
+      {
+        index: 0,
+        finish_reason: 'stop',
+        message: { content, refusal: null, role: 'assistant', tool_calls: toolCalls },
+        logprobs: null,
+      },
+    ],
+    usage: {
+      prompt_tokens: 1,
+      completion_tokens: 2,
+      total_tokens: 3,
+    },
+  };
+}
+
 type Request = http.IncomingMessage;
 type Response = http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage };
 
@@ -62,6 +103,7 @@ export interface LlmResponseSimulator {
   complete: () => Promise<void>;
   rawWrite: (chunk: string) => Promise<void>;
   rawEnd: () => Promise<void>;
+  stream: boolean;
 }
 
 function sseEvent(data: unknown): string {
@@ -245,6 +287,8 @@ export class LlmProxy {
           name,
           when,
           handle: (_request, response, requestBody) => {
+            const stream = requestBody.stream ?? false;
+
             function write(chunk: string) {
               return new Promise<void>((resolve) => response.write(chunk, () => resolve()));
             }
@@ -254,10 +298,11 @@ export class LlmProxy {
 
             const simulator: LlmResponseSimulator = {
               requestBody,
+              stream,
               status: once((status: number) => {
                 response.writeHead(status, {
                   'Elastic-Interceptor': name.replace(/[^\x20-\x7E]/g, ' '),
-                  'Content-Type': 'text/event-stream',
+                  'Content-Type': stream ? 'text/event-stream' : 'application/json',
                   'Cache-Control': 'no-cache',
                   Connection: 'keep-alive',
                 });
@@ -276,11 +321,15 @@ export class LlmProxy {
               },
               complete: async () => {
                 this.log.debug(`Completed intercept for "${name}"`);
-                await write('data: [DONE]\n\n');
+                if (stream) {
+                  await write('data: [DONE]\n\n');
+                }
                 await end();
               },
               error: async (error) => {
-                await write(`data: ${JSON.stringify({ error })}\n\n`);
+                await write(
+                  stream ? `data: ${JSON.stringify({ error })}\n\n` : JSON.stringify({ error })
+                );
                 await end();
               },
             };
@@ -299,11 +348,7 @@ export class LlmProxy {
       completeAfterIntercept: async () => {
         const simulator = await waitForInterceptPromise;
 
-        function getParsedChunks(): Array<string | ToolMessage> {
-          const llmMessage = isFunction(responseChunks)
-            ? responseChunks(simulator.requestBody)
-            : responseChunks;
-
+        function getParsedChunks(llmMessage: LLMMessage): Array<string | ToolMessage> {
           if (!llmMessage) {
             return [];
           }
@@ -319,9 +364,17 @@ export class LlmProxy {
           return [llmMessage];
         }
 
-        const parsedChunks = getParsedChunks();
-        for (const chunk of parsedChunks) {
-          await simulator.next(chunk);
+        const llmMessage = isFunction(responseChunks)
+          ? responseChunks(simulator.requestBody)
+          : responseChunks;
+
+        if (simulator.stream) {
+          const parsedChunks = getParsedChunks(llmMessage);
+          for (const chunk of parsedChunks) {
+            await simulator.next(chunk);
+          }
+        } else {
+          await simulator.rawWrite(JSON.stringify(createOpenAIResponse(llmMessage)));
         }
 
         await simulator.complete();
