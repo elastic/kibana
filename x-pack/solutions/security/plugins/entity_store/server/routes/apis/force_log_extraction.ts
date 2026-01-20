@@ -50,13 +50,10 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
         const logger = baseLogger.get('forceLogExtraction').get(entityType);
         logger.debug(`Force log extraction API called for entity type: ${entityType}`);
 
-        const successful = await logsExtractionClient.extractLogs(entityType, req.body);
+        const summary = await logsExtractionClient.extractLogs(entityType, req.body);
 
         return res.ok({
-          body: {
-            ok: successful,
-            entityType,
-          },
+          body: summary,
         });
       })
     );

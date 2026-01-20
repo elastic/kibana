@@ -11,7 +11,8 @@
     "browser": true,
     "requiredPlugins": [
       "spaces",
-      "taskManager"
+      "taskManager",
+      "dataViews"
     ],
     "optionalPlugins": []
   }

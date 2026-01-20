@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/logging-mocks'
   - '@kbn/spaces-plugin'
+  - '@kbn/data-views-plugin'
 tags:
   - plugin
   - prod

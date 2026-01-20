@@ -9,6 +9,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
@@ -29,6 +30,7 @@ export interface EntityStoreSetupPlugins {
 export interface EntityStoreStartPlugins {
   taskManager: TaskManagerStartContract;
   spaces: SpacesPluginStart;
+  dataViews: DataViewsPluginStart;
 }
 
 export interface EntityStoreApiRequestHandlerContext {

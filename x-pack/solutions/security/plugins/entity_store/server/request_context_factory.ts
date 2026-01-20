@@ -35,6 +35,12 @@ export async function createRequestHandlerContext({
   const taskManagerStart = startPlugins.taskManager;
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
 
+  const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+    core.savedObjects.client,
+    core.elasticsearch.client.asInternalUser,
+    request
+  );
+
   return {
     core,
     logger,
@@ -48,7 +54,8 @@ export async function createRequestHandlerContext({
     logsExtractionClient: new LogsExtractionClient(
       logger,
       namespace,
-      core.elasticsearch.client.asCurrentUser
+      core.elasticsearch.client.asCurrentUser,
+      dataViewsService
     ),
   };
 }

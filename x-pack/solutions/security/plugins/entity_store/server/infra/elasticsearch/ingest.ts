@@ -49,8 +49,12 @@ export async function ingestEntities({
       // Build document object on-demand, one row at a time
       const doc: Record<string, unknown> = {};
       for (let i = 0; i < row.length; i++) {
-        // ignore esIdField, no need to be in the document
-        if (columns[i].name !== esIdField) {
+        if (
+          // ignore esIdField, no need to be in the document
+          columns[i].name !== esIdField &&
+          // ignore null fields
+          row[i] !== null
+        ) {
           doc[columns[i].name] = row[i];
         }
       }
