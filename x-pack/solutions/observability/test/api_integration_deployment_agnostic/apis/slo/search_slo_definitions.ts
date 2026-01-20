@@ -145,7 +145,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Wait for summary documents to be indexed
       const now = new Date().toISOString();
       await insertSummaryDocs(
-        responses.map((r) => createDummySummaryDoc(r.id, '*', now, TEST_SPACE_ID))
+        responses.map((r: { id: string }) => createDummySummaryDoc(r.id, '*', now, TEST_SPACE_ID))
       );
 
       const searchResults = await sloApi.searchDefinitions(adminRoleAuthc, {
@@ -166,7 +166,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Wait for summary documents to be indexed
       const now = new Date().toISOString();
       await insertSummaryDocs(
-        responses.map((r) => createDummySummaryDoc(r.id, '*', now, TEST_SPACE_ID))
+        responses.map((r: { id: string }) => createDummySummaryDoc(r.id, '*', now, TEST_SPACE_ID))
       );
 
       // First page

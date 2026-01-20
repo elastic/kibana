@@ -33,6 +33,18 @@ export class SearchSLODefinitions {
         }
       }
 
+      const filters: Array<Record<string, any>> = [{ term: { spaceId: this.spaceId } }];
+      if (search) {
+        filters.push({
+          simple_query_string: {
+            query: search,
+            fields: ['slo.name^3', 'slo.description^2', 'slo.tags'],
+            default_operator: 'AND' as const,
+            analyze_wildcard: true,
+          },
+        });
+      }
+
       const response = await this.esClient.search<{ slo?: any; remote?: any }>({
         index: indices,
         size: 0,
@@ -54,21 +66,7 @@ export class SearchSLODefinitions {
         },
         query: {
           bool: {
-            filter: [
-              { term: { spaceId: this.spaceId } },
-              ...(search
-                ? [
-                    {
-                      simple_query_string: {
-                        query: search,
-                        fields: ['slo.name^3', 'slo.description^2', 'slo.tags'],
-                        default_operator: 'AND',
-                        analyze_wildcard: true,
-                      },
-                    },
-                  ]
-                : []),
-            ],
+            filter: filters,
           },
         },
         aggs: {

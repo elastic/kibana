@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,12 +33,7 @@ export function SloInstanceSelector({ sloId, remoteName, onSelected, hasError }:
   );
   const [search, setSearch] = useState<string>();
   const [debouncedSearch, setDebouncedSearch] = useState(search);
-  const [searchAfter, setSearchAfter] = useState<string | undefined>(undefined);
   useDebounce(() => setDebouncedSearch(search), 500, [search]);
-
-  useEffect(() => {
-    setSearchAfter(undefined);
-  }, [debouncedSearch]);
 
   const { isLoading, data: instancesData } = useFetchSloInstances({
     sloId,

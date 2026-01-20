@@ -30,6 +30,6 @@ export const searchSloDefinitionsRoute = createSloServerRoute({
     const esClient = scopedClusterClient.asCurrentUser;
     const searchSLODefinitions = new SearchSLODefinitions(esClient, logger, spaceId, settings);
 
-    return await searchSLODefinitions.execute(params.query);
+    return await searchSLODefinitions.execute(params?.query ?? {});
   },
 });
