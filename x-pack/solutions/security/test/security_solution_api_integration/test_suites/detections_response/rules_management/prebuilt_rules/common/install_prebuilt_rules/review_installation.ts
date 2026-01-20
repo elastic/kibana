@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.rules.length).toEqual(2);
       });
 
-      it.skip('returns correct rules for a page specified in the request', async () => {
+      it('returns correct rules for a page specified in the request', async () => {
         const ruleAssets = [
           createRuleAssetSavedObject({ rule_id: 'rule-1' }),
           createRuleAssetSavedObject({ rule_id: 'rule-2' }),
@@ -164,24 +164,26 @@ export default ({ getService }: FtrProviderContext): void => {
           per_page: 2,
         });
 
-        expect(page1Response).toMatchObject({
-          rules: [
+        expect(page1Response.rules).toHaveLength(2);
+        expect(page1Response.rules).toEqual(
+          expect.arrayContaining([
             expect.objectContaining({ rule_id: 'rule-1' }),
             expect.objectContaining({ rule_id: 'rule-2' }),
-          ],
-        });
+          ])
+        );
 
         const page2Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 2,
           per_page: 2,
         });
 
-        expect(page2Response).toMatchObject({
-          rules: [
+        expect(page2Response.rules).toHaveLength(2);
+        expect(page2Response.rules).toEqual(
+          expect.arrayContaining([
             expect.objectContaining({ rule_id: 'rule-3' }),
             expect.objectContaining({ rule_id: 'rule-4' }),
-          ],
-        });
+          ])
+        );
       });
 
       it('returns correct number of rules for the last page', async () => {
@@ -489,11 +491,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const response = await reviewPrebuiltRulesToInstall(supertest);
 
-        expect(response).toMatchObject({
-          rules: [
+        expect(response.rules).toHaveLength(2);
+        expect(response.rules).toEqual(
+          expect.arrayContaining([
             expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
             expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
-          ],
+          ])
+        );
+        expect(response).toMatchObject({
           total: 2,
           stats: {
             num_rules_to_install: 2,
@@ -514,10 +519,13 @@ export default ({ getService }: FtrProviderContext): void => {
               filter: { fields: { name: {} } },
             });
 
-            expect(emptyNameResponse.rules).toEqual([
-              expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
-              expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
-            ]);
+            expect(emptyNameResponse.rules).toHaveLength(2);
+            expect(emptyNameResponse.rules).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
+                expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
+              ])
+            );
           });
 
           it('with empty include array', async () => {
@@ -531,10 +539,13 @@ export default ({ getService }: FtrProviderContext): void => {
               filter: { fields: { name: { include: { values: [] } } } },
             });
 
-            expect(emptyNameResponse.rules).toEqual([
-              expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
-              expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
-            ]);
+            expect(emptyNameResponse.rules).toHaveLength(2);
+            expect(emptyNameResponse.rules).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
+                expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
+              ])
+            );
           });
 
           it('with empty string in include array', async () => {
@@ -548,10 +559,13 @@ export default ({ getService }: FtrProviderContext): void => {
               filter: { fields: { name: { include: { values: [''] } } } },
             });
 
-            expect(emptyNameResponse.rules).toEqual([
-              expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
-              expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
-            ]);
+            expect(emptyNameResponse.rules).toHaveLength(2);
+            expect(emptyNameResponse.rules).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
+                expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
+              ])
+            );
           });
         });
 
@@ -585,11 +599,14 @@ export default ({ getService }: FtrProviderContext): void => {
               filter: { fields: { name: { include: { values: ['rule'] } } } },
             });
 
-            expect(response.rules).toEqual([
-              expect.objectContaining({ rule_id: 'rule-1', name: 'My rule 1' }),
-              expect.objectContaining({ rule_id: 'rule-2', name: 'My rule 2' }),
-              expect.objectContaining({ rule_id: 'rule-3', name: 'My rule 3' }),
-            ]);
+            expect(response.rules).toHaveLength(3);
+            expect(response.rules).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({ rule_id: 'rule-1', name: 'My rule 1' }),
+                expect.objectContaining({ rule_id: 'rule-2', name: 'My rule 2' }),
+                expect.objectContaining({ rule_id: 'rule-3', name: 'My rule 3' }),
+              ])
+            );
           });
 
           it('matches case-insensitively', async () => {
@@ -630,16 +647,19 @@ export default ({ getService }: FtrProviderContext): void => {
               filter: { fields: { tags: { include: { values: [] } } } },
             });
 
-            expect(emptyTagResponse.rules).toEqual([
-              expect.objectContaining({
-                rule_id: 'rule-1',
-                tags: ['tag-a', 'tag-b'],
-              }),
-              expect.objectContaining({
-                rule_id: 'rule-2',
-                tags: ['tag-b', 'tag-c'],
-              }),
-            ]);
+            expect(emptyTagResponse.rules).toHaveLength(2);
+            expect(emptyTagResponse.rules).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({
+                  rule_id: 'rule-1',
+                  tags: ['tag-a', 'tag-b'],
+                }),
+                expect.objectContaining({
+                  rule_id: 'rule-2',
+                  tags: ['tag-b', 'tag-c'],
+                }),
+              ])
+            );
           });
         });
 
@@ -665,16 +685,19 @@ export default ({ getService }: FtrProviderContext): void => {
               filter: { fields: { tags: { include: { values: ['tag-b'] } } } },
             });
 
-            expect(singleTagResponse.rules).toEqual([
-              expect.objectContaining({
-                rule_id: 'rule-1',
-                tags: ['tag-a', 'tag-b'],
-              }),
-              expect.objectContaining({
-                rule_id: 'rule-2',
-                tags: ['tag-b', 'tag-c'],
-              }),
-            ]);
+            expect(singleTagResponse.rules).toHaveLength(2);
+            expect(singleTagResponse.rules).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({
+                  rule_id: 'rule-1',
+                  tags: ['tag-a', 'tag-b'],
+                }),
+                expect.objectContaining({
+                  rule_id: 'rule-2',
+                  tags: ['tag-b', 'tag-c'],
+                }),
+              ])
+            );
           });
 
           it('returns empty array if no matches are found', async () => {

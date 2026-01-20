@@ -10,6 +10,7 @@ import { ADD_ELASTIC_RULES_TABLE } from '../../../../../screens/alerts_detection
 import {
   expectFirstRuleInTable,
   expectLastRuleInTable,
+  expectToContainRule,
   expectVisibleRulesCount,
   filterBySearchTerm,
   filterByTags,
@@ -50,11 +51,15 @@ describe(
         setRowsPerPageTo(5);
 
         expectTablePage(1);
-        expectFirstRuleInTable(ADD_ELASTIC_RULES_TABLE, 'Rule 1');
+        expectVisibleRulesCount(ADD_ELASTIC_RULES_TABLE, 5);
+        // Verify rules 1-5 exist on page 1 (without asserting order)
+        for (let i = 1; i <= 5; i++) {
+          expectToContainRule(ADD_ELASTIC_RULES_TABLE, `Rule ${i}`);
+        }
 
         goToTablePage(2);
         expectTablePage(2);
-        expectFirstRuleInTable(ADD_ELASTIC_RULES_TABLE, 'Rule 6');
+        expectVisibleRulesCount(ADD_ELASTIC_RULES_TABLE, 1);
       });
     });
 

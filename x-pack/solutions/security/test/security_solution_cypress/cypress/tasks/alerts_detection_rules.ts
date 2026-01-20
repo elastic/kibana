@@ -377,7 +377,8 @@ export const expectToContainRule = (
   tableSelector:
     | typeof RULES_MANAGEMENT_TABLE
     | typeof RULES_MONITORING_TABLE
-    | typeof RULES_UPDATES_TABLE,
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
   ruleName: string
 ) => {
   cy.log(`Expecting rules table to contain '${ruleName}'`);
