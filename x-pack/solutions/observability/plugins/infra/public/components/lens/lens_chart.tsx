@@ -40,6 +40,7 @@ export type LensChartProps = BaseChartProps &
     lensAttributes: UseLensAttributesParams;
     withDefaultActions?: boolean;
     disabledActions?: string[];
+    dataTestSubj?: string;
   };
 
 export const LensChart = React.memo(
@@ -61,6 +62,7 @@ export const LensChart = React.memo(
     lensAttributes,
     withDefaultActions = true,
     disabledActions = DEFAULT_DISABLED_ACTIONS,
+    dataTestSubj,
   }: LensChartProps) => {
     const { formula, attributes, getExtraActions, error } = useLensAttributes(lensAttributes);
 
@@ -161,13 +163,26 @@ export const LensChart = React.memo(
       </EuiToolTip>
     );
 
+    function getDataTestSubj() {
+      if (error) {
+        return `${dataTestSubj}-error`;
+      }
+      if (isLoading) {
+        return `${dataTestSubj}-loading`;
+      }
+      if (dataTestSubj) {
+        return dataTestSubj;
+      }
+      return id;
+    }
+
     return (
       <EuiPanel
         hasBorder={!!borderRadius}
         borderRadius={borderRadius}
         hasShadow={false}
         paddingSize={error ? 'm' : 'none'}
-        data-test-subj={id}
+        data-test-subj={getDataTestSubj()}
         css={css`
           position: relative;
           min-height: ${height}px;
