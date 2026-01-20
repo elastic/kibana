@@ -21,34 +21,6 @@ import { FILTERS } from '@kbn/es-query';
 import type { StoredFilter } from './types';
 
 /**
- * Legacy filter interface for legacy Kibana filter format
- * These filters have query properties at the top level instead of under .query
- */
-interface LegacyFilter {
-  meta?: unknown;
-  $state?: unknown;
-  range?: unknown;
-  exists?: unknown;
-  match_all?: unknown;
-  match?: unknown;
-}
-
-/**
- * Type guard to check if a filter has legacy Kibana filter format properties
- * These filters have query properties at the top level instead of under .query
- */
-export function isLegacyFilter(value: unknown): value is LegacyFilter {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-
-  const filter = value as Record<string, unknown>;
-
-  // Check for legacy top-level properties (legacy Kibana filter format)
-  return !!(filter.range || filter.exists || filter.match_all || filter.match);
-}
-
-/**
  * Type guard for query objects with term property
  */
 export function hasTermQuery(query: unknown): query is { term: Record<string, unknown> } {

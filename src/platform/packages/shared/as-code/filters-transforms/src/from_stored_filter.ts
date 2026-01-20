@@ -32,7 +32,6 @@ import { FILTERS } from '@kbn/es-query';
 import type { StoredFilter } from './types';
 import { FilterConversionError } from './errors';
 import {
-  isLegacyFilter,
   hasTermQuery,
   hasTermsQuery,
   hasRangeQuery,
@@ -70,9 +69,7 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
       return undefined;
     }
 
-    const normalizedFilter = (
-      isLegacyFilter(filter) ? migrateFilter(filter) : filter
-    ) as StoredFilter;
+    const normalizedFilter = migrateFilter(filter);
 
     const baseProperties = extractBaseProperties(normalizedFilter);
 

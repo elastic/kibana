@@ -305,10 +305,7 @@ describe('fromStoredFilter', () => {
         meta: {},
         query: {
           match: {
-            message: {
-              type: 'phrase',
-              query: 'test message',
-            },
+            message: 'test message',
           },
         },
       };
@@ -319,10 +316,7 @@ describe('fromStoredFilter', () => {
       if (isDSLFilter(result)) {
         expect(result.dsl.query).toEqual({
           match: {
-            message: {
-              type: 'phrase',
-              query: 'test message',
-            },
+            message: 'test message',
           },
         });
       }

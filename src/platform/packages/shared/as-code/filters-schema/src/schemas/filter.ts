@@ -241,7 +241,6 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
 /**
  * Schema for DSL filters
  * Includes field and params properties specific to DSL filters for preserving metadata
- * Note: Uses basePropertiesWithNegateSchema to allow negating entire DSL filter
  */
 export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
   dsl: schema.recordOf(schema.string(), schema.any(), {
