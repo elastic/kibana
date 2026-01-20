@@ -201,5 +201,6 @@ const toStreamQueryKql = (queryLink: QueryLink): StreamQueryKql => {
     feature: queryLink.query.feature,
     severity_score: queryLink.query.severity_score,
     evidence: queryLink.query.evidence,
+    esql: queryLink.query.esql,
   };
 };

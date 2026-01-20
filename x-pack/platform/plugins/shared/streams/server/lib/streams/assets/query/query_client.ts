@@ -11,7 +11,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { StreamQuery } from '@kbn/streams-schema';
-import { buildEsqlQuery } from '@kbn/streams-schema';
+import { buildEsqlQuery, buildEsqlWhereCondition } from '@kbn/streams-schema';
 import { isEqual, map, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
@@ -27,6 +27,7 @@ import {
   ASSET_ID,
   ASSET_TYPE,
   ASSET_UUID,
+  QUERY_ESQL_WHERE,
   QUERY_EVIDENCE,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
@@ -105,6 +106,7 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
 type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
   [QUERY_KQL_BODY]: string;
+  [QUERY_ESQL_WHERE]?: string;
   [QUERY_SEVERITY_SCORE]?: number;
 };
 
@@ -142,6 +144,11 @@ function fromStorage(link: StoredQueryLink): QueryLink {
       kql: {
         query: storageFields[QUERY_KQL_BODY],
       },
+      esql: storageFields[QUERY_ESQL_WHERE]
+        ? {
+            where: storageFields[QUERY_ESQL_WHERE],
+          }
+        : undefined,
       feature: storageFields[QUERY_FEATURE_NAME]
         ? {
             name: storageFields[QUERY_FEATURE_NAME],
@@ -163,6 +170,7 @@ function toStorage(name: string, request: QueryLinkRequest): StoredQueryLink {
     [STREAM_NAME]: name,
     [QUERY_TITLE]: query.title,
     [QUERY_KQL_BODY]: query.kql.query,
+    [QUERY_ESQL_WHERE]: buildEsqlWhereCondition(query),
     [QUERY_FEATURE_NAME]: query.feature ? query.feature.name : '',
     [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
     [QUERY_FEATURE_TYPE]: query.feature ? query.feature.type : '',
