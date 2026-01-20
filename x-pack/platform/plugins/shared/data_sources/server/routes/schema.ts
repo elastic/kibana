@@ -13,6 +13,7 @@ export interface DataSourceAPIResponse {
   id: string;
   name: string;
   type: string;
+  iconType: string;
   stackConnectors: string[];
   agentTools: string[];
   workflows: string[];
@@ -27,6 +28,7 @@ export function convertSOtoAPIResponse(
     id: savedObject.id,
     name: savedObject.attributes.name,
     type: savedObject.attributes.type,
+    iconType: savedObject.attributes.iconType,
     stackConnectors: savedObject.attributes.kscIds,
     agentTools: savedObject.attributes.toolIds,
     workflows: savedObject.attributes.workflowIds,

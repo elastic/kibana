@@ -12,6 +12,7 @@ export const DATA_SOURCE_SAVED_OBJECT_TYPE = 'data_connector';
 export interface DataSourceAttributes {
   name: string;
   type: string;
+  iconType: string;
   config: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
@@ -33,6 +34,19 @@ export const dataSourceSchemaV1 = schema.object({
   kscIds: schema.arrayOf(schema.string()),
 });
 
+export const dataSourceSchemaV2 = schema.object({
+  name: schema.string(),
+  type: schema.string(),
+  iconType: schema.string(),
+  config: schema.object({}),
+  createdAt: schema.string(),
+  updatedAt: schema.string(),
+  features: schema.maybe(schema.arrayOf(schema.string())),
+  workflowIds: schema.arrayOf(schema.string()),
+  toolIds: schema.arrayOf(schema.string()),
+  kscIds: schema.arrayOf(schema.string()),
+});
+
 export const dataSourceMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
@@ -45,6 +59,9 @@ export const dataSourceMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     type: {
+      type: 'keyword',
+    },
+    iconType: {
       type: 'keyword',
     },
     workflowIds: {
@@ -80,6 +97,20 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
         schemas: {
           forwardCompatibility: dataSourceSchemaV1.extends({}, { unknowns: 'ignore' }),
           create: dataSourceSchemaV1,
+        },
+      },
+      2: {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              iconType: { type: 'keyword' },
+            },
+          },
+        ],
+        schemas: {
+          forwardCompatibility: dataSourceSchemaV2.extends({}, { unknowns: 'ignore' }),
+          create: dataSourceSchemaV2,
         },
       },
     },
