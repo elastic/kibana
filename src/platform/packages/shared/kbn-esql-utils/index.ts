@@ -62,6 +62,8 @@ export {
   hasDateBreakdown,
   getProjectRoutingFromEsqlQuery,
   hasOnlySourceCommand,
+  isComputedColumn,
+  getQuerySummary,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';
