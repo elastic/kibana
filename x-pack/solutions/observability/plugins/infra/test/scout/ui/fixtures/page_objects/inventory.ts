@@ -42,6 +42,21 @@ export class InventoryPage {
 
   public readonly k8sPodWaffleContextMenu: Locator;
 
+  public readonly alertsHeaderButton: Locator;
+  public readonly alertsMenu: Locator;
+
+  public readonly inventoryAlertsMenuOption: Locator;
+  public readonly createInventoryRuleButton: Locator;
+
+  public readonly metricsAlertsMenuOption: Locator;
+  public readonly createMetricsThresholdRuleButton: Locator;
+
+  public readonly customThresholdAlertMenuOption: Locator;
+
+  public readonly alertsFlyout: Locator;
+  public readonly alertsFlyoutRuleDefinitionSection: Locator;
+  public readonly alertsFlyoutRuleTypeName: Locator;
+
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
     this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
@@ -73,6 +88,29 @@ export class InventoryPage {
     this.k8sPodWaffleContextMenu = this.page
       .getByRole('dialog')
       .filter({ hasText: 'Kubernetes Pod details' });
+
+    this.alertsHeaderButton = this.page.getByTestId('infrastructure-alerts-and-rules');
+    this.alertsMenu = this.page.getByTestId('metrics-alert-menu');
+
+    this.inventoryAlertsMenuOption = this.alertsMenu.getByTestId('inventory-alerts-menu-option');
+    this.createInventoryRuleButton = this.alertsMenu.getByTestId('inventory-alerts-create-rule');
+
+    this.metricsAlertsMenuOption = this.alertsMenu.getByTestId(
+      'metrics-threshold-alerts-menu-option'
+    );
+    this.createMetricsThresholdRuleButton = this.alertsMenu.getByTestId(
+      'metrics-threshold-alerts-create-rule'
+    );
+
+    this.customThresholdAlertMenuOption = this.alertsMenu.getByTestId(
+      'custom-threshold-alerts-menu-option'
+    );
+
+    this.alertsFlyout = this.page.getByRole('dialog').filter({ hasText: 'Create rule' });
+    this.alertsFlyoutRuleDefinitionSection = this.alertsFlyout.getByTestId('ruleDefinition');
+    this.alertsFlyoutRuleTypeName = this.alertsFlyout.getByTestId(
+      'ruleDefinitionHeaderRuleTypeName'
+    );
   }
 
   private async waitForNodesToLoad() {
