@@ -46,7 +46,7 @@ describe('IngestionCard', () => {
       renderWithI18n(
         <IngestionCard
           period="daily"
-          hasPrivileges={true}
+          hasPrivileges
           stats={makeStats(2048)}
           statsError={new Error('boom')}
         />
