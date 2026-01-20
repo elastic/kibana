@@ -9,8 +9,8 @@
 
 import type { ESQLFunction } from '../../../../../types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
-import type { FunctionParameterContext } from './types';
-import type { ICommandContext } from '../../../../registry/types';
+import type { ExpressionContext, FunctionParameterContext } from './types';
+import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getFunctionDefinition } from '../..';
 import { SignatureAnalyzer } from './signature_analyzer';
 import type { Signature } from '../../../types';
@@ -19,6 +19,13 @@ export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];
+
+/** Maps KQL suggestion types to ISuggestionItem kind values */
+export const KQL_TYPE_TO_KIND_MAP: Record<string, 'Value' | 'Operator' | 'Field'> = {
+  operator: 'Operator',
+  field: 'Field',
+  value: 'Value',
+};
 
 /**
  * Detects if function signatures accept arbitrary/complex expressions in parameters.
@@ -101,4 +108,53 @@ export function buildExpressionFunctionParameterContext(
     currentParameterIndex: analyzer.getCurrentParameterIndex(),
     validSignatures: analyzer.getValidSignatures(),
   };
+}
+
+/**
+ * Tries to get KQL suggestions if the cursor is inside a KQL function string parameter.
+ *
+ * Detects patterns like:
+ * - KQL("""query here...""")
+ *
+ * Returns null if not inside a KQL function string, allowing normal suggestion flow.
+ */
+export async function getKqlSuggestionsIfApplicable(
+  ctx: ExpressionContext
+): Promise<ISuggestionItem[] | null> {
+  const { innerText, callbacks } = ctx;
+
+  const getKqlSuggestions = callbacks?.getKqlSuggestions;
+
+  if (!getKqlSuggestions) {
+    return null;
+  }
+
+  // Check if we're inside a KQL function call with triple quotes
+  const kqlMatch = innerText.match(/\bkql\s*\(\s*"""([\s\S]*)$/i);
+
+  if (!kqlMatch) {
+    return null;
+  }
+
+  const kqlQuery = kqlMatch[1];
+  const cursorPositionInKql = kqlQuery.length;
+
+  try {
+    // Get KQL suggestions from the autocomplete service
+    const suggestions = await getKqlSuggestions(kqlQuery, cursorPositionInKql);
+
+    if (!suggestions || suggestions.length === 0) {
+      return null;
+    }
+
+    // Transform KQL suggestions to ISuggestionItem format
+    return suggestions.map((suggestion) => ({
+      label: suggestion.text,
+      text: suggestion.text,
+      kind: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
+      detail: typeof suggestion.description === 'string' ? suggestion.description : undefined,
+    }));
+  } catch (error) {
+    return null;
+  }
 }

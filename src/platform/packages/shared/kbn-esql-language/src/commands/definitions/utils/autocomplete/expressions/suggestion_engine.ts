@@ -31,7 +31,7 @@ import type {
   SuggestForExpressionParams,
   SuggestForExpressionResult,
 } from './types';
-import { isNullCheckOperator } from './utils';
+import { getKqlSuggestionsIfApplicable, isNullCheckOperator } from './utils';
 
 const WHITESPACE_REGEX = /\s/;
 const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
@@ -45,7 +45,7 @@ export async function suggestForExpression(
   const baseCtx = buildContext(params);
   const computed = computeDerivedState(baseCtx);
 
-  const kqlSuggestions = await tryGetKqlSuggestions(baseCtx);
+  const kqlSuggestions = await getKqlSuggestionsIfApplicable(baseCtx);
 
   if (kqlSuggestions !== null) {
     return {
@@ -122,54 +122,6 @@ async function trySuggestForPartialOperators(
   }
 
   return dispatchPartialOperators(detection.operatorName, detection, ctx);
-}
-
-/**
- * Tries to get KQL suggestions if the cursor is inside a KQL function string parameter.
- *
- * Detects patterns like:
- * - KQL("/cursor here")
- * - KQL("""/cursor here""")
- *
- * Returns null if not inside a KQL function string, allowing normal suggestion flow.
- */
-async function tryGetKqlSuggestions(ctx: ExpressionContext): Promise<ISuggestionItem[] | null> {
-  const { innerText, callbacks } = ctx;
-
-  const getKqlSuggestions = callbacks?.getKqlSuggestions;
-
-  if (!getKqlSuggestions) {
-    return null;
-  }
-
-  // Check if we're inside a KQL function call with triple quotes
-  const kqlMatch = innerText.match(/\bkql\s*\(\s*"""([\s\S]*)$/i);
-
-  if (!kqlMatch) {
-    return null;
-  }
-
-  const kqlQuery = kqlMatch[1];
-  const cursorPositionInKql = kqlQuery.length;
-
-  try {
-    // Get KQL suggestions from the autocomplete service
-    const suggestions = await getKqlSuggestions(kqlQuery, cursorPositionInKql);
-
-    if (!suggestions || suggestions.length === 0) {
-      return null;
-    }
-
-    // Transform KQL suggestions to ISuggestionItem format
-    return suggestions.map((suggestion) => ({
-      label: suggestion.text,
-      text: suggestion.text,
-      kind: 'Value' as const,
-      detail: typeof suggestion.description === 'string' ? suggestion.description : undefined,
-    }));
-  } catch (error) {
-    return null;
-  }
 }
 
 /** Derives innerText and option flags from the incoming params.*/
