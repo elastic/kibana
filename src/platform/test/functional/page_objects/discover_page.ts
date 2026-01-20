@@ -94,7 +94,15 @@ export class DiscoverPageObject extends FtrService {
     // that issue.  But it does typically take about 3 retries to
     // complete with the expected searchName.
     await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
-      return (await this.getCurrentQueryName()) === searchName;
+      const [first, last] = await Promise.all([
+        this.globalNav.getFirstBreadcrumb(),
+        this.getCurrentQueryName(),
+      ]);
+
+      return (
+        (first === 'Discover' && last === searchName) ||
+        (first === 'Dashboards' && last === `Editing ${searchName}`)
+      );
     });
   }
 
