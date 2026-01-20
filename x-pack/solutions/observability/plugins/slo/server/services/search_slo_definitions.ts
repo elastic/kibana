@@ -8,7 +8,6 @@
 import type { SearchSLODefinitionsParams, SearchSLODefinitionResponse } from '@kbn/slo-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { getSummaryIndices } from './utils/get_summary_indices';
 import type { SLOSettings } from '../domain/models';
 
@@ -105,8 +104,10 @@ export class SearchSLODefinitions {
         const sloSrc = hit?._source?.slo ?? {};
         const kibanaUrl = hit?._source?.kibanaUrl;
         const indexName = hit?._index;
-        const remoteName =
-          indexName && isCCSRemoteIndexName(indexName) ? hit?.fields?.remoteName : undefined;
+        const normalizedRemoteName = Array.isArray(hit?.fields?.remoteName)
+          ? hit.fields.remoteName[0]
+          : hit?.fields?.remoteName;
+        const remoteName = normalizedRemoteName === 'local' ? undefined : normalizedRemoteName;
 
         const groupBy = normalizeGroupBy(sloSrc.groupBy);
 
