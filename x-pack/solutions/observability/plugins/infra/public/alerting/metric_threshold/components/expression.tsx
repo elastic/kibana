@@ -332,7 +332,7 @@ export const Expressions: React.FC<Props> = (props) => {
     }
 
     if (typeof ruleParams.noDataBehavior === 'undefined') {
-      setRuleParams('noDataBehavior', 'recover');
+      setRuleParams('noDataBehavior', getNoDataBehaviorValue(ruleParams, hasGroupBy));
     }
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
