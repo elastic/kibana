@@ -7,6 +7,7 @@
 
 import type { ReactElement } from 'react';
 import React from 'react';
+import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TourCallout } from './tour_callout';
@@ -16,11 +17,13 @@ export const EisKnowledgeBaseCallout = ({
   children,
   isOpen = true,
   zIndex,
+  anchorPosition = 'downCenter',
   dismissCallout,
 }: {
   children: ReactElement;
   isOpen?: boolean;
   zIndex?: number;
+  anchorPosition?: EuiTourStepProps['anchorPosition'];
   dismissCallout: () => void;
 }) => {
   const { docLinks } = useKibana().services;
@@ -36,7 +39,7 @@ export const EisKnowledgeBaseCallout = ({
       })}
       step={1}
       stepsTotal={1}
-      anchorPosition="downLeft"
+      anchorPosition={anchorPosition}
       isOpen={isOpen}
       hasArrow
       maxWidth={320}
