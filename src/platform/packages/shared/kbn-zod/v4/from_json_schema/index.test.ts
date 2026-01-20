@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '../v4';
+import { z } from '..';
 import { fromJSONSchema } from '.';
 import type { ZodType, ZodDiscriminatedUnion } from 'zod/v4';
 
