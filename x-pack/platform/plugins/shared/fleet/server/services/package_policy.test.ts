@@ -590,6 +590,9 @@ describe('Package policy service', () => {
           },
         },
       });
+      jest
+        .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
+        .mockReturnValue(soClient);
 
       const result = await packagePolicyService.create(
         soClient,
@@ -2974,6 +2977,9 @@ describe('Package policy service', () => {
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
         setupSOClientMocks(savedObjectsClient, testedPolicyIds, testedPolicyIds);
+        jest
+          .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
+          .mockReturnValue(savedObjectsClient);
 
         await callPackagePolicyServiceUpdate(
           savedObjectsClient,
@@ -3000,6 +3006,9 @@ describe('Package policy service', () => {
         const updatedPolicyIds = [...testedPolicyIds].splice(1, 2);
 
         setupSOClientMocks(savedObjectsClient, testedPolicyIds, updatedPolicyIds);
+        jest
+          .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
+          .mockReturnValue(savedObjectsClient);
 
         await callPackagePolicyServiceUpdate(
           savedObjectsClient,
@@ -3046,6 +3055,9 @@ describe('Package policy service', () => {
         const updatedPolicyIds = [...testedPolicyIds, 'test-agent-policy-4'];
 
         setupSOClientMocks(savedObjectsClient, testedPolicyIds, updatedPolicyIds);
+        jest
+          .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
+          .mockReturnValue(savedObjectsClient);
 
         await callPackagePolicyServiceUpdate(
           savedObjectsClient,
@@ -8062,6 +8074,9 @@ describe('Package policy service', () => {
           withoutSpaceExtensions: soClient,
         })
       );
+      jest
+        .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
+        .mockReturnValue(soClient);
 
       await packagePolicyService.removeOutputFromAll(esClient, 'output-id-123');
 
