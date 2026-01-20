@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformEnhancementsOut } from './transform_enhancements_out';
+import { convertToDrilldowns } from './convert_to_drilldowns';
 
-describe('transformEnhancementsOut', () => {
+describe('convertToDrilldowns', () => {
   test('should convert dashboard drilldown event', () => {
     const enhancements = {
       dynamicActions: {
@@ -30,7 +30,7 @@ describe('transformEnhancementsOut', () => {
         ],
       },
     };
-    expect(transformEnhancementsOut(enhancements)).toMatchInlineSnapshot(`
+    expect(convertToDrilldowns(enhancements)).toMatchInlineSnapshot(`
       Array [
         Object {
           "config": Object {
