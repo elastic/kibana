@@ -26,7 +26,7 @@ const RestorableStateDocViewBase: React.FC<{
     >
       <EuiFlexItem grow={false}>
         <EuiCallOut title="DocView restorable state" color="primary" iconType="info">
-          By wrapping your custom <code>DocViewer</code> with <code>withRestorableState</code> and
+          By wrapping your custom <code>DocView</code> with <code>withRestorableState</code> and
           using <code>useRestorableState</code>, you can easily add restorable state to your
           component. State is coupled to the specific tab and will be restored when navigating away
           and back to the tab as long as you don&apos;t close the flyout or change the displayed
