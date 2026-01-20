@@ -6,5 +6,8 @@
  */
 
 import type { RouteDependencies } from './types';
+import { registerGetInferenceEndpointsRoute } from './get_inference_endpoints';
 
-export const registerRoutes = (dependencies: RouteDependencies) => {};
+export const registerRoutes = ({ router }: RouteDependencies) => {
+  registerGetInferenceEndpointsRoute(router);
+};
