@@ -140,6 +140,10 @@ src/core/packages/chrome/layout/core-chrome-layout-feature-flags @elastic/appex-
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
 src/core/packages/chrome/navigation @elastic/appex-sharedux
 src/core/packages/chrome/sidebar @elastic/appex-sharedux
+src/core/packages/chrome/sidebar-components @elastic/appex-sharedux
+src/core/packages/chrome/sidebar-context @elastic/appex-sharedux
+src/core/packages/chrome/sidebar-internal @elastic/appex-sharedux
+src/core/packages/chrome/sidebar-mocks @elastic/appex-sharedux
 src/core/packages/config/server-internal @elastic/kibana-core
 src/core/packages/custom-branding/browser @elastic/appex-sharedux
 src/core/packages/custom-branding/browser-internal @elastic/appex-sharedux
