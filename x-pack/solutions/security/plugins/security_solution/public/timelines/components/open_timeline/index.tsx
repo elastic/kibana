@@ -137,7 +137,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   }) => {
     const dispatch = useDispatch();
     const { startTransaction } = useStartTransaction();
-    const notesId = useSelector((state: State) => state.notes.ids);
+    const noteIds = useSelector((state: State) => state.notes.ids);
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
       Record<string, JSX.Element>
@@ -406,8 +406,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     useEffect(() => {
       setItemIdToExpandedNotesRowMap((prev) => {
         const newNotesMap: Record<string, JSX.Element> = { ...prev };
+        const noteIdsSet = new Set(noteIds);
         for (const noteId of Object.keys(newNotesMap)) {
-          if (!notesId.includes(noteId)) {
+          if (!noteIdsSet.has(noteId)) {
             delete newNotesMap[noteId];
           }
         }
@@ -415,7 +416,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         return newNotesMap;
       });
       refetch();
-    }, [notesId, timelineSavedObjectId, refetch]);
+    }, [noteIds, timelineSavedObjectId, refetch]);
 
     return !isModal ? (
       <OpenTimeline

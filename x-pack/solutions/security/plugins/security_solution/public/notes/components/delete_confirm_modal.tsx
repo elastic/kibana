@@ -42,8 +42,8 @@ export const DeleteConfirmModal = React.memo(
     onConfirmCallback,
   }: {
     refetch?: boolean;
-    onCancelCallback?: Function;
-    onConfirmCallback?: Function;
+    onCancelCallback?: () => void;
+    onConfirmCallback?: () => void;
   }) => {
     const dispatch = useDispatch();
     const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
