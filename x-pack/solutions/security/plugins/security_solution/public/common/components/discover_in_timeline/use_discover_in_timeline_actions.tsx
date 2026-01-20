@@ -122,19 +122,21 @@ export const useDiscoverInTimelineActions = (
         try {
           savedSearch = await savedSearchService.get(newSavedSearchId);
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
-          discoverStateContainer.current?.actions.stopSyncing();
-          discoverStateContainer.current?.actions.initializeAndSync();
-          await discoverStateContainer.current?.internalState.dispatch(
-            discoverStateContainer.current?.injectCurrentTab(
-              discoverStateContainer.current?.internalStateActions.updateAppStateAndReplaceUrl
-            )({
+          const discoverDispatch = discoverStateContainer.current?.internalState.dispatch;
+          const injectCurrentTab = discoverStateContainer.current?.injectCurrentTab;
+          const internalStateActions = discoverStateContainer.current?.internalStateActions;
+
+          discoverDispatch(injectCurrentTab(internalStateActions.stopSyncing)());
+          discoverDispatch(injectCurrentTab(internalStateActions.initializeAndSync)());
+
+          await discoverDispatch(
+            injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
               appState: savedSearchState?.appState ?? {},
             })
           );
           setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState());
-          const discoverState = discoverStateContainer.current;
-          discoverState?.internalState.dispatch(
-            discoverState.injectCurrentTab(discoverState.internalStateActions.updateGlobalState)({
+          discoverDispatch(
+            injectCurrentTab(internalStateActions.updateGlobalState)({
               globalState: {
                 timeRange: savedSearch.timeRange ?? defaultDiscoverTimeRange,
               },

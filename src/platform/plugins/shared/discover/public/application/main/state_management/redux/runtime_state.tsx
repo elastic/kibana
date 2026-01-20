@@ -196,14 +196,15 @@ const useRuntimeStateContext = () => {
 export const useCurrentDataView = () => useRuntimeStateContext().currentDataView;
 export const useAdHocDataViews = () => useRuntimeStateContext().adHocDataViews;
 
-class TabSyncSubscription {
+export class TabSyncSubscription {
   private unsubscribeFn: (() => void) | undefined;
 
-  onSubscribed({ unsubscribeFn }: { unsubscribeFn: () => void }) {
+  onSubscribe({ unsubscribeFn }: { unsubscribeFn: () => void }) {
     this.unsubscribeFn = unsubscribeFn;
   }
 
   unsubscribe() {
     this.unsubscribeFn?.();
+    this.unsubscribeFn = undefined;
   }
 }

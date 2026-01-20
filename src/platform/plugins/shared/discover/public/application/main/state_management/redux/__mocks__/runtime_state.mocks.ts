@@ -18,6 +18,7 @@ import {
   type ReactiveTabRuntimeState,
   type RuntimeStateManager,
   type UnifiedHistogramConfig,
+  TabSyncSubscription,
 } from '../runtime_state';
 
 export function getTabRuntimeStateMock(
@@ -25,6 +26,7 @@ export function getTabRuntimeStateMock(
 ): ReactiveTabRuntimeState {
   return {
     stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
+    syncSubscription: new TabSyncSubscription(),
     customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
       undefined
     ),
