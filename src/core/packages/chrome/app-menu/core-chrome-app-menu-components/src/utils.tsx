@@ -229,13 +229,19 @@ export const getPopoverPanels = ({
   const hasActionItems = Boolean(primaryActionItem || secondaryActionItem);
   let currentPanelId = startPanelId;
 
-  const processItems = (
-    itemsToProcess: AppMenuPopoverItem[],
-    panelId: number,
-    parentTitle?: string,
-    parentPopoverTestId?: string,
-    parentPopoverWidth?: number
-  ) => {
+  const processItems = ({
+    itemsToProcess,
+    panelId,
+    parentTitle,
+    parentPopoverTestId,
+    parentPopoverWidth,
+  }: {
+    itemsToProcess: AppMenuPopoverItem[];
+    panelId: number;
+    parentTitle?: string;
+    parentPopoverTestId?: string;
+    parentPopoverWidth?: number;
+  }) => {
     const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
     if (parentPopoverTestId) {
@@ -256,13 +262,13 @@ export const getPopoverPanels = ({
         // popoverWidth may exist on items that are AppMenuItemType (e.g., overflow items)
         const itemPopoverWidth =
           'popoverWidth' in item ? (item as { popoverWidth?: number }).popoverWidth : undefined;
-        processItems(
-          item.items,
-          childPanelId,
-          item.label,
-          item.popoverTestId,
-          itemPopoverWidth ?? DEFAULT_POPOVER_WIDTH
-        );
+        processItems({
+          itemsToProcess: item.items,
+          panelId: childPanelId,
+          parentTitle: item.label,
+          parentPopoverTestId: item.popoverTestId,
+          parentPopoverWidth: itemPopoverWidth ?? DEFAULT_POPOVER_WIDTH,
+        });
         panelItems.push(
           mapAppMenuItemToPanelItem(item, childPanelId, onClose, onCloseOverflowButton)
         );
@@ -283,7 +289,11 @@ export const getPopoverPanels = ({
     });
   };
 
-  processItems(items, startPanelId, undefined, undefined, rootPanelWidth);
+  processItems({
+    itemsToProcess: items,
+    panelId: startPanelId,
+    parentPopoverWidth: rootPanelWidth,
+  });
 
   /**
    * Action items are only added to the main panel and only in lower breakpoints (below "m").
