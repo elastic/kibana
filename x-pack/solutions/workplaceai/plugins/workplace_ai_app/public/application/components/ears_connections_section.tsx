@@ -113,7 +113,7 @@ export const EarsConnectionsSection: React.FC = () => {
         <p>
           <FormattedMessage
             id="xpack.workplaceai.gettingStarted.earsSection.description"
-            defaultMessage="Connect to external services, seemlessly."
+            defaultMessage="Connect to external services, seamlessly."
           />
         </p>
       </EuiText>
