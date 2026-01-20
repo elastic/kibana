@@ -547,4 +547,33 @@ steps:
       },
     });
   });
+
+  it('should not treat inputs as steps', () => {
+    const yaml = `
+name: test
+inputs:
+  - name: people
+    type: array
+    default:
+      - alice
+      - bob
+  - name: greeting
+    type: string
+    default: Hello
+steps:
+  - name: step1
+    type: console
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    // Should only have step1, not the inputs
+    expect(Object.keys(result.steps)).toHaveLength(1);
+    expect(result.steps).toHaveProperty('step1');
+    expect(result.steps).not.toHaveProperty('people');
+    expect(result.steps).not.toHaveProperty('greeting');
+    expect(result.steps.step1.stepId).toBe('step1');
+    expect(result.steps.step1.stepType).toBe('console');
+  });
 });
