@@ -26,7 +26,9 @@ describe('IlmPhaseSelect', () => {
   it('renders the trigger button label', () => {
     render(
       <IlmPhaseSelect
-        button={<EuiButtonEmpty>Add data phase and downsampling</EuiButtonEmpty>}
+        renderButton={(props) => (
+          <EuiButtonEmpty {...props}>Add data phase and downsampling</EuiButtonEmpty>
+        )}
         selectedPhases={[]}
         onSelect={() => {}}
       />
@@ -40,7 +42,9 @@ describe('IlmPhaseSelect', () => {
     const onSelect = jest.fn();
     render(
       <IlmPhaseSelect
-        button={<EuiButtonEmpty>Add data phase and downsampling</EuiButtonEmpty>}
+        renderButton={(props) => (
+          <EuiButtonEmpty {...props}>Add data phase and downsampling</EuiButtonEmpty>
+        )}
         selectedPhases={[]}
         onSelect={onSelect}
       />
@@ -64,7 +68,9 @@ describe('IlmPhaseSelect', () => {
   it('omits already-selected phases from the list', () => {
     render(
       <IlmPhaseSelect
-        button={<EuiButtonEmpty>Add data phase and downsampling</EuiButtonEmpty>}
+        renderButton={(props) => (
+          <EuiButtonEmpty {...props}>Add data phase and downsampling</EuiButtonEmpty>
+        )}
         selectedPhases={['cold']}
         onSelect={() => {}}
         initialIsOpen={true}
@@ -77,7 +83,9 @@ describe('IlmPhaseSelect', () => {
   it('disables the trigger when all phases are already selected', () => {
     render(
       <IlmPhaseSelect
-        button={<EuiButtonEmpty>Add data phase and downsampling</EuiButtonEmpty>}
+        renderButton={(props) => (
+          <EuiButtonEmpty {...props}>Add data phase and downsampling</EuiButtonEmpty>
+        )}
         selectedPhases={['hot', 'warm', 'cold', 'frozen', 'delete']}
         onSelect={() => {}}
       />
@@ -89,7 +97,17 @@ describe('IlmPhaseSelect', () => {
     const onClick = jest.fn();
     render(
       <IlmPhaseSelect
-        button={<EuiButtonEmpty onClick={onClick}>Add data phase and downsampling</EuiButtonEmpty>}
+        renderButton={(props) => (
+          <EuiButtonEmpty
+            {...props}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              onClick(e);
+              props.onClick(e);
+            }}
+          >
+            Add data phase and downsampling
+          </EuiButtonEmpty>
+        )}
         selectedPhases={[]}
         onSelect={() => {}}
       />
@@ -104,11 +122,11 @@ describe('IlmPhaseSelect', () => {
   it('uses a custom aria-label from the provided button', () => {
     render(
       <IlmPhaseSelect
-        button={
-          <EuiButtonEmpty aria-label="Custom trigger label">
+        renderButton={(props) => (
+          <EuiButtonEmpty {...props} aria-label="Custom trigger label">
             Add data phase and downsampling
           </EuiButtonEmpty>
-        }
+        )}
         selectedPhases={[]}
         onSelect={() => {}}
       />

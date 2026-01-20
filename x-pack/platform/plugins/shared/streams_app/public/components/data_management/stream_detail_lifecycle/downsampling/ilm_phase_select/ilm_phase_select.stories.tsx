@@ -28,11 +28,11 @@ export const Default: Story = {
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 140 }}>
           <EuiFlexItem grow={false}>
             <IlmPhaseSelect
-              button={
-                <EuiButton color="text" size="s" iconType="arrowDown" iconSide="right">
+              renderButton={(props) => (
+                <EuiButton {...props} color="text" size="s" iconType="arrowDown" iconSide="right">
                   Add data phase and downsampling
                 </EuiButton>
-              }
+              )}
               selectedPhases={selectedPhases}
               onSelect={(phase) => {
                 action('onSelect')(phase);

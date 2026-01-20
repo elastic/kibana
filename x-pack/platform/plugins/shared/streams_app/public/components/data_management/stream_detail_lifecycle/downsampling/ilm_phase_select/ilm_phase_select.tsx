@@ -25,12 +25,15 @@ const OPTIONS = ['hot', 'warm', 'cold', 'frozen', 'delete'] as const;
 
 export type IlmPhaseSelectOption = (typeof OPTIONS)[number];
 
+export interface IlmPhaseSelectRenderButtonProps {
+  disabled: boolean;
+  onClick: React.MouseEventHandler;
+  'data-test-subj': string;
+  'aria-label': string;
+}
+
 export interface IlmPhaseSelectProps {
-  /**
-   * Trigger element for the popover, similar to `EuiPopover`'s `button` prop.
-   * The component will clone it to wire up open/close behavior and disabled state.
-   */
-  button: React.ReactElement;
+  renderButton: (props: IlmPhaseSelectRenderButtonProps) => React.ReactElement;
   selectedPhases: IlmPhaseSelectOption[];
   onSelect: (phase: IlmPhaseSelectOption) => void;
   disabled?: boolean;
@@ -58,7 +61,7 @@ const PHASE_LABELS: Record<IlmPhaseSelectOption, string> = {
 };
 
 export const IlmPhaseSelect = ({
-  button,
+  renderButton,
   selectedPhases,
   onSelect,
   disabled = false,
@@ -121,19 +124,13 @@ export const IlmPhaseSelect = ({
     ]
   );
 
-  const trigger = React.cloneElement(button, {
-    ...(button.props ?? {}),
-    disabled: isDisabled || button.props?.disabled,
-    onClick: (e: unknown) => {
-      button.props?.onClick?.(e);
-      togglePopover();
-    },
+  const trigger = renderButton({
+    disabled: isDisabled,
+    onClick: () => togglePopover(),
     'data-test-subj': `${dataTestSubj}Button`,
-    'aria-label':
-      button.props?.['aria-label'] ??
-      i18n.translate('xpack.streams.ilmPhaseSelect.buttonAriaLabel', {
-        defaultMessage: 'Add ILM phase button',
-      }),
+    'aria-label': i18n.translate('xpack.streams.ilmPhaseSelect.buttonAriaLabel', {
+      defaultMessage: 'Add ILM phase button',
+    }),
   });
 
   return (
