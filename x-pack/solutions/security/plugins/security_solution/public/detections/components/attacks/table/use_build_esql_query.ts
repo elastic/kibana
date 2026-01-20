@@ -59,7 +59,7 @@ export const useBuildEsqlQuery = (props: UseBuildEsqlQueryProps): string => {
 
         // Sorting criteria
         sorting_criteria = MAX(@timestamp)
-        // sorting_criteria = MAX(kibana.alert.attack_discovery.title)
+        // sorting_criteria = MAX(to_lower(kibana.alert.attack_discovery.title))
         // sorting_criteria = COUNT(CASE(is_detection_alert == true, 1, NULL))
         // detection_alert_count = COUNT(CASE(is_detection_alert == true, 1, NULL))
 
