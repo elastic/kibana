@@ -80,7 +80,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Data ingestion and Fleet**:
 * Enables integration knowledge generation by default and adds a UI setting that allows you to opt out of the integration knowledge indexing [#245080]({{kib-pull}}245080).
 * Enables rolling back integrations to the previously installed version [#240761]({{kib-pull}}240761).
-* Adds capability for rolling back a recent upgrade of a Fleet-managed Elastic Agent using Fleet UI or API [#247398]({{kib-pull}}247398).
+* Adds capability for rolling back a recent upgrade of a Fleet-managed Elastic Agent using Fleet UI or API [#249416]({{kib-pull}}249416).
 * Adds functionality for removing root privilege from Fleet-managed agents if applicable [#237790]({{kib-pull}}237790).
 * Adds **Advanced Internal YAML Settings** field to the agent policy settings UI [#245819]({{kib-pull}}245819).
 * Redesigns the Actions menu in Fleet, placing commonly used actions at the top level and organizing other actions into nested menus by use case [#245174]({{kib-pull}}245174).
