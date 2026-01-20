@@ -47,7 +47,7 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
   return [
     {
       label: UnmappedFieldsStrategy.FAIL,
-      text: UnmappedFieldsStrategy.FAIL,
+      text: `"${UnmappedFieldsStrategy.FAIL}";`,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.failDoc', {
         defaultMessage: 'Fails the query if unmapped fields are present',
@@ -55,7 +55,7 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
     },
     {
       label: UnmappedFieldsStrategy.NULLIFY,
-      text: UnmappedFieldsStrategy.NULLIFY,
+      text: `"${UnmappedFieldsStrategy.NULLIFY}";`,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.nullifyDoc', {
         defaultMessage: 'Treats unmapped fields as null values',
@@ -63,7 +63,7 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
     },
     {
       label: UnmappedFieldsStrategy.LOAD,
-      text: UnmappedFieldsStrategy.LOAD,
+      text: `"${UnmappedFieldsStrategy.LOAD}";`,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
         defaultMessage: 'Attempts to load the fields from the source',
