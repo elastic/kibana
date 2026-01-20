@@ -17,12 +17,12 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
   useEuiTheme,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { EuiMarkdownFormat } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
@@ -33,7 +33,7 @@ import {
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
-import { useMarkdownPluginsWithCursor, CURSOR } from './loading_cursor';
+import { LoadingCursor } from './loading_cursor';
 
 export interface AiInsightAttachment {
   type: string;
@@ -68,10 +68,6 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
 
   const { isLoading, error, summary, context, wasStopped, fetch, stop, regenerate } =
     useStreamingAiInsight(createStream);
-
-  const { parsingPluginList, processingPluginList } = useMarkdownPluginsWithCursor(
-    euiTheme.colors.text
-  );
 
   const handleStartConversation = useCallback(() => {
     if (!agentBuilder?.openConversationFlyout) return;
@@ -143,13 +139,8 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
             <AiInsightErrorBanner error={error} onRetry={fetch} />
           ) : (
             <EuiText size="s">
-              <EuiMarkdownFormat
-                textSize="s"
-                parsingPluginList={parsingPluginList}
-                processingPluginList={processingPluginList}
-              >
-                {`${summary}${isLoading ? CURSOR : ''}`}
-              </EuiMarkdownFormat>
+              <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
+              {isLoading && <LoadingCursor />}
             </EuiText>
           )}
 

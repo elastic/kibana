@@ -5,98 +5,33 @@
  * 2.0.
  */
 
-import { css } from '@emotion/css';
-import classNames from 'classnames';
-import type { Code, InlineCode, Parent, Text } from 'mdast';
-import type { Node } from 'unist';
-import React, { useMemo } from 'react';
-import {
-  getDefaultEuiMarkdownParsingPlugins,
-  getDefaultEuiMarkdownProcessingPlugins,
-} from '@elastic/eui';
+import { css } from '@emotion/react';
+import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
 
-const ANIMATION_TIME = 1;
+export const LoadingCursor = () => {
+  const { euiTheme } = useEuiTheme();
 
-const Cursor = ({ textColor }: { textColor: string }) => {
-  const cursorCss = css`
-    @keyframes blink {
-      0% {
-        opacity: 0;
-      }
-      50% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0;
-      }
-    }
-
-    animation: blink ${ANIMATION_TIME}s infinite;
-    width: 10px;
-    height: 16px;
-    vertical-align: middle;
-    display: inline-block;
-    background-color: ${textColor};
-    opacity: 0.25;
-  `;
-
-  return <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
+  return (
+    <span
+      css={css`
+        @keyframes blink {
+          0%,
+          100% {
+            opacity: 0;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+        display: inline-block;
+        width: 10px;
+        height: 16px;
+        margin-left: 2px;
+        vertical-align: middle;
+        background-color: ${euiTheme.colors.darkShade};
+        animation: blink 1s infinite;
+      `}
+    />
+  );
 };
-
-// a weird combination of different whitespace chars to make sure it stays
-// invisible even when we cannot properly parse the text while still being
-// unique
-export const CURSOR = ` ᠎  `;
-
-const loadingCursorPlugin = () => {
-  const visitor = (node: Node, parent?: Parent) => {
-    if ('children' in node) {
-      const nodeAsParent = node as Parent;
-      nodeAsParent.children.forEach((child) => {
-        visitor(child, nodeAsParent);
-      });
-    }
-
-    if (node.type !== 'text' && node.type !== 'inlineCode' && node.type !== 'code') {
-      return;
-    }
-
-    const textNode = node as Text | InlineCode | Code;
-
-    const indexOfCursor = textNode.value.indexOf(CURSOR);
-    if (indexOfCursor === -1) {
-      return;
-    }
-
-    textNode.value = textNode.value.replace(CURSOR, '');
-
-    const indexOfNode = parent!.children.indexOf(textNode);
-    parent!.children.splice(indexOfNode + 1, 0, {
-      type: 'cursor' as Text['type'],
-      value: CURSOR,
-    });
-  };
-
-  return (tree: Node) => {
-    visitor(tree);
-  };
-};
-
-export function useMarkdownPluginsWithCursor(textColor: string) {
-  return useMemo(() => {
-    const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
-
-    const { components } = processingPlugins[1][1];
-
-    processingPlugins[1][1].components = {
-      ...components,
-      cursor: () => <Cursor textColor={textColor} />,
-    };
-
-    return {
-      parsingPluginList: [loadingCursorPlugin, ...parsingPlugins],
-      processingPluginList: processingPlugins,
-    };
-  }, [textColor]);
-}
