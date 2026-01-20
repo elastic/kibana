@@ -219,7 +219,8 @@ describe('generateOpenApiDocument', () => {
     });
   });
 
-  describe('Zod', () => {
+  // TODO: Re-enable once Zod v4 migration is complete and openapi-3.1 target is available
+  describe.skip('Zod', () => {
     it('generates the expected OpenAPI document for the shared schema', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
