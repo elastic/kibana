@@ -18,55 +18,39 @@ import type { EndpointScript } from '../../../../../../common/endpoint/types';
 import { APP_SCRIPTS_LIBRARY_PATH, SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
+import { EndpointScriptsGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 const createFileHash = () =>
   Array.from(Array(64), () => Math.floor(Math.random() * 36).toString(36)).join('');
-const defaultProps: ScriptsLibraryTableProps = {
-  items: [
-    {
-      id: 'script-1',
-      name: 'Script One',
-      description: 'This is the first script',
-      createdAt: '2026-01-13T10:10:00Z',
-      createdBy: 'user1',
-      updatedAt: '2026-01-13T10:15:00Z',
-      updatedBy: 'user2',
-      platform: [],
-      fileId: 'file-1-id',
-      fileName: 'ScriptOne.sh',
-      fileSize: 1234,
-      fileHash: createFileHash(),
-      requiresInput: false,
-      downloadUri: '',
-      tags: Object.keys(SCRIPT_TAGS) as EndpointScript['tags'],
-      version: '',
-    },
-  ],
-  onChange: jest.fn(),
-  queryParams: {
-    page: 1,
-    pageSize: 10,
-    sortField: 'name',
-    sortDirection: 'asc',
-  },
-  totalItemCount: 1,
-  isLoading: false,
-  searchParams: '',
-  sort: {
-    field: 'name',
-    direction: 'asc',
-  },
-  'data-test-subj': 'test',
-};
+
 describe('ScriptsLibraryTable', () => {
   let userEve: UserEvent;
   let render: (props?: ScriptsLibraryTableProps) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
+  let scriptsGenerator: EndpointScriptsGenerator;
+  const defaultProps: ScriptsLibraryTableProps = {
+    items: [],
+    onChange: jest.fn(),
+    queryParams: {
+      page: 1,
+      pageSize: 10,
+      sortField: 'name',
+      sortDirection: 'asc',
+    },
+    totalItemCount: 1,
+    isLoading: false,
+    searchParams: '',
+    sort: {
+      field: 'name',
+      direction: 'asc',
+    },
+    'data-test-subj': 'test',
+  };
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -77,6 +61,7 @@ describe('ScriptsLibraryTable', () => {
   });
 
   beforeEach(() => {
+    scriptsGenerator = new EndpointScriptsGenerator('seed');
     useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: getEndpointAuthzInitialStateMock(),
     });
@@ -84,6 +69,17 @@ describe('ScriptsLibraryTable', () => {
     userEve = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
+
+    defaultProps.items = [
+      scriptsGenerator.generate({
+        id: 'script-1',
+        name: 'Script One',
+        tags: Object.keys(SCRIPT_TAGS) as EndpointScript['tags'],
+        updatedBy: 'user2',
+        updatedAt: '2026-01-13T10:15:00Z',
+      }),
+    ];
+
     render = (props?: ScriptsLibraryTableProps) => {
       renderResult = mockedContext.render(<ScriptsLibraryTable {...(props ?? defaultProps)} />);
       return renderResult;
@@ -137,36 +133,17 @@ describe('ScriptsLibraryTable', () => {
   describe('With records', () => {
     it('shows correct number of rows', () => {
       reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+
       render({
         ...defaultProps,
-        items: [
-          ...defaultProps.items,
-          {
-            id: 'script-2',
-            name: 'Script Two',
-            description: 'This is the second script',
-            createdAt: '2023-01-03T00:00:00Z',
-            createdBy: 'user3',
-            updatedAt: '2023-01-04T00:00:00Z',
-            updatedBy: 'user4',
-            platform: [],
-            fileId: 'file-2-id',
-            fileName: 'ScriptTwo.sh',
-            fileSize: 5678,
-            fileHash: createFileHash(),
-            requiresInput: true,
-            downloadUri: '',
-            tags: Object.keys(SCRIPT_TAGS) as EndpointScript['tags'],
-            version: '',
-          },
-        ],
-        totalItemCount: 2,
+        items: scriptsGenerator.generateListOfScripts(Array.from({ length: 11 })),
+        totalItemCount: 11,
       });
 
       const { getByTestId } = renderResult;
       const range = getByTestId('test-record-range-label');
 
-      expect(range).toHaveTextContent('Showing 1-2 of 2 scripts');
+      expect(range).toHaveTextContent(`Showing 1-10 of 11 scripts`);
     });
 
     it('shows script name as link for opening details flyout', () => {
