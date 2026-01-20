@@ -65,6 +65,7 @@ export const getHelpText = (
 
 export const getErrorMessage = (
   containsUpperCaseChars: boolean,
+  containsSpaces: boolean,
   isDuplicatedName: boolean,
   rootChildExists: boolean,
   isDotPresent: boolean,
@@ -75,6 +76,11 @@ export const getErrorMessage = (
   if (containsUpperCaseChars) {
     return i18n.translate('xpack.streams.streamDetailRouting.uppercaseCharsError', {
       defaultMessage: 'Stream name cannot contain uppercase characters.',
+    });
+  }
+  if (containsSpaces) {
+    return i18n.translate('xpack.streams.streamDetailRouting.containsSpacesError', {
+      defaultMessage: 'Stream name cannot contain spaces.',
     });
   }
   if (isDuplicatedName) {
@@ -172,6 +178,7 @@ export const useChildStreamInput = (
   const isStreamNameTooLong = localStreamName.length > MAX_STREAM_NAME_LENGTH;
   const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
   const containsUpperCaseChars = localStreamName !== localStreamName.toLowerCase();
+  const containsSpaces = localStreamName.includes(' ');
 
   const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
 
@@ -179,6 +186,7 @@ export const useChildStreamInput = (
 
   const errorMessage = getErrorMessage(
     containsUpperCaseChars,
+    containsSpaces,
     isDuplicatedName,
     rootChildExists,
     isDotPresent,
@@ -191,7 +199,11 @@ export const useChildStreamInput = (
     localStreamName,
     setLocalStreamName,
     isStreamNameValid:
-      isLengthValid && !isDotPresent && !isDuplicatedName && !containsUpperCaseChars,
+      isLengthValid &&
+      !isDotPresent &&
+      !isDuplicatedName &&
+      !containsUpperCaseChars &&
+      !containsSpaces,
     prefix,
     partitionName,
     helpText,
