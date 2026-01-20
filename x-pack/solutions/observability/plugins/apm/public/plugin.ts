@@ -249,6 +249,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         '/mobile-services',
                         '/services',
                         '/service-map',
+                        '/react-flow-service-map',
                       ].some((testPath) => currentPath.startsWith(testPath));
                     },
                   },
@@ -460,6 +461,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           path: '/traces',
         },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
+        { id: 'react-flow-service-map', title: serviceMapTitle, path: '/react-flow-service-map' },
         {
           id: 'dependencies',
           title: dependenciesTitle,

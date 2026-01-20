@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, memo } from 'react';
+import React, { useMemo, memo, useCallback } from 'react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +26,12 @@ export interface ServiceMapNodeData {
     healthStatus?: ServiceHealthStatus;
   };
   isService: boolean;
+  /** Group ID if this node belongs to a group */
+  groupId?: string;
+  /** Group name if this node belongs to a group */
+  groupName?: string;
+  /** Callback to collapse the group this node belongs to */
+  onCollapseGroup?: (groupId: string) => void;
   [key: string]: unknown; // Allow additional properties for popover content
 }
 
@@ -34,6 +40,8 @@ export const ServiceNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<Node<ServiceMapNodeData>>) => {
     const { euiTheme, colorMode } = useEuiTheme();
     const isDarkMode = colorMode === 'DARK';
+
+    const belongsToGroup = !!data.groupId;
 
     const borderColor = useMemo(() => {
       if (data.serviceAnomalyStats?.healthStatus) {
@@ -61,6 +69,16 @@ export const ServiceNode = memo(
 
     const CIRCLE_SIZE = 56;
 
+    const handleCollapseClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (data.groupId && data.onCollapseGroup) {
+          data.onCollapseGroup(data.groupId);
+        }
+      },
+      [data]
+    );
+
     const ariaLabel = useMemo(() => {
       const parts = [
         i18n.translate('xpack.apm.serviceMap.serviceNode', {
@@ -87,6 +105,15 @@ export const ServiceNode = memo(
         );
       }
 
+      if (belongsToGroup && data.groupName) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.partOfGroup', {
+            defaultMessage: 'Part of group: {groupName}',
+            values: { groupName: data.groupName },
+          })
+        );
+      }
+
       if (selected) {
         parts.push(
           i18n.translate('xpack.apm.serviceMap.selected', {
@@ -96,7 +123,19 @@ export const ServiceNode = memo(
       }
 
       return parts.join(', ');
-    }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus, selected]);
+    }, [
+      data.label,
+      data.agentName,
+      data.serviceAnomalyStats?.healthStatus,
+      data.groupName,
+      belongsToGroup,
+      selected,
+    ]);
+
+    const collapseTooltip = i18n.translate('xpack.apm.serviceMap.collapseGroup.tooltip', {
+      defaultMessage: 'Collapse group: {groupName}',
+      values: { groupName: data.groupName || 'services' },
+    });
 
     return (
       <EuiFlexGroup
@@ -152,6 +191,48 @@ export const ServiceNode = memo(
               />
             )}
           </div>
+
+          {/* Collapse badge - shown when node belongs to a group */}
+          {belongsToGroup && data.onCollapseGroup && (
+            <EuiToolTip content={collapseTooltip} position="top">
+              <button
+                type="button"
+                onClick={handleCollapseClick}
+                aria-label={collapseTooltip}
+                data-test-subj={`serviceMapNode-collapse-${data.id}`}
+                css={css`
+                  position: absolute;
+                  top: -4px;
+                  right: -4px;
+                  width: 20px;
+                  height: 20px;
+                  border-radius: 50%;
+                  background: ${euiTheme.colors.backgroundBasePlain};
+                  border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.mediumShade};
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  cursor: pointer;
+                  padding: 0;
+                  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+                  transition: transform 0.15s ease-in-out, background 0.15s ease-in-out;
+
+                  &:hover {
+                    transform: scale(1.1);
+                    background: ${euiTheme.colors.lightShade};
+                  }
+
+                  &:focus {
+                    outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.primary};
+                    outline-offset: 1px;
+                  }
+                `}
+              >
+                <EuiIcon type="minimize" size="s" color={euiTheme.colors.textSubdued} />
+              </button>
+            </EuiToolTip>
+          )}
+
           <Handle
             type="source"
             position={sourcePosition ?? Position.Right}

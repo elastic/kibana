@@ -14,6 +14,7 @@ import type { ServiceMapEdgeData } from './transform_data';
 // Node dimension constants
 const SERVICE_NODE_SIZE = 100;
 const DEPENDENCY_NODE_SIZE = 80;
+const GROUP_NODE_SIZE = 110;
 
 export type LayoutDirection = 'LR' | 'TB';
 
@@ -41,8 +42,12 @@ const DEFAULT_LAYOUT_OPTIONS: Required<LayoutOptions> = {
 /**
  * Get the dimensions for a node based on its type
  */
-function getNodeDimensions(isService: boolean): { width: number; height: number } {
-  const size = isService ? SERVICE_NODE_SIZE : DEPENDENCY_NODE_SIZE;
+function getNodeDimensions(node: Node<ServiceMapNodeData>): { width: number; height: number } {
+  // Check if it's a group node (has isGroup property)
+  if ('isGroup' in node.data && node.data.isGroup) {
+    return { width: GROUP_NODE_SIZE, height: GROUP_NODE_SIZE };
+  }
+  const size = node.data.isService ? SERVICE_NODE_SIZE : DEPENDENCY_NODE_SIZE;
   return { width: size, height: size };
 }
 
@@ -84,7 +89,7 @@ export function applyLayout(
 
   // Add nodes to the graph with their dimensions
   for (const node of nodes) {
-    const dimensions = getNodeDimensions(node.data.isService);
+    const dimensions = getNodeDimensions(node);
     nodeDimensions.set(node.id, dimensions);
     g.setNode(node.id, dimensions);
   }
