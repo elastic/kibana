@@ -76,7 +76,7 @@ describe('IngestionCard', () => {
   describe('monthly period', () => {
     it('renders monthly average with stats and privileges', () => {
       renderWithI18n(
-        <IngestionCard period="monthly" hasPrivileges={true} stats={makeStats(1000)} />
+        <IngestionCard period="monthly" hasPrivileges stats={makeStats(1000)} />
       );
 
       // 1000B * 30 = 30000B = 30.0KB
