@@ -62,8 +62,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const request = get(Request);
       const data = get(PluginStart<AlertingServerStartDependencies['data']>('data'));
       const loggerService = get(LoggerServiceToken);
+      const esClient = get(EsServiceScopedToken);
       const searchClient = data.search.asScoped(request);
-      return new QueryService(searchClient, loggerService);
+      return new QueryService(searchClient, loggerService, esClient);
     })
     .inRequestScope();
 

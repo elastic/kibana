@@ -6,21 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { Request, Response } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { Response } from '@kbn/core-di-server';
+import type { KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import type { Logger as KibanaLogger } from '@kbn/logging';
 import { Logger } from '@kbn/core-di';
-import type { RecordBatch } from 'apache-arrow';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
-import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
-
-const getRuleParamsSchema = schema.object({
-  id: schema.string(),
-});
+import type { QueryServiceContract } from '../lib/services/query_service/query_service';
+import { QueryService } from '../lib/services/query_service/query_service';
 
 @injectable()
 export class GetStreamingRoute {
@@ -36,53 +29,23 @@ export class GetStreamingRoute {
 
   constructor(
     @inject(Logger) private readonly logger: KibanaLogger,
-    @inject(Request)
-    private readonly request: KibanaRequest<TypeOf<typeof getRuleParamsSchema>, unknown, unknown>,
     @inject(Response) private readonly response: KibanaResponseFactory,
-    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient
+    @inject(QueryService) private readonly queryService: QueryServiceContract
   ) {}
 
   async handle() {
     try {
-      // Use helpers.esql() for Arrow streaming support
-      const esqlHelper = this.esClient.helpers.esql({
-        query: 'FROM .alerts-events*',
-        drop_null_columns: false,
-        allow_partial_results: true,
-      });
-
-      // Get Arrow reader for streaming record batches (returns a Promise)
-      const reader = await esqlHelper.toArrowReader();
-
       let rowCount = 0;
-      const columnNames: string[] = [];
 
-      // Process record batches as they arrive (true streaming)
-      for await (const recordBatch of reader) {
-        // Extract column names from the first batch
-        if (columnNames.length === 0 && recordBatch.schema.fields.length > 0) {
-          columnNames.push(...recordBatch.schema.fields.map((field) => field.name));
-        }
-
-        // Process each row in the batch
-        for (let rowIndex = 0; rowIndex < recordBatch.numRows; rowIndex++) {
-          const rowObject: Record<string, unknown> = {};
-
-          // Extract values for each column in this row
-          for (let colIndex = 0; colIndex < recordBatch.numCols; colIndex++) {
-            const column = recordBatch.getChildAt(colIndex);
-            if (column) {
-              const columnName = columnNames[colIndex] || `column_${colIndex}`;
-              // Get the value at the current row index
-              const value = column.get(rowIndex);
-              rowObject[columnName] = value;
-            }
-          }
-
-          // Log each row as it becomes available
-          this.logger.info(`ESQL Row Result: ${JSON.stringify(rowObject)}`);
-          rowCount++;
-        }
+      // Process rows as they arrive (true streaming)
+      for await (const rowObject of this.queryService.executeQueryStreaming({
+        query: 'FROM .alerts-events*',
+        dropNullColumns: false,
+        allowPartialResults: true,
+      })) {
+        // Log each row as it becomes available
+        this.logger.info(`ESQL Row Result: ${JSON.stringify(rowObject)}`);
+        rowCount++;
       }
 
       return this.response.ok({
