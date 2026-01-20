@@ -53,6 +53,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectModelColumnToBeDisplayed();
       });
 
+      it('can search by model name', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectSearchByModelName();
+      });
+
       it('preconfigured endpoints can not be deleted', async () => {
         await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsCannotBeDeleted();
       });

@@ -26,6 +26,15 @@ interface UseTableDataReturn {
   sorting: EuiTableSortingType<InferenceInferenceEndpointInfo>;
 }
 
+const getModelId = (endpoint: InferenceInferenceEndpointInfo): string | undefined => {
+  const serviceSettings = endpoint.service_settings;
+  return 'model_id' in serviceSettings
+    ? serviceSettings.model_id
+    : 'model' in serviceSettings
+    ? serviceSettings.model
+    : undefined;
+};
+
 export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
   queryParams: QueryParams,
@@ -47,7 +56,13 @@ export const useTableData = (
       );
     }
 
-    return filteredEndpoints.filter((endpoint) => endpoint.inference_id.includes(searchKey));
+    return filteredEndpoints.filter((endpoint) => {
+      const lowerSearchKey = searchKey.toLowerCase();
+      const inferenceIdMatch = endpoint.inference_id.toLowerCase().includes(lowerSearchKey);
+      const modelId = getModelId(endpoint);
+      const modelIdMatch = modelId ? modelId.toLowerCase().includes(lowerSearchKey) : false;
+      return inferenceIdMatch || modelIdMatch;
+    });
   }, [inferenceEndpoints, searchKey, filterOptions]);
 
   const sortedTableData: InferenceInferenceEndpointInfo[] = useMemo(() => {

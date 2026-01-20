@@ -144,13 +144,36 @@ describe('useTableData', () => {
     ).toBeTruthy();
   });
 
-  it('should filter data based on searchKey', () => {
+  it('should filter data based on searchKey matching inference_id', () => {
     const searchKey2 = 'model-05';
     const { result } = renderHook(
       () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey2),
       { wrapper }
     );
     const filteredData = result.current.sortedTableData;
-    expect(filteredData.every((item) => item.inference_id.includes(searchKey))).toBeTruthy();
+    expect(filteredData.length).toBe(1);
+    expect(filteredData[0].inference_id).toBe('my-openai-model-05');
+  });
+
+  it('should filter data based on searchKey matching model_id', () => {
+    const searchKey2 = 'third-party';
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey2),
+      { wrapper }
+    );
+    const filteredData = result.current.sortedTableData;
+    expect(filteredData.length).toBe(1);
+    expect(filteredData[0].inference_id).toBe('my-openai-model-05');
+  });
+
+  it('should filter data case-insensitively', () => {
+    const searchKey2 = 'ELSER';
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey2),
+      { wrapper }
+    );
+    const filteredData = result.current.sortedTableData;
+    expect(filteredData.length).toBe(2);
+    expect(filteredData.every((item) => item.inference_id.includes('elser'))).toBeTruthy();
   });
 });
