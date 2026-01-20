@@ -14297,7 +14297,7 @@
               },
               {
                 "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_edit_active_source_flyout.ts"
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
               },
               {
                 "plugin": "maintenanceWindows",

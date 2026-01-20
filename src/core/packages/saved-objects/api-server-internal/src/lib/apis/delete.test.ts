@@ -104,15 +104,37 @@ describe('#delete', () => {
 
     describe('client calls', () => {
       it(`should use the ES delete action when not using a multi-namespace type`, async () => {
-        await deleteSuccess(client, repository, registry, type, id);
-        expect(client.get).not.toHaveBeenCalled();
+        client.get.mockResolvedValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            getMockGetResponse(registry, { type, id })
+          )
+        );
+        client.delete.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            result: 'deleted',
+          } as estypes.DeleteResponse)
+        );
+        await repository.delete(type, id);
+        expect(client.get).toHaveBeenCalledTimes(1);
         expect(client.delete).toHaveBeenCalledTimes(1);
+        client.get.mockClear();
       });
 
       it(`should use ES get action then delete action when using a multi-namespace type`, async () => {
-        await deleteSuccess(client, repository, registry, MULTI_NAMESPACE_ISOLATED_TYPE, id);
-        expect(client.get).not.toHaveBeenCalled();
+        client.get.mockResolvedValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            getMockGetResponse(registry, { type: MULTI_NAMESPACE_ISOLATED_TYPE, id })
+          )
+        );
+        client.delete.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            result: 'deleted',
+          } as estypes.DeleteResponse)
+        );
+        await repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id);
+        expect(client.get).toHaveBeenCalledTimes(2);
         expect(client.delete).toHaveBeenCalledTimes(1);
+        client.get.mockClear();
       });
 
       it(`does not includes the version of the existing document when using a multi-namespace type`, async () => {

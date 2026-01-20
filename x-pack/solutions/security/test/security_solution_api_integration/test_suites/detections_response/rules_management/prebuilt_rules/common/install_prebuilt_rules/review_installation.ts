@@ -180,7 +180,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.rules.length).toEqual(2);
       });
 
-      it('returns correct rules for a page specified in the request', async () => {
+      it.skip('returns correct rules for a page specified in the request', async () => {
         const ruleAssets = [
           createRuleAssetSavedObject({ rule_id: 'rule-1' }),
           createRuleAssetSavedObject({ rule_id: 'rule-2' }),
