@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SearchSLODefinitions } from './search_slo_definitions';
@@ -80,17 +77,7 @@ describe('SearchSLODefinitions', () => {
           size: 0,
           query: {
             bool: {
-              filter: [
-                { term: { spaceId: 'default' } },
-                {
-                  simple_query_string: {
-                    query: '',
-                    fields: ['slo.name^3', 'slo.description^2', 'slo.tags'],
-                    default_operator: 'AND',
-                    analyze_wildcard: true,
-                  },
-                },
-              ],
+              filter: [{ term: { spaceId: 'default' } }],
             },
           },
         })
@@ -688,4 +675,3 @@ describe('SearchSLODefinitions', () => {
     });
   });
 });
-
