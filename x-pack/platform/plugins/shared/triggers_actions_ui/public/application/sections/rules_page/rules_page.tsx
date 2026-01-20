@@ -11,11 +11,17 @@ import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { getCreateRuleRoute, getEditRuleRoute } from '@kbn/rule-data-utils';
+import useObservable from 'react-use/lib/useObservable';
+import {
+  getCreateRuleRoute,
+  getEditRuleRoute,
+  getRulesAppDetailsRoute,
+  rulesAppDetailsRoute,
+} from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
-import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
+import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { NON_SIEM_CONSUMERS } from '../alerts_search_bar/constants';
 import type { Section } from '../../constants';
@@ -30,10 +36,11 @@ const RulesPage = () => {
   const {
     chrome: { docTitle },
     setBreadcrumbs,
-    application: { navigateToApp },
+    application: { navigateToApp, getUrlForApp, isAppRegistered, currentAppId$ },
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const currentAppId = useObservable(currentAppId$, undefined);
 
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
 
@@ -83,6 +90,7 @@ const RulesPage = () => {
     (ruleId: string) => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
+
       const returnApp = 'rules';
       navigateToApp('management', {
         path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleId)}`,
@@ -99,16 +107,16 @@ const RulesPage = () => {
     (ruleTypeId: string) => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
-      const returnApp = 'rules';
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+
+      navigateToApp(currentAppId || 'management', {
+        path: getCreateRuleRoute(ruleTypeId),
         state: {
-          returnApp,
+          returnApp: currentAppId || 'management',
           returnPath,
         },
       });
     },
-    [navigateToApp]
+    [navigateToApp, currentAppId]
   );
 
   const renderRulesList = useCallback(() => {
@@ -121,6 +129,7 @@ const RulesPage = () => {
           setHeaderActions={setHeaderActions}
           navigateToEditRuleForm={navigateToEditRuleForm}
           navigateToCreateRuleForm={navigateToCreateRuleForm}
+          ruleDetailsRoute={rulesAppDetailsRoute}
         />
       </KibanaPageTemplate.Section>
     );
@@ -134,6 +143,7 @@ const RulesPage = () => {
           'xl'
         )({
           setHeaderActions,
+          getRuleDetailsRoute: getRulesAppDetailsRoute,
         })}
       </KibanaPageTemplate.Section>
     );
@@ -141,10 +151,18 @@ const RulesPage = () => {
 
   useEffect(() => {
     if (setBreadcrumbs) {
-      setBreadcrumbs([getAlertingSectionBreadcrumb(currentSection || 'rules')]);
+      if (currentSection === 'logs') {
+        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(
+          isAppRegistered,
+          getUrlForApp
+        );
+        setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('logs')]);
+      } else {
+        setBreadcrumbs([getAlertingSectionBreadcrumb('rules')]);
+      }
     }
-    docTitle.change(getCurrentDocTitle(currentSection || 'rules'));
-  }, [docTitle, setBreadcrumbs, currentSection]);
+    docTitle.change(getCurrentDocTitle('rules'));
+  }, [docTitle, setBreadcrumbs, currentSection, getUrlForApp, isAppRegistered]);
 
   return (
     <RulesPageTemplate
