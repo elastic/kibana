@@ -21,6 +21,7 @@ import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
+import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_ARIA_LABEL } from '../../common/constants';
 
 interface Props {
   traceId: string;
@@ -28,11 +29,6 @@ interface Props {
   serviceName?: string;
   dataView: DocViewRenderProps['dataView'];
 }
-
-const openInDiscoverButtonLabel = i18n.translate(
-  'unifiedDocViewer.observability.traces.trace.openInDiscover.button',
-  { defaultMessage: 'Open in Discover' }
-);
 
 export const fullScreenButtonLabel = i18n.translate(
   'unifiedDocViewer.observability.traces.trace.fullScreen.button',
@@ -99,8 +95,8 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
             ? [
                 {
                   icon: 'discoverApp',
-                  label: openInDiscoverButtonLabel,
-                  ariaLabel: openInDiscoverButtonLabel,
+                  label: OPEN_IN_DISCOVER_LABEL,
+                  ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
                   href: openInDiscoverLink,
                   target: '_blank' as Target,
                   dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',

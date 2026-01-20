@@ -25,7 +25,7 @@ import { getColumns } from './get_columns';
 import { useFetchErrorsByTraceId } from './use_fetch_errors_by_trace_id';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
-import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
+import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_ARIA_LABEL } from '../../common/constants';
 import { createTraceContextWhereClauseForErrors } from '../../common/create_trace_context_where_clause';
 import {
   ScrollableSectionWrapper,
@@ -89,7 +89,7 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
                     {
                       icon: 'discoverApp',
                       label: OPEN_IN_DISCOVER_LABEL,
-                      ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+                      ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
                       href: openInDiscoverLink,
                       dataTestSubj: 'unifiedDocViewerSpanLinksRefreshButton',
                     },
