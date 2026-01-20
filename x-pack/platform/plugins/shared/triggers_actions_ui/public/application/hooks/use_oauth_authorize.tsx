@@ -9,6 +9,13 @@ import { useState, useCallback } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../constants';
 
+/**
+ * BroadcastChannel name used for OAuth authorization communication.
+ * When OAuth flow completes successfully, a message is broadcast on this channel
+ * to notify the original page that initiated the flow.
+ */
+export const OAUTH_BROADCAST_CHANNEL = 'kibana:oauth_authorization';
+
 interface OAuthAuthorizeResponse {
   authorizationUrl: string;
   state: string;

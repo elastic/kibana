@@ -9,6 +9,7 @@ import { useMutation } from '@kbn/react-query';
 import { useRef, useState, useMemo } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
@@ -47,7 +48,13 @@ export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationPr
     browserToolExecutor,
   });
 
-  const resumeRound = async ({ promptId, confirm }: { promptId: string; confirm: boolean }) => {
+  const resumeRound = async ({
+    promptId,
+    promptResponse,
+  }: {
+    promptId: string;
+    promptResponse: PromptResponse;
+  }) => {
     const signal = resumeControllerRef.current?.signal;
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
@@ -60,7 +67,7 @@ export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationPr
     const events$ = chatService.resume({
       signal,
       prompts: {
-        [promptId]: { allow: confirm },
+        [promptId]: promptResponse,
       },
       conversationId,
       agentId,

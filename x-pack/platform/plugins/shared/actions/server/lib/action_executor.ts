@@ -21,6 +21,7 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { isConnectorAuthorizationError } from '@kbn/connector-specs/src/all_errors';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -577,8 +578,9 @@ export class ActionExecutor {
               message: 'an error occurred while running the action',
               serviceMessage: err.message,
               error: err,
-              retry: true,
+              retry: !isConnectorAuthorizationError(err),
               errorSource,
+              errorName: err.name,
             };
           }
         }
@@ -710,7 +712,10 @@ export interface ActionInfo {
 function getErrorSource(error: Error): TaskErrorSource | undefined {
   const SOCKET_DISCONNECTED_ERROR_MESSAGE = 'Client network socket disconnected';
 
-  if (startsWith(error.message, SOCKET_DISCONNECTED_ERROR_MESSAGE)) {
+  if (
+    startsWith(error.message, SOCKET_DISCONNECTED_ERROR_MESSAGE) ||
+    isConnectorAuthorizationError(error)
+  ) {
     return TaskErrorSource.USER;
   }
 

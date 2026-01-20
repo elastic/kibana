@@ -6,6 +6,8 @@
  */
 
 import type {
+  AuthorizationPromptDefinition,
+  AuthorizationStatus,
   ConfirmPromptDefinition,
   ConfirmationStatus,
   PromptResponseState,
@@ -18,6 +20,7 @@ export interface PromptManager {
   get(promptId: string): PromptResponseState | undefined;
   dump(): PromptStorageState;
   getConfirmationStatus(promptId: string): ConfirmationInfo;
+  getAuthorizationStatus(promptId: string): AuthorizationInfo;
   clear(): void;
   forTool(opts: {
     toolId: string;
@@ -30,7 +33,15 @@ export interface ConfirmationInfo {
   status: ConfirmationStatus;
 }
 
+export interface AuthorizationInfo {
+  status: AuthorizationStatus;
+}
+
 export interface ToolPromptManager {
+  /**
+   * Check the status for the given authorization prompt
+   */
+  checkAuthorizationStatus(promptId: string): AuthorizationInfo;
   /**
    * Get the status for the given confirmation prompt
    */
@@ -39,4 +50,8 @@ export interface ToolPromptManager {
    * Creates a confirmation prompt which can be returned by the tool handler
    */
   askForConfirmation(opts: ConfirmPromptDefinition): ToolHandlerPromptReturn;
+  /**
+   * Creates an authorization prompt which can be returned by the tool handler
+   */
+  askForAuthorization(opts: AuthorizationPromptDefinition): ToolHandlerPromptReturn;
 }

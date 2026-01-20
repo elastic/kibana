@@ -7,6 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
@@ -22,7 +23,7 @@ interface SendMessageState {
   canCancel: boolean;
   cancel: () => void;
   cleanConversation: () => void;
-  resumeRound: (opts: { promptId: string; confirm: boolean }) => void;
+  resumeRound: (opts: { promptId: string; promptResponse: PromptResponse }) => void;
   isResuming: boolean;
   connectorSelection: {
     selectedConnector: string | undefined;

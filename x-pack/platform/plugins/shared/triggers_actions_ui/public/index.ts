@@ -107,7 +107,7 @@ export {
   deprecatedMessage,
 } from './common';
 
-export { useSubAction } from './application/hooks';
+export { useSubAction, useOAuthAuthorize, OAUTH_BROADCAST_CHANNEL } from './application/hooks';
 
 export type {
   TriggersAndActionsUIPublicPluginSetup,

@@ -8,6 +8,7 @@
 import { createBadRequestError } from '@kbn/agent-builder-common/base/errors';
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 
 export const ensureValidInput = ({
   input,
@@ -28,7 +29,11 @@ export const ensureValidInput = ({
 
   // prompt pending - we need a prompt response to continue
   if (lastRound?.pending_prompt && lastRoundStatus === ConversationRoundStatus.awaitingPrompt) {
-    if (!hasPromptResponse(lastRound.pending_prompt.id, input)) {
+    const promptId =
+      lastRound.pending_prompt.type === AgentPromptType.confirmation
+        ? lastRound.pending_prompt.id
+        : lastRound.pending_prompt.connector_id;
+    if (!hasPromptResponse(promptId, input)) {
       throw createBadRequestError(
         `Conversation is awaiting a prompt response, but none was provided.`
       );

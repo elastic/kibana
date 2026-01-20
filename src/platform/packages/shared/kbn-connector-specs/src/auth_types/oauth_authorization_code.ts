@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
+import { ConnectorAuthorizationError } from '../all_errors';
 
 const authSchema = z
   .object({
@@ -99,13 +100,15 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
         clientSecret: secret.clientSecret,
       });
     } catch (error) {
-      throw new Error(
+      throw new ConnectorAuthorizationError(
         `Unable to retrieve/refresh the access token. User may need to re-authorize: ${error.message}`
       );
     }
 
     if (!token) {
-      throw new Error(`No access token available. User must complete OAuth authorization flow.`);
+      throw new ConnectorAuthorizationError(
+        `No access token available. User must complete OAuth authorization flow.`
+      );
     }
 
     // set global defaults
