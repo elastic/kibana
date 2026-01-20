@@ -410,6 +410,18 @@ export class FleetPlugin
                 ui: [],
               },
             },
+            {
+              id: 'generate_reports',
+              privilege: {
+                // excludeFromBasePrivileges: true,
+                api: [`${PLUGIN_ID}-generate-reports`],
+                savedObject: {
+                  all: allSavedObjectTypes,
+                  read: allSavedObjectTypes,
+                },
+                ui: [`${PLUGIN_ID}-generate-reports`],
+              },
+            },
           ],
         },
         subFeatures: [
@@ -510,6 +522,28 @@ export class FleetPlugin
                     },
                     includeIn: 'read',
                     alerting: {},
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            name: 'Generate reports',
+            requireAllSpaces,
+            privilegeGroups: [
+              {
+                groupType: 'mutually_exclusive',
+                privileges: [
+                  {
+                    id: `generate_reports_all`,
+                    api: [`${PLUGIN_ID}-generate-reports-all`],
+                    name: 'All',
+                    ui: ['generate_reports_all'],
+                    savedObject: {
+                      all: allSavedObjectTypes,
+                      read: allSavedObjectTypes,
+                    },
+                    includeIn: 'all',
                   },
                 ],
               },

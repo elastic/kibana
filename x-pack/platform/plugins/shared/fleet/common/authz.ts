@@ -29,6 +29,7 @@ export interface FleetAuthz {
     allAgents: boolean;
     readSettings: boolean;
     allSettings: boolean;
+    generateAgentReports: boolean;
     // for UI
     addAgents: boolean;
     addFleetServers: boolean;
@@ -81,74 +82,46 @@ interface CalculateParams {
     agents?: ReadAllParams;
     agentPolicies?: ReadAllParams;
     settings?: ReadAllParams;
+    generateReports?: Omit<ReadAllParams, 'read'>;
   };
 
   integrations: ReadAllParams;
-
-  subfeatureEnabled: boolean;
 }
 
 type PrivilegeMap = Record<string, { executePackageAction: boolean }>;
 
-export const calculateAuthz = ({
-  fleet,
-  integrations,
-  subfeatureEnabled,
-}: CalculateParams): FleetAuthz => {
-  // When subfeatures are enabled, treat fleet.all as combination of all subfeatures
-  const hasFleetAll = subfeatureEnabled
-    ? !!(fleet.agents?.all && fleet.agentPolicies?.all && fleet.settings?.all)
-    : fleet.all;
+export const calculateAuthz = ({ fleet, integrations }: CalculateParams): FleetAuthz => {
+  const hasFleetAll = !!(fleet.agents?.all && fleet.agentPolicies?.all && fleet.settings?.all);
 
-  const writeIntegrationPolicies = subfeatureEnabled
-    ? (fleet.agentPolicies?.all && integrations.all) ?? false
-    : ((fleet.all || fleet.agentPolicies?.all) ?? false) && integrations.all;
-  const readIntegrationPolicies = subfeatureEnabled
-    ? (fleet.agentPolicies?.read && (integrations.all || integrations.read)) ?? false
-    : ((fleet.all || fleet.read || fleet.agentPolicies?.read) ?? false) &&
-      (integrations.all || integrations.read);
+  const writeIntegrationPolicies = (fleet.agentPolicies?.all && integrations.all) ?? false;
+  const readIntegrationPolicies =
+    (fleet.agentPolicies?.read && (integrations.all || integrations.read)) ?? false;
 
-  // TODO remove fallback when the feature flag is removed
-  const fleetAuthz: FleetAuthz['fleet'] = subfeatureEnabled
-    ? {
-        all: hasFleetAll && (integrations.all || integrations.read),
+  const fleetAuthz: FleetAuthz['fleet'] = {
+    all: hasFleetAll && (integrations.all || integrations.read),
 
-        readAgents: (fleet.agents?.read || fleet.agents?.all) ?? false,
-        allAgents: fleet.agents?.all ?? false,
-        readSettings: (fleet.settings?.read || fleet.settings?.all) ?? false,
-        allSettings: fleet.settings?.all ?? false,
-        allAgentPolicies: fleet.agentPolicies?.all ?? false,
-        addAgents: fleet.agents?.all ?? false,
-        addFleetServers:
-          (fleet.agents?.all && fleet.agentPolicies?.all && fleet.settings?.all) ?? false,
-        // Setup is needed to access the Fleet UI
-        setup:
-          hasFleetAll ||
-          fleet.read ||
-          fleet.agents?.read ||
-          fleet.agentPolicies?.read ||
-          fleet.settings?.read ||
-          fleet.setup,
-        // These are currently used by Fleet Server setup
-        readEnrollmentTokens: (fleet.setup || fleet.agents?.all) ?? false,
-        readAgentPolicies: (fleet.setup || fleet.agentPolicies?.read) ?? false,
-      }
-    : {
-        all: fleet.all && (integrations.all || integrations.read),
-
-        readAgents: fleet.all && (integrations.all || integrations.read),
-        allAgents: fleet.all && (integrations.all || integrations.read),
-        readSettings: fleet.all && (integrations.all || integrations.read),
-        allSettings: fleet.all && (integrations.all || integrations.read),
-        allAgentPolicies: fleet.all && (integrations.all || integrations.read),
-        addAgents: fleet.all && (integrations.all || integrations.read),
-        addFleetServers: fleet.all && (integrations.all || integrations.read),
-
-        // These are currently used by Fleet Server setup
-        setup: fleet.all || fleet.setup,
-        readEnrollmentTokens: (fleet.all || fleet.setup || fleet.agents?.all) ?? false,
-        readAgentPolicies: (fleet.all || fleet.setup) ?? false,
-      };
+    readAgents: (fleet.agents?.read || fleet.agents?.all) ?? false,
+    generateAgentReports:
+      (fleet.generateReports?.all && (fleet.agents?.read || fleet.agents?.all)) ?? false,
+    allAgents: fleet.agents?.all ?? false,
+    readSettings: (fleet.settings?.read || fleet.settings?.all) ?? false,
+    allSettings: fleet.settings?.all ?? false,
+    allAgentPolicies: fleet.agentPolicies?.all ?? false,
+    addAgents: fleet.agents?.all ?? false,
+    addFleetServers:
+      (fleet.agents?.all && fleet.agentPolicies?.all && fleet.settings?.all) ?? false,
+    // Setup is needed to access the Fleet UI
+    setup:
+      hasFleetAll ||
+      fleet.read ||
+      fleet.agents?.read ||
+      fleet.agentPolicies?.read ||
+      fleet.settings?.read ||
+      fleet.setup,
+    // These are currently used by Fleet Server setup
+    readEnrollmentTokens: (fleet.setup || fleet.agents?.all) ?? false,
+    readAgentPolicies: (fleet.setup || fleet.agentPolicies?.read) ?? false,
+  };
 
   return {
     fleet: fleetAuthz,

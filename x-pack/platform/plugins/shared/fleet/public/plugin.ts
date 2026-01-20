@@ -341,12 +341,14 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             read: capabilities.fleetv2.settings_read as boolean,
             all: capabilities.fleetv2.settings_all as boolean,
           },
+          generateReports: {
+            all: capabilities.fleetv2.generate_reports_all as boolean,
+          },
         },
         integrations: {
           all: capabilities.fleet.all as boolean,
           read: capabilities.fleet.read as boolean,
         },
-        subfeatureEnabled: true,
       }),
       packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
       endpointExceptionsPrivileges:

@@ -1215,8 +1215,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         enableQueryVersion: true,
         security: {
           authz: {
-            // TODO: Create a new app privilege specifc for reporting
-            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+            requiredPrivileges: [
+              FLEET_API_PRIVILEGES.AGENTS.READ,
+              FLEET_API_PRIVILEGES.GENERATE_REPORTS.ALL,
+            ],
           },
         },
         summary: `Generate agent csv report`,

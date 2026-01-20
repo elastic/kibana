@@ -164,14 +164,20 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         ),
         icon: 'exportAction',
-        disabled: !authz.fleet.readAgents,
+        disabled: !authz.fleet.generateAgentReports,
         onClick: () => {
           setIsExportCSVModalOpen(true);
         },
         'data-test-subj': 'bulkAgentExportBtn',
       },
     ];
-  }, [agentCount, authz.fleet.allAgents, authz.fleet.readAgents, doesLicenseAllowMigration]);
+  }, [
+    agentCount,
+    authz.fleet.allAgents,
+    authz.fleet.readAgents,
+    authz.fleet.generateAgentReports,
+    doesLicenseAllowMigration,
+  ]);
 
   // Build hierarchical menu items
   const menuItems: MenuItem[] = useMemo(() => {

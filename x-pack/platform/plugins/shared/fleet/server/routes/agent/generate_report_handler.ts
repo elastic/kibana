@@ -82,7 +82,6 @@ export const generateReportHandler: FleetRequestHandler<
   }
 };
 
-// TODO move this helper to a common location
 const VERSION_FIELD = 'local_metadata.elastic.agent.version';
 const HOSTNAME_FIELD = 'local_metadata.host.hostname';
 
