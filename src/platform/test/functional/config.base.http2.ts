@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type DashboardDrilldownOptions = {
-  useCurrentFilters: boolean;
-  useCurrentDateRange: boolean;
-  openInNewTab: boolean;
-};
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { configureHTTP2 } from '../common/configure_http2';
 
-export const DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS: DashboardDrilldownOptions = {
-  openInNewTab: false,
-  useCurrentDateRange: true,
-  useCurrentFilters: true,
-};
+// eslint-disable-next-line import/no-default-export
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(require.resolve('./config.base.js'));
+
+  return configureHTTP2({
+    ...functionalConfig.getAll(),
+  });
+}

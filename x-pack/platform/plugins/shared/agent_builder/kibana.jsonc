@@ -40,7 +40,8 @@
       "cloud",
       "licenseManagement",
       "workflowsManagement",
-      "usageCollection"
+      "usageCollection",
+      "home",
     ],
     "extraPublicDirs": []
   }
