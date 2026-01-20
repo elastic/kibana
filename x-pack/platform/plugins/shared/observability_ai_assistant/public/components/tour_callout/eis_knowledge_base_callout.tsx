@@ -32,7 +32,7 @@ export const EisKnowledgeBaseCallout = ({
       })}
       content={i18n.translate('xpack.observabilityAiAssistant.eisKnowledgeBase.content', {
         defaultMessage:
-          'Performing inference, NLP tasks, and other ML activities on the Elastic Inference Service (EIS) incurs additional costs for tokens.',
+          'AI Assistant Knowledge Base semantic search models that use the Elastic Inference Service (EIS) incur additional costs for tokens.',
       })}
       step={1}
       stepsTotal={1}
