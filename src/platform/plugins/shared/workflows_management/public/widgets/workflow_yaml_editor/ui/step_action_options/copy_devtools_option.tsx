@@ -12,7 +12,8 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { buildKibanaRequestFromAction, buildRequestFromConnector } from '@kbn/workflows';
+import type { RequestOptions } from '@kbn/workflows';
+import { buildElasticsearchRequest, buildKibanaRequest } from '@kbn/workflows';
 import {
   type ElasticsearchGraphNode,
   isElasticsearch,
@@ -27,15 +28,6 @@ import { useKibana } from '../../../../hooks/use_kibana';
 
 export interface CopyDevToolsOptionProps {
   onClick: () => void;
-}
-
-interface RequestInfo {
-  method: string;
-  path: string;
-  body?: Record<string, unknown>;
-  query?: Record<string, unknown>;
-  params?: Record<string, string>;
-  headers?: Record<string, string>;
 }
 
 /**
@@ -63,7 +55,7 @@ export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick 
       const esNode = allNodes.find((node): node is ElasticsearchGraphNode => isElasticsearch(node));
       if (esNode) {
         const stepType = esNode.stepType;
-        const requestInfo = buildRequestFromConnector(stepType, esNode.configuration.with || {});
+        const requestInfo = buildElasticsearchRequest(stepType, esNode.configuration.with || {});
         consoleFormat = generateConsoleFormat(requestInfo);
       }
 
@@ -71,10 +63,7 @@ export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick 
       const kibanaNode = allNodes.find((node): node is KibanaGraphNode => isKibana(node));
       if (kibanaNode) {
         const stepType = kibanaNode.configuration.type;
-        const requestInfo = buildKibanaRequestFromAction(
-          stepType,
-          kibanaNode.configuration.with || {}
-        );
+        const requestInfo = buildKibanaRequest(stepType, kibanaNode.configuration.with || {});
         consoleFormat = generateConsoleFormat({
           ...requestInfo,
           // request builder returns path prefixed with one slash, but for kibana apis we need two slashes and a kbn prefix
@@ -134,16 +123,18 @@ export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick 
   );
 };
 
-function generateConsoleFormat(requestInfo: RequestInfo): string {
+function generateConsoleFormat(requestInfo: RequestOptions): string {
   // Handle query params - could be either 'query' or 'params' depending on the builder
-  const queryParams = requestInfo.query || requestInfo.params;
-  const queryString = queryParams
-    ? `?${new URLSearchParams(queryParams as Record<string, string>).toString()}`
-    : '';
+  const queryParams = requestInfo.query;
+  const queryString = queryParams ? `?${new URLSearchParams(queryParams).toString()}` : '';
 
   const lines = [`${requestInfo.method} ${requestInfo.path}${queryString}`];
 
-  if (requestInfo.body && Object.keys(requestInfo.body).length > 0) {
+  if (requestInfo.bulkBody && requestInfo.bulkBody.length > 0) {
+    requestInfo.bulkBody.forEach((operation: Record<string, unknown>) => {
+      lines.push(JSON.stringify(operation, null, 2));
+    });
+  } else if (requestInfo.body && Object.keys(requestInfo.body).length > 0) {
     lines.push(JSON.stringify(requestInfo.body, null, 2));
   }
 

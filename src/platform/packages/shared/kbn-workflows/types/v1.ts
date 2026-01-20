@@ -527,3 +527,13 @@ export interface WorkflowsSearchParams {
   createdBy?: string[];
   enabled?: boolean[];
 }
+
+export interface RequestOptions {
+  method: string;
+  path: string;
+  body?: Record<string, unknown>;
+  query?: Record<string, string>;
+  headers?: Record<string, string>;
+  /** Bulk body for elasticsearch.bulk step */
+  bulkBody?: Array<Record<string, unknown>>;
+}

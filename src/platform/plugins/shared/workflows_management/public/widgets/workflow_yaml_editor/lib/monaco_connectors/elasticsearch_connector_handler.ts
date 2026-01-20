@@ -13,7 +13,7 @@ import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import type { InternalConnectorContract } from '@kbn/workflows';
-import { buildRequestFromConnector, isInternalConnector } from '@kbn/workflows';
+import { buildElasticsearchRequest, isInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { getAllConnectors } from '../../../../../common/schema';
 import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
@@ -209,7 +209,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
     stepType: string,
     withParams?: Record<string, unknown>
   ): ElasticsearchRequestInfo {
-    const { method, path, body } = buildRequestFromConnector(stepType, withParams || {});
+    const { method, path, body } = buildElasticsearchRequest(stepType, withParams || {});
 
     return {
       method,
