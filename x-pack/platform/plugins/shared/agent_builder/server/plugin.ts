@@ -8,6 +8,8 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { ElasticsearchSpanProcessor } from '@kbn/inference-tracing';
+import { LateBindingSpanProcessor } from '@kbn/tracing';
 import type { AgentBuilderConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -43,6 +45,8 @@ export class AgentBuilderPlugin
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
+  private esSpanProcessor?: ElasticsearchSpanProcessor;
+  private unregisterSpanProcessor?: () => Promise<void>;
 
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -123,6 +127,16 @@ export class AgentBuilderPlugin
     { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
     { inference, spaces, actions }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
+    // Register Elasticsearch span processor for gen_ai traces
+    this.esSpanProcessor = new ElasticsearchSpanProcessor({
+      indexName: 'kibana-gen-ai-traces',
+      flushIntervalMs: 5000,
+      maxBatchSize: 100,
+    });
+    this.unregisterSpanProcessor = LateBindingSpanProcessor.register(this.esSpanProcessor);
+    this.esSpanProcessor.setElasticsearchClient(elasticsearch.client.asInternalUser);
+    this.logger.info('Registered Elasticsearch span processor for gen_ai traces');
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
@@ -150,5 +164,8 @@ export class AgentBuilderPlugin
     };
   }
 
-  stop() {}
+  stop() {
+    // Unregister span processor on shutdown
+    this.unregisterSpanProcessor?.();
+  }
 }
