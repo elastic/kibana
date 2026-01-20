@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import type { RouteDependencies } from './types';
-import { registerGetInferenceEndpointsRoute } from './get_inference_endpoints';
-
-export const registerRoutes = ({ router }: RouteDependencies) => {
-  registerGetInferenceEndpointsRoute(router);
-};
+export { RerankStepTypeId, rerankStepCommonDefinition } from './rerank/rerank_step';
+export type { RerankInput, RerankConfig, RerankOutput } from './rerank/rerank_step';
