@@ -15,6 +15,7 @@ import type {
 } from './types';
 import { registerApp } from './application';
 import { type WorkplaceAIServices } from './services';
+import { createRerankStepDefinition } from './steps';
 
 export class WorkplaceAIAppPlugin
   implements
@@ -35,8 +36,10 @@ export class WorkplaceAIAppPlugin
 
   public setup(
     core: CoreSetup<WorkplaceAIAppPluginStartDependencies, WorkplaceAIAppPluginStart>,
-    { dataSourcesRegistry }: WorkplaceAIAppPluginSetupDependencies
+    pluginsSetup: WorkplaceAIAppPluginSetupDependencies
   ): WorkplaceAIAppPluginSetup {
+    pluginsSetup.workflowsExtensions.registerStepDefinition(createRerankStepDefinition(core));
+
     registerApp({
       core,
       getServices: () => {
