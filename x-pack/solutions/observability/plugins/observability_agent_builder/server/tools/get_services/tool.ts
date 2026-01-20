@@ -30,11 +30,11 @@ const getServicesSchema = z.object({
     .string()
     .min(1)
     .optional()
-    .describe('Filter services by environment (e.g., "production", "staging").'),
+    .describe('Filter services by environment. Examples: "production", "staging".'),
   healthStatus: z
     .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
     .optional()
-    .describe('Filter by health status (e.g., ["warning", "critical"]).'),
+    .describe('Filter by health status. Example: ["warning", "critical"].'),
 });
 
 export function createGetServicesTool({

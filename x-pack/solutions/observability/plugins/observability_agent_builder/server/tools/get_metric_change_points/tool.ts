@@ -27,14 +27,16 @@ const getMetricChangePointsSchema = z.object({
   index: z.string().describe('The index or index pattern to find the metrics').optional(),
   kqlFilter: z
     .string()
-    .describe('A KQL filter to filter the metric documents, e.g.: my_field:foo')
+    .describe(
+      "A KQL filter to filter the metric documents. Examples: 'service.name: \"my-service\"', 'my_field: foo'."
+    )
     .optional(),
   aggregation: z
     .object({
       field: z
         .string()
         .describe(
-          `Numeric field to aggregate and observe for changes (e.g., 'transaction.duration.us').`
+          `Numeric field to aggregate and observe for changes. Example: "transaction.duration.us".`
         ),
       type: z
         .enum(['avg', 'sum', 'min', 'max', 'p95', 'p99'])

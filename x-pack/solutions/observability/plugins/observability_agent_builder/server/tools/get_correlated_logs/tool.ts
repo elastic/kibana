@@ -38,7 +38,7 @@ const getCorrelatedLogsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'KQL filter to narrow down logs. Example: "service.name: payment AND host.name: web-server-01". Ignored if logId is provided.'
+      'KQL filter to narrow down logs. Examples: \'service.name: "payment"\', \'host.name: "web-server-01"\'. Ignored if logId is provided.'
     ),
   errorLogsOnly: z
     .boolean()
@@ -50,7 +50,7 @@ const getCorrelatedLogsSchema = z.object({
     .array(z.string())
     .optional()
     .describe(
-      'Field names to correlate logs by (e.g., ["session_id"]). Overrides the default trace/request ID fields.'
+      'Field names to correlate logs by. Example: ["session_id"]. Overrides the default trace/request ID fields.'
     ),
   logSourceFields: z
     .array(z.string())

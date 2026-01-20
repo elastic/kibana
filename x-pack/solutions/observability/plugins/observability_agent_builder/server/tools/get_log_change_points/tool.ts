@@ -28,7 +28,7 @@ const getLogChangePointsSchema = z.object({
   kqlFilter: z
     .string()
     .describe(
-      'A KQL query to filter the log documents. Examples: level:error, service.name:"my-service"'
+      "A KQL query to filter the log documents. Examples: 'log.level: error', 'service.name: \"my-service\"'."
     )
     .optional(),
   messageField: z

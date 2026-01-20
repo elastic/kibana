@@ -26,7 +26,9 @@ const getTraceChangePointsSchema = z.object({
   kqlFilter: z
     .string()
     .optional()
-    .describe('KQL filter for traces. Examples: service.name:"my-service", host.name:"web-*".'),
+    .describe(
+      'KQL filter for traces. Examples: \'service.name: "my-service"\', \'host.name: "web-*"\'.'
+    ),
   groupBy: z
     .string()
     .default('service.name')
