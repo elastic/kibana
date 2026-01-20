@@ -162,7 +162,10 @@ const createIntegrationRoute = (
             description: integrationRequestBody.description,
           };
 
-          await automaticImportService.createIntegration({ authenticatedUser, integrationParams });
+          await automaticImportService.createUpdateIntegration({
+            authenticatedUser,
+            integrationParams,
+          });
 
           if (integrationRequestBody.dataStreams) {
             const dataStreamsParams: DataStreamParams[] = integrationRequestBody.dataStreams.map(
