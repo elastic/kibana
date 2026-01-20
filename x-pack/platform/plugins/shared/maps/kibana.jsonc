@@ -17,6 +17,7 @@
     "requiredPlugins": [
       "controls",
       "unifiedSearch",
+      "kql",
       "lens",
       "licensing",
       "features",

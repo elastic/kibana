@@ -30,6 +30,8 @@
           "({ productName, productVersion, excludeExtension, inferenceId, }: { productName: \"security\" | \"kibana\" | \"observability\" | \"elasticsearch\"; productVersion: string; excludeExtension?: boolean | undefined; inferenceId?: string | undefined; }) => string"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,6 +43,8 @@
             "label": "{\n  productName,\n  productVersion,\n  excludeExtension = false,\n  inferenceId,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+            "lineNumber": 26,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -55,6 +59,8 @@
                   "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+                "lineNumber": 27,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -66,6 +72,8 @@
                 "label": "productVersion",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -80,6 +88,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -94,6 +104,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -114,6 +126,8 @@
           "(productName: \"security\" | \"kibana\" | \"observability\" | \"elasticsearch\", inferenceId?: string | undefined) => string"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,6 +142,8 @@
               "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+            "lineNumber": 14,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -143,6 +159,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+            "lineNumber": 14,
+            "columnNumber": 66,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -172,6 +190,8 @@
           " | undefined"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+        "lineNumber": 125,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -186,6 +206,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+            "lineNumber": 125,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -207,6 +229,8 @@
           "({ version, excludeExtension, inferenceId, }: { version: string; excludeExtension?: boolean | undefined; inferenceId?: string | undefined; }) => string"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+        "lineNumber": 71,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -218,6 +242,8 @@
             "label": "{\n  version,\n  excludeExtension = false,\n  inferenceId,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+            "lineNumber": 75,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -229,6 +255,8 @@
                 "label": "version",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+                "lineNumber": 76,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -243,6 +271,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+                "lineNumber": 77,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -257,6 +287,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+                "lineNumber": 78,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -279,6 +311,8 @@
           "(inferenceId?: string | undefined) => string"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -293,6 +327,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+            "lineNumber": 34,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -312,6 +348,8 @@
           "(path: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact_content.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -326,6 +364,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact_content.ts",
+            "lineNumber": 10,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -347,6 +387,8 @@
           "(version: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+        "lineNumber": 138,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -361,6 +403,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+            "lineNumber": 138,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -380,6 +424,8 @@
           "(artifactName: string) => { inferenceId?: string | undefined; productName: \"security\" | \"kibana\" | \"observability\" | \"elasticsearch\"; productVersion: string; } | undefined"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -394,6 +440,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+            "lineNumber": 38,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -415,6 +463,8 @@
           "(artifactName: string) => { version: string; inferenceId?: string | undefined; resourceType: \"security_labs\"; } | undefined"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -429,6 +479,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -447,6 +499,8 @@
         "label": "ArtifactManifest",
         "description": [],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/manifest.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -458,6 +512,8 @@
             "label": "formatVersion",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/manifest.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -472,6 +528,8 @@
               "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/manifest.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -483,6 +541,8 @@
             "label": "productVersion",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/manifest.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -497,6 +557,8 @@
         "label": "ProductDocumentationAttributes",
         "description": [],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -508,6 +570,8 @@
             "label": "content_title",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -522,6 +586,8 @@
               "string | SemanticTextField"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -536,6 +602,8 @@
               "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -547,6 +615,8 @@
             "label": "root_type",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -558,6 +628,8 @@
             "label": "slug",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -569,6 +641,8 @@
             "label": "url",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -580,6 +654,8 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -591,6 +667,8 @@
             "label": "ai_subtitle",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -605,6 +683,8 @@
               "string | SemanticTextField"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -619,6 +699,8 @@
               "string[] | SemanticTextArrayField"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -633,6 +715,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -649,6 +733,8 @@
         "label": "DocumentationProduct",
         "description": [],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/product.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -666,6 +752,8 @@
           "\"2.0.0\""
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/manifest.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -678,6 +766,8 @@
         "label": "productDocIndexPattern",
         "description": [],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -693,6 +783,8 @@
           "\".kibana_ai_product_doc\""
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -708,6 +800,8 @@
           "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/product.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -725,6 +819,8 @@
           "\"product_doc\" | \"security_labs\""
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/resource_type.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -739,6 +835,8 @@
           "\nIndex pattern for Security Labs content."
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -756,6 +854,8 @@
           "\".kibana_ai_security_labs\""
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -773,6 +873,8 @@
           "{ readonly productDoc: \"product_doc\"; readonly securityLabs: \"security_labs\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/resource_type.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

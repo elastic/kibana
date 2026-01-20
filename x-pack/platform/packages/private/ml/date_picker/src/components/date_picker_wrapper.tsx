@@ -244,6 +244,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
   );
 
   const dateFormat = config.get('dateFormat');
+  const timeZoneName = config.get('dateFormat:tz');
   const timePickerQuickRanges = config.get<TimePickerQuickRange[]>(
     uiSettingsKeys.TIMEPICKER_QUICK_RANGES
   );
@@ -332,6 +333,10 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
             ...(needsUpdate ? { needsUpdate } : {}),
           }}
           width={width}
+          showTimeWindowButtons={true}
+          timeZoneDisplayProps={{
+            timeZone: timeZoneName,
+          }}
         />
       </EuiFlexItem>
       {showRefresh === true || !isTimeRangeSelectorEnabled ? (

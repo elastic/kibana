@@ -16,6 +16,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_layout.tsx",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "GridLayoutProps"
             ],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_layout.tsx",
+            "lineNumber": 51,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,6 +69,8 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/private/kbn-grid-layout/grid/utils/equality_checks.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +91,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/utils/equality_checks.ts",
+            "lineNumber": 60,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,6 +114,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/utils/equality_checks.ts",
+            "lineNumber": 60,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -124,6 +134,8 @@
         "label": "GridLayoutData",
         "description": [],
         "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,6 +151,8 @@
               "GridLayoutWidget"
             ],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -163,6 +177,8 @@
           " extends GridRect"
         ],
         "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_panel/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -174,6 +190,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_panel/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -188,6 +206,8 @@
               "{ minWidth?: number | undefined; maxWidth?: number | undefined; minHeight?: number | undefined; maxHeight?: number | undefined; } | undefined"
             ],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_panel/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -202,6 +222,8 @@
         "label": "GridSectionData",
         "description": [],
         "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -213,6 +235,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -224,6 +248,8 @@
             "label": "row",
             "description": [],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -235,6 +261,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -246,6 +274,8 @@
             "label": "isCollapsed",
             "description": [],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -268,6 +298,8 @@
               "; }"
             ],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_section/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -284,6 +316,8 @@
           "\nThe settings for how the grid should be rendered"
         ],
         "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -295,6 +329,8 @@
             "label": "gutterSize",
             "description": [],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -306,6 +342,8 @@
             "label": "rowHeight",
             "description": [],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -317,6 +355,8 @@
             "label": "columnCount",
             "description": [],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -328,6 +368,8 @@
             "label": "keyboardDragTopLimit",
             "description": [],
             "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -350,6 +392,8 @@
           "\"VIEW\" | \"EDIT\""
         ],
         "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
