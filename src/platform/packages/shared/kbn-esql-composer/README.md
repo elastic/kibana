@@ -192,7 +192,7 @@ Output:
 
 ```sql
   FROM logs-*
-  | WHERE avg_duration = AVG(transaction.duration.us) BY service.name
+  | STATS avg_duration = AVG(transaction.duration.us) BY service.name
 ```
 
 `STATS` with named parameters for dynamic field and function names
@@ -219,6 +219,49 @@ Returns
   | STATS AVG(transaction.duration.us), COUNT(service.name) WHERE agent.name == "java" BY sevice.environment
 ```
 
+
+### `INLINE STATS`
+
+Basic `INLINE STATS` clause
+
+```ts
+import { from, inlineStats } from '@kbn/esql-composer';
+
+from('logs-*')
+  .pipe(inlineStats('avg_duration = AVG(transaction.duration.us) BY service.name'))
+  .toString();
+```
+
+Output: 
+
+```sql
+  FROM logs-*
+  | INLINE STATS avg_duration = AVG(transaction.duration.us) BY service.name
+```
+
+`INLINE STATS` with named parameters for dynamic field and function names
+
+```ts
+import { from, inlineStats } from '@kbn/esql-composer';
+
+from('logs-*')
+  .pipe(
+    inlineStats('??funcName(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env', {
+      funcName: 'AVG',
+      duration: 'transaction.duration.us',
+      svcName: 'service.name',
+      env: 'service.environment',
+    })
+  )
+  .toString();
+```
+
+Returns
+
+```sql
+  FROM logs-*
+  | INLINE STATS AVG(transaction.duration.us), COUNT(service.name) WHERE agent.name == "java" BY sevice.environment
+```
 
 ### `EVAL`
 
