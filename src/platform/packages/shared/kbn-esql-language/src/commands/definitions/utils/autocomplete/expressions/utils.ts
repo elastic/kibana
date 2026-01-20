@@ -20,13 +20,6 @@ export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];
 
-/** Maps KQL suggestion types to ISuggestionItem kind values */
-export const KQL_TYPE_TO_KIND_MAP: Record<string, 'Value' | 'Operator' | 'Field'> = {
-  operator: 'Operator',
-  field: 'Field',
-  value: 'Value',
-};
-
 /**
  * Detects if function signatures accept arbitrary/complex expressions in parameters.
  *
@@ -151,7 +144,7 @@ export async function getKqlSuggestionsIfApplicable(
     return suggestions.map((suggestion) => ({
       label: suggestion.text,
       text: suggestion.text,
-      kind: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
+      kind: suggestion.type,
       detail: suggestion.description,
     }));
   } catch (error) {

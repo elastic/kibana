@@ -79,11 +79,18 @@ export interface ESQLFieldWithMetadata {
   };
 }
 
-export enum KQLInESQLSuggestionType {
-  Value = 'value',
-  Operator = 'operator',
-  Field = 'field',
+enum KQLInESQLSuggestionType {
+  Value = 'Value',
+  Operator = 'Operator',
+  Field = 'Field',
 }
+/** Maps KQL suggestion types to ISuggestionItem kind values */
+export const KQL_TYPE_TO_KIND_MAP: Record<string, KQLInESQLSuggestionType> = {
+  operator: KQLInESQLSuggestionType.Operator,
+  field: KQLInESQLSuggestionType.Field,
+  value: KQLInESQLSuggestionType.Value,
+};
+
 interface KQLInESQLSuggestion {
   text: string;
   type: KQLInESQLSuggestionType;

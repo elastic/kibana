@@ -54,8 +54,8 @@ describe('getKqlSuggestionsIfApplicable', () => {
     expect(result).toBeNull();
   });
 
-  it('should return suggestions with Value kind for value type', async () => {
-    const mockSuggestions = [{ text: 'value1', type: 'value', description: 'A value' }];
+  it('should return suggestions with Value kind for Value type', async () => {
+    const mockSuggestions = [{ text: 'value1', type: 'Value', description: 'A value' }];
     const mockGetKqlSuggestions = jest.fn().mockResolvedValue(mockSuggestions);
     const ctx = createContext('KQL("""query', mockGetKqlSuggestions);
 
@@ -67,40 +67,6 @@ describe('getKqlSuggestionsIfApplicable', () => {
         text: 'value1',
         kind: 'Value',
         detail: 'A value',
-      },
-    ]);
-  });
-
-  it('should return suggestions with Operator kind for operator type', async () => {
-    const mockSuggestions = [{ text: 'AND', type: 'operator', description: 'AND operator' }];
-    const mockGetKqlSuggestions = jest.fn().mockResolvedValue(mockSuggestions);
-    const ctx = createContext('KQL("""query', mockGetKqlSuggestions);
-
-    const result = await getKqlSuggestionsIfApplicable(ctx);
-
-    expect(result).toEqual([
-      {
-        label: 'AND',
-        text: 'AND',
-        kind: 'Operator',
-        detail: 'AND operator',
-      },
-    ]);
-  });
-
-  it('should return suggestions with Field kind for field type', async () => {
-    const mockSuggestions = [{ text: 'myField', type: 'field', description: 'A field' }];
-    const mockGetKqlSuggestions = jest.fn().mockResolvedValue(mockSuggestions);
-    const ctx = createContext('KQL("""query', mockGetKqlSuggestions);
-
-    const result = await getKqlSuggestionsIfApplicable(ctx);
-
-    expect(result).toEqual([
-      {
-        label: 'myField',
-        text: 'myField',
-        kind: 'Field',
-        detail: 'A field',
       },
     ]);
   });

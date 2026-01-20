@@ -47,7 +47,7 @@ import type {
   ESQLCallbacks,
   TelemetryQuerySubmittedProps,
 } from '@kbn/esql-types';
-import { KQLInESQLSuggestionType } from '@kbn/esql-types';
+import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -719,23 +719,14 @@ const ESQLEditorInternal = function ESQLEditor({
           indexPatterns: [dataView],
         });
         return (
-          suggestions
-            ?.filter((suggestion) => {
-              const type = suggestion.type as string;
-              return (
-                type === KQLInESQLSuggestionType.Operator ||
-                type === KQLInESQLSuggestionType.Value ||
-                type === KQLInESQLSuggestionType.Field
-              );
-            })
-            .map((suggestion) => {
-              return {
-                text: suggestion.text,
-                description:
-                  typeof suggestion.description === 'string' ? suggestion.description : undefined,
-                type: suggestion.type as string as KQLInESQLSuggestionType,
-              };
-            }) ?? []
+          suggestions?.map((suggestion) => {
+            return {
+              text: suggestion.text,
+              description:
+                typeof suggestion.description === 'string' ? suggestion.description : undefined,
+              type: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
+            };
+          }) ?? []
         );
       },
     };
