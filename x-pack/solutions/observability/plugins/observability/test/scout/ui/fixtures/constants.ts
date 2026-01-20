@@ -63,6 +63,13 @@ export const LOGS_TAB_TEST_SUBJECTS = {
 } as const;
 
 /**
+ * Constants for generated metrics used in metric threshold rule tests
+ */
+export const GENERATED_METRICS = {
+  metricName: 'system.diskio.write.bytes',
+};
+
+/**
  * Constants for data-test-subj values used in custom threshold rule tests
  */
 export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {

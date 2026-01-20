@@ -1272,7 +1272,7 @@
           "\nConfiguration object for the AppMenu component."
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 227,
+        "lineNumber": 270,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1284,14 +1284,14 @@
             "tags": [],
             "label": "items",
             "description": [
-              "\nList of menu items to display in the top navigation menu."
+              "\nList of menu items to display in the app menu."
             ],
             "signature": [
               "AppMenuItemType",
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-            "lineNumber": 231,
+            "lineNumber": 274,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1303,14 +1303,14 @@
             "tags": [],
             "label": "primaryActionItem",
             "description": [
-              "\nPrimary action button to display in the top navigation menu."
+              "\nPrimary action button to display in the app menu."
             ],
             "signature": [
               "AppMenuPrimaryActionItem",
               " | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-            "lineNumber": 235,
+            "lineNumber": 278,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1322,14 +1322,14 @@
             "tags": [],
             "label": "secondaryActionItem",
             "description": [
-              "\nSecondary action button to display in the top navigation menu."
+              "\nSecondary action button to display in the app menu."
             ],
             "signature": [
               "AppMenuSecondaryActionItem",
               " | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-            "lineNumber": 239,
+            "lineNumber": 282,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1459,7 +1459,7 @@
           " & { order: number; }"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 171,
+        "lineNumber": 211,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1482,7 +1482,7 @@
           " | undefined; separator?: \"above\" | \"below\" | undefined; }"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 181,
+        "lineNumber": 221,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1498,14 +1498,12 @@
           "\nPrimary action button type. Can be either a simple button or a split button."
         ],
         "signature": [
-          "Omit<",
-          "AppMenuItemCommon",
-          ", \"items\"> & { splitButtonProps?: ",
+          "Omit<AppMenuActionButton, \"items\"> & { splitButtonProps?: ",
           "AppMenuSplitButtonProps",
           " | undefined; }"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 213,
+        "lineNumber": 256,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1561,16 +1559,17 @@
         "tags": [],
         "label": "AppMenuSecondaryActionItem",
         "description": [
-          "\nSecondary action button type. Can only be a simple button."
+          "\nSecondary action button type. Can't be a split button."
         ],
         "signature": [
+          "Omit<",
           "AppMenuItemCommon",
-          " & { color?: \"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined; isFilled?: boolean | undefined; minWidth?: false | ",
+          ", \"order\"> & { color?: \"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined; } & { isFilled?: boolean | undefined; minWidth?: false | ",
           "Property",
           ".MinWidth<string | number> | undefined; }"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 195,
+        "lineNumber": 242,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1586,14 +1585,10 @@
           "\nSubset of SplitButtonWithNotificationProps."
         ],
         "signature": [
-          "(BaseSplitProps & { items?: undefined; run: ",
-          "AppMenuRunAction",
-          "; }) | (BaseSplitProps & { items: ",
-          "AppMenuPopoverItem",
-          "[]; run?: undefined; })"
+          "AppMenuSecondarySplitButton | AppMenuSecondarySplitButtonWithPopover"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 51,
+        "lineNumber": 73,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
