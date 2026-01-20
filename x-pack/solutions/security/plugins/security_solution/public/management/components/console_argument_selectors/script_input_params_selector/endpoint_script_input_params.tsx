@@ -9,7 +9,6 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ScriptHelpContent } from './shared/script_help_content';
 import type { EndpointRunScriptActionParameters } from '../../endpoint_responder/command_render_components/run_script_action';
-import {} from '../../endpoint_responder/command_render_components/run_script_action';
 import type { CustomScriptSelectorState } from '../custom_scripts_selector/custom_script_selector';
 import type { EndpointScript } from '../../../../../common/endpoint/types';
 import { TextareaInputArgument } from '../textarea_input_argument';

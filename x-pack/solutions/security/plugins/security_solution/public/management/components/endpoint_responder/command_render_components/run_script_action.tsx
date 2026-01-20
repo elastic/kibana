@@ -107,12 +107,12 @@ export const RunScriptActionResult = memo<
           };
 
           if (agentType === 'endpoint') {
-            const timoutInSeconds = parsedExecuteTimeout(timeout?.[0] as string);
+            const timeoutInSeconds = parsedExecuteTimeout(timeout?.[0] as string);
 
-            if (timoutInSeconds) {
+            if (timeoutInSeconds) {
               (
                 params as RunScriptActionRequestBody<EndpointRunScriptActionRequestParams>['parameters']
-              ).timeout = timoutInSeconds;
+              ).timeout = timeoutInSeconds;
             }
           }
 
