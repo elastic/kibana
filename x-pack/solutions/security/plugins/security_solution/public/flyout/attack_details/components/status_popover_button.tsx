@@ -10,6 +10,8 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { i18n } from '@kbn/i18n';
+import type { inputsModel } from '../../../common/store';
+import { inputsSelectors } from '../../../common/store';
 import { useInvalidateFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useAttackWorkflowStatusContextMenuItems } from '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -21,6 +23,7 @@ import { useAttackDetailsContext } from '../context';
 import { STATUS_POPOVER_BUTTON_TEST_ID, STATUS_POPOVER_TEST_ID } from '../constants/test_ids';
 import { useHeaderData } from '../hooks/use_header_data';
 import type { AlertWorkflowStatus } from '../../../common/types';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 interface StatusPopoverButtonProps {
   /**
@@ -42,6 +45,15 @@ export const StatusPopoverButton = memo(({ enrichedFieldInfo }: StatusPopoverBut
   const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
+
+  const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
+
+  // refetch alerts after status change
+  const refetchGlobalQuery = useCallback(() => {
+    globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  }, [globalQueries]);
+
   // force attacks to be refetched automatically after status change
   const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
 
@@ -51,8 +63,9 @@ export const StatusPopoverButton = memo(({ enrichedFieldInfo }: StatusPopoverBut
   );
   const onWorkflowStatusChange = useCallback(() => {
     invalidateFindAttackDiscoveries();
+    refetchGlobalQuery();
     closeFlyout();
-  }, [closeFlyout, invalidateFindAttackDiscoveries]);
+  }, [closeFlyout, invalidateFindAttackDiscoveries, refetchGlobalQuery]);
 
   const { items, panels } = useAttackWorkflowStatusContextMenuItems({
     attacksWithWorkflowStatus: [
