@@ -264,17 +264,22 @@ export const useListDetailsView = (exceptionListId: string) => {
         id: list.id,
         namespaceType: list.namespace_type,
         onError: handleDeleteError,
-        onSuccess: handleDeleteSuccess(list.name),
+        onSuccess: () => {
+          handleDeleteSuccess(list.name)();
+          requestAnimationFrame(() => {
+            setReferenceModalState(exceptionReferenceModalInitialState);
+            setShowReferenceErrorModal(false);
+            navigateToApp(APP_UI_ID, {
+              deepLinkId: SecurityPageName.exceptions,
+              path: '',
+            });
+          });
+        },
       });
     } catch (error) {
       handleErrorStatus(error);
-    } finally {
       setReferenceModalState(exceptionReferenceModalInitialState);
       setShowReferenceErrorModal(false);
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.exceptions,
-        path: '',
-      });
     }
   }, [
     list,
