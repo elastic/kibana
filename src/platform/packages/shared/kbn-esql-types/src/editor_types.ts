@@ -9,7 +9,6 @@
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ILicense } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { QuerySuggestion } from '@kbn/kql/public';
 import type { RecommendedField, RecommendedQuery } from './extensions_autocomplete_types';
 import type { ESQLSourceResult, IndexAutocompleteItem } from './sources_autocomplete_types';
 import type { ESQLControlVariable } from './variables_types';
@@ -80,6 +79,17 @@ export interface ESQLFieldWithMetadata {
   };
 }
 
+export enum KQLInESQLSuggestionType {
+  Value = 'value',
+  Operator = 'operator',
+  Field = 'field',
+}
+interface KQLInESQLSuggestion {
+  text: string;
+  type: KQLInESQLSuggestionType;
+  description?: string;
+}
+
 export interface ESQLCallbacks {
   getSources?: CallbackFn<{}, ESQLSourceResult>;
   getColumnsFor?: CallbackFn<{ query: string }, ESQLFieldWithMetadata>;
@@ -110,5 +120,6 @@ export interface ESQLCallbacks {
   getKqlSuggestions?: (
     kqlQuery: string,
     cursorPositionInKql: number
-  ) => Promise<QuerySuggestion[] | undefined>;
+    // it shoud be QuerySuggestion[] from kql package but to avoid circular dependency we define our own type
+  ) => Promise<KQLInESQLSuggestion[] | undefined>;
 }

@@ -62,4 +62,5 @@ export {
   type ESQLFieldWithMetadata,
   type EsqlFieldType,
   esqlFieldTypes,
+  KQLInESQLSuggestionType,
 } from './src/editor_types';

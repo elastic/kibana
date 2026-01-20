@@ -152,7 +152,7 @@ export async function getKqlSuggestionsIfApplicable(
       label: suggestion.text,
       text: suggestion.text,
       kind: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
-      detail: typeof suggestion.description === 'string' ? suggestion.description : undefined,
+      detail: suggestion.description,
     }));
   } catch (error) {
     return null;
