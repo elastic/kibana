@@ -34,6 +34,8 @@
           " | undefined>>"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/env/core_env_context.tsx",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -49,6 +51,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -71,6 +75,8 @@
           "CoreEnv"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/env/core_env_context.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

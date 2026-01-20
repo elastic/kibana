@@ -36,6 +36,8 @@
           "<MappingsInDefinition, FullDocumentType, SRM>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -10956,6 +10958,8 @@
               " = never>(args: { ...; }) => Promise<...>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -10967,6 +10971,8 @@
                 "label": "args",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 55,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -10988,6 +10994,8 @@
                       "<MappingsInDefinition, FullDocumentType, SRM>"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 56,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -11079,7 +11087,7 @@
                       "TransportRequestOptions",
                       " | undefined): Promise<",
                       "WriteResponseBase",
-                      ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+                      ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                       "default",
                       "; helpers: ",
                       "default",
@@ -11643,6 +11651,8 @@
                       "TransportRequestOptions",
                       " | undefined): Promise<boolean>; }; profiling: ",
                       "default",
+                      "; project: ",
+                      "default",
                       "; putScript: { (this: That, params: ",
                       "PutScriptRequest",
                       ", options?: ",
@@ -11988,6 +11998,8 @@
                       "; }"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 57,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -12008,6 +12020,8 @@
                       }
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 58,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -12022,6 +12036,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 59,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -12038,6 +12054,8 @@
             "label": "helpers",
             "description": [],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12054,6 +12072,8 @@
                   "<unknown>) => Record<keyof SRM, unknown[]>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 71,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -12069,6 +12089,8 @@
                       "<unknown>"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 71,
+                    "columnNumber": 24,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -12099,6 +12121,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12120,6 +12144,8 @@
                   "<FullDocumentType>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 77,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12148,6 +12174,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12169,6 +12197,8 @@
                   "<FullDocumentType>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 84,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12197,6 +12227,8 @@
               "<FullDocumentType>>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12217,6 +12249,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 91,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12235,6 +12269,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -12265,6 +12301,8 @@
               "<FullDocumentType, Agg>>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12286,6 +12324,8 @@
                   "<SRM>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 105,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12302,6 +12342,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 106,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -12323,6 +12365,8 @@
         "label": "BaseSearchRuntimeMappings",
         "description": [],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/runtime.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12338,6 +12382,8 @@
               "MappingRuntimeField"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/runtime.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12362,6 +12408,8 @@
           "<Mappings, FullMappings, SearchRuntimeMappings>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12373,6 +12421,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12387,6 +12437,8 @@
               "SearchRuntimeMappings | undefined"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12405,6 +12457,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12416,6 +12470,8 @@
             "label": "version",
             "description": [],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12444,6 +12500,8 @@
               " | undefined; composedOf?: string[] | undefined; }"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12458,6 +12516,8 @@
         "label": "DataStreamsSetup",
         "description": [],
         "path": "src/core/packages/data-streams/server/src/contracts.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23386,6 +23446,8 @@
               "<...>) => void"
             ],
             "path": "src/core/packages/data-streams/server/src/contracts.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -23407,6 +23469,8 @@
                   "<MappingsInDefinition, FullDocumentType, SRM>"
                 ],
                 "path": "src/core/packages/data-streams/server/src/contracts.ts",
+                "lineNumber": 31,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -23425,6 +23489,8 @@
         "label": "DataStreamsStart",
         "description": [],
         "path": "src/core/packages/data-streams/server/src/contracts.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36585,6 +36651,8 @@
               " = never>(dataStreamName: string) => Promise<...>"
             ],
             "path": "src/core/packages/data-streams/server/src/contracts.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -36599,6 +36667,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/data-streams/server/src/contracts.ts",
+                "lineNumber": 50,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -36629,6 +36699,8 @@
           "<MappingsInDefinition, FullDocumentType, SRM>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/client.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36646,6 +36718,8 @@
               "<SRM>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/client.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
