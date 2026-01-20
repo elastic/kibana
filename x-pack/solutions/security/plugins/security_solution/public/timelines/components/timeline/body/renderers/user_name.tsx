@@ -15,6 +15,7 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
+import type { EntityIdentifiers } from './entity_identifiers_utils';
 
 interface Props {
   contextId: string;
@@ -23,6 +24,7 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
+  entityIdentifiers?: EntityIdentifiers | null;
 }
 
 const UserNameComponent: React.FC<Props> = ({
@@ -32,6 +34,7 @@ const UserNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
+  entityIdentifiers,
 }) => {
   const eventContext = useContext(StatefulEventContext);
   const userName = `${value}`;
@@ -53,19 +56,20 @@ const UserNameComponent: React.FC<Props> = ({
       }
 
       const { timelineID } = eventContext;
-
+      // Use entityIdentifiers from source event if available, otherwise fall back to user.name only
+      const finalEntityIdentifiers = entityIdentifiers || { 'user.name': userName };
       openFlyout({
         right: {
           id: UserPanelKey,
           params: {
-            entityIdentifiers: { 'user.name': userName },
+            entityIdentifiers: finalEntityIdentifiers,
             contextID: contextId,
             scopeId: timelineID,
           },
         },
       });
     },
-    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, userName]
+    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, userName, entityIdentifiers]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
