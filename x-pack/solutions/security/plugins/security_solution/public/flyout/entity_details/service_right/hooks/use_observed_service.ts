@@ -62,16 +62,14 @@ export const useObservedService = (
   });
 
   const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
-    field: 'service.name',
-    value: serviceName,
+    entityIdentifiers: { 'service.name': serviceName },
     defaultIndex: securityDefaultPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
   });
 
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
-    field: 'service.name',
-    value: serviceName,
+    entityIdentifiers: { 'service.name': serviceName },
     defaultIndex: securityDefaultPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,

@@ -92,7 +92,7 @@ export const getRightPanelParams = ({
       return {
         id: HostPanelKey,
         params: {
-          hostName: value,
+          entityIdentifiers: { 'host.name': value },
           scopeId,
         },
       };
@@ -146,7 +146,7 @@ export const getPreviewPanelParams = ({
       return {
         id: HostPreviewPanelKey,
         params: {
-          hostName: value,
+          entityIdentifiers: { 'host.name': value },
           scopeId,
           banner: HOST_PREVIEW_BANNER,
         },

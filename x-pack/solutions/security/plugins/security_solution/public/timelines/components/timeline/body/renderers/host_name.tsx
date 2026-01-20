@@ -63,7 +63,7 @@ const HostNameComponent: React.FC<Props> = ({
         right: {
           id: HostPanelKey,
           params: {
-            hostName,
+            entityIdentifiers: { 'host.name': hostName },
             contextID: contextId,
             scopeId: timelineID,
           },

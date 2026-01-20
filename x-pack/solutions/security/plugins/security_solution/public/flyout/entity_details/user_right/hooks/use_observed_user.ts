@@ -22,7 +22,7 @@ import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/
 import { sourcererSelectors } from '../../../../sourcerer/store';
 
 export const useObservedUser = (
-  userName: string,
+  entityIdentifiers: Record<string, string>,
   scopeId: string
 ): Omit<ObservedEntityData<UserItem>, 'anomalies'> => {
   const timelineTime = useDeepEqualSelector((state) =>
@@ -45,7 +45,7 @@ export const useObservedUser = (
     useObservedUserDetails({
       endDate: to,
       startDate: from,
-      userName,
+      entityIdentifiers,
       indexNames: securityDefaultPatterns,
       skip: isInitializing,
     });
@@ -60,16 +60,14 @@ export const useObservedUser = (
   });
 
   const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
-    field: 'user.name',
-    value: userName,
+    entityIdentifiers,
     defaultIndex: securityDefaultPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
   });
 
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
-    field: 'user.name',
-    value: userName,
+    entityIdentifiers,
     defaultIndex: securityDefaultPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,

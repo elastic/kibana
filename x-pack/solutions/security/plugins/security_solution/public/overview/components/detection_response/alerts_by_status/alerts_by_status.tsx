@@ -30,7 +30,6 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import type { LegendItem } from '../../../../common/components/charts/legend_item';
-import type { EntityFilter } from './use_alerts_by_status';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
@@ -74,7 +73,7 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
 interface AlertsByStatusProps {
   additionalFilters?: ESBoolQuery[];
   applyGlobalQueriesAndFilters?: boolean;
-  entityFilter?: EntityFilter;
+  entityIdentifiers?: Record<string, string>;
   signalIndexName: string | null;
 }
 
@@ -93,16 +92,11 @@ const getChartConfigs = (euiTheme: EuiThemeComputed) => {
   }));
 };
 
-const eventKindSignalFilter: EntityFilter = {
-  field: 'event.kind',
-  value: 'signal',
-};
-
 export const AlertsByStatus = ({
   additionalFilters,
   applyGlobalQueriesAndFilters = true,
   signalIndexName,
-  entityFilter,
+  entityIdentifiers,
 }: AlertsByStatusProps) => {
   const { euiTheme } = useEuiTheme();
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
@@ -123,16 +117,22 @@ export const AlertsByStatus = ({
 
   const detailsButtonOptions = useMemo(
     () => ({
-      name: canAccessTimelines && entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
-      href: canAccessTimelines && entityFilter ? undefined : href,
+      name: canAccessTimelines && entityIdentifiers ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
+      href: canAccessTimelines && entityIdentifiers ? undefined : href,
       onClick:
-        canAccessTimelines && entityFilter
+        canAccessTimelines && entityIdentifiers
           ? async () => {
-              await openTimelineWithFilters([[entityFilter, eventKindSignalFilter]]);
+              const entityFilters = Object.entries(entityIdentifiers).map(([field, value]) => ({
+                field,
+                value,
+              }));
+              await openTimelineWithFilters([
+                [...entityFilters, { field: 'event.kind', value: 'signal' }],
+              ]);
             }
           : goToAlerts,
     }),
-    [entityFilter, href, goToAlerts, openTimelineWithFilters, canAccessTimelines]
+    [entityIdentifiers, href, goToAlerts, openTimelineWithFilters, canAccessTimelines]
   );
 
   const {
@@ -141,7 +141,7 @@ export const AlertsByStatus = ({
     updatedAt,
   } = useAlertsByStatus({
     additionalFilters,
-    entityFilter,
+    entityIdentifiers,
     signalIndexName,
     skip: !toggleStatus,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
@@ -167,16 +167,14 @@ export const AlertsByStatus = ({
               },
             ]
           : []),
-        ...(entityFilter
-          ? [
-              {
-                selectedOptions: [entityFilter.value],
-                fieldName: entityFilter.field,
-              },
-            ]
+        ...(entityIdentifiers
+          ? Object.entries(entityIdentifiers).map(([fieldName, value]) => ({
+              selectedOptions: [value],
+              fieldName,
+            }))
           : []),
       ]),
-    [entityFilter, navigateToAlerts]
+    [entityIdentifiers, navigateToAlerts]
   );
 
   const navigateToAlertsWithStatusOpen = useCallback(
@@ -223,7 +221,7 @@ export const AlertsByStatus = ({
           )}
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-            title={entityFilter ? ALERTS_BY_SEVERITY_TEXT : ALERTS_TEXT}
+            title={entityIdentifiers ? ALERTS_BY_SEVERITY_TEXT : ALERTS_TEXT}
             titleSize="m"
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple

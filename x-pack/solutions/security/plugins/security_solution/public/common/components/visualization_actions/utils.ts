@@ -76,6 +76,47 @@ export const fieldNameExistsFilter = (pageName: string): Filter[] => {
     : [];
 };
 
+/**
+ * Creates a filter that checks for host EUID existence following entity store priority:
+ * host.entity.id > host.id > host.name > host.hostname
+ */
+export const hostEUIDExistsFilter = (): Filter[] => {
+  return [
+    {
+      query: {
+        bool: {
+          should: [
+            {
+              exists: {
+                field: 'host.id',
+              },
+            },
+            {
+              exists: {
+                field: 'host.name',
+              },
+            },
+            {
+              exists: {
+                field: 'host.hostname',
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      meta: {
+        alias: '',
+        disabled: false,
+        key: 'bool',
+        negate: false,
+        type: 'custom',
+        value: `{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "host.id"}},{"exists": {"field": "host.name"}},{"exists": {"field": "host.hostname"}}],"minimum_should_match": 1}}]}}}`,
+      },
+    },
+  ];
+};
+
 export const getNetworkDetailsPageFilter = (ipAddress?: string): Filter[] =>
   ipAddress
     ? [

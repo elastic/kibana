@@ -13,6 +13,8 @@ import { useFirstLastSeen } from '../../containers/use_first_last_seen';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { Direction } from '../../../../common/search_strategy';
+import type { ESQuery } from '../../../../common/typed_json';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 export enum FirstLastSeenType {
   FIRST_SEEN = 'first-seen',
@@ -21,18 +23,18 @@ export enum FirstLastSeenType {
 
 export interface FirstLastSeenProps {
   indexPatterns: string[];
-  field: string;
+  entityIdentifiers: EntityIdentifiers;
   type: FirstLastSeenType;
-  value: string;
+  filterQuery?: ESQuery | string;
 }
 
 export const FirstLastSeen = React.memo<FirstLastSeenProps>(
-  ({ indexPatterns, field, type, value }) => {
+  ({ indexPatterns, entityIdentifiers, type, filterQuery }) => {
     const [loading, { firstSeen, lastSeen, errorMessage }] = useFirstLastSeen({
-      field,
-      value,
+      entityIdentifiers,
       order: type === FirstLastSeenType.FIRST_SEEN ? Direction.asc : Direction.desc,
       defaultIndex: indexPatterns,
+      filterQuery,
     });
     const valueSeen = useMemo(
       () => (type === FirstLastSeenType.FIRST_SEEN ? firstSeen : lastSeen),
@@ -48,7 +50,7 @@ export const FirstLastSeen = React.memo<FirstLastSeenProps>(
             'data-test-subj': 'firstLastSeenErrorToolTip',
           }}
           aria-label={`firstLastSeenError-${type}`}
-          id={`firstLastSeenError-${field}-${type}`}
+          id={`firstLastSeenError-${Object.keys(entityIdentifiers)[0] || 'unknown'}-${type}`}
           type="warning"
         />
       );

@@ -116,8 +116,7 @@ export const MisconfigurationsPreview = ({
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-    field,
-    value
+    { [field]: value }
   );
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 

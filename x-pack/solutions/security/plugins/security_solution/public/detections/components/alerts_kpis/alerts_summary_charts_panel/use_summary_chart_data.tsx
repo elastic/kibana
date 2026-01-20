@@ -12,7 +12,6 @@ import type { Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { SummaryChartsAgg, SummaryChartsData } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { EntityFilter } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
@@ -31,7 +30,7 @@ export interface UseAlertsQueryProps {
   uniqueQueryId: string;
   signalIndexName: string | null;
   skip?: boolean;
-  entityFilter?: EntityFilter;
+  entityIdentifiers?: Record<string, string>;
   query?: Query;
   filters?: Filter[];
   runtimeMappings?: MappingRuntimeFields;
@@ -41,43 +40,45 @@ export const getAlertsQuery = ({
   additionalFilters = [],
   from,
   to,
-  entityFilter,
+  entityIdentifiers,
   runtimeMappings,
   aggregations,
 }: {
   from: string;
   to: string;
-  entityFilter?: EntityFilter;
+  entityIdentifiers?: Record<string, string>;
   additionalFilters?: ESBoolQuery[];
   runtimeMappings?: MappingRuntimeFields;
   aggregations: {};
-}) => ({
-  size: 0,
-  query: {
-    bool: {
-      filter: [
-        ...additionalFilters,
-        { range: { '@timestamp': { gte: from, lte: to } } },
-        ...(entityFilter
-          ? [
-              {
-                term: {
-                  [entityFilter.field]: entityFilter.value,
-                },
-              },
-            ]
-          : []),
-      ],
+}) => {
+  const entityFilters = entityIdentifiers
+    ? Object.entries(entityIdentifiers).map(([field, value]) => ({
+        term: {
+          [field]: value,
+        },
+      }))
+    : [];
+
+  return {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...additionalFilters,
+          { range: { '@timestamp': { gte: from, lte: to } } },
+          ...entityFilters,
+        ],
+      },
     },
-  },
-  aggs: aggregations,
-  runtime_mappings: runtimeMappings,
-});
+    aggs: aggregations,
+    runtime_mappings: runtimeMappings,
+  };
+};
 
 export const useSummaryChartData: UseAlerts = ({
   aggregations,
   uniqueQueryId,
-  entityFilter,
+  entityIdentifiers,
   query,
   filters,
   runtimeMappings,
@@ -116,7 +117,7 @@ export const useSummaryChartData: UseAlerts = ({
     query: getAlertsQuery({
       from,
       to,
-      entityFilter,
+      entityIdentifiers,
       additionalFilters,
       runtimeMappings,
       aggregations,
@@ -131,13 +132,21 @@ export const useSummaryChartData: UseAlerts = ({
       getAlertsQuery({
         from,
         to,
-        entityFilter,
+        entityIdentifiers,
         additionalFilters,
         runtimeMappings,
         aggregations,
       })
     );
-  }, [setAlertsQuery, from, to, entityFilter, additionalFilters, runtimeMappings, aggregations]);
+  }, [
+    setAlertsQuery,
+    from,
+    to,
+    entityIdentifiers,
+    additionalFilters,
+    runtimeMappings,
+    aggregations,
+  ]);
 
   useEffect(() => {
     if (data == null) {

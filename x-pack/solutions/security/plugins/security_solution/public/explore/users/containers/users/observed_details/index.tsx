@@ -27,7 +27,7 @@ export interface UserDetailsArgs {
 
 interface UseUserDetails {
   endDate: string;
-  userName: string;
+  entityIdentifiers: Record<string, string>;
   id?: string;
   indexNames: string[];
   skip?: boolean;
@@ -36,7 +36,7 @@ interface UseUserDetails {
 
 export const useObservedUserDetails = ({
   endDate,
-  userName,
+  entityIdentifiers,
   indexNames,
   id = OBSERVED_USER_QUERY_ID,
   skip = false,
@@ -73,7 +73,7 @@ export const useObservedUserDetails = ({
     () => ({
       defaultIndex: indexNames,
       factoryQueryType: UsersQueries.observedDetails,
-      userName,
+      entityIdentifiers,
       timerange: {
         interval: '12h',
         from: startDate,
@@ -81,7 +81,7 @@ export const useObservedUserDetails = ({
       },
       filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
     }),
-    [endDate, indexNames, startDate, userName]
+    [endDate, indexNames, startDate, entityIdentifiers]
   );
 
   useEffect(() => {

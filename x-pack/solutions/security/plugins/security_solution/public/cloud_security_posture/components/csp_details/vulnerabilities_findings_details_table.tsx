@@ -94,7 +94,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     };
 
     const { data } = useVulnerabilitiesFindings({
-      query: buildVulnerabilityEntityFlyoutPreviewQuery('host.name', value, currentFilter),
+      query: buildVulnerabilityEntityFlyoutPreviewQuery({ 'host.name': value }, currentFilter),
       sort: [sortFieldDirection],
       enabled: true,
       pageSize: 1,

@@ -51,7 +51,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
-import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
+import { hostEUIDExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
@@ -90,14 +90,14 @@ const HostsComponent = () => {
   const { uiSettings } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    const hostNameExistsFilter = fieldNameExistsFilter(SecurityPageName.hosts);
+    const hostEUIDFilter = hostEUIDExistsFilter();
     if (tabName === HostsTableType.events) {
-      return [...globalFilters, ...hostNameExistsFilter];
+      return [...globalFilters, ...hostEUIDFilter];
     }
 
     if (tabName === HostsTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection, EntityType.host);
-      return [...globalFilters, ...hostNameExistsFilter, ...severityFilter];
+      return [...globalFilters, ...hostEUIDFilter, ...severityFilter];
     }
 
     return globalFilters;
@@ -200,7 +200,11 @@ const HostsComponent = () => {
             <Display show={!globalFullScreen}>
               <HeaderPage
                 subtitle={
-                  <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={selectedPatterns} />
+                  <LastEventTime
+                    entityIdentifiers={{}}
+                    indexKey={LastEventIndexKey.hosts}
+                    indexNames={selectedPatterns}
+                  />
                 }
                 title={i18n.PAGE_TITLE}
                 border
