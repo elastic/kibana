@@ -9,7 +9,7 @@ import type {
   EntityDefinition,
   EntityField,
   EntityIdentityField,
-} from '../../definitions/entity_schema';
+} from '../definitions/entity_schema';
 
 const DEFAULT_FIELDS = ['@timestamp', `entity.id`];
 const METADATA_FIELDS = ['_index'];
@@ -34,7 +34,7 @@ interface LogsExtractionQueryParams {
   toDateISO: string;
 }
 
-export const buildPriorityLogsExtractionEsqlQuery = ({
+export const buildLogsExtractionEsqlQuery = ({
   indexPatterns,
   entityDefinition: { fields, identityFields },
   fromDateISO,

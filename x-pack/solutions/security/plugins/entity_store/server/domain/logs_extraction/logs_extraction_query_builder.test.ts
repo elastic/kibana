@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { buildPriorityLogsExtractionEsqlQuery } from './priority_logs_extraction_query_builder';
-import { entitiesDefinitionRegistry, getEntityDefinition } from '../../definitions/registry';
-import type { EntityType } from '../../definitions/entity_schema';
+import { buildLogsExtractionEsqlQuery } from './logs_extraction_query_builder';
+import { entitiesDefinitionRegistry, getEntityDefinition } from '../definitions/registry';
+import type { EntityType } from '../definitions/entity_schema';
 
-describe('buildPriorityLogsExtractionEsqlQuery', () => {
+describe('buildLogsExtractionEsqlQuery', () => {
   Object.keys(entitiesDefinitionRegistry).forEach((type) => {
     it(`generates the expected query for ${type} entity description`, () => {
-      const query = buildPriorityLogsExtractionEsqlQuery({
+      const query = buildLogsExtractionEsqlQuery({
         indexPatterns: ['test-index-*'],
         latestIndex: 'latest-index',
         entityDefinition: getEntityDefinition({ type: type as EntityType }),

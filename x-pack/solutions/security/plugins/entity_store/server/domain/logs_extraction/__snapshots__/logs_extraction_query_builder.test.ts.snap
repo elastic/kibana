@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`buildPriorityLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
+exports[`buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
 "FROM test-index-*
     METADATA _index
   | WHERE host.name IS NOT NULL
@@ -161,7 +161,7 @@ exports[`buildPriorityLogsExtractionEsqlQuery generates the expected query for g
   | SORT @timestamp ASC"
 `;
 
-exports[`buildPriorityLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
+exports[`buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
 "FROM test-index-*
     METADATA _index
   | WHERE host.name IS NOT NULL
@@ -322,7 +322,7 @@ exports[`buildPriorityLogsExtractionEsqlQuery generates the expected query for h
   | SORT @timestamp ASC"
 `;
 
-exports[`buildPriorityLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
+exports[`buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
 "FROM test-index-*
     METADATA _index
   | WHERE host.name IS NOT NULL
@@ -483,7 +483,7 @@ exports[`buildPriorityLogsExtractionEsqlQuery generates the expected query for s
   | SORT @timestamp ASC"
 `;
 
-exports[`buildPriorityLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
+exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
 "FROM test-index-*
     METADATA _index
   | WHERE host.name IS NOT NULL
