@@ -171,7 +171,7 @@ Object {
       },
     },
     "title": "Heat map",
-    "version": 1,
+    "version": 2,
     "visualizationType": "lnsHeatmap",
   },
   "requestData": Object {
@@ -320,7 +320,7 @@ Object {
       },
     },
     "title": "Heat map",
-    "version": 1,
+    "version": 2,
     "visualizationType": "lnsHeatmap",
   },
   "requestData": Object {

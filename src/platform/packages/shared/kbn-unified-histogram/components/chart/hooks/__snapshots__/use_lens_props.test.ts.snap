@@ -124,7 +124,7 @@ Object {
       },
     },
     "title": "Edit visualization",
-    "version": 1,
+    "version": 2,
     "visualizationType": "lnsXY",
   },
   "esqlVariables": Array [],
@@ -281,7 +281,7 @@ Object {
       },
     },
     "title": "Heat map",
-    "version": 1,
+    "version": 2,
     "visualizationType": "lnsHeatmap",
   },
   "esqlVariables": Array [
