@@ -41,17 +41,17 @@ export function mergeServiceStats({
 }): MergedServiceStat[] {
   const allServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
-  // Make sure to exclude health statuses, SLO counts, and alerts from services
+  // Make sure to exclude health statuses, alerts, and SLO counts from services
   // that are not found in APM data (e.g., wildcard "*" services from SLO alerts)
   const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );
 
-  const matchedSloCounts = sloCounts.filter(({ serviceName }) =>
+  const matchedAlertCounts = alertCounts.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );
 
-  const matchedAlertCounts = alertCounts.filter(({ serviceName }) =>
+  const matchedSloCounts = sloCounts.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );
 
