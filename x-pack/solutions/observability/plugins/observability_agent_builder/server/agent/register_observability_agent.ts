@@ -82,7 +82,7 @@ function getToolSelectionInstructions() {
     - \`get_hosts\`: Infrastructure health (CPU, memory, disk, network)
     
     **Drill-down (narrow the scope)**
-    - \`get_trace_metrics\`: RED metrics with flexible groupBy (service → transaction → host)
+    - \`get_trace_metrics\`: RED metrics with flexible grouping and filtering (service → transaction → host)
     - \`get_downstream_dependencies\`: Service topology and blast radius
     - \`get_log_categories\`: Summarize log patterns into categories
     
