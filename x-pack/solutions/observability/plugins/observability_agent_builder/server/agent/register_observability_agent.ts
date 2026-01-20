@@ -122,7 +122,7 @@ function getKqlInstructions() {
     ### KQL (Kibana Query Language)
     Use KQL syntax for \`kqlFilter\` parameters:
     - Match: \`field: value\`, \`field: (a OR b OR c)\`
-    - Range: \`field > 100\`, \`field >= 10 and field <= 20\`
+    - Range: \`field > 100\`, \`field >= 10 AND field <= 20\`
     - Wildcards: \`field: prefix*\` (trailing only)
     - Negation: \`NOT field: value\`
     - Combine with \`AND\`/\`OR\`, use parentheses for precedence
