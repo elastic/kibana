@@ -87,7 +87,7 @@ function getToolSelectionInstructions() {
     - \`get_log_categories\`: Summarize log patterns into categories
     
     **Timeline (when did it change?)**
-    - \`get_trace_change_points\`: Detect changes in latency/throughput/failure rate
+    - \`get_trace_change_points\`: Detect changes in latency/throughput/error rate
     - \`get_log_change_points\`: Detect changes in log message patterns
     - \`get_metric_change_points\`: Detect changes in infrastructure metrics
     - \`run_log_rate_analysis\`: Correlate log volume spikes/drops with field values
