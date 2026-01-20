@@ -92,9 +92,6 @@ const fieldsConfig: FieldsConfig = {
     deserializer: (value: string | object) => {
       return isXJsonValue(value) ? to.xJsonString(value) : value;
     },
-    serializer: (value: string) => {
-      return isXJsonValue(value) ? value : from.emptyStringToUndefined(value);
-    },
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel', {
       defaultMessage: 'Value',
     }),
@@ -107,7 +104,9 @@ const fieldsConfig: FieldsConfig = {
     validations: [
       {
         validator: ({ value, path, formData }) => {
-          if (isEmpty(value) && isUndefined(formData['fields.copy_from'])) {
+          // Only require a value if it's undefined and copy_from is also not defined.
+          // Empty strings, 0, and false are valid values.
+          if (isUndefined(value) && isUndefined(formData['fields.copy_from'])) {
             return {
               path,
               message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredValue', {
@@ -218,19 +217,20 @@ export const SetProcessor: FunctionComponent = () => {
         })}
       />
 
-      <UseField
-        config={fieldsConfig.value}
-        component={XJsonToggle}
-        path="fields.value"
-        componentProps={{
-          disabled: isCopyFromEnabled,
-          handleIsJson: getIsJsonValue,
-          fieldType: 'text',
-        }}
-        validationData={isDefineAsJson}
-      />
+      {!isCopyFromEnabled && (
+        <UseField
+          config={fieldsConfig.value}
+          component={XJsonToggle}
+          path="fields.value"
+          componentProps={{
+            handleIsJson: getIsJsonValue,
+            fieldType: 'text',
+          }}
+          validationData={isDefineAsJson}
+        />
+      )}
 
-      {hasTemplateSnippet(fields?.value) && (
+      {!isCopyFromEnabled && hasTemplateSnippet(fields?.value) && (
         <UseField
           componentProps={{
             euiFieldProps: {

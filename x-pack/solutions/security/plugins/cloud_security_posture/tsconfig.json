@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -68,6 +68,7 @@
     "@kbn/expandable-flyout",
     "@kbn/code-editor-mock",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

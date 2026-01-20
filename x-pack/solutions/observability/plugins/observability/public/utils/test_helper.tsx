@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { merge } from 'lodash';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';

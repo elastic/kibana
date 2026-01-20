@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -28,5 +28,6 @@
     "@kbn/management-settings-ids",
     "@kbn/core",
     "@kbn/i18n",
+    "@kbn/react-query",
   ]
 }

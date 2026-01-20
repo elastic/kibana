@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -63,6 +63,8 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
     [setSelectedIndices]
   );
 
+  const [isIndicesSelectComboBoxDisabled, setIndicesSelectComboBoxDisabled] =
+    useState<boolean>(false);
   return (
     <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
@@ -101,6 +103,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
             'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.selectableLabel',
             { defaultMessage: 'Select searchable indices' }
           )}
+          setIndicesSelectComboBoxDisabled={setIndicesSelectComboBoxDisabled}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -112,6 +115,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
               data-telemetry-id="entSearchApplications-indices-addNewIndices-submit"
               iconType="plusInCircle"
               onClick={submitSelectedIndices}
+              disabled={isIndicesSelectComboBoxDisabled}
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.submitButton',

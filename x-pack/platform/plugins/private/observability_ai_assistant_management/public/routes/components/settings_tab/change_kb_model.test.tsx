@@ -23,7 +23,7 @@ import {
   elserDescription,
   elserTitle,
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { UseProductDoc } from '../../../hooks/use_product_doc';
 

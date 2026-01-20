@@ -14,11 +14,11 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { createRule } from '@kbn/detections-response-ftr-services';
 import {
   createContainerWithEntries,
   createContainerWithEndpointEntries,
 } from '../exception_list_and_item';
-import { createRule } from '../../../../config/services/detections_response';
 
 /**
  * Convenience testing function where you can pass in just the entries and you will

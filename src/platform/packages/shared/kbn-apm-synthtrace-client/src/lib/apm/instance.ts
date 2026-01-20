@@ -76,18 +76,23 @@ export class Instance extends Entity<ApmFields> {
     type,
     culprit,
     groupingKey,
+    withoutErrorId = false,
   }: {
     message: string;
     type?: string;
     culprit?: string;
     groupingKey?: string;
+    withoutErrorId?: boolean;
   }) {
-    return new ApmError({
-      ...this.fields,
-      ...(groupingKey ? { 'error.grouping_key': groupingKey } : {}),
-      'error.exception': [{ message, ...(type ? { type } : {}) }],
-      'error.culprit': culprit,
-    });
+    return new ApmError(
+      {
+        ...this.fields,
+        ...(groupingKey ? { 'error.grouping_key': groupingKey } : {}),
+        'error.exception': [{ message, ...(type ? { type } : {}) }],
+        'error.culprit': culprit,
+      },
+      { withoutErrorId }
+    );
   }
 
   containerId(containerId: string) {

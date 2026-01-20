@@ -1,10 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
       "node",
-      "jest",
+      "cheerio",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
   },
@@ -13,17 +15,9 @@
     "../../../../../typings/**/*",
     "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-    "config/services/detections_response/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
-    {
-      "path": "../security_solution_endpoint/tsconfig.json"
-    },
-    {
-      "path": "config/services/detections_response/tsconfig.json"
-    },
+    "@kbn/test-suites-xpack-security-endpoint",
     "@kbn/dev-utils",
     "@kbn/test",
     "@kbn/expect",
@@ -66,6 +60,9 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/response-ops-rule-params",
     "@kbn/securitysolution-exceptions-common",
-    "@kbn/security-solution-test-api-clients"
+    "@kbn/security-solution-test-api-clients",
+    "@kbn/setup-node-env",
+    "@kbn/security-solution-test-api-clients",
+    "@kbn/detections-response-ftr-services",
   ]
 }

@@ -43,7 +43,7 @@ export const getLiveQueryResultsRoute = (
       path: '/api/osquery/live_queries/{id}/results/{actionId}',
       security: {
         authz: {
-          requiredPrivileges: [`${PLUGIN_ID}-read`],
+          requiredPrivileges: [`${PLUGIN_ID}-readLiveQueries`],
         },
       },
     })

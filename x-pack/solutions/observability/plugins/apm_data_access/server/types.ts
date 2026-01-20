@@ -13,7 +13,6 @@ import type {
   APMIndices,
 } from '@kbn/apm-sources-access-plugin/server';
 import type { getServices } from './services/get_services';
-import type { ApmDataAccessPrivilegesCheck } from './lib/check_privileges';
 
 export interface ApmDataAccessPluginSetup {
   apmIndicesFromConfigFile: APMIndices;
@@ -30,9 +29,8 @@ export interface ApmDataAccessServerDependencies {
   security?: SecurityPluginStart;
 }
 
-export interface ApmDataAccessPluginStart {
-  hasPrivileges: (params: Pick<ApmDataAccessPrivilegesCheck, 'request'>) => Promise<boolean>;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ApmDataAccessPluginStart {}
 
 export type ApmDataAccessServices = ReturnType<typeof getServices>;
 export type { ApmDataAccessServicesParams } from './services/get_services';
@@ -44,4 +42,3 @@ export type {
   APMEventESSearchRequest,
   APMLogEventESSearchRequest,
 } from './lib/helpers';
-export type { ApmDataAccessPrivilegesCheck };

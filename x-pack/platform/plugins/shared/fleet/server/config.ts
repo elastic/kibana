@@ -241,7 +241,7 @@ export const config: PluginConfigDescriptor = {
             min: 0,
           })
         ),
-        retrySetupOnBoot: schema.boolean({ defaultValue: false }),
+        retrySetupOnBoot: schema.boolean({ defaultValue: true }),
         registry: schema.object(
           {
             kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
@@ -319,6 +319,13 @@ export const config: PluginConfigDescriptor = {
       syncIntegrations: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      fleetPolicyRevisionsCleanup: schema.maybe(
+        schema.object({
+          maxRevisions: schema.number({ min: 1, defaultValue: 10 }),
+          interval: schema.string({ defaultValue: '1h' }),
+          maxPoliciesPerRun: schema.number({ min: 1, defaultValue: 100 }),
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),

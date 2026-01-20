@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { useInspector } from '../../../hooks/use_inspector';
 import { useKibana } from '../../../../common/lib/kibana';

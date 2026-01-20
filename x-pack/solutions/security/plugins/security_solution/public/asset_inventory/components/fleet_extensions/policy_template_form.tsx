@@ -126,7 +126,8 @@ export const CloudAssetInventoryPolicyTemplateForm =
       const showCloudConnectors =
         cloudConnectorsEnabled &&
         !!cloudConnectorRemoteRoleTemplate &&
-        semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
+        semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS) &&
+        setupTechnology === SetupTechnology.AGENTLESS;
 
       // /**
       //  * - Updates policy inputs by user selection

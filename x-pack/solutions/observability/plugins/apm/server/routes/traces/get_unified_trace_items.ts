@@ -7,7 +7,7 @@
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { APMConfig } from '../..';
@@ -29,7 +29,8 @@ import {
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
-import type { UnifiedTraceErrors } from './get_unified_trace_errors';
+import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
+import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -72,25 +73,33 @@ export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
  */
 export async function getUnifiedTraceItems({
   apmEventClient,
+  logsClient,
   maxTraceItemsFromUrlParam,
   traceId,
   start,
   end,
   config,
-  unifiedTraceErrors,
 }: {
   apmEventClient: APMEventClient;
+  logsClient: LogsClient;
   maxTraceItemsFromUrlParam?: number;
   traceId: string;
   start: number;
   end: number;
   config: APMConfig;
-  unifiedTraceErrors: UnifiedTraceErrors;
-}): Promise<TraceItem[]> {
+}): Promise<{ traceItems: TraceItem[]; unifiedTraceErrors: UnifiedTraceErrors }> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
 
-  const response = await apmEventClient.search(
+  const unifiedTraceErrorsPromise = getUnifiedTraceErrors({
+    apmEventClient,
+    logsClient,
+    traceId,
+    start,
+    end,
+  });
+
+  const unifiedTracePromise = apmEventClient.search(
     'get_unified_trace_items',
     {
       apm: {
@@ -135,34 +144,41 @@ export async function getUnifiedTraceItems({
     { skipProcessorEventFilter: true }
   );
 
+  const [unifiedTraceErrors, unifiedTraceItems] = await Promise.all([
+    unifiedTraceErrorsPromise,
+    unifiedTracePromise,
+  ]);
+
   const errorCountByDocId = getErrorCountByDocId(unifiedTraceErrors);
 
-  return response.hits.hits
-    .map((hit) => {
-      const event = unflattenKnownApmEventFields(hit.fields, fields);
-      const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
-      const id = event.span?.id || event.transaction?.id;
-      if (!id) {
-        return undefined;
-      }
+  return {
+    traceItems: unifiedTraceItems.hits.hits
+      .map((hit) => {
+        const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
+        const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
+        const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
+        const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];
 
-      const docErrorCount = errorCountByDocId[id] || 0;
-      return {
-        id: event.span?.id ?? event.transaction?.id,
-        timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
-        name: event.span?.name ?? event.transaction?.name,
-        traceId: event.trace.id,
-        duration: resolveDuration(apmDuration, event.duration),
-        hasError:
-          docErrorCount > 0 ||
-          (event.status?.code && Array.isArray(event.status.code)
-            ? event.status.code[0] === 'Error'
-            : false),
-        parentId: event.parent?.id,
-        serviceName: event.service.name,
-      } as TraceItem;
-    })
-    .filter((_) => _) as TraceItem[];
+        if (!id || !name) {
+          return undefined;
+        }
+
+        const docErrorCount = errorCountByDocId[id] || 0;
+        const statusCode = event[STATUS_CODE];
+        return {
+          id,
+          name,
+          timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
+          traceId: event[TRACE_ID],
+          duration: resolveDuration(apmDuration, event[DURATION]),
+          hasError: docErrorCount > 0 || statusCode === 'Error',
+          parentId: event[PARENT_ID],
+          serviceName: event['service.name'],
+        } satisfies TraceItem;
+      })
+      .filter((_) => _) as TraceItem[],
+    unifiedTraceErrors,
+  };
 }
 
 /**

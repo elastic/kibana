@@ -53,10 +53,12 @@ export function useInstalledIntegrations(
   filters: InstalledIntegrationsFilter,
   pagination: Pagination,
   upgradingIntegrations?: InstalledPackageUIPackageListItem[],
-  uninstallingIntegrations?: InstalledPackageUIPackageListItem[]
+  uninstallingIntegrations?: InstalledPackageUIPackageListItem[],
+  prereleaseIntegrationsEnabled?: boolean
 ) {
   const { data, isInitialLoading, isLoading } = useGetPackagesQuery({
     withPackagePoliciesCount: true,
+    prerelease: prereleaseIntegrationsEnabled,
   });
 
   const internalInstalledPackages: InstalledPackageUIPackageListItem[] = useMemo(

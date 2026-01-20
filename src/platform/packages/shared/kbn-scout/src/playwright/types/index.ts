@@ -21,9 +21,15 @@ export interface ScoutTestOptions extends PlaywrightTestOptions {
   serversConfigDir: string;
   configName: ScoutConfigName;
   [VALID_CONFIG_MARKER]: boolean;
+  runGlobalSetup?: boolean;
 }
 
 export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'testDir' | 'workers'> {
   testDir: string;
   workers?: 1 | 2 | 3; // to keep performance consistent within test suites
+  /**
+   * When true, runs global.setup.ts as a pre-step before running tests.
+   * Defaults to false.
+   */
+  runGlobalSetup?: boolean;
 }

@@ -8,7 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { RenderOptions, RenderResult } from '@testing-library/react';

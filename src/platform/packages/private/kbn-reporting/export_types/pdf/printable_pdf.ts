@@ -76,7 +76,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
     cancellationToken,
     stream,
   }: RunTaskOpts<TaskPayloadPDF>) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
+    const logger = this.logger.get('execute-job');
     const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
@@ -150,7 +150,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         warnings,
       })),
       catchError((err: any) => {
-        logger.error(err);
+        logger.debug(err, { tags: [jobId] });
         return throwError(err);
       })
     );

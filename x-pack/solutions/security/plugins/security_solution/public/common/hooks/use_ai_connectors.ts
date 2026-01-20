@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useAppToasts } from './use_app_toasts';
 import { loadAiConnectors } from '../utils/connectors/ai_connectors';
 import * as i18n from './translations';

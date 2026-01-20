@@ -12,7 +12,7 @@ import type {
   PutSettingsRequestSchema,
   PutSpaceSettingsRequestSchema,
 } from '../../types';
-import { settingsService, agentPolicyService, appContextService } from '../../services';
+import { settingsService } from '../../services';
 import { getSpaceSettings, saveSpaceSettings } from '../../services/spaces/space_settings';
 
 export const getSpaceSettingsHandler: FleetRequestHandler = async (context, request, response) => {
@@ -69,12 +69,10 @@ export const putSettingsHandler: FleetRequestHandler<
   TypeOf<typeof PutSettingsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
-    await agentPolicyService.bumpAllAgentPolicies(esClient, { user });
+
     const body = {
       item: settings,
     };

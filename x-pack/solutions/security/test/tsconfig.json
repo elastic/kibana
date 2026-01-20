@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -24,13 +24,11 @@
     "security_solution_api_integration/**/*",
     "security_solution_endpoint/**/*",
     "*/packages/**/*",
-    "*/*/packages/**/*",
+    "*/*/packages/**/*"
   ],
   "kbn_references": [
-    {
-      "path": "security_solution_api_integration/config/services/detections_response/tsconfig.json"
-    },
     "@kbn/security-solution-test-api-clients",
+    "@kbn/detections-response-ftr-services",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",

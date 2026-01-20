@@ -30,7 +30,7 @@ import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 
 import { EuiBreadcrumb } from '@elastic/eui';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ExtensionsService } from '../services';
 import { HttpService, NotificationService, UiMetricService } from './services';
 import { IndexManagementBreadcrumb } from './services/breadcrumbs';

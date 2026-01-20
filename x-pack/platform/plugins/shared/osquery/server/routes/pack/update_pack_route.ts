@@ -80,7 +80,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
         const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
 
         const currentPackSO = await spaceScopedClient.get<{ name: string; enabled: boolean }>(

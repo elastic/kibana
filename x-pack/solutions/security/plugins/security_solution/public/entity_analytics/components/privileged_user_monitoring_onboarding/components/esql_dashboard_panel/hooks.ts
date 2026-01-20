@@ -6,7 +6,7 @@
  */
 
 import { getESQLResults, getIndexPatternFromESQLQuery, prettifyQuery } from '@kbn/esql-utils';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
@@ -55,6 +55,7 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
   const inspect = useMemo(() => {
     return {
       dsl: [
+        // @ts-expect-error upgrade typescript v5.9.3
         JSON.stringify({ index: [index] ?? [''], body: prettifyQuery(tableQuery, false) }, null, 2),
       ],
       response: response ? [JSON.stringify(response, null, 2)] : [],

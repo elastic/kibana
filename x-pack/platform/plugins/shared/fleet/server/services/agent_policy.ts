@@ -471,21 +471,12 @@ class AgentPolicyService {
 
     validateRequiredVersions(agentPolicy.name, agentPolicy.required_versions);
 
+    const preparedAgentPolicySo = this.prepareAsNewSo(agentPolicy, {
+      username: options?.user?.username,
+    });
+
     const newSo = await soClient
-      .create<AgentPolicySOAttributes>(
-        savedObjectType,
-        {
-          ...agentPolicy,
-          status: 'active',
-          is_managed: agentPolicy.is_managed ?? false,
-          revision: 1,
-          updated_at: new Date().toISOString(),
-          updated_by: options?.user?.username || 'system',
-          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-          is_protected: false,
-        } as AgentPolicy,
-        options
-      )
+      .create<AgentPolicySOAttributes>(savedObjectType, preparedAgentPolicySo, options)
       .catch(
         catchAndSetErrorStackTrace.withMessage(
           `Attempt to create agent policy [${agentPolicy.id}] failed`
@@ -501,49 +492,55 @@ class AgentPolicyService {
       spaceId: soClient.getCurrentNamespace(),
     });
     logger.debug(`Created new agent policy with id ${newSo.id}`);
-    return { id: newSo.id, ...newSo.attributes };
+    return mapAgentPolicySavedObjectToAgentPolicy(newSo);
   }
 
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
-    givenPolicy: { id?: string; name: string; supports_agentless?: boolean | null }
+    policy: {
+      id?: string;
+      name: string;
+      space_ids?: string[];
+      supports_agentless?: boolean | null;
+    }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
-
-    const results = await soClient
+    const isMultispace = (policy.space_ids ?? []).length > 1;
+    const _soClient = isMultispace
+      ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
+      : soClient;
+    const results = await _soClient
       .find<AgentPolicySOAttributes>({
         type: savedObjectType,
         searchFields: ['name'],
-        search: escapeSearchQueryPhrase(givenPolicy.name),
+        search: escapeSearchQueryPhrase(policy.name),
+        ...(isMultispace ? { namespaces: policy.space_ids } : {}),
       })
       .catch(
         catchAndSetErrorStackTrace.withMessage(
-          `Failed to find agent policies with name [${givenPolicy.name}]`
+          `Failed to find agent policies with name [${policy.name}]`
         )
       );
 
-    const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
-    if (Array.isArray(idsWithName)) {
-      const isEditingSelf = givenPolicy.id && idsWithName.includes(givenPolicy.id);
+    const idsWithName = results.total ? results.saved_objects.map(({ id }) => id) : [];
+    const othersWithName = idsWithName.filter((id) => id !== policy.id);
 
-      if (
-        (!givenPolicy?.supports_agentless && !givenPolicy.id) ||
-        (!givenPolicy?.supports_agentless && !isEditingSelf)
-      ) {
-        const isSinglePolicy = idsWithName.length === 1;
-        const existClause = isSinglePolicy
-          ? `Agent Policy '${idsWithName[0]}' already exists`
-          : `Agent Policies '${idsWithName.join(',')}' already exist`;
+    if (othersWithName.length === 0) {
+      return;
+    }
 
-        throw new AgentPolicyNameExistsError(`${existClause} with name '${givenPolicy.name}'`);
-      }
+    if (!policy?.supports_agentless) {
+      const isSinglePolicy = othersWithName.length === 1;
+      const existClause = isSinglePolicy
+        ? `Agent Policy '${othersWithName[0]}' already exists`
+        : `Agent Policies '${othersWithName.join(',')}' already exist`;
 
-      if (givenPolicy?.supports_agentless && !givenPolicy.id) {
-        const integrationName = givenPolicy.name.split(' ').pop();
-        throw new AgentlessPolicyExistsRequestError(
-          `${givenPolicy.name} already exist. Please rename the integration name ${integrationName}.`
-        );
-      }
+      throw new AgentPolicyNameExistsError(`${existClause} with name '${policy.name}'`);
+    } else {
+      const integrationName = policy.name.split(' ').pop();
+      throw new AgentlessPolicyExistsRequestError(
+        `${policy.name} already exist. Please rename the integration name ${integrationName}.`
+      );
     }
   }
 
@@ -841,13 +838,6 @@ class AgentPolicyService {
     const logger = this.getLogger('update');
     logger.debug(`Starting update of agent policy ${id}`);
 
-    if (agentPolicy.name) {
-      await this.requireUniqueName(soClient, {
-        id,
-        name: agentPolicy.name,
-        supports_agentless: agentPolicy?.supports_agentless,
-      });
-    }
     if (agentPolicy.namespace) {
       await validatePolicyNamespaceForSpace({
         spaceId: soClient.getCurrentNamespace(),
@@ -859,6 +849,15 @@ class AgentPolicyService {
 
     if (!existingAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
+    }
+
+    if (agentPolicy.name && agentPolicy.name !== existingAgentPolicy.name) {
+      await this.requireUniqueName(soClient, {
+        id,
+        name: agentPolicy.name,
+        space_ids: agentPolicy?.space_ids ?? existingAgentPolicy.space_ids,
+        supports_agentless: agentPolicy?.supports_agentless,
+      });
     }
 
     validateRequiredVersions(
@@ -912,7 +911,9 @@ class AgentPolicyService {
         force: options?.force,
       });
     }
-    return this._update(soClient, esClient, id, agentPolicy, options?.user, {
+
+    const { space_ids: _, ...preparedAgentPolicySo } = agentPolicy;
+    return this._update(soClient, esClient, id, { ...preparedAgentPolicySo }, options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
@@ -2185,6 +2186,23 @@ class AgentPolicyService {
       (policy) => policy?.policy_ids && policy?.policy_ids.length > 1
     );
     return { policiesWithSingleAP, policiesWithMultipleAP };
+  }
+
+  private prepareAsNewSo(
+    agentPolicy: NewAgentPolicy,
+    options: { username?: string }
+  ): AgentPolicySOAttributes {
+    const { space_ids: _, ...baseAgentPolicySo } = agentPolicy;
+    return {
+      ...baseAgentPolicySo,
+      status: 'active',
+      is_managed: agentPolicy.is_managed ?? false,
+      revision: 1,
+      updated_at: new Date().toISOString(),
+      updated_by: options?.username || 'system',
+      schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+      is_protected: false,
+    };
   }
 }
 

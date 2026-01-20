@@ -8,7 +8,7 @@
 import type { PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
 import { ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS } from '@kbn/elastic-assistant-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { KibanaServices } from '../../../common/lib/kibana';

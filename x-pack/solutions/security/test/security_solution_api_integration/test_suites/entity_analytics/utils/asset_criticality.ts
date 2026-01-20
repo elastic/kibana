@@ -30,7 +30,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { routeWithNamespace, waitFor } from '../../../config/services/detections_response';
+import { routeWithNamespace, waitFor } from '@kbn/detections-response-ftr-services';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>
   `.asset-criticality.asset-criticality-${namespace ?? 'default'}`;

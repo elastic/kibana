@@ -16,7 +16,7 @@ import {
 } from './fixtures/summary_search_document';
 import { GetSLOHealth } from './get_slo_health';
 import { createSLORepositoryMock } from './mocks';
-import { SLORepository } from './slo_repository';
+import type { SLORepository } from './slo_repository';
 
 describe('GetSLOHealth', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -169,7 +169,7 @@ describe('GetSLOHealth', () => {
       `);
     });
 
-    it('returns unhealthy whenever one of the transform is unhealthy', async () => {
+    it("returns overall 'unhealthy' whenever one of the transform is unhealthy", async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
       mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({

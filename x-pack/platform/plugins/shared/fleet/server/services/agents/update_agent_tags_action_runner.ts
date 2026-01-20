@@ -15,7 +15,7 @@ import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
 
-import { FleetError } from '../../errors';
+import { FleetError, FleetVersionConflictError } from '../../errors';
 
 import { ActionRunner } from './action_runner';
 
@@ -218,7 +218,7 @@ export async function updateTagsBatch(
         .getLogger()
         .debug(`action conflict result wrote on ${versionConflictCount} agents`);
     }
-    throw new FleetError(`Version conflict of ${versionConflictCount} agents`);
+    throw new FleetVersionConflictError(`Version conflict of ${versionConflictCount} agents`);
   }
 
   return { actionId, updated: res.updated, took: res.took };

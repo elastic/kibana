@@ -18,8 +18,7 @@ import { PrivateLocationTestService } from '../../services/synthetics_private_lo
 import { addMonitorAPIHelper } from './create_monitor';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/239537
-  describe.skip('getMonitorFilters', function () {
+  describe('getMonitorFilters', function () {
     const kibanaServer = getService('kibanaServer');
     const supertest = getService('supertestWithoutAuth');
     const samlAuth = getService('samlAuth');
@@ -40,6 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         types: [syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle],
       });
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      await privateLocationTestService.installSyntheticsPackage();
       privateLocation = await privateLocationTestService.addTestPrivateLocation();
     });
 

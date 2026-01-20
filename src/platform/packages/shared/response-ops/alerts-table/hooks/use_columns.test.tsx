@@ -11,7 +11,7 @@ import React from 'react';
 import type { FunctionComponent } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { act, waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { BrowserFields } from '@kbn/alerting-types';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { useColumns } from './use_columns';

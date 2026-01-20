@@ -1,9 +1,9 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
@@ -54,7 +54,8 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/spaces-utils",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

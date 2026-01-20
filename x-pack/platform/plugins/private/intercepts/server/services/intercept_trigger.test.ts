@@ -18,24 +18,6 @@ const usageCollectionSetupMock = createUsageCollectionSetupMock();
 describe('InterceptTriggerService', () => {
   const usageCounter = usageCollectionSetupMock.createUsageCounter('interceptsTriggerTest');
 
-  describe('#setup', () => {
-    it('invoking setup registers the backing saved object', () => {
-      const interceptTrigger = new InterceptTriggerService();
-
-      const coreSetupMock = coreMock.createSetup();
-
-      interceptTrigger.setup(coreSetupMock, {
-        logger: loggerMock.create(),
-        kibanaVersion: '9.1.0',
-        usageCollector: usageCounter,
-      });
-
-      expect(coreSetupMock.savedObjects.registerType).toHaveBeenCalledWith(
-        interceptTriggerRecordSavedObject
-      );
-    });
-  });
-
   describe('#start', () => {
     it('should return a specific of properties', () => {
       const interceptTrigger = new InterceptTriggerService();

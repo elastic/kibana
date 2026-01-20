@@ -63,7 +63,10 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
         <MlPageHeader>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <AnomalyResultsViewSelector viewId="timeseriesexplorer" />
+              <AnomalyResultsViewSelector
+                key="anomaly-results-view-selector"
+                viewId="timeseriesexplorer"
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <PageTitle

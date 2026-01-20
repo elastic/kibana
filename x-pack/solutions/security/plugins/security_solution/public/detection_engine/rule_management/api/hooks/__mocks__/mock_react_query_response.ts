@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 
 export const mockReactQueryResponse = <TData>(result: Partial<UseQueryResult<TData>>) => ({
   isLoading: false,

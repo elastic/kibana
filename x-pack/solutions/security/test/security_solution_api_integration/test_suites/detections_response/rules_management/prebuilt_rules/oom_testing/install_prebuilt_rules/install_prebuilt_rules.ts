@@ -19,12 +19,12 @@ import {
   PERFORM_RULE_INSTALLATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { deleteAllRules, waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteEndpointFleetPackage,
   deletePrebuiltRulesFleetPackage,
 } from '../../../../utils/rules/prebuilt_rules/delete_fleet_packages';
-import { deleteAllRules, waitFor } from '../../../../../../config/services/detections_response';
 
 const KIBANA_STATUS_URL = '/api/status';
 
@@ -86,10 +86,10 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('install prebuilt rules from a package', async () => {
-      const { body: bootstrapPrebuiltRulesResponse } = await detectionsApi
-        .bootstrapPrebuiltRules()
-        .expect(200);
+      const { statusCode: bootstrapPrebuiltRulesStatusCode, body: bootstrapPrebuiltRulesResponse } =
+        await detectionsApi.bootstrapPrebuiltRules();
 
+      // Assert body first to be able to see error messages in case of failure
       expect(bootstrapPrebuiltRulesResponse).toMatchObject({
         packages: expect.arrayContaining([
           expect.objectContaining({
@@ -100,6 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }),
         ]),
       });
+      expect(bootstrapPrebuiltRulesStatusCode).toBe(200);
 
       const { body: reviewPrebuiltRulesForInstallationResponse } = await supertest
         .post(REVIEW_RULE_INSTALLATION_URL)

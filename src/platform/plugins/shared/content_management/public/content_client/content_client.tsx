@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { validateVersion } from '@kbn/object-versioning-utils';
 import type { Version } from '@kbn/object-versioning';
 import { createQueryObservable } from './query_observable';

@@ -8,7 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { createPackagePolicyMock } from '../../../common/mocks';
+import { createPackagePolicyMock, createAgentPolicyMock } from '../../../common/mocks';
 
 import { createAppContextStartContractMock, createSavedObjectClientMock } from '../../mocks';
 
@@ -362,6 +362,9 @@ describe('Upgrade', () => {
       appContextService.stop();
     });
     it('should omit spaceIds when upgrading package policies with spaceIds', async () => {
+      mockAgentPolicyService.get.mockResolvedValue({
+        ...createAgentPolicyMock({ space_ids: ['test'] }),
+      });
       soClient.bulkGet.mockImplementation((objects) =>
         Promise.resolve({
           saved_objects: objects.map(({ id }) => ({

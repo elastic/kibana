@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -162,5 +162,7 @@
     "@kbn/product-intercept-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/reporting-test-routes",
+    "@kbn/alerting-types",
+    "@kbn/setup-node-env",
   ]
 }

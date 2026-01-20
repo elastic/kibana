@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
@@ -28,7 +28,8 @@ import {
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { ILogViewsClient } from './types';
+import type { ILogViewsClient } from './types';
+import { excludeTiersQuery } from './exclude_tiers_query';
 
 export class LogViewsClient implements ILogViewsClient {
   constructor(
@@ -84,8 +85,14 @@ export class LogViewsClient implements ILogViewsClient {
   }
 
   public async getResolvedLogViewStatus(
-    resolvedLogView: ResolvedLogView<DataView>
+    resolvedLogView: ResolvedLogView<DataView>,
+    uiSettings?: IUiSettingsClient
   ): Promise<LogViewStatus> {
+    const excludedDataTiers = uiSettings?.get('observability:searchExcludedDataTiers') ?? [];
+    const excludedQuery = excludedDataTiers.length
+      ? excludeTiersQuery(excludedDataTiers)
+      : undefined;
+
     const indexStatus = await lastValueFrom(
       this.search({
         params: {
@@ -95,6 +102,7 @@ export class LogViewsClient implements ILogViewsClient {
           size: 0,
           terminate_after: 1,
           track_total_hits: 1,
+          query: excludedQuery ? { bool: { filter: excludedQuery } } : undefined,
         },
       })
     ).then(
