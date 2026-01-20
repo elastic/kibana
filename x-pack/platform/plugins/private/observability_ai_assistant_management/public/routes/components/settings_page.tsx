@@ -133,15 +133,15 @@ export function SettingsPage() {
       disabled: !knowledgeBase.status.value?.enabled,
     },
     {
-      id: 'search_connector',
+      id: 'content_connector',
       name: i18n.translate(
-        'xpack.observabilityAiAssistantManagement.settingsPage.searchConnector',
+        'xpack.observabilityAiAssistantManagement.settingsPage.contentConnector',
         {
-          defaultMessage: 'Search Connectors',
+          defaultMessage: 'Content Connectors',
         }
       ),
       content: <SearchConnectorTab />,
-      disabled: !isAppRegistered('enterpriseSearch'),
+      disabled: serverless && currentSolution === 'es',
     },
   ];
 
