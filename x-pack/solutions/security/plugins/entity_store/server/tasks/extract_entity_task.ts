@@ -98,7 +98,7 @@ export function registerExtractEntityTasks({
               }),
           }),
         },
-      })
+      });
     });
   } catch (e) {
     logger.error(`Error registering extract entity tasks, received ${e.message}`);

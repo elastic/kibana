@@ -15,10 +15,10 @@ import type {
 } from '@kbn/core-http-request-handler-context-server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
 import type { AssetManager } from './domain/asset_manager';
 import type { FeatureFlags } from './infra/feature_flags';
-import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { CoreSetup } from '@kbn/core/server';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
