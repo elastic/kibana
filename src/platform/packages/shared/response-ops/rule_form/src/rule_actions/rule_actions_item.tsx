@@ -372,7 +372,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
           value: group,
         },
       });
-
       onDefaultParamsChange(group, action.frequency?.summary);
     },
     [action, onDefaultParamsChange, dispatch]
