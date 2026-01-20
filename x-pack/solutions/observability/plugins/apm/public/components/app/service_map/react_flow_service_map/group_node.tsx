@@ -25,7 +25,11 @@ export const GroupNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<Node<GroupNodeData>>) => {
     const { euiTheme } = useEuiTheme();
 
-    const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
+    // Use the group's assigned color if available, otherwise use default colors
+    const groupColor = data.groupColor;
+    const borderColor = selected
+      ? euiTheme.colors.primary
+      : groupColor || euiTheme.colors.mediumShade;
 
     const ariaLabel = useMemo(() => {
       return i18n.translate('xpack.apm.serviceMap.groupNode', {
@@ -76,8 +80,9 @@ export const GroupNode = memo(
               width: ${GROUP_SIZE - 8}px;
               height: ${GROUP_SIZE - 8}px;
               border-radius: 50%;
-              background: ${euiTheme.colors.lightShade};
-              border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.mediumShade};
+              background: ${groupColor ? `${groupColor}20` : euiTheme.colors.lightShade};
+              border: ${euiTheme.border.width.thin} solid
+                ${groupColor || euiTheme.colors.mediumShade};
             `}
           />
           <div
@@ -88,8 +93,9 @@ export const GroupNode = memo(
               width: ${GROUP_SIZE - 4}px;
               height: ${GROUP_SIZE - 4}px;
               border-radius: 50%;
-              background: ${euiTheme.colors.lightShade};
-              border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.mediumShade};
+              background: ${groupColor ? `${groupColor}15` : euiTheme.colors.lightShade};
+              border: ${euiTheme.border.width.thin} solid
+                ${groupColor || euiTheme.colors.mediumShade};
             `}
           />
 
@@ -97,6 +103,7 @@ export const GroupNode = memo(
           <EuiToolTip content={tooltipContent} position="top">
             <div
               role="button"
+              tabIndex={0}
               aria-label={ariaLabel}
               css={css`
                 position: relative;

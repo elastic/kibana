@@ -46,7 +46,9 @@ import { transformElements, type ServiceMapEdgeData } from './transform_data';
 import { applyLayout, type LayoutDirection } from './apply_layout';
 import { ReactFlowPopover } from './react_flow_popover';
 import { useExpandCollapse, type GroupNodeData } from './use_expand_collapse';
-import { identifyServiceClusters } from './grouping_utils';
+import { createGroupsFromServiceGroups } from './grouping_utils';
+import { useServiceGroups } from './use_service_groups';
+import { ServiceGroupSelector } from './service_group_selector';
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -112,6 +114,12 @@ function ReactFlowGraphInner({
     ServiceMapNodeData | GroupNodeData
   > | null>(null);
 
+  // State for selected service groups (dynamic grouping)
+  const [selectedServiceGroupIds, setSelectedServiceGroupIds] = useState<string[]>([]);
+
+  // Fetch available service groups
+  const { serviceGroups: savedServiceGroups, loading: loadingServiceGroups } = useServiceGroups();
+
   const primaryColor = euiTheme.colors.primary;
 
   // Transform elements once (these are the "all" nodes/edges for grouping)
@@ -126,13 +134,14 @@ function ReactFlowGraphInner({
     return { allNodes: transformedNodes, allEdges: transformedEdges };
   }, [elements]);
 
-  // Identify service clusters for grouping
+  // Create groups only when service groups are explicitly selected from the dropdown
   const serviceGroups = useMemo(() => {
-    if (!enableGrouping || allNodes.length === 0) {
+    if (!enableGrouping || allNodes.length === 0 || selectedServiceGroupIds.length === 0) {
       return [];
     }
-    return identifyServiceClusters(allNodes, allEdges, { minGroupSize: 2 });
-  }, [enableGrouping, allNodes, allEdges]);
+
+    return createGroupsFromServiceGroups(allNodes, savedServiceGroups, selectedServiceGroupIds);
+  }, [enableGrouping, allNodes, selectedServiceGroupIds, savedServiceGroups]);
 
   // Use expand/collapse hook for managing visibility
   const {
@@ -156,38 +165,74 @@ function ReactFlowGraphInner({
   const selectedNodeIdRef = React.useRef<string | null>(null);
   selectedNodeIdRef.current = selectedNodeId;
 
+  // Pre-computed marker objects to avoid recreating them on every edge update
+  const markers = useMemo(
+    () => ({
+      defaultEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 12,
+        height: 12,
+        color: EDGE_COLOR_DEFAULT,
+      } as EdgeMarker,
+      highlightedEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 14,
+        height: 14,
+        color: primaryColor,
+      } as EdgeMarker,
+      defaultStart: {
+        type: MarkerType.ArrowClosed,
+        width: 12,
+        height: 12,
+        color: EDGE_COLOR_DEFAULT,
+      } as EdgeMarker,
+      highlightedStart: {
+        type: MarkerType.ArrowClosed,
+        width: 14,
+        height: 14,
+        color: primaryColor,
+      } as EdgeMarker,
+    }),
+    [primaryColor]
+  );
+
   // Helper to apply edge highlighting based on selected node
   const applyEdgeHighlighting = useCallback(
     (edgesToHighlight: Edge<ServiceMapEdgeData>[], nodeId: string | null) => {
       return edgesToHighlight.map((edge) => {
         const isConnected = nodeId !== null && (edge.source === nodeId || edge.target === nodeId);
-        const color = isConnected ? primaryColor : EDGE_COLOR_DEFAULT;
-        const strokeWidth = isConnected ? 2 : 1;
-        const markerSize = isConnected ? 14 : 12;
 
-        // Always create complete marker objects to ensure arrows render in all layouts
-        const markerEnd: EdgeMarker = {
-          type: MarkerType.ArrowClosed,
-          width: markerSize,
-          height: markerSize,
-          color,
-        };
-
-        const markerStart: EdgeMarker | undefined = edge.data?.isBidirectional
-          ? { type: MarkerType.ArrowClosed, width: markerSize, height: markerSize, color }
+        // Use pre-computed marker objects
+        const markerEnd = isConnected ? markers.highlightedEnd : markers.defaultEnd;
+        const markerStart = edge.data?.isBidirectional
+          ? isConnected
+            ? markers.highlightedStart
+            : markers.defaultStart
           : undefined;
 
         return {
           ...edge,
-          style: { stroke: color, strokeWidth },
+          style: {
+            stroke: isConnected ? primaryColor : EDGE_COLOR_DEFAULT,
+            strokeWidth: isConnected ? 2 : 1,
+          },
           markerEnd,
           markerStart,
           zIndex: isConnected ? 1000 : 0,
         };
       });
     },
-    [primaryColor]
+    [primaryColor, markers]
   );
+
+  // Stable reference to collapseGroup to avoid recreating node objects on every render
+  const collapseGroupRef = React.useRef(collapseGroup);
+  collapseGroupRef.current = collapseGroup;
+
+  // Stable callback that uses the ref
+  const stableCollapseGroup = useCallback((groupId: string) => {
+    collapseGroupRef.current(groupId);
+  }, []);
 
   // Apply layout when visible nodes/edges change or layout direction changes
   useEffect(() => {
@@ -204,13 +249,14 @@ function ReactFlowGraphInner({
     );
 
     // Add collapseGroup callback to nodes that belong to groups
+    // Using stable callback reference to avoid unnecessary re-renders
     const nodesWithCallbacks = layoutedNodes.map((node) => {
       if (node.data.groupId) {
         return {
           ...node,
           data: {
             ...node.data,
-            onCollapseGroup: collapseGroup,
+            onCollapseGroup: stableCollapseGroup,
           },
         };
       }
@@ -230,7 +276,7 @@ function ReactFlowGraphInner({
     setNodes,
     setEdges,
     fitView,
-    collapseGroup,
+    stableCollapseGroup,
   ]);
 
   const handleLayoutDirectionChange = useCallback((optionId: string) => {
@@ -404,6 +450,19 @@ function ReactFlowGraphInner({
         })}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
+
+        {/* Service Group Selector - Top Left */}
+        {enableGrouping && savedServiceGroups.length > 0 && (
+          <Panel position="top-left">
+            <ServiceGroupSelector
+              serviceGroups={savedServiceGroups}
+              selectedGroupIds={selectedServiceGroupIds}
+              onSelectionChange={setSelectedServiceGroupIds}
+              loading={loadingServiceGroups}
+            />
+          </Panel>
+        )}
+
         <Panel position="top-right">
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             {/* Expand/Collapse controls - only show when grouping is enabled and groups exist */}
