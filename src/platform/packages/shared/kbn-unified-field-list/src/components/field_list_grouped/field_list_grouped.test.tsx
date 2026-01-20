@@ -55,7 +55,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       core: coreMock.createStart(),
     };
 
-    dataViews.get.mockImplementation(async () => dataView);
+    dataViews.get.mockResolvedValue(dataView);
 
     defaultProps = {
       fieldGroups: {},
@@ -301,31 +301,32 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
   it('renders correctly when fields are searched and filtered', async () => {
     const user = userEvent.setup();
 
-    const hookParams = {
-      dataViewId: dataView.id!,
-      allFields: manyFields,
-    };
-
     await mountGroupedList({
       listProps: {
         ...defaultProps,
         fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
       },
-      hookParams,
+      hookParams: {
+        dataViewId: dataView.id!,
+        allFields: manyFields,
+      },
     });
 
     expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '25 available fields. 112 unmapped fields. 3 meta fields.'
     );
 
-    await user.type(screen.getByTestId('fieldListFiltersFieldSearch'), '@');
+    const searchInput = screen.getByTestId('fieldListFiltersFieldSearch') as HTMLInputElement;
+    await user.type(searchInput, '@');
 
     expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '2 available fields. 8 unmapped fields. 0 meta fields.'
     );
 
-    await user.clear(screen.getByTestId('fieldListFiltersFieldSearch'));
-    await user.type(screen.getByTestId('fieldListFiltersFieldSearch'), '_');
+    await user.type(searchInput, '_', {
+      initialSelectionStart: 0,
+      initialSelectionEnd: searchInput.value.length,
+    });
 
     expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '3 available fields. 24 unmapped fields. 3 meta fields.'

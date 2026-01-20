@@ -19,7 +19,7 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 const ORIGINATING_APP = 'test';
@@ -71,8 +71,6 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
       uiActions,
     });
 
-    expect(visualizeButton).not.toBeNull();
-
     renderWithI18n(visualizeButton);
 
     expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(VISUALIZE_FIELD_TRIGGER, {
@@ -87,13 +85,11 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
 
     await user.click(visualizeLink);
 
-    await waitFor(() => {
-      expect(mockExecuteAction).toHaveBeenCalledWith({
-        contextualFields,
-        dataViewSpec: dataView.toSpec(false),
-        fieldName: FIELD_NAME_KEYWORD,
-        originatingApp: ORIGINATING_APP,
-      });
+    expect(mockExecuteAction).toHaveBeenCalledWith({
+      contextualFields,
+      dataViewSpec: dataView.toSpec(false),
+      fieldName: FIELD_NAME_KEYWORD,
+      originatingApp: ORIGINATING_APP,
     });
   });
 
@@ -130,13 +126,11 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
 
     await user.click(visualizeLink);
 
-    waitFor(() => {
-      expect(mockExecuteAction).toHaveBeenCalledWith({
-        contextualFields: [],
-        dataViewSpec: dataView.toSpec(false),
-        fieldName: FIELD_NAME,
-        originatingApp: ORIGINATING_APP,
-      });
+    expect(mockExecuteAction).toHaveBeenCalledWith({
+      contextualFields: [],
+      dataViewSpec: dataView.toSpec(false),
+      fieldName: FIELD_NAME,
+      originatingApp: ORIGINATING_APP,
     });
   });
 });

@@ -33,7 +33,6 @@ const mockedServices = {
 };
 
 const mockedLoadFieldStats = jest.mocked(loadFieldStats);
-const mockedGetDataView = jest.mocked(mockedServices.dataViews.get);
 
 describe('UnifiedFieldList FieldStats', () => {
   let defaultProps: FieldStatsWithKbnQuery;
@@ -130,7 +129,7 @@ describe('UnifiedFieldList FieldStats', () => {
       'data-test-subj': 'testing',
     };
 
-    mockedGetDataView.mockImplementation(() => {
+    mockedServices.dataViews.get.mockImplementation(() => {
       return Promise.resolve(dataView);
     });
     mockedLoadFieldStats.mockReset();
@@ -209,7 +208,7 @@ describe('UnifiedFieldList FieldStats', () => {
 
     expect(screen.getByText('Top values')).toBeVisible();
     expect(screen.getByText('Distribution')).toBeVisible();
-    expect(await screen.findByTestId('testing-statsFooter')).toHaveTextContent(
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
       `Calculated from ${NUMBER_OF_DOCUMENTS} records.`
     );
 
@@ -270,7 +269,7 @@ describe('UnifiedFieldList FieldStats', () => {
 
     expect(screen.getByText('Top values')).toBeVisible();
     expect(screen.getByText('Distribution')).toBeVisible();
-    expect(await screen.findByTestId('testing-statsFooter')).toHaveTextContent(
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
       `Calculated from ${NUMBER_OF_DOCUMENTS} records.`
     );
 
@@ -420,7 +419,7 @@ describe('UnifiedFieldList FieldStats', () => {
     expect(mockedLoadFieldStats).toHaveBeenCalledTimes(1);
 
     expect(screen.getByText('Top values')).toBeVisible();
-    expect(await screen.findByTestId('testing-statsFooter')).toHaveTextContent(
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
       `Calculated from 1624 records.`
     );
 
@@ -523,7 +522,7 @@ describe('UnifiedFieldList FieldStats', () => {
     expect(screen.getByText('Examples')).toBeVisible();
 
     const valuesContainers = screen.getAllByTestId('testing-topValues-bucket');
-    expect(await screen.findByTestId('testing-statsFooter')).toHaveTextContent(
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
       `Calculated from 1624 records.`
     );
 
@@ -645,7 +644,7 @@ describe('UnifiedFieldList FieldStats', () => {
 
     expect(screen.getByText('Time distribution')).toBeVisible();
     expect(screen.getByTestId('testing-histogram')).toBeVisible();
-    expect(await screen.findByTestId('testing-statsFooter')).toHaveTextContent(
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
       `Calculated from 13 records.`
     );
   });
@@ -735,7 +734,7 @@ describe('UnifiedFieldList FieldStats', () => {
 
     expect(screen.getByText('Top values')).toBeVisible();
     expect(screen.getByText('Distribution')).toBeVisible();
-    expect(await screen.findByTestId('testing-statsFooter')).toHaveTextContent(
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
       `Calculated from 23 sample records.`
     );
 
@@ -889,7 +888,7 @@ describe('UnifiedFieldList FieldStats', () => {
     const maxRow = within(table).getByText('max').closest('tr')!;
     expect(within(maxRow).getByText(String(MAX_VALUE))).toBeVisible();
 
-    expect(await screen.findByTestId('testing-statsFooter')).toHaveTextContent(
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
       `Calculated from 5000 sample records.`
     );
   });
