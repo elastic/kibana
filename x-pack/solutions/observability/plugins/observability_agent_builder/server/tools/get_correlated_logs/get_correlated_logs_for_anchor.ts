@@ -60,7 +60,7 @@ export async function getCorrelatedLogsForAnchor({
       return Object.fromEntries(
         Object.entries(hit.fields ?? {}).map(([key, value]) => [
           key,
-          Array.isArray(value) && value.length > 1 ? value : value?.[0],
+          Array.isArray(value) && value.length === 1 ? value[0] : value,
         ])
       );
     }),
