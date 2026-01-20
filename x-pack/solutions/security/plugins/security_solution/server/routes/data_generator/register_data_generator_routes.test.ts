@@ -90,7 +90,7 @@ describe('registerDataGeneratorRoutes', () => {
     getStartServices = jest
       .fn()
       .mockResolvedValue([
-        coreStart as unknown as (typeof coreStart),
+        coreStart as unknown as typeof coreStart,
         pluginsStart as unknown as StartPlugins,
         undefined,
       ]);
