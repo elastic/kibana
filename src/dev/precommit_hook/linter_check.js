@@ -17,8 +17,9 @@ export class LinterCheck extends PrecommitCheck {
     this.linter = linter;
   }
 
-  async execute(log, files, options) {
-    const filesToLint = await this.linter.pickFilesToLint(log, files);
+  async execute(log, allFiles, options) {
+    const nonDeletedFiles = allFiles.filter((f) => f.getGitStatus() !== 'deleted');
+    const filesToLint = await this.linter.pickFilesToLint(log, nonDeletedFiles);
     if (filesToLint.length > 0) {
       await this.linter.lintFiles(log, filesToLint, {
         fix: options.fix,

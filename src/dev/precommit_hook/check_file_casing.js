@@ -147,6 +147,10 @@ export class FileCasingCheck extends PrecommitCheck {
     super('File Casing');
   }
 
+  shouldExecute() {
+    return !process.env.SKIP_CASING_CHECK?.match(/(1|true)/);
+  }
+
   async execute(log, files) {
     await checkFileCasing(log, files);
   }

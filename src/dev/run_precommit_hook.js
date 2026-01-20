@@ -16,6 +16,7 @@ import {
   YamlLintCheck,
   FileCasingCheck,
   MoonConfigGenerationCheck,
+  SemverRangesCheck,
   getFilesForCommit,
 } from './precommit_hook';
 
@@ -25,6 +26,7 @@ const PRECOMMIT_CHECKS = [
   new LinterCheck('StyleLint', Stylelint),
   new YamlLintCheck(),
   new MoonConfigGenerationCheck(),
+  new SemverRangesCheck(),
 ];
 
 run(

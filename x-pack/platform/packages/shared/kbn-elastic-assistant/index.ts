@@ -211,6 +211,4 @@ export interface UseAssistantAvailability {
   hasAgentBuilderPrivilege?: boolean;
   // When true, use has privilege to manage Agent Builder feature
   hasAgentBuilderManagePrivilege?: boolean;
-  // When true, AI Agents feature is enabled via feature flag
-  isAiAgentsEnabled?: boolean;
 }

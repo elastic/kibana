@@ -78,6 +78,21 @@ export const stubFields: DataViewField[] = Object.values(stubFieldSpecMap).map((
   createIndexPatternFieldStub({ spec })
 );
 
+export const stubFieldSpecWithDateNanosMap: Record<string, FieldSpec> = {
+  ...stubFieldSpecMap,
+  '@timestamp': {
+    name: '@timestamp',
+    type: 'date',
+    esTypes: ['date_nanos'],
+    aggregatable: true,
+    searchable: true,
+  },
+};
+
+export const stubFieldsWithDateNanos: DataViewField[] = Object.values(
+  stubFieldSpecWithDateNanosMap
+).map((spec) => createIndexPatternFieldStub({ spec }));
+
 export const stubLogstashFieldSpecMap: Record<string, FieldSpec> = {
   bytes: {
     name: 'bytes',
