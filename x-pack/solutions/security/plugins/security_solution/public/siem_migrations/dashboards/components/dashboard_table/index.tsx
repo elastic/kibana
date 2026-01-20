@@ -47,7 +47,6 @@ import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_t
 import { useMigrationDashboardDetailsFlyout } from '../../hooks/use_migration_dashboard_details_flyout';
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
-import { DASHBOARD_MIGRATION_TABLE_CAPTION, MIGRATION_DASHBOARD_TABLE_TABLE } from './translations';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
