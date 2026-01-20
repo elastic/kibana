@@ -31,6 +31,7 @@ import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/op
 import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
 import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/read_privileges_route';
 import { searchUnifiedAlertsRoute } from '../lib/detection_engine/routes/unified_alerts/search_route';
+import { searchUnifiedAlertsEsqlRoute } from '../lib/detection_engine/routes/unified_alerts/search_esql_route';
 import { setUnifiedAlertsWorkflowStatusRoute } from '../lib/detection_engine/routes/unified_alerts/set_workflow_status_route';
 import { setUnifiedAlertsTagsRoute } from '../lib/detection_engine/routes/unified_alerts/set_alert_tags_route';
 import { setUnifiedAlertsAssigneesRoute } from '../lib/detection_engine/routes/unified_alerts/set_alert_assignees_route';
@@ -113,6 +114,7 @@ export const initRoutes = (
 
   // Detection Engine Extended Alerts routes that have the REST endpoints of /internal/detection_engine/unified_alerts
   searchUnifiedAlertsRoute(router, ruleDataClient);
+  searchUnifiedAlertsEsqlRoute(router, ruleDataClient);
   setUnifiedAlertsWorkflowStatusRoute(router, ruleDataClient);
   setUnifiedAlertsTagsRoute(router, ruleDataClient);
   setUnifiedAlertsAssigneesRoute(router, ruleDataClient);

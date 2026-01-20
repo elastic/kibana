@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { BoolQuery } from '@kbn/es-query';
+
 import type { AlertClosingReason } from '../../../../../common/types';
 import type { Status } from '../../../../../common/api/detection_engine';
 
@@ -13,6 +15,11 @@ export interface BasicSignals {
 }
 export interface QueryAlerts extends BasicSignals {
   query: object;
+}
+
+export interface QueryEsqlAlerts extends BasicSignals {
+  query: string;
+  filter?: BoolQuery;
 }
 
 export interface AlertsResponse {

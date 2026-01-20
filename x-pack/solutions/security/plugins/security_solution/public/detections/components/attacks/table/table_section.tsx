@@ -35,6 +35,7 @@ import {
 import type { Status } from '../../../../../common/api/detection_engine';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
+import { useBuildEsqlQuery } from './use_build_esql_query';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
 import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
@@ -200,6 +201,11 @@ export const TableSection = React.memo(
       return dataView.toSpec(true);
     }, [dataView]);
 
+    // Build ES|QL query to group alerts by attack_ids
+    // Filters and time range are applied separately via the filter parameter
+    const esqlQuery = useBuildEsqlQuery({ dataView });
+    // console.log(`[TableSection] esqlQuery: ${JSON.stringify(esqlQuery, null, 2)}`);
+
     const { openFlyout } = useExpandableFlyoutApi();
     const openAttackDetailsFlyout = useCallback(
       (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>) => {
@@ -222,7 +228,18 @@ export const TableSection = React.memo(
     const getAdditionalActionButtons = useCallback(
       (selectedGroup: string, fieldBucket: RawBucket<AlertsGroupingAggregation>) => {
         return !isGroupingBucket(fieldBucket) || fieldBucket.isNullGroup
-          ? []
+          ? [
+              <EuiButtonIcon
+                key="expand-attack-button"
+                aria-label={i18n.EXPAND_BUTTON_ARIAL_LABEL}
+                data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
+                disabled={true}
+                iconType="expand"
+                onClick={() => openAttackDetailsFlyout(selectedGroup, fieldBucket)}
+                size="s"
+                color="text"
+              />,
+            ]
           : [
               <EuiButtonIcon
                 key="expand-attack-button"
@@ -260,6 +277,7 @@ export const TableSection = React.memo(
           pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
           settings={groupingSettings}
           getAdditionalActionButtons={getAdditionalActionButtons}
+          esqlQuery={esqlQuery}
         />
       </div>
     );

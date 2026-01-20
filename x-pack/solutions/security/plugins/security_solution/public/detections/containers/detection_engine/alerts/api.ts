@@ -17,6 +17,7 @@ import {
   ALERTS_AS_DATA_FIND_URL,
   DETECTION_ENGINE_ALERTS_INDEX_URL,
   DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
+  DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_ESQL_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -24,6 +25,7 @@ import type {
   BasicSignals,
   Privilege,
   QueryAlerts,
+  QueryEsqlAlerts,
   AlertSearchResponse,
   AlertsIndex,
   UpdateAlertStatusByQueryProps,
@@ -75,6 +77,31 @@ export const fetchQueryUnifiedAlerts = async <Hit, Aggregations>({
       version: '1',
       method: 'POST',
       body: JSON.stringify(query),
+      signal,
+    }
+  );
+};
+
+/**
+ * Fetch Unified Alerts (detection and attack alerts) by providing an ES|QL query
+ *
+ * @param query ES|QL query string
+ * @param filter Optional Elasticsearch query DSL filter to apply to the ES|QL query
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchQueryUnifiedAlertsEsql = async ({
+  query,
+  filter,
+  signal,
+}: QueryEsqlAlerts): Promise<import('@kbn/es-types').ESQLSearchResponse> => {
+  return KibanaServices.get().http.fetch<import('@kbn/es-types').ESQLSearchResponse>(
+    DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_ESQL_URL,
+    {
+      version: '1',
+      method: 'POST',
+      body: JSON.stringify({ query, ...(filter ? { filter } : {}) }),
       signal,
     }
   );

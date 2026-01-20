@@ -118,6 +118,12 @@ export interface AlertsTableComponentProps {
 
   /** Optional function to get additional action buttons to display in group stats before the Take actions button */
   getAdditionalActionButtons?: GetAdditionalActionButtons<AlertsGroupingAggregation>;
+
+  /**
+   * Optional ES|QL query string. If provided, ES|QL query will be used instead of KQL-based grouping query.
+   * The query should return at least two columns: grouping key and count (e.g., `STATS count BY field_name`).
+   */
+  esqlQuery?: string;
 }
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -347,6 +353,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     globalFilters: props.globalFilters,
     globalQuery: props.globalQuery,
     selectedGroups,
+    esqlQuery: props.esqlQuery,
   });
 
   useEffect(() => {
@@ -355,6 +362,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       globalFilters: props.globalFilters,
       globalQuery: props.globalQuery,
       selectedGroups,
+      esqlQuery: props.esqlQuery,
     };
     if (!isEqual(paginationResetTriggers.current, triggers)) {
       resetAllPagination();
@@ -366,6 +374,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     props.globalQuery,
     resetAllPagination,
     selectedGroups,
+    props.esqlQuery,
   ]);
 
   const getLevel = useCallback(
