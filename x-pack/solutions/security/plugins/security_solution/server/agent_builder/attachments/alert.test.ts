@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/onechat-common/attachments';
-import { platformCoreTools } from '@kbn/onechat-common';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
@@ -18,10 +19,11 @@ import { createAlertAttachmentType } from './alert';
 
 describe('createAlertAttachmentType', () => {
   const attachmentType = createAlertAttachmentType();
+  const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
 
   describe('validate', () => {
     it('returns valid when alert data is valid', async () => {
-      const input = { alert: 'test alert data' };
+      const input = { alert: 'test alert data', attachmentLabel: 'Security Alert' };
 
       const result = await attachmentType.validate(input);
 
@@ -59,10 +61,10 @@ describe('createAlertAttachmentType', () => {
       const attachment: Attachment<string, unknown> = {
         id: 'test-id',
         type: SecurityAgentBuilderAttachments.alert,
-        data: { alert: 'test alert content' },
+        data: { alert: 'test alert content', attachmentLabel: 'Security Alert' },
       };
 
-      const formatted = await attachmentType.format(attachment);
+      const formatted = await attachmentType.format(attachment, formatContext);
       const representation = await formatted.getRepresentation();
 
       expect(representation.type).toBe('text');
@@ -73,10 +75,10 @@ describe('createAlertAttachmentType', () => {
       const attachment: Attachment<string, unknown> = {
         id: 'test-id',
         type: SecurityAgentBuilderAttachments.alert,
-        data: { invalid: 'data' },
+        data: { invalid: 'data', attachmentLabel: 'Security Alert' },
       };
 
-      expect(() => attachmentType.format(attachment)).toThrow(
+      expect(() => attachmentType.format(attachment, formatContext)).toThrow(
         'Invalid alert attachment data for attachment test-id'
       );
     });

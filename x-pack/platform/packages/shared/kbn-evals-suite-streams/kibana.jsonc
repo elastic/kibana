@@ -1,7 +1,7 @@
 {
   "type": "functional-tests",
   "id": "@kbn/evals-suite-streams",
-  "owner": "@elastic/streams-program-team",
+  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
   "group": "platform",
   "visibility": "shared"
 }

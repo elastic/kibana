@@ -3,6 +3,7 @@
   "repoName": "kibana",
   "targetBranchChoices": [
     "main",
+    "9.3",
     "9.2",
     "9.1",
     "9.0",
@@ -59,7 +60,7 @@
     "backport"
   ],
   "branchLabelMapping": {
-    "^v9.3.0$": "main",
+    "^v9.4.0$": "main",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   },
   "autoMerge": true,

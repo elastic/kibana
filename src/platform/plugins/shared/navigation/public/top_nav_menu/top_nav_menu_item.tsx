@@ -23,14 +23,21 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import type { SplitButtonProps } from '@kbn/split-button';
 import { SplitButton } from '@kbn/split-button';
 import type { TopNavMenuData } from './top_nav_menu_data';
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export interface TopNavMenuItemProps extends TopNavMenuData {
   closePopover: () => void;
   isMobileMenu?: boolean;
 }
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export function TopNavMenuItem(props: TopNavMenuItemProps) {
   function isDisabled(): boolean {
     const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
@@ -93,7 +100,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     ? getRouterLinkProps({ href: props.href, onClick: handleClick })
     : { onClick: handleClick };
 
-  const commonButtonProps: EuiButtonProps & { id?: string } = {
+  const commonButtonProps: Partial<EuiButtonProps> & { id?: string } = {
     id: props.htmlId,
     isDisabled: isDisabled(),
     isLoading: props.isLoading,
@@ -112,11 +119,13 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
 
+  const showFragment = props.disableButton || props.tooltip;
+
   const btn = props.splitButtonProps ? (
     <SplitButton
       {...commonButtonProps}
       fill={props.emphasize}
-      {...props.splitButtonProps}
+      {...(omit(props.splitButtonProps, 'run') as SplitButtonProps)}
       onSecondaryButtonClick={handleSecondaryButtonClick}
       size="s"
     >
@@ -125,10 +134,10 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
   ) : props.iconOnly && props.iconType && !props.isMobileMenu ? (
     // icon only buttons are not supported by EuiHeaderLink
     React.createElement(
-      props.disableButton ? React.Fragment : EuiToolTip,
+      showFragment ? React.Fragment : EuiToolTip,
       // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
       {
-        ...(props.disableButton
+        ...(showFragment
           ? { key: props.label || props.id! }
           : {
               content: upperFirst(props.label || props.id!),
@@ -162,7 +171,11 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
 
   const tooltip = getTooltip();
   if (tooltip) {
-    return <EuiToolTip content={tooltip}>{btn}</EuiToolTip>;
+    return (
+      <EuiToolTip title={props.tooltipTitle} content={tooltip}>
+        {btn}
+      </EuiToolTip>
+    );
   }
   return btn;
 }

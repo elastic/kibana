@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ActionsConnectorFromSpecServiceProvider } from './from_connector_spec';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ActionsCommonServiceProvider } from './common';
 import { ActionsOpsgenieServiceProvider } from './opsgenie';
@@ -25,5 +26,6 @@ export function ActionsServiceProvider(context: FtrProviderContext) {
     tines: ActionsTinesServiceProvider(context, common),
     slack: ActionsSlackServiceProvider(context, common),
     webhook: ActionsWebhookServiceProvider(context, common),
+    connectorFromSpec: ActionsConnectorFromSpecServiceProvider(context, common),
   };
 }

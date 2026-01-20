@@ -14,8 +14,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Condition, StreamlangWhereBlockWithUIAttributes } from '@kbn/streamlang';
-import { isCondition } from '@kbn/streamlang';
+import type { Condition, StreamlangConditionBlockWithUIAttributes } from '@kbn/streamlang';
+import { isConditionComplete } from '@kbn/streamlang';
 import { isEqual } from 'lodash';
 import React, { useState, useEffect, forwardRef } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
@@ -23,21 +23,19 @@ import { useForm, FormProvider, useController } from 'react-hook-form';
 import type { DeepPartial } from 'utility-types';
 import { useSelector } from '@xstate5/react';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
+import type { StepActorRef } from '../../../state_management/steps_state_machine';
+import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import type { ConditionBlockFormState } from '../../../types';
 import {
-  useStreamEnrichmentSelector,
-  type StreamEnrichmentContextType,
-} from '../../../state_management/stream_enrichment_state_machine';
-import type { WhereBlockFormState } from '../../../types';
-import {
-  getFormStateFromWhereStep,
-  convertWhereBlockFormStateToConfiguration,
+  getFormStateFromConditionStep,
+  convertConditionBlockFormStateToConfiguration,
 } from '../../../utils';
 import { discardChangesPromptOptions, deleteConditionPromptOptions } from './prompt_options';
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
 import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
 
 interface WhereBlockConfigurationProps {
-  stepRef: StreamEnrichmentContextType['stepRefs'][number];
+  stepRef: StepActorRef;
 }
 
 export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConfigurationProps>(
@@ -55,7 +53,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
     );
 
     const [defaultValues] = useState(() =>
-      getFormStateFromWhereStep(step as StreamlangWhereBlockWithUIAttributes)
+      getFormStateFromConditionStep(step as StreamlangConditionBlockWithUIAttributes)
     );
 
     const hasStepChanges = useSelector(
@@ -73,8 +71,8 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
       ...deleteConditionPromptOptions,
     });
 
-    const methods = useForm<WhereBlockFormState>({
-      defaultValues: defaultValues as DeepPartial<WhereBlockFormState>,
+    const methods = useForm<ConditionBlockFormState>({
+      defaultValues: defaultValues as DeepPartial<ConditionBlockFormState>,
       mode: 'onChange',
     });
 
@@ -82,18 +80,18 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
 
     useEffect(() => {
       const { unsubscribe } = methods.watch((value) => {
-        const { whereDefinition } = convertWhereBlockFormStateToConfiguration(
-          value as WhereBlockFormState
+        const { conditionBlockDefinition } = convertConditionBlockFormStateToConfiguration(
+          value as ConditionBlockFormState
         );
         stepRef.send({
           type: 'step.changeCondition',
-          step: whereDefinition,
+          step: conditionBlockDefinition,
         });
       });
       return () => unsubscribe();
     }, [methods, stepRef]);
 
-    const handleSubmit: SubmitHandler<WhereBlockFormState> = () => {
+    const handleSubmit: SubmitHandler<ConditionBlockFormState> = () => {
       stepRef.send({ type: 'step.save' });
     };
 
@@ -168,10 +166,10 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
 );
 
 export const WhereBlockConditionEditor = () => {
-  const { field } = useController<WhereBlockFormState, 'where'>({
-    name: 'where',
+  const { field } = useController<ConditionBlockFormState, 'condition'>({
+    name: 'condition',
     rules: {
-      validate: (value) => isCondition(value),
+      validate: (value) => isConditionComplete(value as Condition | undefined),
     },
   });
 

@@ -8,7 +8,6 @@
  */
 
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
-import { i18n } from '@kbn/i18n';
 
 /**
  * Rule for determining access based on route pattern
@@ -46,20 +45,8 @@ export type AccessControlConfig = Record<string, AppAccessConfig>;
  * - READONLY: View-only mode - shows current scope but prevents changes
  * - DISABLED: Picker is completely disabled
  *
- * Default Configuration:
- *
- * | App        | Route                  | Access Level | Notes                              |
- * |------------|------------------------|--------------|-------------------------------------|
- * | dashboards | all routes except list | EDITABLE     | All dashboard pages except listing  |
- * | dashboards | #/list                 | DISABLED     | List page only                     |
- * | discover   | all routes             | EDITABLE     | All discover pages                 |
- * | visualize  | type:vega in route     | EDITABLE     | Vega visualizations only           |
- * | visualize  | other routes           | DISABLED     | Other visualization types          |
- * | lens       | all routes             | READONLY     | All lens pages (read-only)         |
- * | maps       | all routes             | EDITABLE     | All maps pages (read-only)         |
- * | all others | all routes             | DISABLED     | Default behavior for unknown apps  |
  */
-export const DEFAULT_ACCESS_CONTROL_CONFIG: AccessControlConfig = {
+export const ACCESS_CONTROL_CONFIG: AccessControlConfig = {
   dashboards: {
     defaultAccess: ProjectRoutingAccess.EDITABLE,
     routeRules: [
@@ -82,10 +69,7 @@ export const DEFAULT_ACCESS_CONTROL_CONFIG: AccessControlConfig = {
     ],
   },
   lens: {
-    defaultAccess: ProjectRoutingAccess.READONLY,
-    readonlyMessage: i18n.translate('cps.accessControl.lensReadonlyMessage', {
-      defaultMessage: 'Please adjust project scope for each layer in the Lens editor.',
-    }),
+    defaultAccess: ProjectRoutingAccess.EDITABLE,
   },
   maps: {
     defaultAccess: ProjectRoutingAccess.EDITABLE,
@@ -97,10 +81,9 @@ export const DEFAULT_ACCESS_CONTROL_CONFIG: AccessControlConfig = {
  */
 export const getProjectRoutingAccess = (
   currentAppId: string,
-  hash: string,
-  config: AccessControlConfig = DEFAULT_ACCESS_CONTROL_CONFIG
+  hash: string
 ): ProjectRoutingAccess => {
-  const appConfig = config[currentAppId];
+  const appConfig = ACCESS_CONTROL_CONFIG[currentAppId];
   if (!appConfig) {
     return ProjectRoutingAccess.DISABLED;
   }
@@ -113,11 +96,4 @@ export const getProjectRoutingAccess = (
     }
   }
   return appConfig.defaultAccess;
-};
-
-export const getReadonlyMessage = (
-  currentAppId?: string,
-  config: AccessControlConfig = DEFAULT_ACCESS_CONTROL_CONFIG
-): string | undefined => {
-  return currentAppId ? config[currentAppId]?.readonlyMessage : undefined;
 };

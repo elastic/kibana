@@ -9,9 +9,9 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type {
-  ObservabilityAgentPluginSetupDependencies,
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 
 export async function getApmIndices({
@@ -19,8 +19,11 @@ export async function getApmIndices({
   plugins,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }): Promise<APMIndices> {
   const [coreStart] = await core.getStartServices();

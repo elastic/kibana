@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -15,15 +15,12 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { registerInferenceConnectorsUsageCollector } from './usage/inference/inference_connectors_usage_collector';
 import { registerConnectorTypes } from './connector_types';
-import {
-  validSlackApiChannelsRoute,
-  getWellKnownEmailServiceRoute,
-  getWebhookSecretHeadersKeyRoute,
-} from './routes';
+import { getWellKnownEmailServiceRoute, getWebhookSecretHeadersKeyRoute } from './routes';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
 import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
+
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
   usageCollection?: UsageCollectionSetup;
@@ -38,12 +35,10 @@ export interface ConnectorsPluginsStart {
 export class StackConnectorsPlugin
   implements Plugin<void, void, ConnectorsPluginsSetup, ConnectorsPluginsStart>
 {
-  private readonly logger: Logger;
   private config: StackConnectorsConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;
 
   constructor(context: PluginInitializerContext) {
-    this.logger = context.logger.get();
     this.config = context.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
   }
@@ -55,7 +50,6 @@ export class StackConnectorsPlugin
     const awsSesConfig = actions.getActionsConfigurationUtilities().getAwsSesConfig();
 
     getWellKnownEmailServiceRoute(router, awsSesConfig);
-    validSlackApiChannelsRoute(router, actions.getActionsConfigurationUtilities(), this.logger);
     getWebhookSecretHeadersKeyRoute(router, core.getStartServices);
 
     registerConnectorTypes({

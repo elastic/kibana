@@ -14,6 +14,7 @@ import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
 import {
   UploadSamplesToDataStreamRequestBody,
   UploadSamplesToDataStreamRequestParams,
+  DeleteDataStreamRequestParams,
 } from '../../common';
 
 export const registerDataStreamRoutes = (
@@ -21,6 +22,7 @@ export const registerDataStreamRoutes = (
   logger: Logger
 ) => {
   uploadSamplesRoute(router, logger);
+  deleteDataStreamRoute(router, logger);
 };
 
 const uploadSamplesRoute = (
@@ -66,6 +68,48 @@ const uploadSamplesRoute = (
           return response.ok({ body: result });
         } catch (err) {
           logger.error(`registerDataStreamRoutes: Caught error:`, err);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+            body: err,
+          });
+        }
+      }
+    );
+
+const deleteDataStreamRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .delete({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/data_streams/{data_stream_id}',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(DeleteDataStreamRequestParams),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const automaticImportService = automaticImportv2.automaticImportService;
+          const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
+          const esClient = automaticImportv2.esClient;
+          await automaticImportService.deleteDataStream(integrationId, dataStreamId, esClient);
+          return response.ok();
+        } catch (err) {
+          logger.error(`deleteDataStreamRoute: Caught error:`, err);
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,

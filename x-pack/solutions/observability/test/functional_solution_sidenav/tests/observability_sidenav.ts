@@ -51,40 +51,36 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // open application panel
         await solutionNavigation.sidenav.openPanel('applications');
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('applications');
-          expect(isOpen).to.be(true);
-        }
+        expect(await solutionNavigation.sidenav.isPanelOpen('applications')).to.be(true);
 
         // open Infrastructure popover and navigate to some link inside the panel
-        await solutionNavigation.sidenav.expandMore();
+        // Note: clickLink now automatically expands More menu if needed
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics' });
+
         // open first link in popover to open a panel
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics:inventory' });
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
-          expect(isOpen).to.be(true);
-        }
+        expect(await solutionNavigation.sidenav.isPanelOpen('metrics')).to.be(true);
+
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: 'Infrastructure inventory',
         });
+
         await solutionNavigation.sidenav.clickPanelLink('metrics:hosts');
+
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: 'Hosts',
         });
-
-        {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
-          expect(isOpen).to.be(true);
-        }
+        expect(await solutionNavigation.sidenav.isPanelOpen('metrics')).to.be(true);
 
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
+
         await solutionNavigation.sidenav.clickPanelLink('management:tags');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
+
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'observabilityOnboarding',
         });
@@ -129,24 +125,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('renders a feedback callout', async () => {
         await solutionNavigation.sidenav.feedbackCallout.reset();
         await solutionNavigation.sidenav.openPanel('applications');
+
+        // Navigate to Service inventory page to see the full side panel with feedback snippet
+        await solutionNavigation.sidenav.clickLink({ navId: 'apm:services' });
+
+        // Wait for the Service inventory page to load
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          text: 'Service inventory',
+        });
+
+        // Now the full side panel should be visible with the feedback snippet
         await solutionNavigation.sidenav.feedbackCallout.expectExists();
         await solutionNavigation.sidenav.feedbackCallout.dismiss();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
         await browser.refresh();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
-      });
-
-      it('renders tour', async () => {
-        await solutionNavigation.sidenav.tour.reset();
-        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
-        await solutionNavigation.sidenav.tour.nextStep();
-        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-more');
-        await solutionNavigation.sidenav.tour.nextStep();
-        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
-        await solutionNavigation.sidenav.tour.nextStep();
-        await solutionNavigation.sidenav.tour.expectHidden();
-        await browser.refresh();
-        await solutionNavigation.sidenav.tour.expectHidden();
       });
 
       it('opens panel on legacy management landing page', async () => {

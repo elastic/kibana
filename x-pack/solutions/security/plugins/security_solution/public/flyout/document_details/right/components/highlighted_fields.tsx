@@ -201,7 +201,7 @@ export const HighlightedFields = memo(
               columns={columns}
               compressed
               loading={isEditLoading}
-              message={
+              noItemsMessage={
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.investigation.highlightedFields.noDataDescription"
                   defaultMessage="There's no highlighted fields for this alert."

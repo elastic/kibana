@@ -32,7 +32,6 @@ export const fromCounterRateLensStateToAPI = (
   options: CounterRateIndexPatternColumn,
   ref: LensApiMetricOperation
 ): LensApiCounterRateOperation => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { reduced_time_range, ...sharedProps } = getLensAPIMetricSharedProps(options);
   return {
     operation: 'counter_rate',

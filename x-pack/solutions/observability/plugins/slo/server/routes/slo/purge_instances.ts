@@ -29,9 +29,13 @@ export const purgeInstancesRoute = createSloServerRoute({
   handler: async ({ request, params, logger, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { scopedClusterClient, spaceId, soClient } = await getScopedClients({ request, logger });
+    const { scopedClusterClient, spaceId, settingsRepository } = await getScopedClients({
+      request,
+      logger,
+    });
 
-    return await purgeInstances(params.body, { scopedClusterClient, spaceId, soClient });
+    const settings = await settingsRepository.get();
+    return await purgeInstances(params.body, { settings, scopedClusterClient, spaceId });
   },
 });
 

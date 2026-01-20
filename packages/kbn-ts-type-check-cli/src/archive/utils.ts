@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import Fs from 'fs';
+import { createHash } from 'crypto';
+import { pipeline } from 'stream/promises';
+import Path from 'path';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
@@ -132,4 +135,33 @@ export async function cleanTypeCheckArtifacts(log: SomeDevLog) {
       `Cleared ${directoryPaths.length} type cache directories and ${configPaths.length} config files before restore.`
     );
   }
+}
+
+/**
+ * Calculate the SHA256 hash of a file.
+ * Returns null if the file doesn't exist.
+ */
+export async function calculateFileHash(filePath: string): Promise<string | null> {
+  const fullPath = Path.resolve(REPO_ROOT, filePath);
+  if (!Fs.existsSync(fullPath)) {
+    return null;
+  }
+
+  const hash = createHash('sha256');
+  await pipeline(Fs.createReadStream(fullPath), hash);
+  return hash.digest('hex');
+}
+
+/**
+ * Calculate hashes for a set of files relative to REPO_ROOT.
+ * Returns a record mapping file paths to their hashes (or null if file doesn't exist).
+ */
+export async function calculateFileHashes(
+  filePaths: string[]
+): Promise<Record<string, string | null>> {
+  const hashes: Record<string, string | null> = {};
+  await asyncForEachWithLimit(filePaths, 10, async (filePath) => {
+    hashes[filePath] = await calculateFileHash(filePath);
+  });
+  return hashes;
 }

@@ -11,10 +11,8 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
-  AWS_ORGANIZATION_ACCOUNT,
-} from '@kbn/cloud-security-posture-common';
+import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
 import type { CspRadioOption } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
@@ -90,7 +88,7 @@ const CloudFormationSetup = ({
               defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
-          {accountType === AWS_ORGANIZATION_ACCOUNT ? (
+          {accountType === ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage
                 id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.organizationLogin"

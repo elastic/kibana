@@ -57,6 +57,7 @@ export class IndexMgmtUIPlugin
     >
 {
   private extensionsService = new ExtensionsService();
+  private apiService?: PublicApiService;
   private locator?: IndexManagementLocator;
   private kibanaVersion: SemVer;
   private config: {
@@ -159,8 +160,10 @@ export class IndexMgmtUIPlugin
       })
     );
 
+    this.apiService = new PublicApiService(coreSetup.http);
+
     return {
-      apiService: new PublicApiService(coreSetup.http),
+      apiService: this.apiService,
       extensionsService: this.extensionsService.setup(),
       renderIndexManagementApp: async (params: IndexManagementAppMountParams) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
@@ -247,6 +250,7 @@ export class IndexMgmtUIPlugin
       this.canUseSyntheticSource = next.hasAtLeast('enterprise');
     });
     return {
+      apiService: this.apiService!,
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
         return (props: IndexMappingProps) => {

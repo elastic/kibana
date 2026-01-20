@@ -83,8 +83,8 @@ export default function (ftrContext: FtrProviderContext) {
         USERS.DEFAULT_SPACE_MAPS_READ_USER,
         USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER,
       ],
-      noResults: [],
-      unauthorized: [USERS.NOT_A_KIBANA_USER],
+      noResults: [USERS.NOT_A_KIBANA_USER], // find proxies so.find and returns no results for unauthorized users instead of 403
+      unauthorized: [],
     };
 
     const createUserTest = (

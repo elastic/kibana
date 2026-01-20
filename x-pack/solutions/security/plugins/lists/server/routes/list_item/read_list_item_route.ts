@@ -12,6 +12,7 @@ import {
   ReadListItemRequestQuery,
   ReadListItemResponse,
 } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
@@ -24,7 +25,7 @@ export const readListItemRoute = (router: ListsPluginRouter): void => {
       path: LIST_ITEM_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [LISTS_API_READ],
         },
       },
     })

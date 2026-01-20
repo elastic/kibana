@@ -12,6 +12,7 @@ import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/us
 import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export interface UseExceptionActionProps {
   isEndpointAlert: boolean;
@@ -22,7 +23,8 @@ export const useAlertExceptionActions = ({
   isEndpointAlert,
   onAddExceptionTypeClick,
 }: UseExceptionActionProps) => {
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const [{ hasIndexWrite }] = useUserData();
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const handleDetectionExceptionModal = useCallback(() => {
@@ -34,7 +36,7 @@ export const useAlertExceptionActions = ({
   }, [onAddExceptionTypeClick]);
 
   const disabledAddEndpointException = !canWriteEndpointExceptions || !isEndpointAlert;
-  const disabledAddException = !canUserCRUD || !hasIndexWrite;
+  const disabledAddException = !canEditRules || !hasIndexWrite;
 
   const exceptionActionItems: AlertTableContextMenuItem[] = useMemo(
     () =>

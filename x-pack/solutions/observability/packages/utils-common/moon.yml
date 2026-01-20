@@ -19,8 +19,6 @@ project:
     sourceRoot: x-pack/solutions/observability/packages/utils-common
 dependsOn:
   - '@kbn/es-query'
-  - '@kbn/safer-lodash-set'
-  - '@kbn/utility-types'
 tags:
   - shared-common
   - package

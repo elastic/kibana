@@ -346,12 +346,9 @@ export function summarizeTaskRunStat(
   logger: Logger,
   {
     polling: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       last_successful_poll,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       last_polling_delay,
       duration: pollingDuration,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       claim_duration,
       result_frequency_percent_as_number: pollingResultFrequency,
       claim_conflicts: claimConflicts,
@@ -360,7 +357,6 @@ export function summarizeTaskRunStat(
       persistence: pollingPersistence,
     },
     drift,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     drift_by_type,
     load,
     execution: {

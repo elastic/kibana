@@ -92,6 +92,12 @@ export const getSLOPipelineId = (sloId: string, sloRevision: number) =>
 export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
 
+export const getCustomSLOPipelineId = (sloId: string) => `.slo-${sloId}@custom`;
+
+export const getCustomSLOSummaryPipelineId = (sloId: string) => `.slo-summary-${sloId}@custom`;
+
+export const getCustomSLOWildcardPipelineId = (sloId: string) => `.slo-*${sloId}@custom`;
+
 export const getWildcardPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-observability.*.pipeline-${sloId}-${sloRevision}`;
 

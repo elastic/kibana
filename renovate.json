@@ -17,10 +17,10 @@
   ],
   "baseBranches": [
     "main",
+    "9.3",
     "9.2",
     "9.1",
-    "8.19",
-    "7.17"
+    "8.19"
   ],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -489,7 +489,6 @@
         "@emotion/css",
         "@emotion/react",
         "@emotion/serialize",
-        "@emotion/server",
         "@emotion/styled"
       ],
       "reviewers": [
@@ -1294,27 +1293,6 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/elasticsearch",
-      "matchDepNames": [
-        "@elastic/elasticsearch"
-      ],
-      "reviewers": [
-        "team:kibana-operations",
-        "team:kibana-core"
-      ],
-      "allowedVersions": "<8.0.0",
-      "matchBaseBranches": [
-        "7.17"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Operations",
-        "Team:Core",
-        "backport:skip"
-      ],
-      "enabled": true
-    },
-    {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
         "launchdarkly-js-client-sdk",
@@ -1965,7 +1943,7 @@
     {
       "groupName": "workflow-yaml",
       "matchDepNames": [
-        "@hey-api/openapi-ts", 
+        "@hey-api/openapi-ts",
         "vscode-languageserver-textdocument",
         "yaml-language-server"
       ],
@@ -1976,8 +1954,8 @@
         "main"
       ],
       "labels": [
-        "Team:One Workflow", 
-        "backport:all-open", 
+        "Team:One Workflow",
+        "backport:all-open",
         "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
@@ -2389,7 +2367,8 @@
     {
       "groupName": "search-ui ai dependency",
       "matchDepNames": [
-        "ai"
+        "ai",
+        "@ai-sdk/langchain"
       ],
       "reviewers": [
         "team:search-kibana"
@@ -2794,10 +2773,30 @@
       "allowedVersions": "<2.0.0"
     },
     {
+      "groupName": "mapbox-gl-supported",
+      "description": "versions >=3 mark WebGL1 as incompatible, but maplibre-gl-js supports WebGL1 and WebGL2",
+      "matchDepNames": [
+        "@mapbox/mapbox-gl-supported"
+      ],
+      "reviewers": [
+        "team:kibana-presentation"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Presentation",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true,
+      "allowedVersions": "<3.0.0"
+    },
+    {
       "groupName": "mapbox and maplibre",
       "matchDepNames": [
         "@mapbox/geojson-rewind",
-        "@mapbox/mapbox-gl-supported",
         "mapbox-gl-draw-rectangle-mode",
         "maplibre-gl",
         "@types/geojson"
@@ -3660,9 +3659,10 @@
     },
     {
       "groupName": "CodeQL",
-      "matchDepNames": [
+      "matchPackageNames": [
         "github/codeql-action/analyze",
-        "github/codeql-action/init"
+        "github/codeql-action/init",
+        "advanced-security/dismiss-alerts"
       ],
       "matchManagers": [
         "github-actions"
@@ -4693,18 +4693,18 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "Security Engineering Productivity",
+      "groupName": "dotenv",
       "matchDepNames": [
         "dotenv"
       ],
       "reviewers": [
-        "team:security-engineering-productivity"
+        "team:kibana-operations"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team: Sec Eng Productivity",
+        "Team:Operations",
         "release_note:skip",
         "backport:all-open"
       ],

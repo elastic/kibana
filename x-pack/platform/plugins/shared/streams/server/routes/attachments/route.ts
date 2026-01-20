@@ -36,7 +36,7 @@ const listAttachmentsRoute = createServerRoute({
     access: 'public',
     summary: 'Get stream attachments',
     description:
-      'Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment type.',
+      'Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment types, search query, and tags.',
     availability: {
       stability: 'experimental',
     },
@@ -87,7 +87,13 @@ const listAttachmentsRoute = createServerRoute({
     }),
     query: z
       .object({
-        attachmentType: z.optional(attachmentTypeSchema).describe('Filter by attachment type'),
+        query: z.optional(z.string()).describe('Search query to filter attachments by title'),
+        attachmentTypes: z
+          .optional(z.union([attachmentTypeSchema, z.array(attachmentTypeSchema)]))
+          .describe('Filter by attachment types (single value or array)'),
+        tags: z
+          .optional(z.union([z.string(), z.array(z.string())]))
+          .describe('Filter by tags (single value or array)'),
       })
       .optional(),
   }),
@@ -108,8 +114,21 @@ const listAttachmentsRoute = createServerRoute({
       query,
     } = params;
 
+    // Normalize single values to arrays for consistent handling
+    const attachmentTypes = query?.attachmentTypes
+      ? Array.isArray(query.attachmentTypes)
+        ? query.attachmentTypes
+        : [query.attachmentTypes]
+      : undefined;
+
+    const tags = query?.tags ? (Array.isArray(query.tags) ? query.tags : [query.tags]) : undefined;
+
     return {
-      attachments: await attachmentClient.getAttachments(streamName, query?.attachmentType),
+      attachments: await attachmentClient.getAttachments(streamName, {
+        query: query?.query,
+        attachmentTypes,
+        tags,
+      }),
     };
   },
 });

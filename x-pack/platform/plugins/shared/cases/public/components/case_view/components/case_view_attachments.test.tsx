@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
+import { alertCommentWithIndices, eventComment, basicCase } from '../../../containers/mock';
 import type { CaseUI } from '../../../../common';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { CaseViewAttachments } from './case_view_attachments';
@@ -43,6 +43,7 @@ const platinumLicense = licensingMock.createLicense({
 });
 
 const fileStatsData = { total: 3 };
+const onSearchMock = jest.fn();
 
 describe('Case View Attachments tab', () => {
   beforeEach(() => {
@@ -55,15 +56,40 @@ describe('Case View Attachments tab', () => {
 
   it('should render the case view attachments tab', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />
     );
 
     expect(screen.getByTestId('case-view-tabs')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-files-search')).toBeInTheDocument();
+  });
+
+  it('should call the onSearch callback when the search field is changed', async () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />
+    );
+
+    await userEvent.type(screen.getByTestId('cases-files-search'), 'search{Enter}');
+
+    await waitFor(() => {
+      expect(onSearchMock).toHaveBeenCalledWith('search');
+    });
   });
 
   it('shows the files tab as active', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.FILES}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense },
       }
@@ -77,7 +103,11 @@ describe('Case View Attachments tab', () => {
 
   it('shows the events tab as active', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.EVENTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
       }
@@ -91,7 +121,11 @@ describe('Case View Attachments tab', () => {
 
   it('shows the files tab with the correct count', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.FILES}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense },
       }
@@ -106,7 +140,11 @@ describe('Case View Attachments tab', () => {
     useGetCaseFileStatsMock.mockReturnValue({ isLoading: true, data: fileStatsData });
 
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.FILES}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense },
       }
@@ -115,11 +153,34 @@ describe('Case View Attachments tab', () => {
     expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
   });
 
-  it('shows the alerts tab with the correct count', async () => {
+  it('shows the alerts tab based on totalAlerts when search is not applied', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={{ ...caseData, totalAlerts: 3 }}
         activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
+      {
+        wrapperProps: { license: basicLicense },
+      }
+    );
+
+    const badge = await screen.findByTestId('case-view-alerts-stats-badge');
+
+    expect(badge).toHaveTextContent('3');
+  });
+
+  it('shows the alerts tab based on alert comment count when search is applied', async () => {
+    const alerts = Array.from({ length: 3 }, (_, i) => ({
+      ...alertCommentWithIndices,
+      id: `alert-${i}`,
+    }));
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={{ ...caseData, totalAlerts: 5, comments: alerts }}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+        searchTerm="search"
       />,
       {
         wrapperProps: { license: basicLicense },
@@ -136,6 +197,7 @@ describe('Case View Attachments tab', () => {
       <CaseViewAttachments
         caseData={{ ...caseData, totalAlerts: 3 }}
         activeTab={CASE_VIEW_PAGE_TABS.FILES}
+        onSearch={onSearchMock}
       />,
       {
         wrapperProps: { license: basicLicense },
@@ -150,7 +212,11 @@ describe('Case View Attachments tab', () => {
   it('navigates to the alerts tab when the alerts tab is clicked', async () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense },
       }
@@ -169,7 +235,11 @@ describe('Case View Attachments tab', () => {
   it('navigates to the files tab when the files tab is clicked', async () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense },
       }
@@ -188,7 +258,11 @@ describe('Case View Attachments tab', () => {
   it('navigates to the events tab when the events tab is clicked', async () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
       }
@@ -206,7 +280,11 @@ describe('Case View Attachments tab', () => {
 
   it('should display the alerts tab when the feature is enabled', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense, features: { alerts: { enabled: true } } },
       }
@@ -217,7 +295,11 @@ describe('Case View Attachments tab', () => {
 
   it('should not display the alerts tab when the feature is disabled', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense, features: { alerts: { enabled: false } } },
       }
@@ -229,7 +311,11 @@ describe('Case View Attachments tab', () => {
 
   it('should not show the experimental badge on the alerts table', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense, features: { alerts: { isExperimental: false } } },
       }
@@ -243,7 +329,11 @@ describe('Case View Attachments tab', () => {
 
   it('should show the experimental badge on the alerts table', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense, features: { alerts: { isExperimental: true } } },
       }
@@ -254,11 +344,12 @@ describe('Case View Attachments tab', () => {
     ).toBeInTheDocument();
   });
 
-  it('should display the events tab with correct count when the feature is enabled', async () => {
+  it('should display the events tab based on totalEvents when the feature is enabled and search is not applied', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={{ ...caseData, totalEvents: 4 }}
         activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
       />,
       {
         wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
@@ -271,9 +362,36 @@ describe('Case View Attachments tab', () => {
     expect(badge).toHaveTextContent('4');
   });
 
+  it('should display the events tab with correct count when the feature is enabled', async () => {
+    const events = Array.from({ length: 2 }, (_, i) => ({
+      ...eventComment,
+      id: `event-${i}`,
+    }));
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={{ ...caseData, totalEvents: 4, comments: events }}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+        searchTerm="search"
+      />,
+      {
+        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
+      }
+    );
+
+    expect(await screen.findByTestId('case-view-tab-title-events')).toBeInTheDocument();
+
+    const badge = await screen.findByTestId('case-view-events-stats-badge');
+    expect(badge).toHaveTextContent('2');
+  });
+
   it('should not display the events tab when the feature is disabled', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense, features: { events: { enabled: false } } },
       }
@@ -285,7 +403,11 @@ describe('Case View Attachments tab', () => {
 
   it('should not show observable tabs in non-platinum tiers', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: basicLicense },
       }
@@ -296,7 +418,11 @@ describe('Case View Attachments tab', () => {
 
   it('should not show observable tabs if the observables feature is not enabled', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: {
           license: basicLicense,
@@ -312,7 +438,11 @@ describe('Case View Attachments tab', () => {
     const spyOnUseGetSimilarCases = jest.spyOn(similarCasesHook, 'useGetSimilarCases');
 
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: platinumLicense },
       }
@@ -326,7 +456,11 @@ describe('Case View Attachments tab', () => {
 
   it('should show the observables tab', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: platinumLicense },
       }
@@ -336,7 +470,11 @@ describe('Case View Attachments tab', () => {
   });
   it('shows the observables tab with the correct count', async () => {
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: platinumLicense },
       }
@@ -351,7 +489,11 @@ describe('Case View Attachments tab', () => {
     useGetCaseObservablesMock.mockReturnValue({ isLoading: true, observables: [] });
 
     renderWithTestingProviders(
-      <CaseViewAttachments caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />,
+      <CaseViewAttachments
+        caseData={caseData}
+        activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES}
+        onSearch={onSearchMock}
+      />,
       {
         wrapperProps: { license: platinumLicense },
       }

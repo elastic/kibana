@@ -29,6 +29,13 @@ import {
 import type { IntegrationParams, DataStreamParams } from '../../routes/types';
 import { IntegrationAlreadyExistsError } from '../../errors';
 
+export interface UpdateDataStreamParams {
+  integrationId: string;
+  dataStreamId: string;
+  ingestPipeline: string;
+  status: keyof typeof TASK_STATUSES;
+}
+
 export class AutomaticImportSavedObjectService {
   private savedObjectsClient: SavedObjectsClient;
   private logger: Logger;
@@ -104,8 +111,6 @@ export class AutomaticImportSavedObjectService {
     }
 
     try {
-      this.logger.debug(`Creating integration: ${integrationId}`);
-
       const initialIntegrationData: IntegrationAttributes = {
         integration_id: integrationId,
         status: TASK_STATUSES.pending,
@@ -360,7 +365,7 @@ export class AutomaticImportSavedObjectService {
 
       await this.savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId, options);
 
-      this.logger.info(
+      this.logger.debug(
         `Successfully deleted integration ${integrationId} and ${dataStreamsDeleted} associated data streams`
       );
 
@@ -383,6 +388,13 @@ export class AutomaticImportSavedObjectService {
   /**
    * Data Stream Operations
    */
+
+  /**
+   * Generate composite ID for data stream: integration_id-data_stream_id
+   */
+  private getDataStreamCompositeId(integrationId: string, dataStreamId: string): string {
+    return `${integrationId}-${dataStreamId}`;
+  }
 
   /**
    * Create a data stream
@@ -430,8 +442,8 @@ export class AutomaticImportSavedObjectService {
         },
       };
 
-      // Create automatically checks if there is an existing data stream with the same id and will throw an error if so
-      const createdDataStream = await this.savedObjectsClient.create<DataStreamAttributes>(
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+      return await this.savedObjectsClient.create<DataStreamAttributes>(
         DATA_STREAM_SAVED_OBJECT_TYPE,
         initialDataStreamData,
         {
@@ -439,7 +451,6 @@ export class AutomaticImportSavedObjectService {
           id: compositeId,
         }
       );
-      return createdDataStream;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
         throw new Error(`Data stream ${dataStreamId} already exists`);
@@ -541,6 +552,7 @@ export class AutomaticImportSavedObjectService {
   /**
    * Get a data stream by ID
    * @param dataStreamId - The ID of the data stream
+   * @param integrationId - The ID of the integration
    * @returns The data stream
    */
   public async getDataStream(
@@ -555,6 +567,9 @@ export class AutomaticImportSavedObjectService {
         compositeId
       );
     } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        throw new Error(`Data stream ${dataStreamId} not found`);
+      }
       this.logger.error(`Failed to get data stream ${dataStreamId}: ${error}`);
       throw error;
     }
@@ -608,11 +623,14 @@ export class AutomaticImportSavedObjectService {
 
   /**
    * Delete a data stream by ID
+   * @param integrationId - The ID of the integration
    * @param dataStreamId - The ID of the data stream
+   * @param authenticatedUser - The authenticated user
    * @param options - The options for the delete
    * @returns The deleted data stream
    */
   public async deleteDataStream(
+    integrationId: string,
     dataStreamId: string,
     integrationId: string,
     options?: SavedObjectsDeleteOptions
@@ -627,5 +645,48 @@ export class AutomaticImportSavedObjectService {
     }
 
     // Integration SO no longer stores a denormalized `data_stream_count`.
+  }
+
+  public async updateDataStreamSavedObjectAttributes(
+    updateDataStreamParams: UpdateDataStreamParams
+  ): Promise<void> {
+    const { integrationId, dataStreamId, ingestPipeline, status } = updateDataStreamParams;
+
+    if (!integrationId) {
+      throw new Error('Integration ID is required');
+    }
+
+    if (!dataStreamId) {
+      throw new Error('Data stream ID is required');
+    }
+
+    try {
+      const dataStream = await this.getDataStream(dataStreamId, integrationId);
+      if (!dataStream) {
+        throw new Error(`Data stream ${dataStreamId} not found`);
+      }
+
+      const updatedDataStreamData: DataStreamAttributes = {
+        ...dataStream.attributes,
+        result: {
+          ingest_pipeline: ingestPipeline,
+        },
+        job_info: {
+          ...dataStream.attributes.job_info,
+          status,
+        },
+      };
+
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+
+      await this.savedObjectsClient.update(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        compositeId,
+        updatedDataStreamData
+      );
+    } catch (error) {
+      this.logger.error(`Failed to update data stream ${dataStreamId}: ${error}`);
+      throw error;
+    }
   }
 }

@@ -8,78 +8,53 @@
 import React from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { MetricPanels } from './metric_panels';
-import { PromoCard } from './promo_card';
-import { CloudServerlessPromo } from '../cloud_serverless_promo/cloud_serverless_promo';
-import { DiveDeeperWithElasticsearch } from '../dive_deeper/dive_deeper_with_elasticsearch';
-import { AlternateSolutions } from '../alternate_solutions/alternate_solutions';
-import { Footer } from '../footer/footer';
+import { CloudResources } from './cloud_resources';
+import { BodyLinks } from './body_links';
+import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
-import { HomepageNavLinks } from './homepage_nav_links';
+import { GettingStartedBanner } from './getting_started_banner';
 
 export const SearchHomepageBody = () => {
   const { euiTheme } = useEuiTheme();
-  const itemPadding = css({ padding: `${euiTheme.size.xxl}` });
   const {
-    services: { cloud: { isCloudEnabled = false } = {} },
+    services: { cloud },
   } = useKibana();
-
+  const { isAdmin, isBillingAdmin } = useAuthenticatedUser();
   return (
-    <KibanaPageTemplate.Section alignment="top" restrictWidth={true} grow>
-      <MetricPanels />
+    <KibanaPageTemplate.Section
+      alignment="top"
+      restrictWidth={true}
+      grow
+      paddingSize="none"
+      css={css({ padding: `0 ${euiTheme.size.l}` })}
+    >
       <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem>
-          <EuiHorizontalRule margin="s" />
+          <EuiSpacer size="l" />
+          <MetricPanels />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <PromoCard />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <PromoCard />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="s" />
-        </EuiFlexItem>
-        {!isCloudEnabled && (
-          <>
-            <EuiFlexItem>
-              <EuiHorizontalRule />
-            </EuiFlexItem>
-            <EuiFlexItem css={itemPadding}>
-              <CloudServerlessPromo />
-            </EuiFlexItem>
-          </>
+        {cloud?.isServerlessEnabled && (!isAdmin || !isBillingAdmin) ? null : (
+          <EuiFlexItem>
+            <EuiSpacer size="l" />
+            <CloudResources />
+          </EuiFlexItem>
         )}
         <EuiFlexItem>
-          <HomepageNavLinks type="dataManagement" />
+          <EuiSpacer size="l" />
+          <GettingStartedBanner />
         </EuiFlexItem>
         <EuiFlexItem>
-          <HomepageNavLinks type="stackManagement" />
+          <EuiHorizontalRule margin="xxl" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiHorizontalRule margin="s" />
-        </EuiFlexItem>
-        <EuiFlexItem css={itemPadding}>
-          <DiveDeeperWithElasticsearch />
+          <BodyLinks />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiHorizontalRule />
-        </EuiFlexItem>
-        <EuiFlexItem css={itemPadding}>
-          <AlternateSolutions />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule />
-        </EuiFlexItem>
-        <EuiFlexItem css={itemPadding}>
-          <Footer />
         </EuiFlexItem>
       </EuiFlexGroup>
     </KibanaPageTemplate.Section>

@@ -16,14 +16,13 @@ import { processGapsBatch } from '../../../application/gaps/methods/bulk_fill_ga
 import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 import type { RulesClientApi } from '../../../types';
-import { gapStatus } from '../../../../common/constants';
+import { gapStatus, GAP_AUTO_FILL_STATUS } from '../../../../common/constants';
 import type { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import {
   GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
   DEFAULT_RULES_BATCH_SIZE,
   DEFAULT_GAPS_PER_PAGE,
   DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
-  GAP_AUTO_FILL_STATUS,
 } from '../../../application/gaps/types/scheduler';
 import { backfillInitiator } from '../../../../common/constants';
 import type { RulesClientContext } from '../../../rules_client/types';
@@ -451,7 +450,7 @@ export function registerGapAutoFillSchedulerTask({
 
               if (!ruleIds.length) {
                 await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.SKIPPED,
+                  status: GAP_AUTO_FILL_STATUS.NO_GAPS,
                   results: [],
                   message: 'Skipped execution: no rules with gaps',
                 });
@@ -481,41 +480,36 @@ export function registerGapAutoFillSchedulerTask({
               const aggregatedByRule = gapFillsResult.aggregatedByRule;
               const consolidated = resultsFromMap(aggregatedByRule);
 
-              if (gapFillsResult.state === SchedulerLoopState.CAPACITY_EXHAUSTED) {
-                await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.SUCCESS,
-                  results: consolidated,
-                  message: `Stopped early: gap auto-fill capacity limit reached. This task can schedule at most ${
-                    capacityCheckInitial.maxBackfills
-                  } gap backfills at a time, and existing backfills must finish before new ones can be scheduled. | ${formatConsolidatedSummary(
-                    consolidated
-                  )}`,
-                });
-                return { state: {} };
-              }
-
-              if (gapFillsResult.state === SchedulerLoopState.CANCELLED) {
-                await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.SUCCESS,
-                  results: consolidated,
-                  message: `Gap Auto Fill Scheduler cancelled by timeout | Results: ${formatConsolidatedSummary(
-                    consolidated
-                  )}`,
-                });
-                return { state: {} };
-              }
-
               // Step 5: Finalize and log results
               const { status: outcomeStatus, message: outcomeMessage } =
                 getGapAutoFillRunOutcome(consolidated);
               const summary = consolidated.length
                 ? ` | ${formatConsolidatedSummary(consolidated)}`
                 : '';
+              const summaryMessage = `${outcomeMessage}${summary}`;
+
+              if (gapFillsResult.state === SchedulerLoopState.CAPACITY_EXHAUSTED) {
+                await logEvent({
+                  status: outcomeStatus,
+                  results: consolidated,
+                  message: `Stopped early: gap auto-fill capacity limit reached. This task can schedule at most ${capacityCheckInitial.maxBackfills} gap backfills at a time, and existing backfills must finish before new ones can be scheduled. | ${summaryMessage}`,
+                });
+                return { state: {} };
+              }
+
+              if (gapFillsResult.state === SchedulerLoopState.CANCELLED) {
+                await logEvent({
+                  status: outcomeStatus,
+                  results: consolidated,
+                  message: `Gap Auto Fill Scheduler cancelled by timeout | Results: ${summaryMessage}`,
+                });
+                return { state: {} };
+              }
 
               await logEvent({
                 status: outcomeStatus,
                 results: consolidated,
-                message: `${outcomeMessage}${summary}`,
+                message: summaryMessage,
               });
 
               return { state: {} };

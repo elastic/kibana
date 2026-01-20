@@ -11,7 +11,7 @@
  * Simple mock for monaco model, partially compatible with the real model to be use in tests
  * @param value - The content to create the model from
  * @param cursorOffset - The offset of the cursor in the model
- * @returns The mock monaco model with getValue, getLineCount, getOffsetAt, getPositionAt, getLineContent, getWordUntilPosition, getWordAtPosition, pushEditOperations methods
+ * @returns The mock monaco model with getValue, getLineCount, getOffsetAt, getPositionAt, getLineContent, getLineMaxColumn, getWordUntilPosition, getWordAtPosition, pushEditOperations methods
  */
 export function createFakeMonacoModel(value: string, cursorOffset: number = 0) {
   const lines = value.split('\n');
@@ -58,6 +58,10 @@ export function createFakeMonacoModel(value: string, cursorOffset: number = 0) {
       return { lineNumber: lines.length, column: lines[lines.length - 1].length + 1 };
     },
     getLineContent: (lineNumber: number) => lines[lineNumber - 1] || '',
+    getLineMaxColumn: (lineNumber: number) => {
+      const line = lines[lineNumber - 1] || '';
+      return line.length + 1;
+    },
     getWordUntilPosition: (pos: typeof position) => {
       const line = lines[pos.lineNumber - 1];
       if (!line) {

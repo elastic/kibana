@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { RenderResult } from '@testing-library/react';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { FormTestProvider } from './test_utils';
 import type { ConfigFieldSchema, SecretsFieldSchema } from './simple_connector_form';
 import { SimpleConnectorForm } from './simple_connector_form';
@@ -120,9 +120,7 @@ describe('SimpleConnectorForm', () => {
 
     await fillForm(res);
 
-    await act(async () => {
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
-    });
+    await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
     expect(onSubmit).toHaveBeenCalledWith({
       data: {
@@ -162,6 +160,7 @@ describe('SimpleConnectorForm', () => {
       await fillForm(res);
 
       await userEvent.clear(res.getByTestId(field));
+
       if (value !== '') {
         await userEvent.type(res.getByTestId(field), value, {
           delay: 10,
@@ -170,6 +169,41 @@ describe('SimpleConnectorForm', () => {
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
+
+    it('supports custom validators', async () => {
+      const configSchemaWitCustomValidatos = [
+        {
+          id: 'test',
+          label: 'Test',
+          type: 'TEXT' as const,
+          // so only the custom validator will run
+          isRequired: false,
+          validations: [
+            {
+              validator: () => {
+                return { message: 'Invalid' };
+              },
+            },
+          ],
+        },
+      ];
+
+      const res = render(
+        <FormTestProvider onSubmit={onSubmit}>
+          <SimpleConnectorForm
+            isEdit={true}
+            readOnly={false}
+            configFormSchema={configSchemaWitCustomValidatos}
+            secretsFormSchema={[]}
+          />
+        </FormTestProvider>
+      );
+
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
+
+      expect(await screen.findByText('Invalid'));
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
   });

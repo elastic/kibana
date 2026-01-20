@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server/types';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server/types';
 import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
@@ -22,30 +25,35 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
-import type { ObservabilityAgentDataRegistry } from './data_registry/data_registry';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
-export interface ObservabilityAgentPluginSetup {
-  registerDataProvider: ObservabilityAgentDataRegistry['registerDataProvider'];
+export interface ObservabilityAgentBuilderPluginSetup {
+  registerDataProvider: ObservabilityAgentBuilderDataRegistry['registerDataProvider'];
 }
 
-export type ObservabilityAgentPluginStart = Record<string, never>;
+export type ObservabilityAgentBuilderPluginStart = Record<string, never>;
 
-export interface ObservabilityAgentPluginSetupDependencies {
-  onechat: OnechatPluginSetup;
+export interface ObservabilityAgentBuilderPluginSetupDependencies {
+  agentBuilder: AgentBuilderPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
   security: SecurityPluginSetup;
   ml?: MlPluginSetup;
+  inference: InferenceServerSetup;
 }
 
-export interface ObservabilityAgentPluginStartDependencies {
-  onechat: OnechatPluginStart;
+export interface ObservabilityAgentBuilderPluginStartDependencies {
+  agentBuilder: AgentBuilderPluginStart;
   apmDataAccess: ApmDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
   metricsDataAccess: MetricsDataPluginStart;
   security: SecurityPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
+  inference: InferenceServerStart;
   ml?: MlPluginStart;
+  spaces?: SpacesPluginStart;
 }

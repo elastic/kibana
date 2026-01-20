@@ -12,7 +12,6 @@ import { useStreamDetailAsIngestStream } from '../../hooks/use_stream_detail';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import type { StreamsFeatures } from '../../hooks/use_streams_privileges';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { RedirectTo } from '../redirect_to';
 import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../stream_badges';
@@ -25,11 +24,9 @@ import { FeedbackButton } from '../feedback_button';
 const getStreamDetailTabs = ({
   definition,
   router,
-  features,
 }: {
   definition: Streams.ingest.all.GetResponse;
   router: StatefulStreamsAppRouter;
-  features: StreamsFeatures;
 }) =>
   ({
     overview: {
@@ -80,7 +77,7 @@ export function StreamDetailView() {
 
   const tabs =
     features.significantEvents !== undefined
-      ? getStreamDetailTabs({ definition, router, features })
+      ? getStreamDetailTabs({ definition, router })
       : undefined;
 
   const selectedTabObject = tabs?.[tab as StreamDetailTabName];

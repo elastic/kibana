@@ -33,7 +33,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
@@ -74,7 +73,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  const doTests = () => {
+  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
+    this.tags(['esGate']);
+
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -123,6 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
           category_1_count: 1,
           id_field: 'host.name',
           id_value: 'host-1',
+          modifiers: [],
         };
 
         const [score] = sanitizeScores([results.score]);
@@ -175,6 +177,16 @@ export default ({ getService }: FtrProviderContext): void => {
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',
+            modifiers: [
+              {
+                type: 'asset_criticality',
+                modifier_value: 1.5,
+                metadata: {
+                  criticality_level: 'high_impact',
+                },
+                contribution: 3.5773103045,
+              },
+            ],
           };
 
           const [score] = sanitizeScores([results.score]);
@@ -218,6 +230,7 @@ export default ({ getService }: FtrProviderContext): void => {
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',
+            modifiers: [],
           };
 
           const [score] = sanitizeScores([results.score]);
@@ -242,29 +255,6 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         });
       });
-    });
-  };
-
-  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
-    this.tags(['esGate']);
-
-    describe('ESQL based risk scoring', () => {
-      doTests();
-    });
-
-    describe('scripted metric based risk scoring', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: false,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: true,
-        });
-      });
-      doTests();
     });
   });
 };

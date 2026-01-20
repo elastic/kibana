@@ -81,6 +81,9 @@ export const DetectedFieldsEditor = ({ schemaEditorFields }: DetectedFieldsEdito
         defaultColumns={['name', 'type', 'format', 'status', 'result']}
         fields={schemaEditorFields}
         stream={definition.stream}
+        // Geo-point helpers are disabled in the Processing tab for now
+        // We will enable it once we add geo_point support for wired.
+        enableGeoPointSuggestions={false}
         onFieldUpdate={(field) => {
           if (field.status === 'mapped') {
             mapField(field);

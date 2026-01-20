@@ -106,7 +106,13 @@ export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (sync
         defaultMessage: 'Documents',
       })}
     >
-      <EuiBasicTable columns={columns} items={[syncJobDocuments]} />
+      <EuiBasicTable
+        columns={columns}
+        items={[syncJobDocuments]}
+        tableCaption={i18n.translate('searchConnectors.index.syncJobs.documents.tableCaption', {
+          defaultMessage: 'Sync job document statistics',
+        })}
+      />
     </FlyoutPanel>
   );
 };

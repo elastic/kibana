@@ -8,35 +8,37 @@ import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { Streams, SystemFeature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
-import { GenerateStreamDescriptionPrompt } from './prompt';
+import { createGenerateStreamDescriptionPrompt } from './prompt';
 
 /**
  * Generate a natural-language description
  */
 export async function generateStreamDescription({
   stream,
-  feature,
+  system,
   start,
   end,
   esClient,
   inferenceClient,
   signal,
   logger,
+  systemPrompt,
 }: {
   stream: Streams.all.Definition;
-  feature?: SystemFeature;
+  system?: System;
   start: number;
   end: number;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  systemPrompt: string;
 }): Promise<{ description: string; tokensUsed?: ChatCompletionTokenCount }> {
   logger.debug(
     `Generating stream description for stream ${stream.name}${
-      feature ? ` using feature ${feature.name}` : ''
+      system ? ` using system ${system.name}` : ''
     }`
   );
 
@@ -47,7 +49,7 @@ export async function generateStreamDescription({
       end,
       esClient,
       index: stream.name,
-      filter: feature ? conditionToQueryDsl(feature.filter) : undefined,
+      filter: system ? conditionToQueryDsl(system.filter) : undefined,
     })
   );
 
@@ -61,14 +63,16 @@ export async function generateStreamDescription({
     )
   );
 
+  const prompt = createGenerateStreamDescriptionPrompt({ systemPrompt });
+
   logger.trace('Generating stream description via inference client');
   const response = await withSpan('generate_stream_description', () =>
     inferenceClient.prompt({
       input: {
-        name: feature?.name || stream.name,
+        name: system?.name || stream.name,
         dataset_analysis: JSON.stringify(formattedAnalysis),
       },
-      prompt: GenerateStreamDescriptionPrompt,
+      prompt,
       abortSignal: signal,
     })
   );

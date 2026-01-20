@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { parse, BasicPrettyPrinter } from '@kbn/esql-language';
 import { correctLikeWildcards } from './like';
 
 describe('correctLikeWildcards', () => {

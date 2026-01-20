@@ -11,29 +11,34 @@ import { getLogsIndices } from './get_logs_indices';
 import { getMetricsIndices } from './get_metrics_indices';
 import { getApmIndices } from './get_apm_indices';
 import type {
-  ObservabilityAgentPluginSetupDependencies,
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
+
+export interface ObservabilityDataSources {
+  apmIndexPatterns: APMIndices;
+  logIndexPatterns: string[];
+  metricIndexPatterns: string[];
+  alertsIndexPattern: string[];
+}
 
 export async function getObservabilityDataSources({
   core,
   plugins,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
-}): Promise<{
-  apmIndexPatterns: APMIndices;
-  logIndexPatterns: string[];
-  metricIndexPatterns: string[];
-  alertsIndexPattern: string[];
-}> {
+}): Promise<ObservabilityDataSources> {
   const apmIndexPatterns = await getApmIndices({ core, plugins, logger });
   const logIndexPatterns = await getLogsIndices({ core, logger });
   const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
-  const alertsIndexPattern = ['alerts-observability-*'];
+  const alertsIndexPattern = ['.alerts-observability.*'];
 
   return {
     apmIndexPatterns,

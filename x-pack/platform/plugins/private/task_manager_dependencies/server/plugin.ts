@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -22,11 +23,12 @@ export interface TaskManagerDependenciesPluginSetup {
 
 export interface TaskManagerDependenciesPluginStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
 export class TaskManagerDependenciesPlugin {
-  public setup(core: CoreSetup, plugin: TaskManagerDependenciesPluginSetup) {
+  public setup(_: CoreSetup, plugin: TaskManagerDependenciesPluginSetup) {
     plugin.encryptedSavedObjects.registerType({
       type: 'task',
       attributesToEncrypt: new Set(['apiKey']),
@@ -37,11 +39,14 @@ export class TaskManagerDependenciesPlugin {
     plugin.taskManager.registerCanEncryptedSavedObjects(plugin.encryptedSavedObjects.canEncrypt);
   }
 
-  public start(core: CoreStart, plugin: TaskManagerDependenciesPluginStart) {
+  public start(_: CoreStart, plugin: TaskManagerDependenciesPluginStart) {
     plugin.taskManager.registerEncryptedSavedObjectsClient(
       plugin.encryptedSavedObjects.getClient({
         includedHiddenTypes: ['task'],
       })
+    );
+    plugin.taskManager.registerApiKeyInvalidateFn(
+      plugin.security?.authc.apiKeys.invalidateAsInternalUser
     );
   }
 }

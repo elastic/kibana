@@ -9,14 +9,19 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
-import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
+import { EsqlControlType, ESQLVariableType, type ESQLControlState } from '@kbn/esql-types';
+import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
-import type { BehaviorSubject } from 'rxjs';
-import type { ControlFetchContext } from '../../control_group/control_fetch';
+import { BehaviorSubject } from 'rxjs';
 
 const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
 const mockIsSuccess = jest.fn(() => true);
+
+const mockFetch$ = new BehaviorSubject({});
+jest.mock('@kbn/presentation-publishing', () => ({
+  ...jest.requireActual('@kbn/presentation-publishing'),
+  fetch$: () => mockFetch$,
+}));
 
 jest.mock('./utils/get_esql_single_column_values', () => {
   const getESQLSingleColumnValues = () => mockGetESQLSingleColumnValues();
@@ -34,9 +39,8 @@ describe('ESQLControlApi', () => {
   const uuid = 'myESQLControl';
 
   const dashboardApi = {};
-  const controlGroupApi = getMockedControlGroupApi(dashboardApi);
   const factory = getESQLControlFactory();
-  const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
+  const finalizeApi = getMockedFinalizeApi(uuid, factory, dashboardApi);
 
   test('should publish ES|QL variable', async () => {
     const initialState = {
@@ -47,16 +51,19 @@ describe('ESQLControlApi', () => {
       esqlQuery: 'FROM foo | WHERE column = ?variable1',
       controlType: 'STATIC_VALUES',
     } as ESQLControlState;
-    const { api } = await factory.buildControl({
+    const { api } = await factory.buildEmbeddable({
       initialState,
       finalizeApi,
       uuid,
-      controlGroupApi,
+      parentApi: dashboardApi,
     });
     expect(api.esqlVariable$.value).toStrictEqual({
       key: 'variable1',
       type: 'values',
       value: 'option1',
+      meta: {
+        controlledBy: 'myESQLControl',
+      },
     });
   });
 
@@ -69,26 +76,21 @@ describe('ESQLControlApi', () => {
       esqlQuery: 'FROM foo | WHERE column = ?variable1',
       controlType: 'STATIC_VALUES',
     } as ESQLControlState;
-    const { api } = await factory.buildControl({
+    const { api } = await factory.buildEmbeddable({
       initialState,
       finalizeApi,
       uuid,
-      controlGroupApi,
+      parentApi: dashboardApi,
     });
     expect(api.serializeState()).toStrictEqual({
-      rawState: {
-        availableOptions: ['option1', 'option2'],
-        controlType: 'STATIC_VALUES',
-        esqlQuery: 'FROM foo | WHERE column = ?variable1',
-        grow: false,
-        selectedOptions: ['option1'],
-        title: '',
-        variableName: 'variable1',
-        variableType: 'values',
-        singleSelect: true,
-        width: 'medium',
-      },
-      references: [],
+      availableOptions: ['option1', 'option2'],
+      controlType: 'STATIC_VALUES',
+      esqlQuery: 'FROM foo | WHERE column = ?variable1',
+      selectedOptions: ['option1'],
+      title: '',
+      variableName: 'variable1',
+      variableType: 'values',
+      singleSelect: true,
     });
   });
 
@@ -102,20 +104,48 @@ describe('ESQLControlApi', () => {
         esqlQuery: 'FROM foo | STATS BY column',
         controlType: EsqlControlType.VALUES_FROM_QUERY,
       } as ESQLControlState;
-      await factory.buildControl({
+      await factory.buildEmbeddable({
         initialState,
         finalizeApi,
         uuid,
-        controlGroupApi,
+        parentApi: dashboardApi,
       });
       await waitFor(() => {
         expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
         expect(mockIsSuccess).toHaveBeenCalledTimes(1);
       });
-      const controlFetch$ = controlGroupApi.controlFetch$(
-        uuid
-      ) as BehaviorSubject<ControlFetchContext>;
-      controlFetch$.next({});
+      mockFetch$.next({});
+    });
+
+    test('should update when variables change for queries with dependencies', async () => {
+      const initialState = {
+        selectedOptions: ['option1'],
+        variableName: 'variable2',
+        variableType: 'values',
+        esqlQuery: 'FROM foo | WHERE column1 == ?variable1 | STATS BY column2',
+        controlType: EsqlControlType.VALUES_FROM_QUERY,
+      } as ESQLControlState;
+      await factory.buildEmbeddable({
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: dashboardApi,
+      });
+      await waitFor(() => {
+        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
+        expect(mockIsSuccess).toHaveBeenCalledTimes(1);
+      });
+      // Variable change
+      mockFetch$.next({
+        esqlVariables: [
+          {
+            key: 'variable1',
+            value: 'newValue',
+            type: ESQLVariableType.VALUES,
+          },
+        ],
+      });
+
       await waitFor(() => {
         expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(2);
         expect(mockIsSuccess).toHaveBeenCalledTimes(2);
@@ -133,20 +163,23 @@ describe('ESQLControlApi', () => {
         esqlQuery: 'FROM foo | WHERE column = ?variable1',
         controlType: 'STATIC_VALUES',
       } as ESQLControlState;
-      const { Component, api } = await factory.buildControl({
+      const { Component, api } = await factory.buildEmbeddable({
         initialState,
         finalizeApi,
         uuid,
-        controlGroupApi,
+        parentApi: dashboardApi,
       });
 
       expect(api.esqlVariable$.value).toStrictEqual({
         key: 'variable1',
         type: 'values',
         value: 'option1',
+        meta: {
+          controlledBy: 'myESQLControl',
+        },
       });
 
-      const { findByTestId, findByTitle } = render(<Component className="" />);
+      const { findByTestId, findByTitle } = render(<Component />);
       fireEvent.click(await findByTestId('optionsListSelections'));
       fireEvent.click(await findByTitle('option2'));
 
@@ -155,6 +188,9 @@ describe('ESQLControlApi', () => {
           key: 'variable1',
           type: 'values',
           value: 'option2',
+          meta: {
+            controlledBy: 'myESQLControl',
+          },
         });
       });
     });

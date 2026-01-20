@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/kbn-genai-cli",
-  "owner": "@elastic/obs-knowledge-team",
+  "owner": "@elastic/obs-ai-team",
   "group": "observability",
   "visibility": "private",
   "devOnly": true

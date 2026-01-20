@@ -11,41 +11,21 @@ import {
   EuiSpacer,
   EuiSelectable,
   type EuiSelectableOption,
-  EuiBadge,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   useEuiTheme,
-  EuiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 import { ErrorState } from './error_state';
 import { EmptyState } from './empty_state';
 
-const formatDataRetention = (template: TemplateDeserialized): string | undefined => {
-  const { lifecycle } = template;
-
-  if (!lifecycle?.enabled) {
-    return undefined;
-  }
-
-  if (lifecycle.infiniteDataRetention) {
-    return '∞';
-  }
-
-  if (lifecycle.value && lifecycle.unit) {
-    return `${lifecycle.value}${lifecycle.unit}`;
-  }
-
-  return undefined;
-};
-
 interface SelectTemplateStepProps {
-  templates: TemplateDeserialized[];
+  templates: IndexTemplate[];
   selectedTemplate: string | null;
   onTemplateSelect: (templateName: string | null) => void;
+  onTemplateConfirm: (templateName: string) => void;
   onCreateTemplate: () => void;
   hasErrorLoadingTemplates?: boolean;
   onRetryLoadTemplates: () => void;
@@ -55,6 +35,7 @@ export const SelectTemplateStep = ({
   templates,
   selectedTemplate,
   onTemplateSelect,
+  onTemplateConfirm,
   onCreateTemplate,
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
@@ -64,51 +45,23 @@ export const SelectTemplateStep = ({
   const selectableOptions = useMemo(
     () =>
       templates.map((template) => {
-        const hasIlmPolicy = Boolean(template.ilmPolicy?.name);
-        const dataRetention = !hasIlmPolicy ? formatDataRetention(template) : undefined;
-
         return {
           label: template.name,
           checked: template.name === selectedTemplate ? 'on' : undefined,
           'data-test-subj': `template-option-${template.name}`,
           template,
-          append: hasIlmPolicy ? (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  <EuiTextTruncate text={template.ilmPolicy?.name ?? ''} width={250} />
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {i18n.translate(
-                    'xpack.createClassicStreamFlyout.selectTemplateStep.ilmBadgeLabel',
-                    {
-                      defaultMessage: 'ILM',
-                    }
-                  )}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : dataRetention ? (
-            <EuiText size="s" color="subdued">
-              {dataRetention}
-            </EuiText>
-          ) : undefined,
-        } as EuiSelectableOption<{ template: TemplateDeserialized }>;
+        } as EuiSelectableOption<{ template: IndexTemplate }>;
       }),
     [templates, selectedTemplate]
   );
 
-  const renderOption = (option: EuiSelectableOption<{ template: TemplateDeserialized }>) => {
+  const renderOption = (option: EuiSelectableOption<{ template: IndexTemplate }>) => {
     const templateData = option?.template;
     const isManaged = templateData?._kbnMeta?.type === 'managed';
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTextTruncate text={option.label} width={250} />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
         {isManaged && (
           <EuiFlexItem grow={false}>
             <EuiIconTip
@@ -129,9 +82,15 @@ export const SelectTemplateStep = ({
   const handleTemplateChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       const selected = newOptions.find((option) => option.checked === 'on');
-      onTemplateSelect(selected?.label ?? null);
+      const templateName = selected?.label ?? null;
+      onTemplateSelect(templateName);
+
+      // Auto-advance to next step when a template is selected
+      if (templateName) {
+        onTemplateConfirm(templateName);
+      }
     },
-    [onTemplateSelect]
+    [onTemplateSelect, onTemplateConfirm]
   );
 
   if (hasErrorLoadingTemplates) {

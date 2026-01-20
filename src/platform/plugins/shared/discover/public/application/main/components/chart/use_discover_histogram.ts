@@ -19,7 +19,7 @@ import {
   UnifiedHistogramFetchStatus,
   type UnifiedHistogramFetchParamsExternal,
 } from '@kbn/unified-histogram';
-import { isEqual } from 'lodash';
+import { isEqual, intersection } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
@@ -53,6 +53,11 @@ import { useDataState } from '../../hooks/use_data_state';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
+const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchParamsExternal> = [
+  'externalVisContext',
+  'breakdownField',
+  'timeInterval',
+];
 
 export interface UseUnifiedHistogramOptions {
   initialLayoutProps?: InitialUnifiedHistogramLayoutProps;
@@ -262,7 +267,7 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
-      const visContext = latestFetchDetails?.visContext ?? savedSearchState?.visContext;
+      const visContext = collectedFetchParams?.externalVisContext ?? savedSearchState?.visContext;
       const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
         isEsqlMode,
@@ -311,10 +316,14 @@ export const useDiscoverHistogram = (
       );
     });
 
-    if (changedParams.length === 1 && changedParams[0] === 'externalVisContext') {
-      triggerUnifiedHistogramFetch.current({
-        visContext: collectedFetchParams.externalVisContext,
-      });
+    if (
+      changedParams.length > 0 &&
+      intersection(changedParams, TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH).length ===
+        changedParams.length
+    ) {
+      // if changes happen only in the TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH attributes, then trigger a separate chart refetch
+      // as we know that for these attributes we don't refetch documents (hence no fetchChart$ emission will happen)
+      triggerUnifiedHistogramFetch.current(undefined);
     }
   }, [collectedFetchParams, triggerUnifiedHistogramFetch]);
 

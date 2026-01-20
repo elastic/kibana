@@ -69,6 +69,7 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
@@ -124,6 +125,7 @@ export interface DiscoverSessionTab {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>

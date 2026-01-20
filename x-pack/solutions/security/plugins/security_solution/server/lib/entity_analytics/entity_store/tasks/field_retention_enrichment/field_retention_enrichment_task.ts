@@ -259,12 +259,18 @@ export const runEntityStoreFieldRetentionEnrichTask = async ({
       interval: taskInstance.schedule?.interval,
     });
 
-    // Track entity store usage
-    const indices = entityTypes.map((entityType) =>
-      getEntitiesIndexName(entityType, state.namespace)
+    // Track entity store usage per namespace & entity type
+    await Promise.all(
+      entityTypes.map(async (entityType) => {
+        const index = getEntitiesIndexName(entityType, state.namespace);
+        const storeSize = await getStoreSize(index);
+        telemetry.reportEvent(ENTITY_STORE_USAGE_EVENT.eventType, {
+          storeSize,
+          entityType,
+          namespace: state.namespace,
+        });
+      })
     );
-    const storeSize = await getStoreSize(indices);
-    telemetry.reportEvent(ENTITY_STORE_USAGE_EVENT.eventType, { storeSize });
 
     return {
       state: updatedState,

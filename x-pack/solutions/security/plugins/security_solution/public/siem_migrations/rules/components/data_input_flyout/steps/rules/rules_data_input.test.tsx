@@ -8,20 +8,24 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RulesDataInput } from './rules_data_input';
-import { DataInputStep } from '../constants';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
+import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 
 describe('RulesDataInput', () => {
   const defaultProps = {
     migrationStats: undefined,
     onMigrationCreated: jest.fn(),
+    dataInputStep: SplunkDataInputStep.Upload,
+    migrationSource: MigrationSource.SPLUNK,
+    setDataInputStep: jest.fn(),
     onMissingResourcesFetched: jest.fn(),
+    missingResourcesIndexed: { lookups: [], macros: [] },
   };
 
   it('renders the step number', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesDataInput {...defaultProps} dataInputStep={DataInputStep.Rules} />
+        <RulesDataInput {...defaultProps} migrationSource={MigrationSource.SPLUNK} />
       </TestProviders>
     );
 
@@ -32,7 +36,7 @@ describe('RulesDataInput', () => {
   it('renders the title', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesDataInput {...defaultProps} dataInputStep={DataInputStep.Rules} />
+        <RulesDataInput {...defaultProps} migrationSource={MigrationSource.SPLUNK} />
       </TestProviders>
     );
 
@@ -43,7 +47,7 @@ describe('RulesDataInput', () => {
   it('renders sub-steps when the step is current', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesDataInput {...defaultProps} dataInputStep={DataInputStep.Rules} />
+        <RulesDataInput {...defaultProps} migrationSource={MigrationSource.SPLUNK} />
       </TestProviders>
     );
 
@@ -53,7 +57,11 @@ describe('RulesDataInput', () => {
   it('does not render sub-steps when the step is not current', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <RulesDataInput {...defaultProps} dataInputStep={DataInputStep.Macros} />
+        <RulesDataInput
+          {...defaultProps}
+          dataInputStep={SplunkDataInputStep.Macros}
+          migrationSource={MigrationSource.SPLUNK}
+        />
       </TestProviders>
     );
 

@@ -40,6 +40,7 @@ export function SchemaEditor({
   withFieldSimulation = false,
   withTableActions = false,
   withToolbar = true,
+  enableGeoPointSuggestions = true,
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
   const [isLoadingRecommendations, setIsLoadingRecommendations] = React.useState(false);
@@ -197,6 +198,7 @@ export function SchemaEditor({
       withControls={withControls}
       withFieldSimulation={withFieldSimulation}
       withTableActions={withTableActions}
+      enableGeoPointSuggestions={enableGeoPointSuggestions}
     >
       <EuiFlexGroup
         direction="column"

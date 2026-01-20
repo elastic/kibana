@@ -382,6 +382,25 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+
+    test(
+      'copying selected documents to clipboard as markdown',
+      async () => {
+        await toggleDocSelection(component, esHitsMock[2]);
+        await toggleDocSelection(component, esHitsMock[1]);
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'unifiedDataTableCopyRowsAsMarkdown').simulate('click');
+        // wait for async copy action to avoid act warning
+        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+          `| @timestamp | _index | _score | bytes | date | extension | message | name |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| - | i | 1 | - | 2020-20-01T12:12:12.124 | jpg | - | test2 |
+| - | i | 1 | 50 | 2020-20-01T12:12:12.124 | gif | - | test3 |`
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('edit field button', () => {

@@ -9,6 +9,8 @@
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from './page_bundle_constants';
 
+/** The base API path for dashboard endpoints. */
+export const DASHBOARD_API_PATH = '/api/dashboards';
 export const DASHBOARD_API_VERSION = '1';
 
 export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
@@ -19,6 +21,7 @@ export const DEFAULT_PANEL_HEIGHT = 15;
 export const DEFAULT_DASHBOARD_OPTIONS = {
   hide_panel_titles: false,
   use_margins: true,
+  auto_apply_filters: true,
   sync_colors: false,
   sync_cursor: true,
   sync_tooltips: false,

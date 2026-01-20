@@ -64,7 +64,6 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/custom-integrations-plugin'
   - '@kbn/config-schema'
-  - '@kbn/controls-plugin'
   - '@kbn/shared-ux-router'
   - '@kbn/content-management-plugin'
   - '@kbn/core-saved-objects-api-server'
@@ -101,11 +100,14 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/css-utils'
   - '@kbn/licensing-types'
+  - '@kbn/control-group-renderer'
   - '@kbn/es-query-server'
   - '@kbn/data-service-server'
   - '@kbn/visualizations-common'
   - '@kbn/lens-common'
   - '@kbn/crypto-browser'
+  - '@kbn/cps'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

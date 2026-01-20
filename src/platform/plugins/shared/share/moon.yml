@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/licensing-types'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod

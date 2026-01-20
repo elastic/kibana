@@ -7,6 +7,7 @@
 
 import { services as svlPlatformServices } from '@kbn/test-suites-xpack-platform/serverless/functional/services';
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
+import { services as platformApiServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 import { SvlObltNavigationServiceProvider } from './svl_oblt_navigation';
 
 export const services = {
@@ -14,6 +15,7 @@ export const services = {
   ml: platformServices.ml,
   // Observability Solution serverless FTR services
   svlObltNavigation: SvlObltNavigationServiceProvider,
+  synthtrace: platformApiServices.synthtrace,
 };
 
 export type {

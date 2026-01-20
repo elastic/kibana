@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/infra-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-exploration-team'
+  defaultOwner: '@elastic/obs-presentation-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/infra-plugin'
   description: Moon project for @kbn/infra-plugin
   channel: ''
-  owner: '@elastic/obs-exploration-team'
+  owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/infra
 dependsOn:
@@ -128,9 +128,12 @@ dependsOn:
   - '@kbn/shared-ux-card-no-data-types'
   - '@kbn/licensing-types'
   - '@kbn/apm-types'
+  - '@kbn/control-group-renderer'
   - '@kbn/react-query'
   - '@kbn/deeplinks-analytics'
   - '@kbn/esql-composer'
+  - '@kbn/fleet-plugin'
+  - '@kbn/observability-agent-builder-plugin'
 tags:
   - plugin
   - prod

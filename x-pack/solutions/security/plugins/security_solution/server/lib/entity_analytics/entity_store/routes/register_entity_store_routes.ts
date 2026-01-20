@@ -25,21 +25,22 @@ export const registerEntityStoreRoutes = ({
   router,
   logger,
   getStartServices,
+  telemetrySender: telemetry,
   config,
 }: EntityAnalyticsRoutesDeps) => {
-  enableEntityStoreRoute(router, logger, config);
-  getEntityStoreStatusRoute(router, logger, config);
-  initEntityEngineRoute(router, logger, config);
-  startEntityEngineRoute(router, logger);
-  stopEntityEngineRoute(router, logger);
-  deleteEntityEngineRoute(router, logger, getStartServices);
-  deleteEntityEnginesRoute(router, logger, getStartServices);
-  getEntityEngineRoute(router, logger);
-  listEntityEnginesRoute(router, logger);
-  listEntitiesRoute(router, logger);
-  applyDataViewIndicesEntityEngineRoute(router, logger);
-  entityStoreInternalPrivilegesRoute(router, logger, getStartServices);
-  upsertEntity(router, logger);
-  upsertEntitiesBulk(router, logger);
-  deleteEntity(router, logger);
+  enableEntityStoreRoute(router, logger, telemetry, config);
+  getEntityStoreStatusRoute(router, logger, telemetry, config);
+  initEntityEngineRoute(router, logger, telemetry, config);
+  startEntityEngineRoute(router, telemetry, logger);
+  stopEntityEngineRoute(router, telemetry, logger);
+  deleteEntityEngineRoute(router, telemetry, logger, getStartServices);
+  deleteEntityEnginesRoute(router, telemetry, logger, getStartServices);
+  getEntityEngineRoute(router, telemetry, logger);
+  listEntityEnginesRoute(router, telemetry, logger);
+  listEntitiesRoute(router, telemetry, logger);
+  applyDataViewIndicesEntityEngineRoute(router, telemetry, logger);
+  entityStoreInternalPrivilegesRoute(router, telemetry, logger, getStartServices);
+  upsertEntity(router, telemetry, logger);
+  upsertEntitiesBulk(router, telemetry, logger);
+  deleteEntity(router, telemetry, logger);
 };

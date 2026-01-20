@@ -6,29 +6,17 @@
  */
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { AddFile } from './add_file';
-
-import * as i18n from './translations';
 
 interface FilesUtilityBarProps {
   caseId: string;
-  onSearch: (newSearch: string) => void;
 }
 
-export const FilesUtilityBar = ({ caseId, onSearch }: FilesUtilityBarProps) => {
+export const FilesUtilityBar = ({ caseId }: FilesUtilityBarProps) => {
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="none">
       <AddFile caseId={caseId} />
-      <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
-        <EuiFieldSearch
-          fullWidth
-          placeholder={i18n.SEARCH_PLACEHOLDER}
-          onSearch={onSearch}
-          incremental={false}
-          data-test-subj="cases-files-search"
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

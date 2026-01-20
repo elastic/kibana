@@ -176,9 +176,23 @@ export class LegacyAlertsClient<
           maintenanceWindows,
         });
 
+        // Create a map of maintenance window IDs to names
+        const maintenanceWindowNamesMap = new Map(
+          (maintenanceWindows ?? []).map((mw) => [mw.id, mw.title])
+        );
+
+        // Get the names corresponding to the IDs
+        const maintenanceWindowsWithoutScopedQueryNames =
+          maintenanceWindowsWithoutScopedQueryIds.map(
+            (id) => maintenanceWindowNamesMap.get(id) || id
+          );
+
         for (const id in processedAlertsNew) {
           if (Object.hasOwn(processedAlertsNew, id)) {
             processedAlertsNew[id].setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
+            processedAlertsNew[id].setMaintenanceWindowNames(
+              maintenanceWindowsWithoutScopedQueryNames
+            );
           }
         }
       }
@@ -313,6 +327,7 @@ export class LegacyAlertsClient<
     maintenanceWindows: MaintenanceWindow[];
   }) {
     const maintenanceWindowIds = maintenanceWindows.map((mw) => mw.id);
+    const maintenanceWindowNamesMap = new Map(maintenanceWindows.map((mw) => [mw.id, mw.title]));
 
     const clearMws = (
       alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
@@ -323,7 +338,14 @@ export class LegacyAlertsClient<
           const activeMaintenanceWindowIds = existingMaintenanceWindowIds.filter((mw) => {
             return maintenanceWindowIds.includes(mw);
           });
+
+          // Map active IDs to their corresponding names
+          const activeMaintenanceWindowNames = activeMaintenanceWindowIds.map(
+            (mwId) => maintenanceWindowNamesMap.get(mwId) || mwId
+          );
+
           alerts[id].setMaintenanceWindowIds(activeMaintenanceWindowIds);
+          alerts[id].setMaintenanceWindowNames(activeMaintenanceWindowNames);
         }
       }
     };
