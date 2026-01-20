@@ -3,7 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
+  "include": [
+    "*.ts", 
+    "common/**/*", 
+    "public/**/*", 
+    "server/**/*", 
+    "../../../../../typings/**/*", 
+    "test/scout/**/*",
+  ],
   "kbn_references": [
     "@kbn/spaces-plugin",
     "@kbn/core",
