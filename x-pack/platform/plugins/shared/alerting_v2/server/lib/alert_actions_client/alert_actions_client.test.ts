@@ -31,15 +31,8 @@ describe('AlertActionsClient', () => {
     security.authc.getCurrentUser = jest.fn().mockReturnValue({
       username: 'test-user',
     });
-
     storageService.bulkIndexDocs.mockResolvedValue(undefined);
-
-    client = new AlertActionsClient(
-      request,
-      queryService as unknown as QueryService,
-      storageService as unknown as StorageService,
-      security
-    );
+    client = new AlertActionsClient(request, queryService, storageService, security);
   });
 
   afterEach(() => {
