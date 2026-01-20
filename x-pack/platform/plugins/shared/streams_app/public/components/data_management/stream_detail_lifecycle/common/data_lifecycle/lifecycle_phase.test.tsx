@@ -32,13 +32,13 @@ describe('LifecyclePhase', () => {
 
   describe('Delete phase', () => {
     it('should render trash icon for delete phase', () => {
-      render(<LifecyclePhase isDelete={true} />);
+      render(<LifecyclePhase isDelete />);
 
       expect(screen.getByTestId('dataLifecycle-delete-icon')).toBeInTheDocument();
     });
 
     it('should not render label for delete phase', () => {
-      render(<LifecyclePhase isDelete={true} label="delete" />);
+      render(<LifecyclePhase isDelete label="delete" />);
 
       expect(screen.queryByTestId('lifecyclePhase-delete-name')).not.toBeInTheDocument();
       expect(screen.getByTestId('dataLifecycle-delete-icon')).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe('LifecyclePhase', () => {
     });
 
     it('should display read-only indicator', () => {
-      render(<LifecyclePhase label="cold" color="#0000FF" isReadOnly={true} />);
+      render(<LifecyclePhase label="cold" color="#0000FF" isReadOnly />);
 
       const button = screen.getByRole('button');
       fireEvent.click(button);
@@ -183,7 +183,7 @@ describe('LifecyclePhase', () => {
     });
 
     it('should have correct aria-label for delete phase', () => {
-      render(<LifecyclePhase isDelete={true} />);
+      render(<LifecyclePhase isDelete />);
 
       expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Delete phase');
     });

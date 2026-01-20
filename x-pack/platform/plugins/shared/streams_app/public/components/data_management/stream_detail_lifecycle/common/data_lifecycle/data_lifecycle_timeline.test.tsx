@@ -70,7 +70,7 @@ describe('DataLifecycleTimeline', () => {
         <DataLifecycleTimeline
           {...defaultProps}
           phases={phases}
-          isRetentionInfinite={true}
+          isRetentionInfinite
           gridTemplateColumns="1fr"
         />
       );
