@@ -194,6 +194,7 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Separates sync alert and auto-extract updates in case activity [#236519]({{kib-pull}}236519).
 * Fixes the alert history chart background color in dark mode [#246017]({{kib-pull}}246017).
 * Fixes infinite loop issue in investigation guide editor [#240472]({{kib-pull}}240472).
+* Fixes missing fields when using combined filters with the `ignoreFilterIfFieldNotInIndex` advanced setting enabled [#238945]({{kib-pull}}238945).
 
 
 **Connectivity**:
@@ -248,7 +249,6 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Fixes an issue in Discover where default app state could trigger unsaved changes in saved Discover sessions, such as default columns applied through the `defaultColumns` advanced setting [#246664]({{kib-pull}}246664).
 * Fixes an issue with Discover tabs that occurs when navigating to a different tab while the previous tab is still initializing [#245752]({{kib-pull}}245752).
 * Fixes truncation for longer text in the Discover table [#241440]({{kib-pull}}241440).
-* Fixes missing fields when using combined filters with the `ignoreFilterIfFieldNotInIndex` advanced setting enabled [#238945]({{kib-pull}}238945).
 
 **{{esql}} editor**:
 * Displays the available options when editing an existing variable control [#239315]({{kib-pull}}239315).
