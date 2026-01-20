@@ -11,18 +11,18 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../../common/es_fields/apm';
+} from '../../../../common/es_fields/apm';
 import {
   AnomalyDetectorType,
   getAnomalyDetectorType,
-} from '../../../../../common/anomaly_detection/apm_ml_detectors';
-import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
-import { maybe } from '../../../../../common/utils/maybe';
-import { anomalySearch } from '../../../../lib/anomaly_detection/anomaly_search';
-import { apmMlAnomalyQuery } from '../../../../lib/anomaly_detection/apm_ml_anomaly_query';
-import { apmMlJobsQuery } from '../../../../lib/anomaly_detection/apm_ml_jobs_query';
-import { getMlJobsWithAPMGroup } from '../../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
-import type { MlClient } from '../../../../lib/helpers/get_ml_client';
+} from '../../../../common/anomaly_detection/apm_ml_detectors';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { maybe } from '../../../../common/utils/maybe';
+import { anomalySearch } from '../../../lib/anomaly_detection/anomaly_search';
+import { apmMlAnomalyQuery } from '../../../lib/anomaly_detection/apm_ml_anomaly_query';
+import { apmMlJobsQuery } from '../../../lib/anomaly_detection/apm_ml_jobs_query';
+import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
+import type { MlClient } from '../../../lib/helpers/get_ml_client';
 
 export type ApmAnomalies = Awaited<ReturnType<typeof getAnomalies>>;
 

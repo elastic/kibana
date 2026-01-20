@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { TimeseriesChangePoint } from './get_apm_timeseries';
 import { ApmTimeseriesType, getApmTimeseries } from './get_apm_timeseries';
 

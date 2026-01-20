@@ -7,23 +7,24 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ApmDocumentType } from '../../../../../common/document_type';
-import {
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-} from '../../../../../common/es_fields/apm';
-import { RollupInterval } from '../../../../../common/rollup';
-import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { TRANSACTION_NAME } from '@kbn/observability-shared-plugin/common';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { TRANSACTION_DURATION_HISTOGRAM, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { RollupInterval } from '../../../../common/rollup';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getLatencyAggregation } from '../../../lib/helpers/latency_aggregation_type';
 import { fetchSeries } from './fetch_timeseries';
 
-export async function getExitSpanLatency({
+export async function getTransactionLatency({
   apmEventClient,
   start,
   end,
   intervalString,
   filter,
-  spanDestinationServiceResource,
+  transactionType,
+  transactionName,
+  latencyAggregationType,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -31,40 +32,33 @@ export async function getExitSpanLatency({
   intervalString: string;
   bucketSize: number;
   filter: QueryDslQueryContainer[];
-  spanDestinationServiceResource?: string;
+  transactionType?: string;
+  transactionName?: string;
+  latencyAggregationType: LatencyAggregationType;
 }) {
   return (
     await fetchSeries({
       apmEventClient,
       start,
       end,
-      operationName: 'assistant_get_exit_span_latency',
+      operationName: 'assistant_get_transaction_latency',
       unit: 'ms',
-      documentType: ApmDocumentType.ServiceDestinationMetric,
+      documentType: ApmDocumentType.TransactionMetric,
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
       filter: filter.concat(
-        ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, spanDestinationServiceResource)
+        ...termQuery(TRANSACTION_TYPE, transactionType),
+        ...termQuery(TRANSACTION_NAME, transactionName)
       ),
-      groupByFields: [SPAN_DESTINATION_SERVICE_RESOURCE],
+      groupByFields: [TRANSACTION_TYPE, TRANSACTION_NAME],
       aggs: {
-        count: {
-          sum: {
-            field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-          },
-        },
-        latency: {
-          sum: {
-            field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-          },
-        },
+        ...getLatencyAggregation(latencyAggregationType, TRANSACTION_DURATION_HISTOGRAM),
         value: {
           bucket_script: {
             buckets_path: {
               latency: 'latency',
-              count: 'count',
             },
-            script: '(params.latency / params.count) / 1000',
+            script: 'params.latency / 1000',
           },
         },
       },

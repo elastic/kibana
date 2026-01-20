@@ -6,19 +6,21 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ERROR_GROUP_NAME } from '../../../../../common/es_fields/apm';
-import { ApmDocumentType } from '../../../../../common/document_type';
-import { RollupInterval } from '../../../../../common/rollup';
-import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
+import { RollupInterval } from '../../../../common/rollup';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchSeries } from './fetch_timeseries';
 
-export async function getErrorEventRate({
+export async function getExitSpanThroughput({
   apmEventClient,
   start,
   end,
   intervalString,
   bucketSize,
   filter,
+  spanDestinationServiceResource,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -26,6 +28,7 @@ export async function getErrorEventRate({
   intervalString: string;
   bucketSize: number;
   filter: QueryDslQueryContainer[];
+  spanDestinationServiceResource?: string;
 }) {
   const bucketSizeInMinutes = bucketSize / 60;
   const rangeInMinutes = (end - start) / 1000 / 60;
@@ -35,20 +38,16 @@ export async function getErrorEventRate({
       apmEventClient,
       start,
       end,
-      operationName: 'assistant_get_error_event_rate',
+      operationName: 'assistant_get_exit_span_throughput',
       unit: 'rpm',
-      documentType: ApmDocumentType.ErrorEvent,
-      rollupInterval: RollupInterval.None,
+      documentType: ApmDocumentType.ServiceDestinationMetric,
+      rollupInterval: RollupInterval.OneMinute,
       intervalString,
-      filter,
-      groupByFields: [ERROR_GROUP_NAME],
+      filter: filter.concat(
+        ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, spanDestinationServiceResource)
+      ),
+      groupByFields: [SPAN_DESTINATION_SERVICE_RESOURCE],
       aggs: {
-        sample: {
-          top_metrics: {
-            metrics: { field: ERROR_GROUP_NAME },
-            sort: '_score',
-          },
-        },
         value: {
           bucket_script: {
             buckets_path: {
@@ -68,7 +67,10 @@ export async function getErrorEventRate({
   ).map((fetchedSerie) => {
     return {
       ...fetchedSerie,
-      value: fetchedSerie.value !== null ? fetchedSerie.value / rangeInMinutes : null,
+      value:
+        fetchedSerie.value !== null
+          ? (fetchedSerie.value * bucketSizeInMinutes) / rangeInMinutes
+          : null,
       data: fetchedSerie.data.map((bucket) => {
         return {
           x: bucket.key,

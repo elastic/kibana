@@ -13,17 +13,17 @@ import {
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import * as t from 'io-ts';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import type { Environment } from '../../../../../common/environment_rt';
-import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
-import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { termQuery } from '../../../../../common/utils/term_query';
-import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
-import type { ApmAlertsClient } from '../../../../lib/helpers/get_apm_alerts_client';
-import type { MlClient } from '../../../../lib/helpers/get_ml_client';
-import { getEnvironments } from '../../../../routes/environments/get_environments';
-import { getServiceAnnotations } from '../../../../routes/services/annotations';
-import { getServiceMetadataDetails } from '../../../../routes/services/get_service_metadata_details';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import type { Environment } from '../../../../common/environment_rt';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { termQuery } from '../../../../common/utils/term_query';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import type { MlClient } from '../../../lib/helpers/get_ml_client';
+import { getEnvironments } from '../../../routes/environments/get_environments';
+import { getServiceAnnotations } from '../../../routes/services/annotations';
+import { getServiceMetadataDetails } from '../../../routes/services/get_service_metadata_details';
 import { getAnomalies } from './get_anomalies';
 
 export const serviceSummaryRouteRt = t.intersection([

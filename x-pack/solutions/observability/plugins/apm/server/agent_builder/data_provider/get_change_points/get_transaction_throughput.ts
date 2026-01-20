@@ -7,27 +7,21 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { TRANSACTION_NAME } from '@kbn/observability-shared-plugin/common';
-import { ApmDocumentType } from '../../../../../common/document_type';
-import {
-  TRANSACTION_DURATION_HISTOGRAM,
-  TRANSACTION_TYPE,
-} from '../../../../../common/es_fields/apm';
-import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { RollupInterval } from '../../../../../common/rollup';
-import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getLatencyAggregation } from '../../../../lib/helpers/latency_aggregation_type';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
+import { RollupInterval } from '../../../../common/rollup';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchSeries } from './fetch_timeseries';
 
-export async function getTransactionLatency({
+export async function getTransactionThroughput({
   apmEventClient,
   start,
   end,
   intervalString,
+  bucketSize,
   filter,
   transactionType,
   transactionName,
-  latencyAggregationType,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -37,31 +31,39 @@ export async function getTransactionLatency({
   filter: QueryDslQueryContainer[];
   transactionType?: string;
   transactionName?: string;
-  latencyAggregationType: LatencyAggregationType;
 }) {
+  const bucketSizeInMinutes = bucketSize / 60;
+  const rangeInMinutes = (end - start) / 1000 / 60;
+
   return (
     await fetchSeries({
       apmEventClient,
       start,
       end,
-      operationName: 'assistant_get_transaction_latency',
-      unit: 'ms',
+      operationName: 'assistant_get_transaction_throughput',
+      unit: 'rpm',
       documentType: ApmDocumentType.TransactionMetric,
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
-      filter: filter.concat(
+      filter: [
+        ...filter,
         ...termQuery(TRANSACTION_TYPE, transactionType),
-        ...termQuery(TRANSACTION_NAME, transactionName)
-      ),
+        ...termQuery(TRANSACTION_NAME, transactionName),
+      ],
       groupByFields: [TRANSACTION_TYPE, TRANSACTION_NAME],
       aggs: {
-        ...getLatencyAggregation(latencyAggregationType, TRANSACTION_DURATION_HISTOGRAM),
         value: {
           bucket_script: {
             buckets_path: {
-              latency: 'latency',
+              count: '_count',
             },
-            script: 'params.latency / 1000',
+            script: {
+              lang: 'painless',
+              params: {
+                bucketSizeInMinutes,
+              },
+              source: 'params.count / params.bucketSizeInMinutes',
+            },
           },
         },
       },
@@ -69,10 +71,14 @@ export async function getTransactionLatency({
   ).map((fetchedSerie) => {
     return {
       ...fetchedSerie,
+      value:
+        fetchedSerie.value !== null
+          ? (fetchedSerie.value * bucketSizeInMinutes) / rangeInMinutes
+          : null,
       data: fetchedSerie.data.map((bucket) => {
         return {
           x: bucket.key,
-          y: bucket.value?.value as number | null,
+          y: bucket.value?.value as number,
         };
       }),
     };
