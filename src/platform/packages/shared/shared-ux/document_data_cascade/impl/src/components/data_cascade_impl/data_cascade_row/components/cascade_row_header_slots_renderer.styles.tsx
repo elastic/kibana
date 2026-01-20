@@ -72,6 +72,8 @@ export const useStyles = (scrollState: ScrollState) => {
 
   const slotsScrollButtonBaseStyles = css([
     {
+      label: 'slots-scroll-button-base-styles',
+      display: 'none',
       position: 'absolute',
       // raise the button higher than the stacking index of the slot container
       zIndex: 1,
@@ -83,6 +85,13 @@ export const useStyles = (scrollState: ScrollState) => {
   return {
     slotsContainerWrapper: css({
       position: 'relative',
+      '&:hover': {
+        // use specified label to target the scroll button base styles
+        // see {@link https://github.com/emotion-js/emotion/issues/1217}
+        '[class*="slots-scroll-button-base-styles"]': {
+          display: 'block',
+        },
+      },
     }),
     slotsLeftScrollButton: css([
       slotsScrollButtonBaseStyles,
