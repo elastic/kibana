@@ -138,4 +138,5 @@ export interface DatatableVisualizationState {
   headerRowHeightLines?: number;
   paging?: PagingState;
   density?: DataGridDensity;
+  showRowNumbers?: boolean;
 }
