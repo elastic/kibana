@@ -231,9 +231,14 @@ export function convertDatatableColumnsToAPI(
   const rows: NonNullable<DatatableStateESQL['rows']> = [];
   const splitMetricsBy: NonNullable<DatatableStateESQL['split_metrics_by']> = [];
 
-  for (const column of columns) {
-    const { columnId } = column;
-    const apiOperation = columnId ? getValueApiColumn(columnId, layer) : undefined;
+  // Preserve ES|QL column order based on the datasource layer columns
+  const orderedColumnIds = layer.columns.map(({ columnId }) => columnId);
+
+  for (const columnId of orderedColumnIds) {
+    const column = columnStateMap.get(columnId);
+    if (!column) continue;
+
+    const apiOperation = getValueApiColumn(columnId, layer);
     if (!apiOperation) throw new Error(`Column with id ${columnId} not found`);
 
     if (isMetricColumnESQL(column, layer.columns)) {
