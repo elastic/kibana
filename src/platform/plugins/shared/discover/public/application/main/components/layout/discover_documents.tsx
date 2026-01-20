@@ -50,7 +50,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
-import type { DocViewerApi } from '@kbn/unified-doc-viewer';
+import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
@@ -220,11 +220,18 @@ function DiscoverDocumentsComponent({
   const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
 
   const setExpandedDoc = useCallback(
-    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
+    (
+      doc: DataTableRecord | undefined,
+      options?: {
+        initialTabId?: string;
+        initialTabState?: object;
+      }
+    ) => {
       dispatch(
         setExpandedDocAction({
           expandedDoc: doc,
           initialDocViewerTabId: options?.initialTabId,
+          initialDocViewerTabState: options?.initialTabState,
         })
       );
       if (options?.initialTabId) {
@@ -324,6 +331,16 @@ function DiscoverDocumentsComponent({
     [dispatch, onUpdateESQLQuery]
   );
 
+  const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
+  const setDocViewerUiState = useCurrentTabAction(internalStateActions.setDocViewerUiState);
+
+  const onInitialDocViewerStateChange = useCallback(
+    (newDocViewerUiState: Partial<DocViewerRestorableState>) => {
+      dispatch(setDocViewerUiState({ docViewerUiState: newDocViewerUiState }));
+    },
+    [dispatch, setDocViewerUiState]
+  );
+
   const setInitialDocViewerTabIdAction = useCurrentTabAction(
     internalStateActions.setInitialDocViewerTabId
   );
@@ -360,6 +377,8 @@ function DiscoverDocumentsComponent({
         docViewerRef={docViewerRef}
         docViewerExtensionActions={docViewerExtensionActions}
         onUpdateSelectedTabId={onUpdateSelectedTabId}
+        initialDocViewerState={docViewerUiState}
+        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       />
     ),
     [
@@ -373,6 +392,8 @@ function DiscoverDocumentsComponent({
       initialDocViewerTabId,
       docViewerExtensionActions,
       onUpdateSelectedTabId,
+      docViewerUiState,
+      onInitialDocViewerStateChange,
     ]
   );
 

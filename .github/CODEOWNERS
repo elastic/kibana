@@ -1619,6 +1619,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/routes/streams/schema @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-onboarding-team
 
+# Streams parts owned by Kibana Management
+x-pack/platform/plugins/shared/streams_app/public/components/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
+
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/functional/apps/infra/logs @elastic/obs-exploration-team
