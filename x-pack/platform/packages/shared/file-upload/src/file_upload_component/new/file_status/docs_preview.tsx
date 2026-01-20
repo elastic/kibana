@@ -12,6 +12,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { FieldTypeIcon } from '../field_type_icon';
+import { i18n } from '@kbn/i18n';
 
 interface ResultsPreviewProps {
   sampleDocs: DataTableRecord[];
@@ -57,6 +58,9 @@ export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings, 
         <EuiBasicTable
           data-test-subj={`dataVisualizerFilePreviewPanel-${index}`}
           tableLayout="auto"
+          tableCaption={i18n.translate('xpack.fileUpload.docsPreview.tableCaption', {
+            defaultMessage: 'Sample documents preview',
+          })}
           columns={columns}
           items={items}
           css={{ overflow: 'auto' }}
