@@ -12,19 +12,15 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { SearchSessionStatus } from '../../../../common';
+import type { SearchSessionRequestInfo } from '../../../../common';
 import { SEARCH_SESSION_TYPE, type SearchSessionSavedObjectAttributes } from '../../../../common';
-import type { SearchStatusWithInfo } from './get_session_status';
 import { getSessionStatus } from './get_session_status';
+import type { SessionStatus } from '../types';
 
 export async function updateSessionStatus(
   deps: { esClient: ElasticsearchClient; savedObjectsClient: SavedObjectsClientContract },
   session: SavedObject<SearchSessionSavedObjectAttributes>
-): Promise<{
-  status: SearchSessionStatus;
-  errors?: string[];
-  searchStatuses?: SearchStatusWithInfo[];
-}> {
+): Promise<SessionStatus> {
   const sessionStatus = await getSessionStatus(deps, session.attributes, {
     preferCachedStatus: false,
   });
@@ -50,18 +46,12 @@ export async function updateSessionStatus(
     updatedSession.attributes
   );
 
-  return {
-    status: sessionStatus.status,
-    errors: sessionStatus.searchStatuses
-      ?.filter((s) => s.status === 'error' && !!s.error)
-      .map((s) => s.error) as string[],
-    searchStatuses: sessionStatus.searchStatuses,
-  };
+  return sessionStatus;
 }
 
 function getUpdatedIdMappings(
   session: SearchSessionSavedObjectAttributes,
-  searchStatuses: SearchStatusWithInfo[]
+  searchStatuses: SearchSessionRequestInfo[]
 ) {
   let hasUpdated = false;
   const idMapping = { ...session.idMapping };
@@ -77,6 +67,7 @@ function getUpdatedIdMappings(
       status: searchStatus.status,
       completedAt: searchStatus.completedAt,
       startedAt: searchStatus.startedAt,
+      error: searchStatus.error,
     };
     hasUpdated = true;
   }

@@ -52,7 +52,9 @@ describe('getSessionStatus', () => {
       const res = await updateSessionStatus(deps, session);
 
       // Then
-      expect(res).toEqual({ status: SearchSessionStatus.COMPLETE });
+      expect(res).toEqual({
+        status: SearchSessionStatus.COMPLETE,
+      });
       expect(deps.savedObjectsClient.update).not.toHaveBeenCalled();
     });
   });
@@ -72,7 +74,9 @@ describe('getSessionStatus', () => {
       const res = await updateSessionStatus(deps, session);
 
       // Then
-      expect(res).toEqual({ status: SearchSessionStatus.COMPLETE });
+      expect(res).toEqual({
+        status: SearchSessionStatus.COMPLETE,
+      });
       expect(deps.savedObjectsClient.update).toHaveBeenCalledWith(
         SEARCH_SESSION_TYPE,
         session.id,
@@ -107,7 +111,6 @@ describe('getSessionStatus', () => {
       expect(res).toEqual({
         status: SearchSessionStatus.IN_PROGRESS,
         searchStatuses: [{ id: 'search-1', status: SearchStatus.COMPLETE, strategy: 'esql_async' }],
-        errors: [],
       });
       expect(deps.savedObjectsClient.update).toHaveBeenCalledWith(
         SEARCH_SESSION_TYPE,
@@ -148,7 +151,6 @@ describe('getSessionStatus', () => {
       expect(res).toEqual({
         status: SearchSessionStatus.COMPLETE,
         searchStatuses: [{ id: 'search-1', status: SearchStatus.COMPLETE, strategy: 'esql_async' }],
-        errors: [],
       });
       expect(deps.savedObjectsClient.update).toHaveBeenCalledWith(
         SEARCH_SESSION_TYPE,

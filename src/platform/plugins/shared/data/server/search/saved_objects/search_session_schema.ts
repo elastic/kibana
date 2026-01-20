@@ -42,6 +42,12 @@ export const SCHEMA_SEARCH_SESSION_V1 = SCHEMA_SEARCH_SESSION_V8_8_O.extends({
       status: schema.maybe(schema.string()),
       startedAt: schema.maybe(schema.string()),
       completedAt: schema.maybe(schema.string()),
+      error: schema.maybe(
+        schema.object({
+          code: schema.string(),
+          message: schema.maybe(schema.string()),
+        })
+      ),
     })
   ),
 });

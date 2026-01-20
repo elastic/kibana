@@ -103,7 +103,10 @@ export interface SearchSessionRequestStatus {
   /**
    * An optional error. Set if status is set to error.
    */
-  error?: string;
+  error?: {
+    code: number;
+    message?: string;
+  };
 }
 
 /**

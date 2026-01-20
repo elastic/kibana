@@ -107,15 +107,18 @@ describe('getSessionStatus', () => {
           status: SearchSessionStatus.COMPLETE,
           idMapping: {
             'complete-status': createSearchSessionRequestInfoMock({
+              id: 'complete-status',
               status: SearchStatus.COMPLETE,
             }),
             'with-error-but-good-status': createSearchSessionRequestInfoMock({
+              id: 'with-error-but-good-status',
               status: SearchStatus.COMPLETE,
-              error: 'Some error',
+              error: { code: 400 },
             }),
             'with-error-and-error-status': createSearchSessionRequestInfoMock({
+              id: 'with-error-and-error-status',
               status: SearchStatus.ERROR,
-              error: 'Some error',
+              error: { code: 500 },
             }),
           },
         });
@@ -126,7 +129,25 @@ describe('getSessionStatus', () => {
         // Then
         expect(res).toEqual({
           status: SearchSessionStatus.COMPLETE,
-          errors: ['Some error'],
+          searchStatuses: [
+            {
+              id: 'complete-status',
+              status: SearchStatus.COMPLETE,
+              strategy: 'esql_async',
+            },
+            {
+              id: 'with-error-but-good-status',
+              status: SearchStatus.COMPLETE,
+              strategy: 'esql_async',
+              error: { code: 400 },
+            },
+            {
+              id: 'with-error-and-error-status',
+              status: SearchStatus.ERROR,
+              strategy: 'esql_async',
+              error: { code: 500 },
+            },
+          ],
         });
       });
     });
@@ -168,7 +189,7 @@ describe('getSessionStatus', () => {
       it('should return an error status', async () => {
         // Given
         const deps = getDeps();
-        mockGetSearchStatus.mockResolvedValue({ status: SearchStatus.ERROR, error: 'Some error' });
+        mockGetSearchStatus.mockResolvedValue({ status: SearchStatus.ERROR, error: { code: 500 } });
         const session = createSearchSessionSavedObjectAttributesMock({
           idMapping: {
             '1234': createSearchSessionRequestInfoMock(),
@@ -181,12 +202,11 @@ describe('getSessionStatus', () => {
         // Then
         expect(res).toEqual({
           status: SearchSessionStatus.ERROR,
-          errors: ['Some error'],
           searchStatuses: [
             {
               ...session.idMapping['1234'],
               status: SearchStatus.ERROR,
-              error: 'Some error',
+              error: { code: 500 },
             },
           ],
         });

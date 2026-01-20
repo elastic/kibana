@@ -78,6 +78,35 @@ describe('getSearchStatus', () => {
       });
     });
 
+    describe('when the search already has a Kibana error', () => {
+      it('should return error status immediately', async () => {
+        // Given
+        const { mockEsClient, mockFunctions } = getClientMock({});
+
+        // When
+        const res = await getSearchStatus({
+          esClient: mockEsClient,
+          asyncId: '123',
+          search: getSearch({
+            strategy,
+            status: SearchStatus.ERROR,
+            error: { code: 400, message: 'Bad Request' },
+            startedAt: '2023-01-01T00:00:00.000Z',
+            completedAt: '2023-01-01T01:00:00.000Z',
+          }),
+        });
+
+        // Then
+        expect(res).toEqual({
+          status: SearchStatus.ERROR,
+          startedAt: '2023-01-01T00:00:00.000Z',
+          completedAt: '2023-01-01T01:00:00.000Z',
+          error: { code: 400, message: 'Bad Request' },
+        });
+        expect(mockFunctions[expectedFunctionCall]).not.toHaveBeenCalledWith();
+      });
+    });
+
     describe('when completion_status is an error', () => {
       it('should return an error status', async () => {
         // Given
@@ -103,7 +132,9 @@ describe('getSearchStatus', () => {
           status: SearchStatus.ERROR,
           startedAt: '2023-01-01T00:00:00.000Z',
           completedAt: '2023-01-01T01:00:00.000Z',
-          error: 'Search 123 completed with a 500 status',
+          error: {
+            code: 500,
+          },
         });
         expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(
           { id: '123' },
@@ -202,7 +233,10 @@ describe('getSearchStatus', () => {
         // Then
         expect(res).toEqual({
           status: SearchStatus.ERROR,
-          error: expect.any(String),
+          error: {
+            code: 500,
+            message: 'Unexpected error',
+          },
         });
         expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(
           { id: '123' },

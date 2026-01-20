@@ -20,6 +20,8 @@ import type {
   SearchSessionSavedObjectAttributes,
   SearchSessionStatusResponse,
   SearchSessionStatusesResponse,
+  SearchSessionStatus,
+  SearchSessionRequestInfo,
 } from '../../../common/search';
 import type { SearchSessionsConfigSchema } from '../../config';
 
@@ -52,4 +54,9 @@ export interface IScopedSearchSessionsClient {
 
 export interface ISearchSessionService {
   asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSearchSessionsClient;
+}
+
+export interface SessionStatus {
+  status: SearchSessionStatus;
+  searchStatuses?: SearchSessionRequestInfo[];
 }

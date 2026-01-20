@@ -17,9 +17,10 @@ import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ConfigSchema } from '../../config';
 import type { AuthenticatedUser, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import * as updateSessionStatusModule from './status/update_session_status';
+import { createSearchSessionRequestInfoMock } from './mocks';
 
 const MAX_UPDATE_RETRIES = 3;
 
@@ -288,7 +289,7 @@ describe('SearchSessionService', () => {
           per_page: 1,
           page: 0,
           statuses: {
-            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS, errors: [] },
           },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
@@ -379,7 +380,7 @@ describe('SearchSessionService', () => {
           per_page: 1,
           page: 0,
           statuses: {
-            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS, errors: [] },
           },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
@@ -571,7 +572,7 @@ describe('SearchSessionService', () => {
           per_page: 1,
           page: 0,
           statuses: {
-            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS, errors: [] },
           },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
@@ -987,6 +988,14 @@ describe('SearchSessionService', () => {
                 sessionId: 'session2',
               },
             },
+            {
+              ...mockSavedObject,
+              id: 'session3',
+              attributes: {
+                ...mockSavedObject.attributes,
+                sessionId: 'session3',
+              },
+            },
           ],
         });
 
@@ -997,21 +1006,44 @@ describe('SearchSessionService', () => {
         });
         spy.mockResolvedValueOnce({
           status: SearchSessionStatus.ERROR,
-          errors: ['Test errors'],
+          searchStatuses: [
+            createSearchSessionRequestInfoMock({
+              status: SearchStatus.ERROR,
+              error: { code: 500, message: 'Test errors' },
+            }),
+          ],
+        });
+        spy.mockResolvedValueOnce({
+          status: SearchSessionStatus.ERROR,
+          searchStatuses: [
+            createSearchSessionRequestInfoMock({
+              status: SearchStatus.ERROR,
+              error: { code: 500 },
+            }),
+          ],
         });
 
         // When
         const res = await service.updateStatuses(
           { savedObjectsClient, asCurrentUserElasticsearchClient },
           mockUser1,
-          ['session1', 'session2']
+          ['session1', 'session2', 'session3']
         );
 
         // Then
         expect(res).toEqual({
           statuses: {
             session1: { status: SearchSessionStatus.COMPLETE, errors: [] },
-            session2: { status: SearchSessionStatus.ERROR, errors: ['Test errors'] },
+            session2: {
+              status: SearchSessionStatus.ERROR,
+              errors: [
+                'Search status for search with id 1234 threw an error Test errors (statusCode: 500)',
+              ],
+            },
+            session3: {
+              status: SearchSessionStatus.ERROR,
+              errors: ['Search 1234 completed with a 500 status'],
+            },
           },
         });
       });

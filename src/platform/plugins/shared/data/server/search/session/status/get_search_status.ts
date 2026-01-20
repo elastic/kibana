@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import type { SearchSessionRequestInfo, SearchSessionRequestStatus } from '../../../../common';
@@ -45,12 +44,17 @@ export async function getSearchStatus({
 }): Promise<SearchSessionRequestStatus> {
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
+  const isCompleted = search.status === SearchStatus.COMPLETE;
+  const isKibanaError =
+    search.status === SearchStatus.ERROR && search.error && search.error.code < 500;
+
   try {
-    if (search.status === SearchStatus.COMPLETE) {
+    if (isCompleted || isKibanaError) {
       return {
-        status: SearchStatus.COMPLETE,
+        status: search.status!,
         startedAt: search.startedAt,
         completedAt: search.completedAt,
+        error: search.error,
       };
     }
 
@@ -75,10 +79,9 @@ export async function getSearchStatus({
         status: SearchStatus.ERROR,
         startedAt,
         completedAt,
-        error: i18n.translate('data.search.statusError', {
-          defaultMessage: `Search {searchId} completed with a {errorCode} status`,
-          values: { searchId: asyncId, errorCode: response.completion_status },
-        }),
+        error: {
+          code: response.completion_status!,
+        },
       };
     }
 
@@ -97,14 +100,10 @@ export async function getSearchStatus({
   } catch (e) {
     return {
       status: SearchStatus.ERROR,
-      error: i18n.translate('data.search.statusThrow', {
-        defaultMessage: `Search status for search with id {searchId} threw an error {message} (statusCode: {errorCode})`,
-        values: {
-          message: e.message,
-          errorCode: e.statusCode || 500,
-          searchId: asyncId,
-        },
-      }),
+      error: {
+        code: e.statusCode || 500,
+        message: e.message,
+      },
     };
   }
 }
