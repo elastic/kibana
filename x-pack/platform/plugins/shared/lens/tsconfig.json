@@ -139,6 +139,7 @@
     "@kbn/react-env",
     "@kbn/core-base-browser-mocks",
     "@kbn/react-kibana-context-env",
+    "@kbn/controls-schemas",
   ],
   "exclude": ["target/**/*"]
 }
