@@ -100,7 +100,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
-    conversationAttachments: conversation?.attachments,
   });
 
   const selectedTools = await selectTools({
@@ -197,6 +196,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       startTime,
       modelProvider,
       stateManager,
+      attachmentStateManager: context.attachmentStateManager,
     }),
     evictInternalEvents(),
     shareReplay()
