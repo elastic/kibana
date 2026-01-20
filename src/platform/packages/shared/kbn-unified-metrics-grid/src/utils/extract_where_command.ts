@@ -8,7 +8,7 @@
  */
 
 import type { ESQLCommand } from '@kbn/esql-language';
-import { BasicPrettyPrinter, isProperNode, Parser } from '@kbn/esql-language';
+import { BasicPrettyPrinter, isProperNode, Parser, Walker } from '@kbn/esql-language';
 
 export const extractWhereCommand = (esqlQuery?: string): string[] => {
   if (!esqlQuery) {
@@ -20,12 +20,10 @@ export const extractWhereCommand = (esqlQuery?: string): string[] => {
     return [];
   }
 
-  // NOTE: We intentionally only inspect `root.commands` here (instead of `Walker.matchAll`)
-  // to ensure we only extract top-level `| WHERE ...` commands and avoid capturing WHERE
-  // commands inside subqueries (e.g. `FORK (...)`) or other nested query structures.
-  const whereConditions = root.commands.filter(
-    (command): command is ESQLCommand => command.type === 'command' && command.name === 'where'
-  );
+  const whereConditions = Walker.matchAll(root, {
+    type: 'command',
+    name: 'where',
+  }) as ESQLCommand[];
 
   const serializeWhereExpression = (node: unknown) => {
     if (Array.isArray(node)) {
