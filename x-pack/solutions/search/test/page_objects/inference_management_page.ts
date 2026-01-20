@@ -40,6 +40,12 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         expect(hasE5).to.be(true);
       },
 
+      async expectModelColumnToBeDisplayed() {
+        // Verify model column cells exist using data-test-subj
+        const modelCells = await testSubjects.findAll('modelCell');
+        expect(modelCells.length).to.greaterThan(0);
+      },
+
       async expectPreconfiguredEndpointsCannotBeDeleted() {
         const actionButton = await testSubjects.find('euiCollapsedItemActionsButton');
         await actionButton.click();
