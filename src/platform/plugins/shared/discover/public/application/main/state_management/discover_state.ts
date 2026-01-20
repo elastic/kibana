@@ -204,14 +204,6 @@ export interface DiscoverStateContainer {
      * This is to prevent duplicate ids messing with our system
      */
     updateAdHocDataViewId: (editedDataView: DataView) => Promise<DataView | undefined>;
-
-    /**
-     * Triggered when the user changes the grouping of the cascade layout
-     */
-    onCascadeGroupingChange: (payload: {
-      query: AggregateQuery;
-      cascadeGrouping: string[];
-    }) => void;
   };
 }
 
@@ -684,23 +676,6 @@ export function getDiscoverStateContainer({
   };
 
   /**
-   * Triggered when user changes grouping in the cascade experience
-   */
-  const onCascadeGroupingChange = (({ query, cascadeGrouping }) => {
-    const currentTabState = getCurrentTab();
-
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.setCascadeUiState)({
-        cascadeUiState: {
-          availableCascadeGroups:
-            currentTabState.uiState.cascadedDocuments!.availableCascadeGroups.slice(0),
-          selectedCascadeGroups: cascadeGrouping,
-        },
-      })
-    );
-  }) satisfies DiscoverStateContainer['actions']['onCascadeGroupingChange'];
-
-  /**
    * Function e.g. triggered when user changes data view in the sidebar
    */
   const onChangeDataView = async (dataViewId: string | DataView) => {
@@ -744,7 +719,6 @@ export function getDiscoverStateContainer({
       onOpenSavedSearch,
       setDataView,
       updateAdHocDataViewId,
-      onCascadeGroupingChange,
     },
   };
 }

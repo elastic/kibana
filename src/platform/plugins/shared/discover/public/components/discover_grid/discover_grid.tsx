@@ -14,12 +14,11 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type { AggregateQuery } from '@kbn/es-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { UpdateCascadeGroupingFn } from '../../context_awareness';
 import { useProfileAccessor, type UpdateESQLQueryFn } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
-import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import {
   useGroupBySelectorRenderer,
   LazyCascadedDocumentsLayout,
@@ -39,7 +38,7 @@ export type DiscoverGridProps = UnifiedDataTableProps & {
     | {
         cascadeConfig: CascadedDocumentsRestorableState | undefined;
         // when cascade on grouping change handler config is passed to the discover grid component, we expect that all it's supporting props are passed along
-        onCascadeGroupingChange: DiscoverStateContainer['actions']['onCascadeGroupingChange'];
+        onCascadeGroupingChange: UpdateCascadeGroupingFn;
         onUpdateESQLQuery: UpdateESQLQueryFn;
         viewModeToggle: React.ReactElement | undefined;
         registerCascadeRequestsInspectorAdapter: (requestAdapter: RequestAdapter) => void;
@@ -103,16 +102,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     return getColumnsConfigurationAccessor(() => ({}))();
   }, [getColumnsConfigurationAccessor]);
 
-  /**
-   * For the discover use case we use this function to hook into the app state container,
-   * so that we can respond to changes in the cascade grouping.
-   * We don't have to, but doing it this way means we get all the error handling and loading utils already existing there.
-   */
   const cascadeGroupingChangeHandler = useCallback(
     (cascadeGrouping: string[]) => {
-      return onCascadeGroupingChange?.({ query: query as AggregateQuery, cascadeGrouping });
+      return onCascadeGroupingChange?.(cascadeGrouping);
     },
-    [onCascadeGroupingChange, query]
+    [onCascadeGroupingChange]
   );
 
   const groupBySelectorRenderer = useGroupBySelectorRenderer({

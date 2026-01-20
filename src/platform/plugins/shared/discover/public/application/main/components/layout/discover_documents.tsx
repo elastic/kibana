@@ -73,6 +73,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
   DocViewerExtensionParams,
+  UpdateCascadeGroupingFn,
   UpdateESQLQueryFn,
 } from '../../../../context_awareness';
 import {
@@ -334,6 +335,14 @@ function DiscoverDocumentsComponent({
     },
     [dispatch, updateESQLQuery]
   );
+
+  const updateCascadeGrouping = useCurrentTabAction(internalStateActions.updateCascadeGrouping);
+  const onUpdateCascadeGrouping: UpdateCascadeGroupingFn = useCallback(
+    (groupingUpdater) => {
+      dispatch(updateCascadeGrouping({ groupingOrUpdater: groupingUpdater }));
+    },
+    [dispatch, updateCascadeGrouping]
+  );
   const docViewerExtensionActions = useMemo<DocViewerExtensionParams['actions']>(
     () => ({
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTabExtPointAction(params)),
@@ -563,7 +572,7 @@ function DiscoverDocumentsComponent({
             viewModeToggle={viewModeToggle}
             onFullScreenChange={setIsDataGridFullScreen}
             cascadeConfig={cascadeConfig}
-            onCascadeGroupingChange={stateContainer.actions.onCascadeGroupingChange}
+            onCascadeGroupingChange={onUpdateCascadeGrouping}
             registerCascadeRequestsInspectorAdapter={registerCascadeRequestsInspectorAdapter}
           />
         </CellActionsProvider>
