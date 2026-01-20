@@ -7,15 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type DashboardDrilldownOptions = {
-  useCurrentFilters: boolean;
-  useCurrentDateRange: boolean;
-  openInNewTab: boolean;
-};
-
-export const DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS: DashboardDrilldownOptions = {
-  openInNewTab: false,
-  useCurrentDateRange: true,
-  useCurrentFilters: true,
-};
+export { dashboardNavigationOptionsSchema } from './schemas';
+export type { DashboardNavigationOptions } from './types';

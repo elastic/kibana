@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Source: /oas_docs/output/kibana.yaml, operations: updateCaseDefaultSpace
+ * Source: /oas_docs/output/kibana.yaml, operations: getCaseDefaultSpace
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
@@ -18,8 +18,8 @@
 import { z } from '@kbn/zod/v4';
 
 import {
-  update_case_default_space_request,
-  update_case_default_space_response,
+  get_case_default_space_request,
+  get_case_default_space_response,
 } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
@@ -29,32 +29,32 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATE_CASE_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
-  type: 'kibana.updateCase',
-  summary: `Update cases`,
+export const GET_CASE_CONTRACT: InternalConnectorContract = {
+  type: 'kibana.getCase',
+  summary: `Get case information`,
   description: `**Spaces method and path for this operation:**
 
-<div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases</span></div>
+<div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-You must have \`all\` privileges for the **Cases** feature in the  **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the case you're updating.
+You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
 `,
-  methods: ['PATCH'],
-  patterns: ['/api/cases'],
+  methods: ['GET'],
+  patterns: ['/api/cases/{caseId}'],
   documentation:
-    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-updatecasedefaultspace',
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-getcasedefaultspace',
   parameterTypes: {
-    headerParams: ['kbn-xsrf'],
-    pathParams: [],
-    urlParams: [],
-    bodyParams: ['cases'],
+    headerParams: [],
+    pathParams: ['caseId'],
+    urlParams: ['includeComments'],
+    bodyParams: [],
   },
   paramsSchema: z.object({
-    ...getShapeAt(update_case_default_space_request, 'body'),
-    ...getShapeAt(update_case_default_space_request, 'path'),
-    ...getShapeAt(update_case_default_space_request, 'query'),
+    ...getShapeAt(get_case_default_space_request, 'body'),
+    ...getShapeAt(get_case_default_space_request, 'path'),
+    ...getShapeAt(get_case_default_space_request, 'query'),
     fetcher: FetcherConfigSchema,
   }),
-  outputSchema: update_case_default_space_response,
+  outputSchema: get_case_default_space_response,
 };
