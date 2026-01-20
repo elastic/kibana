@@ -81,6 +81,42 @@ describe('xy_suggestions', () => {
     };
   }
 
+  function ipCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'ip',
+        label: `Top ${columnId}`,
+        isBucketed: true,
+        scale: 'ordinal',
+      },
+    };
+  }
+
+  function geoPointCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'geo_point',
+        label: `Top ${columnId}`,
+        isBucketed: true,
+        scale: 'ordinal',
+      },
+    };
+  }
+
+  function gaugeCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'gauge',
+        label: `${columnId} gauge`,
+        isBucketed: true,
+        scale: 'ordinal',
+      },
+    };
+  }
+
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
   function suggestionSubset(suggestion: VisualizationSuggestion<XYState>) {
@@ -557,6 +593,42 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestions).toHaveLength(10);
+  });
+
+  test('textBased suggestions retain bucket order for textBased data sources', () => {
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [
+          numCol('price'),
+          dateCol('date'),
+          geoPointCol('origin'),
+          gaugeCol('status'),
+          ipCol('client'),
+        ],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      datasourceId: 'textBased',
+    });
+
+    expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessors": Array [
+            "origin",
+            "status",
+            "client",
+          ],
+          "x": "date",
+          "y": Array [
+            "price",
+          ],
+        },
+      ]
+    `);
   });
 
   test('suggests a split x y chart with date on x', () => {

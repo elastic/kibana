@@ -109,14 +109,14 @@ function getSuggestionForColumns(
     allowMixed,
   };
 
+  const isEsql = datasourceId === 'textBased';
   // we have 2 different suggestion: with DSL we can split by only when we have a max of 2 buckets (one for the X and the other for the breakdown)
   // in ESQL we instead suggest split by with more then 1 buckets always.
-  const whenToSuggestSplitBy =
-    datasourceId === 'textBased'
-      ? buckets.length >= 1
-      : buckets.length === 1 || buckets.length === 2;
+  const whenToSuggestSplitBy = isEsql
+    ? buckets.length >= 1
+    : buckets.length === 1 || buckets.length === 2;
   if (whenToSuggestSplitBy) {
-    const [xValue, ...splitBy] = getBucketMappings(table, currentState);
+    const [xValue, ...splitBy] = getBucketMappings(table, isEsql, currentState);
     return getSuggestionsForLayer({
       ...sharedArgs,
       xValue,
@@ -125,7 +125,7 @@ function getSuggestionForColumns(
     });
   } else if (buckets.length === 0) {
     const [yValues, [xValue, splitBy]] = partition(
-      prioritizeColumns(values),
+      prioritizeColumns(values, isEsql),
       (col) => col.operation.dataType === 'number' && !col.operation.isBucketed
     );
     return getSuggestionsForLayer({
@@ -137,13 +137,13 @@ function getSuggestionForColumns(
   }
 }
 
-function getBucketMappings(table: TableSuggestion, currentState?: XYState) {
+function getBucketMappings(table: TableSuggestion, isEsql: boolean, currentState?: XYState) {
   const currentLayer =
     currentState &&
     getDataLayers(currentState.layers).find(({ layerId }) => layerId === table.layerId);
 
   const buckets = table.columns.filter((col) => col.operation.isBucketed);
-  const prioritizedBuckets = prioritizeColumns([...buckets]);
+  const prioritizedBuckets = prioritizeColumns(buckets, isEsql);
 
   if (!currentLayer || table.changeType === 'initial') {
     return prioritizedBuckets;
@@ -184,7 +184,11 @@ function getBucketMappings(table: TableSuggestion, currentState?: XYState) {
 // This shuffles columns around so that the left-most column defualts to:
 // date, string, boolean, then number, in that priority. We then use this
 // order to pluck out the x column, and the split / stack columns.
-function prioritizeColumns(columns: TableSuggestionColumn[]) {
+// don't sort buckets in ESQL mode
+function prioritizeColumns(columns: TableSuggestionColumn[], isEsql: boolean) {
+  if (isEsql) {
+    return columns;
+  }
   return columns.toSorted(
     (a, b) => COLUMN_SORT_ORDER[a.operation.dataType] - COLUMN_SORT_ORDER[b.operation.dataType]
   );
