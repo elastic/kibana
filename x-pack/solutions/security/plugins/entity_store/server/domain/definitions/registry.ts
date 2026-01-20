@@ -6,6 +6,9 @@
  */
 
 import assert from 'node:assert';
+import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import union from 'lodash/union';
 import { hostEntityDescription } from './host';
 import type { EntityType } from './entity_schema';
 import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
@@ -21,17 +24,23 @@ const entitiesDescriptionRegistry = {
 
 interface EntityDefinitionParams {
   type: EntityType;
+  uiSettings: IUiSettingsClient;
 }
 
-export function getEntityDefinition({ type }: EntityDefinitionParams): ManagedEntityDefinition {
-  // TODO: get index patterns from data view in runtime
-
+export async function getEntityDefinition({
+  type,
+  uiSettings,
+}: EntityDefinitionParams): Promise<ManagedEntityDefinition> {
   const description = entitiesDescriptionRegistry[type];
-  assert(description, `No entity description found for type: ${type}`);
+  assert(description, `missing entity description for type: ${type}`);
+
+  const indexPatterns = await uiSettings.get<string[]>(SECURITY_SOLUTION_DEFAULT_INDEX_ID);
+  assert(indexPatterns.length > 0, 'no index patterns configured');
 
   return {
     ...description,
-    id: getEntityDefinitionId(type, 'default'), // TODO: get namespace
     type,
+    id: getEntityDefinitionId(type, 'default'), // TODO: get namespace
+    indexPatterns: union(description.indexPatterns, indexPatterns),
   };
 }

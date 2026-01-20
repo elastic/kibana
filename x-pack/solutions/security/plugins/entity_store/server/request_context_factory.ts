@@ -7,7 +7,6 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type {
   EntityStoreApiRequestHandlerContext,
   EntityStoreRequestHandlerContext,
@@ -22,21 +21,13 @@ interface EntityStoreApiRequestHandlerContextDeps {
   logger: Logger;
 }
 
-export async function getTaskManagerStart(
-  core: CoreSetup<EntityStoreStartPlugins, void>
-): Promise<TaskManagerStartContract> {
-  const [, startPlugins] = await core.getStartServices();
-
-  return startPlugins.taskManager;
-}
-
 export async function createRequestHandlerContext({
   logger,
   context,
   coreSetup,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
-  const taskManagerStart = await getTaskManagerStart(coreSetup);
+  const [, startPlugins] = await coreSetup.getStartServices();
 
   return {
     core,
@@ -44,7 +35,8 @@ export async function createRequestHandlerContext({
     assetManager: new AssetManager(
       logger,
       core.elasticsearch.client.asCurrentUser,
-      taskManagerStart
+      startPlugins.taskManager,
+      core.uiSettings.client
     ),
     featureFlags: new FeatureFlags(core.uiSettings.client),
   };

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import defaults from 'lodash/defaults';
 import { getEntityDefinition } from './definitions/registry';
@@ -17,11 +17,16 @@ import { TasksConfig } from '../tasks/config';
 import { EntityStoreTaskType } from '../tasks/constants';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 
+const EXTRACT_TASK = TasksConfig[EntityStoreTaskType.Values.extractEntity];
+const getTaskDefaults = (input: Partial<EntityStoreTaskConfig>): EntityStoreTaskConfig =>
+  defaults({}, EXTRACT_TASK, input);
+
 export class AssetManager {
   constructor(
     private logger: Logger,
     private esClient: ElasticsearchClient,
-    private taskManager: TaskManagerStartContract
+    private taskManager: TaskManagerStartContract,
+    private uiSettings: IUiSettingsClient
   ) {}
 
   public async init(type: EntityType, logExtractionFrequency?: string) {
@@ -32,11 +37,7 @@ export class AssetManager {
   public async start(type: EntityType, logExtractionFrequency?: string) {
     this.logger.debug(`Scheduling extract entity task for type: ${type}`);
 
-    const task: EntityStoreTaskConfig = defaults(
-      {},
-      TasksConfig[EntityStoreTaskType.Values.extractEntity],
-      { interval: logExtractionFrequency }
-    );
+    const task = getTaskDefaults({ interval: logExtractionFrequency });
 
     // TODO: if this fails, set status to failed
     await scheduleExtractEntityTask({
@@ -57,7 +58,10 @@ export class AssetManager {
   public async install(type: EntityType) {
     // TODO: return early if already installed
     this.logger.debug(`Installing assets for entity type: ${type}`);
-    const definition = getEntityDefinition({ type });
+    const definition = await getEntityDefinition({
+      type,
+      uiSettings: this.uiSettings,
+    });
 
     await installElasticsearchAssets({
       esClient: this.esClient,
@@ -71,7 +75,10 @@ export class AssetManager {
   }
 
   public async uninstall(type: EntityType) {
-    const definition = getEntityDefinition({ type });
+    const definition = await getEntityDefinition({
+      type,
+      uiSettings: this.uiSettings,
+    });
     await this.stop(type);
     await uninstallElasticsearchAssets({
       esClient: this.esClient,

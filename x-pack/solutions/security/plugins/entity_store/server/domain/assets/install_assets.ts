@@ -51,7 +51,14 @@ export async function installElasticsearchAssets({
   } catch (error) {
     logger.error(`error installing assets for ${type}: ${error}`);
 
-    // TODO: We need to uninstall everything, as currently we are in a partial state
+    logger.debug('uninstalling any partially installed assets');
+    await uninstallElasticsearchAssets({
+      esClient,
+      logger,
+      definition,
+      namespace,
+    });
+
     throw error;
   }
 }
