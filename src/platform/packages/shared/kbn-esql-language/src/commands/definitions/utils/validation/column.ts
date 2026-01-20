@@ -6,34 +6,31 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { walk, within } from '../../../../ast';
-import type { ESQLColumn, ESQLCommand, ESQLIdentifier, ESQLMessage } from '../../../../types';
+
+import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../types';
 import { UnmappedFieldsStrategy, type ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getColumnExists } from '../columns';
 import { isParametrized } from '../../../../ast/is';
-import { esqlCommandRegistry } from '../../..';
 
 export function validateColumnForCommand(
   column: ESQLColumn | ESQLIdentifier,
   commandName: string,
-  context: ICommandContext,
-  ast: ESQLCommand[]
+  context: ICommandContext
 ): ESQLMessage[] {
-  return new ColumnValidator(column, context, commandName, ast).validate();
+  return new ColumnValidator(column, context, commandName).validate();
 }
 
 export class ColumnValidator {
   constructor(
     private readonly column: ESQLColumn | ESQLIdentifier,
     private readonly context: ICommandContext,
-    private readonly commandName: string,
-    private readonly ast: ESQLCommand[]
+    private readonly commandName: string
   ) {}
 
   validate(): ESQLMessage[] {
     if (!this.exists) {
-      if (this.isUnmappedColumnAllowed && !this.columnHasBeenRemoved) {
+      if (this.isUnmappedColumnAllowed) {
         return [errors.unmappedColumnWarning(this.column)];
       } else {
         return [errors.unknownColumn(this.column)];
@@ -60,44 +57,5 @@ export class ColumnValidator {
       unmappedFieldsStrategy === UnmappedFieldsStrategy.LOAD ||
       unmappedFieldsStrategy === UnmappedFieldsStrategy.NULLIFY
     );
-  }
-
-  /**
-   * Checks if the column has been removed in previous commands in the AST.
-   * This can happen if the column has been dropped or renamed.
-   */
-  private get columnHasBeenRemoved(): boolean {
-    const commandPositionInAST = this.ast.findIndex((cmd) => within(this.column, cmd));
-    if (commandPositionInAST === -1) {
-      return false;
-    }
-
-    const previousCommands = this.ast.slice(0, commandPositionInAST);
-
-    const removedColumns: string[] = [];
-
-    for (const command of previousCommands) {
-      // Collect dropped columns
-      if (command.name.toLowerCase() === 'drop') {
-        walk(command, {
-          visitColumn: (node) => {
-            removedColumns.push(node.parts.join('.'));
-          },
-        });
-      }
-
-      // Collect renamed columns
-      const commandDef = esqlCommandRegistry.getCommandByName(command.name);
-      if (commandDef?.methods.summary) {
-        const { renamedColumnsPairs } = commandDef?.methods.summary(command, '');
-        if (renamedColumnsPairs) {
-          renamedColumnsPairs.forEach(([_renameTo, renameFrom]) => {
-            removedColumns.push(renameFrom);
-          });
-        }
-      }
-    }
-
-    return removedColumns.includes(this.column.name);
   }
 }
