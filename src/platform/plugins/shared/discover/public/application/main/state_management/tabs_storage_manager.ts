@@ -23,7 +23,11 @@ import type { DiscoverAppState } from './redux';
 import { fromSavedObjectTabToTabState } from './redux';
 import type { TabsUrlState } from '../../../../common/types';
 
-/** @deprecated Use getTabsStorageKey for user-scoped storage */
+/**
+ * @deprecated Temporary legacy key used only during migration from the old, non user-scoped
+ * local storage format. Scheduled for removal in Kibana 9.0.0. Use {@link getTabsStorageKey}
+ * for user-scoped storage instead.
+ */
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
