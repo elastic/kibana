@@ -350,13 +350,14 @@ test.describe(
 
       await test.step('open asset details as page keeping the selected tab', async () => {
         await assetDetailsPage.openAsPageButton.click();
+        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.metadataTab.searchBar).toBeVisible();
+        await expect(assetDetailsPage.metadataTab.table).toBeVisible();
+
         const url = new URL(page.url());
         expect(url.pathname).toBe(
           `/app/metrics/detail/container/${encodeURIComponent(CONTAINER_ID)}`
         );
-        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
-        await expect(assetDetailsPage.metadataTab.searchBar).toBeVisible();
-        await expect(assetDetailsPage.metadataTab.table).toBeVisible();
       });
 
       await test.step('return to flyout from asset details page', async () => {
