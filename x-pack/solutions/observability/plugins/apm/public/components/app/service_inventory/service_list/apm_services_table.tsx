@@ -244,7 +244,7 @@ export function getServiceColumns({
                 })}
               />
             ),
-            width: `${unit * 7}px`,
+            width: `${unit * 8}px`,
             sortable: true,
             render: (_, { serviceName, agentName, sloStatus, sloCount }) => {
               // If no SLO data is available, don't render the badge
@@ -335,7 +335,7 @@ export function getServiceColumns({
             name: i18n.translate('xpack.apm.servicesTable.transactionColumnLabel', {
               defaultMessage: 'Transaction type',
             }),
-            width: `${unit * 8}px`,
+            width: `${unit * 6}px`,
             sortable: true,
           },
         ]
@@ -345,6 +345,7 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.latencyAvgColumnLabel', {
         defaultMessage: 'Latency (avg.)',
       }),
+      width: `${unit * 12}px`,
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, latency }) => {
@@ -370,6 +371,7 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.throughputColumnLabel', {
         defaultMessage: 'Throughput',
       }),
+      width: `${unit * 12}px`,
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, throughput }) => {
@@ -396,6 +398,7 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
+      width: `${unit * 12}px`,
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, transactionErrorRate }) => {
