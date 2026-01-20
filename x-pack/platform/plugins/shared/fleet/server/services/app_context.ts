@@ -10,7 +10,6 @@ import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
@@ -200,22 +199,14 @@ class AppContextService {
     return this.savedObjectsTagging;
   }
   public getInternalUserSOClientForSpaceId(spaceId?: string) {
-    const request = kibanaRequestFactory({
-      headers: {},
-      path: '/',
-      route: { settings: {} },
-      url: { href: '', hash: '' } as URL,
-      raw: { req: { url: '/' } } as any,
-    });
-    if (this.httpSetup && spaceId && spaceId !== DEFAULT_SPACE_ID && spaceId !== ALL_SPACES_ID) {
-      this.httpSetup?.basePath.set(request, `/s/${spaceId}`);
-    }
-
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    return appContextService.getSavedObjects().getScopedClient(request, {
+    let soClient = appContextService.getSavedObjects().getUnsafeInternalClient({
       includedHiddenTypes: this.includedHiddenTypes,
-      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
+    if (spaceId && spaceId !== DEFAULT_SPACE_ID && spaceId !== ALL_SPACES_ID) {
+      soClient = soClient.asScopedToNamespace(spaceId);
+    }
+    return soClient;
   }
 
   public getInternalUserSOClient(request?: KibanaRequest) {
