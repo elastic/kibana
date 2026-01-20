@@ -86,8 +86,8 @@ export class DashboardPageLinks extends FtrService {
 
   public async addDashboardLink(
     destination: string,
-    useCurrentFilters: boolean = true,
-    useCurrentDateRange: boolean = true,
+    useFilters: boolean = true,
+    useTimeRange: boolean = true,
     openInNewTab: boolean = false,
     linkLabel?: string
   ) {
@@ -112,15 +112,15 @@ export class DashboardPageLinks extends FtrService {
     }
 
     await this.testSubjects.setEuiSwitch(
-      'dashboardDrillDownOptions--useCurrentFilters--checkbox',
-      useCurrentFilters ? 'check' : 'uncheck'
+      'dashboardNavigationOptions--useFilters--checkbox',
+      useFilters ? 'check' : 'uncheck'
     );
     await this.testSubjects.setEuiSwitch(
-      'dashboardDrillDownOptions--useCurrentDateRange--checkbox',
-      useCurrentDateRange ? 'check' : 'uncheck'
+      'dashboardNavigationOptions--useTimeRange--checkbox',
+      useTimeRange ? 'check' : 'uncheck'
     );
     await this.testSubjects.setEuiSwitch(
-      'dashboardDrillDownOptions--openInNewTab--checkbox',
+      'dashboardNavigationOptions--openInNewTab--checkbox',
       openInNewTab ? 'check' : 'uncheck'
     );
 

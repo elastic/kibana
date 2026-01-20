@@ -39,6 +39,7 @@
     "@kbn/file-upload-plugin",
     "@kbn/discover-utils",
     "@kbn/controls-schemas",
+    "@kbn/kql",
   ],
   "exclude": [
     "target/**/*",
