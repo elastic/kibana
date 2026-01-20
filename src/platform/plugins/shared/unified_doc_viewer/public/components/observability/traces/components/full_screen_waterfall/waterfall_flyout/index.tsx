@@ -94,6 +94,9 @@ export function WaterfallFlyout({
 
   return (
     <EuiFlyout
+      // Temporarily opt out from the flyout system, until the waterfall is migrated to properly use it
+      // TODO: Remove this once we migrate to the new flyout system: https://github.com/elastic/observability-dev/issues/4980
+      session="never"
       includeFixedHeadersInFocusTrap={false}
       ownFocus={false}
       // This is temporary fix until we migrate to the new flyout system to show the complete trace as main flyout instead of full screen
