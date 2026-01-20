@@ -235,7 +235,9 @@ export const esqlMetricState = schema.object({
   breakdown_by: schema.maybe(schema.allOf([metricStateBreakdownByOptionsSchema, esqlColumnSchema])),
 });
 
-export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState]);
+export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
+  meta: { id: 'metricChartSchema' },
+});
 
 export type MetricState = TypeOf<typeof metricStateSchema>;
 export type MetricStateNoESQL = TypeOf<typeof metricStateSchemaNoESQL>;

@@ -97,45 +97,51 @@ export const colorByValueAbsolute = schema.allOf([
   schema.object({ range: schema.literal('absolute') }),
 ]);
 
-export const colorByValueSchema = schema.oneOf([
-  colorByValueAbsolute,
-  schema.allOf([
-    colorByValueBase,
-    schema.object({
-      /**
-       * The minimum value for the color range. Used as the lower bound for value-based color assignment.
-       */
-      min: schema.number({
-        meta: {
-          description:
-            'The minimum value for the color range. Used as the lower bound for value-based color assignment.',
-        },
+export const colorByValueSchema = schema.oneOf(
+  [
+    colorByValueAbsolute,
+    schema.allOf([
+      colorByValueBase,
+      schema.object({
+        /**
+         * The minimum value for the color range. Used as the lower bound for value-based color assignment.
+         */
+        min: schema.number({
+          meta: {
+            description:
+              'The minimum value for the color range. Used as the lower bound for value-based color assignment.',
+          },
+        }),
+        /**
+         * The maximum value for the color range. Used as the upper bound for value-based color assignment.
+         */
+        max: schema.number({
+          meta: {
+            description:
+              'The maximum value for the color range. Used as the upper bound for value-based color assignment.',
+          },
+        }),
+        /**
+         * Determines whether the range is interpreted as absolute or as a percentage of the data.
+         * Possible values: 'absolute', 'percentage'
+         */
+        range: schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
       }),
-      /**
-       * The maximum value for the color range. Used as the upper bound for value-based color assignment.
-       */
-      max: schema.number({
-        meta: {
-          description:
-            'The maximum value for the color range. Used as the upper bound for value-based color assignment.',
-        },
-      }),
-      /**
-       * Determines whether the range is interpreted as absolute or as a percentage of the data.
-       * Possible values: 'absolute', 'percentage'
-       */
-      range: schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
-    }),
-  ]),
-]);
+    ]),
+  ],
+  { meta: { id: 'colorByValueSchema' } }
+);
 
-export const staticColorSchema = schema.object({
-  type: schema.literal('static'), // Specifies that the color assignment is static (single color for all values). Possible value: 'static'
-  /**
-   * The static color to be used for all values.
-   */
-  color: schema.string({ meta: { description: 'The static color to be used for all values.' } }),
-});
+export const staticColorSchema = schema.object(
+  {
+    type: schema.literal('static'), // Specifies that the color assignment is static (single color for all values). Possible value: 'static'
+    /**
+     * The static color to be used for all values.
+     */
+    color: schema.string({ meta: { description: 'The static color to be used for all values.' } }),
+  },
+  { meta: { id: 'staticColorSchema' } }
+);
 
 const colorFromPaletteSchema = schema.object({
   type: schema.literal('from_palette'),
@@ -182,16 +188,19 @@ const gradientColorMappingSchema = schema.object({
   unassignedColor: schema.maybe(colorCodeSchema),
 });
 
-export const colorMappingSchema = schema.oneOf([
-  /**
-   * Categorical color mapping: assigns colors from a palette to specific values.
-   */
-  categoricalColorMappingSchema,
-  /**
-   * Gradient color mapping: assigns a gradient of colors to a range of values.
-   */
-  gradientColorMappingSchema,
-]);
+export const colorMappingSchema = schema.oneOf(
+  [
+    /**
+     * Categorical color mapping: assigns colors from a palette to specific values.
+     */
+    categoricalColorMappingSchema,
+    /**
+     * Gradient color mapping: assigns a gradient of colors to a range of values.
+     */
+    gradientColorMappingSchema,
+  ],
+  { meta: { id: 'colorMappingSchema' } }
+);
 
 export const allColoringTypeSchema = schema.oneOf([
   colorByValueSchema,

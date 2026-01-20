@@ -134,7 +134,7 @@ describe('Treemap Schema', () => {
       expect(validated.group_by).toHaveLength(2);
     });
 
-    it('validates configuration with color by value', () => {
+    it('validates configuration with color mapping', () => {
       const input: TreemapState = {
         ...baseTreemapConfig,
         metrics: [
@@ -149,11 +149,41 @@ describe('Treemap Schema', () => {
             fields: ['category'],
             size: 5,
             color: {
-              type: 'dynamic',
-              range: 'absolute',
-              steps: [
-                { type: 'from', from: 0, color: 'red' },
-                { type: 'to', to: 100, color: 'blue' },
+              mode: 'categorical',
+              palette: 'default',
+              mapping: [
+                {
+                  values: ['success'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 6,
+                  },
+                },
+                {
+                  values: ['info'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 9,
+                  },
+                },
+                {
+                  values: ['security'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 4,
+                  },
+                },
+                {
+                  values: ['__other__'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 5,
+                  },
+                },
               ],
             },
           },
@@ -161,7 +191,7 @@ describe('Treemap Schema', () => {
       };
 
       const validated = treemapStateSchema.validate(input);
-      expect(validated.group_by?.[0].color).toHaveProperty('type', 'dynamic');
+      expect(validated.group_by?.[0].color).toHaveProperty('mode', 'categorical');
     });
 
     it('validates configuration with collapsed dimensions', () => {
@@ -355,7 +385,7 @@ describe('Treemap Schema', () => {
           };
 
           expect(() => treemapStateSchema.validate(input)).toThrow(
-            /number of non-collapsed group by dimensions must not exceed 2/i
+            / The number of non-collapsed group_by dimensions must not exceed 2/i
           );
         });
       });
@@ -475,7 +505,7 @@ describe('Treemap Schema', () => {
           };
 
           expect(() => treemapStateSchema.validate(input)).toThrow(
-            /number of group by dimensions must not exceed 1/i
+            /the number of non-collapsed group_by dimensions must not exceed 1/i
           );
         });
 
@@ -518,7 +548,7 @@ describe('Treemap Schema', () => {
           };
 
           expect(() => treemapStateSchema.validate(input)).toThrow(
-            /number of group by dimensions must not exceed 1/i
+            /the number of non-collapsed group_by dimensions must not exceed 1/i
           );
         });
       });
@@ -594,11 +624,41 @@ describe('Treemap Schema', () => {
             operation: 'value',
             column: 'category',
             color: {
-              type: 'dynamic',
-              range: 'absolute',
-              steps: [
-                { type: 'from', from: 0, color: 'red' },
-                { type: 'to', to: 100, color: 'blue' },
+              mode: 'categorical',
+              palette: 'default',
+              mapping: [
+                {
+                  values: ['success'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 6,
+                  },
+                },
+                {
+                  values: ['info'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 9,
+                  },
+                },
+                {
+                  values: ['security'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 4,
+                  },
+                },
+                {
+                  values: ['__other__'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 5,
+                  },
+                },
               ],
             },
           },

@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import type { DatatableVisualizationState } from '@kbn/lens-common';
+import { LENS_DATAGRID_DENSITY, LENS_ROW_HEIGHT_MODE } from '@kbn/lens-common';
+import type { DatatableState } from '../../../../schema';
+import { getAccessorName } from '../helpers';
+import { METRIC_ACCESSOR_PREFIX, ROW_ACCESSOR_PREFIX } from '../constants';
+
+function getSortingColumnId(sortBy: NonNullable<DatatableState['sort_by']>): string | undefined {
+  switch (sortBy.column_type) {
+    case 'metric':
+      return getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.index);
+    case 'row':
+      return getAccessorName(ROW_ACCESSOR_PREFIX, sortBy.index);
+    case 'split_metrics_by': {
+      const metricColumnId = getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.metric_index);
+      return `${sortBy.values.join('---')}---${metricColumnId}`;
+    }
+    default:
+      return undefined;
+  }
+}
+
+function buildSortingState(config: DatatableState): Pick<DatatableVisualizationState, 'sorting'> {
+  if (!config.sort_by) {
+    return {};
+  }
+
+  const columnId = getSortingColumnId(config.sort_by);
+  if (!columnId) {
+    return {};
+  }
+
+  return {
+    sorting: {
+      columnId,
+      direction: config.sort_by.direction,
+    },
+  };
+}
+
+function buildDensityState(
+  config: DatatableState
+): Pick<
+  DatatableVisualizationState,
+  'headerRowHeight' | 'headerRowHeightLines' | 'rowHeight' | 'rowHeightLines' | 'density'
+> {
+  return {
+    ...(config.density?.height?.header
+      ? config.density?.height?.header?.type === 'auto'
+        ? { headerRowHeight: LENS_ROW_HEIGHT_MODE.auto }
+        : {
+            headerRowHeight: LENS_ROW_HEIGHT_MODE.custom,
+            headerRowHeightLines: config.density?.height?.header?.max_lines,
+          }
+      : {}),
+    ...(config.density?.height?.value
+      ? config.density?.height?.value?.type === 'auto'
+        ? { rowHeight: LENS_ROW_HEIGHT_MODE.auto }
+        : {
+            rowHeight: LENS_ROW_HEIGHT_MODE.custom,
+            rowHeightLines: config.density?.height?.value?.lines,
+          }
+      : {}),
+    ...(config.density?.mode
+      ? config.density?.mode === 'compact'
+        ? { density: LENS_DATAGRID_DENSITY.COMPACT }
+        : config.density?.mode === 'expanded'
+        ? { density: LENS_DATAGRID_DENSITY.EXPANDED }
+        : { density: LENS_DATAGRID_DENSITY.NORMAL }
+      : {}),
+  };
+}
+
+function buildPagingState(config: DatatableState): Pick<DatatableVisualizationState, 'paging'> {
+  if (!config.paging) {
+    return {};
+  }
+  return { paging: { size: config.paging, enabled: true } };
+}
+
+export function buildAppearanceState(
+  config: DatatableState
+): Pick<
+  DatatableVisualizationState,
+  | 'headerRowHeight'
+  | 'headerRowHeightLines'
+  | 'rowHeight'
+  | 'rowHeightLines'
+  | 'density'
+  | 'paging'
+  | 'sorting'
+> {
+  return {
+    ...buildDensityState(config),
+    ...buildPagingState(config),
+    ...buildSortingState(config),
+  };
+}

@@ -19,6 +19,7 @@ import {
   layerSettingsSchema,
   dslOnlyPanelInfoSchema,
   axisTitleSchemaProps,
+  legendTruncateAfterLinesSchema,
 } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps } from './shared';
 import { positionSchema } from '../alignments';
@@ -26,9 +27,7 @@ import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
 const legendSchemaProps = {
-  truncate_after_lines: schema.maybe(
-    schema.number({ meta: { description: 'Number of lines before truncating legend text' } })
-  ),
+  truncate_after_lines: legendTruncateAfterLinesSchema,
   visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
   size: schema.maybe(
     schema.oneOf(
@@ -135,7 +134,9 @@ export const heatmapStateSchemaESQL = schema.object({
   metric: schema.allOf([schema.object(heatmapStateMetricOptionsSchemaProps), esqlColumnSchema]),
 });
 
-export const heatmapStateSchema = schema.oneOf([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL]);
+export const heatmapStateSchema = schema.oneOf([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
+  meta: { id: 'heatmapChartSchema' },
+});
 
 export type HeatmapState = TypeOf<typeof heatmapStateSchema>;
 export type HeatmapStateNoESQL = TypeOf<typeof heatmapStateSchemaNoESQL>;

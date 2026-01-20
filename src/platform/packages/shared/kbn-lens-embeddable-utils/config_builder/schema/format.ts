@@ -110,12 +110,10 @@ const customFormatSchema = schema.object({
 /**
  * Format configuration
  */
-export const formatTypeSchema = schema.oneOf([
-  numericFormatSchema,
-  byteFormatSchema,
-  durationFormatSchema,
-  customFormatSchema,
-]);
+export const formatTypeSchema = schema.oneOf(
+  [numericFormatSchema, byteFormatSchema, durationFormatSchema, customFormatSchema],
+  { meta: { id: 'formatTypeSchema' } }
+);
 
 export const formatSchema = {
   /**
