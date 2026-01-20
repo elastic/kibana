@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { EsqlControlType } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
@@ -103,8 +104,8 @@ export function ControlType({
   onFlyoutTypeChange,
 }: {
   isDisabled: boolean;
-  initialControlFlyoutType: EsqlControlType;
-  onFlyoutTypeChange?: (flyoutType: EsqlControlType) => void;
+  initialControlFlyoutType: OptionsListESQLControlState['control_type'];
+  onFlyoutTypeChange?: (flyoutType: OptionsListESQLControlState['control_type']) => void;
 }) {
   const controlFlyoutType = controlTypeOptions.find(
     (option) => option.key === initialControlFlyoutType

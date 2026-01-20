@@ -170,9 +170,12 @@ export function ESQLControlsFlyout({
     variableType,
   ]);
 
-  const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
-    setControlFlyoutType(controlType);
-  }, []);
+  const onFlyoutTypeChange = useCallback(
+    (controlType: OptionsListESQLControlState['control_type']) => {
+      setControlFlyoutType(controlType);
+    },
+    []
+  );
 
   const onCreateControl = useCallback(async () => {
     if (controlState && controlState.available_options?.length) {
