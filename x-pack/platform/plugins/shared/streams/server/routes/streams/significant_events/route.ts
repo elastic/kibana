@@ -207,6 +207,7 @@ const generateSignificantEventsRoute = createServerRoute({
       inferenceClient,
       uiSettingsClient,
       soClient,
+      featureClient,
     } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -219,10 +220,11 @@ const generateSignificantEventsRoute = createServerRoute({
     });
 
     // Get connector info for error enrichment
-    const [connector, definition, { significantEventsPromptOverride }] = await Promise.all([
+    const [connector, definition, { significantEventsPromptOverride }, { hits: features }] = await Promise.all([
       inferenceClient.getConnectorById(connectorId),
       streamsClient.getStream(params.path.name),
       new PromptsConfigService({ soClient, logger }).getPrompt(),
+      featureClient.getFeatures(params.path.name),
     ]);
 
     return fromRxjs(
@@ -235,6 +237,7 @@ const generateSignificantEventsRoute = createServerRoute({
           end: params.query.to.valueOf(),
           sampleDocsSize: params.query.sampleDocsSize,
           systemPrompt: significantEventsPromptOverride,
+          features,
         },
         {
           inferenceClient,
