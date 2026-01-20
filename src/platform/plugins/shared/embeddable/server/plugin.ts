@@ -88,7 +88,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableSchemas: () =>
         Object.values(this.transformsRegistry)
-          .map((transforms) => transforms.schema)
+          .map((transforms) => transforms?.getSchema?.())
           .filter((schema) => Boolean(schema)) as ObjectType[],
       getTransforms: (type: string) => {
         return this.transformsRegistry[type];
