@@ -144,13 +144,11 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '300px',
       },
       {
-        field: 'service_settings',
         name: i18n.MODEL,
         'data-test-subj': 'modelCell',
-        render: (_serviceSettings: unknown, endpointInfo: InferenceInferenceEndpointInfo) => {
+        render: (endpointInfo: InferenceInferenceEndpointInfo) => {
           return <Model endpointInfo={endpointInfo} />;
         },
-        sortable: false,
         width: '200px',
       },
       {
