@@ -951,7 +951,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            groupBy: '',
           },
         });
 
