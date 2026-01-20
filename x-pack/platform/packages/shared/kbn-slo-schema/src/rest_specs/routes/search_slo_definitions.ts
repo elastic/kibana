@@ -7,17 +7,13 @@
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 
-const searchSLODefinitionsParamsSchema = t.type({
-  // path: t.type({ id: t.string }),
-  query: t.union([
-    t.undefined,
-    t.partial({
-      search: t.string,
-      size: toNumberRt,
-      searchAfter: t.string,
-      remoteName: t.string,
-    }),
-  ]),
+const searchSLODefinitionsParamsSchema = t.partial({
+  query: t.partial({
+    search: t.string,
+    size: toNumberRt,
+    searchAfter: t.string,
+    remoteName: t.string,
+  }),
 });
 
 type SearchSLODefinitionsParams = t.TypeOf<typeof searchSLODefinitionsParamsSchema.props.query>;
