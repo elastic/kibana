@@ -57,7 +57,7 @@ describe('IngestionCard', () => {
 
     it('shows dash when stats provided but bytesPerDay missing', () => {
       renderWithI18n(
-        <IngestionCard period="daily" hasPrivileges={true} stats={{ someOther: 1 } as any} />
+        <IngestionCard period="daily" hasPrivileges stats={{ someOther: 1 } as any} />
       );
 
       expect(screen.getByTestId('failureStoreIngestion-daily-metric')).toHaveTextContent('-');
