@@ -13,7 +13,6 @@ import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/ty
 describe('extractMetricFields', () => {
   const createMockFieldCapability = (
     type: string,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     time_series_metric?: 'gauge' | 'counter'
   ): FieldCapsFieldCapability => ({
     type,
