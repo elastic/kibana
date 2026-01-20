@@ -277,6 +277,7 @@ export function UnifiedDocViewerFlyout({
         session="start"
         flyoutMenuProps={{
           title: currentFlyoutTitle,
+          'data-test-subj': 'docViewerRowDetailsTitle',
           hideTitle: false,
         }}
         className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
