@@ -90,8 +90,15 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
       !this._sessionTelemetryTracked &&
       (this.state.phase === PHASE.IMPORT || this.state.phase === PHASE.CONFIGURE)
     ) {
-      const sessionTimeMs = Date.now() - this._sessionStartTime;
+      // Create minimal ImportResults for cancellation tracking
+      const cancelledImportResults: ImportResults = {
+        success: false,
+        failures: [],
+        docCount: 0,
+      };
+      const sessionTimeMs = this._getSessionTimeMs();
       this._trackUploadSession(false, false, sessionTimeMs, true);
+      this._trackUploadFiles(cancelledImportResults, sessionTimeMs, false, true);
     }
 
     if (this._geoFileImporter) {
@@ -103,6 +110,60 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
   componentDidUpdate() {
     if (this.props.isIndexingTriggered && this.state.phase === PHASE.CONFIGURE) {
       this._import();
+    }
+  }
+
+  private _getSessionTimeMs(): number {
+    return this._sessionStartTime > 0 ? Date.now() - this._sessionStartTime : 0;
+  }
+
+  private _trackUploadFiles(
+    importResults: ImportResults,
+    uploadTimeMs: number,
+    uploadSuccess: boolean,
+    uploadCancelled: boolean = false
+  ) {
+    if (!this._telemetryService || !this._file) {
+      return;
+    }
+
+    // Track main file upload event
+    const fileSizeBytes = this._file.size;
+    const documentsFailed = importResults.failures?.length ?? 0;
+    const documentsSuccess =
+      importResults.docCount !== undefined ? importResults.docCount - documentsFailed : 0;
+
+    this._telemetryService.trackUploadFile({
+      upload_session_id: this._uploadSessionId,
+      file_id: this._fileId,
+      mapping_clash_new_fields: 0, // Geo files don't have mapping clashes
+      mapping_clash_missing_fields: 0,
+      file_size_bytes: fileSizeBytes,
+      documents_success: documentsSuccess,
+      documents_failed: documentsFailed,
+      upload_success: uploadSuccess,
+      upload_cancelled: uploadCancelled,
+      upload_time_ms: uploadTimeMs,
+      file_extension: getFileExtension(this._file),
+    });
+
+    // Track telemetry for each sidecar file
+    if (this._sidecarFiles.length > 0) {
+      this._sidecarFiles.forEach(({ file: sidecarFile, fileId: sidecarFileId }) => {
+        this._telemetryService!.trackUploadFile({
+          upload_session_id: this._uploadSessionId,
+          file_id: sidecarFileId,
+          mapping_clash_new_fields: 0, // Sidecar files don't have mapping clashes
+          mapping_clash_missing_fields: 0,
+          file_size_bytes: sidecarFile.size,
+          documents_success: 0, // Sidecar files don't produce documents
+          documents_failed: 0,
+          upload_success: uploadSuccess, // Same success status as main file
+          upload_cancelled: uploadCancelled,
+          upload_time_ms: 0, // Sidecar files don't have separate upload time
+          file_extension: getFileExtension(sidecarFile),
+        });
+      });
     }
   }
 
@@ -239,49 +300,9 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
 
     const uploadTimeMs = Date.now() - uploadStartTime;
 
-    // Track file upload event
-    if (this._telemetryService && this._file) {
-      const fileSizeBytes = this._file.size;
-      const documentsFailed = importResults.failures?.length ?? 0;
-      const documentsSuccess =
-        importResults.docCount !== undefined ? importResults.docCount - documentsFailed : 0;
-
-      this._telemetryService.trackUploadFile({
-        upload_session_id: this._uploadSessionId,
-        file_id: this._fileId,
-        mapping_clash_new_fields: 0, // Geo files don't have mapping clashes
-        mapping_clash_missing_fields: 0,
-        file_size_bytes: fileSizeBytes,
-        documents_success: documentsSuccess,
-        documents_failed: documentsFailed,
-        upload_success: importResults.success,
-        upload_cancelled: false,
-        upload_time_ms: uploadTimeMs,
-        file_extension: getFileExtension(this._file),
-      });
-    }
-
-    // Track telemetry for each sidecar file
-    if (this._telemetryService && this._sidecarFiles.length > 0) {
-      this._sidecarFiles.forEach(({ file: sidecarFile, fileId: sidecarFileId }) => {
-        this._telemetryService!.trackUploadFile({
-          upload_session_id: this._uploadSessionId,
-          file_id: sidecarFileId,
-          mapping_clash_new_fields: 0, // Sidecar files don't have mapping clashes
-          mapping_clash_missing_fields: 0,
-          file_size_bytes: sidecarFile.size,
-          documents_success: 0, // Sidecar files don't produce documents
-          documents_failed: 0,
-          upload_success: importResults.success, // Same success status as main file
-          upload_cancelled: false,
-          upload_time_ms: 0, // Sidecar files don't have upload time
-          file_extension: getFileExtension(sidecarFile),
-        });
-      });
-    }
-
     if (!importResults.success) {
       this._trackUploadSession(false, false, uploadTimeMs);
+      this._trackUploadFiles(importResults, uploadTimeMs, false);
       this.setState({
         importResults,
         importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.dataIndexingError', {
@@ -293,6 +314,7 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
       return;
     } else if (importResults.docCount === importResults.failures?.length) {
       this._trackUploadSession(false, false, uploadTimeMs);
+      this._trackUploadFiles(importResults, uploadTimeMs, false);
       this.setState({
         // Force importResults into failure shape when no features are indexed
         importResults: {
@@ -350,7 +372,9 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
         docCount: importResults.docCount !== undefined ? importResults.docCount : 0,
       };
     } catch (error) {
-      this._trackUploadSession(false, false, Date.now() - this._sessionStartTime);
+      const sessionTimeMs = this._getSessionTimeMs();
+      this._trackUploadSession(false, false, sessionTimeMs);
+      this._trackUploadFiles(importResults, sessionTimeMs, false);
       if (this._isMounted) {
         this.setState({
           importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.dataViewError', {
@@ -366,7 +390,9 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
       return;
     }
 
-    this._trackUploadSession(true, true, Date.now() - this._sessionStartTime);
+    const sessionTimeMs = this._getSessionTimeMs();
+    this._trackUploadSession(true, true, sessionTimeMs);
+    this._trackUploadFiles(importResults, uploadTimeMs, true);
 
     //
     // Successful import
