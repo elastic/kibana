@@ -134,6 +134,8 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      */
     settings: CaseSettingsRt,
     [CASE_EXTENDED_FIELDS]: rt.any,
+
+    template: rt.union([CaseTemplate, rt.null]),
   })
 );
 

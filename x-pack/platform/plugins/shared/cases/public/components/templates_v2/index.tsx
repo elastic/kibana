@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiSelectOption, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -25,6 +25,7 @@ import {
   EuiBadge,
   EuiCallOut,
   EuiSelect,
+  EuiButton,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { CodeEditor } from '@kbn/code-editor';
@@ -38,13 +39,15 @@ import {
   useFormContext as useKibanaFormContext,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { HiddenField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { CASE_EXTENDED_FIELDS, CASES_INTERNAL_URL } from '../../../common/constants';
+import { CASE_EXTENDED_FIELDS, CASES_INTERNAL_URL, CASES_URL } from '../../../common/constants';
 import type { CreateTemplateInput, ParsedTemplate, Template } from '../../../common/templates';
 import { CommonFlyout, CommonFlyoutFooter } from '../configure_cases/flyout';
 import { TitleExperimentalBadge } from '../header_page/title';
 import { KibanaServices } from '../../common/lib/kibana';
 import { TruncatedText } from '../truncated_text';
 import type { CaseUI } from '../../containers/types';
+import { useCasesToast } from '../../common/use_cases_toast';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
 const i18n = {
   TEMPLATE_TITLE: 'Templates V2',
@@ -53,6 +56,9 @@ const i18n = {
   ADD_TEMPLATE: 'Add template',
   UPDATE_TEMPLATE: 'Update template',
   CREATE_TEMPLATE: 'Create template',
+  MIGRATE_TO_LATEST: 'Migrate to latest',
+  MIGRATION_SUCCESS: 'Successfully migrated to latest template version',
+  MIGRATION_ERROR: 'Failed to migrate template',
 };
 
 // Api
@@ -101,6 +107,59 @@ const deleteTemplate = async (templateId: string) => {
   return KibanaServices.get().http.delete(`${CASES_INTERNAL_URL}/templates/${templateId}`);
 };
 
+interface MigrateCaseTemplateParams {
+  caseId: string;
+  caseVersion: string;
+  templateId: string;
+  currentExtendedFields: Record<string, unknown>;
+}
+
+const migrateCaseToLatestTemplate = async ({
+  caseId,
+  caseVersion,
+  templateId,
+  currentExtendedFields,
+}: MigrateCaseTemplateParams) => {
+  const latestTemplate = await fetchTemplate(templateId);
+
+  const newExtendedFields: Record<string, unknown> = {};
+
+  for (const field of latestTemplate.definition.fields) {
+    const fieldKey = camelCase(`${field.name}_as_${field.type}`);
+
+    if (fieldKey in currentExtendedFields) {
+      // Preserve existing value if field still exists
+      newExtendedFields[fieldKey] = currentExtendedFields[fieldKey];
+    } else {
+      // New field - set default from metadata if available
+      const defaultValue = (field.metadata as Record<string, unknown>)?.default;
+      if (defaultValue !== undefined) {
+        newExtendedFields[fieldKey] = defaultValue;
+      }
+    }
+  }
+
+  // 3. Patch the case with updated template version and migrated fields
+  const response = await KibanaServices.get().http.fetch(CASES_URL, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      cases: [
+        {
+          id: caseId,
+          version: caseVersion,
+          template: {
+            id: templateId,
+            version: latestTemplate.templateVersion,
+          },
+          extended_fields: newExtendedFields,
+        },
+      ],
+    }),
+  });
+
+  return response;
+};
+
 // Hooks
 
 const useTemplates = () =>
@@ -145,6 +204,22 @@ const useDeleteTemplate = () => {
     mutationFn: deleteTemplate,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+  });
+};
+
+const useMigrateToLatestTemplate = () => {
+  const { showSuccessToast, showErrorToast } = useCasesToast();
+  const refreshCaseViewPage = useRefreshCaseViewPage();
+
+  return useMutation({
+    mutationFn: migrateCaseToLatestTemplate,
+    onSuccess: () => {
+      refreshCaseViewPage();
+      showSuccessToast(i18n.MIGRATION_SUCCESS);
+    },
+    onError: (error: Error) => {
+      showErrorToast(error, { title: i18n.MIGRATION_ERROR });
     },
   });
 };
@@ -545,12 +620,60 @@ export const CreateCaseTemplateFields = () => {
 };
 CreateCaseTemplateFields.displayName = 'TemplateFields';
 
-const CaseViewTemplateFieldsInner = ({
+interface MigrateTemplateButtonProps {
+  caseData: CaseUI;
+  latestVersion: number;
+  onMigrationComplete?: () => void;
+}
+
+const MigrateTemplateButton = ({
+  caseData,
+  latestVersion,
+  onMigrationComplete,
+}: MigrateTemplateButtonProps) => {
+  const migrateMutation = useMigrateToLatestTemplate();
+
+  const handleMigrate = useCallback(() => {
+    if (!caseData.template) return;
+
+    migrateMutation.mutate(
+      {
+        caseId: caseData.id,
+        caseVersion: caseData.version,
+        templateId: caseData.template.id,
+        currentExtendedFields: caseData.extendedFields ?? {},
+      },
+      {
+        onSuccess: () => {
+          onMigrationComplete?.();
+        },
+      }
+    );
+  }, [caseData, migrateMutation, onMigrationComplete]);
+
+  return (
+    <EuiButton
+      size="s"
+      color="warning"
+      onClick={handleMigrate}
+      isLoading={migrateMutation.isLoading}
+      data-test-subj="migrate-template-button"
+    >
+      {`${i18n.MIGRATE_TO_LATEST} (v${latestVersion})`}
+    </EuiButton>
+  );
+};
+
+MigrateTemplateButton.displayName = 'MigrateTemplateButton';
+
+const CaseViewExtendedFieldsInner = ({
   caseData,
   onChanges,
+  onMigrationComplete,
 }: {
   caseData: CaseUI;
   onChanges: (extendedFields: Record<string, unknown>) => void;
+  onMigrationComplete?: () => void;
 }) => {
   const { template, extendedFields } = caseData;
   const templateQuery = useTemplate(template?.id as string, template?.version);
@@ -560,31 +683,39 @@ const CaseViewTemplateFieldsInner = ({
   }
 
   const fields = templateQuery.data?.definition.fields;
-
-  // eslint-disable-next-line no-console
-  console.log('template fields', fields, { onChanges });
+  const isOutdated = !templateQuery.data?.isLatest;
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>
-          {`Extended Fields (${templateQuery.data?.name})`}{' '}
-          {!templateQuery.data?.isLatest && (
-            <EuiBadge>
-              {`Outdated`}{' '}
-              <EuiIconTip
-                type="info"
-                content={`Based on template "${templateQuery.data?.name}" (${
-                  templateQuery.data?.isLatest
-                    ? 'latest template version'
-                    : `v${template?.version}, current version is ${templateQuery.data?.latestVersion}`
-                })`}
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{`Extended Fields (${templateQuery.data?.name})`}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {isOutdated && (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">
+                {`v${template?.version}`}{' '}
+                <EuiIconTip
+                  type="warning"
+                  color="warning"
+                  content={`This case uses an outdated template version. Current version is v${templateQuery.data?.latestVersion}.`}
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <MigrateTemplateButton
+                caseData={caseData}
+                latestVersion={templateQuery.data?.latestVersion ?? template?.version ?? 1}
+                onMigrationComplete={onMigrationComplete}
               />
-            </EuiBadge>
-          )}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
+            </EuiFlexItem>
+          </>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       {fields?.map((field) => {
         const fieldNameRaw = `${field.name}_as_${field.type}`;
         const fieldNameNormalized = camelCase(fieldNameRaw);
@@ -618,14 +749,16 @@ const CaseViewTemplateFieldsInner = ({
   );
 };
 
-CaseViewTemplateFieldsInner.displayName = 'CaseViewTemplateFieldsInner';
+CaseViewExtendedFieldsInner.displayName = 'CaseViewTemplateFieldsInner';
 
 export const CaseViewExtendedFields = ({
   caseData,
   onChanges,
+  onMigrationComplete,
 }: {
   caseData: CaseUI;
   onChanges: (extendedFields: Record<string, unknown>) => void;
+  onMigrationComplete?: () => void;
 }) => {
   if (!caseData.template) {
     return <pre>{`Debug: missing template data in the case object`}</pre>;
@@ -635,7 +768,13 @@ export const CaseViewExtendedFields = ({
     return <pre>{`Debug: missing extended fields property in the case object`}</pre>;
   }
 
-  return <CaseViewTemplateFieldsInner onChanges={onChanges} caseData={caseData} />;
+  return (
+    <CaseViewExtendedFieldsInner
+      onChanges={onChanges}
+      caseData={caseData}
+      onMigrationComplete={onMigrationComplete}
+    />
+  );
 };
 
 CaseViewExtendedFields.displayName = 'CaseViewExtendedFields';
