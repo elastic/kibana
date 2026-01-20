@@ -72,7 +72,12 @@ export const SharepointOnline: ConnectorSpec = {
       handler: async (ctx, input) => {
         ctx.log.debug('SharePoint listing all sites');
         const response = await ctx.client.get(
-          'https://graph.microsoft.com/v1.0/sites/getAllSites/'
+          'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+          {
+            params: {
+              $select: 'id,displayName,webUrl,siteCollection',
+            },
+          }
         );
         return response.data;
       },
@@ -88,7 +93,12 @@ export const SharepointOnline: ConnectorSpec = {
         const typedInput = input as { siteId: string };
         ctx.log.debug(`SharePoint listing all pages from siteId ${typedInput.siteId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/`
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/`,
+          {
+            params: {
+              $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
+            },
+          }
         );
         return response.data;
       },
@@ -111,7 +121,12 @@ export const SharepointOnline: ConnectorSpec = {
         }
 
         ctx.log.debug(`SharePoint getting site info via ${url}`);
-        const response = await ctx.client.get(url);
+        const response = await ctx.client.get(url, {
+          params: {
+            $select:
+              'id,displayName,webUrl,siteCollection,createdDateTime,lastModifiedDateTime',
+          },
+        });
         return response.data;
       },
     },
@@ -127,7 +142,13 @@ export const SharepointOnline: ConnectorSpec = {
 
         ctx.log.debug(`SharePoint getting all drives of site ${typedInput.siteId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/drives/`
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/drives/`,
+          {
+            params: {
+              $select:
+                'id,name,driveType,webUrl,createdDateTime,lastModifiedDateTime,description,owner',
+            },
+          }
         );
         return response.data;
       },
@@ -144,7 +165,13 @@ export const SharepointOnline: ConnectorSpec = {
 
         ctx.log.debug(`SharePoint getting all lists of site ${typedInput.siteId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/`
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/`,
+          {
+            params: {
+              $select:
+                'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
+            },
+          }
         );
         return response.data;
       },
@@ -162,8 +189,58 @@ export const SharepointOnline: ConnectorSpec = {
 
         ctx.log.debug(`SharePoint getting all items of list ${typedInput.listId} of site ${typedInput.siteId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/${typedInput.listId}/items/`
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/${typedInput.listId}/items/`,
+          {
+            params: {
+              $select:
+                'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
+            },
+          }
         );
+        return response.data;
+      },
+    },
+
+    callGraphAPI: {
+      isTool: true,
+      description:
+        'Call a Microsoft Graph v1.0 endpoint by path only (e.g., /v1.0/me).',
+      input: z.object({
+        method: z.enum(['GET', 'POST']).describe('HTTP method'),
+        path: z
+          .string()
+          .describe("Graph path starting with '/v1.0/' (e.g., '/v1.0/me')")
+          .refine((value) => value.startsWith('/v1.0/'), {
+            message: "Path must start with '/v1.0/'",
+          })
+          .refine((value) => !/^https?:\/\//i.test(value), {
+            message: 'Path must not be a full URL',
+          }),
+        query: z
+          .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+          .optional()
+          .describe('Query parameters (e.g., $top, $filter)'),
+        body: z.any().optional().describe('Request body (for POST)'),
+      }),
+      output: z.any(),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          method: 'GET' | 'POST';
+          path: string;
+          query?: Record<string, string | number | boolean>;
+          body?: unknown;
+        };
+
+        const url = `https://graph.microsoft.com${typedInput.path}`;
+        ctx.log.debug(`SharePoint callGraphAPI ${typedInput.method} ${url}`);
+
+        const response = await ctx.client.request({
+          method: typedInput.method,
+          url,
+          params: typedInput.query,
+          data: typedInput.body,
+        });
+
         return response.data;
       },
     },
