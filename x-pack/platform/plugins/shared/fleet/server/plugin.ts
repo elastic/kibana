@@ -865,7 +865,7 @@ export class FleetPlugin
         await backOff(
           async () => {
             await setupFleet(
-              new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+              core.savedObjects.getUnsafeInternalClient(),
               core.elasticsearch.client.asInternalUser,
               { useLock: true }
             );
@@ -921,7 +921,7 @@ export class FleetPlugin
       }
     })();
 
-    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.getUnsafeInternalClient());
     return {
       authz: {
         fromRequest: getAuthzFromRequest,

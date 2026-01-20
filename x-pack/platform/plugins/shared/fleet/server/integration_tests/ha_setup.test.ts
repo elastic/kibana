@@ -150,21 +150,21 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
     it('sets up Fleet correctly with single Kibana instance', async () => {
       await addRoots(1);
       const [root1Start] = await startRoots();
-      const soClient = root1Start.savedObjects.createInternalRepository();
+      const soClient = root1Start.savedObjects.getUnsafeInternalClient();
       await expectFleetSetupState(soClient);
     });
 
     it('sets up Fleet correctly when multiple Kibana instances are started at the same time', async () => {
       await addRoots(3);
       const [root1Start] = await startRoots();
-      const soClient = root1Start.savedObjects.createInternalRepository();
+      const soClient = root1Start.savedObjects.getUnsafeInternalClient();
       await expectFleetSetupState(soClient);
     });
 
     it('sets up Fleet correctly when multiple Kibana instaces are started in serial', async () => {
       const [root1] = await addRoots(1);
       const root1Start = await startAndWaitForFleetSetup(root1);
-      const soClient = root1Start.savedObjects.createInternalRepository();
+      const soClient = root1Start.savedObjects.getUnsafeInternalClient();
       await expectFleetSetupState(soClient);
 
       const [root2] = await addRoots(1);

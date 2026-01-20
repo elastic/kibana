@@ -347,7 +347,7 @@ describe('fleet usage telemetry', () => {
       refresh: 'wait_for',
     });
 
-    const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
+    const soClient = kbnServer.coreStart.savedObjects.getUnsafeInternalClient();
     await soClient.create(packagePolicyType, {
       name: 'fleet_server-1',
       namespace: 'default',

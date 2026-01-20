@@ -124,7 +124,7 @@ describe.skip('Fleet setup preconfiguration with multiple instances Kibana', () 
     it('sets up Fleet correctly', async () => {
       await addRoots(1);
       const [root1Start] = await startRoots();
-      const soClient = root1Start.savedObjects.createInternalRepository();
+      const soClient = root1Start.savedObjects.getUnsafeInternalClient();
 
       const esClient = root1Start.elasticsearch.client.asInternalUser;
       await new Promise((res) => setTimeout(res, 1000));

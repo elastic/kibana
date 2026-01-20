@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObjectsClient } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   CoreSetup,
@@ -200,7 +199,7 @@ export class UnenrollInactiveAgentsTask {
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = coreStart.savedObjects.getUnsafeInternalClient();
 
     try {
       await this.unenrollInactiveAgents(esClient, soClient);

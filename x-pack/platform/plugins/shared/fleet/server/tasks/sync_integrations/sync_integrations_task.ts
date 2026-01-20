@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClient } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -144,7 +144,7 @@ export class SyncIntegrationsTask {
 
     const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = coreStart.savedObjects.getUnsafeInternalClient();
 
     try {
       // write integrations on main cluster

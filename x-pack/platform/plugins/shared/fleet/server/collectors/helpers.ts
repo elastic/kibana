@@ -7,15 +7,15 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClient } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 export async function getInternalClients(
   core: CoreSetup
 ): Promise<[SavedObjectsClient, ElasticsearchClient]> {
   return core.getStartServices().then(async ([coreStart]) => {
-    const savedObjectsRepo = coreStart.savedObjects.createInternalRepository();
+    const savedObjectsRepo = coreStart.savedObjects.getUnsafeInternalClient();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    return [new SavedObjectsClient(savedObjectsRepo), esClient];
+    return [savedObjectsRepo, esClient];
   });
 }

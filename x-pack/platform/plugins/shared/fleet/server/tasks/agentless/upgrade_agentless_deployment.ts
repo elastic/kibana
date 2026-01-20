@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClient, type CoreSetup, type Logger } from '@kbn/core/server';
-import type { ElasticsearchClient, LoggerFactory } from '@kbn/core/server';
+import { type CoreSetup, type Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, LoggerFactory, SavedObjectsClient } from '@kbn/core/server';
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
@@ -275,7 +275,7 @@ export class UpgradeAgentlessDeploymentsTask {
     this.logger.info(`[runTask()] started`);
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = coreStart.savedObjects.getUnsafeInternalClient();
     await this.processUpgradeAgentlessDeployments(esClient, soClient, abortController);
   };
 }

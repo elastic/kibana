@@ -10,8 +10,6 @@ import { differenceBy, chunk } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
 
-import { SavedObjectsClient } from '@kbn/core/server';
-
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -154,14 +152,12 @@ export async function deleteKibanaAssets({
   packageSpecConditions?: PackageSpecConditions;
   spaceId?: string;
 }) {
-  const savedObjectsClient = new SavedObjectsClient(
-    appContextService
-      .getSavedObjects()
-      .createInternalRepository([
-        KibanaSavedObjectType.alertingRuleTemplate,
-        KibanaSavedObjectType.sloTemplate,
-      ])
-  );
+  const savedObjectsClient = appContextService.getSavedObjects().getUnsafeInternalClient({
+    includedHiddenTypes: [
+      KibanaSavedObjectType.alertingRuleTemplate,
+      KibanaSavedObjectType.sloTemplate,
+    ],
+  });
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
   if (namespace) {
