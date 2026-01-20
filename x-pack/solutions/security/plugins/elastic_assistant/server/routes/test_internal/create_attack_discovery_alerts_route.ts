@@ -7,13 +7,125 @@
 
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { API_VERSIONS, CreateAttackDiscoveryAlertsParams } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
+  CreateAttackDiscoveryAlertsParams,
+} from '@kbn/elastic-assistant-common';
+import { ALERT_INSTANCE_ID, ALERT_START, ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { ElasticAssistantPluginRouter } from '../../types';
+import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from '../../lib/attack_discovery/schedules/constants';
+import { ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID } from '../../lib/attack_discovery/data_generator_rule/constants';
+import { getScheduledIndexPattern } from '../../lib/attack_discovery/persistence/get_scheduled_index_pattern';
+import { generateAttackDiscoveryAlertHash } from '../../lib/attack_discovery/persistence/transforms/transform_to_alert_documents';
 
 const RESPONSE_SCHEMA = z.object({ data: z.array(z.unknown()) });
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getBackdatedTimestampByInstanceId = ({
+  attackDiscoveries,
+  connectorId,
+  ownerId,
+  replacements,
+  spaceId,
+}: {
+  attackDiscoveries: CreateAttackDiscoveryAlertsParams['attackDiscoveries'];
+  connectorId: CreateAttackDiscoveryAlertsParams['apiConfig']['connectorId'];
+  ownerId: string;
+  replacements: CreateAttackDiscoveryAlertsParams['replacements'];
+  spaceId: string;
+}): Record<string, string> => {
+  // Deterministic fallback for missing/invalid timestamps:
+  // Use the latest valid discovery timestamp as a proxy for the generator's end-of-window time.
+  const fallbackNow = (() => {
+    const times = attackDiscoveries
+      .map((d) =>
+        typeof d.timestamp === 'string' && d.timestamp.length > 0 ? new Date(d.timestamp) : null
+      )
+      .filter((d): d is Date => d != null && Number.isFinite(d.getTime()))
+      .map((d) => d.getTime());
+    const max = times.length > 0 ? Math.max(...times) : NaN;
+    return Number.isFinite(max) ? new Date(max) : new Date();
+  })();
+
+  return attackDiscoveries.reduce<Record<string, string>>((acc, attackDiscovery) => {
+    const desiredNow = (() => {
+      const ts = attackDiscovery.timestamp;
+      if (typeof ts !== 'string' || ts.length === 0) return fallbackNow;
+      const d = new Date(ts);
+      return Number.isFinite(d.getTime()) ? d : fallbackNow;
+    })();
+
+    const instanceId = generateAttackDiscoveryAlertHash({
+      attackDiscovery,
+      connectorId,
+      ownerId,
+      replacements,
+      spaceId,
+    });
+
+    acc[instanceId] = desiredNow.toISOString();
+    return acc;
+  }, {});
+};
+
+const pollForAttackDiscoveryAlertDocumentIds = async ({
+  esClient,
+  index,
+  expectedInstanceIds,
+  timeoutMs,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  expectedInstanceIds: string[];
+  timeoutMs: number;
+}): Promise<Array<{ documentId: string; instanceId: string; concreteIndex: string }>> => {
+  const start = Date.now();
+  const uniqueExpectedInstanceIds = Array.from(new Set(expectedInstanceIds));
+  const size = Math.max(uniqueExpectedInstanceIds.length, 1);
+
+  let sleepMs = 250;
+  while (Date.now() - start < timeoutMs) {
+    const result = await esClient.search<unknown>({
+      index,
+      size,
+      fields: [ALERT_INSTANCE_ID],
+      _source: false,
+      query: {
+        terms: {
+          [ALERT_INSTANCE_ID]: uniqueExpectedInstanceIds,
+        },
+      },
+    });
+
+    const hits = result.hits.hits;
+    if (hits.length >= uniqueExpectedInstanceIds.length) {
+      return hits.flatMap((h) => {
+        const raw = (h.fields as Record<string, unknown> | undefined)?.[ALERT_INSTANCE_ID];
+        const instanceId =
+          Array.isArray(raw) && typeof raw[0] === 'string'
+            ? raw[0]
+            : typeof raw === 'string'
+            ? raw
+            : null;
+        if (!instanceId || !h._id) return [];
+        return [{ documentId: h._id, instanceId, concreteIndex: h._index }];
+      });
+    }
+
+    await delay(sleepMs);
+    sleepMs = Math.min(2_000, Math.round(sleepMs * 1.5));
+  }
+
+  throw new Error(
+    `Timed out waiting for Attack discovery alerts to be persisted. expected=${uniqueExpectedInstanceIds.length}`
+  );
+};
 
 const isPrivilegedDataGeneratorUser = (user: AuthenticatedUser | null | undefined): boolean => {
   if (!user) return false;
@@ -38,9 +150,8 @@ const hasInternalKibanaOriginHeader = (headerValue: unknown): boolean => {
 /**
  * Dev-only route used by the Security Solution data generator script.
  *
- * In serverless, the ad-hoc Attack Discovery store is a system data stream/index that cannot be created
- * via the Elasticsearch API by end users. This route writes via the Elastic Assistant rule-data client,
- * which can bootstrap the backing store as needed.
+ * This route persists alerts via the Kibana alerting framework, so it does not write directly to
+ * dot-prefixed indices with raw Elasticsearch bulk requests.
  */
 export const createAttackDiscoveryAlertsRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -88,20 +199,157 @@ export const createAttackDiscoveryAlertsRoute = (router: ElasticAssistantPluginR
             });
           }
 
-          const dataClient = await assistantContext.getAttackDiscoveryDataClient();
-          if (!dataClient) {
-            return response.customError({
-              statusCode: 500,
-              body: { message: 'Attack discovery data client not initialized' },
-            });
+          const { rulesClient } = assistantContext;
+          const spaceId = assistantContext.getSpaceId();
+
+          // Pre-install Alerts-as-Data resources for this context/space to avoid first-run races
+          // where the rule fires before its backing alias/index template exists.
+          const init = await assistantContext.frameworkAlerts.getContextInitializationPromise(
+            ATTACK_DISCOVERY_ALERTS_CONTEXT,
+            spaceId
+          );
+          if (!init.result) {
+            throw new Error(
+              `Attack discovery alerts-as-data resources not initialized for space ${spaceId}: ${
+                init.error ?? 'unknown error'
+              }`
+            );
           }
 
-          const data = await dataClient.createAttackDiscoveryAlertsForDataGenerator({
-            authenticatedUser,
-            createAttackDiscoveryAlertsParams: request.body,
-          });
+          let createdRule: { id: string };
+          try {
+            createdRule = await rulesClient.create({
+              data: {
+                name: 'Attack Discovery Data Generator (dev-only)',
+                alertTypeId: ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID,
+                enabled: true,
+                consumer: ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
+                tags: ['attack_discovery', 'data_generator'],
+                schedule: { interval: '1h' },
+                actions: [],
+                params: request.body,
+              },
+            });
+          } catch (err) {
+            throw new Error(`Failed to create data generator rule: ${err}`);
+          }
 
-          return response.ok({ body: { data } });
+          try {
+            try {
+              await rulesClient.runSoon({ id: createdRule.id, force: true });
+            } catch (err) {
+              throw new Error(`Failed to runSoon data generator rule ${createdRule.id}: ${err}`);
+            }
+
+            const expectedInstanceIds = request.body.attackDiscoveries.map((attackDiscovery) =>
+              generateAttackDiscoveryAlertHash({
+                attackDiscovery,
+                connectorId: request.body.apiConfig.connectorId,
+                ownerId: createdRule.id,
+                replacements: request.body.replacements,
+                spaceId,
+              })
+            );
+
+            const esClient = assistantContext.core.elasticsearch.client.asCurrentUser;
+            const index = getScheduledIndexPattern(spaceId);
+
+            let createdDocs: Array<{
+              documentId: string;
+              instanceId: string;
+              concreteIndex: string;
+            }>;
+            try {
+              createdDocs = await pollForAttackDiscoveryAlertDocumentIds({
+                esClient,
+                index,
+                expectedInstanceIds,
+                // Keep this fast; we also avoid slow per-doc refreshes by using a single bulk update.
+                timeoutMs: 20_000,
+              });
+            } catch (err) {
+              throw new Error(`Timed out waiting for created attack discovery alerts: ${err}`);
+            }
+
+            const timestampByInstanceId = getBackdatedTimestampByInstanceId({
+              attackDiscoveries: request.body.attackDiscoveries,
+              connectorId: request.body.apiConfig.connectorId,
+              ownerId: createdRule.id,
+              replacements: request.body.replacements,
+              spaceId,
+            });
+
+            // Backdate framework-owned fields after persistence so the generated alerts span the requested time range.
+            // Use one bulk request (single refresh) to keep generation fast on fresh instances.
+            const bulkOps = createdDocs.flatMap(({ documentId, instanceId, concreteIndex }) => {
+              const ts = timestampByInstanceId[instanceId];
+              if (!ts) return [];
+              return [
+                {
+                  update: {
+                    _index: concreteIndex,
+                    _id: documentId,
+                  },
+                },
+                {
+                  doc: {
+                    [TIMESTAMP]: ts,
+                    [ALERT_START]: ts,
+                    [ALERT_TIME_RANGE]: { gte: ts },
+                  },
+                },
+              ];
+            });
+
+            if (bulkOps.length > 0) {
+              try {
+                await esClient.bulk({
+                  refresh: true,
+                  body: bulkOps,
+                });
+              } catch (err) {
+                throw new Error(`Failed to bulk backdate attack discovery alerts: ${err}`);
+              }
+            }
+
+            const createdDocumentIds = createdDocs.map(({ documentId }) => documentId);
+
+            const dataClient = await assistantContext.getAttackDiscoveryDataClient();
+            if (!dataClient) {
+              return response.customError({
+                statusCode: 500,
+                body: { message: 'Attack discovery data client not initialized' },
+              });
+            }
+
+            const { enableFieldRendering, withReplacements } = request.body;
+
+            const data = (
+              await dataClient.findAttackDiscoveryAlerts({
+                authenticatedUser,
+                esClient,
+                findAttackDiscoveryAlertsParams: {
+                  enableFieldRendering,
+                  ids: createdDocumentIds,
+                  page: 1,
+                  perPage: createdDocumentIds.length,
+                  sortField: '@timestamp',
+                  withReplacements,
+                },
+                logger: assistantContext.logger,
+              })
+            ).data;
+
+            return response.ok({ body: { data } });
+          } finally {
+            try {
+              await rulesClient.delete({ id: createdRule.id });
+            } catch (err) {
+              assistantContext.logger.warn(
+                `Failed to delete dev-only Attack Discovery data generator rule ${createdRule.id}: ${err}`
+              );
+            }
+          }
         } catch (e) {
           const error = transformError(e);
           return siemResponse.error({

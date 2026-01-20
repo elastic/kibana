@@ -24,7 +24,6 @@ import { findDocuments } from '../../../ai_assistant_data_clients/find';
 import { combineFindAttackDiscoveryFilters } from './combine_find_attack_discovery_filters';
 import {
   createAttackDiscoveryAlerts,
-  createAttackDiscoveryAlertsForDataGenerator,
 } from './create_attack_discovery_alerts';
 import { getAttackDiscoveryGenerations } from './get_attack_discovery_generations';
 import { getAttackDiscoveryGenerationByIdQuery } from './get_attack_discovery_generation_by_id_query';
@@ -77,29 +76,6 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       throw new Error('`adhocAttackDiscoveryDataClient` is required');
     }
     return createAttackDiscoveryAlerts({
-      adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
-      authenticatedUser,
-      createAttackDiscoveryAlertsParams,
-      logger: this.options.logger,
-      spaceId: this.spaceId,
-    });
-  };
-
-  /**
-   * Dev-only: create Attack Discovery alerts with timestamps backdated per discovery.
-   * Used by the Security Solution data generator to produce realistic historical timelines.
-   */
-  public createAttackDiscoveryAlertsForDataGenerator = async ({
-    authenticatedUser,
-    createAttackDiscoveryAlertsParams,
-  }: {
-    authenticatedUser: AuthenticatedUser;
-    createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams;
-  }): Promise<AttackDiscoveryApiAlert[]> => {
-    if (this.adhocAttackDiscoveryDataClient === undefined) {
-      throw new Error('`adhocAttackDiscoveryDataClient` is required');
-    }
-    return createAttackDiscoveryAlertsForDataGenerator({
       adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
       authenticatedUser,
       createAttackDiscoveryAlertsParams,

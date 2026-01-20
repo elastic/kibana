@@ -64,7 +64,6 @@ const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock =>
     getAdHocAlertsIndexPattern: jest.fn(),
     getScheduledAndAdHocIndexPattern: jest.fn(),
     createAttackDiscoveryAlerts: jest.fn(),
-    createAttackDiscoveryAlertsForDataGenerator: jest.fn(),
     findAttackDiscoveryAlerts: jest.fn(),
     findDocuments: jest.fn(),
     getAttackDiscoveryGenerations: jest.fn(),

@@ -10,6 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import type { KbnClient } from '@kbn/test';
+import { formatError, getStatusCode, isRecord, isString } from './type_guards';
 
 const ID_NAMESPACE = '3c0de8b5-1a9d-4d9f-9e2a-2fb3a58d6f9f';
 
@@ -242,22 +243,52 @@ const groupAlertsToDiscoveries = ({
 
 const createAttackDiscoveriesViaKibana = async ({
   kbnClient,
+  log,
   params,
 }: {
   kbnClient: KbnClient;
+  log: ToolingLog;
   params: Record<string, unknown>;
 }) => {
-  await kbnClient.request({
-    method: 'POST',
-    path: '/internal/elastic_assistant/data_generator/attack_discoveries/_create',
-    headers: {
-      'kbn-xsrf': 'true',
-      // Required by the server route to avoid accidental invocation.
-      'x-elastic-internal-origin': 'Kibana',
-      'elastic-api-version': '1',
-    },
-    body: params,
-  });
+  try {
+    await kbnClient.request({
+      method: 'POST',
+      path: '/internal/elastic_assistant/data_generator/attack_discoveries/_create',
+      // Force the requester to wrap response errors so we get structured status/response details.
+      retries: 1,
+      headers: {
+        'kbn-xsrf': 'true',
+        // Required by the server route to avoid accidental invocation.
+        'x-elastic-internal-origin': 'Kibana',
+        'elastic-api-version': '1',
+      },
+      body: params,
+    });
+  } catch (e) {
+    const status = getStatusCode(e);
+    const message = (() => {
+      // Axios response error shape (KbnClient without wrapper)
+      const response = isRecord(e) ? e.response : undefined;
+      const data = isRecord(response) ? response.data : undefined;
+      if (isRecord(data) && isString(data.message)) return data.message;
+      if (isRecord(data) && isRecord(data.error) && isString(data.error.message)) return data.error.message;
+
+      // ES-style meta.body (used in other helpers in this scripts folder)
+      const meta = isRecord(e) ? e.meta : undefined;
+      const body = isRecord(meta) ? meta.body : undefined;
+      if (isRecord(body) && isString(body.message)) return body.message;
+      if (isRecord(body) && isRecord(body.error) && isString(body.error.message)) return body.error.message;
+
+      return undefined;
+    })();
+
+    log.error(
+      `Attack Discovery data generator Kibana API call failed (status=${status ?? 'unknown'}). ${
+        message ? `message=${message} ` : ''
+      }error=${formatError(e)}`
+    );
+    throw e;
+  }
 };
 
 export const generateAndIndexAttackDiscoveries = async ({
@@ -372,6 +403,7 @@ export const generateAndIndexAttackDiscoveries = async ({
   );
   await createAttackDiscoveriesViaKibana({
     kbnClient,
+    log,
     params: {
       ...commonParams,
       alertsContextCount: Math.max(0, alerts.length),

@@ -574,29 +574,60 @@ const cleanGeneratedData = async ({
     );
   }
 
-  // 3) Remove previously generated ad-hoc Attack Discoveries (synthetic/no-LLM) for this user.
-  // We intentionally do NOT time-filter here, for the same reason as Security alert deletion above.
+  // 3) Remove previously generated Attack Discoveries (synthetic/no-LLM) within the requested time range.
+  //
+  // We currently persist generated Attack Discoveries into the standard Attack Discovery alerts-as-data index
+  // (`.alerts-security.attack.discovery.alerts-<space>`). Older versions wrote to the `.adhoc` variant; we
+  // clean both for good measure.
+  const attackDiscoveryAlias = `.alerts-security.attack.discovery.alerts-${spaceId}`;
   const adhocDiscoveryAlias = `.adhoc.alerts-security.attack.discovery.alerts-${spaceId}`;
   try {
-    const exists = await esClient.indices.exists({ index: adhocDiscoveryAlias });
+    const deleteQuery = {
+      bool: {
+        filter: [
+          { term: { 'kibana.alert.attack_discovery.api_config.name': 'Synthetic (no-LLM)' } },
+          {
+            range: {
+              '@timestamp': {
+                gte: new Date(startMs).toISOString(),
+                lte: new Date(endMs).toISOString(),
+              },
+            },
+          },
+        ],
+        should: [
+          // Prefer deleting discoveries explicitly tagged by the generator.
+          { term: { tags: 'data_generator' } },
+          { term: { 'kibana.alert.rule.tags': 'data_generator' } },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+
+    const exists = await esClient.indices.exists({ index: attackDiscoveryAlias });
     if (exists) {
+      await esClient.deleteByQuery({
+        index: attackDiscoveryAlias,
+        conflicts: 'proceed',
+        refresh: true,
+        query: deleteQuery,
+      });
+    }
+
+    const adhocExists = await esClient.indices.exists({ index: adhocDiscoveryAlias });
+    if (adhocExists) {
       await esClient.deleteByQuery({
         index: adhocDiscoveryAlias,
         conflicts: 'proceed',
         refresh: true,
-        query: {
-          bool: {
-            filter: [
-              { term: { 'kibana.alert.attack_discovery.api_config.name': 'Synthetic (no-LLM)' } },
-              { term: { 'kibana.alert.attack_discovery.user.name': username } },
-            ],
-          },
-        },
+        query: deleteQuery,
       });
     }
   } catch (e) {
     log.warning(
-      `--clean: failed to delete Attack Discoveries from ${adhocDiscoveryAlias}: ${formatError(e)}`
+      `--clean: failed to delete Attack Discoveries from ${attackDiscoveryAlias} (and/or ${adhocDiscoveryAlias}): ${formatError(
+        e
+      )}`
     );
   }
 

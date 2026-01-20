@@ -27,6 +27,11 @@ export const getStatusCode = (e: unknown): number | undefined => {
   const statusCode = e.statusCode;
   if (typeof statusCode === 'number') return statusCode;
 
+  // Axios-style errors (used by `@kbn/test`'s KbnClient):
+  // error.response.status
+  const response = e.response;
+  if (isRecord(response) && typeof response.status === 'number') return response.status;
+
   const meta = e.meta;
   if (!isRecord(meta)) return undefined;
 

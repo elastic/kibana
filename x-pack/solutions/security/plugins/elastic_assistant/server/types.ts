@@ -50,7 +50,12 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
-import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type {
+  AlertingServerSetup,
+  AlertingServerStart,
+  RulesClient,
+  PublicFrameworkAlertsService,
+} from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -152,6 +157,8 @@ export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   auditLogger?: AuditLogger;
+  rulesClient: RulesClient;
+  frameworkAlerts: PublicFrameworkAlertsService;
   eventLogger: IEventLogger;
   eventLogIndex: string;
   getRegisteredFeatures: GetRegisteredFeatures;

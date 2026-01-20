@@ -7,6 +7,7 @@ It generates:
 - **Realistic raw endpoint events** and **endpoint alerts** by replaying + scaling vendored “attack episodes”
 - **Full-fidelity Security detection alerts** by running the **Detection Engine Rule Preview** API and copying preview alerts into the real alerts index
 - **Optional synthetic Attack Discoveries (no LLM)** built from the generated Security alerts, time-aligned to the requested date range (enable with `--attacks`)
+  - Generated via **Kibana APIs** (Elastic Assistant dev-only route), not by directly bulk-indexing raw alert documents
 
 ## What’s “realistic” about it?
 
@@ -107,7 +108,9 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_c
       - prefers deleting alerts tagged `data-generator`
       - falls back to deleting alerts matching the resolved ruleset rule UUIDs / `rule_id`s (for older generator runs)
       - note: Security alert deletion is not time-filtered (to avoid leaving generator-owned docs behind due to timestamp jitter)
-    - ad-hoc Attack Discoveries created by this script (Synthetic (no-LLM), for the current `--username`) from `.adhoc.alerts-security.attack.discovery.alerts-<spaceId>`
+    - Attack Discoveries created by this script (Synthetic (no-LLM)) from:
+      - `.alerts-security.attack.discovery.alerts-<spaceId>` (current)
+      - `.adhoc.alerts-security.attack.discovery.alerts-<spaceId>` (legacy; best-effort cleanup)
     - Cases created by this script (tagged `data-generator`, plus a narrow legacy fallback)
   - Notes:
     - **Does not delete** preview indices. Some dev setups won’t automatically recreate preview indices once deleted.
@@ -197,7 +200,11 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
 
 12. Optionally (with `--attacks`, or `--cases`) creates **synthetic Attack Discoveries (no LLM)** from generated Security alerts
 
-- Discoveries are written under `.adhoc.alerts-security.attack.discovery.alerts-<spaceId>`
+- Discoveries are created via Kibana (dev-only) API:
+  - `POST /internal/elastic_assistant/data_generator/attack_discoveries/_create`
+- Under the hood, Kibana persists them using the **Alerting framework** into:
+  - `.alerts-security.attack.discovery.alerts-<spaceId>`
+- The generator ensures generated discoveries are **backdated** so `@timestamp` / `kibana.alert.start` fall within the requested `--start-date` → `--end-date` range.
 - Discoveries focus on a small set of “risky” host/user pairs (top alert volume), not every entity
 
 13. Optionally (with `--cases`) creates cases from ~50% of generated Attack Discoveries (tagged `data-generator`)
