@@ -68,8 +68,8 @@ export type EsqlQueryResult = EsqlQuerySuccess | EsqlQueryFailure;
 /**
  * Type guard to check if the result is a successful ES|QL query.
  */
-export const isEsqlQuerySuccess = (result: EsqlQueryResult): result is EsqlQuerySuccess =>
-  result.success;
+export const isEsqlQuerySuccess = (result: unknown): result is EsqlQuerySuccess =>
+  result !== null && typeof result === 'object' && 'success' in result && result.success === true;
 
 /**
  * Helper function to create a consistent failure result for ES|QL query generation.

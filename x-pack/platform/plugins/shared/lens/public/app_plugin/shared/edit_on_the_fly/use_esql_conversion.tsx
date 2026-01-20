@@ -134,7 +134,7 @@ export const useEsqlConversion = (
       // This prevents conversion errors from breaking the visualization
     }
 
-    return esqlLayer && isEsqlQuerySuccess(esqlLayer)
+    return isEsqlQuerySuccess(esqlLayer)
       ? {
           isConvertToEsqlButtonDisabled: false,
           convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
