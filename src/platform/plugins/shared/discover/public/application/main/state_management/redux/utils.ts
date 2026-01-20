@@ -13,8 +13,14 @@ import { v4 as uuid } from 'uuid';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import type {
+  DataPublicPluginStart,
+  DataViewListItem,
+  SearchSessionInfoProvider,
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { ESQLControlState, ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -27,6 +33,8 @@ import type {
   TabActionPayload,
 } from './internal_state';
 import type { DiscoverInternalState, TabState } from './types';
+import type { ReactiveTabRuntimeState } from './runtime_state';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '../../../../../common';
 
 // For some reason if this is not explicitly typed, TypeScript fails with the following error:
 // TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
@@ -171,3 +179,83 @@ export const extractEsqlVariables = (
 
   return variables;
 };
+
+export function createSearchSessionRestorationDataProvider(deps: {
+  data: DataPublicPluginStart;
+  getPersistedDiscoverSession: () => DiscoverSession | undefined;
+  getCurrentTab: () => TabState;
+  getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
+}): SearchSessionInfoProvider {
+  return {
+    getName: async () => {
+      return (
+        deps.getPersistedDiscoverSession()?.title ||
+        i18n.translate('discover.discoverDefaultSearchSessionName', {
+          defaultMessage: 'Discover',
+        })
+      );
+    },
+    getLocatorData: async () => {
+      return {
+        id: DISCOVER_APP_LOCATOR,
+        initialState: createUrlGeneratorState({
+          ...deps,
+          shouldRestoreSearchSession: false,
+        }),
+        restoreState: createUrlGeneratorState({
+          ...deps,
+          shouldRestoreSearchSession: true,
+        }),
+      };
+    },
+  };
+}
+
+function createUrlGeneratorState({
+  data,
+  getPersistedDiscoverSession,
+  getCurrentTab,
+  getCurrentTabRuntimeState,
+  shouldRestoreSearchSession,
+}: {
+  data: DataPublicPluginStart;
+  getPersistedDiscoverSession: () => DiscoverSession | undefined;
+  getCurrentTab: () => TabState;
+  getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
+  shouldRestoreSearchSession: boolean;
+}): DiscoverAppLocatorParams {
+  const appState = getCurrentTab().appState;
+  const dataView = getCurrentTabRuntimeState().currentDataView$.getValue();
+  return {
+    filters: data.query.filterManager.getFilters(),
+    dataViewId: dataView?.id,
+    query: appState.query,
+    savedSearchId: getPersistedDiscoverSession()?.id,
+    timeRange: shouldRestoreSearchSession
+      ? data.query.timefilter.timefilter.getAbsoluteTime()
+      : data.query.timefilter.timefilter.getTime(),
+    searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
+    columns: appState.columns,
+    grid: appState.grid,
+    sort: appState.sort,
+    savedQuery: appState.savedQuery,
+    interval: appState.interval,
+    refreshInterval: shouldRestoreSearchSession
+      ? {
+          pause: true, // force pause refresh interval when restoring a session
+          value: 0,
+        }
+      : undefined,
+    useHash: false,
+    viewMode: appState.viewMode,
+    hideAggregatedPreview: appState.hideAggregatedPreview,
+    breakdownField: appState.breakdownField,
+    dataViewSpec: !dataView?.isPersisted() ? dataView?.toMinimalSpec() : undefined,
+    ...(shouldRestoreSearchSession
+      ? {
+          hideChart: appState.hideChart ?? false,
+          sampleSize: appState.sampleSize,
+        }
+      : {}),
+  };
+}
