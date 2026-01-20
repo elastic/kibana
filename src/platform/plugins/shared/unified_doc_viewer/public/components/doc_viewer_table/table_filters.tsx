@@ -123,21 +123,31 @@ export interface UseTableFiltersReturn extends TableFiltersCommonProps {
 export const useTableFilters = ({
   storage,
   storageKey,
+  searchTerm: externalSearchTerm,
+  onChangeSearchTerm: externalOnChangeSearchTerm,
 }: {
   storage: Storage;
   storageKey: string;
+  searchTerm?: string;
+  onChangeSearchTerm?: (searchTerm: string) => void;
 }): UseTableFiltersReturn => {
-  const [searchTerm, setSearchTerm] = useState(storage.get(storageKey) || '');
+  const [internalSearchTerm, setInternalSearchTerm] = useState(storage.get(storageKey) || '');
   const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>(
     getStoredFieldTypes(storage)
   );
 
+  const searchTerm = externalSearchTerm ?? internalSearchTerm;
+
   const onChangeSearchTerm = useCallback(
     (newSearchTerm: string) => {
-      setSearchTerm(newSearchTerm);
-      persistSearchTerm(newSearchTerm, storage);
+      if (externalOnChangeSearchTerm) {
+        externalOnChangeSearchTerm(newSearchTerm);
+      } else {
+        setInternalSearchTerm(newSearchTerm);
+        persistSearchTerm(newSearchTerm, storage);
+      }
     },
-    [storage, setSearchTerm]
+    [storage, setInternalSearchTerm, externalOnChangeSearchTerm]
   );
 
   const onChangeFieldTypes = useCallback(

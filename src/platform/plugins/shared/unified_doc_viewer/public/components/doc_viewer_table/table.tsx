@@ -44,7 +44,10 @@ import { LOCAL_STORAGE_KEY_SEARCH_TERM, TableFilters, useTableFilters } from './
 import { FieldRow } from './field_row';
 import { TableGrid } from './table_grid';
 
-export interface DocViewerTableRestorableState {}
+export interface DocViewerTableRestorableState {
+  // Main search input value
+  searchTerm: string;
+}
 
 const { withRestorableState, useRestorableState } =
   createRestorableStateProvider<DocViewerTableRestorableState>();
@@ -111,6 +114,8 @@ const InternalDocViewerTable = ({
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
+  const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
+
   const [pinnedFields, setPinnedFields] = useState<string[]>(
     getPinnedFields(currentDataViewId, storage)
   );
@@ -141,9 +146,18 @@ const InternalDocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
+  const onChangeSearchTerm = useCallback(
+    (newSearchTerm: string) => {
+      setSearchTerm(newSearchTerm);
+    },
+    [setSearchTerm]
+  );
+
   const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters({
     storage,
     storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
+    searchTerm,
+    onChangeSearchTerm,
   });
 
   const fieldToItem = useCallback(
@@ -384,7 +398,7 @@ const InternalDocViewerTable = ({
             onRemoveColumn={onRemoveColumn}
             columns={columns}
             onFindSearchTermMatch={onFindSearchTermMatch}
-            searchTerm={tableFiltersProps.searchTerm}
+            searchTerm={searchTerm}
             initialPageSize={initialPageSize}
             onChangePageSize={onChangePageSize}
             pinnedFields={pinnedFields}
