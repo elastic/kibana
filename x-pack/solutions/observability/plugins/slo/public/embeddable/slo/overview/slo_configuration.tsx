@@ -11,7 +11,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
   EuiSpacer,
   EuiFlyout,
   EuiFlyoutHeader,
@@ -60,8 +59,8 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
     SearchSLODefinitionItem | undefined
   >();
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>(ALL_VALUE);
-  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const showAllGroupByInstances = selectedInstanceId === ALL_VALUE;
 
   const hasGroupBy = useMemo(() => {
     if (!selectedSloDefinition?.groupBy) {
@@ -78,14 +77,10 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
       return;
     }
 
-    // When "All instances" is selected, ensure showAllGroupByInstances is true
-    const finalShowAllGroupByInstances =
-      selectedInstanceId === ALL_VALUE ? true : showAllGroupByInstances;
-
     const remoteName: string | undefined = selectedSloDefinition?.remote?.remoteName;
 
     onCreate({
-      showAllGroupByInstances: finalShowAllGroupByInstances,
+      showAllGroupByInstances,
       sloId: selectedSloDefinition.id,
       sloInstanceId: selectedInstanceId ?? ALL_VALUE,
       remoteName,
@@ -119,29 +114,6 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
                     sloId={selectedSloDefinition.id}
                     onSelected={(instanceId) => {
                       setSelectedInstanceId(instanceId);
-                      // When "All instances" is selected, automatically enable showAllGroupByInstances
-                      if (instanceId === ALL_VALUE) {
-                        setShowAllGroupByInstances(true);
-                      } else {
-                        // When a specific instance is selected, reset the toggle
-                        setShowAllGroupByInstances(false);
-                      }
-                    }}
-                  />
-                </EuiFlexItem>
-              )}
-              {hasGroupBy && selectedInstanceId && selectedInstanceId !== ALL_VALUE && (
-                <EuiFlexItem>
-                  <EuiSwitch
-                    label={i18n.translate(
-                      'xpack.slo.sloConfiguration.euiSwitch.showAllGroupByLabel',
-                      {
-                        defaultMessage: 'Show all related group-by instances',
-                      }
-                    )}
-                    checked={showAllGroupByInstances}
-                    onChange={(e) => {
-                      setShowAllGroupByInstances(e.target.checked);
                     }}
                   />
                 </EuiFlexItem>
