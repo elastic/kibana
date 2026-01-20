@@ -345,7 +345,6 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.latencyAvgColumnLabel', {
         defaultMessage: 'Latency (avg.)',
       }),
-      width: `${unit * 12}px`,
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, latency }) => {
@@ -371,7 +370,6 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.throughputColumnLabel', {
         defaultMessage: 'Throughput',
       }),
-      width: `${unit * 12}px`,
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, throughput }) => {
@@ -398,7 +396,6 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
-      width: `${unit * 12}px`,
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, transactionErrorRate }) => {
