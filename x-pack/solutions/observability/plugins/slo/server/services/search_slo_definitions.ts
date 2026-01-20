@@ -103,7 +103,6 @@ export class SearchSLODefinitions {
         const hit = bucket.slo_details.hits.hits[0];
         const sloSrc = hit?._source?.slo ?? {};
         const kibanaUrl = hit?._source?.kibanaUrl;
-        const indexName = hit?._index;
         const normalizedRemoteName = Array.isArray(hit?.fields?.remoteName)
           ? hit.fields.remoteName[0]
           : hit?.fields?.remoteName;
