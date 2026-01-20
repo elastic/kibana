@@ -26,6 +26,13 @@ export const InputSchema = z.object({
    * The user input message to send to the agent.
    */
   message: z.string().describe('The user input message to send to the agent.'),
+  /**
+   * Optional existing conversation id to continue a previous conversation.
+   */
+  conversation_id: z
+    .string()
+    .optional()
+    .describe('Optional existing conversation ID to continue a previous conversation.'),
 });
 
 /**
@@ -41,6 +48,12 @@ export const OutputSchema = z.object({
     .any()
     .optional()
     .describe('The structured output from the agent. Only here when schem was provided'),
+  conversation_id: z
+    .string()
+    .optional()
+    .describe(
+      'Conversation ID associated with this step execution. Present when create_conversation is enabled or conversation_id is provided.'
+    ),
 });
 
 /**
@@ -61,6 +74,14 @@ export const ConfigSchema = z.object({
     .string()
     .optional()
     .describe('The ID of the connector to use. Defaults to the default GenAI connector.'),
+  /**
+   * When true, create/persist a conversation and associate it with the executing user.
+   * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
+   */
+  'create-conversation': z
+    .boolean()
+    .optional()
+    .describe('When true, creates a conversation for the step.'),
 });
 
 export type RunAgentStepInputSchema = typeof InputSchema;
