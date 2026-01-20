@@ -49,6 +49,7 @@ test.describe('Node Details: host', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('Date picker: host - preserves date range across tabs', async ({
     pageObjects: { nodeDetailsPage, datePicker },
+    page,
   }) => {
     await nodeDetailsPage.goToPage(K8S_HOST_NAME, 'host', {
       name: K8S_HOST_NAME,
@@ -65,28 +66,44 @@ test.describe('Node Details: host', { tag: ['@ess', '@svlOblt'] }, () => {
       { name: 'anomalies', clickFn: 'clickAnomaliesTab' },
     ];
 
+    // Get the browser's timezone to parse dates correctly
+    const browserTimezone = await page.evaluate(
+      () => Intl.DateTimeFormat().resolvedOptions().timeZone
+    );
+
     for (const { name, clickFn } of tabs) {
       await test.step(`click ${name} tab and verify date range is preserved`, async () => {
         await (nodeDetailsPage as any)[clickFn]();
         const timeConfig = await datePicker.getTimeConfig();
-        expect(timeConfig.start).toBe(
-          START_HOST_DATE.tz('Europe/Lisbon').format(DATE_PICKER_FORMAT)
-        );
-        expect(timeConfig.end).toBe(END_HOST_DATE.tz('Europe/Lisbon').format(DATE_PICKER_FORMAT));
+        // Parse returned date strings in the browser's timezone and compare UTC timestamps
+        // This ensures we parse the date string in the same timezone the UI used to display it
+        const actualStart = moment.tz(timeConfig.start, DATE_PICKER_FORMAT, true, browserTimezone);
+        const actualEnd = moment.tz(timeConfig.end, DATE_PICKER_FORMAT, true, browserTimezone);
+        expect(actualStart.valueOf()).toBe(START_HOST_DATE.valueOf());
+        expect(actualEnd.valueOf()).toBe(END_HOST_DATE.valueOf());
       });
     }
   });
 
   test('Date picker: host - preserves selected date range between page reloads', async ({
     pageObjects: { nodeDetailsPage, datePicker },
+    page,
   }) => {
     await nodeDetailsPage.clickOverviewTab();
 
     await test.step('refresh page and verify date range is preserved', async () => {
       await nodeDetailsPage.refreshPage();
       const timeConfig = await datePicker.getTimeConfig();
-      expect(timeConfig.start).toBe(START_HOST_DATE.tz('Europe/Lisbon').format(DATE_PICKER_FORMAT));
-      expect(timeConfig.end).toBe(END_HOST_DATE.tz('Europe/Lisbon').format(DATE_PICKER_FORMAT));
+      // Get the browser's timezone to parse dates correctly
+      const browserTimezone = await page.evaluate(
+        () => Intl.DateTimeFormat().resolvedOptions().timeZone
+      );
+      // Parse returned date strings in the browser's timezone and compare UTC timestamps
+      // This ensures we parse the date string in the same timezone the UI used to display it
+      const actualStart = moment.tz(timeConfig.start, DATE_PICKER_FORMAT, true, browserTimezone);
+      const actualEnd = moment.tz(timeConfig.end, DATE_PICKER_FORMAT, true, browserTimezone);
+      expect(actualStart.valueOf()).toBe(START_HOST_DATE.valueOf());
+      expect(actualEnd.valueOf()).toBe(END_HOST_DATE.valueOf());
     });
   });
 
