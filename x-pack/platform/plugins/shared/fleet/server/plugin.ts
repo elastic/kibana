@@ -25,7 +25,7 @@ import type {
   SecurityServiceStart,
   ServiceStatus,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, ServiceStatusLevels } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
@@ -921,7 +921,7 @@ export class FleetPlugin
       }
     })();
 
-    const internalSoClient = new SavedObjectsClient(core.savedObjects.getUnsafeInternalClient());
+    const internalSoClient = core.savedObjects.getUnsafeInternalClient();
     return {
       authz: {
         fromRequest: getAuthzFromRequest,

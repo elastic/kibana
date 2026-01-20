@@ -6,7 +6,11 @@
  */
 
 import { type CoreSetup, type Logger } from '@kbn/core/server';
-import type { ElasticsearchClient, LoggerFactory, SavedObjectsClient } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  LoggerFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
@@ -153,7 +157,7 @@ export class UpgradeAgentlessDeploymentsTask {
 
   private processUpgradeAgentlessDeployments = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient,
+    soClient: SavedObjectsClientContract,
     abortController: AbortController
   ) => {
     const SAVED_OBJECT_TYPE = 'fleet-agent-policies';

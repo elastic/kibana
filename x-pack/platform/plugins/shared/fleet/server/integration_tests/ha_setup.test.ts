@@ -9,7 +9,7 @@ import Path from 'path';
 
 import { range } from 'lodash';
 
-import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TestElasticsearchUtils, createRoot } from '@kbn/core-test-helpers-kbn-server';
 import {
   getSupertest,
@@ -255,7 +255,7 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
     ],
   };
 
-  async function expectFleetSetupState(soClient: ISavedObjectsRepository) {
+  async function expectFleetSetupState(soClient: SavedObjectsClientContract) {
     // Assert setup state
     const agentPolicyType = await getAgentPolicySavedObjectType();
     const packagePolicyType = await getPackagePolicySavedObjectType();
