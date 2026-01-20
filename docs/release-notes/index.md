@@ -99,7 +99,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Optimizes performance by avoiding redundant requests when breakdown or chart interval changes [#245523]({{kib-pull}}245523).
 * Shows multi-fields in the document viewer by default in {{esql}} mode [#245890]({{kib-pull}}245890).
 * Adds support for filtering multivalue fields by interacting with the results table in {{esql}} mode [#245554]({{kib-pull}}245554).
-* Improves the lookup index editor interface available from the {{esql}} mode [#244480]({{kib-pull}}244480).
+* Improves the lookup index editor interface available in {{esql}} mode [#244480]({{kib-pull}}244480).
 * Improves the file upload section of the lookup index editor interface [#244550]({{kib-pull}}244550).
 * Saving an {{esql}} query's visualization to a dashboard now brings any related controls along with it [#237070]({{kib-pull}}237070).
 * Updates the icon in the document viewer to add or remove a field in the main documents table [#246024]({{kib-pull}}246024).
