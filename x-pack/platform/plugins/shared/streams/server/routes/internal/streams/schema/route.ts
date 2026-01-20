@@ -25,6 +25,7 @@ import {
   rebuildGeoPointsFromFlattened,
   collectFieldsWithGeoPoints,
 } from '../../../../lib/streams/helpers/normalize_geo_points';
+import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 const FIELD_SIMULATION_TIMEOUT = '1s';
@@ -200,8 +201,6 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     });
 
     const documentSamplesSearchBody = {
-      // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
-      runtime_mappings: propertiesForSample,
       query: {
         bool: {
           filter: filterConditions,
@@ -213,12 +212,35 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       timeout: FIELD_SIMULATION_TIMEOUT,
     };
 
-    const sampleResults = await scopedClusterClient.asCurrentUser.search({
-      index: params.path.name,
-      ...documentSamplesSearchBody,
-    });
+    let sampleResults: SearchResponse<unknown, Record<string, AggregationsAggregate>> | undefined = undefined
+    try {
+      sampleResults = await scopedClusterClient.asCurrentUser.search({
+        index: params.path.name,
+        // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
+        runtime_mappings: propertiesForSample,
+        ...documentSamplesSearchBody,
+      });
 
-    if (sampleResults.hits.hits.length === 0) {
+    } catch (error) {
+      /**
+       * If the error is due to time_series_dimension shadowing, we need to retry the request for sample documents without runtime_mappings
+       * because the runtime_mappings collides for time_series_dimension.
+       * See https://github.com/elastic/elasticsearch/issues/140882
+       * 
+       * N.B. THIS IS A BANDAID FIX THAT SHOULD BE REMOVED AS QUICKLY AS POSSIBLE WHEN THE ISSUE IS FIXED.
+       * 
+       */
+      if (error.message.includes('time_series_dimension')) {
+        sampleResults = await scopedClusterClient.asCurrentUser.search({
+          index: params.path.name,
+          ...documentSamplesSearchBody,
+        });
+      } else {
+        throw error
+      }
+    }
+
+    if (sampleResults?.hits.hits.length === 0) {
       return {
         status: 'unknown',
         simulationError: null,
@@ -233,11 +255,16 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
 
     const geoPointFields = new Set(
-      userFieldDefinitions.filter((field) => field.type === 'geo_point').map((field) => field.name)
+      userFieldDefinitions
+        .filter((field) => field.type === 'geo_point')
+        .map((field) => field.name)
     );
 
     const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => {
-      const normalized = normalizeGeoPointsInObject(hit._source as SampleDocument, geoPointFields);
+      const normalized = normalizeGeoPointsInObject(
+        hit._source as SampleDocument,
+        geoPointFields
+      );
       const flattenedSource = getFlattenedObject(normalized);
 
       const sourceWithGeoPoints = rebuildGeoPointsFromFlattened(
@@ -263,7 +290,9 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       streamDefinition
     );
 
-    const hasErrors = simulation.docs.some((doc) => doc.doc.error !== undefined);
+    const hasErrors = simulation.docs
+      // .filter((doc) => doc.doc.error !== undefined)
+      .some((doc) => doc.doc.error !== undefined);
 
     if (hasErrors) {
       const documentWithError = simulation.docs.find((doc) => doc.doc.error !== undefined);
