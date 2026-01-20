@@ -1059,11 +1059,38 @@ export default function (providerContext: FtrProviderContext) {
           (n: NodeDataModel) => n.shape === 'label'
         ) as LabelNodeDataModel[];
 
+        // Verify we have label nodes to test
+        expect(labelNodes.length).to.be.greaterThan(0, 'Should have at least one label node');
+
         // Verify label node IDs contain the expected pattern oe([01])oa([01])
         // This confirms isOrigin and isOriginAlert booleans are converted to 0/1
+        // CRITICAL: If COALESCE(..., false) is missing, events with null event.id
+        // would result in isOrigin=null which would break this pattern
         labelNodes.forEach((labelNode: LabelNodeDataModel) => {
-          expect(labelNode.id).to.match(/oe\([01]\)oa\([01]\)/);
+          expect(labelNode.id).to.match(
+            /oe\([01]\)oa\([01]\)/,
+            `Label node ID should contain oe(0|1)oa(0|1) pattern but got: ${labelNode.id}. ` +
+              'This pattern validates that isOrigin and isOriginAlert are properly coalesced to boolean values.'
+          );
         });
+
+        // At least one label should be from an origin event (oe(1))
+        const originLabelNodes = labelNodes.filter((n: LabelNodeDataModel) =>
+          n.id.includes('oe(1)')
+        );
+        expect(originLabelNodes.length).to.be.greaterThan(
+          0,
+          'Should have at least one label node from origin event'
+        );
+
+        // Verify the origin alert label has the correct pattern (oe(1)oa(1))
+        const originAlertLabels = labelNodes.filter((n: LabelNodeDataModel) =>
+          n.id.includes('oe(1)oa(1)')
+        );
+        expect(originAlertLabels.length).to.be.greaterThan(
+          0,
+          'Should have at least one label node from origin alert (kabcd1234efgh5678 is marked as isAlert: true)'
+        );
       });
 
       it('should handle events with null event.id gracefully', async () => {
@@ -1116,29 +1143,72 @@ export default function (providerContext: FtrProviderContext) {
             'Test event with null event.id should exist'
           );
 
+          // Query specifically for the event with null event.id using esQuery filter
+          // Also provide originEventIds to trigger the COALESCE logic for isOrigin/isOriginAlert
+          // This tests that events with null event.id get isOrigin=false (not null)
           const response = await postGraph(supertest, {
             query: {
               indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+              // Include originEventIds to test that isOrigin evaluates to false (not null)
+              // when event.id is null - the COALESCE(..., false) is critical here
               originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: true }],
               start: '2024-09-01T00:00:00Z',
               end: '2024-09-02T00:00:00Z',
+              esQuery: {
+                bool: {
+                  filter: [
+                    {
+                      match_phrase: {
+                        'user.entity.id': 'test-user-null-event-id',
+                      },
+                    },
+                  ],
+                },
+              },
             },
           }).expect(result(200));
 
           expect(response.body).to.have.property('nodes');
+          expect(response.body).to.have.property('edges');
+
+          // Should find the event with null event.id
+          expect(response.body.nodes.length).to.be.greaterThan(
+            0,
+            'Should return nodes for event with null event.id'
+          );
+
           const labelNodes = response.body.nodes.filter(
             (n: NodeDataModel) => n.shape === 'label'
           ) as LabelNodeDataModel[];
 
+          // Verify we got at least one label node for the null event.id event
+          expect(labelNodes.length).to.be.greaterThan(
+            0,
+            'Should have label node for event with null event.id'
+          );
+
           // All label nodes should have valid IDs with the pattern oe([01])oa([01])
           // This confirms COALESCE ensures boolean isOrigin and isOriginAlert values
-          // even when event.id is null
+          // even when event.id is null (should be oe(0)oa(0) for non-origin events)
           labelNodes.forEach((labelNode: LabelNodeDataModel) => {
-            expect(labelNode.id).to.match(/oe\([01]\)oa\([01]\)/);
+            expect(labelNode.id).to.match(
+              /oe\([01]\)oa\([01]\)/,
+              `Label node ID should contain oe(0|1)oa(0|1) pattern but got: ${labelNode.id}. ` +
+                'If the pattern shows null instead of 0/1, the COALESCE fix is missing.'
+            );
           });
 
-          // Verify we got results (confirming events with potentially null event.id were processed)
-          expect(labelNodes.length).to.be.greaterThan(0);
+          // The event with null event.id should have isOrigin=false (oe(0)) since
+          // event.id IN (...) returns null when event.id is null, and COALESCE should
+          // convert that to false
+          const nullEventIdLabelNode = labelNodes.find((n: LabelNodeDataModel) =>
+            n.label?.includes('test_action_null_event_id')
+          );
+          expect(nullEventIdLabelNode).to.not.be(undefined);
+          expect(nullEventIdLabelNode!.id).to.match(
+            /oe\(0\)oa\(0\)/,
+            'Event with null event.id should have isOrigin=false (oe(0)) and isOriginAlert=false (oa(0))'
+          );
         } finally {
           // Clean up: delete the test event using the actual backing index
           if (createdDocId && createdIndex) {
