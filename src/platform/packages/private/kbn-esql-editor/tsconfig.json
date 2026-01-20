@@ -38,8 +38,10 @@
     "@kbn/react-hooks",
     "@kbn/react-kibana-context-theme",
     "@kbn/calculate-width-from-char-count",
-    "@kbn/shared-ux-utility",
     "@kbn/react-field"
+    "@kbn/kql",
+    "@kbn/ebt-tools",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",
