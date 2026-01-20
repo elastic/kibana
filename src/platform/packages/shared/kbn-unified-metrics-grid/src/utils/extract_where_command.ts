@@ -10,15 +10,19 @@
 import type { ESQLCommand } from '@kbn/esql-language';
 import { BasicPrettyPrinter, isProperNode, Parser } from '@kbn/esql-language';
 
-export const extractWhereCommand = (esql?: string): string[] => {
-  if (!esql) {
+export const extractWhereCommand = (esqlQuery?: string): string[] => {
+  if (!esqlQuery) {
     return [];
   }
 
-  const { root, errors } = Parser.parse(esql);
+  const { root, errors } = Parser.parse(esqlQuery);
   if (errors.length > 0) {
     return [];
   }
+
+  // NOTE: We intentionally only inspect `root.commands` here (instead of `Walker.matchAll`)
+  // to ensure we only extract top-level `| WHERE ...` commands and avoid capturing WHERE
+  // commands inside subqueries (e.g. `FORK (...)`) or other nested query structures.
   const whereConditions = root.commands.filter(
     (command): command is ESQLCommand => command.type === 'command' && command.name === 'where'
   );

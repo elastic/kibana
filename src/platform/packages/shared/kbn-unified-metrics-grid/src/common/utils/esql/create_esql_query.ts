@@ -67,9 +67,10 @@ export function createESQLQuery({
   const { name: metricField, instrument, index } = metric;
   const source = timeseries(index);
 
-  const whereCommands = whereStatements
-    .filter((statement) => statement.trim().length > 0)
-    .map((statement) => where(statement));
+  const whereCommands = whereStatements.flatMap((statement) => {
+    const trimmed = statement.trim();
+    return trimmed.length > 0 ? [where(trimmed)] : [];
+  });
 
   const queryPipeline = source.pipe(
     ...whereCommands,
