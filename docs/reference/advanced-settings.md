@@ -46,7 +46,11 @@ Change the settings that apply only to a specific {{product.kibana}} space.
 ### General [kibana-general-settings]
 
 $$$hideAnnouncements$$$`hideAnnouncements` {applies_to}`stack: ga 9.0-9.3, deprecated 9.4+` {applies_to}`serverless: unavailable`
-:   Stops showing messages and tours that highlight new features. `false` by default.
+:   Stops showing messages and tours that highlight new features. `false` by default. 
+    :::{note}
+    :applies_to: stack: ga 9.4+
+    If this setting is set to `false` but the `hideAnnouncements` setting located in the **Global Settings** tab is set to `true`, then messages and tours that highlight new features won't show for the current space.
+    :::
 
 $$$dateformat$$$`dateFormat` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   The format to use for displaying [pretty formatted dates](https://momentjs.com/docs/#/displaying/format/).
