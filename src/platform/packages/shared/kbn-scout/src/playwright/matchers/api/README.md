@@ -10,6 +10,7 @@ Create a Scout API custom `expect` with dynamic matchers for API testing and res
 - Matchers created at runtime based on asserted object's properties
 - Full TypeScript support for dynamically generated matchers
 - Partial and exact matching provided
+- Asymmetric matchers for flexible assertions
 - Error format identical to Playwright's for consistent developer experience
 - Restricted Playwright matchers exposure
 - Supports `not` for all matchers
@@ -48,7 +49,11 @@ expect(response).not.toHaveStatusCode(500);
 // Data assertions with partial matching (default)
 expect(response).toHaveData({ total: 1 });
 expect(response).toHaveData({ cases: [{ id: 'case-123' }] });
-expect(response).toHaveData({ cases: [{}] }); // nested array has at least one item
+
+// Asymmetric matchers for flexible assertions
+expect(response).toHaveData({ cases: expect.toHaveLength() }); // or pass exact length
+expect(response).toHaveData({ total: expect.toBeGreaterThan(0) });
+expect(response).toHaveData({ cases: [{ version: expect.toBeDefined() }] });
 
 // Data assertions with exact matching
 expect(response).toHaveData(
@@ -90,7 +95,7 @@ expect(response).toHaveStatusText('OK'); // ❌ type error - statusText not in r
 
 ### Restricted Value Matchers
 
-`ValueMatchers` only exposes `toBeDefined()` to guide developers toward API-specific assertions and enforce best practices:
+Default playwright's value matchers are restricted to guide developers toward API-specific assertions and enforce best practices:
 
 ```typescript
 // Available for checking system-generated values

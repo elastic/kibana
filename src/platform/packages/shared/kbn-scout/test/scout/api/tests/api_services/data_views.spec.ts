@@ -53,8 +53,11 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
     const response = await apiServices.dataViews.get(dataViewId);
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({ id: dataViewId, title: dataViewTitle });
-    expect(response.data.version).toBeDefined();
+    expect(response).toHaveData({
+      id: dataViewId,
+      title: dataViewTitle,
+      version: expect.toBeDefined(),
+    });
   });
 
   apiTest('should handle get() for non-existent data view', async ({ apiServices }) => {

@@ -108,8 +108,6 @@ describe('toHaveData', () => {
     };
 
     it('matches multiple branches and nested arrays simultaneously', () => {
-      // This tests: partial object matching, partial array matching, deep nesting,
-      // and matching two different items in the same array (parallel branches)
       expect(() =>
         apiExpect({ data: complexData }).toHaveData({
           meta: { version: '1.0' },
@@ -128,6 +126,89 @@ describe('toHaveData', () => {
           results: { items: [{ id: 'nonexistent' }] },
         })
       ).toThrow();
+    });
+  });
+
+  describe('asymmetric matchers', () => {
+    describe('expect.toBeDefined()', () => {
+      it('passes for any non-null/undefined value including falsy ones', () => {
+        expect(() =>
+          apiExpect({ data: { a: 'str', b: 0, c: '', d: false } }).toHaveData({
+            a: apiExpect.toBeDefined(),
+            b: apiExpect.toBeDefined(),
+            c: apiExpect.toBeDefined(),
+            d: apiExpect.toBeDefined(),
+          })
+        ).not.toThrow();
+      });
+
+      it('fails for null or undefined values', () => {
+        expect(() =>
+          apiExpect({ data: { a: null } }).toHaveData({ a: apiExpect.toBeDefined() })
+        ).toThrow();
+        expect(() =>
+          apiExpect({ data: { a: undefined } }).toHaveData({ a: apiExpect.toBeDefined() })
+        ).toThrow();
+      });
+    });
+
+    describe('expect.toBeGreaterThan()', () => {
+      it('passes when number exceeds threshold', () => {
+        expect(() =>
+          apiExpect({ data: { count: 5 } }).toHaveData({ count: apiExpect.toBeGreaterThan(0) })
+        ).not.toThrow();
+      });
+
+      it('fails when number equals or is below threshold', () => {
+        expect(() =>
+          apiExpect({ data: { count: 5 } }).toHaveData({ count: apiExpect.toBeGreaterThan(5) })
+        ).toThrow();
+        expect(() =>
+          apiExpect({ data: { count: 5 } }).toHaveData({ count: apiExpect.toBeGreaterThan(10) })
+        ).toThrow();
+      });
+
+      it('fails for non-number values', () => {
+        expect(() =>
+          apiExpect({ data: { name: 'test' } }).toHaveData({ name: apiExpect.toBeGreaterThan(0) })
+        ).toThrow();
+      });
+    });
+
+    it('works on nested object properties', () => {
+      const data = { user: { profile: { age: 25, name: 'test' } } };
+      expect(() =>
+        apiExpect({ data }).toHaveData({
+          user: { profile: { age: apiExpect.toBeGreaterThan(18) } },
+        })
+      ).not.toThrow();
+    });
+
+    it('works on items inside nested arrays', () => {
+      const data = { items: [{ count: 5 }, { count: 10 }] };
+      expect(() =>
+        apiExpect({ data }).toHaveData({
+          items: [{ count: apiExpect.toBeGreaterThan(4) }],
+        })
+      ).not.toThrow();
+    });
+
+    describe('expect.toHaveLength()', () => {
+      it('matches exact length or non-empty when omitted', () => {
+        expect(() =>
+          apiExpect({ data: { items: [1, 2, 3] } }).toHaveData({
+            items: apiExpect.toHaveLength(3),
+          })
+        ).not.toThrow();
+        expect(() =>
+          apiExpect({ data: { items: [1, 2, 3] } }).toHaveData({
+            items: apiExpect.toHaveLength(),
+          })
+        ).not.toThrow();
+        expect(() =>
+          apiExpect({ data: { items: [] } }).toHaveData({ items: apiExpect.toHaveLength() })
+        ).toThrow();
+      });
     });
   });
 });

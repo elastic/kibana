@@ -52,3 +52,27 @@ export interface ValueMatchers {
 
   not: Omit<ValueMatchers, 'not'>;
 }
+
+/**
+ * Represents an asymmetric matcher that can be used inside toHaveData().
+ * These matchers are identified by Jest/Playwright via the $$typeof symbol.
+ */
+export interface AsymmetricMatcher {
+  $$typeof: symbol;
+  asymmetricMatch(other: unknown): boolean;
+  toString(): string;
+  toAsymmetricMatcher?(): string;
+}
+
+/**
+ * Custom asymmetric matchers available on the expect object.
+ * These can be used inside toHaveData() for flexible value matching.
+ */
+export interface AsymmetricMatchers {
+  /** Matches any value that is not null or undefined */
+  toBeDefined(): AsymmetricMatcher;
+  /** Matches any number greater than the specified value */
+  toBeGreaterThan(min: number): AsymmetricMatcher;
+  /** Matches any array or string with the specified length, or any length > 0 if not specified */
+  toHaveLength(length?: number): AsymmetricMatcher;
+}

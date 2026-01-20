@@ -10,6 +10,7 @@
 import type { MatchersFor } from './types';
 import { createValueMatchers } from './value_matchers';
 import { createDynamicMatchers, type DynamicMatchersInput } from './dynamic_matchers';
+import { asymmetricMatchers } from './asymmetric_matchers';
 
 /**
  * Custom expect wrapper with dynamic matchers based on input properties.
@@ -19,9 +20,13 @@ import { createDynamicMatchers, type DynamicMatchersInput } from './dynamic_matc
  * expect(response).toHaveStatusCode(200);  // ✅ status exists
  * expect(response).toHaveData({ id: 1 });  // ❌ data doesn't exist
  * expect(response.status).toBe(200);       // ✅ value matchers always work
+ *
+ * // Asymmetric matchers for flexible assertions
+ * expect(response).toHaveData({ count: expect.toBeGreaterThan(0) });
+ * expect(response).toHaveData({ metadata: expect.toBeDefined() });
  */
-export function expect<T>(actual: T): MatchersFor<T>;
-export function expect(actual: unknown) {
+function expectFn<T>(actual: T): MatchersFor<T>;
+function expectFn(actual: unknown) {
   const valueMatchers = createValueMatchers(actual);
 
   if (typeof actual === 'object' && actual !== null) {
@@ -35,3 +40,5 @@ export function expect(actual: unknown) {
 
   return valueMatchers;
 }
+
+export const expect = Object.assign(expectFn, asymmetricMatchers);

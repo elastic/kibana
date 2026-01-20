@@ -14,11 +14,27 @@ export interface ToHaveDataOptions {
   exactMatch?: boolean;
 }
 
+// Symbol used by Jest/Playwright to identify asymmetric matchers
+const ASYMMETRIC_MATCHER_SYMBOL = Symbol.for('jest.asymmetricMatcher');
+
+function isAsymmetricMatcher(value: unknown): boolean {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    // eslint-disable-next-line dot-notation
+    (value as Record<string | symbol, unknown>)['$$typeof'] === ASYMMETRIC_MATCHER_SYMBOL
+  );
+}
+
 /**
  * Recursively wraps arrays with `arrayContaining` and objects with `objectContaining`
- * to enable partial matching at any depth.
+ * to enable partial matching at any depth. Preserves asymmetric matchers
+ * (e.g., `expect.toBeDefined()`, `expect.toBeGreaterThan()`) when encountered.
  */
 function toPartialMatch(expected: unknown): unknown {
+  if (isAsymmetricMatcher(expected)) {
+    return expected;
+  }
   if (Array.isArray(expected)) {
     return baseExpect.arrayContaining(expected.map(toPartialMatch));
   }
@@ -39,12 +55,17 @@ function toPartialMatch(expected: unknown): unknown {
  * @param options.exactMatch - If true, performs exact matching for objects/arrays.
  *
  * @example
+ * // Basic usage
  * expect(response).toHaveData();                                   // checks data is not null/undefined
  * expect(response).toHaveData({ id: 1 });                          // partial match (default)
  * expect(response).toHaveData({ id: 1 }, { exactMatch: true });    // exact match
  * expect(response).toHaveData('success');                          // exact match for primitives
  * expect(response).toHaveData({ items: [{ name: 'foo' }] });       // at least one item with name 'foo'
- * expect(response).toHaveData({ comments: [{}] });                 // at least one item exists in array
+ *
+ * // With asymmetric matchers for flexible assertions
+ * expect(response).toHaveData({ metadata: expect.toBeDefined() });
+ * expect(response).toHaveData({ count: expect.toBeGreaterThan(0) });
+ * expect(response).toHaveData({ comments: expect.toHaveLength(3) });
  */
 export function toHaveData<T extends { data: unknown }>(
   obj: T,

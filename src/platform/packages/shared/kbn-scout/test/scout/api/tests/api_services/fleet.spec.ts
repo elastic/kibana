@@ -203,8 +203,7 @@ apiTest.describe('Fleet Outputs Management', { tag: ['@svlSecurity', '@ess'] }, 
     const response: ApiResponse = await apiServices.fleet.outputs.getOutputs();
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData();
-    expect(response.data.items).toBeDefined();
+    expect(response).toHaveData({ items: expect.toHaveLength() });
   });
 
   apiTest('should get a specific output by ID', async ({ apiServices }) => {
