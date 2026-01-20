@@ -9,29 +9,28 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { BehaviorSubject, Observable, skip } from 'rxjs';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { useESQLVariables } from './use_esql_variables';
-import type {
-  ESQLControlState,
-  ESQLControlVariable,
-  ESQLVariableType,
-  EsqlControlType,
-} from '@kbn/esql-types';
+import type { ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import React from 'react';
 
 // Mock ControlGroupRendererApi
 class MockControlGroupRendererApi {
-  inputSubject: BehaviorSubject<Record<string, ControlPanelsState<ESQLControlState>> | null>;
+  inputSubject: BehaviorSubject<Record<
+    string,
+    ControlPanelsState<OptionsListESQLControlState>
+  > | null>;
   addNewPanel: jest.Mock;
 
   constructor() {
     this.inputSubject = new BehaviorSubject<Record<
       string,
-      ControlPanelsState<ESQLControlState>
+      ControlPanelsState<OptionsListESQLControlState>
     > | null>(null);
     this.addNewPanel = jest.fn();
   }
@@ -41,7 +40,7 @@ class MockControlGroupRendererApi {
   }
 
   // Method to simulate new input coming from the API
-  simulateInput(input: Record<string, ControlPanelsState<ESQLControlState>>) {
+  simulateInput(input: Record<string, ControlPanelsState<OptionsListESQLControlState>>) {
     this.inputSubject.next(input);
   }
 }
@@ -114,7 +113,7 @@ describe('useESQLVariables', () => {
         mockControlGroupAPI.simulateInput({
           initialChildControlState: {
             '123': { type: 'esqlControl' },
-          } as unknown as ControlPanelsState<ESQLControlState>,
+          } as unknown as ControlPanelsState<OptionsListESQLControlState>,
         });
       });
 
@@ -278,7 +277,7 @@ describe('useESQLVariables', () => {
         mockControlGroupAPI.simulateInput({
           initialChildControlState: {
             '123': { type: 'esqlControl' },
-          } as unknown as ControlPanelsState<ESQLControlState>,
+          } as unknown as ControlPanelsState<OptionsListESQLControlState>,
         });
       });
 
@@ -315,16 +314,16 @@ describe('useESQLVariables', () => {
       const mockControlWithNumericString = {
         panel1: {
           type: 'esqlControl',
-          variableType: 'values' as ESQLVariableType,
-          variableName: 'numericVar',
-          selectedOptions: ['123'], // String that can be converted to number
+          variable_type: 'values' as ESQLVariableType,
+          variable_name: 'numericVar',
+          selected_options: ['123'], // String that can be converted to number
           title: 'Numeric Panel',
-          availableOptions: ['123', '456'],
-          esqlQuery: '',
-          controlType: 'STATIC_VALUES' as EsqlControlType,
+          available_options: ['123', '456'],
+          esql_query: '',
+          control_type: 'STATIC_VALUES' as EsqlControlType,
           order: 0,
         },
-      } as unknown as ControlPanelsState<ESQLControlState>;
+      } as unknown as ControlPanelsState<OptionsListESQLControlState>;
 
       act(() => {
         mockControlGroupAPI.simulateInput({
@@ -355,16 +354,16 @@ describe('useESQLVariables', () => {
       const mockControlWithTextString = {
         panel2: {
           type: 'esqlControl',
-          variableType: 'values' as ESQLVariableType,
-          variableName: 'textVar',
-          selectedOptions: ['hello'], // String that cannot be converted to number
+          variable_type: 'values' as ESQLVariableType,
+          variable_name: 'textVar',
+          selected_options: ['hello'], // String that cannot be converted to number
           title: 'Text Panel',
-          availableOptions: ['hello', 'world'],
-          esqlQuery: '',
-          controlType: 'STATIC_VALUES' as EsqlControlType,
+          available_options: ['hello', 'world'],
+          esql_query: '',
+          control_type: 'STATIC_VALUES' as EsqlControlType,
           order: 0,
         },
-      } as unknown as ControlPanelsState<ESQLControlState>;
+      } as unknown as ControlPanelsState<OptionsListESQLControlState>;
 
       act(() => {
         mockControlGroupAPI.simulateInput({

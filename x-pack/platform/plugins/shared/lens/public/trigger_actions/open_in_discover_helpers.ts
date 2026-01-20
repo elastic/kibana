@@ -25,7 +25,7 @@ import {
 import type { LensApi } from '@kbn/lens-common-2';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import type { ESQLControlState } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { apiPublishesControlsLayout } from '@kbn/controls-renderer';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers/interfaces/presentation_container';
 import { isLensApi } from '../react_embeddable/type_guards';
@@ -129,8 +129,9 @@ function getEsqlControls(embeddable: LensApi) {
         return acc;
       }
 
-      const controlState = api.serializeState() as ESQLControlState;
-      const variableName = 'variableName' in controlState && (controlState.variableName as string);
+      const controlState = api.serializeState() as OptionsListESQLControlState;
+      const variableName =
+        'variable_name' in controlState && (controlState.variable_name as string);
       if (!variableName) return acc;
       const isUsed = usedVariables.includes(variableName);
       if (!isUsed) return acc;

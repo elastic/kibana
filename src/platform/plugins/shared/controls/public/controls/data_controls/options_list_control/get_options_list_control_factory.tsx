@@ -22,7 +22,7 @@ import {
 } from 'rxjs';
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import type { OptionsListControlState } from '@kbn/controls-schemas';
+import type { OptionsListControlState, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
@@ -258,7 +258,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): OptionsListControlState {
+      function serializeState(): OptionsListDSLControlState {
         return {
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
@@ -269,7 +269,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<OptionsListDSLControlState>({
         uuid,
         parentApi,
         serializeState,

@@ -36,20 +36,20 @@ export const optionsListSelectionSchema = schema.oneOf([schema.string(), schema.
 
 const optionsListControlBaseParameters = {
   display_settings: schema.maybe(optionsListDisplaySettingsSchema),
-  search_technique: schema.maybe(optionsListSearchTechniqueSchema),
-  sort: schema.maybe(optionsListSortSchema),
-  exists_selected: schema.maybe(schema.boolean({ defaultValue: false })),
-  run_past_timeout: schema.maybe(schema.boolean({ defaultValue: false })),
   single_select: schema.maybe(schema.boolean({ defaultValue: false })),
-  exclude: schema.maybe(schema.boolean({ defaultValue: false })),
 };
 
 export const optionsListDSLControlSchema = dataControlSchema
   .extends(optionsListControlBaseParameters)
   .extends({
+    exclude: schema.maybe(schema.boolean({ defaultValue: false })),
+    exists_selected: schema.maybe(schema.boolean({ defaultValue: false })),
+    run_past_timeout: schema.maybe(schema.boolean({ defaultValue: false })),
+    search_technique: schema.maybe(optionsListSearchTechniqueSchema),
     selected_options: schema.maybe(
       schema.arrayOf(optionsListSelectionSchema, { defaultValue: [] })
     ),
+    sort: schema.maybe(optionsListSortSchema),
   });
 
 export const optionsListESQLControlSchema = controlSchema

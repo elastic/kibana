@@ -15,9 +15,9 @@ import {
   ESQLVariableType,
   EsqlControlType,
   TIMEFIELD_ROUTE,
-  type ESQLControlState,
   type ESQLControlVariable,
 } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import {
   appendStatsByToQuery,
   getESQLResults,
@@ -39,10 +39,10 @@ interface ValueControlFormProps {
   search: ISearchGeneric;
   variableType: ESQLVariableType;
   variableName: string;
-  controlFlyoutType: EsqlControlType;
+  controlFlyoutType: OptionsListESQLControlState['control_type'];
   queryString: string;
-  setControlState: (state: ESQLControlState) => void;
-  initialState?: ESQLControlState;
+  setControlState: (state: OptionsListESQLControlState) => void;
+  initialState?: OptionsListESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
   currentApp?: string;
@@ -88,8 +88,8 @@ export function ValueControlForm({
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
-    initialState?.availableOptions
-      ? initialState.availableOptions.map((option) => {
+    initialState?.available_options
+      ? initialState.available_options.map((option) => {
           return {
             label: option,
             key: option,
@@ -101,7 +101,7 @@ export function ValueControlForm({
 
   const [valuesQuery, setValuesQuery] = useState<string>(
     variableType === ESQLVariableType.VALUES
-      ? initialState?.esqlQuery ?? INITIAL_EMPTY_STATE_QUERY
+      ? initialState?.esql_query ?? INITIAL_EMPTY_STATE_QUERY
       : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
@@ -113,7 +113,7 @@ export function ValueControlForm({
 
   const shouldDefaultToMultiSelect = variableType === ESQLVariableType.MULTI_VALUES;
   const [singleSelect, setSingleSelect] = useState<boolean>(
-    initialState?.singleSelect ?? !shouldDefaultToMultiSelect
+    initialState?.single_select ?? !shouldDefaultToMultiSelect
   );
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
@@ -217,8 +217,8 @@ export function ValueControlForm({
 
   useEffect(() => {
     if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
-      if (initialState?.esqlQuery) {
-        onValuesQuerySubmit(initialState.esqlQuery);
+      if (initialState?.esql_query) {
+        onValuesQuerySubmit(initialState.esql_query);
       } else if (valuesRetrieval) {
         setSuggestedQuery();
       }
@@ -226,7 +226,7 @@ export function ValueControlForm({
   }, [
     selectedValues?.length,
     controlFlyoutType,
-    initialState?.esqlQuery,
+    initialState?.esql_query,
     variableName,
     valuesRetrieval,
     onValuesQuerySubmit,
@@ -238,14 +238,14 @@ export function ValueControlForm({
     // removes the question mark from the variable name
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
-      availableOptions,
-      selectedOptions: [availableOptions[0]],
-      singleSelect,
+      available_options: availableOptions,
+      selected_options: [availableOptions[0]],
+      single_select: singleSelect,
       title: label || variableNameWithoutQuestionmark,
-      variableName: variableNameWithoutQuestionmark,
-      variableType: singleSelect ? variableType : ESQLVariableType.MULTI_VALUES,
-      esqlQuery: valuesQuery || queryString,
-      controlType: controlFlyoutType,
+      variable_name: variableNameWithoutQuestionmark,
+      variable_type: singleSelect ? variableType : ESQLVariableType.MULTI_VALUES,
+      esql_query: valuesQuery || queryString,
+      control_type: controlFlyoutType,
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);

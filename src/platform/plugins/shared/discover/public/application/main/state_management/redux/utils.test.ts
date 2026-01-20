@@ -14,7 +14,7 @@ import {
 } from './utils';
 import { type TabState } from './types';
 import { getTabStateMock } from './__mocks__/internal_state.mocks';
-import { type ESQLControlState, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -128,7 +128,7 @@ describe('extractEsqlVariables', () => {
   });
 
   it('should extract single-select string variable', () => {
-    const panels: ControlPanelsState<ESQLControlState> = {
+    const panels: ControlPanelsState<OptionsListESQLControlState> = {
       panel1: createMockESQLControlPanel(
         'myVar',
         ESQLVariableType.VALUES,
@@ -148,7 +148,7 @@ describe('extractEsqlVariables', () => {
   });
 
   it('should extract single-select numeric variable', () => {
-    const panels: ControlPanelsState<ESQLControlState> = {
+    const panels: ControlPanelsState<OptionsListESQLControlState> = {
       panel1: createMockESQLControlPanel('numVar', ESQLVariableType.VALUES, ['123', '456'], true),
     };
 
@@ -163,7 +163,7 @@ describe('extractEsqlVariables', () => {
   });
 
   it('should extract multi-select string variables', () => {
-    const panels: ControlPanelsState<ESQLControlState> = {
+    const panels: ControlPanelsState<OptionsListESQLControlState> = {
       panel1: createMockESQLControlPanel(
         'multiVar',
         ESQLVariableType.MULTI_VALUES,
@@ -183,7 +183,7 @@ describe('extractEsqlVariables', () => {
   });
 
   it('should extract multi-select numeric variables', () => {
-    const panels: ControlPanelsState<ESQLControlState> = {
+    const panels: ControlPanelsState<OptionsListESQLControlState> = {
       panel1: createMockESQLControlPanel(
         'multiVar',
         ESQLVariableType.MULTI_VALUES,

@@ -19,7 +19,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { ESQLControlState } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { PresentationContainer } from '@kbn/presentation-containers';
@@ -87,8 +87,9 @@ function getEsqlControls(
         return acc;
       }
 
-      const controlState = api.serializeState() as ESQLControlState;
-      const variableName = 'variableName' in controlState && (controlState.variableName as string);
+      const controlState = api.serializeState() as OptionsListESQLControlState;
+      const variableName =
+        'variable_name' in controlState && (controlState.variable_name as string);
       if (!variableName) return acc;
       const isUsed = usedVariables.includes(variableName);
       if (!isUsed) return acc;
@@ -109,5 +110,5 @@ function getEsqlControls(
     {}
   );
 
-  return esqlControlState as ControlPanelsState<ESQLControlState> & SerializableRecord;
+  return esqlControlState as ControlPanelsState<OptionsListESQLControlState> & SerializableRecord;
 }

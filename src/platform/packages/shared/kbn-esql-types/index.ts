@@ -12,7 +12,6 @@ export {
   EsqlControlType,
   VariableNamePrefix,
   type ControlWidthOptions,
-  type ESQLControlState,
   type ESQLControlVariable,
   type PublishesESQLVariable,
   type PublishesESQLVariables,

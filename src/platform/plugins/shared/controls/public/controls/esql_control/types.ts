@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { ESQLControlState, PublishesESQLVariable } from '@kbn/esql-types';
+import type { PublishesESQLVariable } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type {
   HasEditCapabilities,
   PublishesDataLoading,
@@ -16,7 +17,7 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { OptionsListComponentState } from '../data_controls/options_list_control/types';
 
-export type ESQLControlApi = DefaultEmbeddableApi<ESQLControlState> &
+export type ESQLControlApi = DefaultEmbeddableApi<OptionsListESQLControlState> &
   PublishesESQLVariable &
   HasEditCapabilities &
   TitlesApi &

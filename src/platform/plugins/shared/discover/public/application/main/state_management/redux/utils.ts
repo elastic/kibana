@@ -15,7 +15,7 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { ESQLControlState, ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
@@ -121,7 +121,7 @@ export const getSerializedSearchSourceDataViewDetails = (
 
 export const parseControlGroupJson = (
   jsonString?: string | null
-): ControlPanelsState<ESQLControlState> => {
+): ControlPanelsState<OptionsListESQLControlState> => {
   try {
     return jsonString ? JSON.parse(jsonString) : {};
   } catch (e) {
@@ -138,7 +138,7 @@ export const parseControlGroupJson = (
  * @returns An array of ESQLControlVariable objects.
  */
 export const extractEsqlVariables = (
-  panels: ControlPanelsState<ESQLControlState> | null
+  panels: ControlPanelsState<OptionsListESQLControlState> | null
 ): ESQLControlVariable[] => {
   if (!panels || Object.keys(panels).length === 0) {
     return [];

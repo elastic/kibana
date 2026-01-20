@@ -9,7 +9,8 @@
 import { isEqual, omit } from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import { skip } from 'rxjs';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -53,7 +54,7 @@ export const useESQLVariables = ({
   onUpdateESQLQuery: (query: string) => void;
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
-  getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
+  getActivePanels: () => ControlPanelsState<OptionsListESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
@@ -79,10 +80,10 @@ export const useESQLVariables = ({
 
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
       const controlGroupState =
-        input.initialChildControlState as ControlPanelsState<ESQLControlState>;
+        input.initialChildControlState as ControlPanelsState<OptionsListESQLControlState>;
       // drop unused keys for BWC
       const transformedState = Object.keys(controlGroupState).reduce((prev, key) => {
-        return { ...prev, [key]: omit(controlGroupState[key], ['id', 'useGlobalFilters']) };
+        return { ...prev, [key]: omit(controlGroupState[key], ['id', 'use_global_filters']) };
       }, {});
       stateContainer.savedSearchState.updateControlState({
         nextControlState: transformedState,
