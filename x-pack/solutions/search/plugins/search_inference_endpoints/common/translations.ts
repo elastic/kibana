@@ -96,6 +96,10 @@ export const ENDPOINT = i18n.translate('xpack.searchInferenceEndpoints.endpoint'
   defaultMessage: 'Endpoint',
 });
 
+export const MODEL = i18n.translate('xpack.searchInferenceEndpoints.model', {
+  defaultMessage: 'Model',
+});
+
 export const SERVICE_PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.serviceProvider', {
   defaultMessage: 'Service',
 });
