@@ -175,7 +175,9 @@ export class DeployPrivateLocationMonitors {
     encryptedSavedObjects,
     soClient,
     spaceIdToSync,
+    privateLocationId,
   }: {
+    privateLocationId?: string;
     spaceIdToSync?: string;
     soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
@@ -190,6 +192,7 @@ export class DeployPrivateLocationMonitors {
       await this.getAllMonitorConfigs({
         encryptedSavedObjects,
         soClient,
+        privateLocationId,
         spaceId: spaceIdToSync,
       });
 
@@ -200,7 +203,9 @@ export class DeployPrivateLocationMonitors {
         )}`
       );
       await this.deployEditMonitors({
-        allPrivateLocations,
+        allPrivateLocations: allPrivateLocations.filter(
+          (loc) => loc.id === privateLocationId || !privateLocationId
+        ),
         configsBySpaces,
         monitorSpaceIds,
         paramsBySpace,
@@ -260,10 +265,12 @@ export class DeployPrivateLocationMonitors {
     soClient,
     encryptedSavedObjects,
     spaceId = ALL_SPACES_ID,
+    privateLocationId,
   }: {
     soClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     spaceId?: string;
+    privateLocationId?: string;
   }) {
     const { syntheticsService } = this.syntheticsMonitorClient;
     const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId });
@@ -275,6 +282,9 @@ export class DeployPrivateLocationMonitors {
 
     const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({
       spaceId,
+      ...(privateLocationId && {
+        filter: `${syntheticsMonitorAttributes}.locations.id:"${privateLocationId}"`,
+      }),
     });
 
     const [paramsBySpace, monitors, maintenanceWindows] = await Promise.all([
