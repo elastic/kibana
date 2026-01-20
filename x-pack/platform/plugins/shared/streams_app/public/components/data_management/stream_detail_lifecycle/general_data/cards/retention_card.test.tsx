@@ -270,7 +270,7 @@ describe('RetentionCard', () => {
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
       const editButton = screen.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton');
-      expect(editButton).toHaveAttribute('aria-label', 'Edit data retention');
+      expect(editButton).toHaveAttribute('aria-label', 'Edit retention method');
     });
   });
 
