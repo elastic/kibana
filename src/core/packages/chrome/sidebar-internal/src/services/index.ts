@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 export { SidebarService } from './sidebar_service';
-export type { SidebarStart, SidebarSetup } from './sidebar_service';
+export type { SidebarStart, SidebarSetup } from '@kbn/core-chrome-sidebar';

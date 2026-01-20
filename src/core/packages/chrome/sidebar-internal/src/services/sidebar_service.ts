@@ -17,8 +17,6 @@ import { SidebarRegistryService } from './sidebar_registry_service';
 import { SidebarStateService } from './sidebar_state_service';
 import { SidebarAppStateService } from './sidebar_app_state_service';
 
-export type { SidebarSetup, SidebarStart } from '@kbn/core-chrome-sidebar';
-
 /**
  * Composite service for sidebar functionality
  *
@@ -47,7 +45,7 @@ export class SidebarService {
   start(basePath: string): SidebarStart {
     // initialize services on start to make sure all apps are registered
     this.appState.start(basePath);
-    (this.state as SidebarStateService).start(basePath);
+    this.state.start(basePath);
 
     const getApp = <TParams = unknown,>(appId: SidebarAppId): SidebarApp<TParams> => {
       return {
