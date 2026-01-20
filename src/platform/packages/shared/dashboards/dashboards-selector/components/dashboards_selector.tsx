@@ -97,7 +97,7 @@ export function DashboardsSelector({
 
       setSelectedDashboards(validDashboards);
 
-      // if the form contains any invalid dashboard IDs, remove them
+      // if the form contains any invalid dashboard IDs, remove them from the parent form
       if (validDashboards.length !== dashboardsFormData.length) {
         onChange(validDashboards);
       }
@@ -106,7 +106,7 @@ export function DashboardsSelector({
       setSelectedDashboards([]);
       onChange([]);
     }
-  }, [dashboardsFormData, uiActions]);
+  }, [dashboardsFormData, uiActions, onChange]);
 
   useEffect(() => {
     fetchDashboardTitles();
