@@ -17,6 +17,7 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, waitFor } from '@testing-library/react';
+import { act } from 'react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import * as dataContext from '../../hooks/use_has_data';
@@ -26,6 +27,7 @@ import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_availa
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AlertsPage } from './alerts';
+import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -125,6 +127,8 @@ const { useHasData } = jest.requireMock('../../hooks/use_has_data');
 
 jest.mock('../../hooks/use_get_available_rules_with_descriptions');
 
+jest.mock('@kbn/triggers-actions-ui-plugin/public');
+
 const ruleDescriptions = [
   {
     id: 'observability.rules.custom_threshold',
@@ -215,6 +219,38 @@ describe('AlertsPage with all capabilities', () => {
     await waitFor(() => {
       expect(wrapper.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
       expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Manage rules link', () => {
+    it('should direct to unified rules page when the experimental feature is enabled', async () => {
+      (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+
+      let wrapper;
+      await act(async () => {
+        wrapper = await setup();
+      });
+
+      await waitFor(() => {
+        const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
+        expect(manageRulesLink).toBeInTheDocument();
+        expect(manageRulesLink.getAttribute('href')).toBe('/app/rules');
+      });
+    });
+
+    it('should direct to oblt rules page when the experimental feature is disabled', async () => {
+      (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+
+      let wrapper;
+      await act(async () => {
+        wrapper = await setup();
+      });
+
+      await waitFor(() => {
+        const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
+        expect(manageRulesLink).toBeInTheDocument();
+        expect(manageRulesLink.getAttribute('href')).toBe('/app/observability/alerts/rules');
+      });
     });
   });
 });

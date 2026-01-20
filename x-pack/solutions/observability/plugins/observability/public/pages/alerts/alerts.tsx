@@ -20,6 +20,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
 import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
+import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
@@ -263,7 +264,9 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = http.basePath.prepend('/app/rules');
+  const manageRulesHref = getIsExperimentalFeatureEnabled('unifiedRulesPage')
+    ? http.basePath.prepend('/app/rules')
+    : http.basePath.prepend('/app/observability/alerts/rules');
 
   return (
     <Provider value={alertSearchBarStateContainer}>
