@@ -40,6 +40,25 @@ export const sloTemplate: SavedObjectsType = {
             'timeWindow',
             'tags',
             'settings',
+          ];
+          return pick(attributes, fields);
+        },
+        create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: (attributes) => {
+          const fields = [
+            'name',
+            'description',
+            'indicator',
+            'budgetingMethod',
+            'objective',
+            'timeWindow',
+            'tags',
+            'settings',
             'groupBy',
             'artifacts',
           ];
