@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ISuggestionItem } from '../types';
+import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
 
 const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   return [
@@ -38,6 +38,36 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   ];
 };
 
+const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
+  return [
+    {
+      label: UnmappedFieldsStrategy.FAIL,
+      text: UnmappedFieldsStrategy.FAIL,
+      kind: 'Value',
+      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.failDoc', {
+        defaultMessage: 'Fails the query if unmapped fields are present',
+      }),
+    },
+    {
+      label: UnmappedFieldsStrategy.NULLIFY,
+      text: UnmappedFieldsStrategy.NULLIFY,
+      kind: 'Value',
+      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.nullifyDoc', {
+        defaultMessage: 'Treats unmapped fields as null values',
+      }),
+    },
+    {
+      label: UnmappedFieldsStrategy.LOAD,
+      text: UnmappedFieldsStrategy.LOAD,
+      kind: 'Value',
+      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
+        defaultMessage: 'Attempts to load the fields from the source',
+      }),
+    },
+  ];
+};
+
 export const COMPLETIONS_BY_SETTING_NAME: Record<string, ISuggestionItem[]> = {
   project_routing: getProjectRoutingCommonCompletionItems(),
+  unmapped_fields: getUnmappedFieldsCompletionItems(),
 };
