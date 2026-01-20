@@ -645,7 +645,8 @@ const ESQLEditorInternal = function ESQLEditor({
         // Only fetch recommendations if there's an active solutionId and a non-empty query
         // Otherwise the route will return an error
         if (activeSolutionId && queryString.trim() !== '') {
-          return await getEditorExtensions(core.http, queryString, activeSolutionId);
+          const extensions = await getEditorExtensions(core.http, queryString, activeSolutionId);
+          return extensions;
         }
         return {
           recommendedQueries: [],
@@ -939,6 +940,8 @@ const ESQLEditorInternal = function ESQLEditor({
     setIsIndicesBrowserOpen(true);
   }, [updateResourceBrowserPosition]);
 
+  const fieldsBrowserQueryStringRef = useRef<string>('');
+
   const openFieldsBrowser = useCallback(async () => {
     if (editorRef.current && editorModel.current) {
       const position = editorRef.current.getPosition();
@@ -947,6 +950,9 @@ const ESQLEditorInternal = function ESQLEditor({
         const fullText = editorModel.current.getValue() || '';
         const offset = editorModel.current.getOffsetAt(position) || 0;
         const innerText = fullText.substring(0, offset);
+
+        // Store the query string for fetching recommended fields
+        fieldsBrowserQueryStringRef.current = innerText;
 
         // Import the necessary functions dynamically to avoid circular dependencies
         const { correctQuerySyntax } = await import(
@@ -1478,6 +1484,9 @@ const ESQLEditorInternal = function ESQLEditor({
             onSelectField={handleResourceBrowserSelect}
             getColumnMap={fieldsBrowserGetColumnMapRef.current}
             position={browserPopoverPosition}
+            queryString={fieldsBrowserQueryStringRef.current}
+            activeSolutionId={activeSolutionId ?? undefined}
+            http={core.http}
           />
         </>
       )}

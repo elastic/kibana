@@ -9,11 +9,14 @@
 
 import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useCallback } from 'react';
-import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnMapFn } from '@kbn/esql-language/src/language/shared/columns_retrieval_helpers';
 import type { ESQLColumnData } from '@kbn/esql-language/src/commands/registry/types';
+import type { HttpStart } from '@kbn/core/public';
+import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import { FieldIcon } from '@kbn/react-field';
+import { getEditorExtensions } from '@kbn/esql-utils';
 import { BrowserPopoverWrapper } from './browser_popover_wrapper';
 
 // Map ESQL field types to FieldIcon types (matching typeToEuiIconMap keys)
@@ -145,6 +148,9 @@ interface FieldsBrowserPopoverProps {
   onSelectField: (fieldName: string, oldLength: number) => void;
   getColumnMap?: GetColumnMapFn;
   position?: { top?: number; left?: number };
+  queryString?: string;
+  activeSolutionId?: SolutionId | null;
+  http?: HttpStart;
 }
 
 export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
@@ -153,7 +159,31 @@ export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
   onSelectField,
   getColumnMap,
   position,
+  queryString = '',
+  activeSolutionId,
+  http,
 }) => {
+  const [recommendedFields, setRecommendedFields] = useState<RecommendedField[]>([]);
+
+  // Fetch recommended fields when popover opens
+  useEffect(() => {
+    const fetchRecommendedFields = async () => {
+      if (isOpen && http && activeSolutionId && queryString.trim() !== '') {
+        try {
+          const extensions = await getEditorExtensions(http, queryString, activeSolutionId);
+          setRecommendedFields(extensions.recommendedFields || []);
+        } catch (error) {
+          // If fetching fails, just don't show recommended fields
+          setRecommendedFields([]);
+        }
+      } else {
+        setRecommendedFields([]);
+      }
+    };
+
+    fetchRecommendedFields();
+  }, [isOpen, http, activeSolutionId, queryString]);
+
   const fetchData = useCallback(async (): Promise<ESQLFieldWithMetadata[]> => {
     if (!getColumnMap) {
       return [];
@@ -191,21 +221,83 @@ export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
 
   const createOptions = useCallback(
     (fields: ESQLFieldWithMetadata[], selectedFields: string[]): EuiSelectableOption[] => {
-      return fields.map((field) => ({
-        key: field.name,
-        label: field.name,
-        checked: selectedFields.includes(field.name) ? ('on' as const) : undefined,
-        prepend: (
-          <FieldIcon type={getFieldIconType(field.type)} size="s" className="eui-alignMiddle" />
-        ),
-        data: {
-          type: field.type,
-          typeLabel: getFieldTypeLabel(field.type),
-          typeKey: getFieldTypeLabel(field.type), // Add typeKey for filtering
-        },
-      }));
+      // Create a set of recommended field names for quick lookup
+      const recommendedFieldNames = new Set(recommendedFields.map((f) => f.name));
+
+      // Split fields into recommended and available
+      const recommended: ESQLFieldWithMetadata[] = [];
+      const available: ESQLFieldWithMetadata[] = [];
+
+      fields.forEach((field) => {
+        if (recommendedFieldNames.has(field.name)) {
+          recommended.push(field);
+        } else {
+          available.push(field);
+        }
+      });
+
+      const options: EuiSelectableOption[] = [];
+
+      // Add recommended fields section if there are any
+      if (recommended.length > 0) {
+        options.push({
+          label: i18n.translate('esqlEditor.fieldsBrowser.recommendedFields', {
+            defaultMessage: 'Recommended fields',
+          }),
+          isGroupLabel: true,
+          key: 'recommended-fields-group',
+        });
+
+        recommended.forEach((field) => {
+          options.push({
+            key: field.name,
+            label: field.name,
+            checked: selectedFields.includes(field.name) ? ('on' as const) : undefined,
+            prepend: (
+              <FieldIcon type={getFieldIconType(field.type)} size="s" className="eui-alignMiddle" />
+            ),
+            data: {
+              type: field.type,
+              typeLabel: getFieldTypeLabel(field.type),
+              typeKey: getFieldTypeLabel(field.type),
+            },
+          });
+        });
+      }
+
+      // Add available fields section
+      if (available.length > 0) {
+        // Only add section label if we have recommended fields (to create sections)
+        if (recommended.length > 0) {
+          options.push({
+            label: i18n.translate('esqlEditor.fieldsBrowser.availableFields', {
+              defaultMessage: 'Available fields',
+            }),
+            isGroupLabel: true,
+            key: 'available-fields-group',
+          });
+        }
+
+        available.forEach((field) => {
+          options.push({
+            key: field.name,
+            label: field.name,
+            checked: selectedFields.includes(field.name) ? ('on' as const) : undefined,
+            prepend: (
+              <FieldIcon type={getFieldIconType(field.type)} size="s" className="eui-alignMiddle" />
+            ),
+            data: {
+              type: field.type,
+              typeLabel: getFieldTypeLabel(field.type),
+              typeKey: getFieldTypeLabel(field.type),
+            },
+          });
+        });
+      }
+
+      return options;
     },
-    []
+    [recommendedFields]
   );
 
   const i18nKeys = useMemo(
