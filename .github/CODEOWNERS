@@ -63,7 +63,7 @@ packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-i18n @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
-packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
+packages/kbn-eslint-plugin-telemetry @elastic/kibana-core
 packages/kbn-extract-plugin-translations @elastic/kibana-core
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-find-used-node-modules @elastic/kibana-operations
@@ -1618,6 +1618,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/routes/streams/processing @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams/server/routes/streams/schema @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-onboarding-team
+
+# Streams parts owned by Kibana Management
+x-pack/platform/plugins/shared/streams_app/public/components/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
