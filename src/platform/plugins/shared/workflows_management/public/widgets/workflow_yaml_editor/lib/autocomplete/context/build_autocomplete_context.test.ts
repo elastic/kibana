@@ -63,7 +63,22 @@ export function getFakeAutocompleteContextParams(
   };
 }
 
+const mockGetOutputSchemaForStepType = jest.fn();
+jest.mock('../../../../../features/workflow_context/lib/get_output_schema_for_step_type', () => ({
+  getOutputSchemaForStepType: (node: unknown) => mockGetOutputSchemaForStepType(node),
+}));
+
 describe('buildAutocompleteContext', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetOutputSchemaForStepType.mockImplementation((node) => {
+      if (node.stepType === 'console') {
+        return z.string();
+      }
+      return z.unknown();
+    });
+  });
+
   it('should return null if the yaml is empty', () => {
     const result = buildAutocompleteContext(getFakeAutocompleteContextParams(''));
 
