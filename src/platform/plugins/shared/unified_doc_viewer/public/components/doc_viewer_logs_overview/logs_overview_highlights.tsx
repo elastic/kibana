@@ -15,7 +15,6 @@ import { EuiBadge, EuiPanel } from '@elastic/eui';
 import type { FieldConfiguration } from '../content_framework';
 import { ContentFrameworkTable } from '../content_framework';
 import { HighlightField } from '../observability/traces/components/highlight_field';
-import { TraceIdLink } from '../observability/traces/components/trace_id_link';
 import { fieldLabels } from '../observability/constants';
 
 interface LogsOverviewHighlightsProps
@@ -66,6 +65,7 @@ const fieldNames: Array<keyof LogDocumentOverview> = [
   // Service & Infrastructure
   fieldConstants.SERVICE_NAME_FIELD,
   fieldConstants.HOST_NAME_FIELD,
+  fieldConstants.TRACE_ID_FIELD,
   fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD,
   fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD,
   // Cloud
@@ -91,17 +91,6 @@ const fieldConfigurations: Record<string, FieldConfiguration> = {
   },
   [fieldConstants.TRACE_ID_FIELD]: {
     title: fieldLabels.TRACE_ID_LABEL,
-    formatter: (value: unknown, formattedValue: string) => (
-      <HighlightField value={value as string} formattedValue={formattedValue}>
-        {({ content }) => (
-          <TraceIdLink
-            traceId={value as string}
-            formattedTraceId={content}
-            data-test-subj="unifiedDocViewLogsOverviewTraceIdHighlightLink"
-          />
-        )}
-      </HighlightField>
-    ),
   },
   [fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]: {
     title: fieldLabels.ORCHESTRATOR_CLUSTER_NAME_LABEL,
@@ -134,7 +123,6 @@ const fieldConfigurations: Record<string, FieldConfiguration> = {
   },
   [fieldConstants.DATASTREAM_NAMESPACE_FIELD]: {
     title: fieldLabels.DATASTREAM_NAMESPACE_LABEL,
-
     formatter: (value, formattedValue) => (
       <HighlightField value={value as string} formattedValue={formattedValue}>
         {({ content }) => <EuiBadge color="hollow">{content}</EuiBadge>}

@@ -21,6 +21,7 @@ import {
   SPAN_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE,
+  TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
@@ -42,6 +43,7 @@ import { useFetchTraceRootSpanContext } from '../../doc_viewer_overview/hooks/us
 const spanFieldNames = [
   SPAN_ID,
   SPAN_NAME,
+  TRACE_ID,
   SERVICE_NAME,
   SPAN_DURATION,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -54,6 +56,7 @@ const spanFieldNames = [
 const transactionFieldNames = [
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TRACE_ID,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   AT_TIMESTAMP,
