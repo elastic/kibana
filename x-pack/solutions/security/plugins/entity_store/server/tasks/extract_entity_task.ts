@@ -16,13 +16,13 @@ import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
 import type { EntityType } from '../domain/definitions/entity_schema';
 
-function getTaskName(entityType: EntityType): string {
+function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
   return `${config.type}:${entityType}`;
 }
 
 function getTaskId(entityType: EntityType, namespace: string): string {
-  return `${getTaskName(entityType)}:${namespace}`;
+  return `${getTaskType(entityType)}:${namespace}`;
 }
 
 async function runTask({
@@ -82,9 +82,9 @@ export function registerExtractEntityTasks({
   try {
     const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
     entityTypes.forEach((type) => {
-      const taskName = getTaskName(type);
+      const taskType = getTaskType(type);
       taskManager.registerTaskDefinitions({
-        [taskName]: {
+        [taskType]: {
           title: config.title,
           timeout: config.timeout,
           createTaskRunner: ({ taskInstance, abortController }) => ({
@@ -120,12 +120,12 @@ export async function scheduleExtractEntityTask({
   namespace: string;
 }): Promise<void> {
   try {
-    const taskName = getTaskName(type);
+    const taskType = getTaskType(type);
     const taskId = getTaskId(type, namespace);
     const interval = frequency || TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
     await taskManager.ensureScheduled({
       id: taskId,
-      taskType: taskName,
+      taskType,
       schedule: { interval },
       state: { namespace },
       params: {},

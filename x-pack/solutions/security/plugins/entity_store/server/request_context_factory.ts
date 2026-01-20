@@ -16,7 +16,6 @@ import type {
 } from './types';
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
-import { DEFAULT_NAMESPACE } from '../common';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
@@ -34,7 +33,7 @@ export async function createRequestHandlerContext({
   const core = await context.core;
   const [_, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
-  const namespace = startPlugins.spaces.spacesService.getSpaceId(request) || DEFAULT_NAMESPACE;
+  const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
 
   return {
     core,
