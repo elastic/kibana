@@ -638,6 +638,7 @@ export class FileWrapper {
       upload_success: resp?.success === true,
       upload_cancelled: importStatus === STATUS.ABORTED,
       upload_time_ms: uploadTimeMs,
+      file_extension: this.file.name.split('.').pop() ?? 'unknown',
     });
   }
 }

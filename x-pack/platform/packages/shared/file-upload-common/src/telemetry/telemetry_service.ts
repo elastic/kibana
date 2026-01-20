@@ -38,6 +38,7 @@ interface FileUploadEvent {
   upload_success: boolean;
   upload_cancelled: boolean;
   upload_time_ms: number;
+  file_extension: string;
   location?: string;
 }
 

@@ -195,6 +195,12 @@ export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSet
           description: 'The time taken to upload the file in milliseconds.',
         },
       },
+      file_extension: {
+        type: 'keyword',
+        _meta: {
+          description: 'The file extension of the uploaded file.',
+        },
+      },
     },
   });
 
