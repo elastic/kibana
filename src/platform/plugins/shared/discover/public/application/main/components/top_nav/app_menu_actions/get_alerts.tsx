@@ -20,7 +20,6 @@ import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
-import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -187,7 +186,7 @@ export const getAlertsAppMenuItem = ({
               iconType: 'tableOfContents',
               testId: 'discoverManageAlertsButton',
               href: services.application.getUrlForApp(
-                getIsExperimentalFeatureEnabled('unifiedRulesPage')
+                services.application.isAppRegistered?.('rules')
                   ? 'rules'
                   : 'management/insightsAndAlerting/triggersActions/rules'
               ),
