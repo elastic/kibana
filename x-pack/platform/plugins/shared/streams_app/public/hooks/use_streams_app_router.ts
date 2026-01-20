@@ -29,31 +29,22 @@ export function useStreamsAppRouter(): StatefulStreamsAppRouter {
   } = useKibana();
   const history = useHistory();
 
-  const getRouterPath = (...args: any[]) => {
-    // @ts-expect-error
-    return streamsAppRouter.link(...args);
-  };
-
   return useMemo<StatefulStreamsAppRouter>(
     () => ({
       ...streamsAppRouter,
-      // Use history.push/replace to preserve search params (_g) during within-app navigation
       push: (...args) => {
-        const path = getRouterPath(...args);
-        // history may be undefined in test environments without router context
-        const search = history?.location?.search || '';
-        history?.push({ pathname: path, search });
+        // @ts-expect-error
+        const path = streamsAppRouter.link(...args);
+        history?.push(path);
       },
-      replace: (path, ...args) => {
-        const nextPath = getRouterPath(path, ...args);
-        const search = history?.location?.search || '';
-        history?.replace({ pathname: nextPath, search });
+      replace: (...args) => {
+        // @ts-expect-error
+        const path = streamsAppRouter.link(...args);
+        history?.replace(path);
       },
-      link: (path, ...args) => {
-        const routerPath = getRouterPath(path, ...args);
-        // history may be undefined in test environments without router context
-        const search = history?.location?.search || '';
-        return http.basePath.prepend(`/app/streams${routerPath}${search}`);
+      link: (...args) => {
+        const path = streamsAppRouter.link(...args);
+        return http.basePath.prepend(`/app/streams${path}`);
       },
     }),
     [history, http.basePath]

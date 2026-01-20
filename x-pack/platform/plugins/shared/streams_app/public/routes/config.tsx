@@ -18,6 +18,21 @@ import { StreamDetailManagement } from '../components/data_management/stream_det
 import { SignificantEventsDiscoveryPage } from '../components/significant_events_discovery/page';
 
 /**
+ * Optional query params for all routes.
+ * - Time params (rangeFrom/rangeTo): DateRangeRedirect will add them if missing on initial load.
+ * - Other params: Used for specific features like opening flyouts with pre-selected data.
+ */
+const optionalQueryParams = t.partial({
+  rangeFrom: t.string,
+  rangeTo: t.string,
+  // Significant events flyout params (matches OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM, SELECTED_FEATURES_URL_PARAM)
+  openFlyout: t.string,
+  selectedFeatures: t.string,
+  // Data quality page state (used by dataset-quality plugin)
+  pageState: t.string,
+});
+
+/**
  * The array of route definitions to be used when the application
  * creates the routes.
  */
@@ -29,12 +44,16 @@ const streamsAppRoutes = {
           defaultMessage: 'Streams',
         })}
         path="/"
+        params={{ query: {} }}
       >
         <StreamsAppPageTemplate>
           <Outlet />
         </StreamsAppPageTemplate>
       </StreamsAppRouterBreadcrumb>
     ),
+    params: t.type({
+      query: optionalQueryParams,
+    }),
     children: {
       '/': {
         element: <StreamListView />,

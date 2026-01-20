@@ -16,6 +16,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
+import { useTimeRangeSync } from '../../../hooks/use_time_range_sync';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
 import { FeedbackButton } from '../../feedback_button';
 import {
@@ -48,6 +49,7 @@ export function Wrapper({
   const { definition } = useStreamDetail();
   const { services } = useKibana();
   const { getStepPropsByStepId } = useStreamsTour();
+  const { rangeFrom, rangeTo } = useTimeRangeSync();
 
   const lastTrackedRef = useRef<string | null>(null);
 
@@ -82,6 +84,7 @@ export function Wrapper({
         {
           href: router.link('/{key}/management/{tab}', {
             path: { key: streamId, tab: tabName },
+            query: { rangeFrom, rangeTo },
           }),
           label: currentTab.label,
           content: currentTab.content,

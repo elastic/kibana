@@ -26,6 +26,7 @@ import {
 } from '../../../constants';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { StreamFeatureDetailsFlyout } from './stream_feature_details_flyout';
 import { TableTitle } from './table_title';
 import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
@@ -44,6 +45,7 @@ export function StreamExistingFeaturesTable({
   aiFeatures: AIFeatures | null;
 }) {
   const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   const [selectedFeature, setSelectedFeature] = useState<System>();
   const [selectedFeatures, setSelectedFeatures] = useState<System[]>([]);
@@ -59,6 +61,8 @@ export function StreamExistingFeaturesTable({
     router.push('/{key}/management/{tab}', {
       path: { key: definition.name, tab: 'significantEvents' },
       query: {
+        rangeFrom,
+        rangeTo,
         [OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM]: 'true',
         [SELECTED_FEATURES_URL_PARAM]: significantEventsFeatures.map((f) => f.name).join(','),
       },

@@ -40,6 +40,7 @@ import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { useTimeRange } from '../../hooks/use_time_range';
 import { RetentionColumn } from './retention_column';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
 import {
@@ -73,6 +74,7 @@ export function StreamsTreeTable({
   loading?: boolean;
 }) {
   const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
   const { getStepPropsByStepId } = useStreamsTour();
@@ -396,12 +398,16 @@ export function StreamsTreeTable({
                 <EuiFlexItem grow={false}>
                   <EuiLink
                     data-test-subj={`streamsNameLink-${item.stream.name}`}
-                    href={router.link('/{key}', { path: { key: item.stream.name } })}
+                    href={router.link('/{key}', {
+                      path: { key: item.stream.name },
+                      query: { rangeFrom, rangeTo },
+                    })}
                     onClick={(e: React.MouseEvent) => {
                       e.preventDefault();
-                      // Use router.push() to preserve current URL search params (including _g)
-                      // at click time, not render time
-                      router.push('/{key}', { path: { key: item.stream.name }, query: {} });
+                      router.push('/{key}', {
+                        path: { key: item.stream.name },
+                        query: { rangeFrom, rangeTo },
+                      });
                     }}
                   >
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
