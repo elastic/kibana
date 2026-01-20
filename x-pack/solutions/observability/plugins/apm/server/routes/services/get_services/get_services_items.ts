@@ -52,6 +52,8 @@ export async function getServicesItems({
   useDurationSummary,
   searchQuery,
   includeSloStatus = true,
+  includeAlerts = true,
+  includeHealthStatus = true,
 }: {
   environment: string;
   kuery: string;
@@ -70,6 +72,8 @@ export async function getServicesItems({
   useDurationSummary: boolean;
   searchQuery?: string;
   includeSloStatus?: boolean;
+  includeAlerts?: boolean;
+  includeHealthStatus?: boolean;
 }): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
@@ -93,14 +97,18 @@ export async function getServicesItems({
           ...commonParams,
           apmEventClient,
         }),
-        getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
-          logger.debug(err);
-          return [];
-        }),
-        getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
-          logger.debug(err);
-          return [];
-        }),
+        includeHealthStatus
+          ? getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
+              logger.debug(err);
+              return [];
+            })
+          : [],
+        includeAlerts
+          ? getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
+              logger.debug(err);
+              return [];
+            })
+          : [],
       ]);
 
     const serviceNames = serviceStats.map((s) => s.serviceName);

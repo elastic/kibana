@@ -121,10 +121,16 @@ const servicesRoute = createApmServerRoute({
     const spacesStart = await plugins.spaces?.start();
     const spaceId = spacesStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-    const capabilities = await coreStart.capabilities.resolveCapabilities(request, {
-      capabilityPath: 'slo.*',
-    });
-    const canReadSlos = !!(capabilities.slo?.read ?? false);
+    // Resolve capabilities for SLOs, alerts, and ML
+    const [sloCapabilities, apmCapabilities, mlCapabilities] = await Promise.all([
+      coreStart.capabilities.resolveCapabilities(request, { capabilityPath: 'slo.*' }),
+      coreStart.capabilities.resolveCapabilities(request, { capabilityPath: 'apm.*' }),
+      coreStart.capabilities.resolveCapabilities(request, { capabilityPath: 'ml.*' }),
+    ]);
+
+    const canReadSlos = Boolean(sloCapabilities.slo?.read);
+    const canReadAlerts = Boolean(apmCapabilities.apm?.['alerting:show']);
+    const canReadMlJobs = Boolean(mlCapabilities.ml?.canGetJobs);
 
     const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
       await Promise.all([
@@ -155,6 +161,8 @@ const servicesRoute = createApmServerRoute({
       useDurationSummary,
       searchQuery,
       includeSloStatus: canReadSlos,
+      includeAlerts: canReadAlerts,
+      includeHealthStatus: canReadMlJobs,
     });
   },
 });

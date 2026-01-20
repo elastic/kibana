@@ -52,6 +52,7 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java',
           },
         ],
+        sloCounts: [],
       })
     ).toEqual([
       {
@@ -100,6 +101,7 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java', // Not in serviceStats - will be excluded
           },
         ],
+        sloCounts: [],
       })
     ).toEqual([
       {
@@ -135,6 +137,7 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java-2',
           },
         ],
+        sloCounts: [],
       })
     ).toEqual([
       {
