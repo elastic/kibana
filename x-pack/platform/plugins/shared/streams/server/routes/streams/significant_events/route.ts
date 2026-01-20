@@ -220,12 +220,13 @@ const generateSignificantEventsRoute = createServerRoute({
     });
 
     // Get connector info for error enrichment
-    const [connector, definition, { significantEventsPromptOverride }, { hits: features }] = await Promise.all([
-      inferenceClient.getConnectorById(connectorId),
-      streamsClient.getStream(params.path.name),
-      new PromptsConfigService({ soClient, logger }).getPrompt(),
-      featureClient.getFeatures(params.path.name),
-    ]);
+    const [connector, definition, { significantEventsPromptOverride }, { hits: features }] =
+      await Promise.all([
+        inferenceClient.getConnectorById(connectorId),
+        streamsClient.getStream(params.path.name),
+        new PromptsConfigService({ soClient, logger }).getPrompt(),
+        featureClient.getFeatures(params.path.name),
+      ]);
 
     return fromRxjs(
       generateSignificantEventDefinitions(
