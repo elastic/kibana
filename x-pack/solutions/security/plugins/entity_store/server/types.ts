@@ -17,13 +17,16 @@ import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { AssetManager } from './domain/asst_manager';
 import type { FeatureFlags } from './infra/feature_flags';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
+  spaces: SpacesPluginSetup;
 }
 
 export interface EntityStoreStartPlugins {
   taskManager: TaskManagerStartContract;
+  spaces: SpacesPluginStart;
 }
 
 export interface EntityStoreApiRequestHandlerContext {

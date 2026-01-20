@@ -24,6 +24,7 @@ interface ExtractEntityTaskParams {
 interface ExtractEntityTaskBaseState {
   runs: number;
   lastExecutionTimestamp: string;
+  namespace: string;
   entityType: EntityType;
 }
 
@@ -44,9 +45,13 @@ interface ExtractEntityTaskInstance extends Omit<ConcreteTaskInstance, 'params' 
   state: ExtractEntityTaskState;
 }
 
-function getTaskId(entityType: EntityType): string {
+function getTaskName(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
   return `${config.type}:${entityType}`;
+}
+
+function getTaskId(entityType: EntityType, namespace: string): string {
+  return `${getTaskName(entityType)}:${namespace}`;
 }
 
 function createRunnerFactory(entityType: EntityType, logger: Logger): TaskRunCreatorFunction {
@@ -83,13 +88,16 @@ async function run({
 }): Promise<RunResult> {
   const currentState = taskInstance.state;
   const runs = currentState.runs || 0;
+  const namespace = currentState.namespace;
+
   const { assetManager } = taskInstance.params;
 
   logger.info(
-    `Running extract entity task, runs: ${runs}, assetManager: ${assetManager}, abortController: ${abortController}`
+    `Running extract entity task, runs: ${runs}, assetManager: ${assetManager}, abortController: ${abortController}, namespace: ${namespace}`
   );
   try {
     const updatedState = {
+      namespace,
       lastExecutionTimestamp: new Date().toISOString(),
       runs: runs + 1,
       entityType,
@@ -124,9 +132,9 @@ export function registerExtractEntityTasks({
   try {
     const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
     entityTypes.forEach((type) => {
-      const taskId = getTaskId(type);
+      const taskName = getTaskName(type);
       taskManager.registerTaskDefinitions({
-        [taskId]: {
+        [taskName]: {
           title: config.title,
           timeout: config.timeout,
           createTaskRunner: createRunnerFactory(type, logger),
@@ -146,26 +154,29 @@ export async function scheduleExtractEntityTasks({
   assetManager,
   logger,
   frequency,
+  namespace,
 }: {
   taskManager: TaskManagerStartContract;
   entityTypes: EntityType[];
   assetManager: AssetManager;
   logger: Logger;
   frequency?: string;
+  namespace: string;
 }): Promise<void> {
   try {
     const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
     const interval = frequency || config.interval;
     for (const type of entityTypes) {
-      const taskId = getTaskId(type);
+      const taskName = getTaskName(type);
+      const taskId = getTaskId(type, namespace);
       await taskManager.ensureScheduled({
         id: taskId,
-        taskType: taskId,
+        taskType: taskName,
         schedule: {
           interval,
         },
         params: { assetManager },
-        state: {},
+        state: { namespace },
       });
     }
   } catch (e) {
@@ -178,12 +189,14 @@ export async function stopExtractEntityTasks({
   taskManager,
   logger,
   entityTypes,
+  namespace,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   entityTypes: EntityType[];
+  namespace: string;
 }): Promise<string[]> {
-  const taskIds = entityTypes.map((entityType) => getTaskId(entityType));
+  const taskIds = entityTypes.map((entityType) => getTaskId(entityType, namespace));
 
   const { statuses } = await taskManager.bulkRemove(taskIds);
   const stoppedTasksIds = statuses.filter((status) => status.success).map((status) => status.id);
