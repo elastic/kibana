@@ -1867,8 +1867,8 @@ export const tasks: TelemetryTask[] = [
     name: 'otel_agents',
     executor: async ({ indices, telemetryClient }) => {
       // Use configured indices (includes both APM and OTel patterns)
-      // The exists filter on resource.attributes.agent.name will filter out APM docs
-      const otelIndices = [indices.transaction, indices.span, indices.error, indices.metric];
+      // The existent filter on resource.attributes.agent.name will filter out APM docs
+      const otelIndices = [indices.transaction, indices.span, indices.error];
 
       // OTel field paths (different from APM, unprocessed data doesn't go through APM pipeline)
       const OTEL_AGENT_NAME = 'resource.attributes.agent.name';
