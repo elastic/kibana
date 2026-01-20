@@ -59,8 +59,6 @@ export const scriptsLibraryHttpMocks = httpHandlerMockFactory<ScriptsLibraryHttp
     id: 'deleteScriptById',
     method: 'delete',
     path: SCRIPTS_LIBRARY_ROUTE_ITEM,
-    handler: ({ path }) => {
-      return path.substring(path.lastIndexOf('/') + 1) || 'unknown-id';
-    },
+    handler: () => {},
   },
 ]);

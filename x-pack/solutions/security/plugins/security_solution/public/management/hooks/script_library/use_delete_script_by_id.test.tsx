@@ -17,16 +17,20 @@ import { resolvePathVariables } from '../../../common/utils/resolve_path_variabl
 import { renderMutation } from '../test_utils';
 import { act } from '@testing-library/react';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('useDeleteEndpointScript hook', () => {
   let response: ReturnType<typeof useDeleteEndpointScript>;
   const useHttpMock = useHttp as jest.Mock;
   let http: AppContextTestRender['coreStart']['http'];
+
   let apiMocks: ReturnType<typeof scriptsLibraryHttpMocks>;
 
   beforeEach(() => {
     const testContext = createAppRootMockRenderer();
     http = testContext.coreStart.http;
     useHttpMock.mockReturnValue(http);
+
     apiMocks = scriptsLibraryHttpMocks(http);
   });
 
