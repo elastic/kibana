@@ -33,28 +33,19 @@ export interface FilterActionPayload {
 
 /**
  * RxJS Subject for filter actions.
- * Flyout components emit actions to this Subject.
- * GraphInvestigation subscribes to handle filter updates.
+ * Action buttons and popover components emit actions to this Subject.
+ * useGraphFilters subscribes to handle filter updates.
  *
- * Flow: Flyout → filterAction$ → GraphInvestigation → setSearchFilters
+ * Flow: ActionButtons/Popovers → filterAction$ → useGraphFilters → store mutation
  */
 export const filterAction$ = new Subject<FilterActionPayload>();
 
 /**
- * Emit a filter action to be handled by GraphInvestigation.
- * Use this from flyout components (e.g., ActionsButton) to trigger filter changes.
+ * Emit a filter action to be handled by useGraphFilters.
+ * Use this from action buttons and popover components to trigger filter changes.
  *
  * @param payload - The filter action payload containing type, field, value, and action
  */
 export const emitFilterAction = (payload: FilterActionPayload): void => {
   filterAction$.next(payload);
-};
-
-/**
- * Reset the filterAction$ Subject (primarily for tests).
- * Creates a new Subject instance to clear any pending subscriptions.
- */
-export const __resetFilterAction = (): void => {
-  // Note: In production, we typically don't need to reset the Subject
-  // This is mainly useful for test isolation
 };

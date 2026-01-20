@@ -20,19 +20,15 @@ import { EVENT_ACTION } from '../../../common/constants';
 
 const mockOnShowEventDetailsClick = jest.fn();
 
-// Mock useFilterState to control filter state in tests
+// Mock isFilterActive to control filter state in tests
 const mockIsFilterActive = jest.fn();
-jest.mock('../../graph_investigation/filter_state', () => ({
-  useFilterState: jest.fn(() => ({
-    filters: [],
-    dataViewId: 'test-data-view',
-    isFilterActive: mockIsFilterActive,
-  })),
-}));
 
 // Mock emitFilterAction to verify filter emissions
 const mockEmitFilterAction = jest.fn();
-jest.mock('../../graph_investigation/filter_actions', () => ({
+jest.mock('../../filters/filter_state', () => ({
+  isFilterActive: (...args: unknown[]) => mockIsFilterActive(...args),
+}));
+jest.mock('../../filters/filter_pub_sub', () => ({
   emitFilterAction: (...args: unknown[]) => mockEmitFilterAction(...args),
 }));
 

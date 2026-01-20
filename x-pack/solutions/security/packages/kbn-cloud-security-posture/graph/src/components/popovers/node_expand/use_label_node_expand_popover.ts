@@ -13,8 +13,8 @@ import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
-import { useFilterState } from '../../graph_investigation/filter_state';
-import { emitFilterAction } from '../../graph_investigation/filter_actions';
+import { isFilterActive } from '../../filters/filter_state';
+import { emitFilterAction } from '../../filters/filter_pub_sub';
 import { getLabelExpandItems, createLabelExpandInput } from './get_label_expand_items';
 
 /**
@@ -28,8 +28,6 @@ import { getLabelExpandItems, createLabelExpandInput } from './get_label_expand_
  * @returns The label node expand popover.
  */
 export const useLabelNodeExpandPopover = (onShowEventDetailsClick?: (node: NodeProps) => void) => {
-  const { isFilterActive } = useFilterState();
-
   const itemsFn = useCallback(
     (
       node: NodeProps
@@ -83,7 +81,7 @@ export const useLabelNodeExpandPopover = (onShowEventDetailsClick?: (node: NodeP
         }
       );
     },
-    [onShowEventDetailsClick, isFilterActive]
+    [onShowEventDetailsClick]
   );
 
   const labelNodeExpandPopover = useNodeExpandPopover({

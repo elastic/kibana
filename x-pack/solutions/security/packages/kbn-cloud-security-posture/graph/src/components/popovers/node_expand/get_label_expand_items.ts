@@ -13,7 +13,7 @@ import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
 } from '../../test_ids';
 import { EVENT_ACTION } from '../../../common/constants';
-import type { FilterActionType } from '../../graph_investigation/filter_actions';
+import type { FilterActionType } from '../../filters/filter_pub_sub';
 
 /**
  * Separator item for visual grouping in the popover.

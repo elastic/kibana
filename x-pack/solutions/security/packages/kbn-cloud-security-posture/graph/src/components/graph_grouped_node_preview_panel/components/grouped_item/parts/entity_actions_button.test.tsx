@@ -9,8 +9,6 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EntityActionsButton } from './entity_actions_button';
 import type { EntityItem } from '../types';
-import { filterState$, dataViewId$ } from '../../../../graph_investigation/filter_state';
-import * as eventsModule from '../../../events';
 import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
 import { useGraphPopoverState } from '../../../../popovers/primitives/use_graph_popover_state';
 
@@ -23,6 +21,19 @@ jest.mock('../../../../popovers/primitives/use_graph_popover_state', () => ({
       closePopover: jest.fn(),
     },
   })),
+}));
+
+// Mock filter and preview modules
+const mockEmitPreviewAction = jest.fn();
+const mockEmitFilterAction = jest.fn();
+jest.mock('../../../../preview_pub_sub', () => ({
+  emitPreviewAction: (...args: unknown[]) => mockEmitPreviewAction(...args),
+}));
+jest.mock('../../../../filters/filter_pub_sub', () => ({
+  emitFilterAction: (...args: unknown[]) => mockEmitFilterAction(...args),
+}));
+jest.mock('../../../../filters/filter_state', () => ({
+  isFilterActive: () => false,
 }));
 
 // Mock ListGraphPopover
@@ -58,9 +69,6 @@ describe('EntityActionsButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset BehaviorSubjects
-    filterState$.next([]);
-    dataViewId$.next('test-data-view');
   });
 
   it('should render the actions button', () => {
@@ -95,15 +103,13 @@ describe('EntityActionsButton', () => {
       expect(screen.getByText('Show entity details')).toBeInTheDocument();
     });
 
-    it('should emit emitGroupedItemClick when entity details is clicked', () => {
-      const emitSpy = jest.spyOn(eventsModule, 'emitGroupedItemClick');
-
+    it('should emit emitPreviewAction when entity details is clicked', () => {
       render(<EntityActionsButton item={mockEntityItem} />);
 
       const entityDetailsButton = screen.getByText('Show entity details');
       fireEvent.click(entityDetailsButton);
 
-      expect(emitSpy).toHaveBeenCalledWith(mockEntityItem);
+      expect(mockEmitPreviewAction).toHaveBeenCalledWith(mockEntityItem);
     });
   });
 });

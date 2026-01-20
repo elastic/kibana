@@ -19,9 +19,9 @@ import {
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
 } from '../../../test_ids';
 import type { EventItem, AlertItem } from '../types';
-import { useFilterState } from '../../../../graph_investigation/filter_state';
-import { emitFilterAction } from '../../../../graph_investigation/filter_actions';
-import { emitGroupedItemClick } from '../../../events';
+import { isFilterActive } from '../../../../filters/filter_state';
+import { emitFilterAction } from '../../../../filters/filter_pub_sub';
+import { emitPreviewAction } from '../../../../preview_pub_sub';
 import {
   getLabelExpandItems,
   type LabelExpandInput,
@@ -47,7 +47,6 @@ export interface EventActionsButtonProps {
 export const EventActionsButton = ({ item }: EventActionsButtonProps) => {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const { state, actions } = useGraphPopoverState('grouped-item-event-actions-popover');
-  const { isFilterActive } = useFilterState();
 
   const handleClick = useCallback(() => {
     if (buttonRef.current) {
@@ -65,10 +64,7 @@ export const EventActionsButton = ({ item }: EventActionsButtonProps) => {
   );
 
   // Generate items with labels - always enable event details in flyout
-  const popoverItems = useMemo(
-    () => getLabelExpandItems(input, isFilterActive, true),
-    [input, isFilterActive]
-  );
+  const popoverItems = useMemo(() => getLabelExpandItems(input, isFilterActive, true), [input]);
 
   // Convert items to popover list items
   // Separators are passed through as-is, action items get onClick handlers
@@ -87,7 +83,7 @@ export const EventActionsButton = ({ item }: EventActionsButtonProps) => {
             label: popoverItem.label,
             onClick: () => {
               if (popoverItem.type === 'show-event-details') {
-                emitGroupedItemClick(item);
+                emitPreviewAction(item);
               } else if (
                 popoverItem.field &&
                 popoverItem.value &&

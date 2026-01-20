@@ -9,9 +9,6 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EventActionsButton } from './event_actions_button';
 import type { EventItem, AlertItem } from '../types';
-import { filterState$, dataViewId$ } from '../../../../graph_investigation/filter_state';
-import * as filterActionsModule from '../../../../graph_investigation/filter_actions';
-import * as eventsModule from '../../../events';
 import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
 import { useGraphPopoverState } from '../../../../popovers/primitives/use_graph_popover_state';
 
@@ -24,6 +21,19 @@ jest.mock('../../../../popovers/primitives/use_graph_popover_state', () => ({
       closePopover: jest.fn(),
     },
   })),
+}));
+
+// Mock filter and preview modules
+const mockEmitPreviewAction = jest.fn();
+const mockEmitFilterAction = jest.fn();
+jest.mock('../../../../preview_pub_sub', () => ({
+  emitPreviewAction: (...args: unknown[]) => mockEmitPreviewAction(...args),
+}));
+jest.mock('../../../../filters/filter_pub_sub', () => ({
+  emitFilterAction: (...args: unknown[]) => mockEmitFilterAction(...args),
+}));
+jest.mock('../../../../filters/filter_state', () => ({
+  isFilterActive: () => false,
 }));
 
 // Mock ListGraphPopover
@@ -69,9 +79,6 @@ describe('EventActionsButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset BehaviorSubjects
-    filterState$.next([]);
-    dataViewId$.next('test-data-view');
   });
 
   it('should render the actions button', () => {
@@ -111,26 +118,22 @@ describe('EventActionsButton', () => {
       expect(screen.getByText('Show related events')).toBeInTheDocument();
     });
 
-    it('should emit emitGroupedItemClick when event details is clicked', () => {
-      const emitSpy = jest.spyOn(eventsModule, 'emitGroupedItemClick');
-
+    it('should emit emitPreviewAction when event details is clicked', () => {
       render(<EventActionsButton item={mockEventItem} />);
 
       const eventDetailsButton = screen.getByText('Show event details');
       fireEvent.click(eventDetailsButton);
 
-      expect(emitSpy).toHaveBeenCalledWith(mockEventItem);
+      expect(mockEmitPreviewAction).toHaveBeenCalledWith(mockEventItem);
     });
 
     it('should emit filter action when show related events is clicked', () => {
-      const emitFilterSpy = jest.spyOn(filterActionsModule, 'emitFilterAction');
-
       render(<EventActionsButton item={mockEventItem} />);
 
       const relatedEventsButton = screen.getByText('Show related events');
       fireEvent.click(relatedEventsButton);
 
-      expect(emitFilterSpy).toHaveBeenCalledWith({
+      expect(mockEmitFilterAction).toHaveBeenCalledWith({
         type: 'TOGGLE_EVENTS_WITH_ACTION',
         field: 'event.action',
         value: 'file_created',
@@ -157,15 +160,13 @@ describe('EventActionsButton', () => {
       expect(screen.getByText('Show alert details')).toBeInTheDocument();
     });
 
-    it('should emit emitGroupedItemClick when alert details is clicked', () => {
-      const emitSpy = jest.spyOn(eventsModule, 'emitGroupedItemClick');
-
+    it('should emit emitPreviewAction when alert details is clicked', () => {
       render(<EventActionsButton item={mockAlertItem} />);
 
       const alertDetailsButton = screen.getByText('Show alert details');
       fireEvent.click(alertDetailsButton);
 
-      expect(emitSpy).toHaveBeenCalledWith(mockAlertItem);
+      expect(mockEmitPreviewAction).toHaveBeenCalledWith(mockAlertItem);
     });
   });
 });

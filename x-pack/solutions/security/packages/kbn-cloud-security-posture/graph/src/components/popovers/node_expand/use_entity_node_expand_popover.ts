@@ -17,8 +17,8 @@ import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
-import { useFilterState } from '../../graph_investigation/filter_state';
-import { emitFilterAction } from '../../graph_investigation/filter_actions';
+import { isFilterActive } from '../../filters/filter_state';
+import { emitFilterAction } from '../../filters/filter_pub_sub';
 import { getEntityExpandItems, createEntityExpandInput } from './get_entity_expand_items';
 
 const DISABLED_TOOLTIP = i18n.translate(
@@ -39,8 +39,6 @@ const DISABLED_TOOLTIP = i18n.translate(
 export const useEntityNodeExpandPopover = (
   onShowEntityDetailsClick?: (node: NodeProps) => void
 ) => {
-  const { isFilterActive } = useFilterState();
-
   const itemsFn = useCallback(
     (
       node: NodeProps
@@ -99,7 +97,7 @@ export const useEntityNodeExpandPopover = (
         }
       );
     },
-    [onShowEntityDetailsClick, isFilterActive]
+    [onShowEntityDetailsClick]
   );
   const entityNodeExpandPopover = useNodeExpandPopover({
     id: 'entity-node-expand-popover',

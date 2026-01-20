@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { groupedItemClick$, __resetGroupedItemClickDedupe } from '../../../events';
+import { previewAction$, __resetPreviewActionDedupe } from '../../../../preview_pub_sub';
 import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
@@ -21,7 +21,7 @@ const flushMicrotasks = () => new Promise((r) => setTimeout(r, 0));
 
 describe('<HeaderRow />', () => {
   beforeEach(() => {
-    __resetGroupedItemClickDedupe();
+    __resetPreviewActionDedupe();
   });
 
   describe('enriched entities', () => {
@@ -46,7 +46,7 @@ describe('<HeaderRow />', () => {
         availableInEntityStore: true,
       };
       const next = jest.fn();
-      const sub = groupedItemClick$.subscribe(next);
+      const sub = previewAction$.subscribe(next);
 
       const { getByTestId } = render(<HeaderRow item={item} />);
 
@@ -66,7 +66,7 @@ describe('<HeaderRow />', () => {
         availableInEntityStore: true,
       };
       const next = jest.fn();
-      const sub = groupedItemClick$.subscribe(next);
+      const sub = previewAction$.subscribe(next);
 
       const { getByTestId } = render(<HeaderRow item={item} />);
 
@@ -111,7 +111,7 @@ describe('<HeaderRow />', () => {
         availableInEntityStore: false,
       };
       const next = jest.fn();
-      const sub = groupedItemClick$.subscribe(next);
+      const sub = previewAction$.subscribe(next);
 
       const { getByTestId } = render(<HeaderRow item={item} />);
 

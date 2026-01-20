@@ -27,7 +27,7 @@ import {
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
-import { emitGroupedItemClick } from '../../../events';
+import { emitPreviewAction } from '../../../../preview_pub_sub';
 import type { EntityOrEventItem, EntityItem, EventItem, AlertItem } from '../types';
 import { displayEntityName, displayEventName } from '../utils';
 import { EntityActionsButton } from './entity_actions_button';
@@ -91,7 +91,7 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
           <EuiLink
             onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
               e.preventDefault();
-              emitGroupedItemClick(item);
+              emitPreviewAction(item);
             }}
             color="primary"
             css={css`

@@ -30,24 +30,18 @@ import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
+import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
 import { isLabelNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
-import { useFiltersPubSub } from './use_filters_pub_sub';
+import { useGraphFilters } from '../filters/use_graph_filters';
 
 const useGraphPopovers = ({
-  dataViewId,
-  searchFilters,
-  setSearchFilters,
   nodeDetailsClickHandler,
   onOpenNetworkPreview,
 }: {
-  dataViewId: string;
-  searchFilters: Filter[];
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
   nodeDetailsClickHandler?: (node: NodeProps) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
 }) => {
@@ -219,7 +213,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onOpenEventPreview,
     onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
-    const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
+    const { searchFilters, setSearchFilters } = useGraphFilters(dataView?.id ?? '');
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
     const [searchToggled, setSearchToggled] = useSessionStorage(
       TOGGLE_SEARCH_BAR_STORAGE_KEY,
@@ -299,9 +293,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       }
     }, [error, isError, notifications]);
 
-    // Manage pub-sub communication with flyout components
-    useFiltersPubSub(searchFilters, setSearchFilters, dataView?.id ?? '');
-
     const nodeDetailsClickHandler = useCallback(
       (node: NodeProps) => {
         onOpenEventPreview?.(node.data);
@@ -320,9 +311,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       createCountryClickHandler,
       createEventClickHandler,
     } = useGraphPopovers({
-      dataViewId: dataView?.id ?? '',
-      searchFilters,
-      setSearchFilters,
       nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
       onOpenNetworkPreview,
     });

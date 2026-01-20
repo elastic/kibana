@@ -19,9 +19,9 @@ import {
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
 } from '../../../test_ids';
 import type { EntityItem } from '../types';
-import { useFilterState } from '../../../../graph_investigation/filter_state';
-import { emitFilterAction } from '../../../../graph_investigation/filter_actions';
-import { emitGroupedItemClick } from '../../../events';
+import { isFilterActive } from '../../../../filters/filter_state';
+import { emitFilterAction } from '../../../../filters/filter_pub_sub';
+import { emitPreviewAction } from '../../../../preview_pub_sub';
 import {
   getEntityExpandItems,
   type EntityExpandInput,
@@ -47,7 +47,6 @@ export interface EntityActionsButtonProps {
 export const EntityActionsButton = ({ item }: EntityActionsButtonProps) => {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const { state, actions } = useGraphPopoverState('grouped-item-entity-actions-popover');
-  const { isFilterActive } = useFilterState();
 
   const handleClick = useCallback(() => {
     if (buttonRef.current) {
@@ -68,10 +67,7 @@ export const EntityActionsButton = ({ item }: EntityActionsButtonProps) => {
   );
 
   // Generate items with labels
-  const popoverItems = useMemo(
-    () => getEntityExpandItems(input, isFilterActive),
-    [input, isFilterActive]
-  );
+  const popoverItems = useMemo(() => getEntityExpandItems(input, isFilterActive), [input]);
 
   // Convert items to popover list items
   // Separators are passed through as-is, action items get onClick handlers
@@ -91,7 +87,7 @@ export const EntityActionsButton = ({ item }: EntityActionsButtonProps) => {
             disabled: popoverItem.disabled,
             onClick: () => {
               if (popoverItem.type === 'show-entity-details') {
-                emitGroupedItemClick(item);
+                emitPreviewAction(item);
               } else if (
                 popoverItem.field &&
                 popoverItem.value &&
