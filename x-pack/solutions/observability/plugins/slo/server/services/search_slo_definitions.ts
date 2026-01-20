@@ -56,14 +56,18 @@ export class SearchSLODefinitions {
           bool: {
             filter: [
               { term: { spaceId: this.spaceId } },
-              {
-                simple_query_string: {
-                  query: search ?? '',
-                  fields: ['slo.name^3', 'slo.description^2', 'slo.tags'],
-                  default_operator: 'AND',
-                  analyze_wildcard: true,
-                },
-              },
+              ...(search
+                ? [
+                    {
+                      simple_query_string: {
+                        query: search,
+                        fields: ['slo.name^3', 'slo.description^2', 'slo.tags'],
+                        default_operator: 'AND',
+                        analyze_wildcard: true,
+                      },
+                    },
+                  ]
+                : []),
             ],
           },
         },
