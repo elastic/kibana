@@ -7,14 +7,14 @@
 
 import { useGetEndpointScript } from './use_get_script_by_id';
 import { useQuery as _useQuery } from '@kbn/react-query';
-import { scriptsLibraryHttpMocks } from '../../../../mocks/scripts_library_http_mocks';
+import { scriptsLibraryHttpMocks } from '../../mocks/scripts_library_http_mocks';
 import {
   createAppRootMockRenderer,
   type AppContextTestRender,
   type ReactQueryHookRenderer,
-} from '../../../../../common/mock/endpoint';
-import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../../../common/endpoint/constants';
-import { resolvePathVariables } from '../../../../../common/utils/resolve_path_variables';
+} from '../../../common/mock/endpoint';
+import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 
 const useQueryMock = _useQuery as jest.Mock;
 

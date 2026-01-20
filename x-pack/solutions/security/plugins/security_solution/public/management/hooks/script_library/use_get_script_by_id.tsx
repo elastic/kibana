@@ -8,10 +8,10 @@
 import type { UseQueryOptions, UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { resolvePathVariables } from '../../../../../common/utils/resolve_path_variables';
-import { useHttp } from '../../../../../common/lib/kibana';
-import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../../../common/endpoint/constants';
-import type { EndpointScriptApiResponse } from '../../../../../../common/endpoint/types';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
+import { useHttp } from '../../../common/lib/kibana';
+import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
+import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
 
 interface ErrorType {
   statusCode: number;

@@ -6,15 +6,15 @@
  */
 
 import { useDeleteEndpointScript } from './use_delete_script_by_id';
-import { scriptsLibraryHttpMocks } from '../../../../mocks/scripts_library_http_mocks';
+import { scriptsLibraryHttpMocks } from '../../mocks/scripts_library_http_mocks';
 import {
   createAppRootMockRenderer,
   type AppContextTestRender,
-} from '../../../../../common/mock/endpoint';
-import { useHttp } from '../../../../../common/lib/kibana';
-import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../../../common/endpoint/constants';
-import { resolvePathVariables } from '../../../../../common/utils/resolve_path_variables';
-import { renderMutation } from '../../../../hooks/test_utils';
+} from '../../../common/mock/endpoint';
+import { useHttp } from '../../../common/lib/kibana';
+import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
+import { renderMutation } from '../test_utils';
 import { act } from '@testing-library/react';
 
 jest.mock('../../../../../common/lib/kibana');
