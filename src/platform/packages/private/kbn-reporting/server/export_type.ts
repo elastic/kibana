@@ -136,6 +136,7 @@ export abstract class ExportType<
     }
   }
 
+  // Provides a no-op search sessions client for internal user searches.
   private getNoOpSearchSessionsClient(): SearchStrategyDependencies['searchSessionsClient'] {
     return {
       getId: async () => '',
@@ -206,6 +207,11 @@ export abstract class ExportType<
     };
   }
 
+  /**
+   * The data plugin doesn't provide an internal search client out of the box yet.
+   * See: https://github.com/elastic/kibana/issues/249146
+   * This method builds a search client that uses the internal user search strategy.
+   */
   protected async getInternalSearchClient(
     dataPluginStart: DataPluginStart,
     request: KibanaRequest
@@ -216,6 +222,7 @@ export abstract class ExportType<
       savedObjectsClient: await this.getSavedObjectsClient(request),
       uiSettingsClient: await this.getUiSettingsClient(request),
       esClient: this.startDeps.esClient.asScoped(request),
+      // No-op search sessions client to satisfy the interface, internal search strategy makes no use of this dep.
       searchSessionsClient: this.getNoOpSearchSessionsClient(),
       request,
     };
