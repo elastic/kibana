@@ -30,7 +30,7 @@ export const createGetDocViewer =
           id: 'doc_view_obs_traces_overview',
           title: tabTitle,
           order: 0,
-          component: (props) => (
+          render: (props) => (
             <UnifiedDocViewerObservabilityTracesOverview {...props} indexes={indexes} />
           ),
         });
