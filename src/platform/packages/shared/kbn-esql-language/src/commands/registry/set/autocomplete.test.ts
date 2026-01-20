@@ -86,8 +86,8 @@ describe('SET Autocomplete', () => {
 
       it('suggests common project routing values for partial input', async () => {
         await setExpectSuggestions('SET project_routing = "_alias:', [
-          '_alias: *',
-          '_alias:_origin',
+          '"_alias: *";',
+          '"_alias:_origin";',
         ]);
       });
     });
@@ -99,6 +99,29 @@ describe('SET Autocomplete', () => {
 
       it('suggests unmapped fields values for partial input', async () => {
         await setExpectSuggestions('SET unmapped_fields = "N', ['FAIL', 'LOAD', 'NULLIFY']);
+      });
+    });
+
+    describe('Approximate setting', () => {
+      it('suggests parameter names after assignment operator', async () => {
+        await setExpectSuggestions('SET approximate = ', ['false;', 'true;', '{ $0 };']);
+      });
+
+      it('suggests map parameter names after selecting the map option', async () => {
+        await setExpectSuggestions('SET approximate = { ', [
+          '"confidence_level": ',
+          '"num_rows": ',
+        ]);
+      });
+
+      it('suggests map parameter name after completing a parameter entry', async () => {
+        await setExpectSuggestions('SET approximate = { "num_rows": 100, ', [
+          '"confidence_level": ',
+        ]);
+      });
+
+      it('suggests map parameter values after parameter name and colon', async () => {
+        await setExpectSuggestions('SET approximate = { "num_rows": ', []);
       });
     });
   });
