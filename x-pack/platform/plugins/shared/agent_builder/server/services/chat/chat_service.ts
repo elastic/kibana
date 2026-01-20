@@ -72,6 +72,9 @@ class ChatServiceImpl implements ChatService {
     conversationId,
     connectorId,
     capabilities,
+    structuredOutput,
+    outputSchema,
+    storeConversation = true,
     request,
     abortSignal,
     nextInput,
@@ -113,9 +116,9 @@ class ChatServiceImpl implements ChatService {
         return context;
       }).pipe(
         switchMap((context) => {
-          // Emit conversation ID for new conversations
+          // Emit conversation ID for new conversations (only when persisting)
           const conversationIdEvent$ =
-            context.conversation.operation === 'CREATE'
+            storeConversation && context.conversation.operation === 'CREATE'
               ? of(createConversationIdSetEvent(context.conversation.id))
               : EMPTY;
 
@@ -125,6 +128,8 @@ class ChatServiceImpl implements ChatService {
             request,
             nextInput,
             capabilities,
+            structuredOutput,
+            outputSchema,
             abortSignal,
             conversation: context.conversation,
             defaultConnectorId: context.selectedConnectorId,
@@ -143,15 +148,17 @@ class ChatServiceImpl implements ChatService {
                 })
               : of(context.conversation.title);
 
-          // Persist conversation
-          const persistenceEvents$ = persistConversation({
-            agentId,
-            conversation: context.conversation,
-            conversationClient: context.conversationClient,
-            conversationId,
-            title$,
-            agentEvents$,
-          });
+          // Persist conversation (optional)
+          const persistenceEvents$ = storeConversation
+            ? persistConversation({
+                agentId,
+                conversation: context.conversation,
+                conversationClient: context.conversationClient,
+                conversationId,
+                title$,
+                agentEvents$,
+              })
+            : EMPTY;
 
           // Merge all event streams
           const effectiveConversationId =
