@@ -406,6 +406,9 @@ export const PolicyList = memo(() => {
           <EuiHorizontalRule margin="xs" />
           {outdatedManifestsCallOut}
           <EuiBasicTable
+            tableCaption={i18n.translate('xpack.securitySolution.policy.list.tableCaption', {
+              defaultMessage: 'List of endpoint policies',
+            })}
             data-test-subj="policyListTable"
             items={data?.items || []}
             columns={policyColumns}
