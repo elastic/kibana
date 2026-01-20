@@ -15,6 +15,7 @@ import { HostDetailsLink } from '../../../../../common/components/links';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
+import type { EntityIdentifiers } from './entity_identifiers_utils';
 
 interface Props {
   contextId: string;
@@ -23,6 +24,7 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
+  entityIdentifiers?: EntityIdentifiers | null;
 }
 
 const HostNameComponent: React.FC<Props> = ({
@@ -32,6 +34,7 @@ const HostNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
+  entityIdentifiers,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
@@ -39,8 +42,7 @@ const HostNameComponent: React.FC<Props> = ({
 
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
-  const isInTimelineContext =
-    hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
+  const isInTimelineContext = hostName && eventContext?.timelineID;
 
   const openHostDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent<Element, Event>) => {
@@ -59,18 +61,20 @@ const HostNameComponent: React.FC<Props> = ({
       }
 
       const { timelineID } = eventContext;
+      // Use entityIdentifiers from source event if available, otherwise fall back to host.name only
+      const finalEntityIdentifiers = entityIdentifiers || { 'host.name': hostName };
       openFlyout({
         right: {
           id: HostPanelKey,
           params: {
-            entityIdentifiers: { 'host.name': hostName },
+            entityIdentifiers: finalEntityIdentifiers,
             contextID: contextId,
             scopeId: timelineID,
           },
         },
       });
     },
-    [contextId, eventContext, hostName, isInTimelineContext, onClick, openFlyout]
+    [contextId, eventContext, hostName, isInTimelineContext, onClick, openFlyout, entityIdentifiers]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

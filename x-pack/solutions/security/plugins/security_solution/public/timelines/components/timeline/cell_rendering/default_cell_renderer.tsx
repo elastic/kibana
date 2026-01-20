@@ -62,6 +62,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
         truncate,
         values,
         context,
+        data,
       })}
     </StyledContent>
   );
