@@ -106,7 +106,7 @@ describe('Data control editor', () => {
           onSave={() => {}}
           parentApi={dashboardApi}
           initialState={{
-            dataViewId: mockDataView.id,
+            data_view_id: mockDataView.id,
             ...initialState,
           }}
           controlId={controlId}

@@ -136,7 +136,7 @@ describe('RangeSliderControlApi', () => {
             },
             query: {
               range: {
-                myfield_name: {
+                myFieldName: {
                   gte: 5,
                   lte: 10,
                 },

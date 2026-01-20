@@ -19,6 +19,7 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 const createMockTabState = (id: string, label: string): TabState => getTabStateMock({ id, label });
 
@@ -111,19 +112,19 @@ describe('extractEsqlVariables', () => {
     selectedOptions: string[],
     singleSelect: boolean = true,
     order: number = 0
-  ): ControlPanelState<ESQLControlState> => ({
+  ): ControlPanelState<OptionsListESQLControlState> => ({
     type: ESQL_CONTROL,
     order,
-    variableName,
-    variableType,
-    selectedOptions,
-    singleSelect,
-    availableOptions: selectedOptions,
+    variable_name: variableName,
+    variable_type: variableType,
+    selected_options: selectedOptions,
+    single_select: singleSelect,
+    available_options: selectedOptions,
     title: `Control for ${variableName}`,
     width: 'medium',
     grow: false,
-    controlType: EsqlControlType.STATIC_VALUES,
-    esqlQuery: '',
+    control_type: EsqlControlType.STATIC_VALUES,
+    esql_query: '',
   });
 
   it('should extract single-select string variable', () => {

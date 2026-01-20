@@ -65,7 +65,7 @@ describe('Options list sorting button', () => {
         initialState: getMockedState({ run_past_timeout: false }),
         field: { type: 'string' } as DataViewField,
       });
-      const toggle = component.getByTestId('optionsListControl__run_past_timeoutAdditionalSetting');
+      const toggle = component.getByTestId('optionsListControl__runPastTimeoutAdditionalSetting');
       expect(toggle.getAttribute('aria-checked')).toBe('false');
       await userEvent.click(toggle);
       expect(updateState).toBeCalledWith({ run_past_timeout: true });
@@ -77,7 +77,7 @@ describe('Options list sorting button', () => {
         initialState: getMockedState({ run_past_timeout: true }),
         field: { type: 'string' } as DataViewField,
       });
-      const toggle = component.getByTestId('optionsListControl__run_past_timeoutAdditionalSetting');
+      const toggle = component.getByTestId('optionsListControl__runPastTimeoutAdditionalSetting');
       expect(toggle.getAttribute('aria-checked')).toBe('true');
     });
   });

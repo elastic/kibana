@@ -49,7 +49,24 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
     appState.rangeFrom = rangeFrom || 'now-15m';
     appState.rangeTo = rangeTo || 'now';
     appState.kuery = kuery || '';
-    appState.controlConfigs = controlConfigs ?? DEFAULT_CONTROLS;
+    const controls = controlConfigs ?? DEFAULT_CONTROLS;
+    appState.controlConfigs = Object.entries(controls).reduce((prev, [id, control]) => {
+      return [
+        ...prev,
+        {
+          title: control.title,
+          fieldName: control.field_name,
+          selectedOptions: control.selected_options,
+          ...(control.display_settings && {
+            displaySettings: {
+              hideActionBar: control.display_settings?.hide_action_bar,
+              hideExists: control.display_settings?.hide_exists,
+            },
+          }),
+          persist: control.persist,
+        },
+      ];
+    }, [] as RuleDetailsControlConfigs);
 
     let path = getRuleDetailsPath(ruleId);
 

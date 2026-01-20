@@ -62,14 +62,18 @@ describe('RuleDetailsLocator', () => {
         title: 'Status',
         field_name: ALERT_STATUS,
         selected_options: ['untracked'],
-        hideActionBar: true,
+        display_settings: {
+          hide_action_bar: true,
+          hide_exists: true,
+        },
         persist: true,
-        hide_exists: true,
       },
       {
         title: 'Rule',
         field_name: ALERT_RULE_NAME,
-        hide_exists: true,
+        display_settings: {
+          hide_exists: true,
+        },
       },
       {
         title: 'Group',
@@ -90,8 +94,8 @@ describe('RuleDetailsLocator', () => {
     });
     expect(location.path).toEqual(
       `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(` +
-        `controlConfigs:!((fieldName:kibana.alert.status,hideActionBar:!t,hideExists:!t,persist:!t,selectedOptions:!(untracked)` +
-        `,title:Status),(fieldName:kibana.alert.rule.name,hideExists:!t,title:Rule),(fieldName:kibana.alert.group.value,title:Group)` +
+        `controlConfigs:!((displaySettings:(hideActionBar:!t,hideExists:!t),fieldName:kibana.alert.status,persist:!t,selectedOptions:!(untracked)` +
+        `,title:Status),(displaySettings:(hideExists:!t),fieldName:kibana.alert.rule.name,title:Rule),(fieldName:kibana.alert.group.value,title:Group)` +
         `,(fieldName:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
     );
   });
