@@ -140,9 +140,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         name: `Test SLO Size ${i}`,
       }));
 
-      const responses = await Promise.all(
-        slos.map((slo) => sloApi.create(slo, adminRoleAuthc))
-      );
+      const responses = await Promise.all(slos.map((slo) => sloApi.create(slo, adminRoleAuthc)));
 
       // Wait for summary documents to be indexed
       const now = new Date().toISOString();
@@ -163,9 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         name: `Test SLO Pagination ${i}`,
       }));
 
-      const responses = await Promise.all(
-        slos.map((slo) => sloApi.create(slo, adminRoleAuthc))
-      );
+      const responses = await Promise.all(slos.map((slo) => sloApi.create(slo, adminRoleAuthc)));
 
       // Wait for summary documents to be indexed
       const now = new Date().toISOString();
@@ -204,9 +200,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       // Wait for summary document to be indexed
       const now = new Date().toISOString();
-      await insertSummaryDocs([
-        createDummySummaryDoc(response.id, '*', now, TEST_SPACE_ID),
-      ]);
+      await insertSummaryDocs([createDummySummaryDoc(response.id, '*', now, TEST_SPACE_ID)]);
 
       const searchResults = await sloApi.searchDefinitions(adminRoleAuthc, {
         search: 'GroupBy',
@@ -231,9 +225,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       // Wait for summary document to be indexed
       const now = new Date().toISOString();
-      await insertSummaryDocs([
-        createDummySummaryDoc(response.id, '*', now, TEST_SPACE_ID),
-      ]);
+      await insertSummaryDocs([createDummySummaryDoc(response.id, '*', now, TEST_SPACE_ID)]);
 
       const searchResults = await sloApi.searchDefinitions(adminRoleAuthc, {
         search: 'All Value',
@@ -266,4 +258,3 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   });
 }
-
