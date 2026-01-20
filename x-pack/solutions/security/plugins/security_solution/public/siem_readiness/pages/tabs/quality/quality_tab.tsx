@@ -128,7 +128,6 @@ export const QualityTab: React.FC = () => {
           return result?.incompatibleFieldCount ?? 0;
         },
         width: '15%',
-        align: 'right',
         render: (item: IndexInfo) => {
           const result = indexResultsMap.get(item.indexName);
           const count = result?.incompatibleFieldCount ?? 0;
@@ -471,31 +470,35 @@ export const QualityTab: React.FC = () => {
                 forceState={openAccordions[category.category] ? 'open' : 'closed'}
                 onToggle={() => toggleAccordion(category.category)}
               >
-                <EuiSpacer size="m" />
+                {openAccordions[category.category] && (
+                  <>
+                    <EuiSpacer size="m" />
 
-                <EuiInMemoryTable
-                  style={{ border: '1px solid #D3DAE6', padding: '24px', borderRadius: '4px' }}
-                  items={category.indices}
-                  columns={columns}
-                  sorting={{
-                    sort: {
-                      field: 'indexName',
-                      direction: 'asc',
-                    },
-                  }}
-                  pagination={{
-                    pageSizeOptions: [5, 10, 20],
-                    initialPageSize: 10,
-                  }}
-                  tableCaption={i18n.translate(
-                    'xpack.securitySolution.siemReadiness.quality.table.caption',
-                    {
-                      defaultMessage: 'Indices for {category} category',
-                      values: { category: category.category },
-                    }
-                  )}
-                  tableLayout="auto"
-                />
+                    <EuiInMemoryTable
+                      style={{ border: '1px solid #D3DAE6', padding: '24px', borderRadius: '4px' }}
+                      items={category.indices}
+                      columns={columns}
+                      sorting={{
+                        sort: {
+                          field: 'indexName',
+                          direction: 'asc',
+                        },
+                      }}
+                      pagination={{
+                        pageSizeOptions: [5, 10, 20],
+                        initialPageSize: 10,
+                      }}
+                      tableCaption={i18n.translate(
+                        'xpack.securitySolution.siemReadiness.quality.table.caption',
+                        {
+                          defaultMessage: 'Indices for {category} category',
+                          values: { category: category.category },
+                        }
+                      )}
+                      tableLayout="auto"
+                    />
+                  </>
+                )}
               </EuiAccordion>
               {index < mainCategories.length - 1 && <EuiHorizontalRule margin="m" />}
             </React.Fragment>
