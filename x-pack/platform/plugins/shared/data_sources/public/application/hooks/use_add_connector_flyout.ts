@@ -135,12 +135,12 @@ export const useAddConnectorFlyout = ({
 
       // Create data connector in the background using mutation
       createDataConnectorMutation.mutate({
-        name: suggestedName || connector.name, // Use suggested name for cloning, fallback to connector name
+        name: connector.name,
         stack_connector_id: connector.id,
         type: dataSourceType,
       });
     },
-    [dataSourceType, suggestedName, onConnectorCreated, closeFlyout, createDataConnectorMutation]
+    [dataSourceType, onConnectorCreated, closeFlyout, createDataConnectorMutation]
   );
 
   const flyout = useMemo(() => {
