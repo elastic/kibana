@@ -19,23 +19,45 @@ import { Loading } from '../../../components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 
 import { CreatePackagePolicySinglePage } from '../create_package_policy_page/single_page_layout';
-import { useBreadcrumbs } from '../../../hooks';
+import { useBreadcrumbs, useGetOneAgentPolicy } from '../../../hooks';
+import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
 
 const ContentWrapper = styled(EuiFlexGroup)`
   height: 100%;
   margin: 0 auto;
 `;
 
+const IntegrationsBreadcrumb = memo<{
+  pkgTitle: string;
+  policyName: string;
+  pkgkey: string;
+}>(({ pkgTitle, policyName, pkgkey }) => {
+  useIntegrationsBreadcrumbs('integration_policy_copy', { policyName, pkgTitle, pkgkey });
+  return null;
+});
+
+const PoliciesBreadcrumb: React.FunctionComponent<{
+  policyName: string;
+  policyId: string;
+}> = ({ policyName, policyId }) => {
+  useBreadcrumbs('copy_integration', { policyName, policyId });
+  return null;
+};
+
+const InstalledIntegrationsBreadcrumb = memo<{
+  policyName: string;
+}>(({ policyName }) => {
+  useIntegrationsBreadcrumbs('integration_policy_edit_from_installed', { policyName });
+  return null;
+});
+
 export const CopyPackagePolicyPage = memo(() => {
   const {
-    params: { packagePolicyId },
-  } = useRouteMatch<{ packagePolicyId: string }>();
+    params: { packagePolicyId, policyId },
+  } = useRouteMatch<{ packagePolicyId: string; policyId?: string }>();
 
   const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
-
-  useBreadcrumbs('copy_integration', {
-    policyId: packagePolicyId,
-  });
+  const agentPolicy = useGetOneAgentPolicy(policyId);
 
   const packagePolicyData = useMemo(() => {
     if (packagePolicy.data?.item) {
@@ -49,16 +71,35 @@ export const CopyPackagePolicyPage = memo(() => {
   // Parse the 'from' query parameter to determine navigation after save
   const { search } = useLocation();
   const qs = new URLSearchParams(search);
-  const fromQs = qs.get('from') as EditPackagePolicyFrom | null;
+  const fromQs = (qs.get('from') as EditPackagePolicyFrom | null) ?? 'fleet-policy-list';
 
-  if (packagePolicy.isLoading) {
-    return <Loading />;
+  if (packagePolicy.isLoading || !packagePolicy.data) {
+    return (
+      <>
+        <Loading />
+      </>
+    );
   }
+
+  const breadcrumb =
+    fromQs === 'fleet-policy-list' && policyId ? (
+      <PoliciesBreadcrumb policyName={agentPolicy.data?.item?.name || ''} policyId={policyId} />
+    ) : fromQs === 'installed-integrations' ? (
+      <InstalledIntegrationsBreadcrumb policyName={packagePolicy.data?.item?.name || ''} />
+    ) : (
+      <IntegrationsBreadcrumb
+        pkgTitle={packagePolicy.data?.item?.package?.title || ''}
+        policyName={packagePolicy.data?.item?.name || ''}
+        pkgkey={packagePolicy.data?.item?.package?.name || ''}
+      />
+    );
+
   const pkgName = packagePolicy.data?.item?.package?.name;
 
   if (pkgName && EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES.includes(pkgName)) {
     return (
       <ContentWrapper>
+        {breadcrumb}
         <EuiEmptyPrompt
           title={
             <FormattedMessage
@@ -74,13 +115,16 @@ export const CopyPackagePolicyPage = memo(() => {
   }
 
   return (
-    <CreatePackagePolicySinglePage
-      from={fromQs || ('copy-from-integrations-policy-list' as EditPackagePolicyFrom)}
-      pkgName={packagePolicy.data!.item!.package!.name}
-      pkgVersion={packagePolicy.data!.item!.package!.version}
-      defaultPolicyData={packagePolicyData}
-      noBreadcrumb={true}
-      prerelease={true}
-    />
+    <>
+      {breadcrumb}
+      <CreatePackagePolicySinglePage
+        from={fromQs || ('copy-from-integrations-policy-list' as EditPackagePolicyFrom)}
+        pkgName={packagePolicy.data!.item!.package!.name}
+        pkgVersion={packagePolicy.data!.item!.package!.version}
+        defaultPolicyData={packagePolicyData}
+        noBreadcrumb={true}
+        prerelease={true}
+      />
+    </>
   );
 });

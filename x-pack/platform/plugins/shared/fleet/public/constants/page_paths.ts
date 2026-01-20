@@ -37,8 +37,10 @@ export type DynamicPage =
   | 'integration_details_api_reference'
   | 'integration_details_configs'
   | 'integration_policy_edit'
+  | 'integration_policy_copy'
   | 'integration_policy_upgrade'
   | 'integration_policy_edit_from_installed'
+  | 'integration_policy_copy_from_installed'
   | 'policy_details'
   | 'add_integration_to_policy'
   | 'edit_integration'
@@ -77,7 +79,7 @@ export const FLEET_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
-  copy_integration: '/policies/copy-integration/:packagePolicyId',
+  copy_integration: '/policies/:policyId/copy-integration/:packagePolicyId',
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
   enrollment_tokens: '/enrollment-tokens',
   uninstall_tokens: '/uninstall-tokens',
@@ -115,6 +117,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details_api_reference: '/detail/:pkgkey/api-reference',
   integration_details_language_clients: '/language_clients/:pkgkey/overview',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
+  integration_policy_copy: '/copy-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
 };
 
@@ -211,6 +214,10 @@ export const pagePathGetters: {
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],
+  integration_policy_copy: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/copy-integration/${packagePolicyId}`,
+  ],
   // Upgrades happen on the same edit form, just with a flag set. Separate page record here
   // allows us to set different breadcrumbs for upgrades when needed.
   integration_policy_upgrade: ({ packagePolicyId }) => [
@@ -219,6 +226,11 @@ export const pagePathGetters: {
   ],
   // Used for breadcrumbs when editing a policy from the installed integrations tab
   integration_policy_edit_from_installed: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/edit-integration/${packagePolicyId}`,
+  ],
+  // Used for breadcrumbs when copying a policy from the installed integrations tab
+  integration_policy_copy_from_installed: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],
@@ -255,9 +267,9 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
   ],
-  copy_integration: ({ packagePolicyId }) => [
+  copy_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
-    `/policies/copy-integration/${packagePolicyId}`,
+    `/policies/${policyId}/copy-integration/${packagePolicyId}`,
   ],
   upgrade_package_policy: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,

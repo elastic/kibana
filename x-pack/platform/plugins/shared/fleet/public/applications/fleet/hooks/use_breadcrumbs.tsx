@@ -79,14 +79,6 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  copy_integration: ({ policyName, policyId }) => [
-    BASE_BREADCRUMB,
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.copyPackagePolicyPageTitle', {
-        defaultMessage: 'Copy integration',
-      }),
-    },
-  ],
   edit_integration: ({ policyName, policyId }) => [
     BASE_BREADCRUMB,
     {
@@ -102,6 +94,24 @@ const breadcrumbGetters: {
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.editPackagePolicyPageTitle', {
         defaultMessage: 'Edit integration',
+      }),
+    },
+  ],
+  copy_integration: ({ policyName, policyId }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.policies()[1],
+      text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
+        defaultMessage: 'Agent policies',
+      }),
+    },
+    {
+      href: pagePathGetters.policy_details({ policyId })[1],
+      text: policyName,
+    },
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.copyPackagePolicyPageTitle', {
+        defaultMessage: 'Copy integration',
       }),
     },
   ],

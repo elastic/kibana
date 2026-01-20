@@ -132,9 +132,17 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         !canWriteIntegrationPolicies ||
         EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES.includes(packagePolicy.package?.name || '')
       }
-      href={getHref('copy_integration', {
-        packagePolicyId: packagePolicy.id,
-      })}
+      href={
+        isOrphanedPolicy || isAgentlessPolicy
+          ? getHref('integration_policy_copy', {
+              policyId: agentPolicy?.id || '',
+              packagePolicyId: packagePolicy.id,
+            }) + (from ? `?from=${from}` : '')
+          : getHref('copy_integration', {
+              policyId: agentPolicy?.id || '',
+              packagePolicyId: packagePolicy.id,
+            }) + (from ? `?from=${from}` : '')
+      }
       data-test-subj="PackagePolicyActionsCopyItem"
       icon="copy"
       key="packagePolicyCopy"
