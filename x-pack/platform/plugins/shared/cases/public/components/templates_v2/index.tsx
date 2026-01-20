@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { EuiSelectOption, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -54,9 +54,6 @@ const i18n = {
   UPDATE_TEMPLATE: 'Update template',
   CREATE_TEMPLATE: 'Create template',
 };
-
-// TODO:
-// 1. update extended_fields in case view
 
 // Api
 
@@ -294,7 +291,7 @@ const styles = {
     }),
 };
 
-const sample = `# This is an example template
+const exampleCaseTemplate = `# This is an example template
 fields:
   - name: severity
     control: select
@@ -314,11 +311,6 @@ export const TemplateFormFields = ({ updating }: { updating?: boolean }) => {
   const { control } = useFormContext<{ name: string; definition: string }>();
 
   const euiTheme = useEuiTheme();
-
-  useEffect(() => {
-    const _parsed = parseYaml(sample);
-    console.log('TemplateFormFields', _parsed);
-  }, []);
 
   return (
     <div css={{ width: '100%', height: '100%', overflowY: 'scroll' }}>
@@ -371,7 +363,7 @@ const TemplateCreationView = ({ onClose }: { onClose: VoidFunction }) => {
 
   const form = useForm<{ name: string; definition: string }>({
     defaultValues: {
-      definition: sample,
+      definition: exampleCaseTemplate,
       name: 'sample template name',
     },
   });
