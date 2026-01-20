@@ -32,6 +32,7 @@ kibana_api_endpoint=""
 onboarding_flow_id=""
 elastic_agent_version=""
 metrics_enabled=true
+write_to_logs_streams=false
 
 help() {
   echo "Usage: sudo ./auto-detect.sh <arguments>"
@@ -42,6 +43,7 @@ help() {
   echo "  --kibana-url=<value>  Kibana API endpoint."
   echo "  --id=<value>   Onboarding flow ID."
   echo "  --ea-version=<value>   Elastic Agent version."
+  echo "  --write-to-logs-streams=<true|false>   Route logs to wired streams (default: false)."
   exit 1
 }
 
@@ -80,6 +82,14 @@ for i in "$@"; do
     case "$val" in
       true) metrics_enabled=true ;;
       *) metrics_enabled=false ;;
+    esac
+    shift
+    ;;
+  --write-to-logs-streams=*)
+    val="${i#*=}"
+    case "$val" in
+      true) write_to_logs_streams=true ;;
+      *) write_to_logs_streams=false ;;
     esac
     shift
     ;;
@@ -314,7 +324,7 @@ install_integrations() {
   done
 
   install_integrations_result=$(curl --request POST \
-    --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install?metricsEnabled=$metrics_enabled" \
+    --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install?metricsEnabled=$metrics_enabled&writeToLogsStreams=$write_to_logs_streams" \
     --header "Authorization: ApiKey $install_api_key_encoded" \
     --header "Content-Type: text/tab-separated-values" \
     --header "Accept: application/x-tar" \

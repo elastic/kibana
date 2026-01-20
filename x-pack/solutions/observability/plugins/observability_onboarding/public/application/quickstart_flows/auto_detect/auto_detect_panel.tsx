@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, type FunctionComponent } from 'react';
+import React, { useState, useEffect, type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPanel,
@@ -31,12 +31,17 @@ import { AccordionWithIcon } from '../shared/accordion_with_icon';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { GetStartedPanel } from '../shared/get_started_panel';
+import {
+  WiredStreamsIngestionSelector,
+  type IngestionMode,
+} from '../shared/wired_streams_ingestion_selector';
 import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { SupportedIntegrationsList } from './supported_integrations_list';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { usePricingFeature } from '../shared/use_pricing_feature';
+import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   useFlowBreadcrumb({
@@ -49,6 +54,12 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
+
+  const { isEnabled: isWiredStreamsAvailable, isLoading: isWiredStreamsLoading } =
+    useWiredStreamsStatus();
+  const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
+  const useWiredStreams = ingestionMode === 'wired';
+
   const command = data
     ? getAutoDetectCommand({
         scriptDownloadUrl: data.scriptDownloadUrl,
@@ -58,12 +69,13 @@ export const AutoDetectPanel: FunctionComponent = () => {
         ingestApiKey: data.ingestApiKey,
         elasticAgentVersion: data.elasticAgentVersionInfo.agentVersion,
         metricsEnabled: metricsOnboardingEnabled,
+        useWiredStreams,
       })
     : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const { onPageReady } = usePerformanceContext();
   const {
-    services: { share },
+    services: { share, docLinks },
   } = useKibana<ObservabilityOnboardingContextValue>();
 
   useEffect(() => {
@@ -102,6 +114,13 @@ export const AutoDetectPanel: FunctionComponent = () => {
             status: status === 'notStarted' ? 'current' : 'complete',
             children: command ? (
               <>
+                {isWiredStreamsAvailable && !isWiredStreamsLoading && (
+                  <WiredStreamsIngestionSelector
+                    ingestionMode={ingestionMode}
+                    onChange={setIngestionMode}
+                    streamsDocLink={docLinks?.links.observability.logsStreams}
+                  />
+                )}
                 <EuiText>
                   <p>
                     {metricsOnboardingEnabled

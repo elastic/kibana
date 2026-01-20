@@ -179,4 +179,28 @@ export class OnboardingApp {
     await this.kubernetesUseCaseTile.waitFor({ state: 'visible' });
     await this.cloudUseCaseTile.waitFor({ state: 'visible' });
   }
+
+  public get ingestionModeSelector() {
+    return this.page.getByTestId('observabilityOnboardingIngestionModeSelector');
+  }
+
+  public get classicIngestionOption() {
+    return this.ingestionModeSelector.getByRole('button', { name: /Classic ingestion/i });
+  }
+
+  public get wiredStreamsOption() {
+    return this.ingestionModeSelector.getByRole('button', { name: /Wired Streams/i });
+  }
+
+  public get techPreviewBadge() {
+    return this.ingestionModeSelector.locator('.euiBetaBadge');
+  }
+
+  async selectWiredStreams() {
+    await this.wiredStreamsOption.click();
+  }
+
+  async selectClassicIngestion() {
+    await this.classicIngestionOption.click();
+  }
 }

@@ -74,4 +74,52 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
   --values '${otelKubeStackValuesFileUrl}' \\
   --version '${OTEL_KUBE_STACK_VERSION}'`);
   });
+
+  describe('wired streams', () => {
+    it('does not include wired streams config when useWiredStreams is false', () => {
+      const command = buildInstallStackCommand({
+        isMetricsOnboardingEnabled: true,
+        isManagedOtlpServiceAvailable: false,
+        managedOtlpEndpointUrl: 'https://example.com/otlp',
+        elasticsearchUrl: 'https://example.com/elasticsearch',
+        apiKeyEncoded: 'encoded_api_key',
+        agentVersion: '9.1.0',
+        useWiredStreams: false,
+      });
+
+      expect(command).not.toContain('logs_index=logs');
+    });
+
+    it('includes wired streams config when useWiredStreams is true', () => {
+      const command = buildInstallStackCommand({
+        isMetricsOnboardingEnabled: true,
+        isManagedOtlpServiceAvailable: false,
+        managedOtlpEndpointUrl: 'https://example.com/otlp',
+        elasticsearchUrl: 'https://example.com/elasticsearch',
+        apiKeyEncoded: 'encoded_api_key',
+        agentVersion: '9.1.0',
+        useWiredStreams: true,
+      });
+
+      expect(command).toContain("--set 'exporters.elasticsearch.logs_index=logs'");
+    });
+
+    it('appends wired streams config at the end of the helm command', () => {
+      const command = buildInstallStackCommand({
+        isMetricsOnboardingEnabled: true,
+        isManagedOtlpServiceAvailable: false,
+        managedOtlpEndpointUrl: 'https://example.com/otlp',
+        elasticsearchUrl: 'https://example.com/elasticsearch',
+        apiKeyEncoded: 'encoded_api_key',
+        agentVersion: '9.1.0',
+        useWiredStreams: true,
+      });
+
+      // Wired streams config should come after the version
+      expect(command).toContain(
+        `--version '${OTEL_KUBE_STACK_VERSION}' \\
+  --set 'exporters.elasticsearch.logs_index=logs'`
+      );
+    });
+  });
 });

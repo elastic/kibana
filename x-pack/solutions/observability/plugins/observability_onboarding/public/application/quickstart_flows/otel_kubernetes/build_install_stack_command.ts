@@ -15,6 +15,7 @@ export function buildInstallStackCommand({
   elasticsearchUrl,
   apiKeyEncoded,
   agentVersion,
+  useWiredStreams = false,
 }: {
   isMetricsOnboardingEnabled: boolean;
   isManagedOtlpServiceAvailable: boolean;
@@ -22,6 +23,7 @@ export function buildInstallStackCommand({
   elasticsearchUrl: string;
   apiKeyEncoded: string;
   agentVersion: string;
+  useWiredStreams?: boolean;
 }): string {
   const ingestEndpointUrl = isManagedOtlpServiceAvailable
     ? managedOtlpEndpointUrl
@@ -35,6 +37,11 @@ export function buildInstallStackCommand({
     agentVersion,
   });
 
+  const wiredStreamsConfig = useWiredStreams
+    ? ` \\
+  --set 'exporters.elasticsearch.logs_index=logs'`
+    : '';
+
   return `kubectl create namespace ${OTEL_STACK_NAMESPACE}
 kubectl create secret generic elastic-secret-otel \\
   --namespace ${OTEL_STACK_NAMESPACE} \\
@@ -43,5 +50,5 @@ kubectl create secret generic elastic-secret-otel \\
 helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${OTEL_STACK_NAMESPACE} \\
   --values '${otelKubeStackValuesFileUrl}' \\
-  --version '${OTEL_KUBE_STACK_VERSION}'`;
+  --version '${OTEL_KUBE_STACK_VERSION}'${wiredStreamsConfig}`;
 }

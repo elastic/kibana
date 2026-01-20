@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSteps,
   EuiText,
   EuiButtonGroup,
   EuiCopy,
-  EuiLink,
   EuiImage,
   EuiCallOut,
   EuiSkeletonText,
@@ -31,9 +31,14 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
+import {
+  WiredStreamsIngestionSelector,
+  type IngestionMode,
+} from '../shared/wired_streams_ingestion_selector';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { buildInstallCommand } from './build_install_command';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
@@ -56,7 +61,7 @@ export const OtelLogsPanel: React.FC = () => {
   });
   const { onPageReady } = usePerformanceContext();
   const {
-    services: { share, http },
+    services: { share, http, docLinks },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const {
@@ -86,6 +91,11 @@ export const OtelLogsPanel: React.FC = () => {
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
+  const { isEnabled: isWiredStreamsAvailable, isLoading: isWiredStreamsLoading } =
+    useWiredStreamsStatus();
+  const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
+  const useWiredStreams = ingestionMode === 'wired';
+
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const hostsLocator = share.url.locators.get('HOSTS_LOCATOR');
 
@@ -107,14 +117,15 @@ export const OtelLogsPanel: React.FC = () => {
       firstStepTitle: HOST_COMMAND,
       content: setupData
         ? buildInstallCommand({
-            platform: 'linux',
-            isMetricsOnboardingEnabled,
-            isManagedOtlpServiceAvailable,
-            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-            elasticsearchUrl: setupData.elasticsearchUrl,
-            apiKeyEncoded: setupData.apiKeyEncoded,
-            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-          })
+          platform: 'linux',
+          isMetricsOnboardingEnabled,
+          isManagedOtlpServiceAvailable,
+          managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+          elasticsearchUrl: setupData.elasticsearchUrl,
+          apiKeyEncoded: setupData.apiKeyEncoded,
+          agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+          useWiredStreams,
+        })
         : '',
       start: 'sudo ./otelcol --config otel.yml',
       codeLanguage: 'sh',
@@ -125,14 +136,15 @@ export const OtelLogsPanel: React.FC = () => {
       firstStepTitle: HOST_COMMAND,
       content: setupData
         ? buildInstallCommand({
-            platform: 'mac',
-            isMetricsOnboardingEnabled,
-            isManagedOtlpServiceAvailable,
-            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-            elasticsearchUrl: setupData.elasticsearchUrl,
-            apiKeyEncoded: setupData.apiKeyEncoded,
-            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-          })
+          platform: 'mac',
+          isMetricsOnboardingEnabled,
+          isManagedOtlpServiceAvailable,
+          managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+          elasticsearchUrl: setupData.elasticsearchUrl,
+          apiKeyEncoded: setupData.apiKeyEncoded,
+          agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+          useWiredStreams,
+        })
         : '',
       start: './otelcol --config otel.yml',
       codeLanguage: 'sh',
@@ -143,14 +155,15 @@ export const OtelLogsPanel: React.FC = () => {
       firstStepTitle: HOST_COMMAND,
       content: setupData
         ? buildInstallCommand({
-            platform: 'windows',
-            isMetricsOnboardingEnabled,
-            isManagedOtlpServiceAvailable,
-            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-            elasticsearchUrl: setupData.elasticsearchUrl,
-            apiKeyEncoded: setupData.apiKeyEncoded,
-            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-          })
+          platform: 'windows',
+          isMetricsOnboardingEnabled,
+          isManagedOtlpServiceAvailable,
+          managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+          elasticsearchUrl: setupData.elasticsearchUrl,
+          apiKeyEncoded: setupData.apiKeyEncoded,
+          agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+          useWiredStreams,
+        })
         : '',
       start: '.\\otelcol.ps1 --config otel.yml',
       codeLanguage: 'powershell',
@@ -178,24 +191,52 @@ export const OtelLogsPanel: React.FC = () => {
               }),
 
               children: (
-                <EuiFlexGroup direction="column">
-                  <EuiButtonGroup
-                    legend={i18n.translate(
-                      'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
-                      {
-                        defaultMessage: 'Choose platform',
-                      }
-                    )}
-                    options={installTabContents.map(({ id, name }) => ({
-                      id,
-                      label: name,
-                    }))}
-                    type="single"
-                    idSelected={selectedTab}
-                    onChange={(id: string) => {
-                      setSelectedTab(id);
-                    }}
-                  />
+                <EuiFlexGroup direction="column" gutterSize="l">
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup direction="column" gutterSize="s">
+                      {isWiredStreamsAvailable && !isWiredStreamsLoading && (
+                        <EuiText size="xs">
+                          <strong>
+                            {i18n.translate(
+                              'xpack.observability_onboarding.otelLogsPanel.osSelector',
+                              {
+                                defaultMessage: 'OS selector',
+                              }
+                            )}
+                          </strong>
+                        </EuiText>
+                      )}
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonGroup
+                          legend={i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
+                            {
+                              defaultMessage: 'Choose platform',
+                            }
+                          )}
+                          options={installTabContents.map(({ id, name }) => ({
+                            id,
+                            label: name,
+                          }))}
+                          type="single"
+                          idSelected={selectedTab}
+                          onChange={(id: string) => {
+                            setSelectedTab(id);
+                          }}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+
+                  {isWiredStreamsAvailable && !isWiredStreamsLoading && (
+                    <EuiFlexItem grow={false}>
+                      <WiredStreamsIngestionSelector
+                        ingestionMode={ingestionMode}
+                        onChange={setIngestionMode}
+                        streamsDocLink={docLinks?.links.observability.logsStreams}
+                      />
+                    </EuiFlexItem>
+                  )}
 
                   {!setupData && <EuiSkeletonText lines={6} />}
 
@@ -263,19 +304,19 @@ export const OtelLogsPanel: React.FC = () => {
                     <p>
                       {selectedTab === 'windows'
                         ? i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.windowsLogDescription',
-                            {
-                              defaultMessage:
-                                'On Windows, logs are collected from the Windows Event Log. You can customize this in the otel.yml file.',
-                            }
-                          )
+                          'xpack.observability_onboarding.otelLogsPanel.windowsLogDescription',
+                          {
+                            defaultMessage:
+                              'On Windows, logs are collected from the Windows Event Log. You can customize this in the otel.yml file.',
+                          }
+                        )
                         : i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
-                            {
-                              defaultMessage:
-                                'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
-                            }
-                          )}
+                          'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
+                          {
+                            defaultMessage:
+                              'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
+                          }
+                        )}
                     </p>
                   </EuiCallOut>
 

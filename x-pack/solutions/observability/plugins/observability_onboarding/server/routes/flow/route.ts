@@ -13,8 +13,8 @@ import {
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
 import { dump } from 'js-yaml';
-import type { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
-import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
+import type { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
+import { generateAgentConfigTar } from './generate_agent_config';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -28,7 +28,6 @@ import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { hasFleetIntegrationPrivileges } from '../../lib/api_key/has_fleet_integration_privileges';
-import { makeTar, type Entry } from './make_tar';
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
@@ -303,6 +302,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     query: t.union([
       t.partial({
         metricsEnabled: t.string,
+        writeToLogsStreams: t.string,
       }),
       t.undefined,
     ]),
@@ -352,6 +352,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     }
 
     const metricsEnabled = params.query?.metricsEnabled === 'true';
+    const writeToLogsStreams = params.query?.writeToLogsStreams === 'true';
     let installedIntegrations: InstalledIntegration[] = [];
     try {
       const settledResults = await ensureInstalledIntegrations(
@@ -417,7 +418,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       headers: {
         'content-type': 'application/x-tar',
       },
-      body: generateAgentConfigTar(output, installedIntegrations),
+      body: generateAgentConfigTar(output, installedIntegrations, writeToLogsStreams),
     });
   },
 });
@@ -603,37 +604,6 @@ function parseRegistryIntegrationMetadata(
     default:
       return undefined;
   }
-}
-
-function generateAgentConfigTar(output: Output, installedIntegrations: InstalledIntegration[]) {
-  const now = new Date();
-
-  return makeTar([
-    {
-      type: 'File',
-      path: 'elastic-agent.yml',
-      mode: 0o644,
-      mtime: now,
-      data: dump({
-        outputs: {
-          default: transformOutputToFullPolicyOutput(output, undefined, true),
-        },
-      }),
-    },
-    {
-      type: 'Directory',
-      path: 'inputs.d/',
-      mode: 0o755,
-      mtime: now,
-    },
-    ...installedIntegrations.map<Entry>((integration) => ({
-      type: 'File',
-      path: `inputs.d/${integration.pkgName}.yml`,
-      mode: 0o644,
-      mtime: now,
-      data: integration.config,
-    })),
-  ]);
 }
 
 export const flowRouteRepository = {
