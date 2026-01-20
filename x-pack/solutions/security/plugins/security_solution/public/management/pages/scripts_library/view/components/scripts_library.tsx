@@ -61,7 +61,6 @@ export const ScriptsLibrary = memo(() => {
     isFetching,
     isFetched,
     error: scriptsLibraryFetchError,
-    refetch: reFetchEndpointScriptsList,
   } = useGetEndpointScriptsList(queryParams, {
     enabled: canReadScriptsLibrary,
     retry: false,
@@ -82,10 +81,8 @@ export const ScriptsLibrary = memo(() => {
 
       setQueryParams((prevState) => ({ ...prevState, ...pagingAndSortingArgs }));
       setPagingAndSortingParams({ ...pagingAndSortingArgs });
-
-      reFetchEndpointScriptsList();
     },
-    [reFetchEndpointScriptsList, setPagingAndSortingParams]
+    [setPagingAndSortingParams]
   );
 
   useEffect(() => {
